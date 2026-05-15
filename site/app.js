@@ -26,6 +26,8 @@ const els = {
   difficultyButtons: document.querySelectorAll("[data-difficulty]"),
   planBuilder: document.querySelector("#plan-builder"),
   planGoal: document.querySelector("#plan-goal"),
+  planFinish: document.querySelector("#plan-finish"),
+  planPace: document.querySelector("#plan-pace"),
   planLevel: document.querySelector("#plan-level"),
   planDays: document.querySelector("#plan-days"),
   planWeeks: document.querySelector("#plan-weeks"),
@@ -60,47 +62,55 @@ const difficultyClass = {
 const planProfiles = {
   "5k": {
     title: "5K 入門",
+    distanceKm: 5,
     longRun: "4-7km",
     focus: "建立連續跑能力",
     benchmark: "能舒服完成 30 分鐘慢跑",
+    defaultPace: 420,
   },
   "10k": {
     title: "10K 穩定完賽",
+    distanceKm: 10,
     longRun: "7-12km",
     focus: "穩定週跑量與節奏感",
     benchmark: "能舒服完成 60 分鐘慢跑",
+    defaultPace: 390,
   },
   half: {
     title: "半馬備賽",
+    distanceKm: 21.0975,
     longRun: "12-20km",
     focus: "長跑耐力與補給演練",
     benchmark: "長跑能到 18km 且隔天可正常恢復",
+    defaultPace: 405,
   },
   marathon: {
     title: "全馬基礎",
+    distanceKm: 42.195,
     longRun: "18-30km",
     focus: "耐力、補給、恢復管理",
     benchmark: "連續 8 週穩定跑量後再拉長跑",
+    defaultPace: 420,
   },
 };
 
 const levelProfiles = {
   beginner: {
     label: "新手",
-    easy: "跑走交替或非常輕鬆跑",
-    quality: "短加速 6 組，每組 20 秒",
+    easy: "跑走交替",
+    quality: "短加速 6 組",
     note: "覺得喘就改成走跑，不追配速。",
   },
   steady: {
     label: "有規律慢跑",
-    easy: "輕鬆跑，能完整講句子",
+    easy: "輕鬆跑",
     quality: "節奏跑 15-25 分鐘",
     note: "一週只安排一堂有強度的課。",
   },
   advanced: {
     label: "想加強配速",
-    easy: "輕鬆跑加 6 組加速跑",
-    quality: "間歇或節奏跑，總快跑量控制在 20% 內",
+    easy: "輕鬆跑加加速跑",
+    quality: "間歇或節奏跑",
     note: "快課隔天固定輕鬆跑或休息。",
   },
 };
@@ -306,12 +316,16 @@ function renderStats() {
   const upcoming = state.races.find((race) => race.race_date >= TODAY) || state.races[0];
   if (!upcoming) {
     els.nextRace.textContent = "--";
-    els.heroNextRace.textContent = "--";
+    if (els.heroNextRace) {
+      els.heroNextRace.textContent = "--";
+    }
     return;
   }
   const date = formatDateParts(upcoming.race_date);
   els.nextRace.textContent = `${date.month}/${date.day}`;
-  els.heroNextRace.textContent = date.full.replaceAll("/", ".");
+  if (els.heroNextRace) {
+    els.heroNextRace.textContent = date.full.replaceAll("/", ".");
+  }
 }
 
 function renderMonths() {
@@ -436,19 +450,76 @@ function renderRaces() {
   });
 }
 
-function buildPlan(goal, level, days, weeks) {
+function parsePace(value) {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(String(value || "").trim());
+  if (!match) {
+    return 0;
+  }
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function parseDuration(value) {
+  const parts = String(value || "")
+    .trim()
+    .split(":")
+    .map((part) => Number(part));
+  if (parts.some((part) => Number.isNaN(part))) {
+    return 0;
+  }
+  if (parts.length === 2) {
+    return parts[0] * 60 + parts[1];
+  }
+  if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  return 0;
+}
+
+function formatPace(seconds) {
+  const safeSeconds = Math.max(1, Math.round(seconds));
+  const minutes = Math.floor(safeSeconds / 60);
+  const rest = String(safeSeconds % 60).padStart(2, "0");
+  return `${minutes}:${rest}/km`;
+}
+
+function formatDuration(seconds) {
+  const safeSeconds = Math.max(1, Math.round(seconds));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const rest = safeSeconds % 60;
+  if (hours) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+  }
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
+}
+
+function paceRange(baseSeconds, slowerFrom, slowerTo) {
+  return `${formatPace(baseSeconds + slowerFrom)} - ${formatPace(baseSeconds + slowerTo)}`;
+}
+
+function buildPlan(goal, level, days, weeks, finishInput, paceInput) {
   const goalProfile = planProfiles[goal] || planProfiles["10k"];
   const levelProfile = levelProfiles[level] || levelProfiles.steady;
   const dayCount = Number(days);
   const weekCount = Number(weeks);
+  const finishSeconds = parseDuration(finishInput);
+  const inputPace = parsePace(paceInput);
+  const racePace = finishSeconds
+    ? finishSeconds / goalProfile.distanceKm
+    : inputPace || goalProfile.defaultPace;
+  const targetFinish = finishSeconds || racePace * goalProfile.distanceKm;
+  const easyRange = paceRange(racePace, 55, 90);
+  const longRange = paceRange(racePace, 40, 75);
+  const tempoRange = paceRange(racePace, 5, 20);
+  const intervalRange = paceRange(racePace, -30, -10);
   const schedule = [
     { day: "週一", work: "休息或 20 分鐘伸展", type: "恢復" },
-    { day: "週二", work: levelProfile.quality, type: "重點" },
-    { day: "週三", work: dayCount >= 5 ? levelProfile.easy : "休息或散步", type: dayCount >= 5 ? "輕鬆" : "恢復" },
-    { day: "週四", work: levelProfile.easy, type: "輕鬆" },
-    { day: "週五", work: dayCount >= 4 ? "短恢復跑 25-40 分鐘" : "休息", type: dayCount >= 4 ? "恢復跑" : "恢復" },
-    { day: "週六", work: `長跑 ${goalProfile.longRun}`, type: "長跑" },
-    { day: "週日", work: dayCount >= 5 ? "恢復跑 30-45 分鐘" : "休息或核心 15 分鐘", type: dayCount >= 5 ? "恢復跑" : "恢復" },
+    { day: "週二", work: `${levelProfile.quality}，${level === "advanced" ? intervalRange : tempoRange}`, type: "重點" },
+    { day: "週三", work: dayCount >= 5 ? `${levelProfile.easy}，${easyRange}` : "休息或散步", type: dayCount >= 5 ? "輕鬆" : "恢復" },
+    { day: "週四", work: `${levelProfile.easy}，${easyRange}`, type: "輕鬆" },
+    { day: "週五", work: dayCount >= 4 ? `短恢復跑 25-40 分鐘，${easyRange}` : "休息", type: dayCount >= 4 ? "恢復跑" : "恢復" },
+    { day: "週六", work: `長跑 ${goalProfile.longRun}，${longRange}`, type: "長跑" },
+    { day: "週日", work: dayCount >= 5 ? `恢復跑 30-45 分鐘，${easyRange}` : "休息或核心 15 分鐘", type: dayCount >= 5 ? "恢復跑" : "恢復" },
   ];
 
   const progression = weekCount === 4
@@ -457,18 +528,44 @@ function buildPlan(goal, level, days, weeks) {
       ? "每 3 週加量後 1 週降載，最後一週保留體力。"
       : "前 8 週建立跑量，第 9-10 週高峰，第 11-12 週逐步減量。";
 
-  return { goalProfile, levelProfile, schedule, progression, weekCount };
+  return {
+    goalProfile,
+    levelProfile,
+    schedule,
+    progression,
+    weekCount,
+    racePace,
+    targetFinish,
+    easyRange,
+    longRange,
+    tempoRange,
+    intervalRange,
+  };
 }
 
 function renderPlan() {
   if (!els.planOutput) {
     return;
   }
-  const { goalProfile, levelProfile, schedule, progression, weekCount } = buildPlan(
+  const {
+    goalProfile,
+    levelProfile,
+    schedule,
+    progression,
+    weekCount,
+    racePace,
+    targetFinish,
+    easyRange,
+    longRange,
+    tempoRange,
+    intervalRange,
+  } = buildPlan(
     els.planGoal?.value,
     els.planLevel?.value,
     els.planDays?.value,
     els.planWeeks?.value,
+    els.planFinish?.value,
+    els.planPace?.value,
   );
 
   els.planOutput.innerHTML = `
@@ -478,16 +575,22 @@ function renderPlan() {
         <strong>${escapeHtml(goalProfile.title)}</strong>
       </div>
       <div>
-        <span>程度</span>
-        <strong>${escapeHtml(levelProfile.label)}</strong>
+        <span>完賽時間</span>
+        <strong>${escapeHtml(formatDuration(targetFinish))}</strong>
       </div>
       <div>
-        <span>週期</span>
-        <strong>${escapeHtml(weekCount)} 週</strong>
+        <span>比賽配速</span>
+        <strong>${escapeHtml(formatPace(racePace))}</strong>
       </div>
     </div>
+    <div class="pace-zones">
+      <div><span>輕鬆跑</span><strong>${escapeHtml(easyRange)}</strong></div>
+      <div><span>節奏跑</span><strong>${escapeHtml(tempoRange)}</strong></div>
+      <div><span>間歇</span><strong>${escapeHtml(intervalRange)}</strong></div>
+      <div><span>長跑</span><strong>${escapeHtml(longRange)}</strong></div>
+    </div>
     <div class="plan-note">
-      <strong>${escapeHtml(goalProfile.focus)}</strong>
+      <strong>${escapeHtml(weekCount)} 週｜${escapeHtml(levelProfile.label)}｜${escapeHtml(goalProfile.focus)}</strong>
       <p>${escapeHtml(progression)} ${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
     </div>
     <div class="plan-week">
@@ -570,7 +673,8 @@ function bindEvents() {
       event.preventDefault();
       renderPlan();
     });
-    [els.planGoal, els.planLevel, els.planDays, els.planWeeks].forEach((control) => {
+    [els.planGoal, els.planLevel, els.planDays, els.planWeeks, els.planFinish, els.planPace].forEach((control) => {
+      control?.addEventListener("input", renderPlan);
       control?.addEventListener("change", renderPlan);
     });
   }

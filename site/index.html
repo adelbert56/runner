@@ -9,7 +9,7 @@
       content="蒐集中部路跑賽事、跑鞋新上市心得、練跑方法與跑步新聞的跑者資訊站。"
     >
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260515-training2">
+    <link rel="stylesheet" href="./styles.css?v=20260515-training3">
   </head>
   <body>
     <header class="site-header">
@@ -37,20 +37,6 @@
           <div class="hero-actions">
             <a class="button primary" href="#races" data-panel-link="races">查看賽事</a>
             <a class="button secondary" href="#training" data-panel-link="training">開始練跑</a>
-          </div>
-          <div class="hero-insights" aria-label="重點資訊">
-            <div>
-              <span>Next start</span>
-              <strong id="hero-next-race">--</strong>
-            </div>
-            <div>
-              <span>Coverage</span>
-              <strong>中部 4 縣市</strong>
-            </div>
-            <div>
-              <span>Focus</span>
-              <strong>賽事 / 跑鞋 / 訓練</strong>
-            </div>
           </div>
         </div>
       </section>
@@ -209,7 +195,7 @@
           <div>
             <p class="eyebrow">練跑知識</p>
             <h2 id="training-title">練跑菜單系統</h2>
-            <p class="section-lead">選目標、程度和每週可跑天數，先產出一份可執行的週課表，再依疲勞狀況微調。</p>
+            <p class="section-lead">輸入目標完賽時間或配速，系統會換算課表配速區間，讓菜單更貼近你的比賽目標。</p>
           </div>
         </div>
 
@@ -223,6 +209,14 @@
                 <option value="half">半馬備賽</option>
                 <option value="marathon">全馬基礎</option>
               </select>
+            </label>
+            <label>
+              <span>目標完賽時間</span>
+              <input id="plan-finish" type="text" inputmode="numeric" placeholder="例：0:55:00">
+            </label>
+            <label>
+              <span>目標配速</span>
+              <input id="plan-pace" type="text" inputmode="numeric" placeholder="例：5:30">
             </label>
             <label>
               <span>目前程度</span>
@@ -252,29 +246,6 @@
           </form>
 
           <div class="plan-output" id="plan-output" aria-live="polite"></div>
-        </div>
-
-        <div class="guide-grid training-guides">
-          <article>
-            <span>01</span>
-            <h3>80% 輕鬆跑</h3>
-            <p>大部分里程用可以聊天的強度完成，讓心肺和肌腱慢慢適應。</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>每週一個重點</h3>
-            <p>速度課、長跑、坡跑不要全塞同一週。先穩定，再加刺激。</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>長跑慢一點</h3>
-            <p>長跑目標是時間與補給經驗，不是每次都證明自己能跑多快。</p>
-          </article>
-          <article>
-            <span>04</span>
-            <h3>疼痛要降載</h3>
-            <p>尖銳痛、單側痛、越跑越痛時先停速度課，改走路或休息。</p>
-          </article>
         </div>
       </section>
 
@@ -310,6 +281,6 @@
       <span>資料來源：本地 Obsidian vault 與賽事爬蟲</span>
     </footer>
 
-    <script src="./app.js?v=20260515-training2"></script>
+    <script src="./app.js?v=20260515-training3"></script>
   </body>
 </html>
