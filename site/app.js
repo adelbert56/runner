@@ -606,19 +606,17 @@ function renderPlan() {
   );
 
   els.planOutput.innerHTML = `
-    <div class="plan-summary">
+    <div class="plan-hero">
       <div>
-        <span>目標</span>
+        <span>${escapeHtml(weekCount)} 週計畫</span>
         <strong>${escapeHtml(goalProfile.title)}</strong>
+        <p>${escapeHtml(raceWindow ? `賽事 ${raceWindow.label}，剩 ${raceWindow.days} 天` : `目標完賽 ${formatDuration(targetFinish)}`)}</p>
       </div>
-      <div>
-        <span>${raceWindow ? "賽事日期" : "完賽時間"}</span>
-        <strong>${escapeHtml(raceWindow ? raceWindow.label : formatDuration(targetFinish))}</strong>
-      </div>
-      <div>
-        <span>比賽配速</span>
-        <strong>${escapeHtml(formatPace(racePace))}</strong>
-      </div>
+      <dl>
+        <div><dt>完賽</dt><dd>${escapeHtml(formatDuration(targetFinish))}</dd></div>
+        <div><dt>比賽配速</dt><dd>${escapeHtml(formatPace(racePace))}</dd></div>
+        <div><dt>程度</dt><dd>${escapeHtml(levelProfile.label)}</dd></div>
+      </dl>
     </div>
     <div class="pace-zones">
       <div><span>輕鬆跑</span><strong>${escapeHtml(easyRange)}</strong></div>
@@ -627,16 +625,16 @@ function renderPlan() {
       <div><span>長跑</span><strong>${escapeHtml(longRange)}</strong></div>
     </div>
     <div class="plan-note">
-      <strong>${escapeHtml(weekCount)} 週計畫｜${escapeHtml(formatDuration(targetFinish))}｜${escapeHtml(levelProfile.label)}</strong>
+      <strong>${escapeHtml(goalProfile.focus)}</strong>
       <p>${escapeHtml(progression)} ${escapeHtml(goalProfile.focus)}。${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
     </div>
-    <div class="plan-week">
+    <div class="plan-table" role="table" aria-label="每週課表">
       ${schedule.map((item) => `
-        <article>
+        <div class="plan-row" role="row">
           <span>${escapeHtml(item.day)}</span>
           <strong>${escapeHtml(item.type)}</strong>
           <p>${escapeHtml(item.work)}</p>
-        </article>
+        </div>
       `).join("")}
     </div>
   `;

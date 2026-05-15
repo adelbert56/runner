@@ -865,16 +865,71 @@ h3 {
   min-height: 320px;
 }
 
-.plan-summary,
-.pace-zones,
-.plan-week {
+.plan-hero,
+.pace-zones {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
-.plan-summary {
+.plan-hero {
+  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 1fr);
+  align-items: stretch;
+  margin-bottom: 14px;
+  padding: 18px;
+  border-radius: 8px;
+  background: #102116;
+  color: white;
+}
+
+.plan-hero span {
+  display: block;
+  color: var(--yellow);
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.plan-hero strong {
+  display: block;
+  margin-top: 5px;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1.12;
+}
+
+.plan-hero p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.plan-hero dl {
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin-bottom: 12px;
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.plan-hero dl div {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.plan-hero dt,
+.plan-hero dd {
+  margin: 0;
+}
+
+.plan-hero dt {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.plan-hero dd {
+  margin-top: 4px;
+  font-weight: 950;
 }
 
 .pace-zones {
@@ -882,36 +937,23 @@ h3 {
   margin-bottom: 12px;
 }
 
-.plan-summary div,
-.pace-zones div,
-.plan-week article {
+.pace-zones div {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbf8ef;
+  background: #edf5ef;
 }
 
-.plan-summary span,
-.pace-zones span,
-.plan-week span {
+.pace-zones span {
   display: block;
   color: var(--muted);
   font-size: 0.76rem;
   font-weight: 950;
 }
 
-.plan-summary strong,
-.pace-zones strong,
-.plan-week strong {
+.pace-zones strong {
   display: block;
   margin-top: 4px;
-}
-
-.pace-zones div {
-  background: #edf5ef;
-}
-
-.pace-zones strong {
   color: var(--green-dark);
   font-size: 0.98rem;
 }
@@ -928,14 +970,40 @@ h3 {
   color: var(--muted);
 }
 
-.plan-week {
-  grid-template-columns: repeat(7, 1fr);
+.plan-table {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
 }
 
-.plan-week p {
-  margin: 7px 0 0;
+.plan-row {
+  display: grid;
+  grid-template-columns: 72px 96px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.plan-row:last-child {
+  border-bottom: 0;
+}
+
+.plan-row span {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.plan-row strong {
+  color: var(--ink);
+}
+
+.plan-row p {
+  margin: 0;
+  color: var(--muted);
 }
 
 .training-guides {
@@ -1037,7 +1105,8 @@ h3 {
   .news-list,
   .shoe-release-list,
   .review-grid,
-  .plan-summary {
+  .plan-hero,
+  .plan-hero dl {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1099,10 +1168,15 @@ h3 {
   .score-grid,
   .shoe-release-list,
   .review-grid,
-  .plan-summary,
   .pace-zones,
-  .plan-week {
+  .plan-hero,
+  .plan-hero dl {
     grid-template-columns: 1fr;
+  }
+
+  .plan-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
   .race-console {
