@@ -480,6 +480,9 @@ function raceDecisionText(race, registrationTarget) {
 function registrationBucket(race) {
   const status = race.registration_status || "";
   const deadlineDays = dateDiffDays(race.registration_deadline);
+  if (isHistoricalRace(race)) {
+    return "history";
+  }
   if (isCancelledRace(race) || status.includes("截止") || (deadlineDays !== null && deadlineDays < 0)) {
     return "closed";
   }
@@ -505,6 +508,11 @@ function sortRaceForBoard(a, b) {
   return aUpcoming
     ? String(a.race_date).localeCompare(String(b.race_date))
     : String(b.race_date).localeCompare(String(a.race_date));
+}
+
+function isHistoricalRace(race) {
+  const raceDays = dateDiffDays(race.race_date);
+  return raceDays !== null && raceDays < -30;
 }
 
 function isFavorite(race) {
@@ -733,9 +741,11 @@ function useRaceForTraining(race) {
 function getVisibleRaces() {
   const query = state.query.trim().toLowerCase();
   return state.races.filter((race) => {
+    const historical = isHistoricalRace(race);
     const matchesCounty = state.county === "all" || race.race_county === state.county;
     const matchesDifficulty = state.difficulty === "all" || race.difficulty === state.difficulty;
     const matchesRegistration = state.registration === "all" || registrationBucket(race) === state.registration;
+    const matchesHistoryScope = state.registration === "history" ? historical : !historical;
     const matchesDistance = state.distance === "all" || distanceBucket(race) === state.distance || (state.distance === "marathon" && ["marathon", "ultra"].includes(distanceBucket(race)));
     const matchesMonth = state.month === "all" || monthOf(race) === state.month;
     const matchesFavorite = !state.favoritesOnly || isFavorite(race);
@@ -753,6 +763,7 @@ function getVisibleRaces() {
       matchesCounty &&
       matchesDifficulty &&
       matchesRegistration &&
+      matchesHistoryScope &&
       matchesDistance &&
       matchesMonth &&
       matchesFavorite &&
@@ -780,7 +791,11 @@ function renderStats() {
 }
 
 function renderMonths() {
-  const source = state.favoritesOnly ? state.races.filter((race) => isFavorite(race)) : state.races;
+  const source = state.races.filter((race) => {
+    const historical = isHistoricalRace(race);
+    const matchesHistoryScope = state.registration === "history" ? historical : !historical;
+    return matchesHistoryScope && (!state.favoritesOnly || isFavorite(race));
+  });
   const counts = source.reduce((acc, race) => {
     const month = monthOf(race);
     acc[month] = (acc[month] || 0) + 1;
@@ -811,6 +826,8 @@ function renderRaces() {
   const races = getVisibleRaces();
   els.resultCount.textContent = state.favoritesOnly
     ? `收藏清單 ${races.length} 場`
+    : state.registration === "history"
+      ? `歷史賽事 ${races.length} 場`
     : `目前顯示 ${races.length} 場`;
 
   if (!races.length) {
