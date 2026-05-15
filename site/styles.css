@@ -1345,23 +1345,42 @@ h3 {
   .site-header {
     align-items: center;
     flex-direction: row;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 12px 18px;
+    flex-wrap: nowrap;
+    gap: 10px;
+    min-height: 64px;
+    padding: 10px 14px;
   }
 
   .main-nav {
-    width: 100%;
+    width: auto;
+    margin-left: auto;
     overflow-x: auto;
-    gap: 8px;
-    padding-bottom: 2px;
+    gap: 2px;
+    padding-bottom: 0;
   }
 
   .main-nav a {
     flex: 0 0 auto;
-    min-width: 68px;
-    min-height: 38px;
+    min-width: 46px;
+    min-height: 36px;
     justify-content: center;
+    padding: 7px 8px;
+    font-size: 0.9rem;
+  }
+
+  .brand {
+    flex: 0 0 auto;
+    gap: 8px;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    font-size: 0.78rem;
+  }
+
+  .brand span {
+    font-size: 0.95rem;
   }
 
   .hero {
@@ -1387,7 +1406,7 @@ h3 {
   }
 
   .section {
-    padding: 38px 20px;
+    padding: 34px 20px;
   }
 
   .section-heading .text-link {
@@ -1400,6 +1419,7 @@ h3 {
 
   .section-lead {
     font-size: 0.95rem;
+    line-height: 1.65;
   }
 
   .section-heading,
@@ -1415,12 +1435,29 @@ h3 {
   .score-grid,
   .shoe-release-list,
   .review-grid,
-  .pace-zones,
-  .training-summary,
-  .phase-table,
   .plan-hero,
   .plan-hero dl {
     grid-template-columns: 1fr;
+  }
+
+  .stats-strip {
+    width: calc(100% - 28px);
+    margin-top: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+  }
+
+  .stats-strip div {
+    padding: 16px 18px;
+  }
+
+  .stats-strip div + div {
+    border: 0;
+  }
+
+  .stats-strip strong {
+    font-size: 1.9rem;
   }
 
   .plan-week-title {
@@ -1617,13 +1654,14 @@ h3 {
   }
 
   .training-system {
-    gap: 12px;
+    gap: 10px;
   }
 
   .plan-builder {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    padding: 14px;
+    gap: 9px;
+    padding: 12px;
+    border-radius: 8px;
   }
 
   .plan-builder label {
@@ -1636,7 +1674,7 @@ h3 {
 
   .plan-builder select,
   .plan-builder input {
-    min-height: 40px;
+    min-height: 42px;
     padding: 7px 9px;
     font-size: 0.92rem;
   }
@@ -1647,30 +1685,79 @@ h3 {
   }
 
   .plan-output {
-    padding: 12px;
+    padding: 10px;
   }
 
   .plan-hero {
-    padding: 14px;
+    gap: 12px;
+    padding: 16px;
   }
 
   .plan-hero strong {
-    font-size: 1.45rem;
+    font-size: 1.55rem;
+  }
+
+  .plan-hero dl {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .plan-hero dl div {
+    padding: 10px;
+  }
+
+  .plan-hero dd {
+    font-size: 0.94rem;
   }
 
   .training-summary,
-  .pace-zones,
-  .phase-table {
+  .pace-zones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
   .training-summary div,
-  .pace-zones div,
-  .phase-table div {
+  .pace-zones div {
     padding: 10px;
   }
 
+  .phase-table {
+    display: flex;
+    grid-template-columns: none;
+    gap: 10px;
+    margin: 14px -10px 16px;
+    overflow-x: auto;
+    padding: 0 10px 8px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .phase-table button {
+    flex: 0 0 148px;
+    padding: 12px;
+    scroll-snap-align: start;
+  }
+
+  .phase-table strong {
+    font-size: 1.05rem;
+  }
+
   .plan-table {
+    gap: 8px;
+    padding: 8px;
     border-radius: 8px;
+  }
+
+  .plan-row {
+    padding: 12px;
+  }
+
+  .plan-row p {
+    font-size: 0.94rem;
+  }
+
+  .back-top {
+    right: 16px;
+    bottom: 16px;
+    width: 42px;
+    height: 42px;
   }
 }
