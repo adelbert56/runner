@@ -1,0 +1,42 @@
+name: Collect content candidates
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:00 Asia/Taipei every Monday.
+    - cron: "0 1 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: content-candidates
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Collect running content candidates
+        run: npm run content:candidates
+
+      - name: Validate scripts
+        run: npm run check
+
+      - name: Commit content candidates
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(content): refresh running content candidates"
+          file_pattern: |
+            runner/内容/候选内容.json
+            runner/内容/候选内容报告.md
