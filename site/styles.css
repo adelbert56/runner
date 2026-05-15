@@ -97,7 +97,8 @@ input {
 }
 
 .main-nav a:hover,
-.main-nav a:focus-visible {
+.main-nav a:focus-visible,
+.main-nav a.active {
   color: var(--green-dark);
   background: #ecf3ed;
 }
@@ -256,6 +257,14 @@ h1 {
   color: var(--muted);
   font-size: 0.92rem;
   font-weight: 800;
+}
+
+.page-panel {
+  display: none;
+}
+
+.page-panel.active {
+  display: block;
 }
 
 .section {
@@ -693,7 +702,8 @@ h3 {
   background: #edf3ed;
 }
 
-.feature-card {
+.feature-card,
+.shoe-spotlight {
   display: grid;
   grid-template-columns: minmax(0, 0.98fr) minmax(300px, 1fr);
   gap: 22px;
@@ -704,6 +714,18 @@ h3 {
   border-radius: 8px;
   background: var(--paper);
   box-shadow: var(--shadow);
+}
+
+.gear-board,
+.training-system {
+  display: grid;
+  gap: 14px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.shoe-spotlight {
+  max-width: none;
 }
 
 .feature-copy {
@@ -787,6 +809,149 @@ h3 {
   color: white;
   font-size: 1.8rem;
   line-height: 1.08;
+}
+
+.shoe-release-list,
+.review-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.shoe-release-list {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.review-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.shoe-release-list article,
+.review-grid article,
+.plan-builder,
+.plan-output {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.shoe-release-list article {
+  min-height: 210px;
+}
+
+.shoe-release-list span {
+  display: inline-flex;
+  margin-bottom: 14px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e4f0e8;
+  color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.shoe-release-list p,
+.review-grid p {
+  color: var(--muted);
+}
+
+.training-system {
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.plan-builder {
+  display: grid;
+  gap: 12px;
+  position: sticky;
+  top: 92px;
+  background: var(--paper);
+}
+
+.plan-builder label {
+  display: grid;
+  gap: 6px;
+}
+
+.plan-builder span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.plan-builder select {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.plan-output {
+  min-height: 320px;
+}
+
+.plan-summary,
+.plan-week {
+  display: grid;
+  gap: 10px;
+}
+
+.plan-summary {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 12px;
+}
+
+.plan-summary div,
+.plan-week article {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbf8ef;
+}
+
+.plan-summary span,
+.plan-week span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.plan-summary strong,
+.plan-week strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.plan-note {
+  margin-bottom: 12px;
+  padding: 14px;
+  border-left: 5px solid var(--green);
+  background: #edf5ef;
+}
+
+.plan-note p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.plan-week {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.plan-week p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.training-guides {
+  margin-top: 0;
 }
 
 .guide-grid {
@@ -881,16 +1046,25 @@ h3 {
 @media (max-width: 960px) {
   .stats-strip,
   .guide-grid,
-  .news-list {
+  .news-list,
+  .shoe-release-list,
+  .review-grid,
+  .plan-summary {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .race-layout,
-  .feature-card {
+  .feature-card,
+  .shoe-spotlight,
+  .training-system {
     grid-template-columns: 1fr;
   }
 
   .month-panel {
+    position: static;
+  }
+
+  .plan-builder {
     position: static;
   }
 
@@ -939,7 +1113,11 @@ h3 {
   .stats-strip,
   .guide-grid,
   .news-list,
-  .score-grid {
+  .score-grid,
+  .shoe-release-list,
+  .review-grid,
+  .plan-summary,
+  .plan-week {
     grid-template-columns: 1fr;
   }
 
@@ -964,7 +1142,7 @@ h3 {
     flex-direction: column;
   }
 
-.register-link,
+  .register-link,
   .favorite-button,
   .calendar-button {
     width: 100%;

@@ -9,7 +9,7 @@
       content="蒐集中部路跑賽事、跑鞋新上市心得、練跑方法與跑步新聞的跑者資訊站。"
     >
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260515-board3">
+    <link rel="stylesheet" href="./styles.css?v=20260515-training2">
   </head>
   <body>
     <header class="site-header">
@@ -18,10 +18,10 @@
         <span>跑者廣場</span>
       </a>
       <nav class="main-nav" aria-label="主要導覽">
-        <a href="#races">賽事</a>
-        <a href="#gear">跑鞋</a>
-        <a href="#training">練跑</a>
-        <a href="#news">新聞</a>
+        <a href="#races" data-panel-link="races">賽事</a>
+        <a href="#gear" data-panel-link="gear">跑鞋</a>
+        <a href="#training" data-panel-link="training">練跑</a>
+        <a href="#news" data-panel-link="news">新聞</a>
       </nav>
     </header>
 
@@ -35,8 +35,8 @@
             整理臺中、彰化、南投、苗栗路跑賽事，搭配跑鞋心得、練跑知識與跑步新聞，幫你快速決定下一場要跑哪裡、該怎麼準備。
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#races">查看賽事</a>
-            <a class="button secondary" href="#training">開始練跑</a>
+            <a class="button primary" href="#races" data-panel-link="races">查看賽事</a>
+            <a class="button secondary" href="#training" data-panel-link="training">開始練跑</a>
           </div>
           <div class="hero-insights" aria-label="重點資訊">
             <div>
@@ -74,7 +74,7 @@
         </div>
       </section>
 
-      <section class="section race-section" id="races" aria-labelledby="races-title">
+      <section class="section race-section page-panel active" id="races" aria-labelledby="races-title" data-panel="races">
         <div class="section-heading">
           <div>
             <p class="eyebrow">賽事查詢</p>
@@ -130,69 +130,155 @@
         </div>
       </section>
 
-      <section class="section split" id="gear" aria-labelledby="gear-title">
-        <div class="section-heading compact">
+      <section class="section split page-panel" id="gear" aria-labelledby="gear-title" data-panel="gear">
+        <div class="section-heading">
           <div>
             <p class="eyebrow">跑鞋心得</p>
-            <h2 id="gear-title">跑鞋新上市心得</h2>
+            <h2 id="gear-title">跑鞋新上市與評測</h2>
+            <p class="section-lead">把新鞋資訊、定位、適合跑者和實跑心得拆開看，避免只被廣告詞帶著買。</p>
           </div>
         </div>
-        <article class="feature-card shoe-card">
-          <div class="feature-copy">
-            <p class="tag">已發布心得</p>
-            <h3>Asics Novablast 3 - 日常訓練神器</h3>
-            <p>
-              500km 後的日常訓練鞋心得，整理舒適度、反彈、耐久、雨天與新手適配情境。
-            </p>
-            <dl class="score-grid">
-              <div><dt>舒適度</dt><dd>5/5</dd></div>
-              <div><dt>性能</dt><dd>4/5</dd></div>
-              <div><dt>耐久</dt><dd>3/5</dd></div>
-            </dl>
-            <a class="button secondary" href="../runner/心得/装备/2026-05-15-asics-novablast3评测.md">閱讀心得</a>
-          </div>
-          <div class="shoe-visual" aria-hidden="true">
-            <div class="shoe-photo">
-              <span>Daily Trainer</span>
-              <strong>500km review</strong>
+
+        <div class="gear-board">
+          <article class="shoe-spotlight">
+            <div class="feature-copy">
+              <p class="tag">實跑心得</p>
+              <h3>日常訓練鞋怎麼選</h3>
+              <p>先分清楚用途，再看腳感。多數跑者至少需要一雙穩定耐用的日常鞋，速度課再另外補輕量或高回彈鞋。</p>
+              <dl class="score-grid">
+                <div><dt>慢跑</dt><dd>緩震穩</dd></div>
+                <div><dt>節奏</dt><dd>回彈快</dd></div>
+                <div><dt>比賽</dt><dd>輕且省力</dd></div>
+              </dl>
+              <a class="button secondary" href="../runner/心得/装备/2026-05-15-asics-novablast3评测.md">閱讀既有心得</a>
             </div>
+            <div class="shoe-visual" aria-hidden="true">
+              <div class="shoe-photo">
+                <span>Rotation</span>
+                <strong>Daily / Tempo / Race</strong>
+              </div>
+            </div>
+          </article>
+
+          <div class="shoe-release-list" aria-label="跑鞋新品快訊">
+            <article>
+              <span>新品</span>
+              <h3>ASICS GEL-NIMBUS 28</h3>
+              <p>高緩震慢跑鞋定位，適合恢復跑、長距離慢跑和想要保護感的新手。</p>
+              <a class="sub-link" href="https://corp.asics.com/en/press/article/asics-launches-global-%27move-your-body-move-your-mind%27-campaign-and-unveils-the-new-gel-nimbustm-28-shoe" target="_blank" rel="noreferrer">官方消息</a>
+            </article>
+            <article>
+              <span>新品</span>
+              <h3>ASICS SUPERBLAST 3</h3>
+              <p>高回彈厚底訓練鞋，適合長跑、馬拉松配速跑，也可當比賽鞋替代方案。</p>
+              <a class="sub-link" href="https://corp.asics.com/en/press/article/unleash-more-energy-to-move-body-and-mind-%E2%80%93-asics-launches-the-next-generation-superblasttm-3-with-new-ff-leaptm-foam-technology" target="_blank" rel="noreferrer">官方消息</a>
+            </article>
+            <article>
+              <span>新品</span>
+              <h3>Nike Structure 26</h3>
+              <p>支撐型日常訓練鞋，適合需要穩定腳感、通勤慢跑和規律累積里程的跑者。</p>
+              <a class="sub-link" href="https://about.nike.com/en/newsroom/releases/nike-structure-26-official-images/" target="_blank" rel="noreferrer">官方消息</a>
+            </article>
+            <article>
+              <span>越野</span>
+              <h3>Nike ACG Pegasus Trail</h3>
+              <p>路跑與輕越野之間的混合定位，適合河濱、土徑、公園碎石路輪替。</p>
+              <a class="sub-link" href="https://about.nike.com/en/newsroom/releases/acg-pegasus-trail-official-images" target="_blank" rel="noreferrer">官方消息</a>
+            </article>
           </div>
-        </article>
+
+          <div class="review-grid" aria-label="評測模板">
+            <article>
+              <h3>評測欄位</h3>
+              <p>每篇心得固定記錄里程、體重、配速區間、路面、鞋碼、磨耗與是否回購。</p>
+            </article>
+            <article>
+              <h3>購買判斷</h3>
+              <p>先看用途是否重疊，再看價格。沒有速度課需求時，超級訓練鞋不一定比日常鞋划算。</p>
+            </article>
+            <article>
+              <h3>團體投稿</h3>
+              <p>同一雙鞋收三位跑者心得，標記新手、半馬跑者、馬拉松跑者，結論會更準。</p>
+            </article>
+          </div>
+        </div>
       </section>
 
-      <section class="section" id="training" aria-labelledby="training-title">
+      <section class="section page-panel" id="training" aria-labelledby="training-title" data-panel="training">
         <div class="section-heading">
           <div>
             <p class="eyebrow">練跑知識</p>
-            <h2 id="training-title">如何練跑</h2>
-            <p class="section-lead">先建立穩定習慣，再慢慢加入配速、長跑和恢復，避免一開始就把每次訓練跑成測驗。</p>
+            <h2 id="training-title">練跑菜單系統</h2>
+            <p class="section-lead">選目標、程度和每週可跑天數，先產出一份可執行的週課表，再依疲勞狀況微調。</p>
           </div>
         </div>
-        <div class="guide-grid">
+
+        <div class="training-system">
+          <form class="plan-builder" id="plan-builder" aria-label="練跑菜單產生器">
+            <label>
+              <span>目標距離</span>
+              <select id="plan-goal">
+                <option value="5k">5K 入門</option>
+                <option value="10k" selected>10K 穩定完賽</option>
+                <option value="half">半馬備賽</option>
+                <option value="marathon">全馬基礎</option>
+              </select>
+            </label>
+            <label>
+              <span>目前程度</span>
+              <select id="plan-level">
+                <option value="beginner">新手</option>
+                <option value="steady" selected>有規律慢跑</option>
+                <option value="advanced">想加強配速</option>
+              </select>
+            </label>
+            <label>
+              <span>每週跑幾天</span>
+              <select id="plan-days">
+                <option value="3">3 天</option>
+                <option value="4" selected>4 天</option>
+                <option value="5">5 天</option>
+              </select>
+            </label>
+            <label>
+              <span>可練幾週</span>
+              <select id="plan-weeks">
+                <option value="4">4 週</option>
+                <option value="8" selected>8 週</option>
+                <option value="12">12 週</option>
+              </select>
+            </label>
+            <button class="button primary" type="submit">產生菜單</button>
+          </form>
+
+          <div class="plan-output" id="plan-output" aria-live="polite"></div>
+        </div>
+
+        <div class="guide-grid training-guides">
           <article>
             <span>01</span>
-            <h3>新手 4 週起跑</h3>
-            <p>用跑走交替建立習慣，每週三跑，先把身體帶進穩定節奏。</p>
+            <h3>80% 輕鬆跑</h3>
+            <p>大部分里程用可以聊天的強度完成，讓心肺和肌腱慢慢適應。</p>
           </article>
           <article>
             <span>02</span>
-            <h3>10K 配速入門</h3>
-            <p>把輕鬆跑、節奏跑與長跑分清楚，避免每次都跑成測驗。</p>
+            <h3>每週一個重點</h3>
+            <p>速度課、長跑、坡跑不要全塞同一週。先穩定，再加刺激。</p>
           </article>
           <article>
             <span>03</span>
-            <h3>半馬備賽檢查</h3>
-            <p>用週跑量、長跑距離、補給演練和鞋款狀態判斷是否準備好。</p>
+            <h3>長跑慢一點</h3>
+            <p>長跑目標是時間與補給經驗，不是每次都證明自己能跑多快。</p>
           </article>
           <article>
             <span>04</span>
-            <h3>賽後恢復</h3>
-            <p>先睡眠、補水、低強度活動，再回到課表，降低受傷風險。</p>
+            <h3>疼痛要降載</h3>
+            <p>尖銳痛、單側痛、越跑越痛時先停速度課，改走路或休息。</p>
           </article>
         </div>
       </section>
 
-      <section class="section news-section" id="news" aria-labelledby="news-title">
+      <section class="section news-section page-panel" id="news" aria-labelledby="news-title" data-panel="news">
         <div class="section-heading">
           <div>
             <p class="eyebrow">最新更新</p>
@@ -202,18 +288,18 @@
         <div class="news-list">
           <article>
             <time datetime="2026-05-15">2026.05.15</time>
-            <h3>中部賽事資料庫完成第一輪整理</h3>
-            <p>已收錄臺中、彰化、南投、苗栗 2026 年賽事，後續可接爬蟲每日更新。</p>
+            <h3>跑鞋新品追蹤欄位上線</h3>
+            <p>每雙鞋會標記定位、適合跑者、官方資料、實跑心得和是否值得團購。</p>
           </article>
           <article>
             <time datetime="2026-05-15">2026.05.15</time>
-            <h3>投稿指南開放</h3>
-            <p>跑鞋心得、比賽報告、訓練分享可依照格式投稿，方便後續同步到網站。</p>
+            <h3>練跑菜單產生器初版</h3>
+            <p>可依目標距離、程度、每週跑量產出週課表，後續會加入配速與賽事倒推。</p>
           </article>
           <article>
             <time datetime="2026-05-15">2026.05.15</time>
-            <h3>跑鞋評測欄位定稿</h3>
-            <p>後續每篇跑鞋心得會統一整理價格、里程、優缺點、適用跑者與替代款。</p>
+            <h3>團體心得格式定稿</h3>
+            <p>跑鞋、比賽報告、訓練分享會統一格式，方便內部成員快速比較。</p>
           </article>
         </div>
       </section>
@@ -224,6 +310,6 @@
       <span>資料來源：本地 Obsidian vault 與賽事爬蟲</span>
     </footer>
 
-    <script src="./app.js?v=20260515-board3"></script>
+    <script src="./app.js?v=20260515-training2"></script>
   </body>
 </html>

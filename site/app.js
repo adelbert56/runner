@@ -24,6 +24,14 @@ const els = {
   clearFilters: document.querySelector("#clear-filters"),
   countyButtons: document.querySelectorAll("[data-county]"),
   difficultyButtons: document.querySelectorAll("[data-difficulty]"),
+  planBuilder: document.querySelector("#plan-builder"),
+  planGoal: document.querySelector("#plan-goal"),
+  planLevel: document.querySelector("#plan-level"),
+  planDays: document.querySelector("#plan-days"),
+  planWeeks: document.querySelector("#plan-weeks"),
+  planOutput: document.querySelector("#plan-output"),
+  panelLinks: document.querySelectorAll("[data-panel-link]"),
+  panels: document.querySelectorAll("[data-panel]"),
 };
 
 const monthNames = {
@@ -48,6 +56,76 @@ const difficultyClass = {
   "中級": "middle",
   "高級": "hard",
 };
+
+const planProfiles = {
+  "5k": {
+    title: "5K 入門",
+    longRun: "4-7km",
+    focus: "建立連續跑能力",
+    benchmark: "能舒服完成 30 分鐘慢跑",
+  },
+  "10k": {
+    title: "10K 穩定完賽",
+    longRun: "7-12km",
+    focus: "穩定週跑量與節奏感",
+    benchmark: "能舒服完成 60 分鐘慢跑",
+  },
+  half: {
+    title: "半馬備賽",
+    longRun: "12-20km",
+    focus: "長跑耐力與補給演練",
+    benchmark: "長跑能到 18km 且隔天可正常恢復",
+  },
+  marathon: {
+    title: "全馬基礎",
+    longRun: "18-30km",
+    focus: "耐力、補給、恢復管理",
+    benchmark: "連續 8 週穩定跑量後再拉長跑",
+  },
+};
+
+const levelProfiles = {
+  beginner: {
+    label: "新手",
+    easy: "跑走交替或非常輕鬆跑",
+    quality: "短加速 6 組，每組 20 秒",
+    note: "覺得喘就改成走跑，不追配速。",
+  },
+  steady: {
+    label: "有規律慢跑",
+    easy: "輕鬆跑，能完整講句子",
+    quality: "節奏跑 15-25 分鐘",
+    note: "一週只安排一堂有強度的課。",
+  },
+  advanced: {
+    label: "想加強配速",
+    easy: "輕鬆跑加 6 組加速跑",
+    quality: "間歇或節奏跑，總快跑量控制在 20% 內",
+    note: "快課隔天固定輕鬆跑或休息。",
+  },
+};
+
+function setActivePanel(panelId, updateHash = true) {
+  const nextPanel = [...els.panels].some((panel) => panel.dataset.panel === panelId)
+    ? panelId
+    : "races";
+
+  els.panels.forEach((panel) => {
+    const active = panel.dataset.panel === nextPanel;
+    panel.classList.toggle("active", active);
+    panel.toggleAttribute("hidden", !active);
+  });
+
+  els.panelLinks.forEach((link) => {
+    const active = link.dataset.panelLink === nextPanel;
+    link.classList.toggle("active", active);
+    link.setAttribute("aria-current", active ? "page" : "false");
+  });
+
+  if (updateHash && window.location.hash !== `#${nextPanel}`) {
+    history.pushState(null, "", `#${nextPanel}`);
+  }
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -101,7 +179,7 @@ function isFavorite(race) {
 function isSourceLink(url) {
   try {
     const host = new URL(url).hostname.toLowerCase();
-    return host.endsWith("running.biji.co") || host.endsWith("biji.co");
+    return host.endsWith("running.biji.co");
   } catch {
     return true;
   }
@@ -358,6 +436,72 @@ function renderRaces() {
   });
 }
 
+function buildPlan(goal, level, days, weeks) {
+  const goalProfile = planProfiles[goal] || planProfiles["10k"];
+  const levelProfile = levelProfiles[level] || levelProfiles.steady;
+  const dayCount = Number(days);
+  const weekCount = Number(weeks);
+  const schedule = [
+    { day: "週一", work: "休息或 20 分鐘伸展", type: "恢復" },
+    { day: "週二", work: levelProfile.quality, type: "重點" },
+    { day: "週三", work: dayCount >= 5 ? levelProfile.easy : "休息或散步", type: dayCount >= 5 ? "輕鬆" : "恢復" },
+    { day: "週四", work: levelProfile.easy, type: "輕鬆" },
+    { day: "週五", work: dayCount >= 4 ? "短恢復跑 25-40 分鐘" : "休息", type: dayCount >= 4 ? "恢復跑" : "恢復" },
+    { day: "週六", work: `長跑 ${goalProfile.longRun}`, type: "長跑" },
+    { day: "週日", work: dayCount >= 5 ? "恢復跑 30-45 分鐘" : "休息或核心 15 分鐘", type: dayCount >= 5 ? "恢復跑" : "恢復" },
+  ];
+
+  const progression = weekCount === 4
+    ? "前 3 週逐步加量，第 4 週降載 20%。"
+    : weekCount === 8
+      ? "每 3 週加量後 1 週降載，最後一週保留體力。"
+      : "前 8 週建立跑量，第 9-10 週高峰，第 11-12 週逐步減量。";
+
+  return { goalProfile, levelProfile, schedule, progression, weekCount };
+}
+
+function renderPlan() {
+  if (!els.planOutput) {
+    return;
+  }
+  const { goalProfile, levelProfile, schedule, progression, weekCount } = buildPlan(
+    els.planGoal?.value,
+    els.planLevel?.value,
+    els.planDays?.value,
+    els.planWeeks?.value,
+  );
+
+  els.planOutput.innerHTML = `
+    <div class="plan-summary">
+      <div>
+        <span>目標</span>
+        <strong>${escapeHtml(goalProfile.title)}</strong>
+      </div>
+      <div>
+        <span>程度</span>
+        <strong>${escapeHtml(levelProfile.label)}</strong>
+      </div>
+      <div>
+        <span>週期</span>
+        <strong>${escapeHtml(weekCount)} 週</strong>
+      </div>
+    </div>
+    <div class="plan-note">
+      <strong>${escapeHtml(goalProfile.focus)}</strong>
+      <p>${escapeHtml(progression)} ${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
+    </div>
+    <div class="plan-week">
+      ${schedule.map((item) => `
+        <article>
+          <span>${escapeHtml(item.day)}</span>
+          <strong>${escapeHtml(item.type)}</strong>
+          <p>${escapeHtml(item.work)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function setActiveButtons(buttons, dataKey, value) {
   buttons.forEach((button) => {
     button.classList.toggle("active", button.dataset[dataKey] === value);
@@ -374,6 +518,18 @@ function render() {
 }
 
 function bindEvents() {
+  els.panelLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      setActivePanel(link.dataset.panelLink);
+      document.getElementById(link.dataset.panelLink)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  window.addEventListener("hashchange", () => {
+    setActivePanel(window.location.hash.replace("#", ""), false);
+  });
+
   els.search.addEventListener("input", (event) => {
     state.query = event.target.value;
     renderRaces();
@@ -408,6 +564,16 @@ function bindEvents() {
     els.search.value = "";
     render();
   });
+
+  if (els.planBuilder) {
+    els.planBuilder.addEventListener("submit", (event) => {
+      event.preventDefault();
+      renderPlan();
+    });
+    [els.planGoal, els.planLevel, els.planDays, els.planWeeks].forEach((control) => {
+      control?.addEventListener("change", renderPlan);
+    });
+  }
 }
 
 async function loadRaces() {
@@ -422,10 +588,12 @@ async function loadRaces() {
 async function init() {
   loadFavorites();
   bindEvents();
+  setActivePanel(window.location.hash.replace("#", "") || "races", false);
   try {
     await loadRaces();
     renderStats();
     render();
+    renderPlan();
   } catch (error) {
     console.error(error);
     els.resultCount.textContent = "資料載入失敗";
