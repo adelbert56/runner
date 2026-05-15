@@ -28,6 +28,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare race data
+        run: |
+          mkdir -p site/data
+          cp "runner/赛事/赛事数据库.json" site/data/races.json
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

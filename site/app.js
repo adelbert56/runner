@@ -734,12 +734,24 @@ function bindEvents() {
 }
 
 async function loadRaces() {
-  const response = await fetch("../runner/赛事/赛事数据库.json");
-  if (!response.ok) {
-    throw new Error(`Race data request failed: ${response.status}`);
+  const dataPaths = ["./data/races.json", "../runner/赛事/赛事数据库.json"];
+  let lastError;
+
+  for (const path of dataPaths) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Race data request failed: ${response.status}`);
+      }
+      const races = await response.json();
+      state.races = races.sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
+      return;
+    } catch (error) {
+      lastError = error;
+    }
   }
-  const races = await response.json();
-  state.races = races.sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
+
+  throw lastError || new Error("Race data request failed");
 }
 
 async function init() {
@@ -754,7 +766,7 @@ async function init() {
   } catch (error) {
     console.error(error);
     els.resultCount.textContent = "資料載入失敗";
-    els.raceList.innerHTML = `<div class="empty-state">賽事資料無法載入，請用本機伺服器開啟 site/index.html。</div>`;
+    els.raceList.innerHTML = `<div class="empty-state">賽事資料無法載入，請確認 site/data/races.json 已部署。</div>`;
   }
 }
 
