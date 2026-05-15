@@ -16,6 +16,7 @@ const state = {
   favorites: new Set(),
   favoritesOnly: false,
   trainingRaceKey: "",
+  planWeek: 1,
 };
 
 const els = {
@@ -215,8 +216,10 @@ function loadPlanSettings() {
       }
     });
     state.trainingRaceKey = stored.trainingRaceKey || "";
+    state.planWeek = Number(stored.planWeek) || 1;
   } catch {
     state.trainingRaceKey = "";
+    state.planWeek = 1;
   }
 }
 
@@ -228,6 +231,7 @@ function savePlanSettings() {
     return acc;
   }, {});
   payload.trainingRaceKey = state.trainingRaceKey;
+  payload.planWeek = state.planWeek;
   localStorage.setItem(PLAN_KEY, JSON.stringify(payload));
 }
 
@@ -474,6 +478,7 @@ function goalFromRace(race) {
 
 function useRaceForTraining(race) {
   state.trainingRaceKey = getRaceKey(race);
+  state.planWeek = 1;
   if (els.planGoal) {
     els.planGoal.value = goalFromRace(race);
   }
@@ -879,7 +884,7 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange
   return schedule;
 }
 
-function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInput, weeklyKmInput, longRunInput, priorityInput) {
+function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInput, weeklyKmInput, longRunInput, priorityInput, selectedWeekInput) {
   const goalProfile = planProfiles[goal] || planProfiles["10k"];
   const levelProfile = levelProfiles[level] || levelProfiles.steady;
   const dayCount = Number(days);
@@ -900,7 +905,8 @@ function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInp
   const intervalRange = paceRange(racePace, -30, -10);
   const targets = goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority);
   const weeklyBlocks = buildWeeklyBlocks(weekCount, targets, goalProfile);
-  const currentWeek = weeklyBlocks[0];
+  const selectedWeek = clampNumber(Number(selectedWeekInput) || 1, 1, weekCount);
+  const currentWeek = weeklyBlocks[selectedWeek - 1];
   const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange);
   const riskNotes = buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longRunKm, priority);
   const progression = buildProgression(weekCount, raceWindow);
@@ -922,6 +928,7 @@ function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInp
     priority,
     weeklyBlocks,
     currentWeek,
+    selectedWeek,
     targets,
     riskNotes,
   };
@@ -948,6 +955,7 @@ function renderPlan() {
     priority,
     weeklyBlocks,
     currentWeek,
+    selectedWeek,
     targets,
     riskNotes,
   } = buildPlan(
@@ -961,7 +969,10 @@ function renderPlan() {
     els.planWeeklyKm?.value,
     els.planLongRun?.value,
     els.planPriority?.value,
+    state.planWeek,
   );
+
+  state.planWeek = selectedWeek;
 
   const priorityLabel = {
     finish: "穩定完賽",
@@ -1005,17 +1016,17 @@ function renderPlan() {
         ${riskNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
       </ul>
     </div>
-    <div class="phase-table" aria-label="週期安排">
+    <div class="phase-table" aria-label="週數切換">
       ${weeklyBlocks.map((week) => `
-        <div>
+        <button class="${week.week === selectedWeek ? "active" : ""}" type="button" data-plan-week="${escapeHtml(week.week)}">
           <span>第 ${escapeHtml(week.week)} 週 · ${escapeHtml(week.phase)}</span>
           <strong>${escapeHtml(week.weeklyKm)} km</strong>
           <p>長跑 ${escapeHtml(week.longRunKm)} km · ${escapeHtml(week.focus)}</p>
-        </div>
+        </button>
       `).join("")}
     </div>
     <div class="plan-week-title">
-      <span>第 1 週執行課表</span>
+      <span>第 ${escapeHtml(selectedWeek)} 週執行課表</span>
       <strong>${escapeHtml(currentWeek.weeklyKm)} km / 長跑 ${escapeHtml(currentWeek.longRunKm)} km</strong>
     </div>
     <div class="plan-table" role="table" aria-label="每週課表">
@@ -1028,6 +1039,14 @@ function renderPlan() {
       `).join("")}
     </div>
   `;
+
+  els.planOutput.querySelectorAll("[data-plan-week]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.planWeek = Number(button.dataset.planWeek) || 1;
+      savePlanSettings();
+      renderPlan();
+    });
+  });
 }
 
 function setActiveButtons(buttons, dataKey, value) {
