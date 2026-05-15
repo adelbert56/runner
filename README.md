@@ -122,7 +122,22 @@ uv run python scripts/main.py --dry-run
 uv run python scripts/main.py
 ```
 
-### 6. GitHub Pages 部署
+### 6. 检查赛事资料品质
+
+不重跑爬虫也可以先盘点现有资料缺口：
+
+```bash
+npm run data:quality
+```
+
+这个指令会产生：
+
+- `runner/赛事/待补资料队列.json`：给人工补资料或下一轮爬虫使用的缺漏清单
+- `runner/赛事/资料品质报告.md`：依欄位、縣市和優先序整理的資料品質報告
+
+目前重点检查官方报名连结、开报时间、截止时间、精确地点、主办单位、费用、名额与资料查证时间。
+
+### 7. GitHub Pages 部署
 
 项目已提供 `.github/workflows/pages.yml`。推送到 `main` 后，GitHub Actions 会部署静态网站。
 

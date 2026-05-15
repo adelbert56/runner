@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node site/server.mjs",
-    "check": "node --check site/app.js && node --check site/server.mjs"
+    "check": "node --check site/app.js && node --check site/server.mjs && node --check scripts/validate-race-data.mjs",
+    "data:quality": "node scripts/validate-race-data.mjs"
   }
 }
