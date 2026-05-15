@@ -742,6 +742,12 @@ h3 {
   color: #6d4c00;
 }
 
+.content-favorite-filter {
+  min-height: 40px;
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
 .race-summary-line,
 .race-schedule {
   display: flex;
@@ -1156,6 +1162,33 @@ h3 {
   font-weight: 950;
 }
 
+.shoe-guide-points {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shoe-guide-points li {
+  padding-left: 14px;
+  border-left: 3px solid rgba(21, 83, 56, 0.28);
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.shoe-guide-points strong {
+  color: var(--ink);
+  font-weight: 950;
+}
+
+.shoe-source-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
 .shoe-visual {
   min-height: 360px;
   border-radius: 8px;
@@ -1217,6 +1250,22 @@ h3 {
   position: relative;
   min-height: 178px;
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.shoe-release-list article,
+.news-list article {
+  position: relative;
+  padding-right: 68px;
+}
+
+.content-favorite {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  min-height: 38px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 18px rgba(31, 42, 36, 0.06);
 }
 
 .review-grid article {

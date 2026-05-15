@@ -9,7 +9,7 @@
       content="蒐集中部路跑賽事、跑鞋新上市心得、練跑方法與跑步新聞的跑者資訊站。"
     >
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260515-content4">
+    <link rel="stylesheet" href="./styles.css?v=20260515-content6">
   </head>
   <body>
     <header class="site-header">
@@ -143,6 +143,7 @@
             <p class="section-lead">用中文整理新鞋定位、適合跑者、訓練用途與原始消息，先判斷值不值得試穿，再決定要不要入手。</p>
           </div>
           <div class="content-controls" aria-label="跑鞋列表控制">
+            <button class="toggle-button content-favorite-filter" type="button" id="shoe-favorite-filter">只看收藏</button>
             <label class="content-sort">
               <span>排序</span>
               <select id="shoe-sort" aria-label="跑鞋排序">
@@ -165,23 +166,30 @@
         <div class="gear-board">
           <article class="shoe-spotlight">
             <div class="feature-copy">
-              <p class="tag">選鞋邏輯</p>
-              <h3>先買對用途，再談品牌與科技</h3>
-              <p>大多數跑者最需要的是一雙穩定耐用的日常訓練鞋。等週跑量穩定後，再依照節奏跑、比賽、越野或支撐需求補第二雙。</p>
+              <p class="tag">2026 選鞋指南</p>
+              <h3>先排訓練用途，再決定鞋款分工</h3>
+              <p>年度跑鞋整理幾乎都會把鞋分成日常訓練、速度課、比賽日與長距離保護。一般跑者先把 70-80% 里程交給穩定耐用的日常鞋，再依課表補速度或競賽鞋，會比直接追旗艦碳板更實用。</p>
               <dl class="score-grid">
-                <div><dt>新手</dt><dd>日常鞋</dd></div>
-                <div><dt>進階</dt><dd>輪替鞋</dd></div>
-                <div><dt>比賽</dt><dd>競速鞋</dd></div>
+                <div><dt>日常里程</dt><dd>Daily Trainer</dd></div>
+                <div><dt>品質課</dt><dd>Tempo Shoe</dd></div>
+                <div><dt>比賽日</dt><dd>Race Shoe</dd></div>
               </dl>
-              <div class="shoe-logic-list">
-                <span>先看：用途 / 腳感 / 穩定 / 跑量</span>
-                <span>再看：重量 / 中底科技 / 碳板 / 價格</span>
+              <ul class="shoe-guide-points">
+                <li><strong>只買一雙：</strong>選日常訓練鞋，重點是合腳、穩定、耐磨與慢跑舒適。</li>
+                <li><strong>每週 3-5 跑：</strong>補一雙速度訓練鞋，拿來跑節奏、間歇與配速課。</li>
+                <li><strong>準備半馬以上：</strong>比賽鞋至少先在長跑或配速跑測過，不要賽前才開箱。</li>
+                <li><strong>碳板鞋：</strong>適合比賽或高品質課，不建議當唯一日常鞋。</li>
+              </ul>
+              <div class="shoe-source-row">
+                <a class="sub-link" href="https://tw.running.biji.co/index.php?act=info&id=112729&q=news" target="_blank" rel="noreferrer">運動筆記選鞋分工</a>
+                <a class="sub-link" href="https://www.runnersworld.com/runners-world-shoe-awards-2025-racing-shoes/" target="_blank" rel="noreferrer">Runner's World 評測邏輯</a>
+                <a class="sub-link" href="https://www.isale.shop/carbon-plated-shoes-buying-guide/" target="_blank" rel="noreferrer">碳板鞋使用提醒</a>
               </div>
             </div>
             <div class="shoe-visual" aria-hidden="true">
               <div class="shoe-photo">
-                <span>Rotation</span>
-                <strong>Daily / Tempo / Race</strong>
+                <span>2026 Rotation</span>
+                <strong>Daily / Tempo / Long / Race</strong>
               </div>
             </div>
           </article>
@@ -438,6 +446,7 @@
             <p class="section-lead">以中文整理跑鞋新品、訓練恢復、補給與備賽觀念，先保留真正能幫跑者做決策的重點。</p>
           </div>
           <div class="content-controls" aria-label="新聞列表控制">
+            <button class="toggle-button content-favorite-filter" type="button" id="news-favorite-filter">只看收藏</button>
             <label class="content-sort">
               <span>排序</span>
               <select id="news-sort" aria-label="新聞排序">
@@ -533,6 +542,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260515-content4"></script>
+    <script src="./app.js?v=20260515-content6"></script>
   </body>
 </html>

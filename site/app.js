@@ -2,6 +2,7 @@ const DEVICE_KEY = "runner-plaza:device-id";
 const LEGACY_FAVORITES_KEY = "runner-plaza:favorites";
 const DEVICE_ID = getDeviceId();
 const FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:favorites`;
+const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const TODAY = "2026-05-15";
 
@@ -14,7 +15,10 @@ const state = {
   month: "all",
   query: "",
   favorites: new Set(),
+  contentFavorites: new Set(),
   favoritesOnly: false,
+  shoeFavoritesOnly: false,
+  newsFavoritesOnly: false,
   trainingRaceKey: "",
   planWeek: 1,
 };
@@ -63,6 +67,8 @@ const els = {
   newsSort: document.querySelector("#news-sort"),
   shoeLimit: document.querySelector("#shoe-limit"),
   newsLimit: document.querySelector("#news-limit"),
+  shoeFavoriteFilter: document.querySelector("#shoe-favorite-filter"),
+  newsFavoriteFilter: document.querySelector("#news-favorite-filter"),
 };
 
 const monthNames = {
@@ -231,6 +237,19 @@ function loadFavorites() {
 
 function saveFavorites() {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify([...state.favorites]));
+}
+
+function loadContentFavorites() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CONTENT_FAVORITES_KEY) || "[]");
+    state.contentFavorites = new Set(Array.isArray(stored) ? stored : []);
+  } catch {
+    state.contentFavorites = new Set();
+  }
+}
+
+function saveContentFavorites() {
+  localStorage.setItem(CONTENT_FAVORITES_KEY, JSON.stringify([...state.contentFavorites]));
 }
 
 function getPlanControls() {
@@ -1634,19 +1653,89 @@ function sortContentCards(containerSelector, itemSelector, mode) {
   sorted.forEach((card) => container.appendChild(card));
 }
 
-function applyContentLimit(containerSelector, itemSelector, limitValue) {
-  const cards = [...document.querySelectorAll(`${containerSelector} ${itemSelector}`)];
-  const limit = Number(limitValue) || 10;
-  cards.forEach((card, index) => {
-    card.hidden = index >= limit;
+function contentFavoriteKey(type, card) {
+  return `${type}:${card.dataset.date || ""}:${card.dataset.title || card.textContent.trim()}`;
+}
+
+function isContentFavorite(type, card) {
+  return state.contentFavorites.has(contentFavoriteKey(type, card));
+}
+
+function decorateContentFavorites(type, containerSelector, itemSelector) {
+  document.querySelectorAll(`${containerSelector} ${itemSelector}`).forEach((card) => {
+    if (card.querySelector("[data-content-favorite]")) {
+      return;
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "favorite-button icon-button content-favorite";
+    button.dataset.contentFavorite = contentFavoriteKey(type, card);
+    button.dataset.contentType = type;
+    button.innerHTML = `<span aria-hidden="true">☆</span>`;
+    card.appendChild(button);
   });
 }
 
+function updateContentFavoriteButtons() {
+  document.querySelectorAll("[data-content-favorite]").forEach((button) => {
+    const active = state.contentFavorites.has(button.dataset.contentFavorite);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+    button.setAttribute("aria-label", active ? "取消收藏文章" : "收藏文章");
+    button.setAttribute("title", active ? "取消收藏" : "收藏");
+    button.querySelector("span").textContent = active ? "★" : "☆";
+  });
+}
+
+function applyContentLimit(containerSelector, itemSelector, limitValue, favoritesOnly = false, type = "") {
+  const cards = [...document.querySelectorAll(`${containerSelector} ${itemSelector}`)];
+  const limit = Number(limitValue) || 10;
+  let visibleIndex = 0;
+  cards.forEach((card) => {
+    const blockedByFavorite = favoritesOnly && !isContentFavorite(type, card);
+    const blockedByLimit = visibleIndex >= limit;
+    card.hidden = blockedByFavorite || blockedByLimit;
+    if (!blockedByFavorite) {
+      visibleIndex += 1;
+    }
+  });
+}
+
+function updateContentList(type) {
+  const config = type === "shoe"
+    ? {
+      container: ".shoe-release-list",
+      item: "[data-shoe-card]",
+      sort: els.shoeSort?.value || "newest",
+      limit: els.shoeLimit?.value || "10",
+      favoritesOnly: state.shoeFavoritesOnly,
+      filter: els.shoeFavoriteFilter,
+      label: "跑鞋",
+    }
+    : {
+      container: ".news-list",
+      item: "[data-news-card]",
+      sort: els.newsSort?.value || "newest",
+      limit: els.newsLimit?.value || "10",
+      favoritesOnly: state.newsFavoritesOnly,
+      filter: els.newsFavoriteFilter,
+      label: "新聞",
+    };
+
+  sortContentCards(config.container, config.item, config.sort);
+  applyContentLimit(config.container, config.item, config.limit, config.favoritesOnly, type);
+  config.filter?.classList.toggle("active", config.favoritesOnly);
+  if (config.filter) {
+    config.filter.textContent = config.favoritesOnly ? `顯示全部${config.label}` : "只看收藏";
+  }
+  updateContentFavoriteButtons();
+}
+
 function initContentSorting() {
-  sortContentCards(".shoe-release-list", "[data-shoe-card]", els.shoeSort?.value || "newest");
-  sortContentCards(".news-list", "[data-news-card]", els.newsSort?.value || "newest");
-  applyContentLimit(".shoe-release-list", "[data-shoe-card]", els.shoeLimit?.value || "10");
-  applyContentLimit(".news-list", "[data-news-card]", els.newsLimit?.value || "10");
+  decorateContentFavorites("shoe", ".shoe-release-list", "[data-shoe-card]");
+  decorateContentFavorites("news", ".news-list", "[data-news-card]");
+  updateContentList("shoe");
+  updateContentList("news");
 }
 
 function render() {
@@ -1683,21 +1772,44 @@ function bindEvents() {
   }
 
   els.shoeSort?.addEventListener("change", () => {
-    sortContentCards(".shoe-release-list", "[data-shoe-card]", els.shoeSort.value);
-    applyContentLimit(".shoe-release-list", "[data-shoe-card]", els.shoeLimit?.value || "10");
+    updateContentList("shoe");
   });
 
   els.newsSort?.addEventListener("change", () => {
-    sortContentCards(".news-list", "[data-news-card]", els.newsSort.value);
-    applyContentLimit(".news-list", "[data-news-card]", els.newsLimit?.value || "10");
+    updateContentList("news");
   });
 
   els.shoeLimit?.addEventListener("change", () => {
-    applyContentLimit(".shoe-release-list", "[data-shoe-card]", els.shoeLimit.value);
+    updateContentList("shoe");
   });
 
   els.newsLimit?.addEventListener("change", () => {
-    applyContentLimit(".news-list", "[data-news-card]", els.newsLimit.value);
+    updateContentList("news");
+  });
+
+  els.shoeFavoriteFilter?.addEventListener("click", () => {
+    state.shoeFavoritesOnly = !state.shoeFavoritesOnly;
+    updateContentList("shoe");
+  });
+
+  els.newsFavoriteFilter?.addEventListener("click", () => {
+    state.newsFavoritesOnly = !state.newsFavoritesOnly;
+    updateContentList("news");
+  });
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-content-favorite]");
+    if (!button) {
+      return;
+    }
+    const key = button.dataset.contentFavorite;
+    if (state.contentFavorites.has(key)) {
+      state.contentFavorites.delete(key);
+    } else {
+      state.contentFavorites.add(key);
+    }
+    saveContentFavorites();
+    updateContentList(button.dataset.contentType);
   });
 
   els.search.addEventListener("input", (event) => {
@@ -1815,6 +1927,7 @@ async function loadRaces() {
 
 async function init() {
   loadFavorites();
+  loadContentFavorites();
   setupDurationPickers();
   bindEvents();
   initContentSorting();
