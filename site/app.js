@@ -201,6 +201,20 @@ function getRegistrationLink(race) {
   return link && !isSourceLink(link) ? link : "";
 }
 
+function getRegistrationTarget(race) {
+  const officialLink = getRegistrationLink(race);
+  if (officialLink) {
+    return { url: officialLink, label: "報名網站", kind: "official" };
+  }
+
+  const sourceLink = race.source_registration_link || "";
+  if (sourceLink) {
+    return { url: sourceLink, label: "報名入口", kind: "source" };
+  }
+
+  return { url: "", label: "待補連結", kind: "missing" };
+}
+
 function formatShortDate(dateText) {
   const date = formatDateParts(dateText);
   return date.month !== "--" && date.day !== "--" ? `${date.month}/${date.day}` : "";
@@ -230,7 +244,7 @@ function escapeIcsText(value) {
 function buildCalendarEvent(race) {
   const start = formatIcsDate(race.race_date);
   const end = formatIcsDate(addDays(race.race_date, 1));
-  const registrationLink = getRegistrationLink(race);
+  const registrationTarget = getRegistrationTarget(race);
   const distances = (race.distances || []).join(" / ");
   const description = [
     `縣市：${race.race_county || "待確認"}`,
@@ -239,8 +253,8 @@ function buildCalendarEvent(race) {
     `報名狀態：${race.registration_status || "待確認"}`,
     `開報：${race.registration_opens_at || "待確認"}`,
     `截止：${race.registration_deadline || "待確認"}`,
-    registrationLink ? `報名網站：${registrationLink}` : "報名網站：待補連結",
-    race.facebook_search_url ? `臉書搜尋：${race.facebook_search_url}` : "",
+    registrationTarget.url ? `${registrationTarget.label}：${registrationTarget.url}` : "報名網站：待補連結",
+    !registrationTarget.url && race.facebook_search_url ? `臉書搜尋：${race.facebook_search_url}` : "",
     race.detail_url ? `來源詳情：${race.detail_url}` : "",
   ].filter(Boolean).join("\n");
 
@@ -376,7 +390,7 @@ function renderRaces() {
       const status = race.registration_status || "狀態待確認";
       const difficulty = race.difficulty || "初級";
       const cls = difficultyClass[difficulty] || "";
-      const registrationLink = getRegistrationLink(race);
+      const registrationTarget = getRegistrationTarget(race);
       const note = race.registration_note || "未提供官方報名連結，待人工補連結";
       const opensAt = formatShortDate(race.registration_opens_at) || "待確認";
       const deadline = formatShortDate(race.registration_deadline) || "待確認";
@@ -408,19 +422,23 @@ function renderRaces() {
           </div>
           <div class="race-actions">
             ${
-              registrationLink
-                ? `<a class="register-link" href="${escapeHtml(registrationLink)}" target="_blank" rel="noreferrer">報名網站</a>`
-                : `<span class="register-link disabled" title="${escapeHtml(note)}">待補連結</span>`
+              registrationTarget.url
+                ? `<a class="register-link ${registrationTarget.kind === "source" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
+                : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
             }
-            <button
-              class="favorite-button ${favorite ? "active" : ""}"
-              type="button"
-              data-favorite="${escapeHtml(key)}"
-              aria-pressed="${favorite ? "true" : "false"}"
-            >${favorite ? "已收藏" : "收藏"}</button>
-            <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">加入行事曆</button>
-            ${!registrationLink && race.facebook_search_url ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書搜尋</a>` : ""}
-            ${race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">來源詳情</a>` : ""}
+            <div class="secondary-actions">
+              <button
+                class="favorite-button ${favorite ? "active" : ""}"
+                type="button"
+                data-favorite="${escapeHtml(key)}"
+                aria-pressed="${favorite ? "true" : "false"}"
+              >${favorite ? "已收藏" : "收藏"}</button>
+              <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">行事曆</button>
+            </div>
+            <div class="detail-actions">
+              ${!registrationTarget.url && race.facebook_search_url ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>` : ""}
+              ${race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>` : ""}
+            </div>
           </div>
         </article>
       `;
