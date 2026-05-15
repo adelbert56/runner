@@ -1175,7 +1175,7 @@ h3 {
 
 .shoe-release-list article,
 .review-grid article {
-  min-height: 190px;
+  min-height: 178px;
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
@@ -1190,7 +1190,7 @@ h3 {
 
 .shoe-release-list span {
   display: inline-flex;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   padding: 4px 8px;
   border-radius: 999px;
   background: #e4f0e8;
@@ -1201,7 +1201,14 @@ h3 {
 
 .shoe-release-list p,
 .review-grid p {
+  margin-bottom: 10px;
   color: var(--muted);
+}
+
+.shoe-release-list .sub-link,
+.news-list .sub-link {
+  align-self: end;
+  width: fit-content;
 }
 
 .training-system {
@@ -1661,7 +1668,7 @@ h3 {
 }
 
 .news-list article {
-  min-height: 180px;
+  min-height: 188px;
   display: grid;
   align-content: start;
 }
