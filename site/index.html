@@ -9,7 +9,7 @@
       content="蒐集中部路跑賽事、跑鞋新上市心得、練跑方法與跑步新聞的跑者資訊站。"
     >
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260515-content2">
+    <link rel="stylesheet" href="./styles.css?v=20260515-content3">
   </head>
   <body>
     <header class="site-header">
@@ -142,14 +142,24 @@
             <h2 id="gear-title">跑鞋新上市與評測</h2>
             <p class="section-lead">用中文整理新鞋定位、適合跑者、訓練用途與原始消息，先判斷值不值得試穿，再決定要不要入手。</p>
           </div>
-          <label class="content-sort">
-            <span>排序</span>
-            <select id="shoe-sort" aria-label="跑鞋排序">
-              <option value="newest">最新加入</option>
-              <option value="oldest">由舊到新</option>
-              <option value="category">用途分類</option>
-            </select>
-          </label>
+          <div class="content-controls" aria-label="跑鞋列表控制">
+            <label class="content-sort">
+              <span>排序</span>
+              <select id="shoe-sort" aria-label="跑鞋排序">
+                <option value="newest">最新加入</option>
+                <option value="oldest">由舊到新</option>
+                <option value="category">用途分類</option>
+              </select>
+            </label>
+            <label class="content-sort">
+              <span>顯示</span>
+              <select id="shoe-limit" aria-label="跑鞋顯示筆數">
+                <option value="10">10 筆</option>
+                <option value="25">25 筆</option>
+                <option value="50">50 筆</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         <div class="gear-board">
@@ -163,7 +173,10 @@
                 <div><dt>進階</dt><dd>輪替鞋</dd></div>
                 <div><dt>比賽</dt><dd>競速鞋</dd></div>
               </dl>
-              <a class="button secondary" href="https://github.com/adelbert56/runner/blob/main/runner/%E5%BF%83%E5%BE%97/%E8%A3%85%E5%A4%87/2026-05-15-asics-novablast3%E8%AF%84%E6%B5%8B.md" target="_blank" rel="noreferrer">閱讀既有心得</a>
+              <div class="shoe-logic-list">
+                <span>先看：用途 / 腳感 / 穩定 / 跑量</span>
+                <span>再看：重量 / 中底科技 / 碳板 / 價格</span>
+              </div>
             </div>
             <div class="shoe-visual" aria-hidden="true">
               <div class="shoe-photo">
@@ -424,13 +437,23 @@
             <h2 id="news-title">路跑知識與新聞</h2>
             <p class="section-lead">以中文整理跑鞋新品、訓練恢復、補給與備賽觀念，先保留真正能幫跑者做決策的重點。</p>
           </div>
-          <label class="content-sort">
-            <span>排序</span>
-            <select id="news-sort" aria-label="新聞排序">
-              <option value="newest">最新優先</option>
-              <option value="oldest">由舊到新</option>
-            </select>
-          </label>
+          <div class="content-controls" aria-label="新聞列表控制">
+            <label class="content-sort">
+              <span>排序</span>
+              <select id="news-sort" aria-label="新聞排序">
+                <option value="newest">最新優先</option>
+                <option value="oldest">由舊到新</option>
+              </select>
+            </label>
+            <label class="content-sort">
+              <span>顯示</span>
+              <select id="news-limit" aria-label="新聞顯示筆數">
+                <option value="10">10 筆</option>
+                <option value="25">25 筆</option>
+                <option value="50">50 筆</option>
+              </select>
+            </label>
+          </div>
         </div>
         <div class="news-list">
           <article data-news-card data-date="2026-05-08" data-title="日常跑鞋趨勢">
@@ -510,6 +533,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260515-content2"></script>
+    <script src="./app.js?v=20260515-content3"></script>
   </body>
 </html>

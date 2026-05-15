@@ -1070,6 +1070,13 @@ h3 {
   padding: clamp(14px, 3vw, 28px);
 }
 
+.content-controls {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .content-sort {
   display: grid;
   gap: 6px;
@@ -1087,6 +1094,19 @@ h3 {
   background: var(--surface);
   color: var(--green-dark);
   font-weight: 900;
+}
+
+.shoe-logic-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.shoe-logic-list span {
+  padding-left: 12px;
+  border-left: 3px solid rgba(21, 83, 56, 0.32);
 }
 
 .tag {

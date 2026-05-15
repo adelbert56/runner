@@ -61,6 +61,8 @@ const els = {
   backTop: document.querySelector("#back-top"),
   shoeSort: document.querySelector("#shoe-sort"),
   newsSort: document.querySelector("#news-sort"),
+  shoeLimit: document.querySelector("#shoe-limit"),
+  newsLimit: document.querySelector("#news-limit"),
 };
 
 const monthNames = {
@@ -1632,9 +1634,19 @@ function sortContentCards(containerSelector, itemSelector, mode) {
   sorted.forEach((card) => container.appendChild(card));
 }
 
+function applyContentLimit(containerSelector, itemSelector, limitValue) {
+  const cards = [...document.querySelectorAll(`${containerSelector} ${itemSelector}`)];
+  const limit = Number(limitValue) || 10;
+  cards.forEach((card, index) => {
+    card.hidden = index >= limit;
+  });
+}
+
 function initContentSorting() {
   sortContentCards(".shoe-release-list", "[data-shoe-card]", els.shoeSort?.value || "newest");
   sortContentCards(".news-list", "[data-news-card]", els.newsSort?.value || "newest");
+  applyContentLimit(".shoe-release-list", "[data-shoe-card]", els.shoeLimit?.value || "10");
+  applyContentLimit(".news-list", "[data-news-card]", els.newsLimit?.value || "10");
 }
 
 function render() {
@@ -1672,10 +1684,20 @@ function bindEvents() {
 
   els.shoeSort?.addEventListener("change", () => {
     sortContentCards(".shoe-release-list", "[data-shoe-card]", els.shoeSort.value);
+    applyContentLimit(".shoe-release-list", "[data-shoe-card]", els.shoeLimit?.value || "10");
   });
 
   els.newsSort?.addEventListener("change", () => {
     sortContentCards(".news-list", "[data-news-card]", els.newsSort.value);
+    applyContentLimit(".news-list", "[data-news-card]", els.newsLimit?.value || "10");
+  });
+
+  els.shoeLimit?.addEventListener("change", () => {
+    applyContentLimit(".shoe-release-list", "[data-shoe-card]", els.shoeLimit.value);
+  });
+
+  els.newsLimit?.addEventListener("change", () => {
+    applyContentLimit(".news-list", "[data-news-card]", els.newsLimit.value);
   });
 
   els.search.addEventListener("input", (event) => {
