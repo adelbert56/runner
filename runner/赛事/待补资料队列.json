@@ -2114,64 +2114,6 @@
     }
   },
   {
-    "race_id": "af9de05e-9895-478a-bcc6-92587d8c2382",
-    "race_name": "2026 第二屆麗晨臺中國際馬拉松",
-    "race_date": "2026-12-06",
-    "race_county": "臺中市",
-    "priority_score": 9,
-    "missing": [
-      {
-        "key": "precise_location",
-        "label": "精確地點",
-        "severity": "medium",
-        "hint": "補 venue 或 start_location，不要只到縣市。"
-      },
-      {
-        "key": "organizer",
-        "label": "主辦單位",
-        "severity": "medium",
-        "hint": "補 organizer 或 host。"
-      },
-      {
-        "key": "fees",
-        "label": "費用",
-        "severity": "low",
-        "hint": "補 fees，可用字串或分組物件。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      },
-      {
-        "key": "verified_at",
-        "label": "資料查證時間",
-        "severity": "low",
-        "hint": "補 verified_at，表示人工或爬蟲最後查證日。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "https://irunner.biji.co/2026-2livetruemarathon",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12814&subtitle=2026+%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12814",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE"
-    },
-    "suggested_override": {
-      "race_name": "2026 第二屆麗晨臺中國際馬拉松",
-      "race_date": "2026-12-06",
-      "registration_link": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
     "race_id": "0929827f-0b09-441f-bb20-f42815b1bcb4",
     "race_name": "2027 第九屆龍虎鳳越野",
     "race_date": "2027-01-09",
@@ -2218,6 +2160,58 @@
     "suggested_override": {
       "race_name": "2027 第九屆龍虎鳳越野",
       "race_date": "2027-01-09",
+      "registration_link": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "af9de05e-9895-478a-bcc6-92587d8c2382",
+    "race_name": "2026 第二屆麗晨臺中國際馬拉松",
+    "race_date": "2026-12-06",
+    "race_county": "臺中市",
+    "priority_score": 8,
+    "missing": [
+      {
+        "key": "precise_location",
+        "label": "精確地點",
+        "severity": "medium",
+        "hint": "補 venue 或 start_location，不要只到縣市。"
+      },
+      {
+        "key": "organizer",
+        "label": "主辦單位",
+        "severity": "medium",
+        "hint": "補 organizer 或 host。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "https://irunner.biji.co/2026-2livetruemarathon",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12814&subtitle=2026+%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12814",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE"
+    },
+    "suggested_override": {
+      "race_name": "2026 第二屆麗晨臺中國際馬拉松",
+      "race_date": "2026-12-06",
       "registration_link": "",
       "registration_opens_at": "",
       "registration_deadline": "",

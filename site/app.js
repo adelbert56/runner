@@ -562,13 +562,23 @@ function escapeIcsText(value) {
 function buildCalendarDetails(race) {
   const registrationTarget = getRegistrationTarget(race);
   const distances = (race.distances || []).join(" / ");
+  const venue = race.venue || race.start_location || race.location || race.race_location || "";
+  const organizer = race.organizer || race.host || race.organizer_name || "";
+  const fees = race.fees || race.fee || race.registration_fee || "";
+  const quota = race.quota || race.participant_limit || "";
+  const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
   const description = [
     `縣市：${race.race_county || "待確認"}`,
+    venue ? `地點：${venue}` : "",
     `距離：${distances || "待確認"}`,
     `難度：${race.difficulty || "待確認"}`,
+    organizer ? `主辦：${organizer}` : "",
+    fees ? `費用：${fees}` : "",
+    quota ? `名額：${quota}` : "",
     `報名狀態：${race.registration_status || "待確認"}`,
     `開報：${race.registration_opens_at || "待確認"}`,
     `截止：${race.registration_deadline || "待確認"}`,
+    verifiedAt ? `資料查證：${verifiedAt}` : "",
     registrationTarget.url ? `${registrationTarget.label}：${registrationTarget.url}` : "報名網站：待補連結",
     !registrationTarget.url && race.facebook_search_url ? `臉書搜尋：${race.facebook_search_url}` : "",
     race.detail_url ? `來源詳情：${race.detail_url}` : "",
@@ -578,7 +588,7 @@ function buildCalendarDetails(race) {
     title: race.race_name || "路跑賽事",
     start: race.race_date,
     end: addDays(race.race_date, 1),
-    location: race.race_county || "",
+    location: venue || race.race_county || "",
     description,
   };
 }
@@ -807,6 +817,14 @@ function renderRaces() {
       const favorite = isFavorite(race);
       const decision = raceDecisionText(race, registrationTarget);
       const canPlanTraining = dateDiffDays(race.race_date) !== null && dateDiffDays(race.race_date) >= 0;
+      const venue = race.venue || race.start_location || race.location || race.race_location || "";
+      const organizer = race.organizer || race.host || race.organizer_name || "";
+      const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
+      const facts = [
+        venue ? `地點 ${venue}` : "",
+        organizer ? `主辦 ${organizer}` : "",
+        verifiedAt ? `查證 ${formatShortDate(verifiedAt) || verifiedAt}` : "",
+      ].filter(Boolean);
 
       return `
         <article class="race-card">
@@ -839,6 +857,7 @@ function renderRaces() {
               <span class="pill">${escapeHtml(status)}</span>
             </div>
             <p>${escapeHtml(distances)}</p>
+            ${facts.length ? `<div class="race-facts">${facts.map((fact) => `<span>${escapeHtml(fact)}</span>`).join("")}</div>` : ""}
             <div class="race-insight">${escapeHtml(decision)}</div>
           </div>
           <div class="race-actions">

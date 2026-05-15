@@ -137,6 +137,18 @@ npm run data:quality
 
 目前重点检查官方报名连结、开报时间、截止时间、精确地点、主办单位、费用、名额与资料查证时间。
 
+人工补资料后，可以直接套用到网站资料：
+
+```bash
+npm run data:apply
+```
+
+若要「套用人工补充 → 重新产生资料品质报告」，使用：
+
+```bash
+npm run data:refresh
+```
+
 ### 7. GitHub Pages 部署
 
 项目已提供 `.github/workflows/pages.yml`。推送到 `main` 后，GitHub Actions 会部署静态网站。

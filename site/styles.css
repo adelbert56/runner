@@ -785,6 +785,26 @@ h3 {
   color: var(--muted);
 }
 
+.race-facts {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.race-facts span {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid rgba(36, 114, 79, 0.14);
+  border-radius: 8px;
+  background: #f3f8f4;
+  color: #31513e;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
 .race-insight {
   margin-top: 8px;
   color: var(--green-dark);
