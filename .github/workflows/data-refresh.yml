@@ -65,6 +65,8 @@ jobs:
             runner/赛事/资料品质报告.md
             runner/赛事/开报后待补资料报告.md
             runner/赛事/开报后待补资料报告.json
+            runner/赛事/报名日期异常报告.md
+            runner/赛事/报名日期异常报告.json
             runner/赛事/爬虫追踪计划.md
             runner/赛事/爬虫追踪计划.json
             runner/赛事/平台爬虫覆盖报告.md

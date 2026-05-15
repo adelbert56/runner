@@ -51,8 +51,9 @@ function applyOverrides(races, overrides) {
     let changed = false;
     const updated = { ...race };
     for (const [field, value] of Object.entries(fields)) {
-      if (updated[field] !== value) {
-        updated[field] = value;
+      const nextValue = value === "__CLEAR__" ? "" : value;
+      if (updated[field] !== nextValue) {
+        updated[field] = nextValue;
         updatedFields += 1;
         changed = true;
       }

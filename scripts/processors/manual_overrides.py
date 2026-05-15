@@ -39,6 +39,11 @@ def apply_overrides(races: list[dict], overrides: dict[str, dict]) -> int:
         if not fields:
             continue
         for field, value in fields.items():
+            if value == "__CLEAR__":
+                if race.get(field) != "":
+                    race[field] = ""
+                    updated += 1
+                continue
             if value not in (None, "") and race.get(field) != value:
                 race[field] = value
                 updated += 1

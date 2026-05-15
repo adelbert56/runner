@@ -469,6 +469,20 @@ function dateDiffDays(dateText) {
   return Math.ceil((target - today) / 86400000);
 }
 
+function sameDate(a, b) {
+  return Boolean(a && b && String(a).slice(0, 10) === String(b).slice(0, 10));
+}
+
+function hasSuspiciousRegistrationDates(race) {
+  const opensAt = race.registration_opens_at || "";
+  const deadline = race.registration_deadline || "";
+  const note = `${race.registration_note || ""} ${race.verification_note || ""}`;
+  if (sameDate(opensAt, deadline) && !/當日報名|現場報名|單日報名/.test(note)) {
+    return true;
+  }
+  return Boolean(opensAt && deadline && String(opensAt).slice(0, 10) > String(deadline).slice(0, 10));
+}
+
 function raceDecisionText(race, registrationTarget) {
   const raceDays = dateDiffDays(race.race_date);
   const deadlineDays = dateDiffDays(race.registration_deadline);
@@ -528,12 +542,13 @@ function getRegistrationDisplayStatus(race) {
 
   const opensDays = dateDiffDays(race.registration_opens_at);
   const deadlineDays = dateDiffDays(race.registration_deadline);
+  const datesNeedCheck = hasSuspiciousRegistrationDates(race);
 
   if (deadlineDays !== null && deadlineDays < 0) {
     return "已截止";
   }
 
-  if (opensDays !== null) {
+  if (opensDays !== null && !datesNeedCheck) {
     if (opensDays > 0) {
       return "尚未開報";
     }
@@ -928,6 +943,8 @@ function renderRaces() {
       const note = race.registration_note || "未提供官方報名連結，待人工補連結";
       const opensAt = formatShortDate(race.registration_opens_at) || "待確認";
       const deadline = formatShortDate(race.registration_deadline) || "待確認";
+      const datesNeedCheck = hasSuspiciousRegistrationDates(race);
+      const scheduleOpenText = datesNeedCheck ? "待查證" : opensAt;
       const favorite = isFavorite(race);
       const decision = raceDecisionText(race, registrationTarget);
       const cancelled = isCancelledRace(race);
@@ -964,9 +981,10 @@ function renderRaces() {
             </div>
             <p class="race-distance">${escapeHtml(distances)}</p>
             <div class="race-schedule" aria-label="報名時間">
-              <span><strong>開報</strong>${escapeHtml(opensAt)}</span>
+              <span class="${datesNeedCheck ? "schedule-warning" : ""}"><strong>開報</strong>${escapeHtml(scheduleOpenText)}</span>
               <span><strong>截止</strong>${escapeHtml(deadline)}</span>
             </div>
+            ${datesNeedCheck ? `<p class="race-data-warning">報名起訖日期邏輯待查證</p>` : ""}
             <div class="race-insight">${escapeHtml(decision)}</div>
             ${
               factItems.length

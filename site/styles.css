@@ -886,10 +886,23 @@ h3 {
   font-weight: 900;
 }
 
+.race-schedule span.schedule-warning {
+  border-color: #e0ad56;
+  background: #fff4cf;
+  color: #7a4a05;
+}
+
 .race-schedule strong {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 950;
+}
+
+.race-data-warning {
+  margin: 7px 0 0;
+  color: #9b4d00;
+  font-size: 0.9rem;
+  font-weight: 900;
 }
 
 .pill {

@@ -8,6 +8,7 @@ const paths = {
   races: resolve(root, "site/data/races.json"),
   qualityQueue: resolve(root, "runner/赛事/待补资料队列.json"),
   openedGaps: resolve(root, "runner/赛事/开报后待补资料报告.json"),
+  dateAnomalies: resolve(root, "runner/赛事/报名日期异常报告.json"),
   tracking: resolve(root, "runner/赛事/爬虫追踪计划.json"),
   contentCandidates: resolve(root, "runner/内容/候选内容.json"),
   siteHtml: resolve(root, "site/index.html"),
@@ -132,10 +133,11 @@ function statusLine(label, value, target, ok) {
 
 async function main() {
   const todayDate = parseDate(today);
-  const [races, queue, openedGaps, tracking, candidates] = await Promise.all([
+  const [races, queue, openedGaps, dateAnomalies, tracking, candidates] = await Promise.all([
     readJson(paths.races),
     readJson(paths.qualityQueue),
     readJson(paths.openedGaps),
+    readJson(paths.dateAnomalies),
     readJson(paths.tracking),
     readJson(paths.contentCandidates),
   ]);
@@ -164,6 +166,7 @@ async function main() {
       verified_count: verifiedCount,
       verified_rate: pct(verifiedCount, races.length),
       opened_gap_count: openGapCount,
+      date_anomaly_count: dateAnomalies.length,
       due_now_count: dueNow.length,
       monthly_tracking_count: monthly.length,
       state_counts: raceStateCounts,
@@ -183,6 +186,7 @@ async function main() {
     statusLine("官方直連率", dashboard.races.official_direct_rate, "80% 以上", officialDirectCount / Math.max(races.length, 1) >= 0.8),
     statusLine("已查證比例", dashboard.races.verified_rate, "80% 以上", verifiedCount / Math.max(races.length, 1) >= 0.8),
     statusLine("開報後待補", `${openGapCount} 場`, "0 場", openGapCount === 0),
+    statusLine("報名日期異常", `${dateAnomalies.length} 場`, "0 場", dateAnomalies.length === 0),
     statusLine("跑鞋上架量", `${shoeCards} 筆`, "至少 10 筆", shoeCards >= 10),
     statusLine("新聞上架量", `${newsCards} 筆`, "至少 10 筆", newsCards >= 10),
     statusLine("內容候選量", `${candidates.length} 筆`, "至少 20 筆", candidates.length >= 20),
@@ -191,6 +195,9 @@ async function main() {
   const nextActions = [];
   if (openGapCount > 0) {
     nextActions.push("優先處理 `runner/赛事/开报后待补资料报告.md`，這些是已開報但資料仍不完整的賽事。");
+  }
+  if (dateAnomalies.length > 0) {
+    nextActions.push("先修 `runner/赛事/报名日期异常报告.md`，日期邏輯錯誤會直接誤導報名狀態。");
   }
   if (dueNow.length > 0) {
     nextActions.push("依 `runner/赛事/爬虫追踪计划.md` 的「現在該重爬」修平台 parser 或補人工資料。");
@@ -236,6 +243,10 @@ async function main() {
     "### 開報後待補",
     "",
     table(topEntries(openedGaps).map((item) => `- ${item.race_date || item.registration_opens_at || "-"}｜${item.race_name}｜缺：${item.missing.map((missing) => missing.label).join("、")}`)).trim(),
+    "",
+    "### 報名日期異常",
+    "",
+    table(topEntries(dateAnomalies).map((item) => `- ${item.race_date || "-"}｜${item.race_name}｜${item.registration_opens_at || "-"} 到 ${item.registration_deadline || "-"}｜${item.anomalies.map((anomaly) => anomaly.label).join("、")}`)).trim(),
     "",
     "### 現在該重爬",
     "",

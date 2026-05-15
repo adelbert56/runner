@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-05-15T15:40:13.797Z",
+  "generated_at": "2026-05-15T16:01:18.215Z",
   "basis_date": "2026-05-15",
   "races": {
     "total": 34,
     "follow_up_count": 14,
     "complete_count": 20,
     "complete_rate": "59%",
-    "official_direct_count": 20,
-    "official_direct_rate": "59%",
-    "verified_count": 21,
-    "verified_rate": "62%",
-    "opened_gap_count": 0,
-    "due_now_count": 0,
+    "official_direct_count": 21,
+    "official_direct_rate": "62%",
+    "verified_count": 22,
+    "verified_rate": "65%",
+    "opened_gap_count": 1,
+    "date_anomaly_count": 0,
+    "due_now_count": 1,
     "monthly_tracking_count": 11,
     "state_counts": {
       "已截止": 5,
       "停辦": 2,
-      "報名中": 14,
-      "尚未開報": 1,
+      "報名中": 15,
       "報名時間未定": 12
     }
   },

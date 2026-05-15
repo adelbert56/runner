@@ -9,6 +9,8 @@ const trackingPath = resolve(root, "runner/赛事/爬虫追踪计划.md");
 const trackingJsonPath = resolve(root, "runner/赛事/爬虫追踪计划.json");
 const openedGapReportPath = resolve(root, "runner/赛事/开报后待补资料报告.md");
 const openedGapJsonPath = resolve(root, "runner/赛事/开报后待补资料报告.json");
+const dateAnomalyReportPath = resolve(root, "runner/赛事/报名日期异常报告.md");
+const dateAnomalyJsonPath = resolve(root, "runner/赛事/报名日期异常报告.json");
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
@@ -114,6 +116,40 @@ function isCancelledRace(race) {
     race.verification_note,
   ].filter(hasText).join(" ");
   return /停辦|停賽|取消|被迫取消|cancel/i.test(text);
+}
+
+function registrationDateAnomalies(race) {
+  const anomalies = [];
+  const opensAt = parseDate(race.registration_opens_at);
+  const deadline = parseDate(race.registration_deadline);
+  const raceDate = parseDate(race.race_date);
+  const note = [
+    race.registration_note,
+    race.verification_note,
+  ].filter(hasText).join(" ");
+
+  if (opensAt && deadline && formatDate(opensAt) === formatDate(deadline) && !/當日報名|現場報名|單日報名/.test(note)) {
+    anomalies.push({
+      key: "open_equals_deadline",
+      label: "開報日與截止日相同",
+      hint: "常見原因是把「即日起至截止日」誤解析成同一天；請回官方頁確認起訖。",
+    });
+  }
+  if (opensAt && deadline && opensAt > deadline) {
+    anomalies.push({
+      key: "open_after_deadline",
+      label: "開報日晚於截止日",
+      hint: "報名日期順序不合理，需重新查證。",
+    });
+  }
+  if (deadline && raceDate && deadline > raceDate) {
+    anomalies.push({
+      key: "deadline_after_race",
+      label: "截止日晚於賽事日",
+      hint: "截止日通常不應晚於賽事日，需確認是否年份解析錯誤。",
+    });
+  }
+  return anomalies;
 }
 
 function raceKey(race) {
@@ -398,6 +434,38 @@ function formatOpenedGapReport(items) {
   return `${lines.join("\n")}\n`;
 }
 
+function formatDateAnomalyReport(items) {
+  const generatedAt = new Date().toISOString();
+  const lines = [
+    "# 報名日期異常報告",
+    "",
+    `產生時間：${generatedAt}`,
+    `追蹤基準日：${TODAY}`,
+    "",
+    "這份報告列出報名日期邏輯不合理的賽事，例如開報日等於截止日、開報日晚於截止日、截止日晚於賽事日。這類資料不能直接當成正常報名區間顯示。",
+    "",
+    `目前共 ${items.length} 場。`,
+    "",
+    "| 賽事日期 | 賽事 | 縣市 | 開報 | 截止 | 異常 | 建議 |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+  ];
+
+  for (const item of items) {
+    lines.push([
+      item.race_date || "-",
+      item.race_name,
+      item.race_county,
+      item.registration_opens_at || "-",
+      item.registration_deadline || "-",
+      item.anomalies.map((anomaly) => anomaly.label).join("、"),
+      item.anomalies.map((anomaly) => anomaly.hint).join("；"),
+    ].map((value) => String(value).replaceAll("|", "｜")).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  }
+
+  lines.push("");
+  return `${lines.join("\n")}\n`;
+}
+
 function countBy(items, getKey) {
   return items.reduce((acc, item) => {
     const key = getKey(item);
@@ -546,6 +614,23 @@ async function main() {
   const openedGaps = openedGapItems(queue);
   await writeFile(openedGapReportPath, formatOpenedGapReport(openedGaps), "utf-8");
   await writeFile(openedGapJsonPath, `${JSON.stringify(openedGaps, null, 2)}\n`, "utf-8");
+  const dateAnomalies = races
+    .map((race) => ({
+      race_id: race.race_id || "",
+      race_name: race.race_name || "",
+      race_date: race.race_date || "",
+      race_county: race.race_county || "",
+      registration_opens_at: race.registration_opens_at || "",
+      registration_deadline: race.registration_deadline || "",
+      registration_link: race.registration_link || "",
+      official_event_url: race.official_event_url || "",
+      detail_url: race.detail_url || "",
+      anomalies: registrationDateAnomalies(race),
+    }))
+    .filter((item) => item.anomalies.length)
+    .sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)) || String(a.race_name).localeCompare(String(b.race_name)));
+  await writeFile(dateAnomalyReportPath, formatDateAnomalyReport(dateAnomalies), "utf-8");
+  await writeFile(dateAnomalyJsonPath, `${JSON.stringify(dateAnomalies, null, 2)}\n`, "utf-8");
   await writeFile(trackingJsonPath, `${JSON.stringify(queue.map((item) => ({
     race_id: item.race_id,
     race_name: item.race_name,
@@ -565,11 +650,13 @@ async function main() {
   console.log(`Needs follow-up: ${queue.length}`);
   console.log(`Due to crawl now: ${dueNow}`);
   console.log(`Opened registration gaps: ${openedGaps.length}`);
+  console.log(`Registration date anomalies: ${dateAnomalies.length}`);
   console.log(`Missing official registration link: ${highPriority}`);
   console.log(`Wrote: ${queuePath}`);
   console.log(`Wrote: ${reportPath}`);
   console.log(`Wrote: ${trackingPath}`);
   console.log(`Wrote: ${openedGapReportPath}`);
+  console.log(`Wrote: ${dateAnomalyReportPath}`);
 }
 
 main().catch((error) => {

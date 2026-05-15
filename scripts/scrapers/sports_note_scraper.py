@@ -114,8 +114,8 @@ def _extract_registration_period(text: str, default_year: str) -> tuple[str, str
         r"|\d{1,2}[./月-]\d{1,2}日?"
     )
     range_pattern = (
-        rf"(?:報名期間|報名時間|報名日期|登記期間).{{0,40}}?"
-        rf"({date_pattern}).{{0,20}}?(?:至|到|~|～).{{0,20}}?({date_pattern})"
+        rf"(?:報名期間|報名時間|報名日期|登記期間).{{0,120}}?"
+        rf"(?:起)?\s*({date_pattern}).{{0,40}}?(?:至|到|~|～|迄).{{0,40}}?({date_pattern})"
     )
     match = re.search(range_pattern, re.sub(r"\s+", " ", text), flags=re.IGNORECASE)
     if not match:
@@ -128,6 +128,7 @@ def _extract_registration_period(text: str, default_year: str) -> tuple[str, str
 def _extract_registration_dates(text: str, race_date: str) -> tuple[str, str]:
     """Extract registration open and deadline dates from detail page text."""
     default_year = race_date[:4] if race_date else "2026"
+    period_open, period_deadline = _extract_registration_period(text, default_year)
     open_keywords = (
         "報名開始", "開放報名", "開始報名", "報名時間", "報名期間",
         "登記開始", "開放登記", "registration starts", "registration opens",
@@ -138,9 +139,8 @@ def _extract_registration_dates(text: str, race_date: str) -> tuple[str, str]:
     )
     opens_at = _extract_date_near_keywords(text, open_keywords, default_year)
     deadline = _extract_date_near_keywords(text, deadline_keywords, default_year)
-    period_open, period_deadline = _extract_registration_period(text, default_year)
-    opens_at = opens_at or period_open
-    deadline = deadline or period_deadline
+    opens_at = period_open or opens_at
+    deadline = period_deadline or deadline
     return opens_at, deadline
 
 

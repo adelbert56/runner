@@ -89,8 +89,8 @@ def date_near_keywords(text: str, keywords: tuple[str, ...], default_year: str) 
 
 def registration_period(text: str, default_year: str) -> tuple[str, str]:
     pattern = (
-        rf"(?:報名期間|報名時間|報名日期|報名方式及日期|登記期間|線上報名).{{0,80}}?"
-        rf"({DATE_PATTERN}).{{0,30}}?(?:至|到|~|～|-).{{0,30}}?({DATE_PATTERN})"
+        rf"(?:報名期間|報名時間|報名日期|報名方式及日期|登記期間|線上報名).{{0,120}}?"
+        rf"(?:起)?\s*({DATE_PATTERN}).{{0,40}}?(?:至|到|~|～|-|迄).{{0,40}}?({DATE_PATTERN})"
     )
     match = re.search(pattern, compact_text(text), flags=re.IGNORECASE)
     if not match:
@@ -100,18 +100,18 @@ def registration_period(text: str, default_year: str) -> tuple[str, str]:
 
 def extract_registration_dates(text: str, race_date: str) -> tuple[str, str]:
     default_year = race_date[:4] if race_date else "2026"
+    period_open, period_deadline = registration_period(text, default_year)
     opens_at = date_near_keywords(
         text,
-        ("報名開始", "開放報名", "開始報名", "報名時間", "報名期間", "起", "即日起"),
+        ("報名開始", "開放報名", "開始報名", "報名時間", "報名期間"),
         default_year,
     )
     deadline = date_near_keywords(
         text,
-        ("報名截止", "截止報名", "報名至", "截止日", "止", "額滿為止"),
+        ("報名截止", "截止報名", "報名至", "截止日", "額滿為止"),
         default_year,
     )
-    period_open, period_deadline = registration_period(text, default_year)
-    return opens_at or period_open, deadline or period_deadline
+    return period_open or opens_at, period_deadline or deadline
 
 
 def find_label_value(lines: list[str], labels: tuple[str, ...]) -> str:
