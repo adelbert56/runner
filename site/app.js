@@ -766,6 +766,14 @@ function renderRaces() {
 
       return `
         <article class="race-card">
+          <button
+            class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
+            type="button"
+            data-favorite="${escapeHtml(key)}"
+            aria-pressed="${favorite ? "true" : "false"}"
+            aria-label="${favorite ? "取消收藏" : "加入收藏"}"
+            title="${favorite ? "取消收藏" : "加入收藏"}"
+          ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
           <div class="date-block" aria-label="${escapeHtml(date.full)}">
             <div>
               <span>${escapeHtml(date.year)}</span>
@@ -795,17 +803,7 @@ function renderRaces() {
                 ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
                 : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
             }
-            <div class="secondary-actions">
-              <button
-                class="favorite-button icon-button ${favorite ? "active" : ""}"
-                type="button"
-                data-favorite="${escapeHtml(key)}"
-                aria-pressed="${favorite ? "true" : "false"}"
-                aria-label="${favorite ? "取消收藏" : "加入收藏"}"
-                title="${favorite ? "取消收藏" : "加入收藏"}"
-              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
-              <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">行事曆</button>
-            </div>
+            <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">加入行事曆</button>
             ${
               canPlanTraining
                 ? `<button class="train-button" type="button" data-train-race="${escapeHtml(key)}">用這場排課</button>`

@@ -24,6 +24,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 88px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   overflow-x: hidden;
@@ -31,6 +32,7 @@ html {
 
 body {
   margin: 0;
+  padding-top: 72px;
   overflow-x: hidden;
   background: var(--soft);
   color: var(--ink);
@@ -64,9 +66,11 @@ select:focus-visible {
 }
 
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 30;
+  left: 0;
+  right: 0;
+  z-index: 80;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -147,7 +151,7 @@ select:focus-visible {
 .hero-content {
   position: relative;
   width: min(980px, 100%);
-  padding: clamp(76px, 12vw, 128px) clamp(20px, 7vw, 88px) 58px;
+  padding: clamp(76px, 12vw, 128px) clamp(20px, 7vw, 88px) 86px;
   color: white;
 }
 
@@ -184,12 +188,6 @@ h1 {
   margin-bottom: 26px;
   color: rgba(255, 255, 255, 0.88);
   font-size: clamp(1.04rem, 1.8vw, 1.22rem);
-}
-
-.hero-actions {
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 26px;
 }
 
 .button {
@@ -547,8 +545,9 @@ h3 {
 }
 
 .race-card {
+  position: relative;
   display: grid;
-  grid-template-columns: 86px minmax(0, 1fr) 136px;
+  grid-template-columns: 86px minmax(0, 1fr) 148px;
   gap: 16px;
   align-items: center;
   padding: 16px;
@@ -609,12 +608,13 @@ h3 {
 
 .race-card h3 {
   margin-bottom: 0;
+  padding-right: 42px;
   overflow-wrap: anywhere;
   font-size: 1.08rem;
 }
 
 .favorite-button {
-  width: 100%;
+  width: 38px;
   min-height: 34px;
   padding: 6px 8px;
   border: 1px solid var(--line);
@@ -627,6 +627,16 @@ h3 {
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
+.race-favorite {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  min-height: 38px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 14px rgba(31, 42, 36, 0.08);
+}
+
 .icon-button {
   display: inline-flex;
   align-items: center;
@@ -637,7 +647,7 @@ h3 {
 
 .calendar-button {
   width: 100%;
-  min-height: 34px;
+  min-height: 38px;
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -743,6 +753,7 @@ h3 {
   flex-direction: column;
   justify-content: center;
   gap: 8px;
+  padding-top: 34px;
 }
 
 .race-card .button {
@@ -1611,6 +1622,7 @@ h3 {
 
   .race-actions {
     grid-column: auto;
+    padding-top: 0;
   }
 
   .main-nav,
@@ -1669,9 +1681,14 @@ h3 {
 }
 
 @media (max-width: 680px) {
+  html {
+    scroll-padding-top: 76px;
+  }
+
   body {
     width: 100%;
     max-width: 100%;
+    padding-top: 64px;
   }
 
   main,
@@ -1934,6 +1951,13 @@ h3 {
     padding: 12px;
   }
 
+  .race-favorite {
+    top: 78px;
+    right: 18px;
+    width: 40px;
+    min-height: 40px;
+  }
+
   .race-main {
     min-width: 0;
     overflow: hidden;
@@ -1953,6 +1977,7 @@ h3 {
   }
 
   .race-card h3 {
+    padding-right: 52px;
     font-size: 0.98rem;
     line-height: 1.25;
   }
@@ -2016,6 +2041,11 @@ h3 {
   .favorite-button,
   .calendar-button {
     width: 100%;
+  }
+
+  .race-favorite {
+    width: 40px;
+    max-width: 40px;
   }
 
   .secondary-actions {
