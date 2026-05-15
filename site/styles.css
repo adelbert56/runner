@@ -1516,6 +1516,44 @@ h3 {
     grid-column: auto;
   }
 
+  .main-nav,
+  .segmented,
+  .month-list,
+  .phase-table {
+    overflow: visible;
+  }
+
+  .segmented {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .segmented button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .month-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .month-list button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .phase-table {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 14px 0 16px;
+    padding: 0;
+  }
+
+  .phase-table button {
+    width: 100%;
+  }
+
   .plan-builder,
   .training-summary,
   .profile-summary,
@@ -1563,7 +1601,7 @@ h3 {
   .main-nav {
     width: auto;
     margin-left: auto;
-    overflow-x: auto;
+    overflow: visible;
     gap: 2px;
     padding-bottom: 0;
   }
@@ -1732,17 +1770,24 @@ h3 {
   }
 
   .segmented {
-    flex-wrap: nowrap;
-    min-height: 44px;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    flex-wrap: wrap;
+    min-height: 0;
+    overflow: visible;
+    overscroll-behavior-inline: auto;
+    gap: 4px;
+    padding: 4px;
   }
 
   .segmented button {
-    flex: 0 0 auto;
-    min-height: 34px;
-    padding: 7px 10px;
-    font-size: 0.86rem;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    padding: 7px 6px;
+    font-size: 0.82rem;
+    line-height: 1.15;
   }
 
   .month-panel {
@@ -1754,13 +1799,16 @@ h3 {
   }
 
   .month-list {
-    display: flex;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
     gap: 8px;
   }
 
   .month-list button {
-    flex: 0 0 84px;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
     min-height: 38px;
   }
 
@@ -1970,17 +2018,18 @@ h3 {
   }
 
   .phase-table {
-    display: flex;
+    display: grid;
     grid-template-columns: none;
     gap: 10px;
-    margin: 14px -10px 16px;
-    overflow-x: auto;
-    padding: 0 10px 8px;
-    scroll-snap-type: x mandatory;
+    margin: 14px 0 16px;
+    overflow: visible;
+    padding: 0;
+    scroll-snap-type: none;
   }
 
   .phase-table button {
-    flex: 0 0 148px;
+    flex: 1 1 auto;
+    width: 100%;
     padding: 12px;
     scroll-snap-align: start;
   }
