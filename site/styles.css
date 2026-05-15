@@ -20,6 +20,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -1378,6 +1380,23 @@ h3 {
 }
 
 @media (max-width: 680px) {
+  body {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  main,
+  section,
+  .page-panel,
+  .race-console,
+  .training-system,
+  .plan-builder,
+  .plan-output,
+  .race-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .site-header {
     align-items: center;
     flex-direction: row;
@@ -1604,26 +1623,27 @@ h3 {
   }
 
   .race-card {
-    grid-template-columns: 78px minmax(0, 1fr);
+    grid-template-columns: 74px minmax(0, 1fr);
     width: 100%;
     max-width: 100%;
-    gap: 12px;
+    gap: 10px;
     align-items: start;
-    overflow: hidden;
+    overflow: visible;
     padding: 12px;
   }
 
   .race-main {
     min-width: 0;
+    overflow: hidden;
   }
 
   .date-block {
     width: auto;
-    min-height: 86px;
+    min-height: 78px;
   }
 
   .date-block strong {
-    font-size: 1.2rem;
+    font-size: 1.12rem;
   }
 
   .race-title-row {
@@ -1631,7 +1651,7 @@ h3 {
   }
 
   .race-card h3 {
-    font-size: 1rem;
+    font-size: 0.98rem;
     line-height: 1.25;
   }
 
@@ -1671,12 +1691,14 @@ h3 {
     max-width: 100%;
     align-items: stretch;
     flex-direction: column;
-    gap: 7px;
+    gap: 8px;
+    overflow: hidden;
   }
 
   .register-link {
     min-height: 38px;
     max-width: 100%;
+    font-size: 0.9rem;
   }
 
   .favorite-button,
@@ -1697,6 +1719,7 @@ h3 {
   .secondary-actions {
     width: 100%;
     max-width: 100%;
+    grid-template-columns: 44px minmax(0, 1fr);
   }
 
   .training-system {
@@ -1704,10 +1727,17 @@ h3 {
   }
 
   .plan-builder {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 9px;
     padding: 12px;
     border-radius: 8px;
+  }
+
+  .plan-builder label,
+  .plan-builder select,
+  .plan-builder input {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .plan-builder label {
@@ -1732,6 +1762,7 @@ h3 {
 
   .plan-output {
     padding: 10px;
+    overflow: hidden;
   }
 
   .plan-hero {
@@ -1744,7 +1775,7 @@ h3 {
   }
 
   .plan-hero dl {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .plan-hero dl div {
@@ -1758,7 +1789,7 @@ h3 {
   .training-summary,
   .profile-summary,
   .pace-zones {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 8px;
   }
 
