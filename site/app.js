@@ -28,6 +28,7 @@ const els = {
   planGoal: document.querySelector("#plan-goal"),
   planFinish: document.querySelector("#plan-finish"),
   planPace: document.querySelector("#plan-pace"),
+  planRaceDate: document.querySelector("#plan-race-date"),
   planLevel: document.querySelector("#plan-level"),
   planDays: document.querySelector("#plan-days"),
   planWeeks: document.querySelector("#plan-weeks"),
@@ -497,11 +498,48 @@ function paceRange(baseSeconds, slowerFrom, slowerTo) {
   return `${formatPace(baseSeconds + slowerFrom)} - ${formatPace(baseSeconds + slowerTo)}`;
 }
 
-function buildPlan(goal, level, days, weeks, finishInput, paceInput) {
+function weeksUntilRace(dateText) {
+  if (!dateText) {
+    return null;
+  }
+  const today = new Date(`${TODAY}T00:00:00+08:00`);
+  const raceDate = new Date(`${dateText}T00:00:00+08:00`);
+  if (Number.isNaN(raceDate.getTime()) || raceDate <= today) {
+    return null;
+  }
+  const days = Math.ceil((raceDate - today) / 86400000);
+  return {
+    days,
+    weeks: Math.max(1, Math.ceil(days / 7)),
+    label: dateText.replaceAll("-", "/"),
+  };
+}
+
+function buildProgression(weekCount, raceWindow) {
+  if (raceWindow) {
+    if (weekCount <= 4) {
+      return `距離賽事還有 ${raceWindow.days} 天，採短週期調整，最後 5-7 天降低跑量。`;
+    }
+    if (weekCount <= 8) {
+      return `距離賽事還有 ${raceWindow.days} 天，每 3 週加量後降載 1 週，最後 1 週減量。`;
+    }
+    return `距離賽事還有 ${raceWindow.days} 天，前段建立跑量，中段進入專項，最後 2 週減量。`;
+  }
+  if (weekCount === 4) {
+    return "前 3 週逐步加量，第 4 週降載 20%。";
+  }
+  if (weekCount === 8) {
+    return "每 3 週加量後 1 週降載，最後一週保留體力。";
+  }
+  return "前 8 週建立跑量，第 9-10 週高峰，第 11-12 週逐步減量。";
+}
+
+function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInput) {
   const goalProfile = planProfiles[goal] || planProfiles["10k"];
   const levelProfile = levelProfiles[level] || levelProfiles.steady;
   const dayCount = Number(days);
-  const weekCount = Number(weeks);
+  const raceWindow = weeksUntilRace(raceDateInput);
+  const weekCount = raceWindow ? raceWindow.weeks : Number(weeks);
   const finishSeconds = parseDuration(finishInput);
   const inputPace = parsePace(paceInput);
   const racePace = finishSeconds
@@ -522,11 +560,7 @@ function buildPlan(goal, level, days, weeks, finishInput, paceInput) {
     { day: "週日", work: dayCount >= 5 ? `恢復跑 30-45 分鐘，${easyRange}` : "休息或核心 15 分鐘", type: dayCount >= 5 ? "恢復跑" : "恢復" },
   ];
 
-  const progression = weekCount === 4
-    ? "前 3 週逐步加量，第 4 週降載 20%。"
-    : weekCount === 8
-      ? "每 3 週加量後 1 週降載，最後一週保留體力。"
-      : "前 8 週建立跑量，第 9-10 週高峰，第 11-12 週逐步減量。";
+  const progression = buildProgression(weekCount, raceWindow);
 
   return {
     goalProfile,
@@ -540,6 +574,7 @@ function buildPlan(goal, level, days, weeks, finishInput, paceInput) {
     longRange,
     tempoRange,
     intervalRange,
+    raceWindow,
   };
 }
 
@@ -559,6 +594,7 @@ function renderPlan() {
     longRange,
     tempoRange,
     intervalRange,
+    raceWindow,
   } = buildPlan(
     els.planGoal?.value,
     els.planLevel?.value,
@@ -566,6 +602,7 @@ function renderPlan() {
     els.planWeeks?.value,
     els.planFinish?.value,
     els.planPace?.value,
+    els.planRaceDate?.value,
   );
 
   els.planOutput.innerHTML = `
@@ -575,8 +612,8 @@ function renderPlan() {
         <strong>${escapeHtml(goalProfile.title)}</strong>
       </div>
       <div>
-        <span>完賽時間</span>
-        <strong>${escapeHtml(formatDuration(targetFinish))}</strong>
+        <span>${raceWindow ? "賽事日期" : "完賽時間"}</span>
+        <strong>${escapeHtml(raceWindow ? raceWindow.label : formatDuration(targetFinish))}</strong>
       </div>
       <div>
         <span>比賽配速</span>
@@ -590,8 +627,8 @@ function renderPlan() {
       <div><span>長跑</span><strong>${escapeHtml(longRange)}</strong></div>
     </div>
     <div class="plan-note">
-      <strong>${escapeHtml(weekCount)} 週｜${escapeHtml(levelProfile.label)}｜${escapeHtml(goalProfile.focus)}</strong>
-      <p>${escapeHtml(progression)} ${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
+      <strong>${escapeHtml(weekCount)} 週計畫｜${escapeHtml(formatDuration(targetFinish))}｜${escapeHtml(levelProfile.label)}</strong>
+      <p>${escapeHtml(progression)} ${escapeHtml(goalProfile.focus)}。${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
     </div>
     <div class="plan-week">
       ${schedule.map((item) => `
@@ -673,7 +710,7 @@ function bindEvents() {
       event.preventDefault();
       renderPlan();
     });
-    [els.planGoal, els.planLevel, els.planDays, els.planWeeks, els.planFinish, els.planPace].forEach((control) => {
+    [els.planGoal, els.planLevel, els.planDays, els.planWeeks, els.planFinish, els.planPace, els.planRaceDate].forEach((control) => {
       control?.addEventListener("input", renderPlan);
       control?.addEventListener("change", renderPlan);
     });
