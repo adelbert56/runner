@@ -848,7 +848,7 @@ h3 {
 }
 
 .shoe-release-list {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .review-grid {
@@ -866,7 +866,7 @@ h3 {
 }
 
 .shoe-release-list article {
-  min-height: 210px;
+  min-height: 190px;
 }
 
 .shoe-release-list span {
