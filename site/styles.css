@@ -102,12 +102,49 @@ select:focus-visible {
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   background: var(--green-dark);
-  color: white;
-  font-size: 0.85rem;
+  box-shadow: 0 8px 18px rgba(21, 83, 56, 0.14);
+  overflow: hidden;
+}
+
+.brand-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.brand-mark rect {
+  fill: var(--green-dark);
+}
+
+.brand-route,
+.brand-runner,
+.brand-letter {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brand-route {
+  stroke: var(--yellow);
+  stroke-width: 5;
+}
+
+.brand-head {
+  fill: var(--yellow);
+}
+
+.brand-runner {
+  stroke: #fff;
+  stroke-width: 5;
+}
+
+.brand-letter {
+  stroke: #fff;
+  stroke-width: 4;
 }
 
 .main-nav {
