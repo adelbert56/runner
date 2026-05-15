@@ -24,6 +24,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--soft);
   color: var(--ink);
   font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
@@ -1262,17 +1263,29 @@ h3 {
 
 @media (max-width: 680px) {
   .site-header {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 18px;
   }
 
   .main-nav {
     width: 100%;
     overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 2px;
+  }
+
+  .main-nav a {
+    flex: 0 0 auto;
+    min-width: 68px;
+    min-height: 38px;
+    justify-content: center;
   }
 
   .hero {
-    min-height: 620px;
+    min-height: 520px;
   }
 
   .hero-media {
@@ -1282,7 +1295,31 @@ h3 {
   }
 
   .hero-content {
-    padding: 64px 20px 44px;
+    padding: 48px 20px 34px;
+  }
+
+  .hero h1 {
+    font-size: 2.7rem;
+  }
+
+  .hero p:not(.eyebrow) {
+    font-size: 1.02rem;
+  }
+
+  .section {
+    padding: 38px 20px;
+  }
+
+  .section-heading .text-link {
+    display: none;
+  }
+
+  h2 {
+    font-size: 2.35rem;
+  }
+
+  .section-lead {
+    font-size: 0.95rem;
   }
 
   .section-heading,
@@ -1318,23 +1355,152 @@ h3 {
 
   .race-console {
     padding: 12px;
+    border-radius: 8px;
+  }
+
+  .race-tools {
+    display: grid;
+    gap: 12px;
+  }
+
+  .search-box {
+    min-width: 0;
+  }
+
+  .search-box input {
+    min-height: 44px;
+  }
+
+  .filter-stack {
+    min-width: 0;
   }
 
   .segmented {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    min-height: 44px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  .segmented button {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 0.86rem;
+  }
+
+  .month-panel {
+    padding: 12px;
+  }
+
+  .month-panel h3 {
+    margin-bottom: 10px;
+  }
+
+  .month-list {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+  }
+
+  .month-list button {
+    flex: 0 0 84px;
+    min-height: 38px;
+  }
+
+  .results-meta {
+    gap: 10px;
+  }
+
+  .result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .toggle-button,
+  .link-button {
+    min-height: 38px;
   }
 
   .race-card {
-    grid-template-columns: 1fr;
+    grid-template-columns: 78px minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    gap: 12px;
+    align-items: start;
+    overflow: hidden;
+    padding: 12px;
+  }
+
+  .race-main {
+    min-width: 0;
   }
 
   .date-block {
-    width: 112px;
+    width: auto;
+    min-height: 86px;
+  }
+
+  .date-block strong {
+    font-size: 1.2rem;
+  }
+
+  .race-title-row {
+    margin-bottom: 2px;
+  }
+
+  .race-card h3 {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+
+  .registration-times {
+    gap: 5px;
+    margin: 7px 0;
+  }
+
+  .registration-times div {
+    min-height: 24px;
+    padding: 3px 7px;
+  }
+
+  .race-meta {
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+
+  .pill {
+    min-height: 22px;
+    padding: 3px 7px;
+    font-size: 0.74rem;
+  }
+
+  .race-card p {
+    font-size: 0.94rem;
+  }
+
+  .race-insight {
+    font-size: 0.78rem;
+    line-height: 1.45;
   }
 
   .race-actions {
+    grid-column: 1 / -1;
     align-items: stretch;
     flex-direction: column;
+    gap: 7px;
+  }
+
+  .register-link {
+    min-height: 38px;
+    max-width: 100%;
+  }
+
+  .favorite-button,
+  .calendar-button,
+  .train-button {
+    min-height: 34px;
   }
 
   .register-link,
@@ -1347,11 +1513,61 @@ h3 {
     width: 100%;
   }
 
-  .race-card .button {
+  .training-system {
+    gap: 12px;
+  }
+
+  .plan-builder {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .plan-builder label {
+    gap: 5px;
+  }
+
+  .plan-builder span {
+    font-size: 0.76rem;
+  }
+
+  .plan-builder select,
+  .plan-builder input {
+    min-height: 40px;
+    padding: 7px 9px;
+    font-size: 0.92rem;
+  }
+
+  .plan-builder .button {
+    grid-column: 1 / -1;
     width: 100%;
   }
 
-  .month-list {
-    grid-template-columns: repeat(2, 1fr);
+  .plan-output {
+    padding: 12px;
+  }
+
+  .plan-hero {
+    padding: 14px;
+  }
+
+  .plan-hero strong {
+    font-size: 1.45rem;
+  }
+
+  .training-summary,
+  .pace-zones,
+  .phase-table {
+    gap: 8px;
+  }
+
+  .training-summary div,
+  .pace-zones div,
+  .phase-table div {
+    padding: 10px;
+  }
+
+  .plan-table {
+    border-radius: 8px;
   }
 }
