@@ -27,8 +27,8 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Collect running content candidates
-        run: npm run content:candidates
+      - name: Collect and publish running content
+        run: npm run content:refresh
 
       - name: Build operational dashboard
         run: npm run ops:dashboard
@@ -43,5 +43,7 @@ jobs:
           file_pattern: |
             runner/内容/候选内容.json
             runner/内容/候选内容报告.md
+            runner/内容/自动上架内容报告.md
+            site/data/content.json
             runner/系统配置/营运仪表板.md
             runner/系统配置/营运仪表板.json

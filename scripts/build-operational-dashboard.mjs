@@ -11,6 +11,7 @@ const paths = {
   dateAnomalies: resolve(root, "runner/赛事/报名日期异常报告.json"),
   tracking: resolve(root, "runner/赛事/爬虫追踪计划.json"),
   contentCandidates: resolve(root, "runner/内容/候选内容.json"),
+  publishedContent: resolve(root, "site/data/content.json"),
   siteHtml: resolve(root, "site/index.html"),
   outputMd: resolve(root, "runner/系统配置/营运仪表板.md"),
   outputJson: resolve(root, "runner/系统配置/营运仪表板.json"),
@@ -116,6 +117,16 @@ function newestContentDate(html, type) {
   return dates[0] || "";
 }
 
+function contentItemsByType(publishedContent, type) {
+  return Array.isArray(publishedContent.items)
+    ? publishedContent.items.filter((item) => item.type === type)
+    : [];
+}
+
+function newestPublishedDate(items) {
+  return items.map((item) => item.date).filter(Boolean).sort().reverse()[0] || "";
+}
+
 function topEntries(items, count = 8) {
   return items.slice(0, count);
 }
@@ -133,13 +144,14 @@ function statusLine(label, value, target, ok) {
 
 async function main() {
   const todayDate = parseDate(today);
-  const [races, queue, openedGaps, dateAnomalies, tracking, candidates] = await Promise.all([
+  const [races, queue, openedGaps, dateAnomalies, tracking, candidates, publishedContent] = await Promise.all([
     readJson(paths.races),
     readJson(paths.qualityQueue),
     readJson(paths.openedGaps),
     readJson(paths.dateAnomalies),
     readJson(paths.tracking),
     readJson(paths.contentCandidates),
+    readJson(paths.publishedContent, { items: [] }),
   ]);
   const html = await readFile(paths.siteHtml, "utf-8");
 
@@ -150,8 +162,10 @@ async function main() {
   const monthly = tracking.filter((item) => item.tracking?.cadence === "monthly_1_15");
   const candidateByCategory = countBy(candidates, (item) => item.category);
   const raceStateCounts = countBy(races, (race) => registrationState(race, todayDate));
-  const shoeCards = countContentCards(html, "shoe");
-  const newsCards = countContentCards(html, "news");
+  const publishedShoes = contentItemsByType(publishedContent, "shoe");
+  const publishedNews = contentItemsByType(publishedContent, "news");
+  const shoeCards = Math.max(countContentCards(html, "shoe"), publishedShoes.length);
+  const newsCards = Math.max(countContentCards(html, "news"), publishedNews.length);
 
   const dashboard = {
     generated_at: new Date().toISOString(),
@@ -174,8 +188,9 @@ async function main() {
     content: {
       shoe_cards: shoeCards,
       news_cards: newsCards,
-      newest_shoe_date: newestContentDate(html, "shoe"),
-      newest_news_date: newestContentDate(html, "news"),
+      newest_shoe_date: newestPublishedDate(publishedShoes) || newestContentDate(html, "shoe"),
+      newest_news_date: newestPublishedDate(publishedNews) || newestContentDate(html, "news"),
+      published_count: Array.isArray(publishedContent.items) ? publishedContent.items.length : 0,
       candidate_count: candidates.length,
       candidate_by_category: candidateByCategory,
     },
@@ -206,7 +221,7 @@ async function main() {
     nextActions.push("提高官方報名直連率，避免卡片只留下運動筆記或待補連結。");
   }
   if (candidates.length >= 20) {
-    nextActions.push("從 `runner/内容/候选内容报告.md` 挑選高分跑鞋與訓練文章，整理成中文摘要後上架。");
+    nextActions.push("內容候選已由 `npm run content:publish` 自動挑選上架；可抽查 `runner/内容/自动上架内容报告.md` 的來源品質。");
   }
   if (!nextActions.length) {
     nextActions.push("目前主要營運指標正常，下一步可做平台 parser 精準度與手機體驗細修。");

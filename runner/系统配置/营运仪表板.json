@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T22:47:43.529Z",
+  "generated_at": "2026-05-15T23:06:35.573Z",
   "basis_date": "2026-05-15",
   "races": {
     "total": 34,
@@ -26,6 +26,7 @@
     "news_cards": 11,
     "newest_shoe_date": "2026-05-15",
     "newest_news_date": "2026-05-15",
+    "published_count": 13,
     "candidate_count": 20,
     "candidate_by_category": {
       "跑步新聞": 5,

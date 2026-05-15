@@ -1675,6 +1675,56 @@ function contentFavoriteKey(type, card) {
   return `${type}:${card.dataset.date || ""}:${card.dataset.title || card.textContent.trim()}`;
 }
 
+function formatContentDate(date) {
+  return String(date || TODAY).replaceAll("-", ".");
+}
+
+function contentArticleHtml(item) {
+  const type = item.type === "shoe" ? "shoe" : "news";
+  const attr = type === "shoe" ? "data-shoe-card" : "data-news-card";
+  const category = item.category || (type === "shoe" ? "跑鞋新品" : "跑步新聞");
+  const sourceText = item.source ? `${item.source} 來源` : "閱讀來源";
+  return `
+    <article ${attr} data-auto-content="true" data-date="${escapeHtml(item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}">
+      <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>
+      ${type === "shoe" ? `<span>${escapeHtml(category)}</span>` : ""}
+      <h3>${escapeHtml(item.title)}</h3>
+      <p>${escapeHtml(item.summary)}</p>
+      <a class="sub-link" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(sourceText)}</a>
+    </article>
+  `;
+}
+
+function renderAutoContent(items) {
+  const shoes = items.filter((item) => item.type === "shoe");
+  const news = items.filter((item) => item.type === "news");
+  const shoeContainer = document.querySelector(".shoe-release-list");
+  const newsContainer = document.querySelector(".news-list");
+
+  if (shoeContainer && shoes.length) {
+    shoeContainer.querySelectorAll("[data-auto-content]").forEach((node) => node.remove());
+    shoeContainer.insertAdjacentHTML("afterbegin", shoes.map(contentArticleHtml).join(""));
+  }
+
+  if (newsContainer && news.length) {
+    newsContainer.querySelectorAll("[data-auto-content]").forEach((node) => node.remove());
+    newsContainer.insertAdjacentHTML("afterbegin", news.map(contentArticleHtml).join(""));
+  }
+}
+
+async function loadPublishedContent() {
+  try {
+    const response = await fetch("./data/content.json");
+    if (!response.ok) {
+      return;
+    }
+    const data = await response.json();
+    renderAutoContent(Array.isArray(data.items) ? data.items : []);
+  } catch (error) {
+    console.info("Published content data not available", error);
+  }
+}
+
 function isContentFavorite(type, card) {
   return state.contentFavorites.has(contentFavoriteKey(type, card));
 }
@@ -1948,6 +1998,7 @@ async function init() {
   loadContentFavorites();
   setupDurationPickers();
   bindEvents();
+  await loadPublishedContent();
   initContentSorting();
   loadPlanSettings();
   syncDurationPickersFromInputs();
