@@ -121,8 +121,7 @@ select:focus-visible {
 }
 
 .brand-route,
-.brand-runner,
-.brand-letter {
+.brand-runner {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -134,17 +133,12 @@ select:focus-visible {
 }
 
 .brand-head {
-  fill: var(--yellow);
+  fill: #fff;
 }
 
 .brand-runner {
   stroke: #fff;
   stroke-width: 5;
-}
-
-.brand-letter {
-  stroke: #fff;
-  stroke-width: 4;
 }
 
 .main-nav {
