@@ -39,6 +39,19 @@ def merge(existing: dict[str, dict], new_races: list[dict]) -> tuple[list[dict],
     for race in new_races:
         key = _dedup_key(race)
         if key not in merged:
+            stale_key = next(
+                (
+                    old_key
+                    for old_key, old in merged.items()
+                    if old.get("race_name", "").strip() == race.get("race_name", "").strip()
+                    and old.get("source") == race.get("source")
+                    and old.get("detail_url") == race.get("detail_url")
+                ),
+                "",
+            )
+            if stale_key:
+                del merged[stale_key]
+                updated += 1
             merged[key] = race
             added += 1
         else:

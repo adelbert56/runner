@@ -47,7 +47,7 @@ def _build_race_table(races: list[dict]) -> str:
 
 
 def write_race_list(races: list[dict], scrape_date: str) -> None:
-    """Overwrite the Obsidian 2026-中部赛事列表.md with fresh data."""
+    """Overwrite the Obsidian race list with fresh data."""
     # Group by month
     by_month: dict[str, list[dict]] = defaultdict(list)
     for r in races:
@@ -70,12 +70,12 @@ def write_race_list(races: list[dict], scrape_date: str) -> None:
     total = len(races)
     content = (
         "---\n"
-        "標題: 2026年中部跑步賽事彙總\n"
+        "標題: 中部跑步賽事彙總\n"
         f"更新: {scrape_date}\n"
         "來源: 自動爬蟲\n"
         "狀態: 維護中\n"
         "---\n\n"
-        "# 2026年中部跑步賽事彙總\n\n"
+        "# 中部跑步賽事彙總\n\n"
         f"> 共 **{total}** 場賽事。最後更新：{scrape_date}\n\n"
         "> 難度：🟢 初級 ｜ 🟡 中級 ｜ 🔴 高級\n"
         "> 狀態：✅ 報名中 ｜ ❌ 已截止 ｜ ⏳ 未開始 ｜ ❓ 未知\n\n"

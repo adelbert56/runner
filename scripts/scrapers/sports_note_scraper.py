@@ -44,12 +44,18 @@ class RaceEntry:
     source_url: str = ""
 
 
-def _parse_date(raw: str) -> str:
-    """Convert '05-10 (週 六)' → '2026-05-10'."""
+def _infer_year_from_name(race_name: str, fallback: str = "2026") -> str:
+    """Use the year in the race title when the source list only shows month/day."""
+    match = re.search(r"(20\d{2})", race_name)
+    return match.group(1) if match else fallback
+
+
+def _parse_date(raw: str, race_name: str = "") -> str:
+    """Convert '05-10 (週 六)' and a race title into 'YYYY-05-10'."""
     m = re.search(r"(\d{2})-(\d{2})", raw)
     if not m:
         return ""
-    return f"2026-{m.group(1)}-{m.group(2)}"
+    return f"{_infer_year_from_name(race_name)}-{m.group(1)}-{m.group(2)}"
 
 
 def _normalize_scraped_date(raw: str, default_year: str = "2026") -> str:
@@ -359,7 +365,7 @@ def scrape() -> list[dict]:
 
         # ─── Date ─────────────────────────────────────────────────────────
         date_el = item.select_one("div.competition-date-title")
-        race_date = _parse_date(date_el.get_text(strip=True)) if date_el else ""
+        race_date = _parse_date(date_el.get_text(strip=True), race_name) if date_el else ""
 
         # ─── Distances ────────────────────────────────────────────────────
         distances = _extract_distances(item)
