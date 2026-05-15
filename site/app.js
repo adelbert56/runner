@@ -449,6 +449,7 @@ function dateDiffDays(dateText) {
 function raceDecisionText(race, registrationTarget) {
   const raceDays = dateDiffDays(race.race_date);
   const deadlineDays = dateDiffDays(race.registration_deadline);
+  const displayStatus = getRegistrationDisplayStatus(race);
   const parts = [];
 
   if (raceDays !== null) {
@@ -462,10 +463,12 @@ function raceDecisionText(race, registrationTarget) {
   }
 
   if (deadlineDays !== null) {
-    if (deadlineDays > 0) {
+    if (displayStatus === "報名中" && deadlineDays > 0) {
       parts.push(`報名剩 ${deadlineDays} 天`);
-    } else if (deadlineDays === 0) {
+    } else if (displayStatus === "報名中" && deadlineDays === 0) {
       parts.push("今天截止");
+    } else if (displayStatus === "尚未開報") {
+      parts.push("尚未開報");
     } else {
       parts.push("報名已截止");
     }
@@ -478,21 +481,47 @@ function raceDecisionText(race, registrationTarget) {
 }
 
 function registrationBucket(race) {
-  const status = race.registration_status || "";
   const deadlineDays = dateDiffDays(race.registration_deadline);
+  const displayStatus = getRegistrationDisplayStatus(race);
   if (isHistoricalRace(race)) {
     return "history";
   }
-  if (isCancelledRace(race) || status.includes("截止") || (deadlineDays !== null && deadlineDays < 0)) {
+  if (isCancelledRace(race) || displayStatus === "已截止") {
     return "closed";
   }
-  if (deadlineDays !== null && deadlineDays <= 14 && deadlineDays >= 0) {
+  if (displayStatus === "報名中" && deadlineDays !== null && deadlineDays <= 14 && deadlineDays >= 0) {
     return "soon";
   }
-  if (status.includes("報名中") || status.includes("開放") || race.source_registration_link || getRegistrationLink(race)) {
+  if (displayStatus === "報名中") {
     return "open";
   }
   return "unknown";
+}
+
+function getRegistrationDisplayStatus(race) {
+  if (isCancelledRace(race)) {
+    return race.registration_status || "停辦";
+  }
+
+  const opensDays = dateDiffDays(race.registration_opens_at);
+  const deadlineDays = dateDiffDays(race.registration_deadline);
+
+  if (deadlineDays !== null && deadlineDays < 0) {
+    return "已截止";
+  }
+
+  if (opensDays !== null) {
+    return opensDays <= 0 ? "報名中" : "尚未開報";
+  }
+
+  const sourceStatus = race.registration_status || "";
+  if (/報名中|開放|開跑|受理/.test(sourceStatus)) {
+    return "報名中";
+  }
+  if (/截止|額滿/.test(sourceStatus)) {
+    return deadlineDays !== null && deadlineDays >= 0 ? "報名中" : "已截止";
+  }
+  return sourceStatus || "狀態待確認";
 }
 
 function getRaceKey(race) {
@@ -840,7 +869,7 @@ function renderRaces() {
       const key = getRaceKey(race);
       const date = formatDateParts(race.race_date);
       const distances = (race.distances || ["距離待確認"]).join(" / ");
-      const status = race.registration_status || "狀態待確認";
+      const status = getRegistrationDisplayStatus(race);
       const difficulty = race.difficulty || "初級";
       const cls = difficultyClass[difficulty] || "";
       const registrationTarget = getRegistrationTarget(race);
@@ -850,7 +879,9 @@ function renderRaces() {
       const favorite = isFavorite(race);
       const decision = raceDecisionText(race, registrationTarget);
       const cancelled = isCancelledRace(race);
-      const canPlanTraining = !cancelled && dateDiffDays(race.race_date) !== null && dateDiffDays(race.race_date) >= 0;
+      const raceDays = dateDiffDays(race.race_date);
+      const expired = raceDays !== null && raceDays < 0;
+      const canPlanTraining = !cancelled && raceDays !== null && raceDays >= 0;
       const disabledTrainingLabel = cancelled ? "活動停辦" : "賽事已過";
       const venue = race.venue || race.start_location || race.location || race.race_location || "";
       const organizer = race.organizer || race.host || race.organizer_name || "";
@@ -862,7 +893,7 @@ function renderRaces() {
       ].filter(Boolean);
 
       return `
-        <article class="race-card">
+        <article class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""}">
           <div class="date-block" aria-label="${escapeHtml(date.full)}">
             <div>
               <span>${escapeHtml(date.year)}</span>

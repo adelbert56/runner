@@ -565,6 +565,35 @@ h3 {
   transform: translateY(-1px);
 }
 
+.race-card.race-expired {
+  border-color: rgba(96, 101, 96, 0.24);
+  background: linear-gradient(90deg, rgba(238, 233, 222, 0.72), #fffdfa 34%);
+  box-shadow: none;
+}
+
+.race-card.race-expired::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: 8px 0 0 8px;
+  background: #9a9386;
+  content: "";
+}
+
+.race-card.race-expired .date-block {
+  background: #eee9df;
+  color: #6d665b;
+}
+
+.race-card.race-expired .race-insight {
+  color: #6d4f21;
+}
+
+.race-card.race-expired .register-link {
+  background: #6b665d;
+  box-shadow: none;
+}
+
 .date-block {
   display: grid;
   place-items: center;
