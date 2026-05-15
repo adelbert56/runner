@@ -117,8 +117,8 @@ def extract_registration_dates(text: str, race_date: str) -> tuple[str, str]:
 def find_label_value(lines: list[str], labels: tuple[str, ...]) -> str:
     stop_words = (
         "活動日期", "活動時間", "活動地點", "報名時間", "報名日期", "報名費用",
-        "主辦單位", "承辦單位", "協辦單位", "贊助單位", "限制名額", "名額",
-        "項目", "組別", "注意事項", "交通資訊",
+        "賽事單位", "指導單位", "主辦單位", "承辦單位", "協辦單位", "贊助單位",
+        "限制名額", "名額", "參加對象", "活動流程", "項目", "組別", "注意事項", "交通資訊",
     )
     for index, line in enumerate(lines):
         normalized_line = compact_text(line)

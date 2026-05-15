@@ -1144,53 +1144,5 @@
       "verified_at": "",
       "verification_note": ""
     }
-  },
-  {
-    "race_id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
-    "race_name": "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
-    "race_date": "2026-08-02",
-    "race_county": "彰化縣",
-    "registration_opens_at": "2026-05-10",
-    "registration_deadline": "2026-06-30",
-    "registration_status": "報名中",
-    "source_platform": "運動筆記",
-    "is_official_direct": true,
-    "priority_score": 3,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-05-15",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：主辦單位。"
-    },
-    "missing": [
-      {
-        "key": "organizer",
-        "label": "主辦單位",
-        "severity": "medium",
-        "hint": "補 organizer 或 host。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "https://irunner.biji.co/RunForDAD2026/signup",
-      "official_event_url": "https://irunner.biji.co/RunForDAD2026/signup",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12978&subtitle=2026+Run+For+Dad+%E7%88%B8%E8%B6%A3%E8%BF%B7%E4%BD%A0%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%81%8B%E5%8B%95i%E8%87%BA%E7%81%A32.0",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12978",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20Run%20For%20Dad%20%E7%88%B8%E8%B6%A3%E8%BF%B7%E4%BD%A0%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%81%8B%E5%8B%95i%E8%87%BA%E7%81%A32.0"
-    },
-    "suggested_override": {
-      "race_name": "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
-      "race_date": "2026-08-02",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
   }
 ]
