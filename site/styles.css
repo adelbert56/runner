@@ -22,6 +22,7 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -1416,6 +1417,90 @@ h3 {
   }
 }
 
+@media (max-width: 900px) {
+  main,
+  section,
+  .page-panel,
+  .race-console,
+  .race-layout,
+  .race-results,
+  .race-list,
+  .race-card,
+  .training-system,
+  .plan-builder,
+  .plan-output {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .race-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  .date-block {
+    min-height: auto;
+    padding: 10px 12px;
+  }
+
+  .date-block div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .date-block strong {
+    margin: 0;
+  }
+
+  .date-block em {
+    margin: 0;
+  }
+
+  .race-main,
+  .race-actions,
+  .secondary-actions,
+  .register-link,
+  .calendar-button,
+  .train-button,
+  .favorite-button {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .race-insight,
+  .race-card h3,
+  .race-card p,
+  .register-link,
+  .calendar-button,
+  .train-button {
+    overflow-wrap: anywhere;
+  }
+
+  .race-actions {
+    grid-column: auto;
+  }
+
+  .plan-builder,
+  .training-summary,
+  .profile-summary,
+  .pace-zones,
+  .plan-hero,
+  .plan-hero dl {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-builder label,
+  .plan-builder select,
+  .plan-builder input {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 680px) {
   body {
     width: 100%;
@@ -1663,7 +1748,7 @@ h3 {
   }
 
   .race-card {
-    grid-template-columns: 74px minmax(0, 1fr);
+    grid-template-columns: 1fr;
     width: 100%;
     max-width: 100%;
     gap: 10px;
@@ -1679,7 +1764,7 @@ h3 {
 
   .date-block {
     width: auto;
-    min-height: 78px;
+    min-height: auto;
   }
 
   .date-block strong {
