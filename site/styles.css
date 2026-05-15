@@ -541,33 +541,35 @@ h3 {
 
 .race-list {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .race-card {
   position: relative;
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 190px;
-  gap: 16px;
-  align-items: center;
-  padding: 16px;
-  border: 1px solid var(--line);
+  grid-template-columns: 104px minmax(0, 1fr) 238px;
+  gap: 20px;
+  align-items: stretch;
+  min-height: 172px;
+  padding: 18px 20px;
+  border: 1px solid rgba(21, 83, 56, 0.14);
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: 0 1px 0 rgba(31, 42, 36, 0.03);
+  box-shadow: 0 10px 28px rgba(31, 42, 36, 0.05);
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .race-card:hover {
   border-color: rgba(36, 114, 79, 0.34);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 14px 34px rgba(31, 42, 36, 0.09);
   transform: translateY(-1px);
 }
 
 .date-block {
   display: grid;
   place-items: center;
-  min-height: 84px;
+  align-self: center;
+  min-height: 104px;
   border-radius: 8px;
   background:
     linear-gradient(180deg, #eff7f1, #e8f1ea);
@@ -578,7 +580,7 @@ h3 {
 .date-block strong {
   display: block;
   margin-top: 2px;
-  font-size: 1.38rem;
+  font-size: 1.54rem;
   line-height: 1;
 }
 
@@ -610,33 +612,31 @@ h3 {
 .race-card h3 {
   margin-bottom: 0;
   overflow-wrap: anywhere;
-  font-size: 1.06rem;
+  font-size: 1.1rem;
   line-height: 1.35;
 }
 
 .favorite-button {
-  width: 38px;
-  min-height: 34px;
-  padding: 6px 8px;
-  border: 1px solid var(--line);
+  width: 44px;
+  min-height: 46px;
+  padding: 0;
+  border: 1px solid rgba(21, 83, 56, 0.16);
   border-radius: 8px;
   background: var(--surface);
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 900;
   cursor: pointer;
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
 .race-favorite {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
-  min-height: 38px;
-  width: 38px;
+  position: static;
+  z-index: 1;
+  width: 44px;
+  min-height: 46px;
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 6px 14px rgba(31, 42, 36, 0.08);
+  box-shadow: 0 8px 18px rgba(31, 42, 36, 0.06);
 }
 
 .icon-button {
@@ -649,13 +649,13 @@ h3 {
 
 .calendar-button {
   width: 100%;
-  min-height: 38px;
-  padding: 6px 8px;
+  min-height: 42px;
+  padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #f7f3e9;
   color: var(--green-dark);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 900;
   cursor: pointer;
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
@@ -736,7 +736,7 @@ h3 {
   max-width: 100%;
 }
 
-.race-summary-line span:not(:last-child) {
+.race-summary-line span {
   padding: 3px 8px;
   border-radius: 999px;
   background: #eee8d8;
@@ -757,16 +757,17 @@ h3 {
   background: #f7d6c9;
 }
 
-.race-summary-line span:last-child {
-  flex-basis: 100%;
-  margin-top: 2px;
-  color: #66736b;
-  font-size: 0.96rem;
-  font-weight: 650;
-}
-
 .race-schedule {
   margin-top: 8px;
+}
+
+.race-distance {
+  margin-top: 8px;
+  color: #66736b;
+  font-size: 0.98rem;
+  font-weight: 750;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .race-schedule span {
@@ -879,13 +880,14 @@ h3 {
   display: grid;
   width: 100%;
   min-width: 0;
+  align-self: center;
   align-content: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 .primary-action-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 44px;
   gap: 8px;
   align-items: stretch;
 }
@@ -897,10 +899,10 @@ h3 {
 .register-link {
   display: inline-flex;
   width: 100%;
-  min-height: 40px;
+  min-height: 46px;
   align-items: center;
   justify-content: center;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border-radius: 8px;
   background: var(--green-dark);
   color: white;
@@ -932,13 +934,13 @@ h3 {
 
 .train-button {
   width: 100%;
-  min-height: 34px;
-  padding: 6px 8px;
+  min-height: 42px;
+  padding: 8px 10px;
   border: 1px solid rgba(19, 83, 56, 0.18);
   border-radius: 8px;
   background: #fff7d4;
   color: #31513e;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 900;
   cursor: pointer;
 }
@@ -951,7 +953,7 @@ h3 {
 
 .detail-actions {
   display: flex;
-  min-height: 18px;
+  min-height: 20px;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -1710,6 +1712,7 @@ h3 {
   .race-card {
     grid-template-columns: 1fr;
     gap: 12px;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -1757,6 +1760,10 @@ h3 {
   .race-actions {
     grid-column: auto;
     padding-top: 0;
+  }
+
+  .primary-action-row {
+    grid-template-columns: minmax(0, 1fr) 44px;
   }
 
   .main-nav,
@@ -2087,8 +2094,8 @@ h3 {
 
   .race-favorite {
     position: absolute;
-    top: 78px;
-    right: 18px;
+    top: 16px;
+    right: 16px;
     z-index: 2;
     width: 40px;
     min-height: 40px;
@@ -2104,6 +2111,10 @@ h3 {
     min-height: auto;
   }
 
+  .date-block div {
+    padding-right: 50px;
+  }
+
   .date-block strong {
     font-size: 1.12rem;
   }
@@ -2114,7 +2125,7 @@ h3 {
   }
 
   .race-card h3 {
-    padding-right: 52px;
+    padding-right: 0;
     font-size: 0.98rem;
     line-height: 1.25;
   }
@@ -2129,18 +2140,19 @@ h3 {
     font-size: 0.76rem;
   }
 
-  .race-summary-line span:not(:last-child),
+  .race-summary-line span,
   .race-schedule span {
     min-height: 24px;
     padding: 3px 7px;
   }
 
-  .race-summary-line span:last-child {
-    font-size: 0.9rem;
-  }
-
   .race-schedule {
     margin-top: 6px;
+  }
+
+  .race-distance {
+    margin-top: 7px;
+    font-size: 0.92rem;
   }
 
   .race-detail-panel dl {
@@ -2173,7 +2185,8 @@ h3 {
   }
 
   .primary-action-row {
-    display: block;
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .register-link {
@@ -2192,7 +2205,6 @@ h3 {
   }
 
   .register-link,
-  .favorite-button,
   .calendar-button {
     width: 100%;
   }

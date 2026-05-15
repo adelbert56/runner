@@ -878,8 +878,8 @@ function renderRaces() {
               <span>${escapeHtml(race.race_county)}</span>
               <span class="${cls}">${escapeHtml(difficulty)}</span>
               <span>${escapeHtml(status)}</span>
-              <span>${escapeHtml(distances)}</span>
             </div>
+            <p class="race-distance">${escapeHtml(distances)}</p>
             <div class="race-schedule" aria-label="報名時間">
               <span><strong>開報</strong>${escapeHtml(opensAt)}</span>
               <span><strong>截止</strong>${escapeHtml(deadline)}</span>
@@ -898,6 +898,11 @@ function renderRaces() {
           </div>
           <div class="race-actions">
             <div class="primary-action-row">
+              ${
+                registrationTarget.url
+                  ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
+                  : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
+              }
               <button
                 class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
                 type="button"
@@ -906,11 +911,6 @@ function renderRaces() {
                 aria-label="${favorite ? "取消收藏" : "加入收藏"}"
                 title="${favorite ? "取消收藏" : "加入收藏"}"
               ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
-              ${
-                registrationTarget.url
-                  ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
-                  : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
-              }
             </div>
             <div class="calendar-menu">
               <button class="calendar-button" type="button" data-calendar-menu="${escapeHtml(key)}" aria-expanded="false">加入行事曆</button>
