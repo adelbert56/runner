@@ -5,6 +5,8 @@ const state = {
   races: [],
   county: "all",
   difficulty: "all",
+  registration: "all",
+  distance: "all",
   month: "all",
   query: "",
   favorites: new Set(),
@@ -24,6 +26,8 @@ const els = {
   clearFilters: document.querySelector("#clear-filters"),
   countyButtons: document.querySelectorAll("[data-county]"),
   difficultyButtons: document.querySelectorAll("[data-difficulty]"),
+  registrationButtons: document.querySelectorAll("[data-registration]"),
+  distanceButtons: document.querySelectorAll("[data-distance]"),
   planBuilder: document.querySelector("#plan-builder"),
   planGoal: document.querySelector("#plan-goal"),
   planFinish: document.querySelector("#plan-finish"),
@@ -32,6 +36,9 @@ const els = {
   planLevel: document.querySelector("#plan-level"),
   planDays: document.querySelector("#plan-days"),
   planWeeks: document.querySelector("#plan-weeks"),
+  planWeeklyKm: document.querySelector("#plan-weekly-km"),
+  planLongRun: document.querySelector("#plan-long-run"),
+  planPriority: document.querySelector("#plan-priority"),
   planOutput: document.querySelector("#plan-output"),
   panelLinks: document.querySelectorAll("[data-panel-link]"),
   panels: document.querySelectorAll("[data-panel]"),
@@ -179,8 +186,97 @@ function monthOf(race) {
   return race.race_date?.slice(5, 7) || "00";
 }
 
+function parseDistanceKm(value) {
+  const match = String(value || "").match(/(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : 0;
+}
+
+function maxDistanceKm(race) {
+  return Math.max(0, ...(race.distances || []).map(parseDistanceKm));
+}
+
+function distanceBucket(race) {
+  const maxDistance = maxDistanceKm(race);
+  if (maxDistance >= 50) {
+    return "ultra";
+  }
+  if (maxDistance >= 42) {
+    return "marathon";
+  }
+  if (maxDistance >= 21) {
+    return "half";
+  }
+  if (maxDistance >= 10) {
+    return "10k";
+  }
+  return "short";
+}
+
+function dateDiffDays(dateText) {
+  if (!dateText) {
+    return null;
+  }
+  const today = new Date(`${TODAY}T00:00:00+08:00`);
+  const target = new Date(`${dateText}T00:00:00+08:00`);
+  if (Number.isNaN(target.getTime())) {
+    return null;
+  }
+  return Math.ceil((target - today) / 86400000);
+}
+
+function raceDecisionText(race, registrationTarget) {
+  const raceDays = dateDiffDays(race.race_date);
+  const deadlineDays = dateDiffDays(race.registration_deadline);
+  const parts = [];
+
+  if (raceDays !== null) {
+    parts.push(raceDays >= 0 ? `距賽 ${raceDays} 天` : "賽事已過");
+  }
+
+  if (deadlineDays !== null) {
+    if (deadlineDays > 0) {
+      parts.push(`報名剩 ${deadlineDays} 天`);
+    } else if (deadlineDays === 0) {
+      parts.push("今天截止");
+    } else {
+      parts.push("報名已截止");
+    }
+  } else {
+    parts.push("截止待確認");
+  }
+
+  parts.push(registrationTarget.kind === "official" ? "官方直連" : registrationTarget.url ? "來源入口" : "待補連結");
+  return parts.join(" · ");
+}
+
+function registrationBucket(race) {
+  const status = race.registration_status || "";
+  const deadlineDays = dateDiffDays(race.registration_deadline);
+  if (status.includes("截止") || (deadlineDays !== null && deadlineDays < 0)) {
+    return "closed";
+  }
+  if (deadlineDays !== null && deadlineDays <= 14 && deadlineDays >= 0) {
+    return "soon";
+  }
+  if (status.includes("報名中") || status.includes("開放") || race.source_registration_link || getRegistrationLink(race)) {
+    return "open";
+  }
+  return "unknown";
+}
+
 function getRaceKey(race) {
   return race.race_id || `${race.race_name}|${race.race_date}`;
+}
+
+function sortRaceForBoard(a, b) {
+  const aUpcoming = String(a.race_date) >= TODAY;
+  const bUpcoming = String(b.race_date) >= TODAY;
+  if (aUpcoming !== bUpcoming) {
+    return aUpcoming ? -1 : 1;
+  }
+  return aUpcoming
+    ? String(a.race_date).localeCompare(String(b.race_date))
+    : String(b.race_date).localeCompare(String(a.race_date));
 }
 
 function isFavorite(race) {
@@ -298,11 +394,42 @@ function downloadCalendarEvent(race) {
   URL.revokeObjectURL(url);
 }
 
+function goalFromRace(race) {
+  const maxDistance = maxDistanceKm(race);
+  if (maxDistance >= 42) {
+    return "marathon";
+  }
+  if (maxDistance >= 21) {
+    return "half";
+  }
+  if (maxDistance >= 10) {
+    return "10k";
+  }
+  return "5k";
+}
+
+function useRaceForTraining(race) {
+  if (els.planGoal) {
+    els.planGoal.value = goalFromRace(race);
+  }
+  if (els.planRaceDate) {
+    els.planRaceDate.value = race.race_date || "";
+  }
+  if (els.planPriority) {
+    els.planPriority.value = "finish";
+  }
+  setActivePanel("training");
+  renderPlan();
+  document.getElementById("training")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function getVisibleRaces() {
   const query = state.query.trim().toLowerCase();
   return state.races.filter((race) => {
     const matchesCounty = state.county === "all" || race.race_county === state.county;
     const matchesDifficulty = state.difficulty === "all" || race.difficulty === state.difficulty;
+    const matchesRegistration = state.registration === "all" || registrationBucket(race) === state.registration;
+    const matchesDistance = state.distance === "all" || distanceBucket(race) === state.distance || (state.distance === "marathon" && ["marathon", "ultra"].includes(distanceBucket(race)));
     const matchesMonth = state.month === "all" || monthOf(race) === state.month;
     const matchesFavorite = !state.favoritesOnly || isFavorite(race);
     const haystack = [
@@ -318,11 +445,13 @@ function getVisibleRaces() {
     return (
       matchesCounty &&
       matchesDifficulty &&
+      matchesRegistration &&
+      matchesDistance &&
       matchesMonth &&
       matchesFavorite &&
       (!query || haystack.includes(query))
     );
-  });
+  }).sort(sortRaceForBoard);
 }
 
 function renderStats() {
@@ -395,6 +524,8 @@ function renderRaces() {
       const opensAt = formatShortDate(race.registration_opens_at) || "待確認";
       const deadline = formatShortDate(race.registration_deadline) || "待確認";
       const favorite = isFavorite(race);
+      const decision = raceDecisionText(race, registrationTarget);
+      const canPlanTraining = dateDiffDays(race.race_date) !== null && dateDiffDays(race.race_date) >= 0;
 
       return `
         <article class="race-card">
@@ -419,6 +550,7 @@ function renderRaces() {
               <span class="pill">${escapeHtml(status)}</span>
             </div>
             <p>${escapeHtml(distances)}</p>
+            <div class="race-insight">${escapeHtml(decision)}</div>
           </div>
           <div class="race-actions">
             ${
@@ -435,6 +567,11 @@ function renderRaces() {
               >${favorite ? "已收藏" : "收藏"}</button>
               <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">行事曆</button>
             </div>
+            ${
+              canPlanTraining
+                ? `<button class="train-button" type="button" data-train-race="${escapeHtml(key)}">用這場排課</button>`
+                : `<button class="train-button" type="button" disabled>賽事已過</button>`
+            }
             <div class="detail-actions">
               ${!registrationTarget.url && race.facebook_search_url ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>` : ""}
               ${race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>` : ""}
@@ -464,6 +601,15 @@ function renderRaces() {
       const race = state.races.find((item) => getRaceKey(item) === button.dataset.calendar);
       if (race) {
         downloadCalendarEvent(race);
+      }
+    });
+  });
+
+  els.raceList.querySelectorAll("[data-train-race]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const race = state.races.find((item) => getRaceKey(item) === button.dataset.trainRace);
+      if (race) {
+        useRaceForTraining(race);
       }
     });
   });
@@ -552,12 +698,128 @@ function buildProgression(weekCount, raceWindow) {
   return "前 8 週建立跑量，第 9-10 週高峰，第 11-12 週逐步減量。";
 }
 
-function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInput) {
+function clampNumber(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority) {
+  const distance = goalProfile.distanceKm;
+  const levelBoost = level === "advanced" ? 1.25 : level === "beginner" ? 0.85 : 1;
+  const priorityBoost = priority === "pb" ? 1.12 : priority === "habit" ? 0.88 : 1;
+  const baseKm = clampNumber(weeklyKm, 6, 80);
+  const rawPeak = Math.max(baseKm * 1.25, distance * 1.4 * levelBoost * priorityBoost);
+  const maxPeak = distance >= 42 ? 58 : distance >= 21 ? 42 : distance >= 10 ? 30 : 22;
+  const peakKm = Math.round(clampNumber(rawPeak, baseKm, maxPeak));
+  const longRunCap = distance >= 42 ? 30 : distance >= 21 ? 20 : distance >= 10 ? 13 : 8;
+  const peakLongRun = Math.round(clampNumber(Math.max(longRunKm + 2, distance * 0.78), longRunKm, longRunCap));
+
+  return {
+    baseKm: Math.round(baseKm),
+    peakKm,
+    baseLongRun: Math.round(clampNumber(longRunKm, 3, longRunCap)),
+    peakLongRun,
+  };
+}
+
+function phaseForWeek(weekIndex, weekCount, goalProfile) {
+  const taperWeeks = goalProfile.distanceKm >= 21 ? 2 : 1;
+  if (weekIndex > weekCount - taperWeeks) {
+    return "減量";
+  }
+  if (weekIndex <= Math.max(2, Math.floor(weekCount * 0.35))) {
+    return "打底";
+  }
+  if (weekIndex <= Math.max(3, Math.floor(weekCount * 0.72))) {
+    return "加量";
+  }
+  return "專項";
+}
+
+function buildWeeklyBlocks(weekCount, targets, goalProfile) {
+  const safeWeekCount = clampNumber(weekCount, 1, 20);
+  return Array.from({ length: safeWeekCount }, (_, index) => {
+    const week = index + 1;
+    const phase = phaseForWeek(week, safeWeekCount, goalProfile);
+    const progress = safeWeekCount === 1 ? 1 : index / (safeWeekCount - 1);
+    const recoveryFactor = week % 4 === 0 && phase !== "減量" ? 0.82 : 1;
+    const taperFactor = phase === "減量" ? (week === safeWeekCount ? 0.55 : 0.75) : 1;
+    const weeklyKm = Math.round((targets.baseKm + (targets.peakKm - targets.baseKm) * progress) * recoveryFactor * taperFactor);
+    const longRunKm = Math.round(clampNumber(
+      (targets.baseLongRun + (targets.peakLongRun - targets.baseLongRun) * progress) * recoveryFactor * taperFactor,
+      3,
+      Math.min(targets.peakLongRun, weeklyKm * 0.42),
+    ));
+
+    return {
+      week,
+      phase,
+      weeklyKm,
+      longRunKm,
+      focus: phase === "打底" ? "穩定頻率" : phase === "加量" ? "提高總量" : phase === "專項" ? "接近比賽需求" : "保留體力",
+    };
+  });
+}
+
+function buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longRunKm, priority) {
+  const notes = [];
+  if (weekCount < 4) {
+    notes.push("距離目標賽事太近，這份菜單以維持狀態與安全完賽為主，不硬做高強度。");
+  }
+  if (goalProfile.distanceKm >= 42 && dayCount <= 3) {
+    notes.push("全馬只跑 3 天風險偏高，長跑壓力會集中，建議至少加入 1 天短恢復跑。");
+  }
+  if (goalProfile.distanceKm >= 21 && weeklyKm < 18) {
+    notes.push("目前週跑量偏低，半馬以上目標先求穩定累積，不建議每週都做間歇。");
+  }
+  if (longRunKm < goalProfile.distanceKm * 0.35 && goalProfile.distanceKm >= 21) {
+    notes.push("目前最長跑距離偏短，長跑要逐步增加，避免單週暴增。");
+  }
+  if (level === "beginner" && priority === "pb") {
+    notes.push("新手挑戰 PB 前，先確認連續 4 週無傷穩定訓練。");
+  }
+  return notes.length ? notes : ["強度日之間至少隔 48 小時；若疼痛改成休息或步行，菜單要讓身體吸收而不是硬撐。"];
+}
+
+function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange) {
+  const quality = level === "advanced" && priority === "pb"
+    ? `間歇 4-6 組，${intervalRange}`
+    : priority === "habit"
+      ? `漸進跑 20 分鐘，最後 5 分鐘接近 ${tempoRange}`
+      : `節奏跑 15-25 分鐘，${tempoRange}`;
+  const recovery = "伸展、肌力或完整休息";
+  const easyKm = Math.max(3, Math.round((currentWeek.weeklyKm - currentWeek.longRunKm) / Math.max(2, dayCount - 1)));
+
+  if (dayCount <= 3) {
+    return [
+      { day: "第 1 跑", type: "輕鬆", work: `${easyKm}km，${easyRange}` },
+      { day: "第 2 跑", type: "重點", work: quality },
+      { day: "長跑日", type: "長跑", work: `${currentWeek.longRunKm}km，${longRange}` },
+    ];
+  }
+
+  const schedule = [
+    { day: "週二", type: "輕鬆", work: `${easyKm}km，${easyRange}` },
+    { day: "週四", type: "重點", work: quality },
+    { day: "週五", type: "恢復", work: dayCount >= 4 ? `短恢復跑 25-35 分鐘，${easyRange}` : recovery },
+    { day: "週末", type: "長跑", work: `${currentWeek.longRunKm}km，${longRange}` },
+  ];
+
+  if (dayCount >= 5) {
+    schedule.splice(2, 0, { day: "週三", type: "補量", work: `${Math.max(3, easyKm - 1)}km 輕鬆跑或跑走，${easyRange}` });
+  }
+
+  return schedule;
+}
+
+function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInput, weeklyKmInput, longRunInput, priorityInput) {
   const goalProfile = planProfiles[goal] || planProfiles["10k"];
   const levelProfile = levelProfiles[level] || levelProfiles.steady;
   const dayCount = Number(days);
   const raceWindow = weeksUntilRace(raceDateInput);
-  const weekCount = raceWindow ? raceWindow.weeks : Number(weeks);
+  const weekCount = clampNumber(raceWindow ? raceWindow.weeks : Number(weeks), 1, 20);
+  const weeklyKm = Number(weeklyKmInput) || 18;
+  const longRunKm = Number(longRunInput) || 8;
+  const priority = priorityInput || "finish";
   const finishSeconds = parseDuration(finishInput);
   const inputPace = parsePace(paceInput);
   const racePace = finishSeconds
@@ -568,16 +830,11 @@ function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInp
   const longRange = paceRange(racePace, 40, 75);
   const tempoRange = paceRange(racePace, 5, 20);
   const intervalRange = paceRange(racePace, -30, -10);
-  const schedule = [
-    { day: "週一", work: "休息或 20 分鐘伸展", type: "恢復" },
-    { day: "週二", work: `${levelProfile.quality}，${level === "advanced" ? intervalRange : tempoRange}`, type: "重點" },
-    { day: "週三", work: dayCount >= 5 ? `${levelProfile.easy}，${easyRange}` : "休息或散步", type: dayCount >= 5 ? "輕鬆" : "恢復" },
-    { day: "週四", work: `${levelProfile.easy}，${easyRange}`, type: "輕鬆" },
-    { day: "週五", work: dayCount >= 4 ? `短恢復跑 25-40 分鐘，${easyRange}` : "休息", type: dayCount >= 4 ? "恢復跑" : "恢復" },
-    { day: "週六", work: `長跑 ${goalProfile.longRun}，${longRange}`, type: "長跑" },
-    { day: "週日", work: dayCount >= 5 ? `恢復跑 30-45 分鐘，${easyRange}` : "休息或核心 15 分鐘", type: dayCount >= 5 ? "恢復跑" : "恢復" },
-  ];
-
+  const targets = goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority);
+  const weeklyBlocks = buildWeeklyBlocks(weekCount, targets, goalProfile);
+  const currentWeek = weeklyBlocks[0];
+  const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange);
+  const riskNotes = buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longRunKm, priority);
   const progression = buildProgression(weekCount, raceWindow);
 
   return {
@@ -593,6 +850,12 @@ function buildPlan(goal, level, days, weeks, finishInput, paceInput, raceDateInp
     tempoRange,
     intervalRange,
     raceWindow,
+    dayCount,
+    priority,
+    weeklyBlocks,
+    currentWeek,
+    targets,
+    riskNotes,
   };
 }
 
@@ -613,6 +876,12 @@ function renderPlan() {
     tempoRange,
     intervalRange,
     raceWindow,
+    dayCount,
+    priority,
+    weeklyBlocks,
+    currentWeek,
+    targets,
+    riskNotes,
   } = buildPlan(
     els.planGoal?.value,
     els.planLevel?.value,
@@ -621,7 +890,16 @@ function renderPlan() {
     els.planFinish?.value,
     els.planPace?.value,
     els.planRaceDate?.value,
+    els.planWeeklyKm?.value,
+    els.planLongRun?.value,
+    els.planPriority?.value,
   );
+
+  const priorityLabel = {
+    finish: "穩定完賽",
+    pb: "挑戰 PB",
+    habit: "建立習慣",
+  }[priority] || "穩定完賽";
 
   els.planOutput.innerHTML = `
     <div class="plan-hero">
@@ -633,8 +911,15 @@ function renderPlan() {
       <dl>
         <div><dt>完賽</dt><dd>${escapeHtml(formatDuration(targetFinish))}</dd></div>
         <div><dt>比賽配速</dt><dd>${escapeHtml(formatPace(racePace))}</dd></div>
-        <div><dt>程度</dt><dd>${escapeHtml(levelProfile.label)}</dd></div>
+        <div><dt>目標</dt><dd>${escapeHtml(priorityLabel)}</dd></div>
       </dl>
+    </div>
+    <div class="training-summary">
+      <div><span>目前週跑量</span><strong>${escapeHtml(targets.baseKm)} km</strong></div>
+      <div><span>高峰週跑量</span><strong>${escapeHtml(targets.peakKm)} km</strong></div>
+      <div><span>目前長跑</span><strong>${escapeHtml(targets.baseLongRun)} km</strong></div>
+      <div><span>高峰長跑</span><strong>${escapeHtml(targets.peakLongRun)} km</strong></div>
+      <div><span>每週頻率</span><strong>${escapeHtml(dayCount)} 天</strong></div>
     </div>
     <div class="pace-zones">
       <div><span>輕鬆跑</span><strong>${escapeHtml(easyRange)}</strong></div>
@@ -645,6 +930,25 @@ function renderPlan() {
     <div class="plan-note">
       <strong>${escapeHtml(goalProfile.focus)}</strong>
       <p>${escapeHtml(progression)} ${escapeHtml(goalProfile.focus)}。${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
+    </div>
+    <div class="risk-panel">
+      <strong>調整提醒</strong>
+      <ul>
+        ${riskNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
+      </ul>
+    </div>
+    <div class="phase-table" aria-label="週期安排">
+      ${weeklyBlocks.map((week) => `
+        <div>
+          <span>第 ${escapeHtml(week.week)} 週 · ${escapeHtml(week.phase)}</span>
+          <strong>${escapeHtml(week.weeklyKm)} km</strong>
+          <p>長跑 ${escapeHtml(week.longRunKm)} km · ${escapeHtml(week.focus)}</p>
+        </div>
+      `).join("")}
+    </div>
+    <div class="plan-week-title">
+      <span>第 1 週執行課表</span>
+      <strong>${escapeHtml(currentWeek.weeklyKm)} km / 長跑 ${escapeHtml(currentWeek.longRunKm)} km</strong>
     </div>
     <div class="plan-table" role="table" aria-label="每週課表">
       ${schedule.map((item) => `
@@ -667,6 +971,8 @@ function setActiveButtons(buttons, dataKey, value) {
 function render() {
   setActiveButtons(els.countyButtons, "county", state.county);
   setActiveButtons(els.difficultyButtons, "difficulty", state.difficulty);
+  setActiveButtons(els.registrationButtons, "registration", state.registration);
+  setActiveButtons(els.distanceButtons, "distance", state.distance);
   els.favoriteFilter.classList.toggle("active", state.favoritesOnly);
   els.favoriteFilter.textContent = state.favoritesOnly ? "顯示全部賽事" : "只看收藏";
   renderMonths();
@@ -705,6 +1011,20 @@ function bindEvents() {
     });
   });
 
+  els.registrationButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.registration = button.dataset.registration;
+      render();
+    });
+  });
+
+  els.distanceButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.distance = button.dataset.distance;
+      render();
+    });
+  });
+
   els.favoriteFilter.addEventListener("click", () => {
     state.favoritesOnly = !state.favoritesOnly;
     state.month = "all";
@@ -714,6 +1034,8 @@ function bindEvents() {
   els.clearFilters.addEventListener("click", () => {
     state.county = "all";
     state.difficulty = "all";
+    state.registration = "all";
+    state.distance = "all";
     state.month = "all";
     state.query = "";
     state.favoritesOnly = false;
@@ -726,7 +1048,7 @@ function bindEvents() {
       event.preventDefault();
       renderPlan();
     });
-    [els.planGoal, els.planLevel, els.planDays, els.planWeeks, els.planFinish, els.planPace, els.planRaceDate].forEach((control) => {
+    [els.planGoal, els.planLevel, els.planDays, els.planWeeks, els.planFinish, els.planPace, els.planRaceDate, els.planWeeklyKm, els.planLongRun, els.planPriority].forEach((control) => {
       control?.addEventListener("input", renderPlan);
       control?.addEventListener("change", renderPlan);
     });
