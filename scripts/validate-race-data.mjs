@@ -286,6 +286,7 @@ function buildQueueItem(race) {
     missing,
     current_links: {
       registration_link: race.registration_link || "",
+      official_event_url: race.official_event_url || "",
       detail_url: race.detail_url || "",
       source_registration_link: race.source_registration_link || "",
       facebook_search_url: race.facebook_search_url || "",
@@ -294,6 +295,7 @@ function buildQueueItem(race) {
       race_name: race.race_name || "",
       race_date: race.race_date || "",
       registration_link: "",
+      official_event_url: "",
       registration_opens_at: "",
       registration_deadline: "",
       venue: "",

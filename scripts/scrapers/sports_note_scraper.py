@@ -33,6 +33,7 @@ class RaceEntry:
     difficulty: str = "初級"
     registration_status: str = ""
     registration_link: str = ""
+    official_event_url: str = ""
     registration_note: str = ""
     registration_opens_at: str = ""
     registration_deadline: str = ""
@@ -264,6 +265,19 @@ def _looks_like_registration_link(text: str, href: str) -> bool:
     return any(keyword.lower() in target for keyword in keywords)
 
 
+def _looks_like_official_event_link(text: str, href: str) -> bool:
+    target = f"{text} {href}".lower()
+    host = urlparse(href).netloc.lower()
+    path = urlparse(href).path.lower()
+    if host.endswith("lohasnet.tw") and not host.startswith("signup."):
+        return True
+    keywords = (
+        "活動官網", "官方網站", "活動網頁", "活動簡章", "賽事官網",
+        "official", "event",
+    )
+    return any(keyword.lower() in target for keyword in keywords) and "signup" not in path
+
+
 def _fetch_detail_soup(detail_url: str, session: requests.Session) -> tuple[BeautifulSoup | None, str]:
     if not detail_url:
         return None, "未提供賽事詳情頁"
@@ -309,6 +323,26 @@ def _extract_official_registration_link(
         return candidates[0], ""
 
     return "", "未在來源頁找到官方報名連結，待人工補報名連結"
+
+
+def _extract_official_event_url(detail_url: str, soup: BeautifulSoup | None) -> str:
+    """Return the official event information page when the source exposes one."""
+    if soup is None:
+        return ""
+
+    candidates: list[str] = []
+    for a in soup.select("a[href]"):
+        href = a.get("href", "").strip()
+        if not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
+            continue
+        absolute = urljoin(detail_url, href)
+        if _is_running_biji_url(absolute) or _is_ignored_external_url(absolute):
+            continue
+        text = a.get_text(" ", strip=True)
+        if _looks_like_official_event_link(text, absolute):
+            candidates.append(absolute)
+
+    return candidates[0] if candidates else ""
 
 
 def scrape() -> list[dict]:
@@ -383,6 +417,7 @@ def scrape() -> list[dict]:
             detail_soup,
             detail_error,
         )
+        official_event_url = _extract_official_event_url(detail_url, detail_soup)
         detail_text = detail_soup.get_text(" ", strip=True) if detail_soup else ""
         opens_at, deadline = _extract_registration_dates(detail_text, race_date)
         if facebook_links and (not opens_at or not deadline):
@@ -399,6 +434,7 @@ def scrape() -> list[dict]:
             difficulty=infer_difficulty(distances),
             registration_status=status,
             registration_link=official_reg_link,
+            official_event_url=official_event_url,
             registration_note=reg_note,
             registration_opens_at=opens_at,
             registration_deadline=deadline,
