@@ -463,9 +463,9 @@ function raceDecisionText(race, registrationTarget) {
   }
 
   if (deadlineDays !== null) {
-    if (displayStatus === "報名中" && deadlineDays > 0) {
+    if ((displayStatus === "報名中" || displayStatus === "即將截止") && deadlineDays > 0) {
       parts.push(`報名剩 ${deadlineDays} 天`);
-    } else if (displayStatus === "報名中" && deadlineDays === 0) {
+    } else if ((displayStatus === "報名中" || displayStatus === "即將截止") && deadlineDays === 0) {
       parts.push("今天截止");
     } else if (displayStatus === "尚未開報") {
       parts.push("尚未開報");
@@ -489,7 +489,7 @@ function registrationBucket(race) {
   if (isCancelledRace(race) || displayStatus === "已截止") {
     return "closed";
   }
-  if (displayStatus === "報名中" && deadlineDays !== null && deadlineDays <= 14 && deadlineDays >= 0) {
+  if (displayStatus === "即將截止") {
     return "soon";
   }
   if (displayStatus === "報名中") {
@@ -511,15 +511,18 @@ function getRegistrationDisplayStatus(race) {
   }
 
   if (opensDays !== null) {
-    return opensDays <= 0 ? "報名中" : "尚未開報";
+    if (opensDays > 0) {
+      return "尚未開報";
+    }
+    return deadlineDays !== null && deadlineDays <= 14 ? "即將截止" : "報名中";
   }
 
   const sourceStatus = race.registration_status || "";
   if (/報名中|開放|開跑|受理/.test(sourceStatus)) {
-    return "報名中";
+    return deadlineDays !== null && deadlineDays <= 14 ? "即將截止" : "報名中";
   }
   if (/截止|額滿/.test(sourceStatus)) {
-    return deadlineDays !== null && deadlineDays >= 0 ? "報名中" : "已截止";
+    return deadlineDays !== null && deadlineDays >= 0 ? "即將截止" : "已截止";
   }
   return sourceStatus || "狀態待確認";
 }
@@ -536,6 +539,9 @@ function getRegistrationStatusClass(race, status) {
   }
   if (status === "報名中") {
     return deadlineDays !== null && deadlineDays <= 14 ? "status-soon" : "status-open";
+  }
+  if (status === "即將截止") {
+    return "status-soon";
   }
   if (status === "已截止") {
     return "status-closed";
