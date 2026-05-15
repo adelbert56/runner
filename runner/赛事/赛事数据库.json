@@ -18,10 +18,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13033&subtitle=2027+%E7%AC%AC%E4%B9%9D%E5%B1%86%E9%BE%8D%E8%99%8E%E9%B3%B3%E8%B6%8A%E9%87%8E",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293623+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027496+00:00",
     "registration_opens_at": "2026-05-01",
     "registration_deadline": "2026-10-31",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13033"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13033",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2027%20%E7%AC%AC%E4%B9%9D%E5%B1%86%E9%BE%8D%E8%99%8E%E9%B3%B3%E8%B6%8A%E9%87%8E"
   },
   {
     "race_id": "e13b53a2-1d3f-48fa-a7f8-e5b5284fed26",
@@ -40,9 +42,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12976&subtitle=2027%E7%AC%AC%E4%B9%9D%E5%B1%86%E8%87%BA%E4%B8%AD%E8%B3%87%E8%A8%8A%E7%9B%83%E5%85%AC%E7%9B%8A%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293650+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027510+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12976"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12976",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E7%AC%AC%E4%B9%9D%E5%B1%86%E8%87%BA%E4%B8%AD%E8%B3%87%E8%A8%8A%E7%9B%83%E5%85%AC%E7%9B%8A%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "291c78c9-41ad-41e5-8a37-41ec356477c8",
@@ -59,10 +63,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12944&subtitle=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292713+00:00",
+    "scraped_at": "2026-05-15T08:12:47.026941+00:00",
     "registration_opens_at": "2026-03-07",
     "registration_deadline": "2026-04-08",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12944"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12944",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0"
   },
   {
     "race_id": "067695b2-b3f2-4b47-951f-cb7934b17d81",
@@ -78,10 +84,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12915&subtitle=2026+BOBDOG+RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292765+00:00",
+    "scraped_at": "2026-05-15T08:12:47.026977+00:00",
     "registration_opens_at": "2026-02-06",
     "registration_deadline": "2026-03-31",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12915"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12915",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20BOBDOG%20RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29"
   },
   {
     "race_id": "276e7a4e-b2f1-43ac-b7aa-462880d806b0",
@@ -100,10 +108,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12902&subtitle=2026+%E6%9D%BE%E9%B6%B4%E8%B6%8A%E9%87%8E",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292790+00:00",
+    "scraped_at": "2026-05-15T08:12:47.026998+00:00",
     "registration_opens_at": "2026-01-21",
     "registration_deadline": "2026-03-31",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12902"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12902",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%9D%BE%E9%B6%B4%E8%B6%8A%E9%87%8E"
   },
   {
     "race_id": "8e5e1e97-3b00-411d-b7b1-11f6ed0fdd25",
@@ -122,10 +132,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12520&subtitle=2026%E4%B8%AD%E8%88%88%E6%96%B0%E6%9D%91%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE-%E6%8A%AB%E8%88%88%E6%88%B4%E6%9C%88%E7%9A%84%E6%83%B3%E4%BD%A0",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292808+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027015+00:00",
     "registration_opens_at": "2025-12-01",
     "registration_deadline": "2026-04-12",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12520"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12520",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E4%B8%AD%E8%88%88%E6%96%B0%E6%9D%91%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE-%E6%8A%AB%E8%88%88%E6%88%B4%E6%9C%88%E7%9A%84%E6%83%B3%E4%BD%A0"
   },
   {
     "race_id": "9c8b1fb8-30e6-4b6c-b7cf-6608dc1ffec4",
@@ -142,10 +154,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12886&subtitle=%E5%A4%8F%E6%97%A5%E9%A6%AC%E6%8B%89%E6%9D%BE+-+%E5%8D%97%E6%8A%95%E5%9F%94%E9%87%8C%E5%A0%B4",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292822+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027029+00:00",
     "registration_opens_at": "2026-04-15",
     "registration_deadline": "2026-04-15",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12886"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12886",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=%E5%A4%8F%E6%97%A5%E9%A6%AC%E6%8B%89%E6%9D%BE%20-%20%E5%8D%97%E6%8A%95%E5%9F%94%E9%87%8C%E5%A0%B4"
   },
   {
     "race_id": "36a2f943-8b2a-4f42-88b9-deaba669ce63",
@@ -162,10 +176,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12919&subtitle=2026%E5%85%A8%E5%8F%B0PAPAGO%E6%AD%A1%E6%A8%82%E8%B7%91--%E8%A5%BF%E6%B9%96%E5%A0%B4",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292846+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027047+00:00",
     "registration_opens_at": "2026-04-16",
     "registration_deadline": "2026-05-30",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12919"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12919",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%85%A8%E5%8F%B0PAPAGO%E6%AD%A1%E6%A8%82%E8%B7%91--%E8%A5%BF%E6%B9%96%E5%A0%B4"
   },
   {
     "race_id": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
@@ -181,11 +197,13 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12810&subtitle=%E7%AC%AC13%E5%B1%86%E5%B0%88%E9%91%84%E4%B8%8D%E5%87%A1-SIMHOPE+x+%E5%A4%A7%E8%85%B3%E4%B8%AB%E5%85%A8%E5%9C%8B%E9%A6%AC%E6%8B%89%E6%9D%BE%E6%8E%A5%E5%8A%9B%E8%B3%BD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292862+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027058+00:00",
     "registration_opens_at": "2026-03-12",
     "registration_deadline": "2026-05-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12810",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結"
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=%E7%AC%AC13%E5%B1%86%E5%B0%88%E9%91%84%E4%B8%8D%E5%87%A1-SIMHOPE%20x%20%E5%A4%A7%E8%85%B3%E4%B8%AB%E5%85%A8%E5%9C%8B%E9%A6%AC%E6%8B%89%E6%9D%BE%E6%8E%A5%E5%8A%9B%E8%B3%BD"
   },
   {
     "race_id": "e975fd2f-602a-4336-8b13-97d0eff460a4",
@@ -202,10 +220,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12974&subtitle=%E5%A4%8F%E6%97%A5%E9%A6%AC%E6%8B%89%E6%9D%BE+-+%E8%8B%97%E6%A0%97%E9%AF%89%E9%AD%9A%E6%BD%AD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292886+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027070+00:00",
     "registration_opens_at": "2026-05-17",
     "registration_deadline": "2026-05-17",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12974"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12974",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=%E5%A4%8F%E6%97%A5%E9%A6%AC%E6%8B%89%E6%9D%BE%20-%20%E8%8B%97%E6%A0%97%E9%AF%89%E9%AD%9A%E6%BD%AD"
   },
   {
     "race_id": "f666760d-e82e-4d02-8542-4b537d1295c0",
@@ -221,11 +241,13 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12989&subtitle=2026+KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292900+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027081+00:00",
     "registration_opens_at": "2026-04-03",
     "registration_deadline": "2026-05-22",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12989",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結"
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91"
   },
   {
     "race_id": "fd352db7-c2bd-4f58-829f-b2f73c5e7583",
@@ -242,10 +264,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12963&subtitle=2026+VISOGE+%E5%A4%9C%E8%B7%91%E6%B4%BE%E5%B0%8D+%E5%8F%B0%E4%B8%AD%E5%A0%B4",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292914+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027093+00:00",
     "registration_opens_at": "2026-03-23",
     "registration_deadline": "2026-04-30",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12963"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12963",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20VISOGE%20%E5%A4%9C%E8%B7%91%E6%B4%BE%E5%B0%8D%20%E5%8F%B0%E4%B8%AD%E5%A0%B4"
   },
   {
     "race_id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
@@ -261,11 +285,13 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12978&subtitle=2026+Run+For+Dad+%E7%88%B8%E8%B6%A3%E8%BF%B7%E4%BD%A0%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%81%8B%E5%8B%95i%E8%87%BA%E7%81%A32.0",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292926+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027102+00:00",
     "registration_opens_at": "2026-06-30",
     "registration_deadline": "2026-06-30",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12978",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結"
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20Run%20For%20Dad%20%E7%88%B8%E8%B6%A3%E8%BF%B7%E4%BD%A0%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%81%8B%E5%8B%95i%E8%87%BA%E7%81%A32.0"
   },
   {
     "race_id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
@@ -283,11 +309,13 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12979&subtitle=2026%E6%9D%B1%E5%9F%8E%E7%9B%83%E5%90%88%E6%AD%A1%E5%B1%B1%E8%B6%8A%E9%87%8E%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292946+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027117+00:00",
     "registration_opens_at": "2026-04-01",
     "registration_deadline": "2026-06-15",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12979",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結"
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%9D%B1%E5%9F%8E%E7%9B%83%E5%90%88%E6%AD%A1%E5%B1%B1%E8%B6%8A%E9%87%8E%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "a6e6b4c2-8596-4e22-af67-7849a9ff7b58",
@@ -307,10 +335,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12904&subtitle=2026%E6%B5%AA%E6%BC%AB%E5%8F%B0%E4%B8%89%E7%B7%9A%E6%96%B0%E5%BA%97%E8%80%81%E8%A1%97%E8%B7%AF%E8%B7%91%E8%B3%BD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292971+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027137+00:00",
     "registration_opens_at": "2026-04-30",
     "registration_deadline": "2026-07-24",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12904"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12904",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%B5%AA%E6%BC%AB%E5%8F%B0%E4%B8%89%E7%B7%9A%E6%96%B0%E5%BA%97%E8%80%81%E8%A1%97%E8%B7%AF%E8%B7%91%E8%B3%BD"
   },
   {
     "race_id": "0cbfb0b7-c08d-44f8-a648-6ea360f29597",
@@ -329,10 +359,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12889&subtitle=2026+%E7%AC%AC%E4%BA%94%E5%B1%86%E6%B3%B0%E5%AE%89%E7%83%8F%E5%98%8E%E5%BD%A5%E5%8E%9F%E9%84%89%E7%A7%98%E5%A2%83%E6%A3%AE%E6%9E%97%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.292990+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027152+00:00",
     "registration_opens_at": "2026-04-03",
     "registration_deadline": "2026-07-03",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12889"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12889",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E7%AC%AC%E4%BA%94%E5%B1%86%E6%B3%B0%E5%AE%89%E7%83%8F%E5%98%8E%E5%BD%A5%E5%8E%9F%E9%84%89%E7%A7%98%E5%A2%83%E6%A3%AE%E6%9E%97%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "9435cbf4-7877-40a1-a6ec-34e4bf08a34f",
@@ -349,9 +381,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13041&subtitle=%E4%BB%81%E6%84%9B%E9%95%B7%E5%BA%9A%E5%90%88%E4%BD%9C%E8%81%AF%E7%9B%9F%E9%86%AB%E9%99%A22026%E6%B0%B8%E6%85%B6%E7%9B%83%E8%B7%AF%E8%B7%91",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293004+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027164+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13041"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13041",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=%E4%BB%81%E6%84%9B%E9%95%B7%E5%BA%9A%E5%90%88%E4%BD%9C%E8%81%AF%E7%9B%9F%E9%86%AB%E9%99%A22026%E6%B0%B8%E6%85%B6%E7%9B%83%E8%B7%AF%E8%B7%91"
   },
   {
     "race_id": "269e9045-3335-4a6b-b2c7-aef66050c677",
@@ -370,10 +404,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12954&subtitle=2026+%E5%B1%B1%E5%9F%8E%E6%98%9F%E5%85%89%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293030+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027179+00:00",
     "registration_opens_at": "2026-03-16",
     "registration_deadline": "2026-07-26",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12954"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12954",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E5%B1%B1%E5%9F%8E%E6%98%9F%E5%85%89%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "ed5e0139-3f43-4eac-b756-798e109005d8",
@@ -392,11 +428,13 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13026&subtitle=2026+Puli+Power+%E5%9F%94%E9%87%8C%E5%B1%B1%E5%9F%8E%E6%B4%BE%E5%B0%8D%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293063+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027193+00:00",
     "registration_opens_at": "2026-05-01",
     "registration_deadline": "2026-06-30",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13026",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結"
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20Puli%20Power%20%E5%9F%94%E9%87%8C%E5%B1%B1%E5%9F%8E%E6%B4%BE%E5%B0%8D%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
@@ -413,9 +451,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13042&subtitle=2026%E5%85%AC%E5%8B%9D%E7%9B%83",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293093+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027205+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13042"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13042",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%85%AC%E5%8B%9D%E7%9B%83"
   },
   {
     "race_id": "3a39e33f-f3ce-44c1-860f-5e4142df7dcd",
@@ -433,10 +473,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12981&subtitle=2026+%E5%8D%97%E5%BA%84%E5%B1%B1%E6%B0%B4%E6%82%A0%E9%81%8A%E8%A1%8C+%E2%80%94+%E5%B1%B1%E6%B0%B4%E8%B7%AF%E8%B7%91%E8%B3%BD+%C3%97+%E6%85%A2%E5%9F%8E%E7%88%AC%E5%9D%A1%28%E8%A7%80%E8%B3%9E%29%E8%B3%BD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293121+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027218+00:00",
     "registration_opens_at": "2026-04-01",
     "registration_deadline": "2026-08-31",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12981"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12981",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E5%8D%97%E5%BA%84%E5%B1%B1%E6%B0%B4%E6%82%A0%E9%81%8A%E8%A1%8C%20%E2%80%94%20%E5%B1%B1%E6%B0%B4%E8%B7%AF%E8%B7%91%E8%B3%BD%20%C3%97%20%E6%85%A2%E5%9F%8E%E7%88%AC%E5%9D%A1%28%E8%A7%80%E8%B3%9E%29%E8%B3%BD"
   },
   {
     "race_id": "86798062-ad4b-423e-8176-4807d0eb553e",
@@ -452,9 +494,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13050&subtitle=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293137+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027229+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF"
   },
   {
     "race_id": "b2667ebb-500b-435d-90ec-9978a2f8b0b1",
@@ -473,9 +517,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13034&subtitle=2026+%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293163+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027245+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "c22e79f8-5375-4bd8-978c-1551c8b9cc7d",
@@ -494,11 +540,13 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12926&subtitle=2026+%E5%8D%97%E6%8A%95%E9%A6%AC11th+%E8%8D%89%E9%9E%8B%E5%A2%A9%E9%A6%AC%E6%8B%89%E6%9D%BE+%E5%89%8D%E9%80%B2%E9%B3%A5%E5%98%B4%E6%BD%AD%E3%80%81%E5%A5%94%E5%90%91%E4%B9%9D%E4%B9%9D%E5%B3%B0",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293187+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027259+00:00",
     "registration_opens_at": "2026-04-27",
     "registration_deadline": "2026-07-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12926",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結"
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E5%8D%97%E6%8A%95%E9%A6%AC11th%20%E8%8D%89%E9%9E%8B%E5%A2%A9%E9%A6%AC%E6%8B%89%E6%9D%BE%20%E5%89%8D%E9%80%B2%E9%B3%A5%E5%98%B4%E6%BD%AD%E3%80%81%E5%A5%94%E5%90%91%E4%B9%9D%E4%B9%9D%E5%B3%B0"
   },
   {
     "race_id": "0e285ab6-7707-4faf-88db-c50e4628f9ab",
@@ -517,10 +565,12 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13028&subtitle=2026+%E6%B8%85%E6%B0%B4%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%98%89%E5%B9%B4%E8%8F%AF",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293210+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027273+00:00",
     "registration_opens_at": "2026-05-04",
     "registration_deadline": "2026-09-20",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13028"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13028",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%B8%85%E6%B0%B4%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%98%89%E5%B9%B4%E8%8F%AF"
   },
   {
     "race_id": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
@@ -538,11 +588,13 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12897&subtitle=2026%E6%97%A5%E6%9C%88%E6%BD%AD%E7%92%B0%E6%B9%96%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293253+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027285+00:00",
     "registration_opens_at": "2026-01-23",
     "registration_deadline": "2026-05-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12897",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結"
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%97%A5%E6%9C%88%E6%BD%AD%E7%92%B0%E6%B9%96%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
@@ -560,9 +612,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293327+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027300+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12929"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12929",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "4deefa08-b316-4d29-8842-a5e9848f396c",
@@ -580,9 +634,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12900&subtitle=2026+%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293374+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027329+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12900"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12900",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF"
   },
   {
     "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
@@ -599,9 +655,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13045&subtitle=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293405+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027347+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13045"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13045",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8"
   },
   {
     "race_id": "86139039-c643-4bf9-ad9f-e66ca5239784",
@@ -620,9 +678,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293444+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027373+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12934"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12934",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "af9de05e-9895-478a-bcc6-92587d8c2382",
@@ -636,14 +696,18 @@
       "3km"
     ],
     "difficulty": "中級",
-    "registration_status": "報名時間未定",
-    "registration_link": "",
+    "registration_status": "報名中",
+    "registration_link": "https://irunner.biji.co/2026-2livetruemarathon",
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12814&subtitle=2026+%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293484+00:00",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12814"
+    "scraped_at": "2026-05-15T08:12:47.027402+00:00",
+    "registration_note": "人工查證：iRunner 報名頁",
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12814",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "registration_opens_at": "2026-05-15",
+    "registration_deadline": "2026-07-15"
   },
   {
     "race_id": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
@@ -662,9 +726,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12997&subtitle=%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293517+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027429+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12997"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12997",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4%E9%A6%AC%E6%8B%89%E6%9D%BE"
   },
   {
     "race_id": "ea131e34-b3e9-4bc4-b626-c5345c26cb59",
@@ -683,9 +749,11 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293549+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027459+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13031"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13031",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91"
   },
   {
     "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
@@ -704,8 +772,10 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-05-15T07:48:18.293583+00:00",
+    "scraped_at": "2026-05-15T08:12:47.027478+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994"
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE"
   }
 ]

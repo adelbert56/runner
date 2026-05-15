@@ -14,9 +14,10 @@ from pathlib import Path
 
 # Local imports
 sys.path.insert(0, str(Path(__file__).parent))
-from config import SOURCES, RACE_DB_JSON
+from config import SOURCES, RACE_DB_JSON, RACE_MANUAL_OVERRIDES_JSON
 from scrapers import sports_note_scraper, sportsnet_scraper, twttra_scraper
 from processors.race_normalizer import normalize_all
+from processors.manual_overrides import apply_overrides, load_overrides
 from processors.dedup import load_existing, merge, save
 from obsidian_writer import write_race_list, append_scrape_log
 
@@ -62,6 +63,7 @@ def main(dry_run: bool = False, sources: list[str] | None = None) -> None:
 
     # ── Normalize ────────────────────────────────────────────────────────────
     normalized = normalize_all(all_raw)
+    apply_overrides(normalized, load_overrides(RACE_MANUAL_OVERRIDES_JSON))
     logger.info(f"After normalization: {len(normalized)} races")
 
     if dry_run:

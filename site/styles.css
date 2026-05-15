@@ -577,18 +577,11 @@ h3 {
   color: #6d4c00;
 }
 
-.race-date-line {
-  margin-bottom: 8px;
-  color: var(--green-dark);
-  font-size: 0.9rem;
-  font-weight: 900;
-}
-
 .registration-times {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin: 0 0 9px;
+  margin: 7px 0 9px;
 }
 
 .registration-times div {

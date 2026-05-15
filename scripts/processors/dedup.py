@@ -53,6 +53,8 @@ def merge(existing: dict[str, dict], new_races: list[dict]) -> tuple[list[dict],
                 "registration_opens_at",
                 "registration_deadline",
                 "source_registration_link",
+                "social_links",
+                "facebook_search_url",
             ):
                 if race.get(field, "") != old.get(field, ""):
                     old[field] = race.get(field, "")

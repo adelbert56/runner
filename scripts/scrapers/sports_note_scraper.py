@@ -4,7 +4,7 @@ import re
 import time
 import logging
 from dataclasses import dataclass, field
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -37,6 +37,8 @@ class RaceEntry:
     registration_opens_at: str = ""
     registration_deadline: str = ""
     source_registration_link: str = ""
+    social_links: list[str] = field(default_factory=list)
+    facebook_search_url: str = ""
     detail_url: str = ""
     source: str = SOURCE_NAME
     source_url: str = ""
@@ -190,6 +192,63 @@ def _is_ignored_external_url(url: str) -> bool:
     return False
 
 
+def _is_facebook_url(url: str) -> bool:
+    host = urlparse(url).netloc.lower()
+    return host.endswith("facebook.com") or host.endswith("fb.com")
+
+
+def _is_generic_facebook_url(url: str) -> bool:
+    path = urlparse(url).path.lower().strip("/")
+    generic_pages = {
+        "sportsnote",
+        "running.school.tw",
+    }
+    return path in generic_pages
+
+
+def _extract_facebook_links(soup: BeautifulSoup | None, detail_url: str) -> list[str]:
+    """Extract public Facebook links from the source detail page."""
+    if soup is None:
+        return []
+    links: list[str] = []
+    for a in soup.select("a[href]"):
+        href = a.get("href", "").strip()
+        if not href:
+            continue
+        absolute = urljoin(detail_url, href)
+        if _is_facebook_url(absolute) and not _is_generic_facebook_url(absolute) and absolute not in links:
+            links.append(absolute)
+    return links[:5]
+
+
+def _facebook_mobile_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.netloc.lower().endswith("facebook.com"):
+        return parsed._replace(netloc="mbasic.facebook.com").geturl()
+    return url
+
+
+def _fetch_facebook_text(links: list[str], session: requests.Session) -> str:
+    """Best-effort fetch for public Facebook pages/posts."""
+    texts: list[str] = []
+    for link in links[:3]:
+        for url in (link, _facebook_mobile_url(link)):
+            try:
+                resp = session.get(url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
+                if resp.status_code >= 400:
+                    continue
+                soup = BeautifulSoup(resp.text, "html.parser")
+                text = soup.get_text(" ", strip=True)
+                if "登入" in text[:200] or "Log in" in text[:200]:
+                    continue
+                if text:
+                    texts.append(text)
+                    break
+            except requests.RequestException as e:
+                logger.debug(f"Facebook fetch failed {url}: {e}")
+    return " ".join(texts)
+
+
 def _looks_like_registration_link(text: str, href: str) -> bool:
     target = f"{text} {href}".lower()
     keywords = (
@@ -312,6 +371,7 @@ def scrape() -> list[dict]:
         # ─── Registration link ────────────────────────────────────────────
         source_reg_link = _extract_source_registration_link(item, cid)
         detail_soup, detail_error = _fetch_detail_soup(detail_url, session)
+        facebook_links = _extract_facebook_links(detail_soup, detail_url)
         official_reg_link, reg_note = _extract_official_registration_link(
             detail_url,
             detail_soup,
@@ -319,6 +379,11 @@ def scrape() -> list[dict]:
         )
         detail_text = detail_soup.get_text(" ", strip=True) if detail_soup else ""
         opens_at, deadline = _extract_registration_dates(detail_text, race_date)
+        if facebook_links and (not opens_at or not deadline):
+            facebook_text = _fetch_facebook_text(facebook_links, session)
+            fb_opens_at, fb_deadline = _extract_registration_dates(facebook_text, race_date)
+            opens_at = opens_at or fb_opens_at
+            deadline = deadline or fb_deadline
 
         entry = RaceEntry(
             race_name=race_name,
@@ -332,6 +397,8 @@ def scrape() -> list[dict]:
             registration_opens_at=opens_at,
             registration_deadline=deadline,
             source_registration_link=source_reg_link,
+            social_links=facebook_links,
+            facebook_search_url=f"https://www.facebook.com/search/top?q={quote(race_name)}",
             detail_url=detail_url,
             source_url=SOURCE_URL,
         )

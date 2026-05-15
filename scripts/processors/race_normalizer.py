@@ -76,6 +76,8 @@ def normalize(raw: dict) -> dict:
         "registration_opens_at": raw.get("registration_opens_at", ""),
         "registration_deadline": raw.get("registration_deadline", ""),
         "source_registration_link": raw.get("source_registration_link", ""),
+        "social_links": raw.get("social_links", []),
+        "facebook_search_url": raw.get("facebook_search_url", ""),
         "detail_url": raw.get("detail_url", ""),
         "source": raw.get("source", ""),
         "source_url": raw.get("source_url", ""),

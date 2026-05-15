@@ -151,6 +151,7 @@ function buildCalendarEvent(race) {
     `開報：${race.registration_opens_at || "待確認"}`,
     `截止：${race.registration_deadline || "待確認"}`,
     registrationLink ? `報名網站：${registrationLink}` : "報名網站：待補連結",
+    race.facebook_search_url ? `臉書搜尋：${race.facebook_search_url}` : "",
     race.detail_url ? `來源詳情：${race.detail_url}` : "",
   ].filter(Boolean).join("\n");
 
@@ -301,7 +302,6 @@ function renderRaces() {
             <div class="race-title-row">
               <h3>${escapeHtml(race.race_name)}</h3>
             </div>
-            <div class="race-date-line">${escapeHtml(date.full)}</div>
             <dl class="registration-times">
               <div><dt>開報</dt><dd>${escapeHtml(opensAt)}</dd></div>
               <div><dt>截止</dt><dd>${escapeHtml(deadline)}</dd></div>
@@ -326,6 +326,7 @@ function renderRaces() {
               aria-pressed="${favorite ? "true" : "false"}"
             >${favorite ? "已收藏" : "收藏"}</button>
             <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">加入行事曆</button>
+            ${!registrationLink && race.facebook_search_url ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書搜尋</a>` : ""}
             ${race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">來源詳情</a>` : ""}
           </div>
         </article>
