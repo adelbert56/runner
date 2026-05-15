@@ -856,14 +856,6 @@ function renderRaces() {
           <div class="race-main">
             <div class="race-title-row">
               <h3>${escapeHtml(race.race_name)}</h3>
-              <button
-                class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
-                type="button"
-                data-favorite="${escapeHtml(key)}"
-                aria-pressed="${favorite ? "true" : "false"}"
-                aria-label="${favorite ? "取消收藏" : "加入收藏"}"
-                title="${favorite ? "取消收藏" : "加入收藏"}"
-              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
             </div>
             <dl class="registration-times">
               <div><dt>開報</dt><dd>${escapeHtml(opensAt)}</dd></div>
@@ -879,11 +871,21 @@ function renderRaces() {
             <div class="race-insight">${escapeHtml(decision)}</div>
           </div>
           <div class="race-actions">
-            ${
-              registrationTarget.url
-                ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
-                : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
-            }
+            <div class="primary-action-row">
+              <button
+                class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
+                type="button"
+                data-favorite="${escapeHtml(key)}"
+                aria-pressed="${favorite ? "true" : "false"}"
+                aria-label="${favorite ? "取消收藏" : "加入收藏"}"
+                title="${favorite ? "取消收藏" : "加入收藏"}"
+              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
+              ${
+                registrationTarget.url
+                  ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
+                  : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
+              }
+            </div>
             <div class="calendar-menu">
               <button class="calendar-button" type="button" data-calendar-menu="${escapeHtml(key)}" aria-expanded="false">加入行事曆</button>
               <div class="calendar-options" data-calendar-options="${escapeHtml(key)}" hidden>

@@ -547,8 +547,8 @@ h3 {
 .race-card {
   position: relative;
   display: grid;
-  grid-template-columns: 86px minmax(0, 1fr) 148px;
-  gap: 16px;
+  grid-template-columns: 92px minmax(0, 1fr) 206px;
+  gap: 18px;
   align-items: center;
   padding: 16px;
   border: 1px solid var(--line);
@@ -603,10 +603,7 @@ h3 {
 }
 
 .race-title-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 10px;
+  display: block;
   margin-bottom: 4px;
 }
 
@@ -813,12 +810,18 @@ h3 {
 }
 
 .race-actions {
+  display: grid;
   width: 100%;
   min-width: 0;
-  align-items: stretch;
-  flex-direction: column;
-  justify-content: center;
+  align-content: center;
   gap: 8px;
+}
+
+.primary-action-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
 }
 
 .race-card .button {
@@ -2084,10 +2087,14 @@ h3 {
     grid-column: 1 / -1;
     width: 100%;
     max-width: 100%;
+    display: grid;
     align-items: stretch;
-    flex-direction: column;
     gap: 8px;
     overflow: hidden;
+  }
+
+  .primary-action-row {
+    display: block;
   }
 
   .register-link {
