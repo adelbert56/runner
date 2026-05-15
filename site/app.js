@@ -39,7 +39,12 @@ const els = {
   planExperience: document.querySelector("#plan-experience"),
   planGoal: document.querySelector("#plan-goal"),
   planFinish: document.querySelector("#plan-finish"),
+  planFinishHour: document.querySelector("#plan-finish-hour"),
+  planFinishMinute: document.querySelector("#plan-finish-minute"),
+  planFinishSecond: document.querySelector("#plan-finish-second"),
   planPace: document.querySelector("#plan-pace"),
+  planPaceMinute: document.querySelector("#plan-pace-minute"),
+  planPaceSecond: document.querySelector("#plan-pace-second"),
   planRaceDate: document.querySelector("#plan-race-date"),
   planLevel: document.querySelector("#plan-level"),
   planInjury: document.querySelector("#plan-injury"),
@@ -273,17 +278,65 @@ function savePlanSettings() {
 }
 
 function normalizeControlValue(control, value) {
-  if (control.type !== "time") {
-    return value;
+  return value;
+}
+
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function optionRange(start, end) {
+  return Array.from({ length: end - start + 1 }, (_, index) => {
+    const value = start + index;
+    return `<option value="${value}">${pad2(value)}</option>`;
+  }).join("");
+}
+
+function setupDurationPickers() {
+  if (!els.planFinishHour || !els.planPaceMinute) {
+    return;
   }
-  const parts = String(value || "").split(":").map((part) => part.padStart(2, "0"));
-  if (parts.length === 2) {
-    return `00:${parts[0]}:${parts[1]}`;
+  els.planFinishHour.innerHTML = optionRange(0, 12);
+  els.planFinishMinute.innerHTML = optionRange(0, 59);
+  els.planFinishSecond.innerHTML = optionRange(0, 59);
+  els.planPaceMinute.innerHTML = optionRange(3, 12);
+  els.planPaceSecond.innerHTML = optionRange(0, 59);
+  syncDurationPickersFromInputs();
+}
+
+function syncDurationPickersFromInputs() {
+  const finish = parseDurationParts(els.planFinish?.value || "1:05:00");
+  const pace = parseDurationParts(els.planPace?.value || "6:30");
+  if (els.planFinishHour) {
+    els.planFinishHour.value = String(finish.hours);
+    els.planFinishMinute.value = String(finish.minutes);
+    els.planFinishSecond.value = String(finish.seconds);
   }
-  if (parts.length === 3) {
-    return parts.join(":");
+  if (els.planPaceMinute) {
+    const paceMinutes = pace.hours * 60 + pace.minutes;
+    els.planPaceMinute.value = String(clampNumber(paceMinutes || 6, 3, 12));
+    els.planPaceSecond.value = String(pace.seconds);
   }
-  return control.value;
+}
+
+function updateDurationInputs() {
+  if (els.planFinish) {
+    els.planFinish.value = `${Number(els.planFinishHour?.value || 0)}:${pad2(els.planFinishMinute?.value || 0)}:${pad2(els.planFinishSecond?.value || 0)}`;
+  }
+  if (els.planPace) {
+    els.planPace.value = `${Number(els.planPaceMinute?.value || 6)}:${pad2(els.planPaceSecond?.value || 0)}`;
+  }
+}
+
+function parseDurationParts(value) {
+  const parts = String(value || "").split(":").map(Number);
+  if (parts.length === 3 && parts.every(Number.isFinite)) {
+    return { hours: parts[0], minutes: parts[1], seconds: parts[2] };
+  }
+  if (parts.length === 2 && parts.every(Number.isFinite)) {
+    return { hours: 0, minutes: parts[0], seconds: parts[1] };
+  }
+  return { hours: 0, minutes: 0, seconds: 0 };
 }
 
 function formatDateParts(dateText) {
@@ -1390,6 +1443,7 @@ function bindEvents() {
   if (els.planBuilder) {
     els.planBuilder.addEventListener("submit", (event) => {
       event.preventDefault();
+      updateDurationInputs();
       savePlanSettings();
       renderPlan();
     });
@@ -1401,6 +1455,14 @@ function bindEvents() {
       });
       control?.addEventListener("change", () => {
         state.planWeek = 1;
+        savePlanSettings();
+        renderPlan();
+      });
+    });
+    [els.planFinishHour, els.planFinishMinute, els.planFinishSecond, els.planPaceMinute, els.planPaceSecond].forEach((control) => {
+      control?.addEventListener("change", () => {
+        state.planWeek = 1;
+        updateDurationInputs();
         savePlanSettings();
         renderPlan();
       });
@@ -1431,8 +1493,10 @@ async function loadRaces() {
 
 async function init() {
   loadFavorites();
+  setupDurationPickers();
   bindEvents();
   loadPlanSettings();
+  syncDurationPickersFromInputs();
   setActivePanel(window.location.hash.replace("#", "") || "races", false);
   try {
     await loadRaces();

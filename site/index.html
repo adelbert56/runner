@@ -9,7 +9,7 @@
       content="蒐集中部路跑賽事、跑鞋新上市心得、練跑方法與跑步新聞的跑者資訊站。"
     >
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260515-mobile3">
+    <link rel="stylesheet" href="./styles.css?v=20260515-duration1">
   </head>
   <body>
     <header class="site-header">
@@ -260,11 +260,25 @@
             </label>
             <label>
               <span>目標完賽時間</span>
-              <input id="plan-finish" type="time" step="1" value="01:05:00" aria-describedby="time-format-note">
+              <input id="plan-finish" type="hidden" value="1:05:00">
+              <div class="duration-picker" data-duration-picker="finish" aria-label="目標完賽時間">
+                <select id="plan-finish-hour" aria-label="完賽小時"></select>
+                <em>時</em>
+                <select id="plan-finish-minute" aria-label="完賽分鐘"></select>
+                <em>分</em>
+                <select id="plan-finish-second" aria-label="完賽秒數"></select>
+                <em>秒</em>
+              </div>
             </label>
             <label>
               <span>目標配速</span>
-              <input id="plan-pace" type="time" step="1" value="00:06:30" aria-describedby="time-format-note">
+              <input id="plan-pace" type="hidden" value="6:30">
+              <div class="duration-picker compact" data-duration-picker="pace" aria-label="目標配速">
+                <select id="plan-pace-minute" aria-label="配速分鐘"></select>
+                <em>分</em>
+                <select id="plan-pace-second" aria-label="配速秒數"></select>
+                <em>秒/km</em>
+              </div>
             </label>
             <label>
               <span>目標賽事日期</span>
@@ -348,7 +362,7 @@
               </select>
             </label>
             <button class="button primary" type="submit">生成自訂菜單</button>
-            <p class="time-format-note" id="time-format-note">時間請用選擇器：完賽時間用時:分:秒，配速用 00:分:秒。</p>
+            <p class="time-format-note" id="time-format-note">完賽時間與配速使用數字選擇器，不會出現上午/下午。</p>
             <p class="device-note">收藏與菜單會自動保存在這台裝置的瀏覽器。</p>
           </form>
 
@@ -412,6 +426,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260515-export1"></script>
+    <script src="./app.js?v=20260515-duration1"></script>
   </body>
 </html>
