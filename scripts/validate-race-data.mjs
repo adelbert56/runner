@@ -134,6 +134,19 @@ function addDays(date, days) {
   return next;
 }
 
+function nextMonthlyCheckpoint(date) {
+  const day = date.getDate();
+  const next = new Date(date);
+
+  if (day < 15) {
+    next.setDate(15);
+    return next;
+  }
+
+  next.setMonth(next.getMonth() + 1, 1);
+  return next;
+}
+
 function daysBetween(fromDate, toDate) {
   if (!fromDate || !toDate) {
     return null;
@@ -247,9 +260,9 @@ function trackingPlanForRace(race, missing, todayText = TODAY) {
       return {
         status: "monitor_monthly",
         status_label: "每月追蹤",
-        next_check_date: formatDate(addDays(today, 30)),
-        cadence: "monthly",
-        reason: `距離賽事 ${daysToRace} 天，可能尚未釋出完整資訊，先每月檢查。`,
+        next_check_date: formatDate(nextMonthlyCheckpoint(today)),
+        cadence: "monthly_1_15",
+        reason: `距離賽事 ${daysToRace} 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。`,
       };
     }
     return {

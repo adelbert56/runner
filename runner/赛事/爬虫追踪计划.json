@@ -8,9 +8,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 128 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 128 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -39,9 +39,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 142 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 142 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -70,9 +70,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 155 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 155 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -101,9 +101,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 156 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 156 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -132,9 +132,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 177 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 177 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -163,9 +163,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -194,9 +194,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -225,9 +225,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -256,9 +256,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 212 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 212 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -287,9 +287,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -318,9 +318,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-14",
-      "cadence": "monthly",
-      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先每月檢查。"
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
