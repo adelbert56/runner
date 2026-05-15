@@ -922,6 +922,14 @@ h3 {
   font-weight: 850;
 }
 
+.device-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
 .plan-output {
   min-height: 320px;
 }

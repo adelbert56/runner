@@ -1,4 +1,8 @@
-const FAVORITES_KEY = "runner-plaza:favorites";
+const DEVICE_KEY = "runner-plaza:device-id";
+const LEGACY_FAVORITES_KEY = "runner-plaza:favorites";
+const DEVICE_ID = getDeviceId();
+const FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:favorites`;
+const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const TODAY = "2026-05-15";
 
 const state = {
@@ -11,6 +15,7 @@ const state = {
   query: "",
   favorites: new Set(),
   favoritesOnly: false,
+  trainingRaceKey: "",
 };
 
 const els = {
@@ -124,6 +129,22 @@ const levelProfiles = {
   },
 };
 
+function getDeviceId() {
+  try {
+    const existing = localStorage.getItem(DEVICE_KEY);
+    if (existing) {
+      return existing;
+    }
+    const id = globalThis.crypto?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : `device-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    localStorage.setItem(DEVICE_KEY, id);
+    return id;
+  } catch {
+    return "browser";
+  }
+}
+
 function setActivePanel(panelId, updateHash = true) {
   const nextPanel = [...els.panels].some((panel) => panel.dataset.panel === panelId)
     ? panelId
@@ -157,8 +178,10 @@ function escapeHtml(value) {
 
 function loadFavorites() {
   try {
-    const stored = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    const storedValue = localStorage.getItem(FAVORITES_KEY) || localStorage.getItem(LEGACY_FAVORITES_KEY) || "[]";
+    const stored = JSON.parse(storedValue);
     state.favorites = new Set(Array.isArray(stored) ? stored : []);
+    saveFavorites();
   } catch {
     state.favorites = new Set();
   }
@@ -166,6 +189,46 @@ function loadFavorites() {
 
 function saveFavorites() {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify([...state.favorites]));
+}
+
+function getPlanControls() {
+  return [
+    ["goal", els.planGoal],
+    ["finish", els.planFinish],
+    ["pace", els.planPace],
+    ["raceDate", els.planRaceDate],
+    ["level", els.planLevel],
+    ["days", els.planDays],
+    ["weeks", els.planWeeks],
+    ["weeklyKm", els.planWeeklyKm],
+    ["longRun", els.planLongRun],
+    ["priority", els.planPriority],
+  ];
+}
+
+function loadPlanSettings() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PLAN_KEY) || "{}");
+    getPlanControls().forEach(([key, control]) => {
+      if (control && stored[key]) {
+        control.value = stored[key];
+      }
+    });
+    state.trainingRaceKey = stored.trainingRaceKey || "";
+  } catch {
+    state.trainingRaceKey = "";
+  }
+}
+
+function savePlanSettings() {
+  const payload = getPlanControls().reduce((acc, [key, control]) => {
+    if (control) {
+      acc[key] = control.value;
+    }
+    return acc;
+  }, {});
+  payload.trainingRaceKey = state.trainingRaceKey;
+  localStorage.setItem(PLAN_KEY, JSON.stringify(payload));
 }
 
 function formatDateParts(dateText) {
@@ -410,6 +473,7 @@ function goalFromRace(race) {
 }
 
 function useRaceForTraining(race) {
+  state.trainingRaceKey = getRaceKey(race);
   if (els.planGoal) {
     els.planGoal.value = goalFromRace(race);
   }
@@ -419,6 +483,7 @@ function useRaceForTraining(race) {
   if (els.planPriority) {
     els.planPriority.value = "finish";
   }
+  savePlanSettings();
   setActivePanel("training");
   renderPlan();
   document.getElementById("training")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1058,11 +1123,18 @@ function bindEvents() {
   if (els.planBuilder) {
     els.planBuilder.addEventListener("submit", (event) => {
       event.preventDefault();
+      savePlanSettings();
       renderPlan();
     });
     [els.planGoal, els.planLevel, els.planDays, els.planWeeks, els.planFinish, els.planPace, els.planRaceDate, els.planWeeklyKm, els.planLongRun, els.planPriority].forEach((control) => {
-      control?.addEventListener("input", renderPlan);
-      control?.addEventListener("change", renderPlan);
+      control?.addEventListener("input", () => {
+        savePlanSettings();
+        renderPlan();
+      });
+      control?.addEventListener("change", () => {
+        savePlanSettings();
+        renderPlan();
+      });
     });
   }
 }
@@ -1091,6 +1163,7 @@ async function loadRaces() {
 async function init() {
   loadFavorites();
   bindEvents();
+  loadPlanSettings();
   setActivePanel(window.location.hash.replace("#", "") || "races", false);
   try {
     await loadRaces();
