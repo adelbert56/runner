@@ -7,6 +7,8 @@ const queuePath = resolve(root, "runner/赛事/待补资料队列.json");
 const reportPath = resolve(root, "runner/赛事/资料品质报告.md");
 const trackingPath = resolve(root, "runner/赛事/爬虫追踪计划.md");
 const trackingJsonPath = resolve(root, "runner/赛事/爬虫追踪计划.json");
+const openedGapReportPath = resolve(root, "runner/赛事/开报后待补资料报告.md");
+const openedGapJsonPath = resolve(root, "runner/赛事/开报后待补资料报告.json");
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
@@ -281,6 +283,9 @@ function buildQueueItem(race) {
     race_name: race.race_name || "",
     race_date: race.race_date || "",
     race_county: race.race_county || "",
+    registration_opens_at: race.registration_opens_at || "",
+    registration_deadline: race.registration_deadline || "",
+    registration_status: race.registration_status || "",
     priority_score: priorityScore(missing),
     tracking,
     missing,
@@ -306,6 +311,69 @@ function buildQueueItem(race) {
       verification_note: "",
     },
   };
+}
+
+function openedGapItems(queue, todayText = TODAY) {
+  const today = parseDate(todayText);
+  return queue
+    .filter((item) => {
+      const opensAt = parseDate(item.registration_opens_at);
+      if (!opensAt || daysBetween(opensAt, today) < 0) {
+        return false;
+      }
+      if (item.tracking.status === "cancelled" || item.tracking.status === "archive_gap") {
+        return false;
+      }
+      return item.missing.some((missing) => ["high", "medium"].includes(missing.severity));
+    })
+    .sort((a, b) => {
+      const deadlineCompare = String(a.registration_deadline || "9999-99-99").localeCompare(String(b.registration_deadline || "9999-99-99"));
+      return deadlineCompare || b.priority_score - a.priority_score || String(a.race_date).localeCompare(String(b.race_date));
+    });
+}
+
+function gapAction(item) {
+  if (item.missing.some((missing) => missing.key === "official_registration_link")) {
+    return "先找官方報名或活動頁，避免只留運動筆記。";
+  }
+  if (item.current_links.registration_link || item.current_links.official_event_url) {
+    return "官方頁已存在，人工查欄位或為此平台新增專用解析器。";
+  }
+  return "用賽事名稱搜尋官方頁與粉專公告。";
+}
+
+function formatOpenedGapReport(items) {
+  const generatedAt = new Date().toISOString();
+  const lines = [
+    "# 開報後待補資料報告",
+    "",
+    `產生時間：${generatedAt}`,
+    `追蹤基準日：${TODAY}`,
+    "",
+    "這份報告只列「開報日已經開始，但官方資料仍補不齊」的賽事。這些才是需要優先人工查證或新增專用爬蟲的平台。",
+    "",
+    `目前共 ${items.length} 場。`,
+    "",
+    "| 開報 | 截止 | 賽事 | 縣市 | 狀態 | 缺漏 | 官方/報名頁 | 建議 |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+  ];
+
+  for (const item of items) {
+    const link = item.current_links.official_event_url || item.current_links.registration_link || item.current_links.detail_url || item.current_links.facebook_search_url || "";
+    lines.push([
+      item.registration_opens_at || "-",
+      item.registration_deadline || "-",
+      item.race_name,
+      item.race_county,
+      item.registration_status || "-",
+      item.missing.map((missing) => missing.label).join("、"),
+      link || "待搜尋",
+      gapAction(item),
+    ].map((value) => String(value).replaceAll("|", "｜")).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  }
+
+  lines.push("");
+  return `${lines.join("\n")}\n`;
 }
 
 function countBy(items, getKey) {
@@ -453,6 +521,9 @@ async function main() {
   await writeFile(queuePath, `${JSON.stringify(queue, null, 2)}\n`, "utf-8");
   await writeFile(reportPath, formatReport(races, queue), "utf-8");
   await writeFile(trackingPath, formatTrackingPlan(queue), "utf-8");
+  const openedGaps = openedGapItems(queue);
+  await writeFile(openedGapReportPath, formatOpenedGapReport(openedGaps), "utf-8");
+  await writeFile(openedGapJsonPath, `${JSON.stringify(openedGaps, null, 2)}\n`, "utf-8");
   await writeFile(trackingJsonPath, `${JSON.stringify(queue.map((item) => ({
     race_id: item.race_id,
     race_name: item.race_name,
@@ -469,10 +540,12 @@ async function main() {
   console.log(`Races: ${races.length}`);
   console.log(`Needs follow-up: ${queue.length}`);
   console.log(`Due to crawl now: ${dueNow}`);
+  console.log(`Opened registration gaps: ${openedGaps.length}`);
   console.log(`Missing official registration link: ${highPriority}`);
   console.log(`Wrote: ${queuePath}`);
   console.log(`Wrote: ${reportPath}`);
   console.log(`Wrote: ${trackingPath}`);
+  console.log(`Wrote: ${openedGapReportPath}`);
 }
 
 main().catch((error) => {

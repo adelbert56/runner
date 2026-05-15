@@ -169,7 +169,7 @@ async function fetchOfficialDetails(race) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
   const html = await response.text();
-  if (host.endsWith("lohasnet.tw")) {
+  if (host.endsWith("lohasnet.tw") && !host.startsWith("signup.")) {
     return { officialUrl, details: extractLohasDetails(html, race) };
   }
   return null;
@@ -187,7 +187,14 @@ async function enrichPath(path) {
       next.push(race);
       continue;
     }
-    const result = await fetchOfficialDetails(race);
+    let result = null;
+    try {
+      result = await fetchOfficialDetails(race);
+    } catch (error) {
+      console.warn(`${raceKey(race)}: official enrichment skipped (${error.message})`);
+      next.push(race);
+      continue;
+    }
     if (!result) {
       next.push(race);
       continue;

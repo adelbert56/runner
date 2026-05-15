@@ -4,6 +4,9 @@
     "race_name": "仁愛長庚合作聯盟醫院2026永慶盃路跑",
     "race_date": "2026-09-20",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -89,6 +92,9 @@
     "race_name": "2026公勝盃",
     "race_date": "2026-10-04",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -174,6 +180,9 @@
     "race_name": "2026年FUN電多巴胺路跑嘉年華",
     "race_date": "2026-10-17",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -259,6 +268,9 @@
     "race_name": "2026 臺中國際馬拉松",
     "race_date": "2026-10-18",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -344,6 +356,9 @@
     "race_name": "2026台灣米倉田中馬拉松",
     "race_date": "2026-11-08",
     "race_county": "彰化縣",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -429,6 +444,9 @@
     "race_name": "2026 臺中舒跑杯",
     "race_date": "2026-11-15",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -514,6 +532,9 @@
     "race_name": "2026國聚慵懶跑者聚樂部",
     "race_date": "2026-11-15",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -599,6 +620,9 @@
     "race_name": "2026鹿港馬拉松",
     "race_date": "2026-11-15",
     "race_county": "彰化縣",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -684,6 +708,9 @@
     "race_name": "母子鱷魚40週年馬拉松",
     "race_date": "2026-12-13",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -769,6 +796,9 @@
     "race_name": "2026第二屆食安盃馬拉松",
     "race_date": "2026-12-19",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -854,6 +884,9 @@
     "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
     "race_date": "2026-12-19",
     "race_county": "彰化縣",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -939,6 +972,9 @@
     "race_name": "2027第九屆臺中資訊盃公益馬拉松",
     "race_date": "2027-01-17",
     "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
     "priority_score": 20,
     "tracking": {
       "status": "wait_future",
@@ -1024,6 +1060,9 @@
     "race_name": "第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
     "race_date": "2026-07-05",
     "race_county": "臺中市",
+    "registration_opens_at": "2026-03-12",
+    "registration_deadline": "2026-05-31",
+    "registration_status": "已截止",
     "priority_score": 14,
     "tracking": {
       "status": "due_now",
@@ -1097,6 +1136,9 @@
     "race_name": "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
     "race_date": "2026-08-02",
     "race_county": "彰化縣",
+    "registration_opens_at": "2026-06-30",
+    "registration_deadline": "2026-06-30",
+    "registration_status": "已截止",
     "priority_score": 14,
     "tracking": {
       "status": "wait_until_open_window",
@@ -1170,6 +1212,9 @@
     "race_name": "2026東城盃合歡山越野馬拉松",
     "race_date": "2026-09-04",
     "race_county": "南投縣",
+    "registration_opens_at": "2026-04-01",
+    "registration_deadline": "2026-06-15",
+    "registration_status": "已截止",
     "priority_score": 14,
     "tracking": {
       "status": "due_now",
@@ -1243,6 +1288,9 @@
     "race_name": "2026 Puli Power 埔里山城派對馬拉松",
     "race_date": "2026-10-04",
     "race_county": "南投縣",
+    "registration_opens_at": "2026-05-01",
+    "registration_deadline": "2026-06-30",
+    "registration_status": "已截止",
     "priority_score": 14,
     "tracking": {
       "status": "due_now",
@@ -1316,6 +1364,9 @@
     "race_name": "2026 南投馬11th 草鞋墩馬拉松 前進鳥嘴潭、奔向九九峰",
     "race_date": "2026-10-25",
     "race_county": "南投縣",
+    "registration_opens_at": "2026-04-27",
+    "registration_deadline": "2026-07-31",
+    "registration_status": "已截止",
     "priority_score": 14,
     "tracking": {
       "status": "due_now",
@@ -1389,6 +1440,9 @@
     "race_name": "2026日月潭環湖馬拉松",
     "race_date": "2026-11-01",
     "race_county": "南投縣",
+    "registration_opens_at": "2026-01-23",
+    "registration_deadline": "2026-05-31",
+    "registration_status": "已截止",
     "priority_score": 14,
     "tracking": {
       "status": "due_now",
@@ -1462,6 +1516,9 @@
     "race_name": "2026第九屆幸福龍井活力健康路跑健走",
     "race_date": "2026-05-09",
     "race_county": "臺中市",
+    "registration_opens_at": "2026-03-07",
+    "registration_deadline": "2026-04-08",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "archive_gap",
@@ -1529,6 +1586,9 @@
     "race_name": "2026 松鶴越野",
     "race_date": "2026-05-17",
     "race_county": "南投縣",
+    "registration_opens_at": "2026-01-21",
+    "registration_deadline": "2026-03-31",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "closed_gap",
@@ -1596,6 +1656,9 @@
     "race_name": "夏日馬拉松 - 南投埔里場",
     "race_date": "2026-06-13",
     "race_county": "南投縣",
+    "registration_opens_at": "2026-04-15",
+    "registration_deadline": "2026-04-15",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "closed_gap",
@@ -1663,6 +1726,9 @@
     "race_name": "2026全台PAPAGO歡樂跑--西湖場",
     "race_date": "2026-06-21",
     "race_county": "苗栗縣",
+    "registration_opens_at": "2026-04-16",
+    "registration_deadline": "2026-05-30",
+    "registration_status": "原2026/06/28因故改期至2026/06/21",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -1730,6 +1796,9 @@
     "race_name": "夏日馬拉松 - 苗栗鯉魚潭",
     "race_date": "2026-07-11",
     "race_county": "苗栗縣",
+    "registration_opens_at": "2026-05-17",
+    "registration_deadline": "2026-05-17",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -1797,6 +1866,9 @@
     "race_name": "2026 VISOGE 夜跑派對 台中場",
     "race_date": "2026-07-18",
     "race_county": "臺中市",
+    "registration_opens_at": "2026-03-23",
+    "registration_deadline": "2026-04-30",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "closed_gap",
@@ -1864,6 +1936,9 @@
     "race_name": "2026浪漫台三線新店老街路跑賽",
     "race_date": "2026-09-06",
     "race_county": "苗栗縣",
+    "registration_opens_at": "2026-04-30",
+    "registration_deadline": "2026-07-24",
+    "registration_status": "原2026/04/26因故延期至2026/09/06",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -1931,6 +2006,9 @@
     "race_name": "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
     "race_date": "2026-09-20",
     "race_county": "苗栗縣",
+    "registration_opens_at": "2026-04-03",
+    "registration_deadline": "2026-07-03",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -1998,6 +2076,9 @@
     "race_name": "2026 山城星光馬拉松",
     "race_date": "2026-10-03",
     "race_county": "苗栗縣",
+    "registration_opens_at": "2026-03-16",
+    "registration_deadline": "2026-07-26",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -2065,6 +2146,9 @@
     "race_name": "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽",
     "race_date": "2026-10-17",
     "race_county": "苗栗縣",
+    "registration_opens_at": "2026-04-01",
+    "registration_deadline": "2026-08-31",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -2132,6 +2216,9 @@
     "race_name": "2026 清水馬拉松嘉年華",
     "race_date": "2026-10-31",
     "race_county": "臺中市",
+    "registration_opens_at": "2026-05-04",
+    "registration_deadline": "2026-09-20",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -2199,6 +2286,9 @@
     "race_name": "2027 第九屆龍虎鳳越野",
     "race_date": "2027-01-09",
     "race_county": "苗栗縣",
+    "registration_opens_at": "2026-05-01",
+    "registration_deadline": "2026-10-31",
+    "registration_status": "已截止",
     "priority_score": 9,
     "tracking": {
       "status": "due_now",
@@ -2266,6 +2356,9 @@
     "race_name": "2026 第二屆麗晨臺中國際馬拉松",
     "race_date": "2026-12-06",
     "race_county": "臺中市",
+    "registration_opens_at": "2026-05-15",
+    "registration_deadline": "2026-07-15",
+    "registration_status": "報名中",
     "priority_score": 8,
     "tracking": {
       "status": "due_now",
