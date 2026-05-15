@@ -19,7 +19,12 @@
     "registration_deadline": "2026-04-08",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12944",
     "social_links": [],
-    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0"
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0",
+    "official_event_url": "https://www.joinnow.com.tw/run-step1.php?cnt_id=135",
+    "source_platform": "JoinNow",
+    "is_official_direct": true,
+    "verified_at": "2026-05-15",
+    "verification_note": "平台爬蟲自動查證：JoinNow"
   },
   {
     "race_id": "067695b2-b3f2-4b47-951f-cb7934b17d81",
@@ -43,7 +48,10 @@
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20BOBDOG%20RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29",
     "registration_note": "人工查證：伊貝特報名頁停辦通知；因場地申請緣故，北、中、高活動取消停辦，已完成報名者將全額退還報名費及郵寄費。",
     "verified_at": "2026-05-15",
-    "verification_note": "截圖顯示停辦通知。"
+    "verification_note": "截圖顯示停辦通知。",
+    "official_event_url": "https://bao-ming.com/eb/content/6890#reg",
+    "source_platform": "bao-ming",
+    "is_official_direct": true
   },
   {
     "race_id": "276e7a4e-b2f1-43ac-b7aa-462880d806b0",
@@ -77,7 +85,9 @@
     "fees": "LV5 50K Green 3400元 / Normal 4400元；LV3 20K Green 2250元 / Normal 2850元；LV2 13K Green 1650元 / Normal 1900元；LV1 7K Green 1150元 / Normal 1350元；一般價另有調整。",
     "quota": "LV5、LV3、LV2、LV1 各300名。",
     "verified_at": "2026-05-15",
-    "verification_note": "官方報名頁顯示主辦、協辦、名額上限與報名費；跑寶島頁確認地點為南投縣國姓鄉泰雅渡假村。"
+    "verification_note": "官方報名頁顯示主辦、協辦、名額上限與報名費；跑寶島頁確認地點為南投縣國姓鄉泰雅渡假村。",
+    "source_platform": "bao-ming",
+    "is_official_direct": true
   },
   {
     "race_id": "8e5e1e97-3b00-411d-b7b1-11f6ed0fdd25",
@@ -111,7 +121,9 @@
     "fees": "21K 1100元、10K 900元、5K 700元、3K 700元；晶片押金各100元；訂單行政處理費30元。",
     "quota": "21K、10K、5K、3K 各1000人。",
     "verified_at": "2026-05-15",
-    "verification_note": "官方頁：https://lohasnet.tw/ChungHsingVillage2026/；活動地點、主辦、報名費用、開放名額皆可查。"
+    "verification_note": "官方頁：https://lohasnet.tw/ChungHsingVillage2026/；活動地點、主辦、報名費用、開放名額皆可查。",
+    "source_platform": "Lohas",
+    "is_official_direct": true
   },
   {
     "race_id": "9c8b1fb8-30e6-4b6c-b7cf-6608dc1ffec4",
@@ -143,7 +155,9 @@
     "fees": "42K 雲海組 1600元；21K 綠野組 1300元；42K 雲海永續組 1300元；21K 綠野永續組 1000元；晶片押金各100元。",
     "quota": "限制名額800人。",
     "verified_at": "2026-05-15",
-    "verification_note": "活動頁顯示地點、主辦承辦與費用；報名頁費用表顯示各組費用、晶片押金與限制名額800人。"
+    "verification_note": "活動頁顯示地點、主辦承辦與費用；報名頁費用表顯示各組費用、晶片押金與限制名額800人。",
+    "source_platform": "Focusline",
+    "is_official_direct": true
   },
   {
     "race_id": "36a2f943-8b2a-4f42-88b9-deaba669ce63",
@@ -174,7 +188,9 @@
     "fees": "官方頁未標示費用。",
     "quota": "官方頁未標示名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "EventGo 顯示地點、地址與主辦；Focusline 為報名入口。"
+    "verification_note": "EventGo 顯示地點、地址與主辦；Focusline 為報名入口。",
+    "source_platform": "EventGo、Focusline",
+    "is_official_direct": true
   },
   {
     "race_id": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
@@ -205,7 +221,9 @@
     "fees": "學生組4000元；社會組、公司機關團體、國軍戰士榮民組、長青樂齡組各6000元。",
     "quota": "接力賽組限額250隊。",
     "verified_at": "2026-05-15",
-    "verification_note": "iRunner 活動簡章顯示主辦、地點、費用與隊數限額。"
+    "verification_note": "iRunner 活動簡章顯示主辦、地點、費用與隊數限額。",
+    "source_platform": "iRunner",
+    "is_official_direct": true
   },
   {
     "race_id": "e975fd2f-602a-4336-8b13-97d0eff460a4",
@@ -236,7 +254,9 @@
     "fees": "42K鋸齒環湖組1600元、21K水簾映翠組1300元、42K鋸齒環湖永續組1300元、21K水簾映翠永續組1000元；晶片押金100元。",
     "quota": "限制名額800人。",
     "verified_at": "2026-05-15",
-    "verification_note": "運動筆記與 EventGo 顯示地點、主辦、報名時間、費用與限制名額。"
+    "verification_note": "運動筆記與 EventGo 顯示地點、主辦、報名時間、費用與限制名額。",
+    "source_platform": "EventGo",
+    "is_official_direct": true
   },
   {
     "race_id": "f666760d-e82e-4d02-8542-4b537d1295c0",
@@ -293,7 +313,10 @@
     "fees": "10公里組 1080元、3公里組 980元；晶片押金各100元。",
     "quota": "官方頁未標示總名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "官方頁顯示活動地點、主辦承辦、報名時間、費用與晶片押金。"
+    "verification_note": "官方頁顯示活動地點、主辦承辦、報名時間、費用與晶片押金。",
+    "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=311",
+    "source_platform": "CTRun",
+    "is_official_direct": true
   },
   {
     "race_id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
@@ -347,7 +370,9 @@
     "fees": "44.5K 2000元、26K 2000元、10K 1100元；晶片押金各100元。",
     "quota": "44.5K、26K、10K 各600人。",
     "verified_at": "2026-05-15",
-    "verification_note": "iRunner 報名頁顯示費用與限額；運動筆記賽事頁顯示主辦與地點。"
+    "verification_note": "iRunner 報名頁顯示費用與限額；運動筆記賽事頁顯示主辦與地點。",
+    "source_platform": "iRunner",
+    "is_official_direct": true
   },
   {
     "race_id": "a6e6b4c2-8596-4e22-af67-7849a9ff7b58",
@@ -381,7 +406,9 @@
     "fees": "53.5K 1250元、42.8K 1150元、21.4K 1000元、10.7K 700元、5K 600元；晶片押金各100元。",
     "quota": "官方頁未標示名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "一起報名頁顯示活動地點、日期、報名期限、各組費用與晶片押金。"
+    "verification_note": "一起報名頁顯示活動地點、日期、報名期限、各組費用與晶片押金。",
+    "source_platform": "JoinNow",
+    "is_official_direct": true
   },
   {
     "race_id": "0cbfb0b7-c08d-44f8-a648-6ea360f29597",
@@ -414,7 +441,9 @@
     "fees": "50K 2200元、43K 1400元、24K 1200元、10K 900元；各組另收晶片押金100元。",
     "quota": "50K 250人、43K 450人、24K 350人、10K 300人。",
     "verified_at": "2026-05-15",
-    "verification_note": "運動筆記頁顯示費用與限額；EventGo 顯示地址與主辦。"
+    "verification_note": "運動筆記頁顯示費用與限額；EventGo 顯示地址與主辦。",
+    "source_platform": "Focusline",
+    "is_official_direct": true
   },
   {
     "race_id": "9435cbf4-7877-40a1-a6ec-34e4bf08a34f",
@@ -469,7 +498,9 @@
     "fees": "42K 1100元、42K雙人組1800元、21K 900元、21K雙人組1600元。",
     "quota": "官方頁未標示名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "全統活動頁顯示會場地點、主辦承辦與活動組別費用。"
+    "verification_note": "全統活動頁顯示會場地點、主辦承辦與活動組別費用。",
+    "source_platform": "CTRun",
+    "is_official_direct": true
   },
   {
     "race_id": "ed5e0139-3f43-4eac-b756-798e109005d8",
@@ -502,7 +533,9 @@
     "fees": "全馬組1400元、超半馬組1200元、挑戰組1000元、親子組700元；前三組含晶片押金100元。",
     "quota": "全馬組、超半馬組、挑戰組、親子組各1500人。",
     "verified_at": "2026-05-15",
-    "verification_note": "iRunner 活動簡章顯示地點、報名費用與各組預計名額。"
+    "verification_note": "iRunner 活動簡章顯示地點、報名費用與各組預計名額。",
+    "source_platform": "iRunner",
+    "is_official_direct": true
   },
   {
     "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
@@ -555,7 +588,9 @@
     "fees": "山水路跑賽：半馬900元、10K 700元、4K 400元；慢城爬坡賽：精英組700元、市民挑戰組700元、觀賽加油組400元；晶片押金依組別100元或1000元。",
     "quota": "官方頁未標示總名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "官方頁與全統活動頁顯示組別、費用與晶片押金。"
+    "verification_note": "官方頁與全統活動頁顯示組別、費用與晶片押金。",
+    "source_platform": "CTRun",
+    "is_official_direct": true
   },
   {
     "race_id": "86798062-ad4b-423e-8176-4807d0eb553e",
@@ -632,7 +667,9 @@
     "fees": "42K 1300元、22K 1100元、10K 900元、5K 700元；42K/22K/10K 晶片押金各100元。",
     "quota": "42K 1000名、22K 1000名、10K 800名、5K 500名。",
     "verified_at": "2026-05-15",
-    "verification_note": "全統活動頁顯示會場、主辦、費用與名額。"
+    "verification_note": "全統活動頁顯示會場、主辦、費用與名額。",
+    "source_platform": "CTRun",
+    "is_official_direct": true
   },
   {
     "race_id": "0e285ab6-7707-4faf-88db-c50e4628f9ab",
@@ -665,7 +702,9 @@
     "fees": "原價：42K 1100元、23K 900元、12K 650元、4K 550元；早鳥價：42K 1000元、23K 800元、12K 550元、4K 450元；前三組晶片押金100元。",
     "quota": "42K 1000人、23K 1000人、12K 1500人、4K 1500人。",
     "verified_at": "2026-05-15",
-    "verification_note": "樂活官方頁顯示活動地點、費用、晶片押金與開放名額。"
+    "verification_note": "樂活官方頁顯示活動地點、費用、晶片押金與開放名額。",
+    "source_platform": "Lohas",
+    "is_official_direct": true
   },
   {
     "race_id": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
@@ -698,7 +737,9 @@
     "fees": "42K 2600元/2300元/1800元；29K 2400元/2100元/1600元；6K 2100元等不同紀念品方案。",
     "quota": "總名額6000人：42K 1000名、29K 4000名、6K 1000名。",
     "verified_at": "2026-05-15",
-    "verification_note": "iRunner 活動簡章顯示會場、主辦、報名費用與總名額。"
+    "verification_note": "iRunner 活動簡章顯示會場、主辦、報名費用與總名額。",
+    "source_platform": "iRunner",
+    "is_official_direct": true
   },
   {
     "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
@@ -819,7 +860,9 @@
     "organizer": "麗晨建設、臺灣大腳丫長跑協會",
     "fees": "42K 1300元、42K永續組600元、21K 1000元、21K永續組400元、10K 750元、3K 400元；晶片押金各100元。",
     "quota": "官方頁未標示總名額。",
-    "verification_note": "運動筆記頁顯示地點與主辦；iRunner 活動簡章顯示費用與晶片押金。"
+    "verification_note": "運動筆記頁顯示地點與主辦；iRunner 活動簡章顯示費用與晶片押金。",
+    "source_platform": "iRunner",
+    "is_official_direct": true
   },
   {
     "race_id": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
@@ -923,7 +966,9 @@
     "fees": "神獸組6550-7300元、龍組4950-6000元、玄武組3510-4400元、猛瑪組2520-3300元、烏蛇組1530-2200元、親子組630-1100元。",
     "quota": "依報名項目上限。",
     "verified_at": "2026-05-15",
-    "verification_note": "EventGo 活動頁整理伊貝特報名資訊，顯示地點、報名起訖、費用與限額說明。"
+    "verification_note": "EventGo 活動頁整理伊貝特報名資訊，顯示地點、報名起訖、費用與限額說明。",
+    "source_platform": "bao-ming",
+    "is_official_direct": true
   },
   {
     "race_id": "7609d890-e7fe-426b-b5e7-ea9419d2ff54",

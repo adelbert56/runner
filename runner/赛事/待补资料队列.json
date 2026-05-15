@@ -7,6 +7,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -95,6 +97,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -183,6 +187,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -271,6 +277,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -359,6 +367,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -447,6 +457,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -535,6 +547,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -623,6 +637,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -711,6 +727,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -799,6 +817,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -887,6 +907,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -975,6 +997,8 @@
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "wait_future",
@@ -1063,6 +1087,8 @@
     "registration_opens_at": "2026-06-30",
     "registration_deadline": "2026-06-30",
     "registration_status": "已截止",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 14,
     "tracking": {
       "status": "wait_until_open_window",
@@ -1139,13 +1165,15 @@
     "registration_opens_at": "2026-03-07",
     "registration_deadline": "2026-04-08",
     "registration_status": "已截止",
-    "priority_score": 9,
+    "source_platform": "JoinNow",
+    "is_official_direct": true,
+    "priority_score": 8,
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
       "next_check_date": "2026-05-15",
       "cadence": "manual",
-      "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。除非要補歷史資料，優先度較低。"
+      "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },
     "missing": [
       {
@@ -1171,17 +1199,11 @@
         "label": "名額",
         "severity": "low",
         "hint": "補 quota 或 participant_limit。"
-      },
-      {
-        "key": "verified_at",
-        "label": "資料查證時間",
-        "severity": "low",
-        "hint": "補 verified_at，表示人工或爬蟲最後查證日。"
       }
     ],
     "current_links": {
       "registration_link": "https://www.joinnow.com.tw/run-step1.php?cnt_id=135",
-      "official_event_url": "",
+      "official_event_url": "https://www.joinnow.com.tw/run-step1.php?cnt_id=135",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12944&subtitle=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12944",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0"

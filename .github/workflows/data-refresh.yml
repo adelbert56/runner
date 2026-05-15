@@ -41,6 +41,9 @@ jobs:
       - name: Run race scrapers
         run: uv run python scripts/main.py
 
+      - name: Enrich official platform details
+        run: uv run python scripts/enrich_platforms.py
+
       - name: Apply manual supplements and quality report
         run: npm run data:refresh
 
@@ -61,4 +64,5 @@ jobs:
             runner/赛事/开报后待补资料报告.json
             runner/赛事/爬虫追踪计划.md
             runner/赛事/爬虫追踪计划.json
+            runner/赛事/平台爬虫覆盖报告.md
             site/data/races.json

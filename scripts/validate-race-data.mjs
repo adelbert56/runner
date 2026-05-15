@@ -99,6 +99,13 @@ function getOfficialRegistrationLink(race) {
   return hasText(link) && !isSourceLink(link) ? link : "";
 }
 
+function isOfficialDirect(race) {
+  if (race.is_official_direct === true) {
+    return true;
+  }
+  return Boolean(getOfficialRegistrationLink(race));
+}
+
 function isCancelledRace(race) {
   const text = [
     race.race_name,
@@ -299,6 +306,8 @@ function buildQueueItem(race) {
     registration_opens_at: race.registration_opens_at || "",
     registration_deadline: race.registration_deadline || "",
     registration_status: race.registration_status || "",
+    source_platform: race.source_platform || race.source || "",
+    is_official_direct: isOfficialDirect(race),
     priority_score: priorityScore(missing),
     tracking,
     missing,
@@ -542,6 +551,8 @@ async function main() {
     race_name: item.race_name,
     race_date: item.race_date,
     race_county: item.race_county,
+    source_platform: item.source_platform,
+    is_official_direct: item.is_official_direct,
     priority_score: item.priority_score,
     tracking: item.tracking,
     missing: item.missing.map((missing) => missing.key),

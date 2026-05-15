@@ -84,6 +84,8 @@ def normalize(raw: dict) -> dict:
         "quota": raw.get("quota", ""),
         "verified_at": raw.get("verified_at", ""),
         "verification_note": raw.get("verification_note", ""),
+        "source_platform": raw.get("source_platform", ""),
+        "is_official_direct": raw.get("is_official_direct", False),
         "source_registration_link": raw.get("source_registration_link", ""),
         "social_links": raw.get("social_links", []),
         "facebook_search_url": raw.get("facebook_search_url", ""),

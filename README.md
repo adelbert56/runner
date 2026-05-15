@@ -120,6 +120,8 @@ uv run python scripts/main.py --dry-run
 
 ```bash
 uv run python scripts/main.py
+uv run python scripts/enrich_platforms.py
+npm run data:refresh
 ```
 
 ### 6. 检查赛事资料品质
@@ -151,16 +153,41 @@ npm run data:apply
 npm run data:refresh
 ```
 
+若要只測試官方平台補資料，不寫入檔案：
+
+```bash
+uv run python scripts/enrich_platforms.py --dry-run
+```
+
+目前官方平台補資料支援：
+
+- iRunner
+- Lohas
+- bao-ming / 伊貝特
+- EventGo
+- Focusline
+- CTRun
+- JoinNow
+
+平台爬蟲會保守補空欄位，人工補充仍有最高優先權。補完後會產生 `runner/赛事/平台爬虫覆盖报告.md`，用來看哪些平台命中、哪些頁面抓不到或解析失敗。
+
 ### 7. 定期更新赛事资料
 
 GitHub Actions 已提供 `.github/workflows/data-refresh.yml`，会每天 06:30（Asia/Taipei）执行：
 
 ```bash
 uv run python scripts/main.py
+uv run python scripts/enrich_platforms.py
 npm run data:refresh
 ```
 
 这个流程会尝试重跑爬虫、套用人工补充、更新资料品质报告和爬虫追踪计划，并在资料有变化时自动提交。也可以在 GitHub Actions 页面手动执行 `Refresh race data`。
+
+資料更新 SOP：
+
+- [資料更新 SOP](runner/系统配置/资料更新SOP.md)
+- 每月追蹤固定排在每月 1 號與 15 號。
+- 開報日前後會提高檢查優先度，報名截止或賽事過期後降低追蹤頻率。
 
 ### 8. GitHub Pages 部署
 

@@ -4,6 +4,8 @@
     "race_name": "仁愛長庚合作聯盟醫院2026永慶盃路跑",
     "race_date": "2026-09-20",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -35,6 +37,8 @@
     "race_name": "2026公勝盃",
     "race_date": "2026-10-04",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -66,6 +70,8 @@
     "race_name": "2026年FUN電多巴胺路跑嘉年華",
     "race_date": "2026-10-17",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -97,6 +103,8 @@
     "race_name": "2026 臺中國際馬拉松",
     "race_date": "2026-10-18",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -128,6 +136,8 @@
     "race_name": "2026台灣米倉田中馬拉松",
     "race_date": "2026-11-08",
     "race_county": "彰化縣",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -159,6 +169,8 @@
     "race_name": "2026 臺中舒跑杯",
     "race_date": "2026-11-15",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -190,6 +202,8 @@
     "race_name": "2026國聚慵懶跑者聚樂部",
     "race_date": "2026-11-15",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -221,6 +235,8 @@
     "race_name": "2026鹿港馬拉松",
     "race_date": "2026-11-15",
     "race_county": "彰化縣",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -252,6 +268,8 @@
     "race_name": "母子鱷魚40週年馬拉松",
     "race_date": "2026-12-13",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -283,6 +301,8 @@
     "race_name": "2026第二屆食安盃馬拉松",
     "race_date": "2026-12-19",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -314,6 +334,8 @@
     "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
     "race_date": "2026-12-19",
     "race_county": "彰化縣",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -345,6 +367,8 @@
     "race_name": "2027第九屆臺中資訊盃公益馬拉松",
     "race_date": "2027-01-17",
     "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "wait_future",
@@ -376,6 +400,8 @@
     "race_name": "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
     "race_date": "2026-08-02",
     "race_county": "彰化縣",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
     "priority_score": 14,
     "tracking": {
       "status": "wait_until_open_window",
@@ -405,24 +431,25 @@
     "race_name": "2026第九屆幸福龍井活力健康路跑健走",
     "race_date": "2026-05-09",
     "race_county": "臺中市",
-    "priority_score": 9,
+    "source_platform": "JoinNow",
+    "is_official_direct": true,
+    "priority_score": 8,
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
       "next_check_date": "2026-05-15",
       "cadence": "manual",
-      "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。除非要補歷史資料，優先度較低。"
+      "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },
     "missing": [
       "precise_location",
       "organizer",
       "fees",
-      "quota",
-      "verified_at"
+      "quota"
     ],
     "current_links": {
       "registration_link": "https://www.joinnow.com.tw/run-step1.php?cnt_id=135",
-      "official_event_url": "",
+      "official_event_url": "https://www.joinnow.com.tw/run-step1.php?cnt_id=135",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12944&subtitle=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12944",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0"
