@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -105,6 +105,15 @@ function compact(text) {
     .trim();
 }
 
+function decodeHtml(text) {
+  return compact(text)
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
 function absoluteUrl(href, baseUrl) {
   try {
     return new URL(href, baseUrl).toString();
@@ -140,6 +149,54 @@ function classify(title) {
   return "跑步新聞";
 }
 
+function extractMetaTitle(html) {
+  const metaPatterns = [
+    /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["'][^>]*>/i,
+    /<meta[^>]+name=["']twitter:title["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<title[^>]*>([\s\S]*?)<\/title>/i,
+  ];
+
+  for (const pattern of metaPatterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      return decodeHtml(match[1])
+        .replace(/\s*[｜|│]\s*(動一動|Don1Don|Bounce|HK01|Women's Health|運動筆記).*$/i, "")
+        .replace(/^(\d{4})-([a-z])/i, "$1 $2")
+        .replace(/\bpanasonic\b/gi, "Panasonic")
+        .trim();
+    }
+  }
+  return "";
+}
+
+async function fetchArticleTitle(item) {
+  try {
+    const response = await fetch(item.url, {
+      headers: {
+        "accept": "text/html,application/xhtml+xml",
+        "user-agent": "RunnerPlazaContentBot/0.1 (+https://github.com/adelbert56/runner)",
+      },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) {
+      return item;
+    }
+    const title = extractMetaTitle(await response.text());
+    if (!title || title.length < 6) {
+      return item;
+    }
+    return {
+      ...item,
+      title,
+      category: classify(title),
+      score: Math.max(item.score, scoreTitle(title, { priority: item.score - 1 })),
+    };
+  } catch {
+    return item;
+  }
+}
+
 function extractLinks(html, source) {
   const links = [];
   const anchorPattern = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
@@ -149,7 +206,7 @@ function extractLinks(html, source) {
     const url = absoluteUrl(match[1], source.url);
     const title = compact(match[2]);
 
-    if (!url || url.endsWith("#") || !title || title.length < 6 || title.length > 80) {
+    if (!url || url.endsWith("#") || !title || title.length < 6 || title.length > 140) {
       continue;
     }
 
@@ -188,6 +245,14 @@ async function fetchSource(source) {
   }
 
   return extractLinks(await response.text(), source);
+}
+
+async function enrichTitles(items) {
+  const enriched = [];
+  for (const item of items.slice(0, 60)) {
+    enriched.push(await fetchArticleTitle(item));
+  }
+  return enriched;
 }
 
 function dedupe(items) {
@@ -243,7 +308,15 @@ async function main() {
     }
   }
 
-  const candidates = dedupe(results);
+  let candidates = dedupe(await enrichTitles(results));
+  if (!candidates.length && errors.length) {
+    try {
+      candidates = JSON.parse(await readFile(jsonPath, "utf8"));
+      errors.push({ source: "fallback", message: "本次來源抓取失敗，保留上一版候選內容，避免清空前台素材。" });
+    } catch {
+      // Keep empty candidates when there is no previous file.
+    }
+  }
   await mkdir(outputDir, { recursive: true });
   await writeFile(jsonPath, `${JSON.stringify(candidates, null, 2)}\n`, "utf8");
   await writeFile(reportPath, buildReport(candidates, errors), "utf8");

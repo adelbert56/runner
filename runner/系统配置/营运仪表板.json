@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T23:06:35.573Z",
+  "generated_at": "2026-05-15T23:18:37.214Z",
   "basis_date": "2026-05-15",
   "races": {
     "total": 34,
@@ -29,9 +29,9 @@
     "published_count": 13,
     "candidate_count": 20,
     "candidate_by_category": {
+      "跑鞋新品": 9,
       "跑步新聞": 5,
-      "訓練": 6,
-      "跑鞋新品": 9
+      "訓練": 6
     }
   }
 }
