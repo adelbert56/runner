@@ -786,6 +786,42 @@ h3 {
   background: #f7d6c9;
 }
 
+.race-summary-line span.race-status {
+  border: 1px solid transparent;
+}
+
+.race-summary-line span.status-open {
+  color: #065f46;
+  border-color: rgba(6, 95, 70, 0.18);
+  background: #d9f3e4;
+}
+
+.race-summary-line span.status-soon {
+  color: #7a4b00;
+  border-color: rgba(217, 119, 6, 0.22);
+  background: #ffe3ad;
+}
+
+.race-summary-line span.status-closed,
+.race-summary-line span.status-expired {
+  color: #5f6258;
+  border-color: rgba(95, 98, 88, 0.18);
+  background: #e6e1d6;
+}
+
+.race-summary-line span.status-cancelled {
+  color: #7c2d12;
+  border-color: rgba(124, 45, 18, 0.2);
+  background: #f3d8cc;
+}
+
+.race-summary-line span.status-pending,
+.race-summary-line span.status-unknown {
+  color: #536158;
+  border-color: rgba(83, 97, 88, 0.18);
+  background: #eef4ef;
+}
+
 .race-schedule {
   margin-top: 8px;
 }

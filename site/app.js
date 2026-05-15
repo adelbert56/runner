@@ -524,6 +524,28 @@ function getRegistrationDisplayStatus(race) {
   return sourceStatus || "狀態待確認";
 }
 
+function getRegistrationStatusClass(race, status) {
+  const raceDays = dateDiffDays(race.race_date);
+  const deadlineDays = dateDiffDays(race.registration_deadline);
+
+  if (isCancelledRace(race)) {
+    return "status-cancelled";
+  }
+  if (raceDays !== null && raceDays < 0) {
+    return "status-expired";
+  }
+  if (status === "報名中") {
+    return deadlineDays !== null && deadlineDays <= 14 ? "status-soon" : "status-open";
+  }
+  if (status === "已截止") {
+    return "status-closed";
+  }
+  if (status === "尚未開報") {
+    return "status-pending";
+  }
+  return "status-unknown";
+}
+
 function getRaceKey(race) {
   return race.race_id || `${race.race_name}|${race.race_date}`;
 }
@@ -870,6 +892,7 @@ function renderRaces() {
       const date = formatDateParts(race.race_date);
       const distances = (race.distances || ["距離待確認"]).join(" / ");
       const status = getRegistrationDisplayStatus(race);
+      const statusClass = getRegistrationStatusClass(race, status);
       const difficulty = race.difficulty || "初級";
       const cls = difficultyClass[difficulty] || "";
       const registrationTarget = getRegistrationTarget(race);
@@ -908,7 +931,7 @@ function renderRaces() {
             <div class="race-summary-line">
               <span>${escapeHtml(race.race_county)}</span>
               <span class="${cls}">${escapeHtml(difficulty)}</span>
-              <span>${escapeHtml(status)}</span>
+              <span class="race-status ${statusClass}">${escapeHtml(status)}</span>
             </div>
             <p class="race-distance">${escapeHtml(distances)}</p>
             <div class="race-schedule" aria-label="報名時間">
