@@ -59,6 +59,8 @@ const els = {
   panelLinks: document.querySelectorAll("[data-panel-link]"),
   panels: document.querySelectorAll("[data-panel]"),
   backTop: document.querySelector("#back-top"),
+  shoeSort: document.querySelector("#shoe-sort"),
+  newsSort: document.querySelector("#news-sort"),
 };
 
 const monthNames = {
@@ -1609,6 +1611,32 @@ function setActiveButtons(buttons, dataKey, value) {
   });
 }
 
+function sortContentCards(containerSelector, itemSelector, mode) {
+  const container = document.querySelector(containerSelector);
+  if (!container) {
+    return;
+  }
+
+  const cards = [...container.querySelectorAll(itemSelector)];
+  const sorted = cards.sort((a, b) => {
+    if (mode === "oldest") {
+      return String(a.dataset.date || "").localeCompare(String(b.dataset.date || ""));
+    }
+    if (mode === "category") {
+      return String(a.dataset.category || "").localeCompare(String(b.dataset.category || ""))
+        || String(a.dataset.title || a.textContent || "").localeCompare(String(b.dataset.title || b.textContent || ""));
+    }
+    return String(b.dataset.date || "").localeCompare(String(a.dataset.date || ""));
+  });
+
+  sorted.forEach((card) => container.appendChild(card));
+}
+
+function initContentSorting() {
+  sortContentCards(".shoe-release-list", "[data-shoe-card]", els.shoeSort?.value || "newest");
+  sortContentCards(".news-list", "[data-news-card]", els.newsSort?.value || "newest");
+}
+
 function render() {
   setActiveButtons(els.countyButtons, "county", state.county);
   setActiveButtons(els.difficultyButtons, "difficulty", state.difficulty);
@@ -1641,6 +1669,14 @@ function bindEvents() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
+
+  els.shoeSort?.addEventListener("change", () => {
+    sortContentCards(".shoe-release-list", "[data-shoe-card]", els.shoeSort.value);
+  });
+
+  els.newsSort?.addEventListener("change", () => {
+    sortContentCards(".news-list", "[data-news-card]", els.newsSort.value);
+  });
 
   els.search.addEventListener("input", (event) => {
     state.query = event.target.value;
@@ -1759,6 +1795,7 @@ async function init() {
   loadFavorites();
   setupDurationPickers();
   bindEvents();
+  initContentSorting();
   loadPlanSettings();
   syncDurationPickersFromInputs();
   setActivePanel(window.location.hash.replace("#", "") || "races", false);

@@ -1070,6 +1070,25 @@ h3 {
   padding: clamp(14px, 3vw, 28px);
 }
 
+.content-sort {
+  display: grid;
+  gap: 6px;
+  min-width: 150px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.content-sort select {
+  min-height: 40px;
+  padding: 8px 34px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
 .tag {
   display: inline-flex;
   margin-bottom: 12px;
@@ -1195,6 +1214,14 @@ h3 {
   border-radius: 999px;
   background: #e4f0e8;
   color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.shoe-release-list time {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
   font-size: 0.78rem;
   font-weight: 950;
 }
