@@ -249,7 +249,7 @@ function loadPlanSettings() {
     const stored = JSON.parse(localStorage.getItem(PLAN_KEY) || "{}");
     getPlanControls().forEach(([key, control]) => {
       if (control && stored[key]) {
-        control.value = stored[key];
+        control.value = normalizeControlValue(control, stored[key]);
       }
     });
     state.trainingRaceKey = stored.trainingRaceKey || "";
@@ -270,6 +270,20 @@ function savePlanSettings() {
   payload.trainingRaceKey = state.trainingRaceKey;
   payload.planWeek = state.planWeek;
   localStorage.setItem(PLAN_KEY, JSON.stringify(payload));
+}
+
+function normalizeControlValue(control, value) {
+  if (control.type !== "time") {
+    return value;
+  }
+  const parts = String(value || "").split(":").map((part) => part.padStart(2, "0"));
+  if (parts.length === 2) {
+    return `00:${parts[0]}:${parts[1]}`;
+  }
+  if (parts.length === 3) {
+    return parts.join(":");
+  }
+  return control.value;
 }
 
 function formatDateParts(dateText) {
@@ -493,6 +507,18 @@ function downloadCalendarEvent(race) {
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = `${race.race_date}-${slugifyFileName(race.race_name)}.ics`;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function downloadTextFile(filename, content, type = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
   document.body.append(anchor);
   anchor.click();
   anchor.remove();
@@ -726,11 +752,17 @@ function renderRaces() {
 }
 
 function parsePace(value) {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(String(value || "").trim());
-  if (!match) {
+  const parts = String(value || "").trim().split(":").map(Number);
+  if (parts.length === 2 && parts.every(Number.isFinite)) {
+    return parts[0] * 60 + parts[1];
+  }
+  if (parts.length === 3 && parts.every(Number.isFinite)) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  if (!String(value || "").trim()) {
     return 0;
   }
-  return Number(match[1]) * 60 + Number(match[2]);
+  return 0;
 }
 
 function parseDuration(value) {
@@ -940,6 +972,27 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange
   return schedule;
 }
 
+function buildPlanSnapshot() {
+  return buildPlan({
+    athlete: els.planAthlete?.value,
+    experience: els.planExperience?.value,
+    goal: els.planGoal?.value,
+    level: els.planLevel?.value,
+    injury: els.planInjury?.value,
+    days: els.planDays?.value,
+    weeks: els.planWeeks?.value,
+    finishInput: els.planFinish?.value,
+    paceInput: els.planPace?.value,
+    raceDateInput: els.planRaceDate?.value,
+    weeklyKmInput: els.planWeeklyKm?.value,
+    longRunInput: els.planLongRun?.value,
+    longRunDay: els.planLongRunDay?.value,
+    priorityInput: els.planPriority?.value,
+    intensity: els.planIntensity?.value,
+    selectedWeekInput: state.planWeek,
+  });
+}
+
 function buildPlan(profileInput) {
   const {
     athlete,
@@ -1006,6 +1059,7 @@ function buildPlan(profileInput) {
     tempoRange,
     intervalRange,
     raceWindow,
+    raceDateInput,
     dayCount,
     longRunDay: safeLongRunDay,
     priority,
@@ -1018,10 +1072,109 @@ function buildPlan(profileInput) {
   };
 }
 
+function buildPlanCalendar(plan) {
+  const anchor = parseDateAsUtc(plan.raceDateInput || TODAY);
+  const start = new Date(anchor.getTime() - (plan.raceWindow ? (plan.weekCount - 1) * 7 * 86400000 : 0));
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Runner Plaza//Training Plan//ZH-TW",
+    "CALSCALE:GREGORIAN",
+  ];
+
+  plan.weeklyBlocks.forEach((week, weekIndex) => {
+    const weekStart = new Date(start.getTime() + weekIndex * 7 * 86400000);
+    const schedule = buildTrainingSchedule(
+      plan.dayCount,
+      els.planLevel?.value,
+      plan.priority,
+      week,
+      plan.easyRange,
+      plan.tempoRange,
+      plan.intervalRange,
+      plan.longRange,
+      plan.longRunDay,
+      plan.intensity,
+      plan.injury,
+    );
+    schedule.forEach((item, itemIndex) => {
+      const date = new Date(weekStart.getTime() + itemIndex * 86400000);
+      const day = formatUtcIcsDate(date);
+      const uid = `${slugifyFileName(plan.athleteName)}-${week.week}-${itemIndex}@runner-plaza`;
+      lines.push(
+        "BEGIN:VEVENT",
+        `UID:${escapeIcsText(uid)}`,
+        `DTSTAMP:${day}T000000Z`,
+        `DTSTART;VALUE=DATE:${day}`,
+        `SUMMARY:${escapeIcsText(`第 ${week.week} 週 ${item.type}`)}`,
+        `DESCRIPTION:${escapeIcsText(`${item.day}｜${item.work}`)}`,
+        "END:VEVENT",
+      );
+    });
+  });
+
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+
+function buildGarminGuide(plan) {
+  const rows = [
+    `${plan.athleteName} - ${plan.goalProfile.title}`,
+    `完賽目標：${formatDuration(plan.targetFinish)}｜比賽配速：${formatPace(plan.racePace)}｜週數：${plan.weekCount}`,
+    "",
+    "Garmin Connect 建課摘要",
+    "說明：Garmin 手錶要吃到結構化課表，通常需在 Garmin Connect 建立訓練並同步到裝置，或使用 Garmin Training API/第三方平台。這份檔案提供手動建立每週課表的內容。",
+    "",
+  ];
+  plan.weeklyBlocks.forEach((week) => {
+    const schedule = buildTrainingSchedule(
+      plan.dayCount,
+      els.planLevel?.value,
+      plan.priority,
+      week,
+      plan.easyRange,
+      plan.tempoRange,
+      plan.intervalRange,
+      plan.longRange,
+      plan.longRunDay,
+      plan.intensity,
+      plan.injury,
+    );
+    rows.push(`第 ${week.week} 週｜${week.phase}｜${week.weeklyKm} km｜長跑 ${week.longRunKm} km`);
+    schedule.forEach((item) => rows.push(`- ${item.day} ${item.type}：${item.work}`));
+    rows.push("");
+  });
+  return rows.join("\n");
+}
+
+function parseDateAsUtc(dateText) {
+  const [year, month, day] = String(dateText || TODAY).split("-").map(Number);
+  return new Date(Date.UTC(year || 2026, (month || 1) - 1, day || 1));
+}
+
+function formatUtcIcsDate(date) {
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    String(date.getUTCDate()).padStart(2, "0"),
+  ].join("");
+}
+
+function downloadPlanCalendar() {
+  const plan = buildPlanSnapshot();
+  downloadTextFile(`${slugifyFileName(plan.athleteName)}-training-plan.ics`, buildPlanCalendar(plan), "text/calendar;charset=utf-8");
+}
+
+function downloadGarminGuide() {
+  const plan = buildPlanSnapshot();
+  downloadTextFile(`${slugifyFileName(plan.athleteName)}-garmin-workouts.txt`, buildGarminGuide(plan));
+}
+
 function renderPlan() {
   if (!els.planOutput) {
     return;
   }
+  const plan = buildPlanSnapshot();
   const {
     athleteName,
     experience,
@@ -1047,24 +1200,7 @@ function renderPlan() {
     selectedWeek,
     targets,
     riskNotes,
-  } = buildPlan({
-    athlete: els.planAthlete?.value,
-    experience: els.planExperience?.value,
-    goal: els.planGoal?.value,
-    level: els.planLevel?.value,
-    injury: els.planInjury?.value,
-    days: els.planDays?.value,
-    weeks: els.planWeeks?.value,
-    finishInput: els.planFinish?.value,
-    paceInput: els.planPace?.value,
-    raceDateInput: els.planRaceDate?.value,
-    weeklyKmInput: els.planWeeklyKm?.value,
-    longRunInput: els.planLongRun?.value,
-    longRunDay: els.planLongRunDay?.value,
-    priorityInput: els.planPriority?.value,
-    intensity: els.planIntensity?.value,
-    selectedWeekInput: state.planWeek,
-  });
+  } = plan;
 
   state.planWeek = selectedWeek;
 
@@ -1116,6 +1252,10 @@ function renderPlan() {
       <strong>${escapeHtml(goalProfile.focus)}</strong>
       <p>${escapeHtml(progression)} 依照 ${escapeHtml(experienceLabel)}、${escapeHtml(injuryLabel)}、${escapeHtml(intensityLabel)} 調整跑量與強度。${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
     </div>
+    <div class="plan-export-actions" aria-label="課表匯出">
+      <button class="export-button" type="button" data-export-plan="calendar">匯出行事曆</button>
+      <button class="export-button" type="button" data-export-plan="garmin">Garmin 建課摘要</button>
+    </div>
     <div class="risk-panel">
       <strong>調整提醒</strong>
       <ul>
@@ -1153,6 +1293,8 @@ function renderPlan() {
       renderPlan();
     });
   });
+  els.planOutput.querySelector("[data-export-plan='calendar']")?.addEventListener("click", downloadPlanCalendar);
+  els.planOutput.querySelector("[data-export-plan='garmin']")?.addEventListener("click", downloadGarminGuide);
 }
 
 function setActiveButtons(buttons, dataKey, value) {

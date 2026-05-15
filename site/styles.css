@@ -967,6 +967,15 @@ h3 {
   line-height: 1.5;
 }
 
+.time-format-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
 .plan-output {
   min-height: 320px;
 }
@@ -1092,6 +1101,24 @@ h3 {
   padding: 14px;
   border-left: 5px solid var(--green);
   background: #edf5ef;
+}
+
+.plan-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.export-button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid rgba(19, 83, 56, 0.18);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--green-dark);
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .plan-note p {
