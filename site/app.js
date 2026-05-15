@@ -455,6 +455,12 @@ function raceDecisionText(race, registrationTarget) {
     parts.push(raceDays >= 0 ? `距賽 ${raceDays} 天` : "賽事已過");
   }
 
+  if (isCancelledRace(race)) {
+    parts.push(race.registration_status || "活動停辦");
+    parts.push(registrationTarget.url ? "查看公告" : "待補公告");
+    return parts.join(" · ");
+  }
+
   if (deadlineDays !== null) {
     if (deadlineDays > 0) {
       parts.push(`報名剩 ${deadlineDays} 天`);
@@ -474,7 +480,7 @@ function raceDecisionText(race, registrationTarget) {
 function registrationBucket(race) {
   const status = race.registration_status || "";
   const deadlineDays = dateDiffDays(race.registration_deadline);
-  if (status.includes("截止") || (deadlineDays !== null && deadlineDays < 0)) {
+  if (isCancelledRace(race) || status.includes("截止") || (deadlineDays !== null && deadlineDays < 0)) {
     return "closed";
   }
   if (deadlineDays !== null && deadlineDays <= 14 && deadlineDays >= 0) {
@@ -519,15 +525,25 @@ function getRegistrationLink(race) {
   return link && !isSourceLink(link) ? link : "";
 }
 
+function isCancelledRace(race) {
+  const text = [
+    race.race_name,
+    race.registration_status,
+    race.registration_note,
+    race.verification_note,
+  ].filter(Boolean).join(" ");
+  return /停辦|停賽|取消|被迫取消|cancel/i.test(text);
+}
+
 function getRegistrationTarget(race) {
   const officialLink = getRegistrationLink(race);
   if (officialLink) {
-    return { url: officialLink, label: "報名網站", kind: "official" };
+    return { url: officialLink, label: isCancelledRace(race) ? "停辦公告" : "報名網站", kind: "official" };
   }
 
   const detailLink = race.detail_url || race.source_url || "";
   if (detailLink) {
-    return { url: detailLink, label: "賽事資訊", kind: "detail" };
+    return { url: detailLink, label: isCancelledRace(race) ? "停賽資訊" : "賽事資訊", kind: "detail" };
   }
 
   return { url: "", label: "待補連結", kind: "missing" };
@@ -816,7 +832,9 @@ function renderRaces() {
       const deadline = formatShortDate(race.registration_deadline) || "待確認";
       const favorite = isFavorite(race);
       const decision = raceDecisionText(race, registrationTarget);
-      const canPlanTraining = dateDiffDays(race.race_date) !== null && dateDiffDays(race.race_date) >= 0;
+      const cancelled = isCancelledRace(race);
+      const canPlanTraining = !cancelled && dateDiffDays(race.race_date) !== null && dateDiffDays(race.race_date) >= 0;
+      const disabledTrainingLabel = cancelled ? "活動停辦" : "賽事已過";
       const venue = race.venue || race.start_location || race.location || race.race_location || "";
       const organizer = race.organizer || race.host || race.organizer_name || "";
       const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
@@ -877,7 +895,7 @@ function renderRaces() {
             ${
               canPlanTraining
                 ? `<button class="train-button" type="button" data-train-race="${escapeHtml(key)}">用這場排課</button>`
-                : `<button class="train-button" type="button" disabled>賽事已過</button>`
+                : `<button class="train-button" type="button" disabled>${escapeHtml(disabledTrainingLabel)}</button>`
             }
             <div class="detail-actions">
               ${!registrationTarget.url && race.facebook_search_url ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>` : ""}

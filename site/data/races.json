@@ -30,7 +30,7 @@
       "3.5km"
     ],
     "difficulty": "初級",
-    "registration_status": "已截止",
+    "registration_status": "停辦",
     "registration_link": "https://bao-ming.com/eb/content/6890#reg",
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12915&subtitle=2026+BOBDOG+RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29",
     "source": "運動筆記",
@@ -40,7 +40,10 @@
     "registration_deadline": "2026-03-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12915",
     "social_links": [],
-    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20BOBDOG%20RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29"
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20BOBDOG%20RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29",
+    "registration_note": "人工查證：伊貝特報名頁停辦通知；因場地申請緣故，北、中、高活動取消停辦，已完成報名者將全額退還報名費及郵寄費。",
+    "verified_at": "2026-05-15",
+    "verification_note": "截圖顯示停辦通知。"
   },
   {
     "race_id": "276e7a4e-b2f1-43ac-b7aa-462880d806b0",
@@ -187,7 +190,7 @@
       "3.5km"
     ],
     "difficulty": "初級",
-    "registration_status": "已截止",
+    "registration_status": "停賽",
     "registration_link": "",
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12989&subtitle=2026+KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91",
     "source": "運動筆記",
@@ -196,9 +199,13 @@
     "registration_opens_at": "2026-04-03",
     "registration_deadline": "2026-05-22",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12989",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
+    "registration_note": "人工查證：官方報名頁標示（停賽）2026 KOF拳皇公益主題路跑。",
     "social_links": [],
-    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91"
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91",
+    "venue": "台中烏日啤酒觀光工廠",
+    "start_location": "台中市烏日區光華街1號",
+    "verified_at": "2026-05-15",
+    "verification_note": "截圖顯示停賽、報名時間與場地。"
   },
   {
     "race_id": "fd352db7-c2bd-4f58-829f-b2f73c5e7583",

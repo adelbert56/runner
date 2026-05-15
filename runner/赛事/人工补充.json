@@ -1,5 +1,25 @@
 [
   {
+    "race_name": "2026 BOBDOG RUN(台中場)",
+    "race_date": "2026-05-16",
+    "registration_status": "停辦",
+    "registration_note": "人工查證：伊貝特報名頁停辦通知；因場地申請緣故，北、中、高活動取消停辦，已完成報名者將全額退還報名費及郵寄費。",
+    "verified_at": "2026-05-15",
+    "verification_note": "截圖顯示停辦通知。"
+  },
+  {
+    "race_name": "2026 KOF拳皇公益主題路跑",
+    "race_date": "2026-07-12",
+    "registration_status": "停賽",
+    "registration_note": "人工查證：官方報名頁標示（停賽）2026 KOF拳皇公益主題路跑。",
+    "venue": "台中烏日啤酒觀光工廠",
+    "start_location": "台中市烏日區光華街1號",
+    "registration_opens_at": "2026-04-03",
+    "registration_deadline": "2026-05-22",
+    "verified_at": "2026-05-15",
+    "verification_note": "截圖顯示停賽、報名時間與場地。"
+  },
+  {
     "race_name": "2026 第二屆麗晨臺中國際馬拉松",
     "race_date": "2026-12-06",
     "registration_status": "報名中",

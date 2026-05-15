@@ -97,6 +97,16 @@ function getOfficialRegistrationLink(race) {
   return hasText(link) && !isSourceLink(link) ? link : "";
 }
 
+function isCancelledRace(race) {
+  const text = [
+    race.race_name,
+    race.registration_status,
+    race.registration_note,
+    race.verification_note,
+  ].filter(hasText).join(" ");
+  return /停辦|停賽|取消|被迫取消|cancel/i.test(text);
+}
+
 function raceKey(race) {
   return race.race_id || `${race.race_name || ""}|${race.race_date || ""}`;
 }
@@ -150,6 +160,18 @@ function trackingPlanForRace(race, missing, todayText = TODAY) {
   const daysToRace = daysBetween(today, raceDate);
   const daysToOpen = daysBetween(today, opensAt);
   const missingLabels = missing.map((item) => item.label).join("、");
+
+  if (isCancelledRace(race)) {
+    return {
+      status: "cancelled",
+      status_label: "停辦/停賽，停止追蹤",
+      next_check_date: "",
+      cadence: "none",
+      reason: missing.length
+        ? `活動已停辦或停賽，只需保留查證紀錄。仍缺：${missingLabels}。`
+        : "活動已停辦或停賽，不再追地點、費用、名額等商品化欄位。",
+    };
+  }
 
   if (!missing.length) {
     return {
@@ -247,9 +269,12 @@ function trackingPlanForRace(race, missing, todayText = TODAY) {
 }
 
 function buildQueueItem(race) {
-  const missing = fieldGroups
+  const rawMissing = fieldGroups
     .filter((field) => !field.hasValue(race))
     .map(({ key, label, severity, hint }) => ({ key, label, severity, hint }));
+  const missing = isCancelledRace(race)
+    ? rawMissing.filter((item) => item.key === "verified_at")
+    : rawMissing;
   const tracking = trackingPlanForRace(race, missing);
   return {
     race_id: race.race_id || "",
@@ -381,6 +406,7 @@ function formatTrackingPlan(queue) {
     ["wait_until_open_window", "等待接近開報"],
     ["monitor_monthly", "每月追蹤"],
     ["wait_future", "未來再查"],
+    ["cancelled", "停辦/停賽，停止追蹤"],
     ["closed_gap", "已截止，低頻補齊"],
     ["archive_gap", "賽事已過，低頻補齊"],
   ];

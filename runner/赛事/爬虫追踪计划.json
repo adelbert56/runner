@@ -388,34 +388,6 @@
     }
   },
   {
-    "race_id": "f666760d-e82e-4d02-8542-4b537d1295c0",
-    "race_name": "2026 KOF拳皇公益主題路跑",
-    "race_date": "2026-07-12",
-    "race_county": "臺中市",
-    "priority_score": 14,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-05-15",
-      "cadence": "weekly",
-      "reason": "開報日已過，仍缺：官方報名連結、精確地點、主辦單位、費用、名額、資料查證時間。"
-    },
-    "missing": [
-      "official_registration_link",
-      "precise_location",
-      "organizer",
-      "fees",
-      "quota",
-      "verified_at"
-    ],
-    "current_links": {
-      "registration_link": "",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12989&subtitle=2026+KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12989",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91"
-    }
-  },
-  {
     "race_id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
     "race_name": "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
     "race_date": "2026-08-02",
@@ -580,33 +552,6 @@
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12944&subtitle=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12944",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0"
-    }
-  },
-  {
-    "race_id": "067695b2-b3f2-4b47-951f-cb7934b17d81",
-    "race_name": "2026 BOBDOG RUN(台中場)",
-    "race_date": "2026-05-16",
-    "race_county": "臺中市",
-    "priority_score": 9,
-    "tracking": {
-      "status": "closed_gap",
-      "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-05-15",
-      "cadence": "manual",
-      "reason": "報名已截止但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。保留供歷史資料補齊。"
-    },
-    "missing": [
-      "precise_location",
-      "organizer",
-      "fees",
-      "quota",
-      "verified_at"
-    ],
-    "current_links": {
-      "registration_link": "https://bao-ming.com/eb/content/6890#reg",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12915&subtitle=2026+BOBDOG+RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12915",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20BOBDOG%20RUN%28%E5%8F%B0%E4%B8%AD%E5%A0%B4%29"
     }
   },
   {
