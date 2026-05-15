@@ -855,10 +855,10 @@ function renderRaces() {
       const venue = race.venue || race.start_location || race.location || race.race_location || "";
       const organizer = race.organizer || race.host || race.organizer_name || "";
       const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
-      const facts = [
-        venue ? `地點 ${venue}` : "",
-        organizer ? `主辦 ${organizer}` : "",
-        verifiedAt ? `查證 ${formatShortDate(verifiedAt) || verifiedAt}` : "",
+      const factItems = [
+        venue ? ["地點", venue] : null,
+        organizer ? ["主辦", organizer] : null,
+        verifiedAt ? ["查證", formatShortDate(verifiedAt) || verifiedAt] : null,
       ].filter(Boolean);
 
       return `
@@ -874,18 +874,27 @@ function renderRaces() {
             <div class="race-title-row">
               <h3>${escapeHtml(race.race_name)}</h3>
             </div>
-            <dl class="registration-times">
-              <div><dt>開報</dt><dd>${escapeHtml(opensAt)}</dd></div>
-              <div><dt>截止</dt><dd>${escapeHtml(deadline)}</dd></div>
-            </dl>
-            <div class="race-meta">
-              <span class="pill">${escapeHtml(race.race_county)}</span>
-              <span class="pill ${cls}">${escapeHtml(difficulty)}</span>
-              <span class="pill">${escapeHtml(status)}</span>
+            <div class="race-summary-line">
+              <span>${escapeHtml(race.race_county)}</span>
+              <span class="${cls}">${escapeHtml(difficulty)}</span>
+              <span>${escapeHtml(status)}</span>
+              <span>${escapeHtml(distances)}</span>
             </div>
-            <p>${escapeHtml(distances)}</p>
-            ${facts.length ? `<div class="race-facts">${facts.map((fact) => `<span>${escapeHtml(fact)}</span>`).join("")}</div>` : ""}
+            <div class="race-schedule" aria-label="報名時間">
+              <span><strong>開報</strong>${escapeHtml(opensAt)}</span>
+              <span><strong>截止</strong>${escapeHtml(deadline)}</span>
+            </div>
             <div class="race-insight">${escapeHtml(decision)}</div>
+            ${
+              factItems.length
+                ? `<details class="race-detail-panel">
+                    <summary>資料來源與場地</summary>
+                    <dl>
+                      ${factItems.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}
+                    </dl>
+                  </details>`
+                : ""
+            }
           </div>
           <div class="race-actions">
             <div class="primary-action-row">
