@@ -909,6 +909,14 @@ h3 {
   gap: 6px;
 }
 
+.form-section-title {
+  grid-column: 1 / -1;
+  margin: 4px 0 0;
+  color: var(--green-dark);
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
 .plan-builder span {
   color: var(--muted);
   font-size: 0.8rem;
@@ -941,7 +949,8 @@ h3 {
 
 .plan-hero,
 .pace-zones,
-.training-summary {
+.training-summary,
+.profile-summary {
   display: grid;
   gap: 12px;
 }
@@ -1013,24 +1022,32 @@ h3 {
 }
 
 .training-summary {
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
+  margin-bottom: 12px;
+}
+
+.profile-summary {
+  grid-template-columns: repeat(4, 1fr);
   margin-bottom: 12px;
 }
 
 .pace-zones div,
-.training-summary div {
+.training-summary div,
+.profile-summary div {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #edf5ef;
 }
 
-.training-summary div {
+.training-summary div,
+.profile-summary div {
   background: var(--surface);
 }
 
 .pace-zones span,
-.training-summary span {
+.training-summary span,
+.profile-summary span {
   display: block;
   color: var(--muted);
   font-size: 0.76rem;
@@ -1038,7 +1055,8 @@ h3 {
 }
 
 .pace-zones strong,
-.training-summary strong {
+.training-summary strong,
+.profile-summary strong {
   display: block;
   margin-top: 4px;
   color: var(--green-dark);
@@ -1311,6 +1329,7 @@ h3 {
   .review-grid,
   .plan-hero,
   .plan-hero dl,
+  .profile-summary,
   .training-summary,
   .phase-table {
     grid-template-columns: repeat(2, 1fr);
@@ -1435,6 +1454,7 @@ h3 {
   .score-grid,
   .shoe-release-list,
   .review-grid,
+  .profile-summary,
   .plan-hero,
   .plan-hero dl {
     grid-template-columns: 1fr;
@@ -1710,12 +1730,14 @@ h3 {
   }
 
   .training-summary,
+  .profile-summary,
   .pace-zones {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
   .training-summary div,
+  .profile-summary div,
   .pace-zones div {
     padding: 10px;
   }

@@ -9,7 +9,7 @@
       content="蒐集中部路跑賽事、跑鞋新上市心得、練跑方法與跑步新聞的跑者資訊站。"
     >
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260515-mobile1">
+    <link rel="stylesheet" href="./styles.css?v=20260515-athlete1">
   </head>
   <body>
     <header class="site-header">
@@ -225,12 +225,26 @@
           <div>
             <p class="eyebrow">練跑知識</p>
             <h2 id="training-title">練跑菜單系統</h2>
-            <p class="section-lead">輸入目標完賽時間或配速，系統會換算課表配速區間，並用中文提醒跑量、恢復與賽前調整。</p>
+            <p class="section-lead">建立選手資料、目標賽事與訓練限制，系統會換算配速、週期與每週課表，生成更貼近個人的練跑菜單。</p>
           </div>
         </div>
 
         <div class="training-system">
           <form class="plan-builder" id="plan-builder" aria-label="練跑菜單產生器">
+            <p class="form-section-title">選手資料</p>
+            <label>
+              <span>選手名稱</span>
+              <input id="plan-athlete" type="text" autocomplete="name" placeholder="例：阿明">
+            </label>
+            <label>
+              <span>跑齡</span>
+              <select id="plan-experience">
+                <option value="rookie">未滿 6 個月</option>
+                <option value="regular" selected>6 個月以上</option>
+                <option value="seasoned">2 年以上</option>
+              </select>
+            </label>
+            <p class="form-section-title">目標賽事</p>
             <label>
               <span>目標距離</span>
               <select id="plan-goal">
@@ -261,11 +275,28 @@
               </select>
             </label>
             <label>
+              <span>傷痛狀態</span>
+              <select id="plan-injury">
+                <option value="none" selected>目前無傷</option>
+                <option value="tight">偶爾緊繃</option>
+                <option value="recovering">剛恢復訓練</option>
+              </select>
+            </label>
+            <p class="form-section-title">訓練限制</p>
+            <label>
               <span>目標類型</span>
               <select id="plan-priority">
                 <option value="finish" selected>穩定完賽</option>
                 <option value="pb">挑戰 PB</option>
                 <option value="habit">建立習慣</option>
+              </select>
+            </label>
+            <label>
+              <span>強度偏好</span>
+              <select id="plan-intensity">
+                <option value="safe" selected>保守穩定</option>
+                <option value="balanced">均衡進步</option>
+                <option value="push">積極突破</option>
               </select>
             </label>
             <label>
@@ -298,6 +329,13 @@
               </select>
             </label>
             <label>
+              <span>長跑日</span>
+              <select id="plan-long-run-day">
+                <option value="sat">週六</option>
+                <option value="sun" selected>週日</option>
+              </select>
+            </label>
+            <label>
               <span>可練幾週</span>
               <select id="plan-weeks">
                 <option value="4">4 週</option>
@@ -305,7 +343,7 @@
                 <option value="12">12 週</option>
               </select>
             </label>
-            <button class="button primary" type="submit">產生菜單</button>
+            <button class="button primary" type="submit">生成自訂菜單</button>
             <p class="device-note">收藏與菜單會自動保存在這台裝置的瀏覽器。</p>
           </form>
 
@@ -369,6 +407,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260515-plan1"></script>
+    <script src="./app.js?v=20260515-athlete1"></script>
   </body>
 </html>
