@@ -56,7 +56,34 @@ function inferShoeCategory(title) {
   return "跑鞋新品";
 }
 
+function cleanSummary(text) {
+  const cleaned = String(text || "")
+    .replace(/\s+/g, " ")
+    .replace(/^摘要[:：]\s*/, "")
+    .trim();
+  if (!cleaned || cleaned.length < 18 || /國內外各大精選賽事|一手掌握|不漏接|預計\s*\d+\s*月份上市/.test(cleaned)) {
+    return "";
+  }
+  const limit = 120;
+  if (cleaned.length <= limit) {
+    return /[。！？.!?]$/.test(cleaned) ? cleaned : `${cleaned}...`;
+  }
+  const clipped = cleaned.slice(0, limit);
+  const sentenceEnd = Math.max(
+    clipped.lastIndexOf("。"),
+    clipped.lastIndexOf("！"),
+    clipped.lastIndexOf("？"),
+    clipped.lastIndexOf("."),
+  );
+  return `${(sentenceEnd > 42 ? clipped.slice(0, sentenceEnd + 1) : clipped).trim()}...`;
+}
+
 function summarize(item, type) {
+  const description = cleanSummary(item.description);
+  if (description) {
+    return description;
+  }
+
   const title = item.title.replace(/\s+/g, " ").trim();
   if (type === "shoe") {
     if (/防水|GTX|GORE/i.test(title)) {

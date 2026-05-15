@@ -170,7 +170,27 @@ function extractMetaTitle(html) {
   return "";
 }
 
-async function fetchArticleTitle(item) {
+function extractMetaDescription(html) {
+  const metaPatterns = [
+    /<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:description["'][^>]*>/i,
+    /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["'][^>]*>/i,
+    /<meta[^>]+name=["']twitter:description["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+  ];
+
+  for (const pattern of metaPatterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      return decodeHtml(match[1])
+        .replace(/\s*[｜|│]\s*(動一動|Don1Don|Bounce|HK01|Women's Health|運動筆記).*$/i, "")
+        .trim();
+    }
+  }
+  return "";
+}
+
+async function fetchArticleMetadata(item) {
   try {
     const response = await fetch(item.url, {
       headers: {
@@ -182,15 +202,15 @@ async function fetchArticleTitle(item) {
     if (!response.ok) {
       return item;
     }
-    const title = extractMetaTitle(await response.text());
-    if (!title || title.length < 6) {
-      return item;
-    }
+    const html = await response.text();
+    const title = extractMetaTitle(html);
+    const description = extractMetaDescription(html);
     return {
       ...item,
-      title,
-      category: classify(title),
-      score: Math.max(item.score, scoreTitle(title, { priority: item.score - 1 })),
+      title: title && title.length >= 6 ? title : item.title,
+      description: description || item.description || "",
+      category: classify(title && title.length >= 6 ? title : item.title),
+      score: title && title.length >= 6 ? Math.max(item.score, scoreTitle(title, { priority: item.score - 1 })) : item.score,
     };
   } catch {
     return item;
@@ -250,7 +270,7 @@ async function fetchSource(source) {
 async function enrichTitles(items) {
   const enriched = [];
   for (const item of items.slice(0, 60)) {
-    enriched.push(await fetchArticleTitle(item));
+    enriched.push(await fetchArticleMetadata(item));
   }
   return enriched;
 }
@@ -281,9 +301,9 @@ function buildReport(items, errors) {
     "",
     `候選筆數：${items.length}`,
     "",
-    "| 分數 | 分類 | 來源 | 標題 | 連結 |",
-    "| ---: | --- | --- | --- | --- |",
-    ...items.map((item) => `| ${item.score} | ${item.category} | ${item.source} | ${item.title.replace(/\|/g, "／")} | [來源](${item.url}) |`),
+    "| 分數 | 分類 | 來源 | 標題 | 摘要 | 連結 |",
+    "| ---: | --- | --- | --- | --- | --- |",
+    ...items.map((item) => `| ${item.score} | ${item.category} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${(item.description || "").replace(/\|/g, "／")} | [來源](${item.url}) |`),
   ];
 
   if (errors.length) {
