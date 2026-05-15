@@ -1214,8 +1214,64 @@ h3 {
 
 .shoe-release-list article,
 .review-grid article {
+  position: relative;
   min-height: 178px;
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.review-grid article {
+  overflow: hidden;
+  border-color: rgba(21, 83, 56, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.97), rgba(247, 250, 247, 0.92)),
+    var(--surface);
+}
+
+.review-grid article::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  content: "";
+}
+
+.review-grid article:nth-child(1)::before {
+  background: #155338;
+}
+
+.review-grid article:nth-child(2)::before {
+  background: #d8a322;
+}
+
+.review-grid article:nth-child(3)::before {
+  background: #7f9fb0;
+}
+
+.review-grid article:nth-child(4)::before {
+  background: #b66a3c;
+}
+
+.review-grid article:nth-child(5)::before {
+  background: #6f7f54;
+}
+
+.review-grid article:nth-child(1) {
+  background: linear-gradient(180deg, #f5fbf6, #fffdfa);
+}
+
+.review-grid article:nth-child(2) {
+  background: linear-gradient(180deg, #fff9e9, #fffdfa);
+}
+
+.review-grid article:nth-child(3) {
+  background: linear-gradient(180deg, #eef7fa, #fffdfa);
+}
+
+.review-grid article:nth-child(4) {
+  background: linear-gradient(180deg, #fff2ea, #fffdfa);
+}
+
+.review-grid article:nth-child(5) {
+  background: linear-gradient(180deg, #f3f6e9, #fffdfa);
 }
 
 .shoe-release-list article:hover,
