@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>跑者廣場 | 中部路跑賽事與跑步知識</title>
+    <meta
+      name="description"
+      content="蒐集中部路跑賽事、跑鞋新上市心得、練跑方法與跑步新聞的跑者資訊站。"
+    >
+    <link rel="stylesheet" href="./styles.css?v=20260515-deadline">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="跑者廣場首頁">
+        <span class="brand-mark">RP</span>
+        <span>跑者廣場</span>
+      </a>
+      <nav class="main-nav" aria-label="主要導覽">
+        <a href="#races">賽事</a>
+        <a href="#gear">跑鞋</a>
+        <a href="#training">練跑</a>
+        <a href="#news">新聞</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-media" role="img" aria-label="清晨路跑者穿越城市道路"></div>
+        <div class="hero-content">
+          <p class="eyebrow">中部路跑資訊站</p>
+          <h1 id="hero-title">中部跑者的賽事雷達</h1>
+          <p>
+            整理臺中、彰化、南投、苗栗路跑賽事，搭配跑鞋心得、練跑知識與跑步新聞，幫你快速決定下一場要跑哪裡、該怎麼準備。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#races">查看賽事</a>
+            <a class="button secondary" href="#training">開始練跑</a>
+          </div>
+          <div class="hero-insights" aria-label="重點資訊">
+            <div>
+              <span>Next start</span>
+              <strong id="hero-next-race">--</strong>
+            </div>
+            <div>
+              <span>Coverage</span>
+              <strong>中部 4 縣市</strong>
+            </div>
+            <div>
+              <span>Focus</span>
+              <strong>賽事 / 跑鞋 / 訓練</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-strip" aria-label="網站統計">
+        <div>
+          <strong id="race-count">--</strong>
+          <span>收錄賽事</span>
+        </div>
+        <div>
+          <strong>4</strong>
+          <span>中部縣市</span>
+        </div>
+        <div>
+          <strong id="next-race">--</strong>
+          <span>下一場日期</span>
+        </div>
+        <div>
+          <strong id="favorite-count">0</strong>
+          <span>我的收藏</span>
+        </div>
+      </section>
+
+      <section class="section race-section" id="races" aria-labelledby="races-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">賽事查詢</p>
+            <h2 id="races-title">中部賽事列表</h2>
+            <p class="section-lead">用縣市、月份、難度和關鍵字快速縮小清單，適合找週末短跑、半馬備賽或越野挑戰。</p>
+          </div>
+          <a class="text-link" href="../runner/赛事/2026-中部赛事列表.md">查看 Markdown 原始資料</a>
+        </div>
+
+        <div class="race-console">
+          <div class="race-tools" aria-label="賽事篩選">
+            <label class="search-box">
+              <span>搜尋賽事</span>
+              <input id="race-search" type="search" placeholder="輸入賽事、縣市或距離">
+            </label>
+            <div class="filter-stack">
+              <span>縣市</span>
+              <div class="segmented" role="group" aria-label="縣市篩選">
+                <button class="active" type="button" data-county="all">全部</button>
+                <button type="button" data-county="臺中市">臺中</button>
+                <button type="button" data-county="彰化縣">彰化</button>
+                <button type="button" data-county="南投縣">南投</button>
+                <button type="button" data-county="苗栗縣">苗栗</button>
+              </div>
+            </div>
+            <div class="filter-stack">
+              <span>難度</span>
+              <div class="segmented" role="group" aria-label="難度篩選">
+                <button class="active" type="button" data-difficulty="all">全部</button>
+                <button type="button" data-difficulty="初級">初級</button>
+                <button type="button" data-difficulty="中級">中級</button>
+                <button type="button" data-difficulty="高級">高級</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="race-layout">
+            <aside class="month-panel" aria-labelledby="months-title">
+              <h3 id="months-title">月份索引</h3>
+              <div id="month-list" class="month-list"></div>
+            </aside>
+            <div class="race-results">
+              <div class="results-meta">
+                <span id="result-count">載入中</span>
+                <div class="result-actions">
+                  <button class="toggle-button" type="button" id="favorite-filter">只看收藏</button>
+                  <button class="link-button" type="button" id="clear-filters">清除篩選</button>
+                </div>
+              </div>
+              <div id="race-list" class="race-list" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section split" id="gear" aria-labelledby="gear-title">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">跑鞋心得</p>
+            <h2 id="gear-title">跑鞋新上市心得</h2>
+          </div>
+        </div>
+        <article class="feature-card shoe-card">
+          <div class="feature-copy">
+            <p class="tag">已發布心得</p>
+            <h3>Asics Novablast 3 - 日常訓練神器</h3>
+            <p>
+              500km 後的日常訓練鞋心得，整理舒適度、反彈、耐久、雨天與新手適配情境。
+            </p>
+            <dl class="score-grid">
+              <div><dt>舒適度</dt><dd>5/5</dd></div>
+              <div><dt>性能</dt><dd>4/5</dd></div>
+              <div><dt>耐久</dt><dd>3/5</dd></div>
+            </dl>
+            <a class="button secondary" href="../runner/心得/装备/2026-05-15-asics-novablast3评测.md">閱讀心得</a>
+          </div>
+          <div class="shoe-visual" aria-hidden="true">
+            <div class="shoe-photo">
+              <span>Daily Trainer</span>
+              <strong>500km review</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="section" id="training" aria-labelledby="training-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">練跑知識</p>
+            <h2 id="training-title">如何練跑</h2>
+            <p class="section-lead">先建立穩定習慣，再慢慢加入配速、長跑和恢復，避免一開始就把每次訓練跑成測驗。</p>
+          </div>
+        </div>
+        <div class="guide-grid">
+          <article>
+            <span>01</span>
+            <h3>新手 4 週起跑</h3>
+            <p>用跑走交替建立習慣，每週三跑，先把身體帶進穩定節奏。</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>10K 配速入門</h3>
+            <p>把輕鬆跑、節奏跑與長跑分清楚，避免每次都跑成測驗。</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>半馬備賽檢查</h3>
+            <p>用週跑量、長跑距離、補給演練和鞋款狀態判斷是否準備好。</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>賽後恢復</h3>
+            <p>先睡眠、補水、低強度活動，再回到課表，降低受傷風險。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section news-section" id="news" aria-labelledby="news-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">最新更新</p>
+            <h2 id="news-title">路跑知識與新聞</h2>
+          </div>
+        </div>
+        <div class="news-list">
+          <article>
+            <time datetime="2026-05-15">2026.05.15</time>
+            <h3>中部賽事資料庫完成第一輪整理</h3>
+            <p>已收錄臺中、彰化、南投、苗栗 2026 年賽事，後續可接爬蟲每日更新。</p>
+          </article>
+          <article>
+            <time datetime="2026-05-15">2026.05.15</time>
+            <h3>投稿指南開放</h3>
+            <p>跑鞋心得、比賽報告、訓練分享可依照格式投稿，方便後續同步到網站。</p>
+          </article>
+          <article>
+            <time datetime="2026-05-15">2026.05.15</time>
+            <h3>跑鞋評測欄位定稿</h3>
+            <p>後續每篇跑鞋心得會統一整理價格、里程、優缺點、適用跑者與替代款。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>跑者廣場 Runner Plaza</span>
+      <span>資料來源：本地 Obsidian vault 與賽事爬蟲</span>
+    </footer>
+
+    <script src="./app.js?v=20260515-deadline"></script>
+  </body>
+</html>

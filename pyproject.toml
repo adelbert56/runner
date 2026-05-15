@@ -1,0 +1,12 @@
+[project]
+name = "runner-plaza"
+version = "0.1.0"
+description = "Central Taiwan running race board and scraper."
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4>=4.12.0",
+  "requests>=2.31.0",
+]
+
+[tool.uv]
+package = false

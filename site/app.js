@@ -1,0 +1,348 @@
+const FAVORITES_KEY = "runner-plaza:favorites";
+const TODAY = "2026-05-15";
+
+const state = {
+  races: [],
+  county: "all",
+  difficulty: "all",
+  month: "all",
+  query: "",
+  favorites: new Set(),
+  favoritesOnly: false,
+};
+
+const els = {
+  raceCount: document.querySelector("#race-count"),
+  favoriteCount: document.querySelector("#favorite-count"),
+  nextRace: document.querySelector("#next-race"),
+  heroNextRace: document.querySelector("#hero-next-race"),
+  search: document.querySelector("#race-search"),
+  raceList: document.querySelector("#race-list"),
+  monthList: document.querySelector("#month-list"),
+  resultCount: document.querySelector("#result-count"),
+  favoriteFilter: document.querySelector("#favorite-filter"),
+  clearFilters: document.querySelector("#clear-filters"),
+  countyButtons: document.querySelectorAll("[data-county]"),
+  difficultyButtons: document.querySelectorAll("[data-difficulty]"),
+};
+
+const monthNames = {
+  "01": "1月",
+  "02": "2月",
+  "03": "3月",
+  "04": "4月",
+  "05": "5月",
+  "06": "6月",
+  "07": "7月",
+  "08": "8月",
+  "09": "9月",
+  "10": "10月",
+  "11": "11月",
+  "12": "12月",
+};
+
+const weekdays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+
+const difficultyClass = {
+  "初級": "beginner",
+  "中級": "middle",
+  "高級": "hard",
+};
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function loadFavorites() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    state.favorites = new Set(Array.isArray(stored) ? stored : []);
+  } catch {
+    state.favorites = new Set();
+  }
+}
+
+function saveFavorites() {
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify([...state.favorites]));
+}
+
+function formatDateParts(dateText) {
+  const [, year = "----", month = "--", day = "--"] =
+    /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateText) || [];
+  const date = new Date(`${year}-${month}-${day}T00:00:00+08:00`);
+  const weekday = Number.isNaN(date.getTime()) ? "" : weekdays[date.getDay()];
+  return {
+    year,
+    month,
+    monthLabel: monthNames[month] || `${month}月`,
+    day,
+    weekday,
+    full: `${year}/${month}/${day}${weekday ? ` ${weekday}` : ""}`,
+  };
+}
+
+function monthOf(race) {
+  return race.race_date?.slice(5, 7) || "00";
+}
+
+function getRaceKey(race) {
+  return race.race_id || `${race.race_name}|${race.race_date}`;
+}
+
+function isFavorite(race) {
+  return state.favorites.has(getRaceKey(race));
+}
+
+function isSourceLink(url) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host.endsWith("running.biji.co") || host.endsWith("biji.co");
+  } catch {
+    return true;
+  }
+}
+
+function getRegistrationLink(race) {
+  const link = race.registration_link || "";
+  return link && !isSourceLink(link) ? link : "";
+}
+
+function formatShortDate(dateText) {
+  const date = formatDateParts(dateText);
+  return date.month !== "--" && date.day !== "--" ? `${date.month}/${date.day}` : "";
+}
+
+function getVisibleRaces() {
+  const query = state.query.trim().toLowerCase();
+  return state.races.filter((race) => {
+    const matchesCounty = state.county === "all" || race.race_county === state.county;
+    const matchesDifficulty = state.difficulty === "all" || race.difficulty === state.difficulty;
+    const matchesMonth = state.month === "all" || monthOf(race) === state.month;
+    const matchesFavorite = !state.favoritesOnly || isFavorite(race);
+    const haystack = [
+      race.race_name,
+      race.race_county,
+      race.difficulty,
+      race.registration_status,
+      race.race_date,
+      ...(race.distances || []),
+    ]
+      .join(" ")
+      .toLowerCase();
+    return (
+      matchesCounty &&
+      matchesDifficulty &&
+      matchesMonth &&
+      matchesFavorite &&
+      (!query || haystack.includes(query))
+    );
+  });
+}
+
+function renderStats() {
+  els.raceCount.textContent = String(state.races.length);
+  els.favoriteCount.textContent = String(state.favorites.size);
+  const upcoming = state.races.find((race) => race.race_date >= TODAY) || state.races[0];
+  if (!upcoming) {
+    els.nextRace.textContent = "--";
+    els.heroNextRace.textContent = "--";
+    return;
+  }
+  const date = formatDateParts(upcoming.race_date);
+  els.nextRace.textContent = `${date.month}/${date.day}`;
+  els.heroNextRace.textContent = date.full.replaceAll("/", ".");
+}
+
+function renderMonths() {
+  const source = state.favoritesOnly ? state.races.filter((race) => isFavorite(race)) : state.races;
+  const counts = source.reduce((acc, race) => {
+    const month = monthOf(race);
+    acc[month] = (acc[month] || 0) + 1;
+    return acc;
+  }, {});
+
+  const total = source.length;
+  const buttons = [
+    `<button type="button" class="${state.month === "all" ? "active" : ""}" data-month="all"><span>全部</span><span>${total}</span></button>`,
+    ...Object.keys(counts)
+      .sort()
+      .map((month) => {
+        const active = state.month === month ? "active" : "";
+        return `<button type="button" class="${active}" data-month="${month}"><span>${monthNames[month] || `${month}月`}</span><span>${counts[month]}</span></button>`;
+      }),
+  ];
+
+  els.monthList.innerHTML = buttons.join("");
+  els.monthList.querySelectorAll("[data-month]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.month = button.dataset.month;
+      render();
+    });
+  });
+}
+
+function renderRaces() {
+  const races = getVisibleRaces();
+  els.resultCount.textContent = state.favoritesOnly
+    ? `收藏清單 ${races.length} 場`
+    : `目前顯示 ${races.length} 場`;
+
+  if (!races.length) {
+    els.raceList.innerHTML = `<div class="empty-state">${state.favoritesOnly ? "還沒有收藏符合條件的賽事。" : "沒有符合條件的賽事。"}</div>`;
+    return;
+  }
+
+  els.raceList.innerHTML = races
+    .map((race) => {
+      const key = getRaceKey(race);
+      const date = formatDateParts(race.race_date);
+      const distances = (race.distances || ["距離待確認"]).join(" / ");
+      const status = race.registration_status || "狀態待確認";
+      const difficulty = race.difficulty || "初級";
+      const cls = difficultyClass[difficulty] || "";
+      const registrationLink = getRegistrationLink(race);
+      const note = race.registration_note || "未提供官方報名連結，待人工補連結";
+      const opensAt = formatShortDate(race.registration_opens_at) || "待確認";
+      const deadline = formatShortDate(race.registration_deadline) || "待確認";
+      const favorite = isFavorite(race);
+
+      return `
+        <article class="race-card">
+          <div class="date-block" aria-label="${escapeHtml(date.full)}">
+            <div>
+              <span>${escapeHtml(date.year)}</span>
+              <strong>${escapeHtml(date.month)}/${escapeHtml(date.day)}</strong>
+              <em>${escapeHtml(date.weekday)}</em>
+            </div>
+          </div>
+          <div class="race-main">
+            <div class="race-title-row">
+              <h3>${escapeHtml(race.race_name)}</h3>
+            </div>
+            <div class="race-date-line">${escapeHtml(date.full)}</div>
+            <dl class="registration-times">
+              <div><dt>開報</dt><dd>${escapeHtml(opensAt)}</dd></div>
+              <div><dt>截止</dt><dd>${escapeHtml(deadline)}</dd></div>
+            </dl>
+            <div class="race-meta">
+              <span class="pill">${escapeHtml(race.race_county)}</span>
+              <span class="pill ${cls}">${escapeHtml(difficulty)}</span>
+              <span class="pill">${escapeHtml(status)}</span>
+            </div>
+            <p>${escapeHtml(distances)}</p>
+          </div>
+          <div class="race-actions">
+            ${
+              registrationLink
+                ? `<a class="register-link" href="${escapeHtml(registrationLink)}" target="_blank" rel="noreferrer">報名網站</a>`
+                : `<span class="register-link disabled" title="${escapeHtml(note)}">待補連結</span>`
+            }
+            <button
+              class="favorite-button ${favorite ? "active" : ""}"
+              type="button"
+              data-favorite="${escapeHtml(key)}"
+              aria-pressed="${favorite ? "true" : "false"}"
+            >${favorite ? "已收藏" : "收藏"}</button>
+            ${race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">來源詳情</a>` : ""}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  els.raceList.querySelectorAll("[data-favorite]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.favorite;
+      if (state.favorites.has(key)) {
+        state.favorites.delete(key);
+      } else {
+        state.favorites.add(key);
+      }
+      saveFavorites();
+      renderStats();
+      render();
+    });
+  });
+}
+
+function setActiveButtons(buttons, dataKey, value) {
+  buttons.forEach((button) => {
+    button.classList.toggle("active", button.dataset[dataKey] === value);
+  });
+}
+
+function render() {
+  setActiveButtons(els.countyButtons, "county", state.county);
+  setActiveButtons(els.difficultyButtons, "difficulty", state.difficulty);
+  els.favoriteFilter.classList.toggle("active", state.favoritesOnly);
+  els.favoriteFilter.textContent = state.favoritesOnly ? "顯示全部賽事" : "只看收藏";
+  renderMonths();
+  renderRaces();
+}
+
+function bindEvents() {
+  els.search.addEventListener("input", (event) => {
+    state.query = event.target.value;
+    renderRaces();
+  });
+
+  els.countyButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.county = button.dataset.county;
+      render();
+    });
+  });
+
+  els.difficultyButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.difficulty = button.dataset.difficulty;
+      render();
+    });
+  });
+
+  els.favoriteFilter.addEventListener("click", () => {
+    state.favoritesOnly = !state.favoritesOnly;
+    state.month = "all";
+    render();
+  });
+
+  els.clearFilters.addEventListener("click", () => {
+    state.county = "all";
+    state.difficulty = "all";
+    state.month = "all";
+    state.query = "";
+    state.favoritesOnly = false;
+    els.search.value = "";
+    render();
+  });
+}
+
+async function loadRaces() {
+  const response = await fetch("../runner/赛事/赛事数据库.json");
+  if (!response.ok) {
+    throw new Error(`Race data request failed: ${response.status}`);
+  }
+  const races = await response.json();
+  state.races = races.sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
+}
+
+async function init() {
+  loadFavorites();
+  bindEvents();
+  try {
+    await loadRaces();
+    renderStats();
+    render();
+  } catch (error) {
+    console.error(error);
+    els.resultCount.textContent = "資料載入失敗";
+    els.raceList.innerHTML = `<div class="empty-state">賽事資料無法載入，請用本機伺服器開啟 site/index.html。</div>`;
+  }
+}
+
+init();

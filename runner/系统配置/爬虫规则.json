@@ -1,0 +1,156 @@
+{
+  "scraper_config_version": "0.1",
+  "description": "中部赛事爬虫规则配置",
+  "last_updated": "2026-05-15",
+  "comment": "每个网站一个爬虫规则对象。待开发race-scraper-skill后正式启用。",
+  "sources": [
+    {
+      "source_id": "1",
+      "source_name": "运动笔记",
+      "url": "https://example.com/races",
+      "description": "台湾赛事数据库，更新频率最高",
+      "update_frequency": "daily",
+      "strategy": "requests",
+      "comment": "需确认具体URL，可能需要处理动态加载",
+      "selectors": {
+        "race_name": ".race-title",
+        "race_date": ".race-date",
+        "race_location": ".race-location",
+        "race_distance": ".race-distance",
+        "registration_link": "a.register",
+        "registration_deadline": ".deadline"
+      },
+      "pagination": {
+        "type": "url_param",
+        "param": "page",
+        "max_pages": 10
+      },
+      "dedup_fields": ["race_name", "race_date", "race_location"],
+      "transformation": {
+        "date_format": "YYYY-MM-DD",
+        "distance_format": "extract_number_with_unit",
+        "region": "extract_from_location"
+      },
+      "error_handling": {
+        "retry": 3,
+        "timeout": 30
+      }
+    },
+    {
+      "source_id": "2",
+      "source_name": "跑者广场",
+      "url": "https://example.com/events",
+      "description": "社区讨论型赛事信息源",
+      "update_frequency": "every_other_day",
+      "strategy": "selenium",
+      "comment": "可能需JavaScript渲染，推荐用selenium",
+      "selectors": {
+        "race_name": ".event-title",
+        "race_date": ".event-date",
+        "race_location": ".event-location",
+        "discussion_link": "a.discussion"
+      },
+      "pagination": {
+        "type": "infinite_scroll",
+        "scroll_pause": 2
+      },
+      "dedup_fields": ["race_name", "race_date"],
+      "transformation": {
+        "date_format": "YYYY-MM-DD"
+      }
+    },
+    {
+      "source_id": "3",
+      "source_name": "勘履者",
+      "url": "https://example.com/trails",
+      "description": "越野跑、登山赛事专门网站",
+      "update_frequency": "weekly",
+      "strategy": "requests",
+      "selectors": {
+        "race_name": ".trail-name",
+        "race_date": ".race-date",
+        "difficulty": ".difficulty-level",
+        "elevation": ".elevation-gain",
+        "distance": ".distance"
+      },
+      "dedup_fields": ["race_name", "race_date"],
+      "transformation": {
+        "date_format": "YYYY-MM-DD",
+        "difficulty_mapping": {
+          "初级": "初级",
+          "入门": "初级",
+          "中级": "中级",
+          "高级": "高级",
+          "挑战": "高级"
+        }
+      }
+    },
+    {
+      "source_id": "4",
+      "source_name": "中部马拉松联盟官网",
+      "url": "https://example.com/races",
+      "description": "官方赛事发布、成绩公布",
+      "update_frequency": "as_needed",
+      "strategy": "requests",
+      "comment": "可能发布PDF公告，需额外处理",
+      "selectors": {
+        "race_name": ".race-title",
+        "race_date": ".race-date",
+        "race_location": ".location",
+        "official_link": "a.official"
+      },
+      "dedup_fields": ["race_name", "race_date"]
+    },
+    {
+      "source_id": "5",
+      "source_name": "各地运协网站",
+      "url": "https://example.com/county-races",
+      "description": "台中、南投、彰化、苗栗运协赛事公告",
+      "update_frequency": "as_needed",
+      "strategy": "requests",
+      "comment": "网站质量参差不齐，需要多套规则",
+      "counties": ["台中", "南投", "彰化", "苗栗"],
+      "selectors": {
+        "race_name": ".announcement-title",
+        "race_date": ".date",
+        "contact": ".contact-info"
+      },
+      "dedup_fields": ["race_name", "race_date", "county"]
+    }
+  ],
+  "global_settings": {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "timeout": 30,
+    "retry_attempts": 3,
+    "concurrent_requests": 3,
+    "request_delay": 2,
+    "comment": "避免对网站造成压力，添加请求延迟"
+  },
+  "dedup_strategy": {
+    "algorithm": "exact_match",
+    "fields": ["race_name", "race_date", "race_location"],
+    "comment": "基于赛事名+日期+地点去重，准确率目标>95%"
+  },
+  "output_format": {
+    "type": "json",
+    "schema": {
+      "race_id": "自动生成UUID",
+      "race_name": "string",
+      "race_date": "YYYY-MM-DD",
+      "race_location": "string (县市+地点)",
+      "distance": "string (21.1km, 42.2km等)",
+      "difficulty": "初级|中级|高级",
+      "registration_link": "string (URL)",
+      "registration_deadline": "YYYY-MM-DD (可选)",
+      "source": "来源网站名",
+      "source_url": "来源链接",
+      "scraped_at": "ISO8601时间戳",
+      "notes": "备注 (可选)"
+    }
+  },
+  "schedule": {
+    "daily_scrape": "02:00 UTC+8",
+    "weekly_review": "Monday 10:00",
+    "comment": "每天凌晨爬取（发布新赛事黄金时段后），周一审核去重结果"
+  }
+}
