@@ -20,6 +20,22 @@
     "verification_note": "截圖顯示停賽、報名時間與場地。"
   },
   {
+    "race_name": "2026中興新村半程馬拉松-披興戴月的想你",
+    "race_date": "2026-05-24",
+    "registration_link": "https://signup.lohasnet.tw/signup/4115",
+    "official_event_url": "https://lohasnet.tw/ChungHsingVillage2026/",
+    "registration_status": "已截止",
+    "registration_note": "人工查證：樂活報名網官方活動頁與報名頁；報名頁目前顯示已截止報名。",
+    "venue": "中興會堂",
+    "start_location": "中興會堂",
+    "organizer": "雲林縣三鐵運動協會",
+    "co_organizer": "樂活資訊服務股份有限公司",
+    "fees": "21K 1100元、10K 900元、5K 700元、3K 700元；晶片押金各100元；訂單行政處理費30元。",
+    "quota": "21K、10K、5K、3K 各1000人。",
+    "verified_at": "2026-05-15",
+    "verification_note": "官方頁：https://lohasnet.tw/ChungHsingVillage2026/；活動地點、主辦、報名費用、開放名額皆可查。"
+  },
+  {
     "race_name": "2026 第二屆麗晨臺中國際馬拉松",
     "race_date": "2026-12-06",
     "registration_status": "報名中",
