@@ -42,6 +42,7 @@ const els = {
   planOutput: document.querySelector("#plan-output"),
   panelLinks: document.querySelectorAll("[data-panel-link]"),
   panels: document.querySelectorAll("[data-panel]"),
+  backTop: document.querySelector("#back-top"),
 };
 
 const monthNames = {
@@ -245,7 +246,7 @@ function raceDecisionText(race, registrationTarget) {
     parts.push("截止待確認");
   }
 
-  parts.push(registrationTarget.kind === "official" ? "官方直連" : registrationTarget.url ? "來源入口" : "待補連結");
+  parts.push(registrationTarget.kind === "official" ? "官方直連" : registrationTarget.url ? "公開資訊" : "待補連結");
   return parts.join(" · ");
 }
 
@@ -303,9 +304,9 @@ function getRegistrationTarget(race) {
     return { url: officialLink, label: "報名網站", kind: "official" };
   }
 
-  const sourceLink = race.source_registration_link || "";
-  if (sourceLink) {
-    return { url: sourceLink, label: "報名入口", kind: "source" };
+  const detailLink = race.detail_url || race.source_url || "";
+  if (detailLink) {
+    return { url: detailLink, label: "賽事資訊", kind: "detail" };
   }
 
   return { url: "", label: "待補連結", kind: "missing" };
@@ -555,16 +556,18 @@ function renderRaces() {
           <div class="race-actions">
             ${
               registrationTarget.url
-                ? `<a class="register-link ${registrationTarget.kind === "source" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
+                ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
                 : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
             }
             <div class="secondary-actions">
               <button
-                class="favorite-button ${favorite ? "active" : ""}"
+                class="favorite-button icon-button ${favorite ? "active" : ""}"
                 type="button"
                 data-favorite="${escapeHtml(key)}"
                 aria-pressed="${favorite ? "true" : "false"}"
-              >${favorite ? "已收藏" : "收藏"}</button>
+                aria-label="${favorite ? "取消收藏" : "加入收藏"}"
+                title="${favorite ? "取消收藏" : "加入收藏"}"
+              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
               <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">行事曆</button>
             </div>
             ${
@@ -574,7 +577,7 @@ function renderRaces() {
             }
             <div class="detail-actions">
               ${!registrationTarget.url && race.facebook_search_url ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>` : ""}
-              ${race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>` : ""}
+              ${race.detail_url && registrationTarget.url !== race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>` : ""}
             </div>
           </div>
         </article>
@@ -991,6 +994,15 @@ function bindEvents() {
   window.addEventListener("hashchange", () => {
     setActivePanel(window.location.hash.replace("#", ""), false);
   });
+
+  if (els.backTop) {
+    window.addEventListener("scroll", () => {
+      els.backTop.classList.toggle("visible", window.scrollY > 420);
+    });
+    els.backTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
 
   els.search.addEventListener("input", (event) => {
     state.query = event.target.value;
