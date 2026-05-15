@@ -328,6 +328,56 @@ function updateDurationInputs() {
   }
 }
 
+function getSelectedGoalProfile() {
+  return planProfiles[els.planGoal?.value] || planProfiles["10k"];
+}
+
+function setFinishFromSeconds(seconds) {
+  const safeSeconds = Math.round(clampNumber(Number(seconds) || 1, 1, 12 * 3600 + 59 * 60 + 59));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const rest = safeSeconds % 60;
+  if (els.planFinishHour) {
+    els.planFinishHour.value = String(hours);
+    els.planFinishMinute.value = String(minutes);
+    els.planFinishSecond.value = String(rest);
+  }
+  if (els.planFinish) {
+    els.planFinish.value = `${hours}:${pad2(minutes)}:${pad2(rest)}`;
+  }
+}
+
+function setPaceFromSeconds(seconds) {
+  const safeSeconds = Math.round(clampNumber(Number(seconds) || 390, 3 * 60, 12 * 60 + 59));
+  const minutes = Math.floor(safeSeconds / 60);
+  const rest = safeSeconds % 60;
+  if (els.planPaceMinute) {
+    els.planPaceMinute.value = String(minutes);
+    els.planPaceSecond.value = String(rest);
+  }
+  if (els.planPace) {
+    els.planPace.value = `${minutes}:${pad2(rest)}`;
+  }
+}
+
+function syncPaceFromFinish() {
+  updateDurationInputs();
+  const finishSeconds = parseDuration(els.planFinish?.value);
+  const goalProfile = getSelectedGoalProfile();
+  if (finishSeconds && goalProfile?.distanceKm) {
+    setPaceFromSeconds(finishSeconds / goalProfile.distanceKm);
+  }
+}
+
+function syncFinishFromPace() {
+  updateDurationInputs();
+  const paceSeconds = parsePace(els.planPace?.value);
+  const goalProfile = getSelectedGoalProfile();
+  if (paceSeconds && goalProfile?.distanceKm) {
+    setFinishFromSeconds(paceSeconds * goalProfile.distanceKm);
+  }
+}
+
 function parseDurationParts(value) {
   const parts = String(value || "").split(":").map(Number);
   if (parts.length === 3 && parts.every(Number.isFinite)) {
@@ -1455,14 +1505,25 @@ function bindEvents() {
       });
       control?.addEventListener("change", () => {
         state.planWeek = 1;
+        if (control === els.planGoal) {
+          syncFinishFromPace();
+        }
         savePlanSettings();
         renderPlan();
       });
     });
-    [els.planFinishHour, els.planFinishMinute, els.planFinishSecond, els.planPaceMinute, els.planPaceSecond].forEach((control) => {
+    [els.planFinishHour, els.planFinishMinute, els.planFinishSecond].forEach((control) => {
       control?.addEventListener("change", () => {
         state.planWeek = 1;
-        updateDurationInputs();
+        syncPaceFromFinish();
+        savePlanSettings();
+        renderPlan();
+      });
+    });
+    [els.planPaceMinute, els.planPaceSecond].forEach((control) => {
+      control?.addEventListener("change", () => {
+        state.planWeek = 1;
+        syncFinishFromPace();
         savePlanSettings();
         renderPlan();
       });
