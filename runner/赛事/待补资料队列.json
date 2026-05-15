@@ -5,6 +5,13 @@
     "race_date": "2026-09-20",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 128 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -81,6 +88,13 @@
     "race_date": "2026-10-04",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 142 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -157,6 +171,13 @@
     "race_date": "2026-10-17",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 155 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -233,6 +254,13 @@
     "race_date": "2026-10-18",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 156 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -309,6 +337,13 @@
     "race_date": "2026-11-08",
     "race_county": "彰化縣",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 177 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -385,6 +420,13 @@
     "race_date": "2026-11-15",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -461,6 +503,13 @@
     "race_date": "2026-11-15",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -537,6 +586,13 @@
     "race_date": "2026-11-15",
     "race_county": "彰化縣",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -613,6 +669,13 @@
     "race_date": "2026-12-13",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 212 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -689,6 +752,13 @@
     "race_date": "2026-12-19",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -765,6 +835,13 @@
     "race_date": "2026-12-19",
     "race_county": "彰化縣",
     "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-14",
+      "cadence": "monthly",
+      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先每月檢查。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -841,6 +918,13 @@
     "race_date": "2027-01-17",
     "race_county": "臺中市",
     "priority_score": 20,
+    "tracking": {
+      "status": "wait_future",
+      "status_label": "未來再查",
+      "next_check_date": "2026-07-21",
+      "cadence": "future",
+      "reason": "距離賽事 247 天，先排到賽前約 180 天再追。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -917,6 +1001,13 @@
     "race_date": "2026-07-05",
     "race_county": "臺中市",
     "priority_score": 14,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：官方報名連結、精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -981,6 +1072,13 @@
     "race_date": "2026-07-12",
     "race_county": "臺中市",
     "priority_score": 14,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：官方報名連結、精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -1045,6 +1143,13 @@
     "race_date": "2026-08-02",
     "race_county": "彰化縣",
     "priority_score": 14,
+    "tracking": {
+      "status": "wait_until_open_window",
+      "status_label": "等待接近開報",
+      "next_check_date": "2026-06-16",
+      "cadence": "weekly_near_open",
+      "reason": "已知開報日 2026-06-30，開報前 14 天再開始追蹤。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -1109,6 +1214,13 @@
     "race_date": "2026-09-04",
     "race_county": "南投縣",
     "priority_score": 14,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：官方報名連結、精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -1173,6 +1285,13 @@
     "race_date": "2026-10-04",
     "race_county": "南投縣",
     "priority_score": 14,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -1237,6 +1356,13 @@
     "race_date": "2026-10-25",
     "race_county": "南投縣",
     "priority_score": 14,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -1301,6 +1427,13 @@
     "race_date": "2026-11-01",
     "race_county": "南投縣",
     "priority_score": 14,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：官方報名連結、精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "official_registration_link",
@@ -1365,6 +1498,13 @@
     "race_date": "2026-05-09",
     "race_county": "臺中市",
     "priority_score": 9,
+    "tracking": {
+      "status": "archive_gap",
+      "status_label": "賽事已過，低頻補齊",
+      "next_check_date": "2026-05-15",
+      "cadence": "manual",
+      "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。除非要補歷史資料，優先度較低。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1423,6 +1563,13 @@
     "race_date": "2026-05-16",
     "race_county": "臺中市",
     "priority_score": 9,
+    "tracking": {
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-05-15",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。保留供歷史資料補齊。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1481,6 +1628,13 @@
     "race_date": "2026-05-17",
     "race_county": "南投縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-05-15",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。保留供歷史資料補齊。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1539,6 +1693,13 @@
     "race_date": "2026-05-24",
     "race_county": "南投縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-05-15",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。保留供歷史資料補齊。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1597,6 +1758,13 @@
     "race_date": "2026-06-13",
     "race_county": "南投縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-05-15",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。保留供歷史資料補齊。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1655,6 +1823,13 @@
     "race_date": "2026-06-21",
     "race_county": "苗栗縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1713,6 +1888,13 @@
     "race_date": "2026-07-11",
     "race_county": "苗栗縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1771,6 +1953,13 @@
     "race_date": "2026-07-18",
     "race_county": "臺中市",
     "priority_score": 9,
+    "tracking": {
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-05-15",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：精確地點、主辦單位、費用、名額、資料查證時間。保留供歷史資料補齊。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1829,6 +2018,13 @@
     "race_date": "2026-09-06",
     "race_county": "苗栗縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1887,6 +2083,13 @@
     "race_date": "2026-09-20",
     "race_county": "苗栗縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -1945,6 +2148,13 @@
     "race_date": "2026-10-03",
     "race_county": "苗栗縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -2003,6 +2213,13 @@
     "race_date": "2026-10-17",
     "race_county": "苗栗縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -2061,6 +2278,13 @@
     "race_date": "2026-10-31",
     "race_county": "臺中市",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -2119,6 +2343,13 @@
     "race_date": "2027-01-09",
     "race_county": "苗栗縣",
     "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額、資料查證時間。"
+    },
     "missing": [
       {
         "key": "precise_location",
@@ -2177,6 +2408,13 @@
     "race_date": "2026-12-06",
     "race_county": "臺中市",
     "priority_score": 8,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-05-15",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額。"
+    },
     "missing": [
       {
         "key": "precise_location",

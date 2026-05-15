@@ -134,8 +134,10 @@ npm run data:quality
 
 - `runner/赛事/待补资料队列.json`：给人工补资料或下一轮爬虫使用的缺漏清单
 - `runner/赛事/资料品质报告.md`：依欄位、縣市和優先序整理的資料品質報告
+- `runner/赛事/爬虫追踪计划.md`：依開報窗口、賽事日期與缺漏欄位安排下次重爬時機
 
 目前重点检查官方报名连结、开报时间、截止时间、精确地点、主办单位、费用、名额与资料查证时间。
+很多賽事早期只公布日期，追蹤計畫會把它們排到接近開報日再查，不會把所有缺漏都當成現在必須人工補完。
 
 人工补资料后，可以直接套用到网站资料：
 
@@ -149,7 +151,18 @@ npm run data:apply
 npm run data:refresh
 ```
 
-### 7. GitHub Pages 部署
+### 7. 定期更新赛事资料
+
+GitHub Actions 已提供 `.github/workflows/data-refresh.yml`，会每天 06:30（Asia/Taipei）执行：
+
+```bash
+uv run python scripts/main.py
+npm run data:refresh
+```
+
+这个流程会尝试重跑爬虫、套用人工补充、更新资料品质报告和爬虫追踪计划，并在资料有变化时自动提交。也可以在 GitHub Actions 页面手动执行 `Refresh race data`。
+
+### 8. GitHub Pages 部署
 
 项目已提供 `.github/workflows/pages.yml`。推送到 `main` 后，GitHub Actions 会部署静态网站。
 

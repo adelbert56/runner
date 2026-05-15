@@ -1,0 +1,54 @@
+name: Refresh race data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 06:30 Asia/Taipei. Race pages often update overnight or early morning.
+    - cron: "30 22 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: race-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install scraper dependencies
+        run: uv sync
+
+      - name: Run race scrapers
+        run: uv run python scripts/main.py
+
+      - name: Apply manual supplements and quality report
+        run: npm run data:refresh
+
+      - name: Commit data updates
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(data): refresh race data"
+          file_pattern: |
+            runner/赛事/赛事数据库.json
+            runner/赛事/中部赛事列表.md
+            runner/赛事/爬虫日志.md
+            runner/赛事/待补资料队列.json
+            runner/赛事/资料品质报告.md
+            runner/赛事/爬虫追踪计划.md
+            runner/赛事/爬虫追踪计划.json
+            site/data/races.json

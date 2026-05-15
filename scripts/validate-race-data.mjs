@@ -5,6 +5,11 @@ const root = resolve(import.meta.dirname, "..");
 const dataPath = resolve(root, "site/data/races.json");
 const queuePath = resolve(root, "runner/赛事/待补资料队列.json");
 const reportPath = resolve(root, "runner/赛事/资料品质报告.md");
+const trackingPath = resolve(root, "runner/赛事/爬虫追踪计划.md");
+const trackingJsonPath = resolve(root, "runner/赛事/爬虫追踪计划.json");
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
 
 const sourceDomains = ["running.biji.co"];
 
@@ -96,6 +101,34 @@ function raceKey(race) {
   return race.race_id || `${race.race_name || ""}|${race.race_date || ""}`;
 }
 
+function parseDate(value) {
+  if (!hasText(value)) {
+    return null;
+  }
+  const date = new Date(`${String(value).slice(0, 10)}T00:00:00+08:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDate(date) {
+  if (!date) {
+    return "";
+  }
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function daysBetween(fromDate, toDate) {
+  if (!fromDate || !toDate) {
+    return null;
+  }
+  return Math.ceil((toDate - fromDate) / MS_PER_DAY);
+}
+
 function priorityScore(missing) {
   return missing.reduce((score, item) => {
     if (item.severity === "high") {
@@ -108,16 +141,123 @@ function priorityScore(missing) {
   }, 0);
 }
 
+function trackingPlanForRace(race, missing, todayText = TODAY) {
+  const today = parseDate(todayText);
+  const raceDate = parseDate(race.race_date);
+  const opensAt = parseDate(race.registration_opens_at);
+  const deadline = parseDate(race.registration_deadline);
+  const hasImportantMissing = missing.some((item) => ["high", "medium"].includes(item.severity));
+  const daysToRace = daysBetween(today, raceDate);
+  const daysToOpen = daysBetween(today, opensAt);
+  const missingLabels = missing.map((item) => item.label).join("、");
+
+  if (!missing.length) {
+    return {
+      status: "complete",
+      status_label: "資料完整",
+      next_check_date: "",
+      cadence: "none",
+      reason: "目前品質檢查欄位都已有資料。",
+    };
+  }
+
+  if (raceDate && daysToRace < 0) {
+    return {
+      status: "archive_gap",
+      status_label: "賽事已過，低頻補齊",
+      next_check_date: todayText,
+      cadence: "manual",
+      reason: `賽事已過但仍缺：${missingLabels}。除非要補歷史資料，優先度較低。`,
+    };
+  }
+
+  if (deadline && daysBetween(today, deadline) < 0) {
+    return {
+      status: "closed_gap",
+      status_label: "已截止，低頻補齊",
+      next_check_date: todayText,
+      cadence: "manual",
+      reason: `報名已截止但仍缺：${missingLabels}。保留供歷史資料補齊。`,
+    };
+  }
+
+  if (opensAt) {
+    if (daysToOpen > 14) {
+      return {
+        status: "wait_until_open_window",
+        status_label: "等待接近開報",
+        next_check_date: formatDate(addDays(opensAt, -14)),
+        cadence: "weekly_near_open",
+        reason: `已知開報日 ${formatDate(opensAt)}，開報前 14 天再開始追蹤。`,
+      };
+    }
+    if (daysToOpen >= -30) {
+      return {
+        status: "due_now",
+        status_label: "現在該重爬",
+        next_check_date: todayText,
+        cadence: "every_3_days",
+        reason: `開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：${missingLabels}。`,
+      };
+    }
+    return {
+      status: hasImportantMissing ? "due_now" : "monitor_weekly",
+      status_label: hasImportantMissing ? "現在該重爬" : "每週追蹤",
+      next_check_date: todayText,
+      cadence: hasImportantMissing ? "weekly" : "biweekly",
+      reason: `開報日已過，仍缺：${missingLabels}。`,
+    };
+  }
+
+  if (daysToRace !== null) {
+    if (daysToRace <= 120) {
+      return {
+        status: "due_now",
+        status_label: "現在該重爬",
+        next_check_date: todayText,
+        cadence: "weekly",
+        reason: `距離賽事 ${daysToRace} 天且開報日未知，應每週追蹤報名頁是否釋出。`,
+      };
+    }
+    if (daysToRace <= 240) {
+      return {
+        status: "monitor_monthly",
+        status_label: "每月追蹤",
+        next_check_date: formatDate(addDays(today, 30)),
+        cadence: "monthly",
+        reason: `距離賽事 ${daysToRace} 天，可能尚未釋出完整資訊，先每月檢查。`,
+      };
+    }
+    return {
+      status: "wait_future",
+      status_label: "未來再查",
+      next_check_date: formatDate(addDays(raceDate, -180)),
+      cadence: "future",
+      reason: `距離賽事 ${daysToRace} 天，先排到賽前約 180 天再追。`,
+    };
+  }
+
+  return {
+    status: "due_now",
+    status_label: "現在該重爬",
+    next_check_date: todayText,
+    cadence: "weekly",
+    reason: `缺賽事日期或追蹤基準，需人工確認。缺：${missingLabels}。`,
+  };
+}
+
 function buildQueueItem(race) {
   const missing = fieldGroups
     .filter((field) => !field.hasValue(race))
     .map(({ key, label, severity, hint }) => ({ key, label, severity, hint }));
+  const tracking = trackingPlanForRace(race, missing);
   return {
     race_id: race.race_id || "",
     race_name: race.race_name || "",
     race_date: race.race_date || "",
     race_county: race.race_county || "",
     priority_score: priorityScore(missing),
+    tracking,
     missing,
     current_links: {
       registration_link: race.registration_link || "",
@@ -156,6 +296,10 @@ function completionRate(total, missingCount) {
   return `${Math.round(((total - missingCount) / total) * 100)}%`;
 }
 
+function trackingSummary(queue) {
+  return countBy(queue, (item) => item.tracking.status_label || "未分類");
+}
+
 function formatReport(races, queue) {
   const missingByField = Object.fromEntries(fieldGroups.map((field) => [field.key, 0]));
   for (const item of queue) {
@@ -165,8 +309,12 @@ function formatReport(races, queue) {
   }
 
   const byCounty = countBy(queue, (item) => item.race_county || "未標縣市");
+  const byTracking = trackingSummary(queue);
   const highPriority = queue
     .filter((item) => item.missing.some((missing) => missing.severity === "high"))
+    .slice(0, 12);
+  const dueNow = queue
+    .filter((item) => item.tracking.status === "due_now")
     .slice(0, 12);
   const generatedAt = new Date().toISOString();
 
@@ -196,6 +344,20 @@ function formatReport(races, queue) {
       .sort((a, b) => b[1] - a[1])
       .map(([county, count]) => `| ${county} | ${count} |`),
     "",
+    "## 追蹤節奏",
+    "",
+    "| 狀態 | 筆數 |",
+    "| --- | ---: |",
+    ...Object.entries(byTracking)
+      .sort((a, b) => b[1] - a[1])
+      .map(([status, count]) => `| ${status} | ${count} |`),
+    "",
+    "## 現在該重爬",
+    "",
+    "| 日期 | 賽事 | 縣市 | 下次檢查 | 原因 |",
+    "| --- | --- | --- | --- | --- |",
+    ...dueNow.map((item) => `| ${item.race_date} | ${item.race_name} | ${item.race_county} | ${item.tracking.next_check_date} | ${item.tracking.reason} |`),
+    "",
     "## 優先補資料",
     "",
     "| 日期 | 賽事 | 縣市 | 缺漏 |",
@@ -204,12 +366,51 @@ function formatReport(races, queue) {
     "",
     "## 使用方式",
     "",
-    "1. 打開 `runner/赛事/待补资料队列.json` 找 priority_score 高的賽事。",
-    "2. 用官方網站、報名平台、主辦單位公告或臉書活動頁補資料。",
-    "3. 把確認過的欄位寫進 `runner/赛事/人工补充.json`。",
-    "4. 重跑爬蟲或資料同步後，再跑 `npm run data:quality` 檢查缺漏是否下降。",
+    "1. 先看 `runner/赛事/爬虫追踪计划.md`，依「現在該重爬」與「等待接近開報」安排爬蟲。",
+    "2. 爬蟲抓不到但人工查到的欄位，寫進 `runner/赛事/人工补充.json`。",
+    "3. 跑 `npm run data:refresh` 套用人工補充並重產報告。",
+    "4. 賽事只公布日期時，不急著人工補完；讓追蹤排程在開報窗口前後提醒重查。",
     "",
   ].join("\n");
+}
+
+function formatTrackingPlan(queue) {
+  const generatedAt = new Date().toISOString();
+  const sections = [
+    ["due_now", "現在該重爬"],
+    ["wait_until_open_window", "等待接近開報"],
+    ["monitor_monthly", "每月追蹤"],
+    ["wait_future", "未來再查"],
+    ["closed_gap", "已截止，低頻補齊"],
+    ["archive_gap", "賽事已過，低頻補齊"],
+  ];
+
+  const lines = [
+    "# 爬蟲追蹤計畫",
+    "",
+    `產生時間：${generatedAt}`,
+    `追蹤基準日：${TODAY}`,
+    "",
+    "這份清單不是要求一次補完資料，而是依賽事資料公開節奏安排重查。很多賽事會先公布日期，等接近開報才補上報名頁、地點、主辦、費用與名額。",
+    "",
+  ];
+
+  for (const [status, title] of sections) {
+    const items = queue.filter((item) => item.tracking.status === status);
+    lines.push(`## ${title}`, "");
+    if (!items.length) {
+      lines.push("目前沒有賽事。", "");
+      continue;
+    }
+    lines.push("| 下次檢查 | 日期 | 賽事 | 縣市 | 節奏 | 缺漏 |");
+    lines.push("| --- | --- | --- | --- | --- | --- |");
+    for (const item of items.slice(0, 30)) {
+      lines.push(`| ${item.tracking.next_check_date || "-"} | ${item.race_date} | ${item.race_name} | ${item.race_county} | ${item.tracking.cadence} | ${item.missing.map((missing) => missing.label).join("、")} |`);
+    }
+    lines.push("");
+  }
+
+  return `${lines.join("\n")}\n`;
 }
 
 async function main() {
@@ -223,13 +424,27 @@ async function main() {
   await mkdir(dirname(queuePath), { recursive: true });
   await writeFile(queuePath, `${JSON.stringify(queue, null, 2)}\n`, "utf-8");
   await writeFile(reportPath, formatReport(races, queue), "utf-8");
+  await writeFile(trackingPath, formatTrackingPlan(queue), "utf-8");
+  await writeFile(trackingJsonPath, `${JSON.stringify(queue.map((item) => ({
+    race_id: item.race_id,
+    race_name: item.race_name,
+    race_date: item.race_date,
+    race_county: item.race_county,
+    priority_score: item.priority_score,
+    tracking: item.tracking,
+    missing: item.missing.map((missing) => missing.key),
+    current_links: item.current_links,
+  })), null, 2)}\n`, "utf-8");
 
   const highPriority = queue.filter((item) => item.missing.some((missing) => missing.severity === "high")).length;
+  const dueNow = queue.filter((item) => item.tracking.status === "due_now").length;
   console.log(`Races: ${races.length}`);
   console.log(`Needs follow-up: ${queue.length}`);
+  console.log(`Due to crawl now: ${dueNow}`);
   console.log(`Missing official registration link: ${highPriority}`);
   console.log(`Wrote: ${queuePath}`);
   console.log(`Wrote: ${reportPath}`);
+  console.log(`Wrote: ${trackingPath}`);
 }
 
 main().catch((error) => {
