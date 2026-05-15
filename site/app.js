@@ -117,6 +117,83 @@ function formatShortDate(dateText) {
   return date.month !== "--" && date.day !== "--" ? `${date.month}/${date.day}` : "";
 }
 
+function addDays(dateText, days) {
+  const date = new Date(`${dateText}T00:00:00+08:00`);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  date.setDate(date.getDate() + days);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatIcsDate(dateText) {
+  return dateText.replaceAll("-", "");
+}
+
+function escapeIcsText(value) {
+  return String(value ?? "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("\n", "\\n")
+    .replaceAll(",", "\\,")
+    .replaceAll(";", "\\;");
+}
+
+function buildCalendarEvent(race) {
+  const start = formatIcsDate(race.race_date);
+  const end = formatIcsDate(addDays(race.race_date, 1));
+  const registrationLink = getRegistrationLink(race);
+  const distances = (race.distances || []).join(" / ");
+  const description = [
+    `縣市：${race.race_county || "待確認"}`,
+    `距離：${distances || "待確認"}`,
+    `難度：${race.difficulty || "待確認"}`,
+    `報名狀態：${race.registration_status || "待確認"}`,
+    `開報：${race.registration_opens_at || "待確認"}`,
+    `截止：${race.registration_deadline || "待確認"}`,
+    registrationLink ? `報名網站：${registrationLink}` : "報名網站：待補連結",
+    race.detail_url ? `來源詳情：${race.detail_url}` : "",
+  ].filter(Boolean).join("\n");
+
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Runner Plaza//Race Board//ZH-TW",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${escapeIcsText(getRaceKey(race))}@runner-plaza`,
+    `DTSTAMP:${formatIcsDate(TODAY)}T000000Z`,
+    `DTSTART;VALUE=DATE:${start}`,
+    `DTEND;VALUE=DATE:${end}`,
+    `SUMMARY:${escapeIcsText(race.race_name)}`,
+    `LOCATION:${escapeIcsText(race.race_county || "")}`,
+    `DESCRIPTION:${escapeIcsText(description)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+}
+
+function slugifyFileName(value) {
+  return String(value || "race")
+    .trim()
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+}
+
+function downloadCalendarEvent(race) {
+  const ics = buildCalendarEvent(race);
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${race.race_date}-${slugifyFileName(race.race_name)}.ics`;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
 function getVisibleRaces() {
   const query = state.query.trim().toLowerCase();
   return state.races.filter((race) => {
@@ -248,6 +325,7 @@ function renderRaces() {
               data-favorite="${escapeHtml(key)}"
               aria-pressed="${favorite ? "true" : "false"}"
             >${favorite ? "已收藏" : "收藏"}</button>
+            <button class="calendar-button" type="button" data-calendar="${escapeHtml(key)}">加入行事曆</button>
             ${race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">來源詳情</a>` : ""}
           </div>
         </article>
@@ -266,6 +344,15 @@ function renderRaces() {
       saveFavorites();
       renderStats();
       render();
+    });
+  });
+
+  els.raceList.querySelectorAll("[data-calendar]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const race = state.races.find((item) => getRaceKey(item) === button.dataset.calendar);
+      if (race) {
+        downloadCalendarEvent(race);
+      }
     });
   });
 }
