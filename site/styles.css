@@ -11,7 +11,11 @@
   --yellow: #f5c84c;
   --orange: #e8753d;
   --blue: #dbeef3;
+  --panel: #fbf8f0;
+  --panel-strong: #f1eadc;
   --shadow: 0 16px 40px rgba(31, 42, 36, 0.1);
+  --shadow-soft: 0 10px 28px rgba(31, 42, 36, 0.07);
+  --shadow-lift: 0 16px 34px rgba(31, 42, 36, 0.12);
 }
 
 * {
@@ -44,6 +48,21 @@ input {
   font: inherit;
 }
 
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(245, 200, 76, 0.58);
+  outline-offset: 2px;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -57,6 +76,7 @@ input {
   border-bottom: 1px solid var(--line);
   background: rgba(255, 253, 248, 0.94);
   backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 rgba(31, 42, 36, 0.04);
 }
 
 .brand,
@@ -104,6 +124,7 @@ input {
 .main-nav a.active {
   color: var(--green-dark);
   background: #ecf3ed;
+  box-shadow: inset 0 0 0 1px rgba(21, 83, 56, 0.06);
 }
 
 .hero {
@@ -181,11 +202,13 @@ h1 {
   border-radius: 8px;
   font-weight: 900;
   cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
 .button.primary {
   color: #172319;
   background: var(--yellow);
+  box-shadow: 0 8px 18px rgba(145, 101, 0, 0.14);
 }
 
 .button.secondary {
@@ -198,6 +221,16 @@ h1 {
   color: white;
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.34);
+}
+
+.button:hover,
+.register-link:hover,
+.calendar-button:hover,
+.train-button:hover,
+.toggle-button:hover,
+.favorite-button:hover,
+.month-list button:hover {
+  transform: translateY(-1px);
 }
 
 .stats-strip {
@@ -222,7 +255,7 @@ h1 {
   background:
     linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(250, 246, 236, 0.96)),
     var(--paper);
-  box-shadow: 0 18px 36px rgba(31, 42, 36, 0.11);
+  box-shadow: var(--shadow-lift);
   backdrop-filter: blur(10px);
 }
 
@@ -252,6 +285,11 @@ h1 {
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
+}
+
+.stat-caption {
+  color: var(--green-dark);
+  font-weight: 950;
 }
 
 .stats-strip strong {
@@ -331,11 +369,13 @@ h3 {
 .race-console {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 18px;
+  padding: 20px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--paper);
-  box-shadow: var(--shadow);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.96)),
+    var(--paper);
+  box-shadow: var(--shadow-soft);
 }
 
 .race-tools {
@@ -375,6 +415,7 @@ h3 {
   outline: none;
   background: var(--surface);
   color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(31, 42, 36, 0.03);
 }
 
 .search-box input:focus {
@@ -388,7 +429,7 @@ h3 {
   gap: 4px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f4f0e6;
+  background: var(--panel-strong);
 }
 
 .segmented button {
@@ -406,6 +447,7 @@ h3 {
 .segmented button.active {
   color: white;
   background: var(--green-dark);
+  box-shadow: 0 7px 14px rgba(21, 83, 56, 0.16);
 }
 
 .race-layout {
@@ -421,7 +463,8 @@ h3 {
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #faf7ef;
+  background: var(--surface);
+  box-shadow: 0 8px 20px rgba(31, 42, 36, 0.05);
 }
 
 .month-panel h3 {
@@ -442,16 +485,18 @@ h3 {
   padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: 8px;
-  background: #efe9db;
+  background: var(--panel-strong);
   color: var(--ink);
   font-weight: 900;
   cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
 
 .month-list button.active {
   border-color: var(--green);
   color: white;
   background: var(--green-dark);
+  box-shadow: 0 8px 16px rgba(21, 83, 56, 0.14);
 }
 
 .race-results {
@@ -506,15 +551,18 @@ h3 {
   grid-template-columns: 86px minmax(0, 1fr) 136px;
   gap: 16px;
   align-items: center;
-  padding: 14px 16px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  box-shadow: 0 1px 0 rgba(31, 42, 36, 0.03);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .race-card:hover {
   border-color: rgba(36, 114, 79, 0.34);
-  box-shadow: 0 12px 28px rgba(31, 42, 36, 0.09);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
 }
 
 .date-block {
@@ -522,7 +570,8 @@ h3 {
   place-items: center;
   min-height: 84px;
   border-radius: 8px;
-  background: #eef5ef;
+  background:
+    linear-gradient(180deg, #eff7f1, #e8f1ea);
   color: var(--green-dark);
   text-align: center;
 }
@@ -575,6 +624,7 @@ h3 {
   font-size: 0.78rem;
   font-weight: 900;
   cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
 .icon-button {
@@ -596,6 +646,7 @@ h3 {
   font-size: 0.78rem;
   font-weight: 900;
   cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
 .favorite-button.active {
@@ -619,7 +670,7 @@ h3 {
   padding: 3px 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbf8ef;
+  background: var(--panel);
 }
 
 .registration-times dt,
@@ -712,6 +763,8 @@ h3 {
   font-weight: 900;
   line-height: 1.15;
   text-align: center;
+  box-shadow: 0 8px 16px rgba(21, 83, 56, 0.14);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
 
 .register-link.fallback {
@@ -779,11 +832,13 @@ h3 {
   gap: 22px;
   max-width: 1120px;
   margin: 0 auto;
-  padding: 18px;
+  padding: 20px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--paper);
-  box-shadow: var(--shadow);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.96)),
+    var(--paper);
+  box-shadow: var(--shadow-soft);
 }
 
 .gear-board,
@@ -835,7 +890,7 @@ h3 {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .score-grid dt {
@@ -903,10 +958,22 @@ h3 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  box-shadow: 0 1px 0 rgba(31, 42, 36, 0.03);
 }
 
-.shoe-release-list article {
+.shoe-release-list article,
+.review-grid article {
   min-height: 190px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.shoe-release-list article:hover,
+.review-grid article:hover,
+.guide-grid article:hover,
+.news-list article:hover {
+  border-color: rgba(36, 114, 79, 0.26);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
 }
 
 .shoe-release-list span {
@@ -936,7 +1003,9 @@ h3 {
   gap: 12px;
   position: sticky;
   top: 92px;
-  background: var(--paper);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.96)),
+    var(--paper);
 }
 
 .plan-builder label {
@@ -968,6 +1037,13 @@ h3 {
   background: var(--surface);
   color: var(--ink);
   font-weight: 850;
+  box-shadow: inset 0 1px 0 rgba(31, 42, 36, 0.03);
+}
+
+.plan-builder select:focus,
+.plan-builder input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(36, 114, 79, 0.12);
 }
 
 .duration-picker {
@@ -1015,6 +1091,9 @@ h3 {
 
 .plan-output {
   min-height: 320px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(255, 255, 255, 0.96)),
+    var(--surface);
 }
 
 .plan-hero,
@@ -1031,8 +1110,10 @@ h3 {
   margin-bottom: 14px;
   padding: 18px;
   border-radius: 8px;
-  background: #102116;
+  background:
+    linear-gradient(135deg, #0d2418, #173e2b);
   color: white;
+  box-shadow: 0 14px 30px rgba(15, 37, 25, 0.18);
 }
 
 .plan-hero span {
@@ -1112,7 +1193,7 @@ h3 {
 
 .training-summary div,
 .profile-summary div {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.86);
 }
 
 .pace-zones span,
@@ -1138,6 +1219,7 @@ h3 {
   padding: 14px;
   border-left: 5px solid var(--green);
   background: #edf5ef;
+  border-radius: 0 8px 8px 0;
 }
 
 .plan-export-actions {
@@ -1156,6 +1238,12 @@ h3 {
   color: white;
   font-weight: 900;
   cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.export-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(31, 42, 36, 0.12);
 }
 
 .export-button[data-export-plan="garmin"] {
@@ -1311,8 +1399,11 @@ h3 {
   padding: 22px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--paper);
-  box-shadow: 0 10px 24px rgba(31, 42, 36, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.9)),
+    var(--paper);
+  box-shadow: 0 1px 0 rgba(31, 42, 36, 0.03);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .guide-grid article {
@@ -1359,6 +1450,8 @@ h3 {
 
 .news-list article {
   min-height: 180px;
+  display: grid;
+  align-content: start;
 }
 
 .news-list time {
@@ -1397,7 +1490,11 @@ h3 {
   opacity: 0;
   pointer-events: none;
   transform: translateY(8px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.back-top:hover {
+  box-shadow: 0 16px 34px rgba(31, 42, 36, 0.22);
 }
 
 .back-top.visible {
