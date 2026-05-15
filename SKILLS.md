@@ -63,6 +63,7 @@
 - 一般修改：`npm run check`。
 - Python 修改：`uv run python -m compileall scripts`。
 - 資料流程修改：`uv run python scripts/enrich_platforms.py --dry-run` 後再跑 `npm run data:refresh`。
+- 營運狀態檢查：`npm run ops:dashboard`，看賽事完整度、官方直連率、開報後待補與內容候選量。
 - UI 修改：啟動 `npm run dev`，用瀏覽器桌面與手機 viewport 截圖檢查。
 - CSS/JS 有變動時，更新 `site/index.html` 的版本參數，避免 GitHub Pages 快取讓使用者看舊版。
 

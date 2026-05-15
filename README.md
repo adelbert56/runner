@@ -171,6 +171,17 @@ uv run python scripts/enrich_platforms.py --dry-run
 
 平台爬蟲會保守補空欄位，人工補充仍有最高優先權。補完後會產生 `runner/赛事/平台爬虫覆盖报告.md`，用來看哪些平台命中、哪些頁面抓不到或解析失敗。
 
+### 6.1 查看營運儀表板
+
+```bash
+npm run ops:dashboard
+```
+
+這會產生：
+
+- `runner/系统配置/营运仪表板.md`：賽事完整度、官方直連率、開報後待補、內容候選量與下一步。
+- `runner/系统配置/营运仪表板.json`：給後續自動化或代理人判讀的結構化摘要。
+
 ### 7. 定期更新赛事资料
 
 GitHub Actions 已提供 `.github/workflows/data-refresh.yml`，会每天 06:30（Asia/Taipei）执行：

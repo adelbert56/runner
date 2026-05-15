@@ -47,6 +47,9 @@ jobs:
       - name: Apply manual supplements and quality report
         run: npm run data:refresh
 
+      - name: Build operational dashboard
+        run: npm run ops:dashboard
+
       - name: Validate generated files
         run: npm run check
 
@@ -65,4 +68,6 @@ jobs:
             runner/赛事/爬虫追踪计划.md
             runner/赛事/爬虫追踪计划.json
             runner/赛事/平台爬虫覆盖报告.md
+            runner/系统配置/营运仪表板.md
+            runner/系统配置/营运仪表板.json
             site/data/races.json

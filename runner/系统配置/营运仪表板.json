@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-05-15T15:40:13.797Z",
+  "basis_date": "2026-05-15",
+  "races": {
+    "total": 34,
+    "follow_up_count": 14,
+    "complete_count": 20,
+    "complete_rate": "59%",
+    "official_direct_count": 20,
+    "official_direct_rate": "59%",
+    "verified_count": 21,
+    "verified_rate": "62%",
+    "opened_gap_count": 0,
+    "due_now_count": 0,
+    "monthly_tracking_count": 11,
+    "state_counts": {
+      "已截止": 5,
+      "停辦": 2,
+      "報名中": 14,
+      "尚未開報": 1,
+      "報名時間未定": 12
+    }
+  },
+  "content": {
+    "shoe_cards": 10,
+    "news_cards": 11,
+    "newest_shoe_date": "2026-05-15",
+    "newest_news_date": "2026-05-15",
+    "candidate_count": 20,
+    "candidate_by_category": {
+      "跑步新聞": 5,
+      "訓練": 6,
+      "跑鞋新品": 9
+    }
+  }
+}

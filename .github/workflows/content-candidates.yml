@@ -30,6 +30,9 @@ jobs:
       - name: Collect running content candidates
         run: npm run content:candidates
 
+      - name: Build operational dashboard
+        run: npm run ops:dashboard
+
       - name: Validate scripts
         run: npm run check
 
@@ -40,3 +43,5 @@ jobs:
           file_pattern: |
             runner/内容/候选内容.json
             runner/内容/候选内容报告.md
+            runner/系统配置/营运仪表板.md
+            runner/系统配置/营运仪表板.json

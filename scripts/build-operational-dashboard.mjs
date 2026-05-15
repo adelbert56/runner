@@ -1,0 +1,262 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+
+const root = resolve(import.meta.dirname, "..");
+const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+
+const paths = {
+  races: resolve(root, "site/data/races.json"),
+  qualityQueue: resolve(root, "runner/赛事/待补资料队列.json"),
+  openedGaps: resolve(root, "runner/赛事/开报后待补资料报告.json"),
+  tracking: resolve(root, "runner/赛事/爬虫追踪计划.json"),
+  contentCandidates: resolve(root, "runner/内容/候选内容.json"),
+  siteHtml: resolve(root, "site/index.html"),
+  outputMd: resolve(root, "runner/系统配置/营运仪表板.md"),
+  outputJson: resolve(root, "runner/系统配置/营运仪表板.json"),
+};
+
+function hasText(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
+function parseDate(value) {
+  if (!hasText(value)) {
+    return null;
+  }
+  const date = new Date(`${String(value).slice(0, 10)}T00:00:00+08:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function daysBetween(fromDate, toDate) {
+  if (!fromDate || !toDate) {
+    return null;
+  }
+  return Math.ceil((toDate - fromDate) / (24 * 60 * 60 * 1000));
+}
+
+function pct(done, total) {
+  if (!total) {
+    return "0%";
+  }
+  return `${Math.round((done / total) * 100)}%`;
+}
+
+async function readJson(path, fallback = []) {
+  try {
+    return JSON.parse(await readFile(path, "utf-8"));
+  } catch {
+    return fallback;
+  }
+}
+
+function isCancelledRace(race) {
+  const text = [
+    race.race_name,
+    race.registration_status,
+    race.registration_note,
+    race.verification_note,
+  ].filter(hasText).join(" ");
+  return /停辦|停賽|取消|被迫取消|cancel/i.test(text);
+}
+
+function isOfficialDirect(race) {
+  if (race.is_official_direct === true) {
+    return true;
+  }
+  if (!hasText(race.registration_link)) {
+    return false;
+  }
+  try {
+    return !new URL(race.registration_link).hostname.toLowerCase().endsWith("running.biji.co");
+  } catch {
+    return false;
+  }
+}
+
+function registrationState(race, todayDate) {
+  if (isCancelledRace(race)) {
+    return "停辦";
+  }
+  const raceDate = parseDate(race.race_date);
+  const opensAt = parseDate(race.registration_opens_at);
+  const deadline = parseDate(race.registration_deadline);
+  if (raceDate && daysBetween(raceDate, todayDate) > 30) {
+    return "歷史";
+  }
+  if (deadline && daysBetween(deadline, todayDate) > 0) {
+    return "已截止";
+  }
+  if (opensAt && daysBetween(todayDate, opensAt) > 0) {
+    return "尚未開報";
+  }
+  if (opensAt && deadline && daysBetween(opensAt, todayDate) >= 0 && daysBetween(todayDate, deadline) >= 0) {
+    return "報名中";
+  }
+  return race.registration_status || "待確認";
+}
+
+function countBy(items, getKey) {
+  return items.reduce((acc, item) => {
+    const key = getKey(item) || "未分類";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function countContentCards(html, type) {
+  const pattern = type === "shoe" ? /data-shoe-card\b/g : /data-news-card\b/g;
+  return [...html.matchAll(pattern)].length;
+}
+
+function newestContentDate(html, type) {
+  const attr = type === "shoe" ? "data-shoe-card" : "data-news-card";
+  const pattern = new RegExp(`<article[^>]*${attr}[^>]*data-date=["']([^"']+)["']`, "gi");
+  const dates = [...html.matchAll(pattern)].map((match) => match[1]).filter(Boolean).sort().reverse();
+  return dates[0] || "";
+}
+
+function topEntries(items, count = 8) {
+  return items.slice(0, count);
+}
+
+function table(rows) {
+  if (!rows.length) {
+    return "目前沒有項目。\n";
+  }
+  return rows.join("\n") + "\n";
+}
+
+function statusLine(label, value, target, ok) {
+  return `| ${label} | ${value} | ${target} | ${ok ? "正常" : "需處理"} |`;
+}
+
+async function main() {
+  const todayDate = parseDate(today);
+  const [races, queue, openedGaps, tracking, candidates] = await Promise.all([
+    readJson(paths.races),
+    readJson(paths.qualityQueue),
+    readJson(paths.openedGaps),
+    readJson(paths.tracking),
+    readJson(paths.contentCandidates),
+  ]);
+  const html = await readFile(paths.siteHtml, "utf-8");
+
+  const officialDirectCount = races.filter(isOfficialDirect).length;
+  const verifiedCount = races.filter((race) => hasText(race.verified_at)).length;
+  const openGapCount = openedGaps.length;
+  const dueNow = tracking.filter((item) => item.tracking?.status === "due_now");
+  const monthly = tracking.filter((item) => item.tracking?.cadence === "monthly_1_15");
+  const candidateByCategory = countBy(candidates, (item) => item.category);
+  const raceStateCounts = countBy(races, (race) => registrationState(race, todayDate));
+  const shoeCards = countContentCards(html, "shoe");
+  const newsCards = countContentCards(html, "news");
+
+  const dashboard = {
+    generated_at: new Date().toISOString(),
+    basis_date: today,
+    races: {
+      total: races.length,
+      follow_up_count: queue.length,
+      complete_count: races.length - queue.length,
+      complete_rate: pct(races.length - queue.length, races.length),
+      official_direct_count: officialDirectCount,
+      official_direct_rate: pct(officialDirectCount, races.length),
+      verified_count: verifiedCount,
+      verified_rate: pct(verifiedCount, races.length),
+      opened_gap_count: openGapCount,
+      due_now_count: dueNow.length,
+      monthly_tracking_count: monthly.length,
+      state_counts: raceStateCounts,
+    },
+    content: {
+      shoe_cards: shoeCards,
+      news_cards: newsCards,
+      newest_shoe_date: newestContentDate(html, "shoe"),
+      newest_news_date: newestContentDate(html, "news"),
+      candidate_count: candidates.length,
+      candidate_by_category: candidateByCategory,
+    },
+  };
+
+  const metrics = [
+    statusLine("賽事資料完整度", dashboard.races.complete_rate, "80% 以上", dashboard.races.complete_count / Math.max(races.length, 1) >= 0.8),
+    statusLine("官方直連率", dashboard.races.official_direct_rate, "80% 以上", officialDirectCount / Math.max(races.length, 1) >= 0.8),
+    statusLine("已查證比例", dashboard.races.verified_rate, "80% 以上", verifiedCount / Math.max(races.length, 1) >= 0.8),
+    statusLine("開報後待補", `${openGapCount} 場`, "0 場", openGapCount === 0),
+    statusLine("跑鞋上架量", `${shoeCards} 筆`, "至少 10 筆", shoeCards >= 10),
+    statusLine("新聞上架量", `${newsCards} 筆`, "至少 10 筆", newsCards >= 10),
+    statusLine("內容候選量", `${candidates.length} 筆`, "至少 20 筆", candidates.length >= 20),
+  ];
+
+  const nextActions = [];
+  if (openGapCount > 0) {
+    nextActions.push("優先處理 `runner/赛事/开报后待补资料报告.md`，這些是已開報但資料仍不完整的賽事。");
+  }
+  if (dueNow.length > 0) {
+    nextActions.push("依 `runner/赛事/爬虫追踪计划.md` 的「現在該重爬」修平台 parser 或補人工資料。");
+  }
+  if (officialDirectCount / Math.max(races.length, 1) < 0.8) {
+    nextActions.push("提高官方報名直連率，避免卡片只留下運動筆記或待補連結。");
+  }
+  if (candidates.length >= 20) {
+    nextActions.push("從 `runner/内容/候选内容报告.md` 挑選高分跑鞋與訓練文章，整理成中文摘要後上架。");
+  }
+  if (!nextActions.length) {
+    nextActions.push("目前主要營運指標正常，下一步可做平台 parser 精準度與手機體驗細修。");
+  }
+
+  const md = [
+    "# 營運儀表板",
+    "",
+    `產生時間：${dashboard.generated_at}`,
+    `追蹤基準日：${today}`,
+    "",
+    "這份報告把賽事資料品質、爬蟲追蹤、跑鞋與新聞內容量整合在一起，用來判斷下一輪最該補哪裡。",
+    "",
+    "## 指標",
+    "",
+    "| 項目 | 目前 | 目標 | 狀態 |",
+    "| --- | ---: | ---: | --- |",
+    ...metrics,
+    "",
+    "## 賽事狀態分布",
+    "",
+    "| 狀態 | 筆數 |",
+    "| --- | ---: |",
+    ...Object.entries(raceStateCounts).sort((a, b) => b[1] - a[1]).map(([key, value]) => `| ${key} | ${value} |`),
+    "",
+    "## 內容候選分布",
+    "",
+    "| 分類 | 筆數 |",
+    "| --- | ---: |",
+    ...Object.entries(candidateByCategory).sort((a, b) => b[1] - a[1]).map(([key, value]) => `| ${key} | ${value} |`),
+    "",
+    "## 近期需處理",
+    "",
+    "### 開報後待補",
+    "",
+    table(topEntries(openedGaps).map((item) => `- ${item.race_date || item.registration_opens_at || "-"}｜${item.race_name}｜缺：${item.missing.map((missing) => missing.label).join("、")}`)).trim(),
+    "",
+    "### 現在該重爬",
+    "",
+    table(topEntries(dueNow).map((item) => `- ${item.race_date || "-"}｜${item.race_name}｜${item.tracking?.reason || ""}`)).trim(),
+    "",
+    "## 下一步",
+    "",
+    ...nextActions.map((item) => `- ${item}`),
+    "",
+  ].join("\n");
+
+  await mkdir(dirname(paths.outputMd), { recursive: true });
+  await writeFile(paths.outputMd, `${md}\n`, "utf-8");
+  await writeFile(paths.outputJson, `${JSON.stringify(dashboard, null, 2)}\n`, "utf-8");
+
+  console.log(`Operational dashboard: ${paths.outputMd}`);
+  console.log(`Race completeness: ${dashboard.races.complete_rate}`);
+  console.log(`Content candidates: ${dashboard.content.candidate_count}`);
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

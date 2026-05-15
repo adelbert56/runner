@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "node site/server.mjs",
-    "check": "node --check site/app.js && node --check site/server.mjs && node --check scripts/validate-race-data.mjs && node --check scripts/apply-manual-overrides.mjs && node --check scripts/enrich-official-race-data.mjs && node --check scripts/collect-content-candidates.mjs && node --check scripts/sync-race-data.mjs",
+    "check": "node --check site/app.js && node --check site/server.mjs && node --check scripts/validate-race-data.mjs && node --check scripts/apply-manual-overrides.mjs && node --check scripts/enrich-official-race-data.mjs && node --check scripts/collect-content-candidates.mjs && node --check scripts/sync-race-data.mjs && node --check scripts/build-operational-dashboard.mjs",
     "data:apply": "node scripts/apply-manual-overrides.mjs",
     "data:sync": "node scripts/sync-race-data.mjs",
     "data:enrich:official": "node scripts/enrich-official-race-data.mjs",
     "data:quality": "node scripts/validate-race-data.mjs",
     "data:refresh": "npm run data:apply && npm run data:sync && npm run data:quality",
     "data:refresh:online": "npm run data:apply && npm run data:enrich:official && npm run data:sync && npm run data:quality",
-    "content:candidates": "node scripts/collect-content-candidates.mjs"
+    "content:candidates": "node scripts/collect-content-candidates.mjs",
+    "ops:dashboard": "node scripts/build-operational-dashboard.mjs"
   }
 }
