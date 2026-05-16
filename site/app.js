@@ -1010,6 +1010,14 @@ function formatStartTimes(race, fallback = "官方尚未提供各距離開跑時
   return items.length ? items.join("、") : fallback;
 }
 
+function renderStartTimes(race) {
+  const items = getStartTimeItems(race);
+  if (!items.length) {
+    return "";
+  }
+  return `<ul class="start-time-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
 function sourceLabelForRace(race) {
   return firstText(race.source_platform, race.source, "資料來源待確認");
 }
@@ -1365,7 +1373,7 @@ function renderRaces() {
                       factItems.length
                         ? `
                     <dl>
-                      ${factItems.map((item) => `<div><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${escapeHtml(item.value)}</dd></div>`).join("")}
+                      ${factItems.map((item) => `<div><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : escapeHtml(item.value)}</dd></div>`).join("")}
                     </dl>
                         `
                         : ""
