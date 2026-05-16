@@ -1,387 +1,329 @@
-# 🏃 跑者广场 (Runner Plaza)
+# 跑者廣場
 
-> 一个为台湾中部跑者打造的社区平台：赛事聚合 + 心得分享 + 数据分析
+跑者廣場是一個以臺灣中部跑者為主的路跑資訊站，整理臺中、彰化、南投、苗栗賽事，並補充跑鞋新品、跑步新聞與練跑菜單工具。專案目前採靜態網站加 GitHub Actions 自動更新資料，適合小型社群或內部團體用低成本方式維護。
 
-## 项目概览
+公開網站：[https://adelbert56.github.io/runner/site/](https://adelbert56.github.io/runner/site/)
 
-**跑者广场**是一个多层次的跑步社区系统：
+## 目前狀態
 
-- 📝 **知识库**: Obsidian vault，存储赛事信息和心得分享
-- 🤖 **自动化**: Claude Code Skills + Python爬虫，自动爬取和处理赛事数据
-- 💾 **第二大脑**: Claude Code Memory系统，存储项目规则和决策
-- 🌐 **未来展示**: 计划开发网站/App展示内容
+- 倉庫狀態：Public
+- 網站部署：GitHub Pages
+- 賽事資料：每日自動爬蟲與品質檢查
+- 跑鞋 / 新聞資料：每週自動收集候選內容並自動上架摘要
+- 本機預覽：`npm run dev`
+- 主要資料來源：運動筆記、iRunner、Lohas、CTRun、JoinNow、Focusline、bao-ming、EventGo，以及跑鞋 / 跑步內容來源
 
----
+## 功能
 
-## 📂 项目结构
+- 中部路跑賽事公告：依縣市、月份、難度、距離、報名狀態篩選。
+- 官方報名入口：優先導向官方或主辦平台，避免只停在資料聚合頁。
+- 資料品質標記：保存來源平台、官方直連、最後查證時間、缺漏欄位與人工補充。
+- 收藏與行事曆：收藏存在使用者裝置瀏覽器；賽事可匯出手機行事曆使用。
+- 歷史賽事：過期超過一個月的賽事收進歷史資料邏輯。
+- 跑鞋新品與心得：整理跑鞋新品、評測心得、選鞋知識與文章收藏。
+- 跑步新聞：收集中文跑步新聞與訓練文章，可排序與收藏。
+- 練跑菜單：依目標距離、完賽時間、配速、目標賽事日期、每週可跑天數與目前能力生成課表。
+- 營運儀表板：追蹤賽事完整度、官方直連率、開報後待補、內容候選量與下一步。
 
+## 技術架構
+
+| 類別 | 技術 |
+| --- | --- |
+| 網站 | Static HTML / CSS / JavaScript |
+| 本機伺服器 | Node.js |
+| 賽事爬蟲 | Python 3.11、requests、BeautifulSoup |
+| 資料處理 | Node.js scripts、Python scripts |
+| 資料格式 | JSON、Markdown |
+| 知識庫 | Obsidian-style Markdown vault |
+| 部署 | GitHub Pages |
+| 自動化 | GitHub Actions |
+
+## 專案結構
+
+```text
+.
+├── site/                         # GitHub Pages 網站
+│   ├── index.html
+│   ├── app.js
+│   ├── styles.css
+│   ├── assets/
+│   └── data/
+│       ├── races.json            # 網站使用的賽事資料
+│       └── content.json          # 網站使用的跑鞋 / 新聞資料
+├── scripts/                      # 爬蟲、資料整理與報告產生
+│   ├── main.py                   # 賽事主爬蟲入口
+│   ├── enrich_platforms.py       # 官方平台補資料
+│   ├── collect-content-candidates.mjs
+│   ├── publish-content.mjs
+│   ├── validate-race-data.mjs
+│   ├── sync-race-data.mjs
+│   ├── build-operational-dashboard.mjs
+│   ├── platforms/                # iRunner / Lohas / CTRun 等平台解析
+│   └── scrapers/                 # 原始賽事來源爬蟲
+├── runner/                       # 第二大腦與資料庫
+│   ├── 赛事/
+│   │   ├── 赛事数据库.json
+│   │   ├── 人工补充.json
+│   │   ├── 中部赛事列表.md
+│   │   ├── 资料品质报告.md
+│   │   ├── 开报后待补资料报告.md
+│   │   ├── 报名日期异常报告.md
+│   │   └── 平台爬虫覆盖报告.md
+│   ├── 内容/
+│   │   ├── 候选内容.json
+│   │   ├── 候选内容报告.md
+│   │   └── 自动上架内容报告.md
+│   └── 系统配置/
+│       ├── 资料更新SOP.md
+│       ├── 营运仪表板.md
+│       └── 内容来源与爬虫规划.md
+├── .github/workflows/
+│   ├── pages.yml                 # 部署網站
+│   ├── data-refresh.yml          # 賽事資料更新
+│   └── content-candidates.yml    # 跑鞋 / 新聞候選內容更新
+├── package.json
+├── pyproject.toml
+└── README.md
 ```
-Runner/
-├── README.md                          # 本文件
-├── runner/                             # Obsidian vault根目录
-│   ├── 歡迎.md                        # 项目首页
-│   ├── 赛事/                          # 赛事信息
-│   │   ├── 2026-中部赛事列表.md      # 赛事汇总表
-│   │   └── 爬虫日志.md               # 爬虫运行日志
-│   ├── 心得/                          # 个人分享
-│   │   ├── 装备/                     # 跑鞋、服装、手表评测
-│   │   ├── 训练/                     # 训练日志、课表
-│   │   ├── 比赛/                     # 赛事体验、成绩分享
-│   │   └── 营养/                     # 饮食、补给建议
-│   ├── 社区/                          # 社区系统
-│   │   ├── 投稿指南.md               # 投稿格式和流程
-│   │   ├── 审核队列.md               # 待审核投稿
-│   │   └── 已发布.md                 # 已发布内容索引
-│   ├── 数据分析/                      # 统计和分析
-│   │   ├── 赛事统计.md               # 赛事热度、参赛人数
-│   │   └── 参赛人数趋势.md           # 长期趋势分析
-│   ├── 系统配置/                      # 配置文件
-│   │   ├── 标签体系.md               # Obsidian标签规范
-│   │   ├── 爬虫规则.json             # 爬虫配置
-│   │   ├── MCP配置.md                # 外部集成配置
-│   │   └── .obsidian/                # Obsidian应用配置
-│   └── attachments/                   # 图片和附件
-│
-├── .claude/                            # Claude Code配置
-│   ├── memory/                        # 第二大脑系统（Claude的持久化记忆）
-│   │   ├── project_context.md         # 项目背景
-│   │   ├── data_sources.md            # 数据源规范
-│   │   ├── content_guidelines.md      # 内容规范
-│   │   ├── automation_status.md       # 自动化状态
-│   │   └── MEMORY.md                  # 内存索引
-│   ├── plans/                         # 项目规划
-│   │   └── virtual-napping-puppy.md  # Phase制实施计划
-│   └── settings.json                  # Claude Code权限配置
-│
-└── scripts/                            # Python脚本（待开发）
-    ├── scrapers/                      # 爬虫脚本
-    │   ├── runner_plaza_scraper.py   # 跑者广场爬虫
-    │   ├── sports_note_scraper.py    # 运动笔记爬虫
-    │   └── ...
-    ├── processors/                    # 数据处理脚本
-    │   ├── content_processor.py       # 内容格式化
-    │   └── dedup.py                   # 去重逻辑
-    └── scheduler.py                   # 定时任务调度
-```
 
----
+## 快速開始
 
-## 🚀 快速开始
+### 1. 安裝需求
 
-### 1. 查看项目（用户/编辑）
+- Node.js 22 或相容版本
+- Python 3.11+
+- uv
+- Git
+
+### 2. 下載專案
 
 ```bash
-# 打开Obsidian
-1. 打开 Runner 文件夹为vault
-2. 点击 歡迎.md 了解项目
-3. 浏览各个文件夹的内容
+git clone https://github.com/adelbert56/runner.git
+cd runner
 ```
 
-### 2. 投稿新内容
+### 3. 安裝 Python 依賴
 
 ```bash
-1. 阅读 runner/社区/投稿指南.md
-2. 准备内容（按格式要求）
-3. 发送到 投稿群组（Line/Telegram）
-4. 等待24小时内审核 ✓
+uv sync
 ```
 
-### 3. 启动爬虫（开发者）
-
-```bash
-# 待Phase 2完成
-# python scripts/scheduler.py --start
-```
-
-### 4. 启动网站预览
+### 4. 啟動本機網站
 
 ```bash
 npm run dev
 ```
 
-打开 `http://localhost:4173/site/` 查看目前的网站版本。网站会读取 `runner/赛事/赛事数据库.json`，并展示中部赛事、跑鞋心得、练跑知识与新闻更新。
+開啟：
 
-网站功能：
-
-- 赛事查询与筛选
-- 收藏赛事（储存在浏览器）
-- 外部报名网站连结
-- 开报/截止时间标记
-- 下载 `.ics` 行事历档，Android 与 iPhone 可汇入手机行事历
-
-### 5. 启动爬虫环境
-
-```bash
-uv sync
-uv run python scripts/main.py --dry-run
+```text
+http://localhost:4173/site/
 ```
 
-正式更新资料库与 Obsidian 文件：
+不要直接用檔案方式開 `site/index.html`，因為瀏覽器安全限制可能造成 `site/data/*.json` 載入失敗。
+
+## 常用指令
+
+| 指令 | 用途 |
+| --- | --- |
+| `npm run dev` | 啟動本機靜態網站預覽 |
+| `npm run check` | 檢查主要 JavaScript 檔案語法 |
+| `npm run data:apply` | 套用人工補充資料 |
+| `npm run data:sync` | 同步賽事資料到網站資料 |
+| `npm run data:quality` | 產生資料品質、待補、異常報告 |
+| `npm run data:refresh` | 套用人工補充、同步網站資料、產生品質報告 |
+| `npm run data:refresh:online` | 加上官方平台補資料的完整線上更新 |
+| `npm run content:candidates` | 收集跑鞋 / 新聞候選內容 |
+| `npm run content:publish` | 將候選內容整理成網站資料 |
+| `npm run content:refresh` | 收集並發布跑鞋 / 新聞內容 |
+| `npm run ops:dashboard` | 產生營運儀表板 |
+
+## 賽事資料更新
+
+本機完整更新：
 
 ```bash
 uv run python scripts/main.py
 uv run python scripts/enrich_platforms.py
 npm run data:refresh
+npm run ops:dashboard
+npm run check
 ```
 
-### 6. 检查赛事资料品质
-
-不重跑爬虫也可以先盘点现有资料缺口：
+只想看目前資料品質，不重跑爬蟲：
 
 ```bash
 npm run data:quality
 ```
 
-这个指令会产生：
-
-- `runner/赛事/待补资料队列.json`：给人工补资料或下一轮爬虫使用的缺漏清单
-- `runner/赛事/资料品质报告.md`：依欄位、縣市和優先序整理的資料品質報告
-- `runner/赛事/爬虫追踪计划.md`：依開報窗口、賽事日期與缺漏欄位安排下次重爬時機
-
-目前重点检查官方报名连结、开报时间、截止时间、精确地点、主办单位、费用、名额与资料查证时间。
-很多賽事早期只公布日期，追蹤計畫會把它們排到接近開報日再查，不會把所有缺漏都當成現在必須人工補完。
-
-人工补资料后，可以直接套用到网站资料：
-
-```bash
-npm run data:apply
-```
-
-若要「套用人工补充 → 重新产生资料品质报告」，使用：
-
-```bash
-npm run data:refresh
-```
-
-若要只測試官方平台補資料，不寫入檔案：
+官方平台補資料測試，不寫入：
 
 ```bash
 uv run python scripts/enrich_platforms.py --dry-run
 ```
 
-目前官方平台補資料支援：
+### 賽事資料品質檢查重點
 
-- iRunner
-- Lohas
-- bao-ming / 伊貝特
-- EventGo
-- Focusline
-- CTRun
-- JoinNow
+- 官方報名連結
+- 精確地點
+- 主辦單位
+- 報名費用
+- 名額
+- 開報時間
+- 報名截止時間
+- 最後查證時間
+- 是否官方直連
+- 資料來源平台
 
-平台爬蟲會保守補空欄位，人工補充仍有最高優先權。補完後會產生 `runner/赛事/平台爬虫覆盖报告.md`，用來看哪些平台命中、哪些頁面抓不到或解析失敗。
+若報名日已開始但仍缺關鍵資料，會進入 `runner/赛事/开报后待补资料报告.md`。這份報告是下一輪爬蟲或人工補資料的優先清單。
 
-### 6.1 查看營運儀表板
+## 跑鞋與新聞資料更新
+
+本機更新：
 
 ```bash
+npm run content:refresh
 npm run ops:dashboard
+npm run check
 ```
 
-這會產生：
+主要輸出：
 
-- `runner/系统配置/营运仪表板.md`：賽事完整度、官方直連率、開報後待補、內容候選量與下一步。
-- `runner/系统配置/营运仪表板.json`：給後續自動化或代理人判讀的結構化摘要。
+- `runner/内容/候选内容.json`
+- `runner/内容/候选内容报告.md`
+- `runner/内容/自动上架内容报告.md`
+- `site/data/content.json`
 
-### 7. 定期更新赛事资料
+內容流程會先收集候選文章，再依分類、分數、標題與摘要品質自動整理到網站。摘要優先使用文章頁面的 meta description；若來源摘要過短或太籠統，會改用站內規則產生跑者視角摘要。
 
-GitHub Actions 已提供 `.github/workflows/data-refresh.yml`，会每天 06:30（Asia/Taipei）执行：
+## GitHub Actions
+
+### Deploy static site
+
+檔案：`.github/workflows/pages.yml`
+
+觸發：
+
+- 推送到 `main`
+- 手動執行
+
+用途：
+
+- 將 `site/` 部署到 GitHub Pages。
+- 部署完成後網站位於 [https://adelbert56.github.io/runner/site/](https://adelbert56.github.io/runner/site/)。
+
+### Refresh race data
+
+檔案：`.github/workflows/data-refresh.yml`
+
+觸發：
+
+- 每天 06:30 Asia/Taipei
+- 手動執行
+
+用途：
+
+- 重跑賽事爬蟲。
+- 補官方平台資料。
+- 套用人工補充。
+- 更新品質報告、追蹤計畫、營運儀表板和網站資料。
+- 有變更時自動提交 `chore(data): refresh race data`。
+
+### Collect content candidates
+
+檔案：`.github/workflows/content-candidates.yml`
+
+觸發：
+
+- 每週一 09:00 Asia/Taipei
+- 手動執行
+
+用途：
+
+- 收集跑鞋新品、跑步新聞、訓練文章候選資料。
+- 自動整理可上架內容到 `site/data/content.json`。
+- 更新營運儀表板。
+- 有變更時自動提交 `chore(content): refresh running content candidates`。
+
+## 如何確認 GitHub 上自動化正常
+
+1. 進入 GitHub 倉庫：[https://github.com/adelbert56/runner](https://github.com/adelbert56/runner)
+2. 點選 `Actions`
+3. 查看三個 workflow：
+   - `Deploy static site`
+   - `Refresh race data`
+   - `Collect content candidates`
+4. 綠色勾勾代表該次成功。
+5. 若 `Refresh race data` 或 `Collect content candidates` 成功且有資料變更，GitHub Actions bot 會自動新增 commit。
+
+## GitHub Pages 設定
+
+第一次公開部署時，請確認：
+
+1. GitHub repo 進入 `Settings`
+2. 左側點 `Pages`
+3. `Build and deployment` 的 `Source` 選 `GitHub Actions`
+4. 回到 `Actions` 手動執行 `Deploy static site`，或推送一次 `main`
+
+## 資料維護原則
+
+- 人工補充資料優先權最高。
+- 官方平台資料優先於聚合平台資料。
+- 報名連結優先導向官方或主辦平台。
+- 抓不到資料時保留來源與缺漏欄位，不用猜。
+- 開報日前後提高追蹤優先度。
+- 報名截止後降低追蹤頻率。
+- 賽事過期超過一個月收進歷史賽事邏輯。
+- 停辦、報名中、已截止、尚未開報等狀態必須清楚標色。
+
+## 重要文件
+
+| 文件 | 用途 |
+| --- | --- |
+| `runner/系统配置/资料更新SOP.md` | 資料更新與檢查流程 |
+| `runner/系统配置/营运仪表板.md` | 目前資料與內容狀態 |
+| `runner/赛事/资料品质报告.md` | 賽事資料完整度 |
+| `runner/赛事/开报后待补资料报告.md` | 開報後仍缺資料的優先補強清單 |
+| `runner/赛事/报名日期异常报告.md` | 開報 / 截止日期邏輯異常 |
+| `runner/赛事/平台爬虫覆盖报告.md` | 官方平台爬蟲命中狀況 |
+| `runner/内容/候选内容报告.md` | 跑鞋 / 新聞候選內容 |
+| `runner/内容/自动上架内容报告.md` | 已自動上架內容 |
+| `SKILLS.md` | 代理人實作經驗與協作準則 |
+
+## 常見問題
+
+### 為什麼本機直接開 `site/index.html` 會顯示資料載入失敗？
+
+網站需要讀取 `site/data/races.json` 與 `site/data/content.json`。直接用檔案方式開啟時，瀏覽器可能阻擋本機 JSON 讀取。請改用：
 
 ```bash
-uv run python scripts/main.py
-uv run python scripts/enrich_platforms.py
-npm run data:refresh
+npm run dev
 ```
 
-这个流程会尝试重跑爬虫、套用人工补充、更新资料品质报告和爬虫追踪计划，并在资料有变化时自动提交。也可以在 GitHub Actions 页面手动执行 `Refresh race data`。
+### 手機行事曆能不能直接連動？
 
-資料更新 SOP：
+目前採 `.ics` 行事曆匯出，Android 與 iPhone 都可匯入。這是小型公開靜態站最穩定、最不需要登入的方式。若未來要做到直接寫入 Google Calendar 或 Apple Calendar，需要 OAuth 登入與後端服務。
 
-- [資料更新 SOP](runner/系统配置/资料更新SOP.md)
-- [代理人實作準則](SKILLS.md)
-- [第二大腦索引](runner/系统配置/第二大脑.md)
-- 每月追蹤固定排在每月 1 號與 15 號。
-- 開報日前後會提高檢查優先度，報名截止或賽事過期後降低追蹤頻率。
+### 收藏會不會換裝置就不見？
 
-### 8. GitHub Pages 部署
+目前收藏綁在裝置瀏覽器的 localStorage。這符合小眾內部系統低維護成本的需求。若要跨裝置同步，需要登入系統或後端資料庫。
 
-项目已提供 `.github/workflows/pages.yml`。推送到 `main` 后，GitHub Actions 会部署静态网站。
+### GitHub Actions 沒有產生新 commit 是不是失敗？
 
-部署入口：
+不一定。若爬蟲成功但資料沒有變動，auto-commit action 不會新增 commit。請以 Actions run 的狀態為準。
 
-```text
-https://adelbert56.github.io/runner/site/
-```
+### 資料沒有全部自動補齊是爬蟲壞了嗎？
 
-如果第一次部署没有出现页面，请到 GitHub repo 的 Settings → Pages，把 Build and deployment source 设为 GitHub Actions。
+不一定。很多賽事一開始只公布日期，詳細地點、費用、名額會等開報後才出現。系統會把「已開報但仍缺資料」列入優先報告，方便下一輪爬蟲或人工查證。
 
----
+## 開發注意事項
 
-## 📋 项目进度
+- 不要提交 `.obsidian/workspace.json`，這類本機 UI 狀態已放進 `.gitignore`。
+- 更新賽事資料前先檢查 `runner/赛事/人工补充.json`，避免覆蓋人工查證內容。
+- 若新增平台爬蟲，請同步更新 `runner/系统配置/内容来源与爬虫规划.md` 或資料 SOP。
+- 任何 UI 調整都要檢查手機版，尤其是賽事卡片、篩選列、練跑菜單表單。
+- 公開網站內容以繁體中文為主。
 
-### Phase 1: 基础设施 ✅
-- [x] Obsidian项目结构设计
-- [x] Memory系统建立（4个核心文档）
-- [x] 投稿指南 + 标签体系
-- [x] 爬虫规则配置（JSON）
-- [ ] Obsidian链接测试
+## License
 
-**Status**: 进行中 (完成度 80%)
-
-### Phase 2: 爬虫系统 🔨 (下周开始)
-- [ ] race-scraper-skill 开发
-- [ ] Python爬虫脚本 (5个网站)
-- [ ] 数据去重逻辑
-- [ ] Obsidian自动更新
-
-**预计时间**: 7天
-
-### Phase 3: 内容处理 ⏳
-- [ ] content-processor-skill
-- [ ] community-manager-skill
-- [ ] 投稿队列自动化
-
-**预计时间**: 7天
-
-### Phase 4: 数据分析 ⏳
-- [ ] analytics-skill
-- [ ] Obsidian统计视图
-- [ ] 网站API接口
-
-**预计时间**: 7天
-
-### v1.0: 网站展示 🌐
-- [x] 静态网站预览版（site/）
-- [ ] 前端框架（Next.js/Vue）
-- [ ] 后端API（FastAPI/Node）
-- [ ] Obsidian <> 网站同步
-- [ ] 用户评论系统
-
-**预计时间**: 4-6周
-
----
-
-## 🛠️ 技术栈
-
-### 现阶段（v0.1）
-- **知识库**: Obsidian (Markdown)
-- **自动化**: Claude Code Skills
-- **爬虫**: Python (requests/selenium)
-- **存储**: 本地文件 (JSON/Markdown)
-
-### 计划（v0.5+）
-- **前端**: Next.js / React
-- **后端**: FastAPI / Node.js
-- **数据库**: PostgreSQL / MongoDB
-- **部署**: Docker + AWS/GCP
-
----
-
-## 📖 重要文档
-
-### 用户文档
-- [投稿指南](runner/社区/投稿指南.md) - 如何投稿
-- [标签体系](runner/系统配置/标签体系.md) - 如何分类内容
-- [2026赛事列表](runner/赛事/2026-中部赛事列表.md) - 赛事信息
-
-### 开发文档
-- [项目规划](../.claude/plans/virtual-napping-puppy.md) - Phase制实施计划
-- [Memory系统](../.claude/memory/MEMORY.md) - 第二大脑索引
-- [爬虫规则](runner/系统配置/爬虫规则.json) - 爬虫配置
-- [数据源规范](../.claude/memory/data_sources.md) - 各网站爬虫策略
-
-### 系统文档
-- [MCP配置](runner/系统配置/MCP配置.md) - 外部集成计划
-- [自动化状态](../.claude/memory/automation_status.md) - Skills开发进度
-
----
-
-## 🎯 核心数据流
-
-```
-投稿 → 社群 → 审核队列 ✓
-                  ↓
-                 格式化 (content-processor-skill)
-                  ↓
-          添加标签/元数据
-                  ↓
-            发布到Obsidian
-                  ↓
-          同步到网站 (未来)
-
-网站爬虫 → 爬取赛事 (race-scraper-skill) → 去重
-                  ↓
-          格式化为Markdown
-                  ↓
-        自动更新赛事列表
-                  ↓
-          生成统计报告 (analytics-skill)
-```
-
----
-
-## 📊 预期效果
-
-### 当前状态
-- 📝 手动投稿系统
-- 🔍 人工维护赛事库
-- 📂 知识库组织
-
-### 3个月后（v0.5）
-- ✅ 自动爬虫运行
-- ✅ 内容自动分类
-- ✅ 社区管理自动化
-- ✅ 赛事热度分析
-
-### 6个月后（v1.0）
-- ✅ 网站上线
-- ✅ 个人数据追踪
-- ✅ 推荐算法
-- ✅ 社交分享
-
----
-
-## 🤝 贡献指南
-
-### 投稿内容
-1. 参考 [投稿指南](runner/社区/投稿指南.md)
-2. 发送到投稿群组
-3. 等待审核
-
-### 改进建议
-1. 提Issue或评论
-2. 或直接修改Obsidian文件
-3. 通知管理员审核
-
-### 开发参与
-1. Fork本项目
-2. 新建分支 (feature/xxx)
-3. 提交Pull Request
-
----
-
-## 📞 联系方式
-
-- **投稿**: [投稿群组](待公布)
-- **建议反馈**: @管理员
-- **Bug报告**: GitHub Issues
-
----
-
-## 📜 许可证
-
-暂未指定，欢迎建议。
-
----
-
-## 🙏 致谢
-
-感谢所有贡献者的分享和支持！
-
----
-
-**项目启动**: 2026-05-15  
-**当前版本**: v0.1 (Beta)  
-**维护者**: 管理员小组  
-**最后更新**: 2026-05-15
-
-祝你跑步愉快！🏃‍♂️🏃‍♀️
+目前尚未指定授權。若要開放外部貢獻，建議後續補上明確 license。
