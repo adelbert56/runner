@@ -362,6 +362,7 @@ uv run python -m compileall scripts
 | 文件 | 用途 |
 | --- | --- |
 | [runner/系統配置/資料更新SOP.md](runner/系統配置/資料更新SOP.md) | 資料更新與檢查流程 |
+| [runner/系統配置/本地收尾整理.md](runner/系統配置/本地收尾整理.md) | 本機資料夾、救援資料與排程觀察狀態 |
 | [runner/系統配置/營運儀表板.md](runner/系統配置/營運儀表板.md) | 目前資料與內容狀態 |
 | [runner/賽事/資料品質報告.md](runner/賽事/資料品質報告.md) | 賽事資料完整度 |
 | [runner/賽事/開報後待補資料報告.md](runner/賽事/開報後待補資料報告.md) | 開報後仍缺資料的優先補強清單 |
