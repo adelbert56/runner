@@ -23,6 +23,7 @@
 ## 資料原則
 
 - 官方報名網站優先，避免把需要登入的中介頁當成主要入口。
+- `is_official_direct` 只能由非 `running.biji.co` 的 `registration_link` 判定；不要因為平台曾被爬蟲掃描就標 true。
 - 人工補充資料優先權最高，平台爬蟲只補空欄位或低信心欄位。
 - 平台解析要保守：沒抓準就寫入待補或報告，不要用泛用文字硬塞主辦、費用、名額。
 - 每筆重要賽事盡量保留 `verified_at`、`source_platform`、`is_official_direct`、`verification_note` 與缺漏欄位。
@@ -74,6 +75,7 @@
 - 資料流程修改：`uv run python scripts/enrich_platforms.py --dry-run` 後再跑 `npm run data:refresh`。
 - 收尾驗證：`npm run data:refresh`、`npm run content:refresh`、`npm run ops:dashboard`、`npm run check`、`uv run python -m compileall scripts`。
 - 營運狀態檢查：`npm run ops:dashboard`，看賽事完整度、官方直連率、開報後待補與內容候選量。
+- 上線判斷優先看「上線可用完整度、開報後待補、報名日期異常、內容品質、UI layout」。原始完整度包含遠期尚未開報賽事，只能作為長期追蹤，不應單獨阻擋上線。
 - UI 修改：啟動 `npm run dev`，依 `runner/系統配置/UI商品化驗收標準.md` 用瀏覽器桌面與手機 viewport 截圖檢查。
 - CSS/JS 有變動時，更新 `site/index.html` 的版本參數，避免 GitHub Pages 快取讓使用者看舊版。
 
@@ -92,3 +94,4 @@
 - 若發現資料錯誤來自平台 parser，補 parser 規則與測試路徑。
 - 若發現 UI 問題來自手機 viewport，補進手機驗證清單。
 - 若使用者反覆指出同類問題，將它升級成固定驗證項目。
+- Codex 本機沙盒常會讓外部 HTTP 顯示 `fetch failed`；內容或官方來源是否真的壞，要用 GitHub Actions 或授權網路執行結果判斷。

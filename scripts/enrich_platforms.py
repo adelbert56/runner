@@ -78,6 +78,15 @@ def platform_for_url(url: str) -> tuple[str, PlatformParser] | tuple[str, None]:
     return "", None
 
 
+def is_source_url(url: str) -> bool:
+    return host_of(url).endswith("running.biji.co")
+
+
+def has_official_registration_link(race: dict) -> bool:
+    url = str(race.get("registration_link", "")).strip()
+    return has_text(url) and not is_source_url(url)
+
+
 def race_key(race: dict) -> str:
     return f"{race.get('race_name', '').strip()}||{race.get('race_date', '').strip()}"
 
@@ -211,7 +220,11 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
         if updated.get("source_platform") != platform_text:
             updated["source_platform"] = platform_text
             changed.append("source_platform")
-        updated["is_official_direct"] = True
+
+    official_direct = has_official_registration_link(updated)
+    if updated.get("is_official_direct") != official_direct:
+        updated["is_official_direct"] = official_direct
+        changed.append("is_official_direct")
 
     if changed:
         updated["verified_at"] = TODAY

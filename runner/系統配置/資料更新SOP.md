@@ -50,6 +50,8 @@
 - `verified_at`：最後查證日期。
 - `source_platform`：資料來源平台。
 - `is_official_direct`：是否官方直連。
+  - 只能在 `registration_link` 指向非 `running.biji.co` 的官方/報名平台時視為 true。
+  - 運動筆記詳情頁、會員報名紀錄頁或空連結都不能算官方直連。
 - `verification_note`：查證來源摘要。
 - `registration_note`：特殊狀態，例如停辦、額滿、登入限制或日期差異。
 - `start_times`：各距離開跑時間；建議用物件，例如 `{ "21km": "06:00", "10km": "06:10" }`。
@@ -63,3 +65,11 @@
 4. 推送到 `main` 後，GitHub Pages 會自動部署。
 5. 若前端 CSS/JS 有修改，更新 `site/index.html` 的版本參數以避開瀏覽器快取。
 6. 收尾前建議再跑 `npm run ops:dashboard`，確認賽事、內容與待補數據都有反映到營運儀表板。
+7. 上線判斷優先看「上線可用完整度、開報後待補、報名日期異常、內容品質」；原始資料完整度包含遠期尚未開報賽事，未達 80% 不一定代表不能上線。
+
+## 本機沙盒與來源健康度
+
+- Codex 本機沙盒可能擋外部 HTTP socket，導致內容來源或官方補資料顯示 `fetch failed`。
+- 若本機沙盒失敗但授權網路執行或 GitHub Actions 成功，應把它視為環境限制，不要誤判成來源壞掉。
+- `runner/內容/內容來源健康度報告.md` 的「穩定 / 可用需觀察 / 需補強」要以可連外環境的結果為準。
+- 若 GitHub Actions 也連續失敗，再處理來源網址、Cloudflare、網站改版或 parser 規則。

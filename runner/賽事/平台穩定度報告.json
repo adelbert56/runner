@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-16T13:57:26.214Z",
+  "generated_at": "2026-05-16T15:27:56.947Z",
   "basis_date": "2026-05-16",
   "items": [
     {
       "platform": "運動筆記",
       "total": 14,
-      "official_direct": 14,
+      "official_direct": 1,
       "verified": 14,
       "missing": 12,
       "opened_gap": 0,
@@ -17,10 +17,10 @@
         "仁愛長庚合作聯盟醫院2026永慶盃路跑"
       ],
       "complete_rate": "14%",
-      "official_direct_rate": "100%",
+      "official_direct_rate": "7%",
       "verified_rate": "100%",
-      "score": 70,
-      "status": "可用需觀察"
+      "score": 47,
+      "status": "需補強"
     },
     {
       "platform": "iRunner",
