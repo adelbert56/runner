@@ -11,7 +11,7 @@
     <link rel="shortcut icon" href="./favicon.ico?v=20260515-icon1">
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=20260515-icon1">
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=20260515-icon1">
-    <link rel="stylesheet" href="./styles.css?v=20260516-content-ui2">
+    <link rel="stylesheet" href="./styles.css?v=20260516-pro1">
   </head>
   <body>
     <header class="site-header">
@@ -52,22 +52,22 @@
 
       <section class="stats-strip" aria-label="網站統計">
         <div class="stat-card">
-          <span class="stat-label">Races</span>
+          <span class="stat-label">賽事</span>
           <strong id="race-count">--</strong>
           <span class="stat-caption">收錄賽事</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Coverage</span>
+          <span class="stat-label">涵蓋</span>
           <strong>4</strong>
           <span class="stat-caption">中部縣市</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Next</span>
+          <span class="stat-label">下場</span>
           <strong id="next-race">--</strong>
           <span class="stat-caption">下一場日期</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Saved</span>
+          <span class="stat-label">收藏</span>
           <strong id="favorite-count">0</strong>
           <span class="stat-caption">我的收藏</span>
         </div>
@@ -470,97 +470,100 @@
               </label>
             </div>
             <button class="button primary plan-quick-submit" type="submit">用目前設定生成菜單</button>
-            <div class="plan-field-group compact">
-              <p class="form-section-title">身體狀態</p>
-              <label>
-                <span>目前程度</span>
-                <select id="plan-level">
-                  <option value="beginner">新手</option>
-                  <option value="steady" selected>有規律慢跑</option>
-                  <option value="advanced">想加強配速</option>
-                </select>
-              </label>
-              <label>
-                <span>傷痛狀態</span>
-                <select id="plan-injury">
-                  <option value="none" selected>目前無傷</option>
-                  <option value="tight">偶爾緊繃</option>
-                  <option value="recovering">剛恢復訓練</option>
-                </select>
-              </label>
-              <label>
-                <span>近期狀態</span>
-                <select id="plan-readiness">
-                  <option value="normal" selected>正常訓練</option>
-                  <option value="tired">疲勞偏高</option>
-                  <option value="busy">時間不穩</option>
-                  <option value="confident">狀態很好</option>
-                </select>
-              </label>
-            </div>
-            <div class="plan-field-group compact">
-              <p class="form-section-title">訓練安排</p>
-              <label>
-                <span>目標類型</span>
-                <select id="plan-priority">
-                  <option value="finish" selected>穩定完賽</option>
-                  <option value="pb">挑戰 PB</option>
-                  <option value="habit">建立習慣</option>
-                </select>
-              </label>
-              <label>
-                <span>強度偏好</span>
-                <select id="plan-intensity">
-                  <option value="safe" selected>保守穩定</option>
-                  <option value="balanced">均衡進步</option>
-                  <option value="push">積極突破</option>
-                </select>
-              </label>
-              <label>
-                <span>每週跑幾天</span>
-                <select id="plan-days">
-                  <option value="3">3 天</option>
-                  <option value="4" selected>4 天</option>
-                  <option value="5">5 天</option>
-                </select>
-              </label>
-              <label>
-                <span>目前週跑量</span>
-                <select id="plan-weekly-km">
-                  <option value="8">0-10 km</option>
-                  <option value="18" selected>10-20 km</option>
-                  <option value="30">20-35 km</option>
-                  <option value="45">35-50 km</option>
-                  <option value="60">50+ km</option>
-                </select>
-              </label>
-              <label>
-                <span>目前最長跑</span>
-                <select id="plan-long-run">
-                  <option value="3">3 km</option>
-                  <option value="5">5 km</option>
-                  <option value="8" selected>8 km</option>
-                  <option value="12">12 km</option>
-                  <option value="16">16 km</option>
-                  <option value="21">21 km+</option>
-                </select>
-              </label>
-              <label>
-                <span>長跑日</span>
-                <select id="plan-long-run-day">
-                  <option value="sat">週六</option>
-                  <option value="sun" selected>週日</option>
-                </select>
-              </label>
-              <label>
-                <span>可練幾週</span>
-                <select id="plan-weeks">
-                  <option value="4">4 週</option>
-                  <option value="8" selected>8 週</option>
-                  <option value="12">12 週</option>
-                </select>
-              </label>
-            </div>
+            <details class="plan-advanced">
+              <summary>進階設定：狀態、跑量與訓練安排</summary>
+              <div class="plan-field-group compact">
+                <p class="form-section-title">身體狀態</p>
+                <label>
+                  <span>目前程度</span>
+                  <select id="plan-level">
+                    <option value="beginner">新手</option>
+                    <option value="steady" selected>有規律慢跑</option>
+                    <option value="advanced">想加強配速</option>
+                  </select>
+                </label>
+                <label>
+                  <span>傷痛狀態</span>
+                  <select id="plan-injury">
+                    <option value="none" selected>目前無傷</option>
+                    <option value="tight">偶爾緊繃</option>
+                    <option value="recovering">剛恢復訓練</option>
+                  </select>
+                </label>
+                <label>
+                  <span>近期狀態</span>
+                  <select id="plan-readiness">
+                    <option value="normal" selected>正常訓練</option>
+                    <option value="tired">疲勞偏高</option>
+                    <option value="busy">時間不穩</option>
+                    <option value="confident">狀態很好</option>
+                  </select>
+                </label>
+              </div>
+              <div class="plan-field-group compact">
+                <p class="form-section-title">訓練安排</p>
+                <label>
+                  <span>目標類型</span>
+                  <select id="plan-priority">
+                    <option value="finish" selected>穩定完賽</option>
+                    <option value="pb">挑戰 PB</option>
+                    <option value="habit">建立習慣</option>
+                  </select>
+                </label>
+                <label>
+                  <span>強度偏好</span>
+                  <select id="plan-intensity">
+                    <option value="safe" selected>保守穩定</option>
+                    <option value="balanced">均衡進步</option>
+                    <option value="push">積極突破</option>
+                  </select>
+                </label>
+                <label>
+                  <span>每週跑幾天</span>
+                  <select id="plan-days">
+                    <option value="3">3 天</option>
+                    <option value="4" selected>4 天</option>
+                    <option value="5">5 天</option>
+                  </select>
+                </label>
+                <label>
+                  <span>目前週跑量</span>
+                  <select id="plan-weekly-km">
+                    <option value="8">0-10 km</option>
+                    <option value="18" selected>10-20 km</option>
+                    <option value="30">20-35 km</option>
+                    <option value="45">35-50 km</option>
+                    <option value="60">50+ km</option>
+                  </select>
+                </label>
+                <label>
+                  <span>目前最長跑</span>
+                  <select id="plan-long-run">
+                    <option value="3">3 km</option>
+                    <option value="5">5 km</option>
+                    <option value="8" selected>8 km</option>
+                    <option value="12">12 km</option>
+                    <option value="16">16 km</option>
+                    <option value="21">21 km+</option>
+                  </select>
+                </label>
+                <label>
+                  <span>長跑日</span>
+                  <select id="plan-long-run-day">
+                    <option value="sat">週六</option>
+                    <option value="sun" selected>週日</option>
+                  </select>
+                </label>
+                <label>
+                  <span>可練幾週</span>
+                  <select id="plan-weeks">
+                    <option value="4">4 週</option>
+                    <option value="8" selected>8 週</option>
+                    <option value="12">12 週</option>
+                  </select>
+                </label>
+              </div>
+            </details>
             <div class="plan-submit-row">
               <button class="button primary" type="submit">生成自訂菜單</button>
               <p class="time-format-note" id="time-format-note">完賽時間與配速會依目標距離雙向換算。</p>
@@ -707,6 +710,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260516-content-ui2"></script>
+    <script src="./app.js?v=20260516-pro1"></script>
   </body>
 </html>

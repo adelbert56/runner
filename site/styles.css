@@ -981,6 +981,42 @@ h3 {
   font-weight: 900;
 }
 
+.race-trust-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.trust-pill {
+  display: inline-flex;
+  min-height: 23px;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid rgba(21, 83, 56, 0.12);
+  border-radius: 999px;
+  background: #f4faf5;
+  color: #4f6258;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.trust-pill.trusted {
+  border-color: rgba(21, 83, 56, 0.22);
+  background: #e4f2e8;
+  color: var(--green-dark);
+}
+
+.trust-pill.verified {
+  background: #fff8dc;
+  color: #6d4c00;
+}
+
+.trust-pill.warning {
+  background: #fff0e8;
+  color: #9b3f19;
+}
+
 .race-detail-panel {
   margin-top: 8px;
   color: var(--muted);
@@ -1957,6 +1993,49 @@ h3 {
 
 .plan-field-group.compact .form-section-title {
   grid-column: 1 / -1;
+}
+
+.plan-advanced {
+  display: grid;
+  gap: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(31, 42, 36, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.plan-advanced summary {
+  min-height: 42px;
+  padding: 11px 12px;
+  color: var(--green-dark);
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 950;
+  list-style: none;
+}
+
+.plan-advanced summary::-webkit-details-marker {
+  display: none;
+}
+
+.plan-advanced summary::after {
+  content: "+";
+  float: right;
+  width: 24px;
+  color: var(--green);
+  text-align: center;
+}
+
+.plan-advanced[open] {
+  padding-bottom: 10px;
+}
+
+.plan-advanced[open] summary::after {
+  content: "-";
+}
+
+.plan-advanced .plan-field-group {
+  margin: 0 10px;
 }
 
 .plan-submit-row {
@@ -3077,7 +3156,7 @@ h3 {
   }
 
   .hero {
-    min-height: 520px;
+    min-height: 430px;
   }
 
   .hero-media {
@@ -3087,17 +3166,18 @@ h3 {
   }
 
   .hero-content {
-    padding: 48px 20px 34px;
+    padding: 36px 20px 26px;
   }
 
   .hero h1 {
-    max-width: 330px;
-    font-size: 2.35rem;
+    max-width: 310px;
+    font-size: 2.05rem;
     line-height: 1.08;
   }
 
   .hero p:not(.eyebrow) {
-    font-size: 1.02rem;
+    font-size: 0.94rem;
+    line-height: 1.6;
   }
 
   .section {
@@ -3151,35 +3231,32 @@ h3 {
   }
 
   .stats-strip {
-    width: calc(100% - 28px);
-    margin-top: 16px;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    width: calc(100% - 20px);
+    margin-top: 10px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
   }
 
   .stat-card {
-    min-height: 104px;
-    gap: 7px;
-    padding: 16px 16px 14px;
+    min-height: 74px;
+    gap: 4px;
+    padding: 10px 8px;
   }
 
   .stats-strip strong {
-    font-size: 1.9rem;
+    font-size: 1.25rem;
   }
 
   .stat-card::after {
-    top: 12px;
-    right: 12px;
-    width: 26px;
-    height: 26px;
+    display: none;
   }
 
   .stat-label {
-    font-size: 0.64rem;
+    font-size: 0.54rem;
   }
 
   .stat-caption {
-    font-size: 0.82rem;
+    font-size: 0.66rem;
   }
 
   .path-ladder {
@@ -3461,6 +3538,16 @@ h3 {
     font-size: 0.74rem;
   }
 
+  .race-trust-line {
+    gap: 4px;
+  }
+
+  .trust-pill {
+    min-height: 21px;
+    padding: 2px 6px;
+    font-size: 0.68rem;
+  }
+
   .race-card p {
     font-size: 0.94rem;
   }
@@ -3547,6 +3634,20 @@ h3 {
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 10px;
+  }
+
+  .plan-advanced {
+    gap: 8px;
+  }
+
+  .plan-advanced summary {
+    min-height: 40px;
+    padding: 10px;
+    font-size: 0.82rem;
+  }
+
+  .plan-advanced .plan-field-group {
+    margin: 0 8px;
   }
 
   .plan-builder label {

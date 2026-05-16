@@ -1208,6 +1208,16 @@ function renderRaces() {
         organizer ? ["主辦", organizer] : null,
         verifiedAt ? ["查證", formatShortDate(verifiedAt) || verifiedAt] : null,
       ].filter(Boolean);
+      const sourcePlatform = race.source_platform || race.source || "";
+      const trustItems = [
+        registrationTarget.kind === "official"
+          ? ["官方直連", "trusted"]
+          : registrationTarget.url
+            ? ["公開資訊", "neutral"]
+            : ["連結待補", "warning"],
+        verifiedAt ? [`${formatShortDate(verifiedAt) || verifiedAt} 查證`, "verified"] : ["待查證", "warning"],
+        sourcePlatform ? [`來源 ${sourcePlatform}`, "source"] : null,
+      ].filter(Boolean);
 
       return `
         <article class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""}">
@@ -1234,6 +1244,9 @@ function renderRaces() {
             </div>
             ${datesNeedCheck ? `<p class="race-data-warning">報名起訖日期邏輯待查證</p>` : ""}
             <div class="race-insight">${escapeHtml(decision)}</div>
+            <div class="race-trust-line" aria-label="資料可信度">
+              ${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}
+            </div>
             ${
               factItems.length
                 ? `<details class="race-detail-panel">
