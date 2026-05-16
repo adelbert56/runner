@@ -39,6 +39,7 @@ const els = {
   nextRace: document.querySelector("#next-race"),
   nextRaceCaption: document.querySelector("#next-race-caption"),
   nextRaceCountdown: document.querySelector("#next-race-countdown"),
+  nextRaceName: document.querySelector("#next-race-name"),
   heroNextRace: document.querySelector("#hero-next-race"),
   search: document.querySelector("#race-search"),
   raceList: document.querySelector("#race-list"),
@@ -1412,7 +1413,10 @@ function renderStats() {
       els.nextRaceCaption.textContent = "追蹤賽事";
     }
     if (els.nextRaceCountdown) {
-      els.nextRaceCountdown.textContent = "暫無追蹤賽事";
+      els.nextRaceCountdown.textContent = "未追蹤";
+    }
+    if (els.nextRaceName) {
+      els.nextRaceName.textContent = "先收藏賽事";
     }
     if (els.nextRaceLink) {
       els.nextRaceLink.removeAttribute("data-next-race");
@@ -1431,7 +1435,10 @@ function renderStats() {
     els.nextRaceCaption.textContent = "追蹤賽事";
   }
   if (els.nextRaceCountdown) {
-    els.nextRaceCountdown.textContent = `${countdown} · ${upcoming.race_name || "路跑賽事"}`;
+    els.nextRaceCountdown.textContent = countdown;
+  }
+  if (els.nextRaceName) {
+    els.nextRaceName.textContent = upcoming.race_name || "路跑賽事";
   }
   if (els.nextRaceLink) {
     els.nextRaceLink.dataset.nextRace = getRaceKey(upcoming);
