@@ -75,6 +75,9 @@ const els = {
   newsFavoriteFilter: document.querySelector("#news-favorite-filter"),
   shoePagination: document.querySelector("#shoe-pagination"),
   newsPagination: document.querySelector("#news-pagination"),
+  shareRaceFavorites: document.querySelector("#share-race-favorites"),
+  shareShoeFavorites: document.querySelector("#share-shoe-favorites"),
+  shareNewsFavorites: document.querySelector("#share-news-favorites"),
 };
 
 const monthNames = {
@@ -228,6 +231,86 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function encodeSharePayload(payload) {
+  const json = JSON.stringify(payload);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+
+function decodeSharePayload(value) {
+  try {
+    const padded = String(value || "").replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(String(value || "").length / 4) * 4, "=");
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
+}
+
+function readSharedFavorites() {
+  const params = new URLSearchParams(window.location.search);
+  const payload = decodeSharePayload(params.get("share"));
+  if (!payload || payload.version !== 1) {
+    return;
+  }
+  if (Array.isArray(payload.races)) {
+    state.favorites = new Set(payload.races);
+    state.favoritesOnly = true;
+  }
+  if (Array.isArray(payload.content)) {
+    state.contentFavorites = new Set(payload.content);
+    state.shoeFavoritesOnly = payload.kind === "shoe" || payload.kind === "all";
+    state.newsFavoritesOnly = payload.kind === "news" || payload.kind === "all";
+  }
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.append(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    textarea.remove();
+  }
+}
+
+async function shareFavorites(kind, button) {
+  const content = [...state.contentFavorites].filter((key) => (
+    kind === "all" || key.startsWith(`${kind}:`)
+  ));
+  const payload = {
+    version: 1,
+    kind,
+    races: kind === "races" || kind === "all" ? [...state.favorites] : [],
+    content: kind === "races" ? [] : content,
+    createdAt: new Date().toISOString(),
+  };
+  if (!payload.races.length && !payload.content.length) {
+    button.textContent = "尚無收藏";
+    setTimeout(() => {
+      button.textContent = "分享收藏";
+    }, 1400);
+    return;
+  }
+  const panel = kind === "shoe" ? "gear" : kind === "news" ? "news" : "races";
+  const url = new URL(window.location.href);
+  url.searchParams.set("share", encodeSharePayload(payload));
+  url.hash = panel;
+  await copyText(url.toString());
+  button.textContent = "已複製連結";
+  setTimeout(() => {
+    button.textContent = "分享收藏";
+  }, 1600);
 }
 
 function loadFavorites() {
@@ -2000,6 +2083,18 @@ function bindEvents() {
     updateContentList("news");
   });
 
+  els.shareRaceFavorites?.addEventListener("click", () => {
+    shareFavorites("races", els.shareRaceFavorites);
+  });
+
+  els.shareShoeFavorites?.addEventListener("click", () => {
+    shareFavorites("shoe", els.shareShoeFavorites);
+  });
+
+  els.shareNewsFavorites?.addEventListener("click", () => {
+    shareFavorites("news", els.shareNewsFavorites);
+  });
+
   document.addEventListener("click", (event) => {
     const pageButton = event.target.closest("[data-content-page]");
     if (pageButton) {
@@ -2144,6 +2239,7 @@ async function loadRaces() {
 async function init() {
   loadFavorites();
   loadContentFavorites();
+  readSharedFavorites();
   setupDurationPickers();
   bindEvents();
   await loadPublishedContent();
