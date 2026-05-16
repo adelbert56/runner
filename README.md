@@ -83,7 +83,9 @@
 │       └── UI商品化驗收標準.md
 ├── .github/workflows/
 │   ├── pages.yml                 # 部署網站
+│   ├── ci.yml                    # 品質檢查與 UI layout 驗證
 │   ├── data-refresh.yml          # 賽事資料更新
+│   ├── weather-refresh.yml       # 賽前天氣更新
 │   └── content-candidates.yml    # 跑鞋 / 新聞候選內容更新
 ├── package.json
 ├── pyproject.toml
@@ -220,6 +222,21 @@ npm run check
 
 ## GitHub Actions
 
+### CI
+
+檔案：`.github/workflows/ci.yml`
+
+觸發：
+
+- 推送到 `main`
+- Pull request
+- 手動執行
+
+用途：
+
+- 執行 JavaScript、Python、資料品質、內容品質與 UI layout 檢查。
+- 確認公開站交付前的基本品質門檻。
+
 ### Deploy static site
 
 檔案：`.github/workflows/pages.yml`
@@ -251,6 +268,21 @@ npm run check
 - 更新品質報告、追蹤計畫、營運儀表板和網站資料。
 - 有變更時自動提交 `chore(data): refresh race data`。
 
+### Refresh race weather
+
+檔案：`.github/workflows/weather-refresh.yml`
+
+觸發：
+
+- 每天 07:00 Asia/Taipei
+- 手動執行
+
+用途：
+
+- 更新 7 天內賽事的當日天氣預報。
+- 跑完後執行前端資料載入檢查。
+- 有變更時自動提交 `chore(data): refresh race weather`。
+
 ### Collect content candidates
 
 檔案：`.github/workflows/content-candidates.yml`
@@ -271,12 +303,14 @@ npm run check
 
 1. 進入 GitHub 倉庫：[https://github.com/adelbert56/runner](https://github.com/adelbert56/runner)
 2. 點選 `Actions`
-3. 查看三個 workflow：
+3. 查看五個 workflow：
+   - `CI`
    - `Deploy static site`
    - `Refresh race data`
+   - `Refresh race weather`
    - `Collect content candidates`
 4. 綠色勾勾代表該次成功。
-5. 若 `Refresh race data` 或 `Collect content candidates` 成功且有資料變更，GitHub Actions bot 會自動新增 commit。
+5. 若資料或內容排程成功且有資料變更，GitHub Actions bot 會自動新增 commit。
 
 ## GitHub Pages 設定
 

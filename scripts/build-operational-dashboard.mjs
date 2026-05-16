@@ -331,7 +331,7 @@ async function main() {
     nextActions.push("先修 `runner/賽事/報名日期異常報告.md`，日期邏輯錯誤會直接誤導報名狀態。");
   }
   if (dueNow.length > 0) {
-    nextActions.push("`runner/賽事/爬蟲追蹤計畫.md` 已把到期項目列入「現在該重爬」；GitHub Actions 會定期自動重查，若重查後仍缺再修平台 parser 或補人工資料。");
+    nextActions.push("`runner/賽事/爬蟲追蹤計畫.md` 已把到期項目列入「現在該重爬」或「賽前 14 天複查」；GitHub Actions 會定期自動重查，若重查後仍缺再修平台 parser 或補人工資料。");
   }
   if (officialDirectCount / Math.max(races.length, 1) < 0.8) {
     nextActions.push("官方直連率未達 80% 的賽事已進追蹤節奏；等待自動重查補齊，只有開報後仍缺才人工介入。");
@@ -396,7 +396,7 @@ async function main() {
     "",
     table(topEntries(dateAnomalies).map((item) => `- ${item.race_date || "-"}｜${item.race_name}｜${item.registration_opens_at || "-"} 到 ${item.registration_deadline || "-"}｜${item.anomalies.map((anomaly) => anomaly.label).join("、")}`)).trim(),
     "",
-    "### 現在該重爬",
+    "### 到期重查與賽前複查",
     "",
     table(topEntries(dueNow).map((item) => `- ${item.race_date || "-"}｜${item.race_name}｜${item.tracking?.reason || ""}`)).trim(),
     "",
