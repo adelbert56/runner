@@ -3,8 +3,8 @@ name: Refresh race data
 on:
   workflow_dispatch:
   schedule:
-    # 06:30 Asia/Taipei. Race pages often update overnight or early morning.
-    - cron: "30 22 * * *"
+    # 18:00 Asia/Taipei every Tuesday and Thursday.
+    - cron: "0 10 * * 2,4"
 
 permissions:
   contents: write
