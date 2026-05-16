@@ -1900,7 +1900,7 @@ h3 {
 }
 
 .profile-summary {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   margin-bottom: 12px;
 }
 
@@ -1998,6 +1998,121 @@ h3 {
   margin: 8px 0 0;
   padding-left: 18px;
   color: var(--muted);
+}
+
+.coach-panel {
+  display: grid;
+  gap: 14px;
+  margin: 14px 0 16px;
+  padding: 16px;
+  border: 1px solid rgba(21, 83, 56, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(21, 83, 56, 0.08), rgba(247, 201, 72, 0.12)),
+    #fffdf8;
+}
+
+.coach-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.coach-header span {
+  display: block;
+  color: var(--green);
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.coach-header strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink);
+  font-size: 1.2rem;
+}
+
+.coach-header p,
+.coach-chat p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.coach-score {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: var(--green-dark);
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 950;
+  box-shadow: 0 12px 26px rgba(21, 83, 56, 0.2);
+}
+
+.coach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.coach-grid section {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(216, 207, 190, 0.74);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.coach-grid h3 {
+  margin: 0 0 8px;
+  color: var(--green-dark);
+  font-size: 0.95rem;
+}
+
+.coach-grid ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.coach-chat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 8px;
+  background: rgba(21, 83, 56, 0.08);
+}
+
+.coach-chat strong {
+  color: var(--ink);
+}
+
+.coach-questions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.coach-questions button {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid rgba(21, 83, 56, 0.24);
+  border-radius: 999px;
+  background: white;
+  color: var(--green-dark);
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .plan-progress-panel {
@@ -2445,6 +2560,8 @@ h3 {
   .training-summary,
   .profile-summary,
   .pace-zones,
+  .coach-grid,
+  .coach-chat,
   .academy-hero,
   .academy-grid,
   .academy-library,
@@ -2974,6 +3091,28 @@ h3 {
   .plan-progress-panel {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  .coach-panel {
+    padding: 12px;
+  }
+
+  .coach-header {
+    grid-template-columns: 1fr;
+  }
+
+  .coach-score {
+    width: 56px;
+    height: 56px;
+    font-size: 1.2rem;
+  }
+
+  .coach-questions {
+    justify-content: stretch;
+  }
+
+  .coach-questions button {
+    flex: 1 1 calc(50% - 8px);
   }
 
   .plan-progress-panel button {

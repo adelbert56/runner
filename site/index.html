@@ -11,7 +11,7 @@
     <link rel="shortcut icon" href="./favicon.ico?v=20260515-icon1">
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=20260515-icon1">
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=20260515-icon1">
-    <link rel="stylesheet" href="./styles.css?v=20260516-polish1">
+    <link rel="stylesheet" href="./styles.css?v=20260516-coach1">
   </head>
   <body>
     <header class="site-header">
@@ -485,6 +485,15 @@
                 <option value="recovering">剛恢復訓練</option>
               </select>
             </label>
+            <label>
+              <span>近期狀態</span>
+              <select id="plan-readiness">
+                <option value="normal" selected>正常訓練</option>
+                <option value="tired">疲勞偏高</option>
+                <option value="busy">時間不穩</option>
+                <option value="confident">狀態很好</option>
+              </select>
+            </label>
             <p class="form-section-title">訓練限制</p>
             <label>
               <span>目標類型</span>
@@ -685,6 +694,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260516-polish1"></script>
+    <script src="./app.js?v=20260516-coach1"></script>
   </body>
 </html>

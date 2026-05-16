@@ -58,6 +58,7 @@ const els = {
   planRaceDate: document.querySelector("#plan-race-date"),
   planLevel: document.querySelector("#plan-level"),
   planInjury: document.querySelector("#plan-injury"),
+  planReadiness: document.querySelector("#plan-readiness"),
   planDays: document.querySelector("#plan-days"),
   planWeeks: document.querySelector("#plan-weeks"),
   planWeeklyKm: document.querySelector("#plan-weekly-km"),
@@ -179,6 +180,13 @@ const intensityLabels = {
   safe: "保守穩定",
   balanced: "均衡進步",
   push: "積極突破",
+};
+
+const readinessLabels = {
+  normal: "正常訓練",
+  tired: "疲勞偏高",
+  busy: "時間不穩",
+  confident: "狀態很好",
 };
 
 const weekdayLabels = {
@@ -355,6 +363,7 @@ function getPlanControls() {
     ["raceDate", els.planRaceDate],
     ["level", els.planLevel],
     ["injury", els.planInjury],
+    ["readiness", els.planReadiness],
     ["days", els.planDays],
     ["weeks", els.planWeeks],
     ["weeklyKm", els.planWeeklyKm],
@@ -1487,6 +1496,7 @@ function buildPlanSnapshot() {
     goal: els.planGoal?.value,
     level: els.planLevel?.value,
     injury: els.planInjury?.value,
+    readiness: els.planReadiness?.value,
     days: els.planDays?.value,
     weeks: els.planWeeks?.value,
     finishInput: els.planFinish?.value,
@@ -1508,6 +1518,7 @@ function buildPlan(profileInput) {
     goal,
     level,
     injury,
+    readiness,
     days,
     weeks,
     finishInput,
@@ -1531,6 +1542,7 @@ function buildPlan(profileInput) {
   const athleteName = String(athlete || "").trim() || "自訂選手";
   const safeExperience = experience || "regular";
   const safeInjury = injury || "none";
+  const safeReadiness = readiness || "normal";
   const safeIntensity = intensity || "safe";
   const safeLongRunDay = longRunDay || "sun";
   const finishSeconds = parseDuration(finishInput);
@@ -1557,6 +1569,7 @@ function buildPlan(profileInput) {
     goalProfile,
     levelProfile,
     injury: safeInjury,
+    readiness: safeReadiness,
     schedule,
     progression,
     weekCount,
@@ -1577,6 +1590,97 @@ function buildPlan(profileInput) {
     selectedWeek,
     targets,
     riskNotes,
+  };
+}
+
+function buildCoachInsights(plan) {
+  const risks = [];
+  const strengths = [];
+  const nextActions = [];
+  let score = 82;
+  const distance = plan.goalProfile.distanceKm;
+  const longRunRatio = plan.targets.baseKm > 0 ? plan.targets.baseLongRun / plan.targets.baseKm : 0;
+
+  if (plan.dayCount >= 4) {
+    strengths.push("每週頻率足夠，比只靠週末長跑更容易穩定進步。");
+    score += 4;
+  } else {
+    risks.push("每週 3 天可完賽，但進步空間有限，長跑與重點課之間要留足恢復。");
+    score -= distance >= 21 ? 8 : 4;
+  }
+
+  if (distance >= 21 && plan.targets.baseKm < 18) {
+    risks.push("半馬以上目標目前週跑量偏低，前 2-3 週先補有氧底，不急著加速。");
+    score -= 10;
+  }
+  if (distance >= 42 && plan.targets.baseKm < 30) {
+    risks.push("全馬目標需要更長時間堆跑量，這份課表應先當基礎期，不建議直接挑戰 PB。");
+    score -= 12;
+  }
+  if (longRunRatio > 0.45) {
+    risks.push("長跑占週跑量比例偏高，容易週末練太重，建議平日補一趟輕鬆跑。");
+    score -= 8;
+  } else {
+    strengths.push("長跑比例尚可，課表壓力不會全部集中在單日。");
+  }
+
+  if (plan.injury === "recovering") {
+    risks.push("剛恢復訓練時先取消間歇，連續兩週無痛再恢復節奏跑。");
+    score -= 14;
+  } else if (plan.injury === "tight") {
+    risks.push("偶爾緊繃代表恢復訊號要盯緊，快課後 24 小時若仍不舒服就降載。");
+    score -= 6;
+  }
+
+  if (plan.readiness === "tired") {
+    risks.push("近期疲勞偏高，本週先降 15-25% 跑量，保留一趟輕鬆跑和長跑即可。");
+    score -= 12;
+  }
+  if (plan.readiness === "busy") {
+    risks.push("時間不穩時不要硬補課，優先保留長跑與一堂重點課，其餘用短恢復跑補足。");
+    score -= 5;
+  }
+  if (plan.readiness === "confident") {
+    strengths.push("近期狀態好，可以小幅推進，但同一週不要同時加跑量又加強度。");
+    score += 4;
+  }
+
+  if (plan.priority === "pb" && plan.intensity !== "push") {
+    nextActions.push("若目標是 PB，先把強度偏好調到均衡或積極，再看身體反應微調。");
+  }
+  if (plan.priority === "habit") {
+    nextActions.push("把完成率放在第一順位，連續 3 週有跑比單週跑很猛更重要。");
+  }
+  if (plan.raceWindow && plan.raceWindow.days <= 21) {
+    risks.push("距離目標賽事很近，現在重點是維持手感與恢復，不適合大幅增加跑量。");
+    score -= 6;
+  }
+
+  nextActions.push(`本週先完成第 ${plan.selectedWeek} 週課表，重點是 ${plan.currentWeek.focus}。`);
+  nextActions.push(`長跑控制在 ${plan.longRange}，跑完隔天若疲勞超過 24 小時，下週跑量降 10%。`);
+
+  const finalScore = clampNumber(Math.round(score), 35, 96);
+  const status = finalScore >= 82 ? "穩定推進" : finalScore >= 65 ? "保守調整" : "先降載";
+  const mainAdvice = finalScore >= 82
+    ? "目前設定合理，可以照課表推進。重點是穩定完成，不要因為狀態好就臨時多加一堂快課。"
+    : finalScore >= 65
+      ? "這份課表可用，但需要保守執行。先讓身體吸收訓練，再逐步把配速和跑量拉上來。"
+      : "目前風險偏高，建議先把課表當恢復與打底，不要急著追目標配速。";
+
+  return {
+    score: finalScore,
+    status,
+    mainAdvice,
+    strengths: strengths.slice(0, 3),
+    risks: risks.slice(0, 4),
+    nextActions: nextActions.slice(0, 3),
+    encouragement: `${plan.athleteName}，你現在最該追的是可持續的完成率。每週穩穩完成 80% 課表，會比偶爾爆量更接近目標。`,
+    replies: {
+      tired: "今天很累就改 20-30 分鐘輕鬆跑或休息。疲勞是資料，不是失敗；連續兩天沉重就把本週重點課取消。",
+      pain: "如果是尖銳痛、跛行或越跑越痛，今天不要跑。若只是輕微緊繃，改步行、伸展與睡眠，隔天再評估。",
+      faster: "想跑快先不要每趟都加速。保留一堂節奏或間歇，其餘維持輕鬆跑，讓快課真的有品質。",
+      taper: "賽前一週跑量降到平常 50-60%，保留短暫配速感，不做新的長跑、新鞋或新補給測試。",
+    },
   };
 }
 
@@ -1689,6 +1793,7 @@ function renderPlan() {
     goalProfile,
     levelProfile,
     injury,
+    readiness,
     schedule,
     progression,
     weekCount,
@@ -1728,8 +1833,10 @@ function renderPlan() {
 
   const experienceLabel = experienceLabels[experience] || experienceLabels.regular;
   const injuryLabel = injuryLabels[injury] || injuryLabels.none;
+  const readinessLabel = readinessLabels[readiness] || readinessLabels.normal;
   const intensityLabel = intensityLabels[intensity] || intensityLabels.safe;
   const longRunDayLabel = weekdayLabels[longRunDay] || "週日";
+  const coach = buildCoachInsights(plan);
 
   els.planOutput.innerHTML = `
     <div class="plan-hero">
@@ -1756,6 +1863,7 @@ function renderPlan() {
       <div><span>選手</span><strong>${escapeHtml(athleteName)}</strong></div>
       <div><span>跑齡</span><strong>${escapeHtml(experienceLabel)}</strong></div>
       <div><span>傷痛</span><strong>${escapeHtml(injuryLabel)}</strong></div>
+      <div><span>狀態</span><strong>${escapeHtml(readinessLabel)}</strong></div>
       <div><span>強度</span><strong>${escapeHtml(intensityLabel)}</strong></div>
     </div>
     <div class="pace-zones">
@@ -1777,6 +1885,42 @@ function renderPlan() {
       <ul>
         ${riskNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
       </ul>
+    </div>
+    <div class="coach-panel">
+      <div class="coach-header">
+        <div>
+          <span>Personal Coach</span>
+          <strong>教練分析 · ${escapeHtml(coach.status)}</strong>
+          <p>${escapeHtml(coach.mainAdvice)}</p>
+        </div>
+        <div class="coach-score" aria-label="教練評分">${escapeHtml(coach.score)}</div>
+      </div>
+      <div class="coach-grid">
+        <section>
+          <h3>做得好的地方</h3>
+          <ul>${coach.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>先把資料填完整，系統會更準確判斷訓練狀態。</li>"}</ul>
+        </section>
+        <section>
+          <h3>需要留意</h3>
+          <ul>${coach.risks.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>目前沒有明顯高風險設定，照課表跑並觀察恢復即可。</li>"}</ul>
+        </section>
+        <section>
+          <h3>下一步</h3>
+          <ul>${coach.nextActions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </section>
+      </div>
+      <div class="coach-chat">
+        <div>
+          <strong>問教練</strong>
+          <p id="coach-response">${escapeHtml(coach.encouragement)}</p>
+        </div>
+        <div class="coach-questions" aria-label="教練問答">
+          <button type="button" data-coach-question="tired">今天很累</button>
+          <button type="button" data-coach-question="pain">有點痛</button>
+          <button type="button" data-coach-question="faster">想跑快</button>
+          <button type="button" data-coach-question="taper">賽前一週</button>
+        </div>
+      </div>
     </div>
     <div class="plan-progress-panel">
       <div>
@@ -1830,6 +1974,14 @@ function renderPlan() {
   });
   els.planOutput.querySelector("[data-export-plan='calendar']")?.addEventListener("click", downloadPlanCalendar);
   els.planOutput.querySelector("[data-export-plan='garmin']")?.addEventListener("click", downloadGarminGuide);
+  els.planOutput.querySelectorAll("[data-coach-question]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const response = els.planOutput.querySelector("#coach-response");
+      if (response) {
+        response.textContent = coach.replies[button.dataset.coachQuestion] || coach.encouragement;
+      }
+    });
+  });
 }
 
 function setActiveButtons(buttons, dataKey, value) {
