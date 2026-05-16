@@ -66,9 +66,6 @@ function isCancelledRace(race) {
 }
 
 function isOfficialDirect(race) {
-  if (race.is_official_direct === true) {
-    return true;
-  }
   if (!hasText(race.registration_link)) {
     return false;
   }
@@ -231,6 +228,10 @@ function statusLine(label, value, target, ok) {
   return `| ${label} | ${value} | ${target} | ${ok ? "正常" : "需處理"} |`;
 }
 
+function isLaunchBlockingTracking(item) {
+  return ["due_now", "pre_race_recheck", "wait_until_open_window"].includes(item.tracking?.status);
+}
+
 async function main() {
   const todayDate = parseDate(today);
   const [races, queue, openedGaps, dateAnomalies, tracking, candidates, contentSourceHealth, editorialContent, publishedContent] = await Promise.all([
@@ -250,6 +251,7 @@ async function main() {
   const verifiedCount = races.filter((race) => hasText(race.verified_at)).length;
   const openGapCount = openedGaps.length;
   const dueNow = tracking.filter((item) => ["due_now", "pre_race_recheck"].includes(item.tracking?.status));
+  const launchBlockingGaps = queue.filter(isLaunchBlockingTracking);
   const monthly = tracking.filter((item) => item.tracking?.cadence === "monthly_1_15");
   const contentPool = [...candidates, ...editorialContent];
   const candidateByCategory = countBy(contentPool, (item) => item.category);
@@ -269,6 +271,9 @@ async function main() {
       follow_up_count: queue.length,
       complete_count: races.length - queue.length,
       complete_rate: pct(races.length - queue.length, races.length),
+      launch_blocking_gap_count: launchBlockingGaps.length,
+      launch_ready_count: races.length - launchBlockingGaps.length,
+      launch_ready_rate: pct(races.length - launchBlockingGaps.length, races.length),
       official_direct_count: officialDirectCount,
       official_direct_rate: pct(officialDirectCount, races.length),
       verified_count: verifiedCount,
@@ -302,7 +307,8 @@ async function main() {
   };
 
   const metrics = [
-    statusLine("賽事資料完整度", dashboard.races.complete_rate, "80% 以上", dashboard.races.complete_count / Math.max(races.length, 1) >= 0.8),
+    statusLine("上線可用完整度", dashboard.races.launch_ready_rate, "90% 以上", dashboard.races.launch_ready_count / Math.max(races.length, 1) >= 0.9),
+    statusLine("原始資料完整度", dashboard.races.complete_rate, "80% 以上", dashboard.races.complete_count / Math.max(races.length, 1) >= 0.8),
     statusLine("官方直連率", dashboard.races.official_direct_rate, "80% 以上", officialDirectCount / Math.max(races.length, 1) >= 0.8),
     statusLine("已查證比例", dashboard.races.verified_rate, "80% 以上", verifiedCount / Math.max(races.length, 1) >= 0.8),
     statusLine("開報後待補", `${openGapCount} 場`, "0 場", openGapCount === 0),
@@ -317,6 +323,9 @@ async function main() {
   const nextActions = [];
   if (openGapCount > 0) {
     nextActions.push("優先處理 `runner/賽事/開報後待補資料報告.md`，這些是已開報但資料仍不完整的賽事。");
+  }
+  if (launchBlockingGaps.length > 0) {
+    nextActions.push("上線阻塞待補只看已到追蹤窗口的賽事；遠期尚未開報賽事保留在追蹤計畫，不應人工硬補。");
   }
   if (dateAnomalies.length > 0) {
     nextActions.push("先修 `runner/賽事/報名日期異常報告.md`，日期邏輯錯誤會直接誤導報名狀態。");
@@ -344,6 +353,8 @@ async function main() {
     `追蹤基準日：${today}`,
     "",
     "這份報告把賽事資料品質、爬蟲追蹤、跑鞋與新聞內容量整合在一起，用來判斷下一輪最該補哪裡。",
+    "",
+    "判斷上線狀態時優先看「上線可用完整度、開報後待補、報名日期異常、內容品質」。原始資料完整度包含遠期尚未開報賽事，適合做長期追蹤，不應單獨視為上線阻塞。",
     "",
     "## 指標",
     "",

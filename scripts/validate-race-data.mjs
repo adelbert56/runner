@@ -114,10 +114,11 @@ function getOfficialRegistrationLink(race) {
 }
 
 function isOfficialDirect(race) {
-  if (race.is_official_direct === true) {
-    return true;
-  }
   return Boolean(getOfficialRegistrationLink(race));
+}
+
+function isActionableTracking(item) {
+  return ["due_now", "pre_race_recheck", "wait_until_open_window"].includes(item.tracking.status);
 }
 
 function isCancelledRace(race) {
@@ -746,8 +747,10 @@ function formatReport(races, queue) {
 
   const byCounty = countBy(queue, (item) => item.race_county || "未標縣市");
   const byTracking = trackingSummary(queue);
+  const actionableQueue = queue.filter(isActionableTracking);
+  const actionableCompleteness = completionRate(races.length, actionableQueue.length);
   const highPriority = queue
-    .filter((item) => item.missing.some((missing) => missing.severity === "high"))
+    .filter((item) => isActionableTracking(item) && item.missing.some((missing) => missing.severity === "high"))
     .slice(0, 12);
   const dueNow = queue
     .filter((item) => item.tracking.status === "due_now")
@@ -764,7 +767,11 @@ function formatReport(races, queue) {
     "",
     `- 賽事總數：${races.length}`,
     `- 待補賽事：${queue.length}`,
-    `- 完整度：${completionRate(races.length, queue.length)}`,
+    `- 原始完整度：${completionRate(races.length, queue.length)}`,
+    `- 上線可用完整度：${actionableCompleteness}`,
+    `- 上線阻塞待補：${actionableQueue.length}`,
+    "",
+    "上線可用完整度只把「現在該重爬、賽前複查、接近開報」的缺漏算成阻塞；遠期尚未開報、停辦或已過期的缺漏保留追蹤，但不應阻擋網站上線。",
     "",
     "## 欄位缺漏",
     "",

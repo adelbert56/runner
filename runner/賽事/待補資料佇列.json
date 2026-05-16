@@ -8,7 +8,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -98,7 +98,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -188,7 +188,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -278,7 +278,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -368,7 +368,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -458,7 +458,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -548,7 +548,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -638,7 +638,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -728,7 +728,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -818,7 +818,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "monitor_monthly",
@@ -908,7 +908,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
       "status": "wait_future",
@@ -998,7 +998,7 @@
     "registration_deadline": "",
     "registration_status": "報名時間未定",
     "source_platform": "運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "priority_score": 19,
     "tracking": {
       "status": "monitor_monthly",
