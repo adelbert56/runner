@@ -11,7 +11,7 @@
     <link rel="shortcut icon" href="./favicon.ico?v=20260515-icon1">
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=20260515-icon1">
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=20260515-icon1">
-    <link rel="stylesheet" href="./styles.css?v=20260516-coach1">
+    <link rel="stylesheet" href="./styles.css?v=20260516-system1">
   </head>
   <body>
     <header class="site-header">
@@ -157,37 +157,41 @@
             <p class="section-lead">用中文整理新鞋定位、適合跑者、訓練用途與原始消息，先判斷值不值得試穿，再決定要不要入手。</p>
           </div>
           <div class="content-controls" aria-label="跑鞋列表控制">
-            <label class="content-sort">
-              <span>類別</span>
-              <select id="shoe-category" aria-label="跑鞋類別">
-                <option value="all">全部類別</option>
-                <option value="日常訓練">日常訓練</option>
-                <option value="速度訓練">速度訓練</option>
-                <option value="競速">競速</option>
-                <option value="長距離緩震">長距離緩震</option>
-                <option value="越野">越野</option>
-                <option value="防水">防水</option>
-                <option value="跑鞋新品">跑鞋新品</option>
-              </select>
-            </label>
-            <label class="content-sort">
-              <span>排序</span>
-              <select id="shoe-sort" aria-label="跑鞋排序">
-                <option value="newest">最新加入</option>
-                <option value="oldest">由舊到新</option>
-                <option value="category">用途分類</option>
-              </select>
-            </label>
-            <label class="content-sort">
-              <span>顯示</span>
-              <select id="shoe-limit" aria-label="跑鞋顯示筆數">
-                <option value="10">10 筆</option>
-                <option value="25">25 筆</option>
-                <option value="50">50 筆</option>
-              </select>
-            </label>
-            <button class="toggle-button content-favorite-filter" type="button" id="shoe-favorite-filter">只看收藏</button>
-            <button class="link-button share-list-button" type="button" id="share-shoe-favorites">分享清單</button>
+            <div class="content-filter-grid">
+              <label class="content-sort">
+                <span>類別</span>
+                <select id="shoe-category" aria-label="跑鞋類別">
+                  <option value="all">全部類別</option>
+                  <option value="日常訓練">日常訓練</option>
+                  <option value="速度訓練">速度訓練</option>
+                  <option value="競速">競速</option>
+                  <option value="長距離緩震">長距離緩震</option>
+                  <option value="越野">越野</option>
+                  <option value="防水">防水</option>
+                  <option value="跑鞋新品">跑鞋新品</option>
+                </select>
+              </label>
+              <label class="content-sort">
+                <span>排序</span>
+                <select id="shoe-sort" aria-label="跑鞋排序">
+                  <option value="newest">最新加入</option>
+                  <option value="oldest">由舊到新</option>
+                  <option value="category">用途分類</option>
+                </select>
+              </label>
+              <label class="content-sort">
+                <span>顯示</span>
+                <select id="shoe-limit" aria-label="跑鞋顯示筆數">
+                  <option value="10">10 筆</option>
+                  <option value="25">25 筆</option>
+                  <option value="50">50 筆</option>
+                </select>
+              </label>
+            </div>
+            <div class="content-action-row">
+              <button class="toggle-button content-favorite-filter" type="button" id="shoe-favorite-filter">只看收藏</button>
+              <button class="link-button share-list-button" type="button" id="share-shoe-favorites">分享清單</button>
+            </div>
           </div>
         </div>
 
@@ -572,36 +576,40 @@
             <p class="section-lead">以中文整理跑鞋新品、訓練恢復、補給與備賽觀念，先保留真正能幫跑者做決策的重點。</p>
           </div>
           <div class="content-controls" aria-label="新聞列表控制">
-            <label class="content-sort">
-              <span>類別</span>
-              <select id="news-category" aria-label="新聞類別">
-                <option value="all">全部類別</option>
-                <option value="入門知識">入門知識</option>
-                <option value="賽事資訊">賽事資訊</option>
-                <option value="訓練">訓練</option>
-                <option value="跑鞋裝備">跑鞋裝備</option>
-                <option value="恢復保養">恢復保養</option>
-                <option value="補給">補給</option>
-                <option value="跑步新聞">跑步新聞</option>
-              </select>
-            </label>
-            <label class="content-sort">
-              <span>排序</span>
-              <select id="news-sort" aria-label="新聞排序">
-                <option value="newest">最新優先</option>
-                <option value="oldest">由舊到新</option>
-              </select>
-            </label>
-            <label class="content-sort">
-              <span>顯示</span>
-              <select id="news-limit" aria-label="新聞顯示筆數">
-                <option value="10">10 筆</option>
-                <option value="25">25 筆</option>
-                <option value="50">50 筆</option>
-              </select>
-            </label>
-            <button class="toggle-button content-favorite-filter" type="button" id="news-favorite-filter">只看收藏</button>
-            <button class="link-button share-list-button" type="button" id="share-news-favorites">分享清單</button>
+            <div class="content-filter-grid">
+              <label class="content-sort">
+                <span>類別</span>
+                <select id="news-category" aria-label="新聞類別">
+                  <option value="all">全部類別</option>
+                  <option value="入門知識">入門知識</option>
+                  <option value="賽事資訊">賽事資訊</option>
+                  <option value="訓練">訓練</option>
+                  <option value="跑鞋裝備">跑鞋裝備</option>
+                  <option value="恢復保養">恢復保養</option>
+                  <option value="補給">補給</option>
+                  <option value="跑步新聞">跑步新聞</option>
+                </select>
+              </label>
+              <label class="content-sort">
+                <span>排序</span>
+                <select id="news-sort" aria-label="新聞排序">
+                  <option value="newest">最新優先</option>
+                  <option value="oldest">由舊到新</option>
+                </select>
+              </label>
+              <label class="content-sort">
+                <span>顯示</span>
+                <select id="news-limit" aria-label="新聞顯示筆數">
+                  <option value="10">10 筆</option>
+                  <option value="25">25 筆</option>
+                  <option value="50">50 筆</option>
+                </select>
+              </label>
+            </div>
+            <div class="content-action-row">
+              <button class="toggle-button content-favorite-filter" type="button" id="news-favorite-filter">只看收藏</button>
+              <button class="link-button share-list-button" type="button" id="share-news-favorites">分享清單</button>
+            </div>
           </div>
         </div>
         <div class="news-list">
@@ -694,6 +702,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260516-coach1"></script>
+    <script src="./app.js?v=20260516-system1"></script>
   </body>
 </html>
