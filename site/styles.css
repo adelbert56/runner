@@ -1448,6 +1448,205 @@ h3 {
   margin-bottom: 20px;
 }
 
+.academy-section {
+  background: linear-gradient(180deg, #f6fbf7 0%, #fffdf8 100%);
+}
+
+.academy-hero,
+.academy-grid,
+.academy-panels {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.academy-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 16px;
+  padding: 20px;
+  border: 1px solid rgba(21, 83, 56, 0.14);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(13, 36, 24, 0.96), rgba(25, 74, 50, 0.94)),
+    var(--green-dark);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.academy-hero span {
+  display: inline-block;
+  color: var(--yellow);
+  font-size: 0.82rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.academy-hero h3 {
+  margin-top: 8px;
+  color: white;
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  line-height: 1.12;
+}
+
+.academy-hero p {
+  max-width: 620px;
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.75;
+}
+
+.path-ladder {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  list-style: none;
+}
+
+.path-ladder li {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  min-height: 150px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.path-ladder strong {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #172319;
+}
+
+.path-ladder li span {
+  color: white;
+  font-size: 1rem;
+  text-transform: none;
+}
+
+.path-ladder em {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.academy-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.academy-grid article,
+.academy-panels article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 1px 0 rgba(31, 42, 36, 0.03);
+}
+
+.academy-grid article {
+  display: grid;
+  align-content: start;
+  min-height: 310px;
+  padding: 18px;
+}
+
+.academy-grid article:nth-child(1) {
+  border-top: 5px solid var(--green-dark);
+}
+
+.academy-grid article:nth-child(2) {
+  border-top: 5px solid var(--yellow);
+}
+
+.academy-grid article:nth-child(3) {
+  border-top: 5px solid #7f9fb0;
+}
+
+.academy-grid article:nth-child(4) {
+  border-top: 5px solid var(--orange);
+}
+
+.academy-grid span {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 12px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #e4f0e8;
+  color: var(--green-dark);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.academy-grid h3,
+.academy-panels h3 {
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.academy-grid p,
+.academy-panels dd,
+.academy-panels li {
+  color: var(--muted);
+  line-height: 1.62;
+}
+
+.academy-grid ul,
+.academy-panels ul {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding-left: 18px;
+}
+
+.academy-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.academy-panels article {
+  padding: 20px;
+}
+
+.academy-panels dl {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.academy-panels dl div {
+  padding: 12px;
+  border: 1px solid rgba(21, 83, 56, 0.1);
+  border-radius: 8px;
+  background: #f5faf6;
+}
+
+.academy-panels dt,
+.academy-panels dd {
+  margin: 0;
+}
+
+.academy-panels dt {
+  color: var(--green-dark);
+  font-weight: 950;
+}
+
 .plan-builder {
   display: grid;
   gap: 12px;
@@ -2172,6 +2371,9 @@ h3 {
   .training-summary,
   .profile-summary,
   .pace-zones,
+  .academy-hero,
+  .academy-grid,
+  .academy-panels,
   .plan-hero,
   .plan-hero dl {
     grid-template-columns: 1fr;
@@ -2301,6 +2503,9 @@ h3 {
   .score-grid,
   .shoe-release-list,
   .review-grid,
+  .academy-hero,
+  .academy-grid,
+  .academy-panels,
   .profile-summary,
   .plan-hero,
   .plan-hero dl {
@@ -2337,6 +2542,14 @@ h3 {
 
   .stat-caption {
     font-size: 0.82rem;
+  }
+
+  .path-ladder {
+    grid-template-columns: 1fr;
+  }
+
+  .path-ladder li {
+    min-height: 0;
   }
 
   .plan-week-title {
