@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node site/server.mjs",
-    "check": "node --check site/app.js && node --check site/server.mjs && node --check scripts/validate-race-data.mjs && node --check scripts/apply-manual-overrides.mjs && node --check scripts/enrich-official-race-data.mjs && node --check scripts/collect-content-candidates.mjs && node --check scripts/publish-content.mjs && node --check scripts/sync-race-data.mjs && node --check scripts/build-operational-dashboard.mjs",
+    "check": "node --check site/app.js && node --check site/server.mjs && node --check scripts/validate-race-data.mjs && node --check scripts/apply-manual-overrides.mjs && node --check scripts/enrich-official-race-data.mjs && node --check scripts/collect-content-candidates.mjs && node --check scripts/publish-content.mjs && node --check scripts/sync-race-data.mjs && node --check scripts/build-operational-dashboard.mjs && node --check scripts/ui-smoke-check.mjs && node scripts/ui-smoke-check.mjs",
+    "ui:check": "node scripts/ui-smoke-check.mjs",
     "data:apply": "node scripts/apply-manual-overrides.mjs",
     "data:sync": "node scripts/sync-race-data.mjs",
     "data:enrich:official": "node scripts/enrich-official-race-data.mjs",

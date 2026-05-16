@@ -12,7 +12,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 128 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 127 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -45,7 +45,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 142 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 141 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -78,7 +78,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 155 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 154 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -111,7 +111,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 156 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 155 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -144,7 +144,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 177 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 176 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -177,7 +177,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 183 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -210,7 +210,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 183 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -243,7 +243,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 184 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 183 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -276,7 +276,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 212 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 211 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -309,7 +309,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 217 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -342,7 +342,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 218 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 217 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -375,7 +375,7 @@
       "status_label": "未來再查",
       "next_check_date": "2026-07-21",
       "cadence": "future",
-      "reason": "距離賽事 247 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 246 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       "official_registration_link",
@@ -406,7 +406,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-05-15",
+      "next_check_date": "2026-05-16",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },

@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const candidatesPath = resolve(root, "runner/内容/候选内容.json");
+const editorialPath = resolve(root, "runner/内容/人工精选内容.json");
 const outputPath = resolve(root, "site/data/content.json");
 const reportPath = resolve(root, "runner/内容/自动上架内容报告.md");
 const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
@@ -13,8 +14,8 @@ const LIMITS = {
 };
 
 const MIN_SCORE = {
-  shoe: 5,
-  news: 5,
+  shoe: 4,
+  news: 3,
 };
 
 const SUMMARY_RULES = [
@@ -81,10 +82,11 @@ function inferNewsCategory(title, description = "") {
 }
 
 function cleanSummary(text) {
-  const cleaned = String(text || "")
+  let cleaned = String(text || "")
     .replace(/\s+/g, " ")
     .replace(/^摘要[:：]\s*/, "")
     .trim();
+  cleaned = dedupeSentences(cleaned);
   if (!cleaned || cleaned.length < 18 || /國內外各大精選賽事|一手掌握|不漏接|預計\s*\d+\s*月份上市/.test(cleaned)) {
     return "";
   }
@@ -115,12 +117,32 @@ function cleanSummary(text) {
   return /[。！？.!?]$/.test(summary) ? summary : `${summary}。`;
 }
 
+function dedupeSentences(text) {
+  const pieces = String(text || "").match(/[^。！？.!?]+[。！？.!?]?/g) || [];
+  const seen = new Set();
+  const deduped = [];
+
+  for (const piece of pieces) {
+    const sentence = piece.trim();
+    if (!sentence) continue;
+    const key = sentence
+      .replace(/[，、；：,.!?！？。;:\s]/g, "")
+      .slice(0, 48);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(sentence);
+  }
+
+  return deduped.join("");
+}
+
 function summarize(item, type) {
-  const description = cleanSummary(item.description);
   const title = item.title.replace(/\s+/g, " ").trim();
   const newsCategory = inferNewsCategory(title, item.description);
 
   if (type === "shoe") {
+    const shoeSummary = summarizeShoeTitle(title);
+    if (shoeSummary) return shoeSummary;
     const category = inferShoeCategory(title);
     const shoeUse = {
       競速: "適合放在比賽日、節奏跑與間歇課，週跑量還不穩時不要拿來天天穿。",
@@ -134,21 +156,8 @@ function summarize(item, type) {
     return `這雙鞋目前以「${category}」定位收錄。${shoeUse}`;
   }
 
-  if (description) {
-    if (newsCategory === "賽事資訊") {
-      return `${description}可用來判斷報名時程、距離或是否值得排進年度目標。`;
-    }
-    if (newsCategory === "訓練") {
-      return `${description}建議對照自己的週跑量、疲勞與目標賽事距離後再採用。`;
-    }
-    if (newsCategory === "恢復保養") {
-      return `${description}適合放在跑後恢復、戶外訓練或傷痛檢查清單中參考。`;
-    }
-    if (newsCategory === "補給") {
-      return `${description}建議先在長跑或配速課中測試，不要比賽日第一次嘗試。`;
-    }
-    return `${description}保留和訓練、裝備或賽事決策相關的資訊，方便快速判斷是否深入閱讀。`;
-  }
+  const titleSummary = summarizeNewsTitle(title, newsCategory);
+  if (titleSummary) return titleSummary;
 
   if (/訓練|間歇|節奏|長跑|半馬|馬拉松/i.test(title)) {
     return "這篇適合作為課表調整參考。重點不是照抄強度，而是確認自己目前週跑量、恢復能力與目標賽事距離。";
@@ -160,6 +169,62 @@ function summarize(item, type) {
     return "補給文章可用於長跑與比賽前演練。不要比賽當天第一次嘗試新補給，避免腸胃或配速失控。";
   }
   return "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。";
+}
+
+function summarizeShoeTitle(title) {
+  if (/GHOST 18/i.test(title)) {
+    return "Ghost 18 偏日常穩定與舒適里程，適合新手、恢復跑、通勤慢跑與想找一雙主力訓練鞋的跑者。";
+  }
+  if (/PEGASUS 42/i.test(title)) {
+    return "Pegasus 42 延續日常訓練鞋定位，適合輕鬆跑、一般配速課與想用一雙鞋處理多數里程的跑者。";
+  }
+  if (/MACH 7/i.test(title)) {
+    return "Mach 7 偏輕量與速度訓練，適合已能穩定慢跑、想把節奏跑或中長距離配速課跑得更俐落的跑者。";
+  }
+  if (/壽命|更換時機/.test(title)) {
+    return "跑鞋壽命要看里程、鞋底磨耗、中底回彈與身體反應。若開始疼痛或支撐明顯下降，就該評估輪替或汰換。";
+  }
+  if (/總結2026上半年|adidas|冠軍跑鞋/.test(title)) {
+    return "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。";
+  }
+  return "";
+}
+
+function summarizeNewsTitle(title, category) {
+  if (/Panasonic|城市路跑|開放報名/.test(title)) {
+    return "台北城市路跑屬於秋季城市賽事，可當作 10K、親子同跑或下半年恢復比賽節奏的目標。先確認距離、報名期限與交通安排。";
+  }
+  if (/富士山|FUJI|UTMF|越野/.test(title)) {
+    return "富士山周邊賽事從公路馬到長距離越野都有，重點不是只看距離，而是爬升、補給、旅跑成本與自身山徑經驗是否匹配。";
+  }
+  if (/Alice Finot|歐洲紀錄/.test(title)) {
+    return "菁英跑者移地訓練的價值在於紀律、恢復與長期目標管理。一般跑者可借鏡訓練節奏，不必照抄強度。";
+  }
+  if (/防曬|保養|肌膚/.test(title)) {
+    return "戶外跑步除了課表，也要管理防曬、清潔與跑後恢復。長時間晨跑或午後跑者，應把保養納入訓練流程。";
+  }
+  if (/HYROX|重訓|健身/.test(title)) {
+    return "HYROX 類型訓練提醒跑者：肌力、動作控制與心肺耐力會互相影響。想提升表現，不能只堆跑量。";
+  }
+  if (/金字塔|低強度|馬拉松|跑量/.test(title)) {
+    return "馬拉松進步不只靠高強度，穩定低強度跑量才是地基。安排課表時，要先確保恢復能力跟得上。";
+  }
+  if (/跑步姿勢|跑姿/.test(title)) {
+    return "跑姿沒有單一完美答案，重點是降低過度用力與受傷風險。可先從步頻、落地位置與身體放鬆度檢查。";
+  }
+  if (/停滯不前|去跑步/.test(title)) {
+    return "這類跑步故事適合當作入門動機參考。真正執行時，先從低門檻頻率與可持續習慣開始。";
+  }
+  if (/世界紀錄|課表硬/.test(title)) {
+    return "菁英課表可看結構，不宜照抄強度。一般跑者應先確認基礎跑量、肌力與恢復能力。";
+  }
+  if (/初半馬|學員故事/.test(title)) {
+    return "初半馬故事適合作為新手備賽參考，重點在循序累積、穩定完成課表與避免臨時硬拉長跑。";
+  }
+  if (category === "賽事資訊") {
+    return "這篇屬於賽事資訊，可用來判斷報名時程、距離組別、交通與是否值得排進年度目標。";
+  }
+  return "";
 }
 
 function toPublishedItem(item) {
@@ -200,6 +265,14 @@ function pick(items, type) {
     .slice(0, LIMITS[type]);
 }
 
+async function readJson(path, fallback) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch {
+    return fallback;
+  }
+}
+
 function buildReport(published) {
   const rows = published.map((item) => (
     `| ${item.type === "shoe" ? "跑鞋" : "新聞"} | ${item.score} | ${item.date} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${item.summary.replace(/\|/g, "／")} | [來源](${item.url}) |`
@@ -226,8 +299,9 @@ function buildReport(published) {
 }
 
 async function main() {
-  const raw = JSON.parse(await readFile(candidatesPath, "utf8"));
-  const normalized = raw.map(toPublishedItem);
+  const raw = await readJson(candidatesPath, []);
+  const editorial = await readJson(editorialPath, []);
+  const normalized = [...raw, ...editorial].map(toPublishedItem);
   const published = [
     ...pick(normalized, "shoe"),
     ...pick(normalized, "news"),

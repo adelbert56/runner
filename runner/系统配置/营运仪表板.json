@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-16T01:00:23.969Z",
+  "generated_at": "2026-05-16T10:40:35.892Z",
   "basis_date": "2026-05-16",
   "races": {
     "total": 34,
@@ -22,16 +22,17 @@
     }
   },
   "content": {
-    "shoe_cards": 10,
-    "news_cards": 11,
-    "newest_shoe_date": "2026-05-15",
-    "newest_news_date": "2026-05-15",
-    "published_count": 12,
-    "candidate_count": 19,
+    "shoe_cards": 12,
+    "news_cards": 10,
+    "newest_shoe_date": "2026-05-16",
+    "newest_news_date": "2026-05-16",
+    "published_count": 22,
+    "candidate_count": 22,
+    "editorial_count": 3,
     "candidate_by_category": {
-      "跑鞋新品": 9,
-      "跑步新聞": 5,
-      "訓練": 5
+      "跑鞋新品": 12,
+      "跑步新聞": 6,
+      "訓練": 4
     }
   },
   "platform_stability": {

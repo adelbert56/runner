@@ -11,7 +11,7 @@
     <link rel="shortcut icon" href="./favicon.ico?v=20260515-icon1">
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=20260515-icon1">
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=20260515-icon1">
-    <link rel="stylesheet" href="./styles.css?v=20260516-pro1">
+    <link rel="stylesheet" href="./styles.css?v=20260516-pro6">
   </head>
   <body>
     <header class="site-header">
@@ -88,51 +88,58 @@
               <span>搜尋賽事</span>
               <input id="race-search" type="search" placeholder="輸入賽事、縣市或距離">
             </label>
-            <div class="filter-stack">
-              <span>縣市</span>
-              <div class="segmented" role="group" aria-label="縣市篩選">
-                <button class="active" type="button" data-county="all">全部</button>
-                <button type="button" data-county="臺中市">臺中</button>
-                <button type="button" data-county="彰化縣">彰化</button>
-                <button type="button" data-county="南投縣">南投</button>
-                <button type="button" data-county="苗栗縣">苗栗</button>
+            <details class="race-filter-panel" open>
+              <summary>篩選條件</summary>
+              <div class="race-filter-body">
+                <div class="filter-stack">
+                  <span>縣市</span>
+                  <div class="segmented" role="group" aria-label="縣市篩選">
+                    <button class="active" type="button" data-county="all">全部</button>
+                    <button type="button" data-county="臺中市">臺中</button>
+                    <button type="button" data-county="彰化縣">彰化</button>
+                    <button type="button" data-county="南投縣">南投</button>
+                    <button type="button" data-county="苗栗縣">苗栗</button>
+                  </div>
+                </div>
+                <div class="filter-stack">
+                  <span>難度</span>
+                  <div class="segmented" role="group" aria-label="難度篩選">
+                    <button class="active" type="button" data-difficulty="all">全部</button>
+                    <button type="button" data-difficulty="初級">初級</button>
+                    <button type="button" data-difficulty="中級">中級</button>
+                    <button type="button" data-difficulty="高級">高級</button>
+                  </div>
+                </div>
+                <div class="filter-stack">
+                  <span>狀態</span>
+                  <div class="segmented" role="group" aria-label="報名狀態篩選">
+                    <button class="active" type="button" data-registration="all">全部</button>
+                    <button type="button" data-registration="open">可報名</button>
+                    <button type="button" data-registration="soon">即將截止</button>
+                    <button type="button" data-registration="closed">已截止</button>
+                    <button type="button" data-registration="history">歷史</button>
+                  </div>
+                </div>
+                <div class="filter-stack">
+                  <span>距離</span>
+                  <div class="segmented" role="group" aria-label="距離篩選">
+                    <button class="active" type="button" data-distance="all">全部</button>
+                    <button type="button" data-distance="short">短程</button>
+                    <button type="button" data-distance="10k">10K</button>
+                    <button type="button" data-distance="half">半馬</button>
+                    <button type="button" data-distance="marathon">全馬+</button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="filter-stack">
-              <span>難度</span>
-              <div class="segmented" role="group" aria-label="難度篩選">
-                <button class="active" type="button" data-difficulty="all">全部</button>
-                <button type="button" data-difficulty="初級">初級</button>
-                <button type="button" data-difficulty="中級">中級</button>
-                <button type="button" data-difficulty="高級">高級</button>
-              </div>
-            </div>
-            <div class="filter-stack">
-              <span>狀態</span>
-              <div class="segmented" role="group" aria-label="報名狀態篩選">
-                <button class="active" type="button" data-registration="all">全部</button>
-                <button type="button" data-registration="open">可報名</button>
-                <button type="button" data-registration="soon">即將截止</button>
-                <button type="button" data-registration="closed">已截止</button>
-                <button type="button" data-registration="history">歷史</button>
-              </div>
-            </div>
-            <div class="filter-stack">
-              <span>距離</span>
-              <div class="segmented" role="group" aria-label="距離篩選">
-                <button class="active" type="button" data-distance="all">全部</button>
-                <button type="button" data-distance="short">短程</button>
-                <button type="button" data-distance="10k">10K</button>
-                <button type="button" data-distance="half">半馬</button>
-                <button type="button" data-distance="marathon">全馬+</button>
-              </div>
-            </div>
+            </details>
           </div>
 
           <div class="race-layout">
             <aside class="month-panel" aria-labelledby="months-title">
-              <h3 id="months-title">月份索引</h3>
-              <div id="month-list" class="month-list"></div>
+              <details class="month-index-panel" open>
+                <summary id="months-title">月份索引</summary>
+                <div id="month-list" class="month-list"></div>
+              </details>
             </aside>
             <div class="race-results">
               <div class="results-meta">
@@ -710,6 +717,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260516-pro1"></script>
+    <script src="./app.js?v=20260516-pro6"></script>
   </body>
 </html>

@@ -5,7 +5,7 @@ const FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:favorites`;
 const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const TODAY = "2026-05-15";
+const TODAY = getTodayString();
 
 const state = {
   races: [],
@@ -217,6 +217,19 @@ const weekdayLabels = {
   sat: "週六",
   sun: "週日",
 };
+
+function getTodayString() {
+  try {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Taipei",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
 
 function getDeviceId() {
   try {
@@ -555,6 +568,21 @@ function setupDurationPickers() {
   syncDurationPickersFromInputs();
 }
 
+function setupResponsiveDefaults() {
+  const raceFilters = document.querySelector(".race-filter-panel");
+  const monthIndex = document.querySelector(".month-index-panel");
+  if (typeof window.matchMedia !== "function") {
+    return;
+  }
+  const compact = window.matchMedia("(max-width: 680px)").matches;
+  if (raceFilters) {
+    raceFilters.open = !compact;
+  }
+  if (monthIndex) {
+    monthIndex.open = !compact;
+  }
+}
+
 function syncDurationPickersFromInputs() {
   const finish = parseDurationParts(els.planFinish?.value || "1:05:00");
   const pace = parseDurationParts(els.planPace?.value || "6:30");
@@ -741,7 +769,6 @@ function raceDecisionText(race, registrationTarget) {
     parts.push("截止待確認");
   }
 
-  parts.push(registrationTarget.kind === "official" ? "官方直連" : registrationTarget.url ? "公開資訊" : "待補連結");
   return parts.join(" · ");
 }
 
@@ -1206,7 +1233,6 @@ function renderRaces() {
       const factItems = [
         venue ? ["地點", venue] : null,
         organizer ? ["主辦", organizer] : null,
-        verifiedAt ? ["查證", formatShortDate(verifiedAt) || verifiedAt] : null,
       ].filter(Boolean);
       const sourcePlatform = race.source_platform || race.source || "";
       const trustItems = [
@@ -1244,16 +1270,22 @@ function renderRaces() {
             </div>
             ${datesNeedCheck ? `<p class="race-data-warning">報名起訖日期邏輯待查證</p>` : ""}
             <div class="race-insight">${escapeHtml(decision)}</div>
-            <div class="race-trust-line" aria-label="資料可信度">
-              ${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}
-            </div>
             ${
-              factItems.length
+              factItems.length || trustItems.length
                 ? `<details class="race-detail-panel">
                     <summary>資料來源與場地</summary>
+                    <div class="race-trust-line" aria-label="資料可信度">
+                      ${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}
+                    </div>
+                    ${
+                      factItems.length
+                        ? `
                     <dl>
                       ${factItems.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}
                     </dl>
+                        `
+                        : ""
+                    }
                   </details>`
                 : ""
             }
@@ -2149,13 +2181,11 @@ function renderAutoContent(items) {
   const newsContainer = document.querySelector(".news-list");
 
   if (shoeContainer && shoes.length) {
-    shoeContainer.querySelectorAll("[data-auto-content]").forEach((node) => node.remove());
-    shoeContainer.insertAdjacentHTML("afterbegin", shoes.map(contentArticleHtml).join(""));
+    shoeContainer.innerHTML = shoes.map(contentArticleHtml).join("");
   }
 
   if (newsContainer && news.length) {
-    newsContainer.querySelectorAll("[data-auto-content]").forEach((node) => node.remove());
-    newsContainer.insertAdjacentHTML("afterbegin", news.map(contentArticleHtml).join(""));
+    newsContainer.innerHTML = news.map(contentArticleHtml).join("");
   }
 }
 
@@ -2560,6 +2590,7 @@ async function init() {
   loadFavorites();
   loadContentFavorites();
   readSharedFavorites();
+  setupResponsiveDefaults();
   setupDurationPickers();
   bindEvents();
   await loadPublishedContent();
