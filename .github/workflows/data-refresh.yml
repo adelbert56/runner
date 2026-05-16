@@ -47,6 +47,9 @@ jobs:
       - name: Apply manual supplements and quality report
         run: npm run data:refresh
 
+      - name: Update race weather forecast
+        run: npm run data:weather
+
       - name: Build operational dashboard
         run: npm run ops:dashboard
 

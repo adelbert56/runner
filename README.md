@@ -19,6 +19,8 @@
 - 官方報名入口：優先導向官方或主辦平台，避免只停在資料聚合頁。
 - 資料品質標記：保存來源平台、官方直連、最後查證時間、缺漏欄位與人工補充。
 - 收藏與行事曆：收藏存在使用者裝置瀏覽器；賽事可匯出手機行事曆使用。
+- 場地導航與開跑時間：賽事卡片可直接開啟地圖導航；行事曆內容會帶入各距離開跑時間。
+- 賽前天氣：賽事進入 7 天內後，由排程寫入當日縣市天氣預報並在網站顯示。
 - 歷史賽事：過期超過一個月的賽事收進歷史資料邏輯。
 - 跑鞋新品與心得：整理跑鞋新品、評測心得、選鞋知識與文章收藏。
 - 跑步新聞：收集中文跑步新聞與訓練文章，可排序與收藏。
@@ -133,6 +135,7 @@ http://localhost:4173/site/
 | `npm run data:sync` | 同步賽事資料到網站資料 |
 | `npm run data:quality` | 產生資料品質、待補、異常報告 |
 | `npm run data:refresh` | 套用人工補充、同步網站資料、產生品質報告 |
+| `npm run data:weather` | 更新 7 天內賽事的當日天氣預報 |
 | `npm run data:refresh:online` | 加上官方平台補資料的完整線上更新 |
 | `npm run content:candidates` | 收集跑鞋 / 新聞候選內容 |
 | `npm run content:publish` | 將候選內容整理成網站資料 |
@@ -163,6 +166,7 @@ runner/系統配置/UI商品化驗收標準.md
 uv run python scripts/main.py
 uv run python scripts/enrich_platforms.py
 npm run data:refresh
+npm run data:weather
 npm run ops:dashboard
 npm run check
 ```

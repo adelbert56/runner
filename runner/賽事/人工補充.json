@@ -32,8 +32,14 @@
     "co_organizer": "樂活資訊服務股份有限公司",
     "fees": "21K 1100元、10K 900元、5K 700元、3K 700元；晶片押金各100元；訂單行政處理費30元。",
     "quota": "21K、10K、5K、3K 各1000人。",
+    "start_times": {
+      "21km": "06:00",
+      "10km": "06:10",
+      "5km": "06:20",
+      "3km": "06:30"
+    },
     "verified_at": "2026-05-15",
-    "verification_note": "官方頁：https://lohasnet.tw/ChungHsingVillage2026/；活動地點、主辦、報名費用、開放名額皆可查。"
+    "verification_note": "官方頁：https://lohasnet.tw/ChungHsingVillage2026/；活動地點、主辦、報名費用、開放名額與各組起跑時間皆可查。"
   },
   {
     "race_name": "2026 松鶴越野",
@@ -48,8 +54,14 @@
     "co_organizer": "醫聲論壇鐵人三項協會 AED runner、快快運動行銷有限公司、泰雅渡假村",
     "fees": "LV5 50K Green 3400元 / Normal 4400元；LV3 20K Green 2250元 / Normal 2850元；LV2 13K Green 1650元 / Normal 1900元；LV1 7K Green 1150元 / Normal 1350元；一般價另有調整。",
     "quota": "LV5、LV3、LV2、LV1 各300名。",
+    "start_times": {
+      "50km": "04:30",
+      "20km": "08:00",
+      "13km": "08:45",
+      "7km": "09:30"
+    },
     "verified_at": "2026-05-15",
-    "verification_note": "官方報名頁顯示主辦、協辦、名額上限與報名費；跑寶島頁確認地點為南投縣國姓鄉泰雅渡假村。"
+    "verification_note": "官方報名頁顯示主辦、協辦、名額上限與報名費；運動筆記與跑寶島頁確認地點與各組起跑時間。"
   },
   {
     "race_name": "夏日馬拉松 - 南投埔里場",

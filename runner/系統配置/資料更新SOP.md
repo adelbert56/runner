@@ -3,6 +3,7 @@
 ## 自動排程
 
 - GitHub Actions `Refresh race data` 每週二、四 18:00（Asia/Taipei）執行，也可手動執行。
+- GitHub Actions `Refresh race weather` 每天 07:00（Asia/Taipei）執行，只更新 7 天內賽事的當日預報。
 - GitHub Actions `Collect content candidates` 每週一 09:00（Asia/Taipei）執行，也可手動執行。
 - 流程會先跑賽事清單爬蟲，再跑官方平台補資料，最後產生品質報告。
 - 每月追蹤賽事固定排在每月 1 號與 15 號檢查。
@@ -18,6 +19,10 @@
    - 套用人工補充。
    - 同步 `runner/賽事/賽事資料庫.json` 到 `site/data/races.json`。
    - 重產資料品質、追蹤計畫與開報後待補報告。
+4. `npm run data:weather`
+   - 只處理距離賽事日 0 到 7 天內的賽事。
+   - 依縣市座標查詢 Open-Meteo 當日預報，寫入 `weather_forecast`。
+   - 前端只顯示符合賽事日期的預報，避免過早或過期天氣干擾。
 
 ## 內容流程
 
@@ -44,6 +49,8 @@
 - `is_official_direct`：是否官方直連。
 - `verification_note`：查證來源摘要。
 - `registration_note`：特殊狀態，例如停辦、額滿、登入限制或日期差異。
+- `start_times`：各距離開跑時間；建議用物件，例如 `{ "21km": "06:00", "10km": "06:10" }`。
+- `weather_forecast`：賽前 7 天內由排程寫入的天氣資料，不需人工維護。
 
 ## 發布檢查
 

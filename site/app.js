@@ -953,19 +953,98 @@ function escapeIcsText(value) {
     .replaceAll(";", "\\;");
 }
 
+function hasText(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
+function firstText(...values) {
+  return values.find((value) => hasText(value)) || "";
+}
+
+function venueForRace(race) {
+  return firstText(race.venue, race.start_location, race.location, race.race_location);
+}
+
+function mapQueryForRace(race, venue = venueForRace(race)) {
+  const query = [venue, race.race_county].filter(hasText).join(" ");
+  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : "";
+}
+
+function normalizeStartTimeItems(value) {
+  if (!value) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => {
+      if (typeof item === "string") {
+        return item.trim() ? [item.trim()] : [];
+      }
+      if (item && typeof item === "object") {
+        const distance = firstText(item.distance, item.group, item.name, item.label);
+        const time = firstText(item.time, item.start_time, item.starts_at, item.value);
+        return distance || time ? [`${distance}${distance && time ? " " : ""}${time}`] : [];
+      }
+      return [];
+    });
+  }
+  if (typeof value === "object") {
+    return Object.entries(value).flatMap(([distance, time]) => {
+      if (!hasText(time)) {
+        return [];
+      }
+      return [`${distance} ${String(time).trim()}`];
+    });
+  }
+  return String(value)
+    .split(/[、；;,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function getStartTimeItems(race) {
+  return normalizeStartTimeItems(firstText(race.start_times, race.distance_start_times, race.wave_start_times, race.start_time, race.event_time));
+}
+
+function formatStartTimes(race, fallback = "官方尚未提供各距離開跑時間") {
+  const items = getStartTimeItems(race);
+  return items.length ? items.join("、") : fallback;
+}
+
+function sourceLabelForRace(race) {
+  return firstText(race.source_platform, race.source, "資料來源待確認");
+}
+
+function weatherSummaryForRace(race) {
+  const forecast = race.weather_forecast;
+  if (!forecast || typeof forecast !== "object") {
+    return "";
+  }
+  if (forecast.forecast_for && race.race_date && forecast.forecast_for !== race.race_date) {
+    return "";
+  }
+  return firstText(forecast.summary, forecast.text);
+}
+
 function buildCalendarDetails(race) {
   const registrationTarget = getRegistrationTarget(race);
   const distances = (race.distances || []).join(" / ");
-  const venue = race.venue || race.start_location || race.location || race.race_location || "";
+  const venue = venueForRace(race);
   const organizer = race.organizer || race.host || race.organizer_name || "";
   const fees = race.fees || race.fee || race.registration_fee || "";
   const quota = race.quota || race.participant_limit || "";
   const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
+  const startTimes = formatStartTimes(race);
+  const mapLink = mapQueryForRace(race, venue);
+  const sourceLabel = sourceLabelForRace(race);
+  const weather = weatherSummaryForRace(race);
   const description = [
     `縣市：${race.race_county || "待確認"}`,
     venue ? `地點：${venue}` : "",
+    mapLink ? `導航：${mapLink}` : "",
     `距離：${distances || "待確認"}`,
+    `開跑時間：${startTimes}`,
     `難度：${race.difficulty || "待確認"}`,
+    weather ? `賽事天氣：${weather}` : "",
     organizer ? `主辦：${organizer}` : "",
     fees ? `費用：${fees}` : "",
     quota ? `名額：${quota}` : "",
@@ -973,9 +1052,9 @@ function buildCalendarDetails(race) {
     `開報：${race.registration_opens_at || "待確認"}`,
     `截止：${race.registration_deadline || "待確認"}`,
     verifiedAt ? `資料查證：${verifiedAt}` : "",
+    sourceLabel ? `資料來源：${sourceLabel}` : "",
     registrationTarget.url ? `${registrationTarget.label}：${registrationTarget.url}` : "報名網站：待補連結",
     !registrationTarget.url && race.facebook_search_url ? `臉書搜尋：${race.facebook_search_url}` : "",
-    race.detail_url ? `來源詳情：${race.detail_url}` : "",
   ].filter(Boolean).join("\n");
 
   return {
@@ -1227,12 +1306,17 @@ function renderRaces() {
       const expired = raceDays !== null && raceDays < 0;
       const canPlanTraining = !cancelled && raceDays !== null && raceDays >= 0;
       const disabledTrainingLabel = cancelled ? "活動停辦" : "賽事已過";
-      const venue = race.venue || race.start_location || race.location || race.race_location || "";
+      const venue = venueForRace(race);
+      const mapLink = mapQueryForRace(race, venue);
+      const startTimes = formatStartTimes(race, "");
+      const weather = weatherSummaryForRace(race);
       const organizer = race.organizer || race.host || race.organizer_name || "";
       const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
       const factItems = [
-        venue ? ["地點", venue] : null,
-        organizer ? ["主辦", organizer] : null,
+        venue ? { label: "地點", value: venue, action: mapLink ? { href: mapLink, label: "導航" } : null } : null,
+        startTimes ? { label: "開跑", value: startTimes } : null,
+        weather ? { label: "天氣", value: weather } : null,
+        organizer ? { label: "主辦", value: organizer } : null,
       ].filter(Boolean);
       const sourcePlatform = race.source_platform || race.source || "";
       const trustItems = [
@@ -1281,7 +1365,7 @@ function renderRaces() {
                       factItems.length
                         ? `
                     <dl>
-                      ${factItems.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}
+                      ${factItems.map((item) => `<div><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${escapeHtml(item.value)}</dd></div>`).join("")}
                     </dl>
                         `
                         : ""

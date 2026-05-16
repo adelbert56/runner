@@ -177,6 +177,36 @@ def first_quota_text(text: str) -> str:
     return "、".join(value.replace(" ", "") for value in values[:8])
 
 
+def extract_start_times(lines: list[str]) -> str:
+    direct = find_label_value(lines, ("開跑時間", "起跑時間", "鳴槍時間", "出發時間", "各組出發"))
+    if direct:
+        return direct
+
+    grouped: list[str] = []
+    current_group = ""
+    for index, line in enumerate(lines):
+        group_match = re.search(r"((?:\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km))|半馬|全馬|挑戰組|休閒組|健走組)", line)
+        if group_match and len(line) <= 32:
+            current_group = compact_text(group_match.group(1)).upper().replace(" ", "")
+        if current_group and "起跑" in line:
+            for candidate in lines[index + 1:index + 4]:
+                time_match = re.search(r"([01]?\d|2[0-3])[:：][0-5]\d", candidate)
+                if time_match:
+                    grouped.append(f"{current_group} {time_match.group(0).replace('：', ':')}")
+                    break
+        if len(grouped) >= 8:
+            return "、".join(dict.fromkeys(grouped))
+
+    text = " ".join(lines)
+    snippets: list[str] = []
+    pattern = r"((?:\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|半馬|全馬|挑戰組|休閒組|健走組).{0,18}?(?:[01]?\d|2[0-3])[:：][0-5]\d)"
+    for match in re.finditer(pattern, text):
+        snippets.append(compact_text(match.group(1)).replace(" ：", " "))
+        if len(snippets) >= 8:
+            break
+    return "、".join(dict.fromkeys(snippets))
+
+
 def status_from_text(text: str) -> str:
     snippet = compact_text(text[:4000])
     if any(keyword in snippet for keyword in ("停辦", "停賽", "取消辦理", "取消停辦")):
@@ -203,6 +233,7 @@ def generic_extract(html: str, race: dict) -> dict:
         "co_organizer": find_label_value(lines, ("承辦單位", "承辦", "協辦單位", "協辦")),
         "fees": first_fee_text(text),
         "quota": first_quota_text(text),
+        "start_times": extract_start_times(lines),
         "registration_status": status_from_text(text),
     }
 

@@ -1082,6 +1082,10 @@ h3 {
 }
 
 .race-detail-panel dt {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
   color: var(--green-dark);
   font-size: 0.68rem;
   font-weight: 950;
@@ -1091,6 +1095,26 @@ h3 {
   margin-top: 2px;
   overflow-wrap: anywhere;
   font-weight: 850;
+}
+
+.fact-action {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  border: 1px solid rgba(21, 83, 56, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--green-dark);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.fact-action:hover {
+  border-color: rgba(21, 83, 56, 0.32);
+  background: #e9f3ec;
 }
 
 .race-actions {

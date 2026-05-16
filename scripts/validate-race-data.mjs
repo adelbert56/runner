@@ -47,6 +47,14 @@ const fieldGroups = [
     hint: "補 venue 或 start_location，不要只到縣市。",
   },
   {
+    key: "start_times",
+    label: "各距離開跑時間",
+    severity: "low",
+    optional: true,
+    hasValue: (race) => firstText(race.start_times, race.distance_start_times, race.wave_start_times, race.start_time, race.event_time),
+    hint: "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。",
+  },
+  {
     key: "organizer",
     label: "主辦單位",
     severity: "medium",
@@ -75,6 +83,8 @@ const fieldGroups = [
     hint: "補 verified_at，表示人工或爬蟲最後查證日。",
   },
 ];
+
+const coreFieldGroups = fieldGroups.filter((field) => !field.optional);
 
 function hasText(value) {
   return value !== undefined && value !== null && String(value).trim() !== "";
@@ -327,7 +337,7 @@ function trackingPlanForRace(race, missing, todayText = TODAY) {
 }
 
 function buildQueueItem(race) {
-  const rawMissing = fieldGroups
+  const rawMissing = coreFieldGroups
     .filter((field) => !field.hasValue(race))
     .map(({ key, label, severity, hint }) => ({ key, label, severity, hint }));
   const missing = isCancelledRace(race)
