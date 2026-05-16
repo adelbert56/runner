@@ -12,12 +12,14 @@
 
 - 前端：`site/` 靜態頁，資料讀 `site/data/races.json`。
 - 公開網站：`https://adelbert56.github.io/runner/`，不要再使用舊的 `adelbert56.github.io` 網址。
+- 目前收尾狀態：已進入公開可用與排程觀察階段；最新收尾基準是 `f99c9aa docs(ops): Clarify automation closeout`。
 - 賽事資料源：`runner/賽事/賽事資料庫.json`。
 - 跑鞋 / 新聞資料源：`runner/內容/候選內容.json`，發布到 `site/data/content.json`。
 - 主爬蟲：`scripts/main.py`。
 - 官方平台補資料：`scripts/enrich_platforms.py` 與 `scripts/platforms/`。
 - 資料同步與報告：`npm run data:refresh`、`npm run data:quality`。
-- 自動排程：`.github/workflows/data-refresh.yml` 每週二、四 18:00 Asia/Taipei 更新賽事；`.github/workflows/content-candidates.yml` 每週一 09:00 Asia/Taipei 更新跑鞋 / 新聞。
+- 自動排程：`.github/workflows/data-refresh.yml` 每週二、四 18:00 Asia/Taipei 更新賽事；`.github/workflows/weather-refresh.yml` 每天 07:00 Asia/Taipei 更新賽前天氣；`.github/workflows/content-candidates.yml` 每週一 09:00 Asia/Taipei 更新跑鞋 / 新聞。
+- 品質檢查：`.github/workflows/ci.yml` 會跑 JS、資料品質、內容品質、Python compileall 與 UI layout。
 - 發布：`.github/workflows/pages.yml`，推送 `main` 後部署 GitHub Pages。
 
 ## 資料原則
@@ -73,7 +75,7 @@
 - 一般修改：`npm run check`。
 - Python 修改：`uv run python -m compileall scripts`。
 - 資料流程修改：`uv run python scripts/enrich_platforms.py --dry-run` 後再跑 `npm run data:refresh`。
-- 收尾驗證：`npm run data:refresh`、`npm run content:refresh`、`npm run ops:dashboard`、`npm run check`、`uv run python -m compileall scripts`。
+- 收尾驗證：`npm run data:refresh`、`npm run content:refresh`、`npm run ops:dashboard`、`npm run check`、`npm run data:quality:strict`、`npm run content:quality:strict`、`uv run python -m compileall scripts`。
 - 營運狀態檢查：`npm run ops:dashboard`，看賽事完整度、官方直連率、開報後待補與內容候選量。
 - 上線判斷優先看「上線可用完整度、開報後待補、報名日期異常、內容品質、UI layout」。原始完整度包含遠期尚未開報賽事，只能作為長期追蹤，不應單獨阻擋上線。
 - UI 修改：啟動 `npm run dev`，依 `runner/系統配置/UI商品化驗收標準.md` 用瀏覽器桌面與手機 viewport 截圖檢查。
@@ -83,6 +85,9 @@
 
 - 不提交 `.obsidian/workspace.json`，這類本機工作區狀態應留在 `.gitignore`。
 - 空的 `server.out.log`、`server.err.log` 與 `scripts/**/__pycache__` 可以清理；`.venv` 是本機依賴環境，除非要重建環境，否則不要當一般整理項目刪除。
+- `.codex-rescues/` 是 Codex 對話修復與 log archive；不要提交，也不要在未確認前刪除。
+- `output/playwright/` 是 UI 驗證截圖；可由下一輪 `npm run ui:layout` 覆蓋，不需要提交。
+- 本地資料夾收尾狀態記在 `runner/系統配置/本地收尾整理.md`。
 - 既有未提交的使用者變更不要順手 stage。
 - 若只改文件，提交時只 stage 相關文件。
 - 推送到 `main` 後確認 GitHub Pages 會由 workflow 自動部署。
@@ -95,3 +100,4 @@
 - 若發現 UI 問題來自手機 viewport，補進手機驗證清單。
 - 若使用者反覆指出同類問題，將它升級成固定驗證項目。
 - Codex 本機沙盒常會讓外部 HTTP 顯示 `fetch failed`；內容或官方來源是否真的壞，要用 GitHub Actions 或授權網路執行結果判斷。
+- 排程觀察時，如果 GitHub Actions 成功但沒有 auto-commit，通常代表資料無變動；不要誤判成排程失效。
