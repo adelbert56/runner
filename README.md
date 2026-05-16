@@ -61,23 +61,23 @@
 │   ├── platforms/                # iRunner / Lohas / CTRun 等平台解析
 │   └── scrapers/                 # 原始賽事來源爬蟲
 ├── runner/                       # 第二大腦與資料庫
-│   ├── 赛事/
-│   │   ├── 赛事数据库.json
-│   │   ├── 人工补充.json
-│   │   ├── 中部赛事列表.md
-│   │   ├── 资料品质报告.md
-│   │   ├── 开报后待补资料报告.md
-│   │   ├── 报名日期异常报告.md
-│   │   └── 平台爬虫覆盖报告.md
-│   ├── 内容/
-│   │   ├── 候选内容.json
-│   │   ├── 候选内容报告.md
-│   │   └── 自动上架内容报告.md
-│   └── 系统配置/
-│       ├── 资料更新SOP.md
-│       ├── 营运仪表板.md
-│       ├── 内容来源与爬虫规划.md
-│       └── UI商品化验收标准.md
+│   ├── 賽事/
+│   │   ├── 賽事資料庫.json
+│   │   ├── 人工補充.json
+│   │   ├── 中部賽事列表.md
+│   │   ├── 資料品質報告.md
+│   │   ├── 開報後待補資料報告.md
+│   │   ├── 報名日期異常報告.md
+│   │   └── 平台爬蟲覆蓋報告.md
+│   ├── 內容/
+│   │   ├── 候選內容.json
+│   │   ├── 候選內容報告.md
+│   │   └── 自動上架內容報告.md
+│   └── 系統配置/
+│       ├── 資料更新SOP.md
+│       ├── 營運儀表板.md
+│       ├── 內容來源與爬蟲規劃.md
+│       └── UI商品化驗收標準.md
 ├── .github/workflows/
 │   ├── pages.yml                 # 部署網站
 │   ├── data-refresh.yml          # 賽事資料更新
@@ -144,7 +144,7 @@ http://localhost:4173/site/
 這個專案的 UI 目標不是臨時公告欄，而是可公開使用的跑者資訊產品。任何 UI 調整都必須先遵守：
 
 ```text
-runner/系统配置/UI商品化验收标准.md
+runner/系統配置/UI商品化驗收標準.md
 ```
 
 核心要求：
@@ -192,7 +192,7 @@ uv run python scripts/enrich_platforms.py --dry-run
 - 是否官方直連
 - 資料來源平台
 
-若報名日已開始但仍缺關鍵資料，會進入 `runner/赛事/开报后待补资料报告.md`。這份報告是下一輪爬蟲或人工補資料的優先清單。
+若報名日已開始但仍缺關鍵資料，會進入 `runner/賽事/開報後待補資料報告.md`。這份報告是下一輪爬蟲或人工補資料的優先清單。
 
 ## 跑鞋與新聞資料更新
 
@@ -206,9 +206,9 @@ npm run check
 
 主要輸出：
 
-- `runner/内容/候选内容.json`
-- `runner/内容/候选内容报告.md`
-- `runner/内容/自动上架内容报告.md`
+- `runner/內容/候選內容.json`
+- `runner/內容/候選內容報告.md`
+- `runner/內容/自動上架內容報告.md`
 - `site/data/content.json`
 
 內容流程會先收集候選文章，再依分類、分數、標題與摘要品質自動整理到網站。摘要優先使用文章頁面的 meta description；若來源摘要過短或太籠統，會改用站內規則產生跑者視角摘要。
@@ -313,7 +313,7 @@ uv run python -m compileall scripts
 
 驗收重點：
 
-- 賽事：`site/data/races.json` 可由 `runner/赛事/赛事数据库.json` 同步產生，品質報告與開報後待補報告能重建。
+- 賽事：`site/data/races.json` 可由 `runner/賽事/賽事資料庫.json` 同步產生，品質報告與開報後待補報告能重建。
 - 入門與練跑：前端 `#academy`、`#training` 仍可正常顯示，不依賴外部 API。
 - 跑鞋與新聞：`site/data/content.json` 至少保留可用數量，摘要不過長、不重複。
 - GitHub Pages：`Deploy static site` 成功後公開網址為 `https://adelbert56.github.io/runner/`。
@@ -322,14 +322,14 @@ uv run python -m compileall scripts
 
 | 文件 | 用途 |
 | --- | --- |
-| [runner/系統配置/資料更新SOP.md](runner/系统配置/资料更新SOP.md) | 資料更新與檢查流程 |
-| [runner/系統配置/營運儀表板.md](runner/系统配置/营运仪表板.md) | 目前資料與內容狀態 |
-| [runner/賽事/資料品質報告.md](runner/赛事/资料品质报告.md) | 賽事資料完整度 |
-| [runner/賽事/開報後待補資料報告.md](runner/赛事/开报后待补资料报告.md) | 開報後仍缺資料的優先補強清單 |
-| [runner/賽事/報名日期異常報告.md](runner/赛事/报名日期异常报告.md) | 開報 / 截止日期邏輯異常 |
-| [runner/賽事/平台爬蟲覆蓋報告.md](runner/赛事/平台爬虫覆盖报告.md) | 官方平台爬蟲命中狀況 |
-| [runner/內容/候選內容報告.md](runner/内容/候选内容报告.md) | 跑鞋 / 新聞候選內容 |
-| [runner/內容/自動上架內容報告.md](runner/内容/自动上架内容报告.md) | 已自動上架內容 |
+| [runner/系統配置/資料更新SOP.md](runner/系統配置/資料更新SOP.md) | 資料更新與檢查流程 |
+| [runner/系統配置/營運儀表板.md](runner/系統配置/營運儀表板.md) | 目前資料與內容狀態 |
+| [runner/賽事/資料品質報告.md](runner/賽事/資料品質報告.md) | 賽事資料完整度 |
+| [runner/賽事/開報後待補資料報告.md](runner/賽事/開報後待補資料報告.md) | 開報後仍缺資料的優先補強清單 |
+| [runner/賽事/報名日期異常報告.md](runner/賽事/報名日期異常報告.md) | 開報 / 截止日期邏輯異常 |
+| [runner/賽事/平台爬蟲覆蓋報告.md](runner/賽事/平台爬蟲覆蓋報告.md) | 官方平台爬蟲命中狀況 |
+| [runner/內容/候選內容報告.md](runner/內容/候選內容報告.md) | 跑鞋 / 新聞候選內容 |
+| [runner/內容/自動上架內容報告.md](runner/內容/自動上架內容報告.md) | 已自動上架內容 |
 | [SKILLS.md](SKILLS.md) | 代理人實作經驗與協作準則 |
 
 ## 常見問題
@@ -361,8 +361,8 @@ npm run dev
 ## 開發注意事項
 
 - 不要提交 `.obsidian/workspace.json`，這類本機 UI 狀態已放進 `.gitignore`。
-- 更新賽事資料前先檢查 `runner/赛事/人工补充.json`，避免覆蓋人工查證內容。
-- 若新增平台爬蟲，請同步更新 `runner/系统配置/内容来源与爬虫规划.md` 或資料 SOP。
+- 更新賽事資料前先檢查 `runner/賽事/人工補充.json`，避免覆蓋人工查證內容。
+- 若新增平台爬蟲，請同步更新 `runner/系統配置/內容來源與爬蟲規劃.md` 或資料 SOP。
 - 任何 UI 調整都要檢查手機版，尤其是賽事卡片、篩選列、練跑菜單表單。
 - 公開網站內容以繁體中文為主。
 

@@ -12,8 +12,8 @@
 
 - 前端：`site/` 靜態頁，資料讀 `site/data/races.json`。
 - 公開網站：`https://adelbert56.github.io/runner/`，不要再使用舊的 `adelbert56.github.io` 網址。
-- 賽事資料源：`runner/赛事/赛事数据库.json`。
-- 跑鞋 / 新聞資料源：`runner/内容/候选内容.json`，發布到 `site/data/content.json`。
+- 賽事資料源：`runner/賽事/賽事資料庫.json`。
+- 跑鞋 / 新聞資料源：`runner/內容/候選內容.json`，發布到 `site/data/content.json`。
 - 主爬蟲：`scripts/main.py`。
 - 官方平台補資料：`scripts/enrich_platforms.py` 與 `scripts/platforms/`。
 - 資料同步與報告：`npm run data:refresh`、`npm run data:quality`。
@@ -39,7 +39,7 @@
 
 ## UI 原則
 
-- 使用者已多次強調「UI 風格一致性」與「系統商品化」。這是硬性需求，不是可選優化；任何 UI 任務都要先讀 `runner/系统配置/UI商品化验收标准.md`。
+- 使用者已多次強調「UI 風格一致性」與「系統商品化」。這是硬性需求，不是可選優化；任何 UI 任務都要先讀 `runner/系統配置/UI商品化驗收標準.md`。
 - 手機優先。賽事、跑鞋、練跑、新聞四個分頁不可造成橫向溢出。
 - 做完前端修改後，用瀏覽器手機 viewport 實測，不只看桌面。
 - UI 修改要優先維護設計系統，而不是針對單張截圖補丁。先統一 token、卡片、控制列、按鈕與間距，再處理單頁例外。
@@ -74,7 +74,7 @@
 - 資料流程修改：`uv run python scripts/enrich_platforms.py --dry-run` 後再跑 `npm run data:refresh`。
 - 收尾驗證：`npm run data:refresh`、`npm run content:refresh`、`npm run ops:dashboard`、`npm run check`、`uv run python -m compileall scripts`。
 - 營運狀態檢查：`npm run ops:dashboard`，看賽事完整度、官方直連率、開報後待補與內容候選量。
-- UI 修改：啟動 `npm run dev`，依 `runner/系统配置/UI商品化验收标准.md` 用瀏覽器桌面與手機 viewport 截圖檢查。
+- UI 修改：啟動 `npm run dev`，依 `runner/系統配置/UI商品化驗收標準.md` 用瀏覽器桌面與手機 viewport 截圖檢查。
 - CSS/JS 有變動時，更新 `site/index.html` 的版本參數，避免 GitHub Pages 快取讓使用者看舊版。
 
 ## Git 與檔案規則
@@ -87,7 +87,7 @@
 
 ## 自我迭代規則
 
-- 每次修復告一段落後，更新這份 `SKILLS.md` 或 `runner/系统配置/第二大脑.md`。
+- 每次修復告一段落後，更新這份 `SKILLS.md` 或 `runner/系統配置/第二大腦.md`。
 - 要記錄的是可重複使用的判斷，不是流水帳。
 - 若發現資料錯誤來自平台 parser，補 parser 規則與測試路徑。
 - 若發現 UI 問題來自手機 viewport，補進手機驗證清單。

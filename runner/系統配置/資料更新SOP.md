@@ -16,7 +16,7 @@
    - 優先補開報時間、截止時間、地點、主辦、費用、名額、狀態與查證時間。
 3. `npm run data:refresh`
    - 套用人工補充。
-   - 同步 `runner/赛事/赛事数据库.json` 到 `site/data/races.json`。
+   - 同步 `runner/賽事/賽事資料庫.json` 到 `site/data/races.json`。
    - 重產資料品質、追蹤計畫與開報後待補報告。
 
 ## 內容流程
@@ -25,14 +25,14 @@
    - 收集跑鞋新品、跑步新聞與訓練文章候選資料。
 2. `npm run content:publish`
    - 將候選內容整理成 `site/data/content.json`。
-   - 更新 `runner/内容/自动上架内容报告.md`。
+   - 更新 `runner/內容/自動上架內容報告.md`。
 3. `npm run content:refresh`
    - 一次執行候選收集與發布，適合本機收尾與 GitHub Actions。
 
 ## 人工待補原則
 
 - 只有平台爬蟲抓不到或欄位仍缺時，才進人工待補清單。
-- 人工查到的欄位寫入 `runner/赛事/人工补充.json`。
+- 人工查到的欄位寫入 `runner/賽事/人工補充.json`。
 - 補完後執行 `npm run data:refresh`。
 
 ## 查證欄位

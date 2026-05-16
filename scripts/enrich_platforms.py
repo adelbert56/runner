@@ -23,9 +23,9 @@ from platforms.common import has_text, host_of
 
 logger = logging.getLogger("enrich_platforms")
 
-RACE_DB_JSON = ROOT_DIR / "runner" / "赛事" / "赛事数据库.json"
+RACE_DB_JSON = ROOT_DIR / "runner" / "賽事" / "賽事資料庫.json"
 SITE_RACE_JSON = ROOT_DIR / "site" / "data" / "races.json"
-REPORT_MD = ROOT_DIR / "runner" / "赛事" / "平台爬虫覆盖报告.md"
+REPORT_MD = ROOT_DIR / "runner" / "賽事" / "平台爬蟲覆蓋報告.md"
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 ENRICH_FIELDS = (

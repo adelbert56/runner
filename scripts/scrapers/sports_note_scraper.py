@@ -259,7 +259,7 @@ def _fetch_facebook_text(links: list[str], session: requests.Session) -> str:
 def _looks_like_registration_link(text: str, href: str) -> bool:
     target = f"{text} {href}".lower()
     keywords = (
-        "報名", "报名", "線上報名", "我要報名", "立即報名",
+        "報名", "線上報名", "我要報名", "立即報名",
         "registration", "register", "signup", "sign-up", "entry",
     )
     return any(keyword.lower() in target for keyword in keywords)

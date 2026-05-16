@@ -5,10 +5,10 @@ from pathlib import Path
 # ─── Paths ───────────────────────────────────────────────────────────────────
 ROOT_DIR = Path(__file__).parent.parent
 OBSIDIAN_VAULT = ROOT_DIR / "runner"
-RACE_LIST_MD = OBSIDIAN_VAULT / "赛事" / "中部赛事列表.md"
-RACE_DB_JSON = OBSIDIAN_VAULT / "赛事" / "赛事数据库.json"
-RACE_MANUAL_OVERRIDES_JSON = OBSIDIAN_VAULT / "赛事" / "人工补充.json"
-SCRAPE_LOG_MD = OBSIDIAN_VAULT / "赛事" / "爬虫日志.md"
+RACE_LIST_MD = OBSIDIAN_VAULT / "賽事" / "中部賽事列表.md"
+RACE_DB_JSON = OBSIDIAN_VAULT / "賽事" / "賽事資料庫.json"
+RACE_MANUAL_OVERRIDES_JSON = OBSIDIAN_VAULT / "賽事" / "人工補充.json"
+SCRAPE_LOG_MD = OBSIDIAN_VAULT / "賽事" / "爬蟲日誌.md"
 
 # ─── Central Taiwan counties filter ──────────────────────────────────────────
 CENTRAL_TAIWAN_COUNTIES = {

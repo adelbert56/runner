@@ -2565,7 +2565,7 @@ function bindEvents() {
 }
 
 async function loadRaces() {
-  const dataPaths = ["./data/races.json", "../runner/赛事/赛事数据库.json"];
+  const dataPaths = ["./data/races.json", "../runner/賽事/賽事資料庫.json"];
   let lastError;
 
   for (const path of dataPaths) {

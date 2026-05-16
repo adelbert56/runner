@@ -41,9 +41,9 @@ jobs:
         with:
           commit_message: "chore(content): refresh running content candidates"
           file_pattern: |
-            runner/内容/候选内容.json
-            runner/内容/候选内容报告.md
-            runner/内容/自动上架内容报告.md
+            runner/內容/候選內容.json
+            runner/內容/候選內容報告.md
+            runner/內容/自動上架內容報告.md
             site/data/content.json
-            runner/系统配置/营运仪表板.md
-            runner/系统配置/营运仪表板.json
+            runner/系統配置/營運儀表板.md
+            runner/系統配置/營運儀表板.json

@@ -83,8 +83,8 @@ def write_race_list(races: list[dict], scrape_date: str) -> None:
         + "\n\n---\n\n"
         "## 相關連結\n"
         "- [[投稿指南]]\n"
-        "- [[标签体系]]\n"
-        "- [[爬虫日志]]\n"
+        "- [[標籤體系]]\n"
+        "- [[爬蟲日誌]]\n"
     )
 
     RACE_LIST_MD.parent.mkdir(parents=True, exist_ok=True)
@@ -100,7 +100,7 @@ def append_scrape_log(
     sources: list[str],
     errors: list[str],
 ) -> None:
-    """Append a run summary to 爬虫日志.md."""
+    """Append a run summary to 爬蟲日誌.md."""
     error_section = ""
     if errors:
         error_section = "\n**錯誤**:\n" + "\n".join(f"- {e}" for e in errors)

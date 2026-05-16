@@ -2,10 +2,10 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const candidatesPath = resolve(root, "runner/内容/候选内容.json");
-const editorialPath = resolve(root, "runner/内容/人工精选内容.json");
+const candidatesPath = resolve(root, "runner/內容/候選內容.json");
+const editorialPath = resolve(root, "runner/內容/人工精選內容.json");
 const outputPath = resolve(root, "site/data/content.json");
-const reportPath = resolve(root, "runner/内容/自动上架内容报告.md");
+const reportPath = resolve(root, "runner/內容/自動上架內容報告.md");
 const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
 
 const LIMITS = {
@@ -308,7 +308,7 @@ async function main() {
   ].sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.score - a.score);
 
   await mkdir(resolve(root, "site/data"), { recursive: true });
-  await mkdir(resolve(root, "runner/内容"), { recursive: true });
+  await mkdir(resolve(root, "runner/內容"), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify({ generated_at: new Date().toISOString(), items: published }, null, 2)}\n`, "utf8");
   await writeFile(reportPath, buildReport(published), "utf8");
   console.log(`Published content: ${published.length}`);

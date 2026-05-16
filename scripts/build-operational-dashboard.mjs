@@ -6,18 +6,18 @@ const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
 
 const paths = {
   races: resolve(root, "site/data/races.json"),
-  qualityQueue: resolve(root, "runner/赛事/待补资料队列.json"),
-  openedGaps: resolve(root, "runner/赛事/开报后待补资料报告.json"),
-  dateAnomalies: resolve(root, "runner/赛事/报名日期异常报告.json"),
-  tracking: resolve(root, "runner/赛事/爬虫追踪计划.json"),
-  contentCandidates: resolve(root, "runner/内容/候选内容.json"),
-  editorialContent: resolve(root, "runner/内容/人工精选内容.json"),
+  qualityQueue: resolve(root, "runner/賽事/待補資料佇列.json"),
+  openedGaps: resolve(root, "runner/賽事/開報後待補資料報告.json"),
+  dateAnomalies: resolve(root, "runner/賽事/報名日期異常報告.json"),
+  tracking: resolve(root, "runner/賽事/爬蟲追蹤計畫.json"),
+  contentCandidates: resolve(root, "runner/內容/候選內容.json"),
+  editorialContent: resolve(root, "runner/內容/人工精選內容.json"),
   publishedContent: resolve(root, "site/data/content.json"),
   siteHtml: resolve(root, "site/index.html"),
-  platformStabilityMd: resolve(root, "runner/赛事/平台稳定度报告.md"),
-  platformStabilityJson: resolve(root, "runner/赛事/平台稳定度报告.json"),
-  outputMd: resolve(root, "runner/系统配置/营运仪表板.md"),
-  outputJson: resolve(root, "runner/系统配置/营运仪表板.json"),
+  platformStabilityMd: resolve(root, "runner/賽事/平台穩定度報告.md"),
+  platformStabilityJson: resolve(root, "runner/賽事/平台穩定度報告.json"),
+  outputMd: resolve(root, "runner/系統配置/營運儀表板.md"),
+  outputJson: resolve(root, "runner/系統配置/營運儀表板.json"),
 };
 
 function hasText(value) {
@@ -308,19 +308,19 @@ async function main() {
 
   const nextActions = [];
   if (openGapCount > 0) {
-    nextActions.push("優先處理 `runner/赛事/开报后待补资料报告.md`，這些是已開報但資料仍不完整的賽事。");
+    nextActions.push("優先處理 `runner/賽事/開報後待補資料報告.md`，這些是已開報但資料仍不完整的賽事。");
   }
   if (dateAnomalies.length > 0) {
-    nextActions.push("先修 `runner/赛事/报名日期异常报告.md`，日期邏輯錯誤會直接誤導報名狀態。");
+    nextActions.push("先修 `runner/賽事/報名日期異常報告.md`，日期邏輯錯誤會直接誤導報名狀態。");
   }
   if (dueNow.length > 0) {
-    nextActions.push("`runner/赛事/爬虫追踪计划.md` 已把到期項目列入「現在該重爬」；GitHub Actions 會定期自動重查，若重查後仍缺再修平台 parser 或補人工資料。");
+    nextActions.push("`runner/賽事/爬蟲追蹤計畫.md` 已把到期項目列入「現在該重爬」；GitHub Actions 會定期自動重查，若重查後仍缺再修平台 parser 或補人工資料。");
   }
   if (officialDirectCount / Math.max(races.length, 1) < 0.8) {
     nextActions.push("官方直連率未達 80% 的賽事已進追蹤節奏；等待自動重查補齊，只有開報後仍缺才人工介入。");
   }
   if (contentPool.length >= 20) {
-    nextActions.push("內容候選已由 `npm run content:publish` 自動挑選上架；可抽查 `runner/内容/自动上架内容报告.md` 的來源品質。");
+    nextActions.push("內容候選已由 `npm run content:publish` 自動挑選上架；可抽查 `runner/內容/自動上架內容報告.md` 的來源品質。");
   }
   if (!nextActions.length) {
     nextActions.push("目前主要營運指標正常，下一步可做平台 parser 精準度與手機體驗細修。");

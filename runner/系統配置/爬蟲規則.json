@@ -1,14 +1,14 @@
 {
   "scraper_config_version": "0.1",
-  "description": "中部赛事爬虫规则配置",
+  "description": "中部賽事爬蟲規則配置",
   "last_updated": "2026-05-15",
-  "comment": "每个网站一个爬虫规则对象。待开发race-scraper-skill后正式启用。",
+  "comment": "每个网站一个爬蟲規則对象。待开发race-scraper-skill后正式啟用。",
   "sources": [
     {
       "source_id": "1",
-      "source_name": "运动笔记",
+      "source_name": "運動筆記",
       "url": "https://example.com/races",
-      "description": "台湾赛事数据库，更新频率最高",
+      "description": "台灣賽事資料庫，更新頻率最高",
       "update_frequency": "daily",
       "strategy": "requests",
       "comment": "需确认具体URL，可能需要处理动态加载",
@@ -40,10 +40,10 @@
       "source_id": "2",
       "source_name": "跑者广场",
       "url": "https://example.com/events",
-      "description": "社区讨论型赛事信息源",
+      "description": "社區讨论型賽事資訊源",
       "update_frequency": "every_other_day",
       "strategy": "selenium",
-      "comment": "可能需JavaScript渲染，推荐用selenium",
+      "comment": "可能需JavaScript渲染，推薦用selenium",
       "selectors": {
         "race_name": ".event-title",
         "race_date": ".event-date",
@@ -63,7 +63,7 @@
       "source_id": "3",
       "source_name": "勘履者",
       "url": "https://example.com/trails",
-      "description": "越野跑、登山赛事专门网站",
+      "description": "越野跑、登山賽事专门网站",
       "update_frequency": "weekly",
       "strategy": "requests",
       "selectors": {
@@ -87,12 +87,12 @@
     },
     {
       "source_id": "4",
-      "source_name": "中部马拉松联盟官网",
+      "source_name": "中部馬拉松聯盟官網",
       "url": "https://example.com/races",
-      "description": "官方赛事发布、成绩公布",
+      "description": "官方賽事發布、成绩公布",
       "update_frequency": "as_needed",
       "strategy": "requests",
-      "comment": "可能发布PDF公告，需额外处理",
+      "comment": "可能發布PDF公告，需额外处理",
       "selectors": {
         "race_name": ".race-title",
         "race_date": ".race-date",
@@ -105,10 +105,10 @@
       "source_id": "5",
       "source_name": "各地运协网站",
       "url": "https://example.com/county-races",
-      "description": "台中、南投、彰化、苗栗运协赛事公告",
+      "description": "台中、南投、彰化、苗栗运协賽事公告",
       "update_frequency": "as_needed",
       "strategy": "requests",
-      "comment": "网站质量参差不齐，需要多套规则",
+      "comment": "网站质量参差不齐，需要多套規則",
       "counties": ["台中", "南投", "彰化", "苗栗"],
       "selectors": {
         "race_name": ".announcement-title",
@@ -129,15 +129,15 @@
   "dedup_strategy": {
     "algorithm": "exact_match",
     "fields": ["race_name", "race_date", "race_location"],
-    "comment": "基于赛事名+日期+地点去重，准确率目标>95%"
+    "comment": "基于賽事名+日期+地點去重，準確率目标>95%"
   },
   "output_format": {
     "type": "json",
     "schema": {
-      "race_id": "自动生成UUID",
+      "race_id": "自動生成UUID",
       "race_name": "string",
       "race_date": "YYYY-MM-DD",
-      "race_location": "string (县市+地点)",
+      "race_location": "string (县市+地點)",
       "distance": "string (21.1km, 42.2km等)",
       "difficulty": "初级|中级|高级",
       "registration_link": "string (URL)",
@@ -151,6 +151,6 @@
   "schedule": {
     "daily_scrape": "02:00 UTC+8",
     "weekly_review": "Monday 10:00",
-    "comment": "每天凌晨爬取（发布新赛事黄金时段后），周一审核去重结果"
+    "comment": "每天凌晨爬取（發布新賽事黃金時段後），週一審核去重結果"
   }
 }

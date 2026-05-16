@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
-const outputDir = resolve(root, "runner/内容");
-const jsonPath = resolve(outputDir, "候选内容.json");
-const reportPath = resolve(outputDir, "候选内容报告.md");
+const outputDir = resolve(root, "runner/內容");
+const jsonPath = resolve(outputDir, "候選內容.json");
+const reportPath = resolve(outputDir, "候選內容報告.md");
 
 const sources = [
   {

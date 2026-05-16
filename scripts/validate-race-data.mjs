@@ -3,14 +3,14 @@ import { dirname, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const dataPath = resolve(root, "site/data/races.json");
-const queuePath = resolve(root, "runner/赛事/待补资料队列.json");
-const reportPath = resolve(root, "runner/赛事/资料品质报告.md");
-const trackingPath = resolve(root, "runner/赛事/爬虫追踪计划.md");
-const trackingJsonPath = resolve(root, "runner/赛事/爬虫追踪计划.json");
-const openedGapReportPath = resolve(root, "runner/赛事/开报后待补资料报告.md");
-const openedGapJsonPath = resolve(root, "runner/赛事/开报后待补资料报告.json");
-const dateAnomalyReportPath = resolve(root, "runner/赛事/报名日期异常报告.md");
-const dateAnomalyJsonPath = resolve(root, "runner/赛事/报名日期异常报告.json");
+const queuePath = resolve(root, "runner/賽事/待補資料佇列.json");
+const reportPath = resolve(root, "runner/賽事/資料品質報告.md");
+const trackingPath = resolve(root, "runner/賽事/爬蟲追蹤計畫.md");
+const trackingJsonPath = resolve(root, "runner/賽事/爬蟲追蹤計畫.json");
+const openedGapReportPath = resolve(root, "runner/賽事/開報後待補資料報告.md");
+const openedGapJsonPath = resolve(root, "runner/賽事/開報後待補資料報告.json");
+const dateAnomalyReportPath = resolve(root, "runner/賽事/報名日期異常報告.md");
+const dateAnomalyJsonPath = resolve(root, "runner/賽事/報名日期異常報告.json");
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
@@ -551,9 +551,9 @@ function formatReport(races, queue) {
     "",
     "## 使用方式",
     "",
-    "1. `runner/赛事/爬虫追踪计划.md` 會依頻率分流：現在該重爬、等待接近開報、每月追蹤、未來再查、低頻補齊。",
+    "1. `runner/賽事/爬蟲追蹤計畫.md` 會依頻率分流：現在該重爬、等待接近開報、每月追蹤、未來再查、低頻補齊。",
     "2. GitHub Actions 會定期執行 `scripts/main.py`、`scripts/enrich_platforms.py`、`npm run data:refresh`，讓待追蹤資料自動重查。",
-    "3. 爬蟲重查後仍缺、且已開報或日期異常的項目，再修平台 parser 或寫進 `runner/赛事/人工补充.json`。",
+    "3. 爬蟲重查後仍缺、且已開報或日期異常的項目，再修平台 parser 或寫進 `runner/賽事/人工補充.json`。",
     "4. 賽事只公布日期時，不急著人工補完；讓追蹤排程依既定頻率在開報窗口前後自動重查。",
     "",
   ].join("\n");

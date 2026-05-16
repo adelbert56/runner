@@ -2,9 +2,9 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const overridePath = resolve(root, "runner/赛事/人工补充.json");
+const overridePath = resolve(root, "runner/賽事/人工補充.json");
 const raceDbPaths = [
-  resolve(root, "runner/赛事/赛事数据库.json"),
+  resolve(root, "runner/賽事/賽事資料庫.json"),
   resolve(root, "site/data/races.json"),
 ];
 

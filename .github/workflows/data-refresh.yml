@@ -58,20 +58,20 @@ jobs:
         with:
           commit_message: "chore(data): refresh race data"
           file_pattern: |
-            runner/赛事/赛事数据库.json
-            runner/赛事/中部赛事列表.md
-            runner/赛事/爬虫日志.md
-            runner/赛事/待补资料队列.json
-            runner/赛事/资料品质报告.md
-            runner/赛事/开报后待补资料报告.md
-            runner/赛事/开报后待补资料报告.json
-            runner/赛事/报名日期异常报告.md
-            runner/赛事/报名日期异常报告.json
-            runner/赛事/爬虫追踪计划.md
-            runner/赛事/爬虫追踪计划.json
-            runner/赛事/平台爬虫覆盖报告.md
-            runner/赛事/平台稳定度报告.md
-            runner/赛事/平台稳定度报告.json
-            runner/系统配置/营运仪表板.md
-            runner/系统配置/营运仪表板.json
+            runner/賽事/賽事資料庫.json
+            runner/賽事/中部賽事列表.md
+            runner/賽事/爬蟲日誌.md
+            runner/賽事/待補資料佇列.json
+            runner/賽事/資料品質報告.md
+            runner/賽事/開報後待補資料報告.md
+            runner/賽事/開報後待補資料報告.json
+            runner/賽事/報名日期異常報告.md
+            runner/賽事/報名日期異常報告.json
+            runner/賽事/爬蟲追蹤計畫.md
+            runner/賽事/爬蟲追蹤計畫.json
+            runner/賽事/平台爬蟲覆蓋報告.md
+            runner/賽事/平台穩定度報告.md
+            runner/賽事/平台穩定度報告.json
+            runner/系統配置/營運儀表板.md
+            runner/系統配置/營運儀表板.json
             site/data/races.json
