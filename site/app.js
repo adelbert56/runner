@@ -20,6 +20,8 @@ const state = {
   favoritesOnly: false,
   shoeFavoritesOnly: false,
   newsFavoritesOnly: false,
+  shoeCategory: "all",
+  newsCategory: "all",
   shoePage: 1,
   newsPage: 1,
   trainingRaceKey: "",
@@ -67,6 +69,8 @@ const els = {
   panelLinks: document.querySelectorAll("[data-panel-link]"),
   panels: document.querySelectorAll("[data-panel]"),
   backTop: document.querySelector("#back-top"),
+  shoeCategory: document.querySelector("#shoe-category"),
+  newsCategory: document.querySelector("#news-category"),
   shoeSort: document.querySelector("#shoe-sort"),
   newsSort: document.querySelector("#news-sort"),
   shoeLimit: document.querySelector("#shoe-limit"),
@@ -1856,7 +1860,9 @@ function sortContentCards(containerSelector, itemSelector, mode) {
 }
 
 function contentFavoriteKey(type, card) {
-  return `${type}:${card.dataset.date || ""}:${card.dataset.title || card.textContent.trim()}`;
+  const title = String(card.dataset.title || "").replace(/\s+/g, " ").trim()
+    || String(card.querySelector("h3")?.textContent || card.textContent || "").replace(/\s+/g, " ").trim();
+  return `${type}:${card.dataset.date || ""}:${title}`;
 }
 
 function formatContentDate(date) {
@@ -1910,18 +1916,22 @@ async function loadPublishedContent() {
 }
 
 function isContentFavorite(type, card) {
-  return state.contentFavorites.has(contentFavoriteKey(type, card));
+  const key = card.dataset.favoriteKey || contentFavoriteKey(type, card);
+  return state.contentFavorites.has(key);
 }
 
 function decorateContentFavorites(type, containerSelector, itemSelector) {
   document.querySelectorAll(`${containerSelector} ${itemSelector}`).forEach((card) => {
+    const key = contentFavoriteKey(type, card);
+    card.dataset.favoriteKey = key;
     if (card.querySelector("[data-content-favorite]")) {
+      card.querySelector("[data-content-favorite]").dataset.contentFavorite = key;
       return;
     }
     const button = document.createElement("button");
     button.type = "button";
     button.className = "favorite-button icon-button content-favorite";
-    button.dataset.contentFavorite = contentFavoriteKey(type, card);
+    button.dataset.contentFavorite = key;
     button.dataset.contentType = type;
     button.innerHTML = `<span aria-hidden="true">☆</span>`;
     card.appendChild(button);
@@ -1939,10 +1949,14 @@ function updateContentFavoriteButtons() {
   });
 }
 
-function applyContentLimit(containerSelector, itemSelector, limitValue, favoritesOnly = false, type = "", page = 1) {
+function applyContentLimit(containerSelector, itemSelector, limitValue, favoritesOnly = false, type = "", page = 1, category = "all") {
   const cards = [...document.querySelectorAll(`${containerSelector} ${itemSelector}`)];
   const limit = Number(limitValue) || 10;
-  const eligible = cards.filter((card) => !favoritesOnly || isContentFavorite(type, card));
+  const eligible = cards.filter((card) => {
+    const categoryMatch = category === "all" || card.dataset.category === category;
+    const favoriteMatch = !favoritesOnly || isContentFavorite(type, card);
+    return categoryMatch && favoriteMatch;
+  });
   const totalPages = Math.max(1, Math.ceil(eligible.length / limit));
   const safePage = clampNumber(Number(page) || 1, 1, totalPages);
   const start = (safePage - 1) * limit;
@@ -1981,6 +1995,7 @@ function updateContentList(type) {
       sort: els.shoeSort?.value || "newest",
       limit: els.shoeLimit?.value || "10",
       favoritesOnly: state.shoeFavoritesOnly,
+      category: els.shoeCategory?.value || state.shoeCategory,
       filter: els.shoeFavoriteFilter,
       label: "跑鞋",
       page: state.shoePage,
@@ -1991,17 +2006,20 @@ function updateContentList(type) {
       sort: els.newsSort?.value || "newest",
       limit: els.newsLimit?.value || "10",
       favoritesOnly: state.newsFavoritesOnly,
+      category: els.newsCategory?.value || state.newsCategory,
       filter: els.newsFavoriteFilter,
       label: "新聞",
       page: state.newsPage,
     };
 
   sortContentCards(config.container, config.item, config.sort);
-  const pagination = applyContentLimit(config.container, config.item, config.limit, config.favoritesOnly, type, config.page);
+  const pagination = applyContentLimit(config.container, config.item, config.limit, config.favoritesOnly, type, config.page, config.category);
   if (type === "shoe") {
     state.shoePage = pagination.page;
+    state.shoeCategory = config.category;
   } else {
     state.newsPage = pagination.page;
+    state.newsCategory = config.category;
   }
   renderContentPagination(type, pagination);
   config.filter?.classList.toggle("active", config.favoritesOnly);
@@ -2057,6 +2075,16 @@ function bindEvents() {
   });
 
   els.newsSort?.addEventListener("change", () => {
+    state.newsPage = 1;
+    updateContentList("news");
+  });
+
+  els.shoeCategory?.addEventListener("change", () => {
+    state.shoePage = 1;
+    updateContentList("shoe");
+  });
+
+  els.newsCategory?.addEventListener("change", () => {
     state.newsPage = 1;
     updateContentList("news");
   });

@@ -1454,6 +1454,7 @@ h3 {
 
 .academy-hero,
 .academy-grid,
+.academy-library,
 .academy-panels {
   max-width: 1120px;
   margin: 0 auto;
@@ -1549,7 +1550,15 @@ h3 {
   gap: 14px;
 }
 
+.academy-library {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
 .academy-grid article,
+.academy-library article,
 .academy-panels article {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1562,6 +1571,47 @@ h3 {
   align-content: start;
   min-height: 310px;
   padding: 18px;
+}
+
+.academy-library article {
+  position: relative;
+  overflow: hidden;
+  min-height: 178px;
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.97), rgba(247, 250, 247, 0.92)),
+    var(--surface);
+}
+
+.academy-library article::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  content: "";
+}
+
+.academy-library article:nth-child(1)::before {
+  background: #155338;
+}
+
+.academy-library article:nth-child(2)::before {
+  background: #d8a322;
+}
+
+.academy-library article:nth-child(3)::before {
+  background: #7f9fb0;
+}
+
+.academy-library article:nth-child(4)::before {
+  background: #b66a3c;
+}
+
+.academy-library article:nth-child(5)::before {
+  background: #6f7f54;
+}
+
+.academy-library article:nth-child(6)::before {
+  background: #7c6b4e;
 }
 
 .academy-grid article:nth-child(1) {
@@ -1580,7 +1630,8 @@ h3 {
   border-top: 5px solid var(--orange);
 }
 
-.academy-grid span {
+.academy-grid span,
+.academy-library span {
   display: inline-flex;
   width: fit-content;
   margin-bottom: 12px;
@@ -1593,12 +1644,14 @@ h3 {
 }
 
 .academy-grid h3,
+.academy-library h3,
 .academy-panels h3 {
   font-size: 1.08rem;
   line-height: 1.35;
 }
 
 .academy-grid p,
+.academy-library p,
 .academy-panels dd,
 .academy-panels li {
   color: var(--muted);
@@ -2228,6 +2281,7 @@ h3 {
   .news-list,
   .shoe-release-list,
   .review-grid,
+  .academy-library,
   .plan-hero,
   .plan-hero dl,
   .profile-summary,
@@ -2373,6 +2427,7 @@ h3 {
   .pace-zones,
   .academy-hero,
   .academy-grid,
+  .academy-library,
   .academy-panels,
   .plan-hero,
   .plan-hero dl {

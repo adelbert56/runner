@@ -17,6 +17,13 @@ const MIN_SCORE = {
   news: 5,
 };
 
+const SUMMARY_RULES = [
+  "類別用標籤呈現，摘要不要重複來源名稱。",
+  "摘要不使用「重點：」「訓練重點：」「賽事重點：」這種開頭。",
+  "跑鞋入門與選鞋邏輯歸入入門專區；跑鞋頁只放新品、定位與評測。",
+  "來源描述太籠統時使用決策型摘要，避免硬塞無資訊量文字。",
+];
+
 function normalizeUrl(url) {
   try {
     const parsed = new URL(url);
@@ -44,16 +51,31 @@ function parseDate(value) {
 }
 
 function inferType(item) {
-  return item.category === "跑鞋新品" ? "shoe" : "news";
+  const text = `${item.title || ""} ${item.description || ""}`;
+  const hasShoeSignal = /跑鞋|鞋款|鞋底|中底|鞋面|鞋碼|碳板|GTX|GORE|BROOKS GHOST|PEGASUS|GEL-|NIMBUS|KAYANO|MACH|DEVIATE|FAST-R|PHANTASM|NEO VISTA|CLOUDMONSTER/i.test(text);
+  const eventOnlySignal = /賽事|報名|馬拉松|半馬|UTMB|開放報名|城市路跑/i.test(text) && !hasShoeSignal;
+  if (item.category === "跑鞋新品" && hasShoeSignal && !eventOnlySignal) return "shoe";
+  return "news";
 }
 
 function inferShoeCategory(title) {
   if (/碳板|競速|PHANTASM|FAST-R|ELITE|比賽/i.test(title)) return "競速";
   if (/越野|Trail|UTMB|CASCADIA|ULTRAFLY/i.test(title)) return "越野";
   if (/防水|GTX|GORE/i.test(title)) return "防水";
-  if (/緩震|厚底|NIMBUS|NEO VISTA|CUMULUS/i.test(title)) return "緩震";
+  if (/緩震|厚底|NIMBUS|NEO VISTA|CUMULUS|CLOUDMONSTER/i.test(title)) return "長距離緩震";
   if (/速度|節奏|TEMPO|MACH|DEVIATE/i.test(title)) return "速度訓練";
+  if (/GHOST|PEGASUS|日常|慢跑/i.test(title)) return "日常訓練";
   return "跑鞋新品";
+}
+
+function inferNewsCategory(title, description = "") {
+  const text = `${title} ${description}`;
+  if (/賽事|報名|馬拉松|半馬|城市路跑|開放報名|完賽/i.test(text)) return "賽事資訊";
+  if (/恢復|傷|睡眠|疲勞|伸展|保養|防曬|肌膚|休息/i.test(text)) return "恢復保養";
+  if (/補給|飲食|碳水|蛋白|能量膠|水分|電解質/i.test(text)) return "補給";
+  if (/跑鞋|鞋款|裝備|Nike|ASICS|Brooks|HOKA|PUMA|New Balance|Mizuno|On Cloud/i.test(text)) return "跑鞋裝備";
+  if (/訓練|間歇|節奏|長跑|配速|課表|週跑量|跑量|肌力|坡跑/i.test(text)) return "訓練";
+  return "跑步新聞";
 }
 
 function cleanSummary(text) {
@@ -70,7 +92,7 @@ function cleanSummary(text) {
     cleaned.lastIndexOf("？"),
     cleaned.lastIndexOf("."),
   );
-  const limit = 120;
+  const limit = 150;
   if (cleaned.length <= limit) {
     if (lastSentenceEnd < 0 && cleaned.length > 70) {
       return "";
@@ -85,7 +107,7 @@ function cleanSummary(text) {
     clipped.lastIndexOf("."),
   );
   if (sentenceEnd <= 42) {
-    return "";
+    return `${clipped.replace(/[，、；：\s]+$/g, "").trim()}...`;
   }
   const summary = (sentenceEnd > 42 ? clipped.slice(0, sentenceEnd + 1) : clipped).trim();
   return /[。！？.!?]$/.test(summary) ? summary : `${summary}。`;
@@ -94,6 +116,7 @@ function cleanSummary(text) {
 function summarize(item, type) {
   const description = cleanSummary(item.description);
   const title = item.title.replace(/\s+/g, " ").trim();
+  const newsCategory = inferNewsCategory(title, item.description);
 
   if (type === "shoe") {
     const category = inferShoeCategory(title);
@@ -101,21 +124,28 @@ function summarize(item, type) {
       競速: "適合放在比賽日、節奏跑與間歇課，週跑量還不穩時不要拿來天天穿。",
       越野: "適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
       防水: "適合雨天、通勤慢跑與濕冷環境，夏季長跑要留意悶熱與排汗。",
-      緩震: "適合長跑、恢復跑與累積里程，挑選時要看後段穩定，不只看剛試穿的彈感。",
+      長距離緩震: "適合長跑、恢復跑與累積里程，挑選時要看後段穩定，不只看剛試穿的彈感。",
       速度訓練: "適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
+      日常訓練: "適合輕鬆跑、恢復跑與日常累積里程，是多數跑者第一雙主力鞋的優先選項。",
       跑鞋新品: "先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
     }[category];
     return `這雙鞋目前以「${category}」定位收錄。${shoeUse}`;
   }
 
   if (description) {
-    if (/賽事|報名|路跑|馬拉松|半馬/i.test(title)) {
-      return `賽事重點：${description}可用來判斷報名時程、距離或是否值得排進年度目標。`;
+    if (newsCategory === "賽事資訊") {
+      return `${description}可用來判斷報名時程、距離或是否值得排進年度目標。`;
     }
-    if (/訓練|間歇|節奏|長跑|配速|課表|恢復/i.test(title)) {
-      return `訓練重點：${description}建議對照自己的週跑量、疲勞與目標賽事距離後再採用。`;
+    if (newsCategory === "訓練") {
+      return `${description}建議對照自己的週跑量、疲勞與目標賽事距離後再採用。`;
     }
-    return `重點：${description}已保留和訓練、裝備或賽事決策相關的資訊，方便快速判斷是否深入閱讀。`;
+    if (newsCategory === "恢復保養") {
+      return `${description}適合放在跑後恢復、戶外訓練或傷痛檢查清單中參考。`;
+    }
+    if (newsCategory === "補給") {
+      return `${description}建議先在長跑或配速課中測試，不要比賽日第一次嘗試。`;
+    }
+    return `${description}保留和訓練、裝備或賽事決策相關的資訊，方便快速判斷是否深入閱讀。`;
   }
 
   if (/訓練|間歇|節奏|長跑|半馬|馬拉松/i.test(title)) {
@@ -140,7 +170,7 @@ function toPublishedItem(item) {
     title,
     date: parseDate(item.checked_at),
     source: item.source,
-    category: type === "shoe" ? inferShoeCategory(title) : item.category,
+    category: type === "shoe" ? inferShoeCategory(title) : inferNewsCategory(title, item.description),
     summary: summarize(item, type),
     url: item.url,
     score: item.score,
@@ -179,6 +209,10 @@ function buildReport(published) {
     `查詢基準日：${today}`,
     "",
     "候選內容會依分數、分類與去重規則自動上架到前台。低分、重複或非跑者決策相關內容會留在候選清單。",
+    "",
+    "## 上架規則",
+    "",
+    ...SUMMARY_RULES.map((rule) => `- ${rule}`),
     "",
     `已上架：${published.length} 筆`,
     "",
