@@ -13,6 +13,8 @@ const paths = {
   contentCandidates: resolve(root, "runner/内容/候选内容.json"),
   publishedContent: resolve(root, "site/data/content.json"),
   siteHtml: resolve(root, "site/index.html"),
+  platformStabilityMd: resolve(root, "runner/赛事/平台稳定度报告.md"),
+  platformStabilityJson: resolve(root, "runner/赛事/平台稳定度报告.json"),
   outputMd: resolve(root, "runner/系统配置/营运仪表板.md"),
   outputJson: resolve(root, "runner/系统配置/营运仪表板.json"),
 };
@@ -73,6 +75,91 @@ function isOfficialDirect(race) {
   } catch {
     return false;
   }
+}
+
+function hostFromUrl(url) {
+  if (!hasText(url)) {
+    return "";
+  }
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function platformFromRace(race) {
+  if (hasText(race.source_platform)) {
+    return String(race.source_platform).split(/[、,，/]/)[0].trim();
+  }
+  const host = hostFromUrl(race.registration_link || race.official_event_url || race.detail_url);
+  if (/irunner|biji/.test(host)) return "iRunner";
+  if (/lohasnet/.test(host)) return "Lohas";
+  if (/ctrun/.test(host)) return "CTRun";
+  if (/joinnow/.test(host)) return "JoinNow";
+  if (/focusline/.test(host)) return "Focusline";
+  if (/bao-ming/.test(host)) return "bao-ming";
+  if (/eventgo/.test(host)) return "EventGo";
+  return race.source || "未分類";
+}
+
+function rowKey(item) {
+  return item.race_id || `${item.race_name || ""}|${item.race_date || ""}`;
+}
+
+function buildPlatformStability(races, queue, openedGaps, dateAnomalies, tracking) {
+  const missingSet = new Set(queue.map(rowKey));
+  const openGapSet = new Set(openedGaps.map(rowKey));
+  const anomalySet = new Set(dateAnomalies.map(rowKey));
+  const dueSet = new Set(tracking.filter((item) => item.tracking?.status === "due_now").map(rowKey));
+  const stats = new Map();
+
+  races.forEach((race) => {
+    const platform = platformFromRace(race);
+    if (!stats.has(platform)) {
+      stats.set(platform, {
+        platform,
+        total: 0,
+        official_direct: 0,
+        verified: 0,
+        missing: 0,
+        opened_gap: 0,
+        date_anomaly: 0,
+        due_now: 0,
+        sample_races: [],
+      });
+    }
+    const item = stats.get(platform);
+    const key = rowKey(race);
+    item.total += 1;
+    item.official_direct += isOfficialDirect(race) ? 1 : 0;
+    item.verified += hasText(race.verified_at) ? 1 : 0;
+    item.missing += missingSet.has(key) ? 1 : 0;
+    item.opened_gap += openGapSet.has(key) ? 1 : 0;
+    item.date_anomaly += anomalySet.has(key) ? 1 : 0;
+    item.due_now += dueSet.has(key) ? 1 : 0;
+    if (item.sample_races.length < 3) {
+      item.sample_races.push(race.race_name);
+    }
+  });
+
+  return [...stats.values()]
+    .map((item) => {
+      const completeRate = (item.total - item.missing) / item.total;
+      const officialRate = item.official_direct / item.total;
+      const verifiedRate = item.verified / item.total;
+      const cleanDateRate = (item.total - item.date_anomaly) / item.total;
+      const score = Math.round((completeRate * 0.35 + officialRate * 0.25 + verifiedRate * 0.25 + cleanDateRate * 0.15) * 100);
+      return {
+        ...item,
+        complete_rate: pct(item.total - item.missing, item.total),
+        official_direct_rate: pct(item.official_direct, item.total),
+        verified_rate: pct(item.verified, item.total),
+        score,
+        status: score >= 80 ? "穩定" : score >= 60 ? "可用需觀察" : "需補強",
+      };
+    })
+    .sort((a, b) => b.total - a.total || b.score - a.score || a.platform.localeCompare(b.platform));
 }
 
 function registrationState(race, todayDate) {
@@ -166,6 +253,7 @@ async function main() {
   const publishedNews = contentItemsByType(publishedContent, "news");
   const shoeCards = Math.max(countContentCards(html, "shoe"), publishedShoes.length);
   const newsCards = Math.max(countContentCards(html, "news"), publishedNews.length);
+  const platformStability = buildPlatformStability(races, queue, openedGaps, dateAnomalies, tracking);
 
   const dashboard = {
     generated_at: new Date().toISOString(),
@@ -194,6 +282,12 @@ async function main() {
       candidate_count: candidates.length,
       candidate_by_category: candidateByCategory,
     },
+    platform_stability: {
+      stable_count: platformStability.filter((item) => item.status === "穩定").length,
+      watch_count: platformStability.filter((item) => item.status === "可用需觀察").length,
+      weak_count: platformStability.filter((item) => item.status === "需補強").length,
+      items: platformStability,
+    },
   };
 
   const metrics = [
@@ -205,6 +299,7 @@ async function main() {
     statusLine("跑鞋上架量", `${shoeCards} 筆`, "至少 10 筆", shoeCards >= 10),
     statusLine("新聞上架量", `${newsCards} 筆`, "至少 10 筆", newsCards >= 10),
     statusLine("內容候選量", `${candidates.length} 筆`, "至少 20 筆", candidates.length >= 20),
+    statusLine("穩定平台數", `${dashboard.platform_stability.stable_count} 個`, "至少 3 個", dashboard.platform_stability.stable_count >= 3),
   ];
 
   const nextActions = [];
@@ -253,6 +348,12 @@ async function main() {
     "| --- | ---: |",
     ...Object.entries(candidateByCategory).sort((a, b) => b[1] - a[1]).map(([key, value]) => `| ${key} | ${value} |`),
     "",
+    "## 平台穩定度",
+    "",
+    "| 平台 | 狀態 | 分數 | 賽事 | 完整度 | 官方直連 | 已查證 | 待補 | 日期異常 |",
+    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...platformStability.map((item) => `| ${item.platform} | ${item.status} | ${item.score} | ${item.total} | ${item.complete_rate} | ${item.official_direct_rate} | ${item.verified_rate} | ${item.missing} | ${item.date_anomaly} |`),
+    "",
     "## 近期需處理",
     "",
     "### 開報後待補",
@@ -274,8 +375,27 @@ async function main() {
   ].join("\n");
 
   await mkdir(dirname(paths.outputMd), { recursive: true });
+  await mkdir(dirname(paths.platformStabilityMd), { recursive: true });
   await writeFile(paths.outputMd, `${md}\n`, "utf-8");
   await writeFile(paths.outputJson, `${JSON.stringify(dashboard, null, 2)}\n`, "utf-8");
+  await writeFile(paths.platformStabilityJson, `${JSON.stringify({
+    generated_at: dashboard.generated_at,
+    basis_date: today,
+    items: platformStability,
+  }, null, 2)}\n`, "utf-8");
+  await writeFile(paths.platformStabilityMd, `${[
+    "# 平台穩定度報告",
+    "",
+    `產生時間：${dashboard.generated_at}`,
+    `追蹤基準日：${today}`,
+    "",
+    "分數用完整度、官方直連率、查證率與日期異常加權計算，用來判斷哪個平台 parser 最需要優先補強。",
+    "",
+    "| 平台 | 狀態 | 分數 | 賽事 | 完整度 | 官方直連 | 已查證 | 待補 | 開報後待補 | 日期異常 | 該重爬 |",
+    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...platformStability.map((item) => `| ${item.platform} | ${item.status} | ${item.score} | ${item.total} | ${item.complete_rate} | ${item.official_direct_rate} | ${item.verified_rate} | ${item.missing} | ${item.opened_gap} | ${item.date_anomaly} | ${item.due_now} |`),
+    "",
+  ].join("\n")}\n`, "utf-8");
 
   console.log(`Operational dashboard: ${paths.outputMd}`);
   console.log(`Race completeness: ${dashboard.races.complete_rate}`);

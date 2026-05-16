@@ -66,7 +66,7 @@ function cleanSummary(text) {
   }
   const limit = 120;
   if (cleaned.length <= limit) {
-    return /[。！？.!?]$/.test(cleaned) ? cleaned : `${cleaned}...`;
+    return /[。！？.!?]$/.test(cleaned) ? cleaned : `${cleaned}。`;
   }
   const clipped = cleaned.slice(0, limit);
   const sentenceEnd = Math.max(
@@ -75,27 +75,42 @@ function cleanSummary(text) {
     clipped.lastIndexOf("？"),
     clipped.lastIndexOf("."),
   );
-  return `${(sentenceEnd > 42 ? clipped.slice(0, sentenceEnd + 1) : clipped).trim()}...`;
+  if (sentenceEnd <= 42) {
+    return "";
+  }
+  const summary = (sentenceEnd > 42 ? clipped.slice(0, sentenceEnd + 1) : clipped).trim();
+  return /[。！？.!?]$/.test(summary) ? summary : `${summary}。`;
 }
 
 function summarize(item, type) {
   const description = cleanSummary(item.description);
-  if (description) {
-    return description;
+  const title = item.title.replace(/\s+/g, " ").trim();
+  const source = item.source ? `${item.source}：` : "";
+
+  if (type === "shoe") {
+    const category = inferShoeCategory(title);
+    const shoeUse = {
+      競速: "適合放在比賽日、節奏跑與間歇課，週跑量還不穩時不要拿來天天穿。",
+      越野: "適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
+      防水: "適合雨天、通勤慢跑與濕冷環境，夏季長跑要留意悶熱與排汗。",
+      緩震: "適合長跑、恢復跑與累積里程，挑選時要看後段穩定，不只看剛試穿的彈感。",
+      速度訓練: "適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
+      跑鞋新品: "先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+    }[category];
+    if (description) {
+      return `${source}重點：${description}跑者可判斷它屬於「${category}」定位，${shoeUse}`;
+    }
+    return `這雙鞋目前以「${category}」定位收錄。${shoeUse}`;
   }
 
-  const title = item.title.replace(/\s+/g, " ").trim();
-  if (type === "shoe") {
-    if (/防水|GTX|GORE/i.test(title)) {
-      return "防水跑鞋適合雨季、通勤慢跑與濕滑路面，但夏天悶熱感較明顯，建議作為輪替鞋而不是唯一主力。";
+  if (description) {
+    if (/賽事|報名|路跑|馬拉松|半馬/i.test(title)) {
+      return `${source}賽事重點：${description}可用來判斷報名時程、距離或是否值得排進年度目標。`;
     }
-    if (/碳板|競速|PHANTASM|FAST-R|ELITE/i.test(title)) {
-      return "競速鞋適合節奏跑、間歇與比賽日。若週跑量還不穩，先用日常鞋打底，再把它放進重點課表。";
+    if (/訓練|間歇|節奏|長跑|配速|課表|恢復/i.test(title)) {
+      return `${source}訓練重點：${description}建議對照自己的週跑量、疲勞與目標賽事距離後再採用。`;
     }
-    if (/緩震|厚底|NIMBUS|NEO VISTA|CUMULUS/i.test(title)) {
-      return "高緩震或厚底鞋適合長距離、恢復跑與累積里程。挑選時要注意後段穩定性，不只看剛試穿的彈感。";
-    }
-    return "新品資訊已收錄，適合先看定位、重量、路面與課表用途，再決定是否放進自己的跑鞋輪替。";
+    return `${source}重點：${description}已保留和訓練、裝備或賽事決策相關的資訊，方便快速判斷是否深入閱讀。`;
   }
 
   if (/訓練|間歇|節奏|長跑|半馬|馬拉松/i.test(title)) {
@@ -150,7 +165,7 @@ function pick(items, type) {
 
 function buildReport(published) {
   const rows = published.map((item) => (
-    `| ${item.type === "shoe" ? "跑鞋" : "新聞"} | ${item.score} | ${item.date} | ${item.source} | ${item.title.replace(/\|/g, "／")} | [來源](${item.url}) |`
+    `| ${item.type === "shoe" ? "跑鞋" : "新聞"} | ${item.score} | ${item.date} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${item.summary.replace(/\|/g, "／")} | [來源](${item.url}) |`
   ));
   return [
     "# 自動上架內容報告",
@@ -162,8 +177,8 @@ function buildReport(published) {
     "",
     `已上架：${published.length} 筆`,
     "",
-    "| 類型 | 分數 | 日期 | 來源 | 標題 | 連結 |",
-    "| --- | ---: | --- | --- | --- | --- |",
+    "| 類型 | 分數 | 日期 | 來源 | 標題 | 摘要 | 連結 |",
+    "| --- | ---: | --- | --- | --- | --- | --- |",
     ...rows,
     "",
   ].join("\n");

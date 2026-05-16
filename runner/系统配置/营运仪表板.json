@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-15T23:23:08.146Z",
-  "basis_date": "2026-05-15",
+  "generated_at": "2026-05-16T00:49:36.773Z",
+  "basis_date": "2026-05-16",
   "races": {
     "total": 34,
     "follow_up_count": 13,
@@ -26,12 +26,155 @@
     "news_cards": 11,
     "newest_shoe_date": "2026-05-15",
     "newest_news_date": "2026-05-15",
-    "published_count": 13,
-    "candidate_count": 20,
+    "published_count": 12,
+    "candidate_count": 19,
     "candidate_by_category": {
       "跑鞋新品": 9,
       "跑步新聞": 5,
-      "訓練": 6
+      "訓練": 5
     }
+  },
+  "platform_stability": {
+    "stable_count": 6,
+    "watch_count": 0,
+    "weak_count": 1,
+    "items": [
+      {
+        "platform": "iRunner",
+        "total": 19,
+        "official_direct": 6,
+        "verified": 7,
+        "missing": 12,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
+          "2026 KOF拳皇公益主題路跑",
+          "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0"
+        ],
+        "complete_rate": "37%",
+        "official_direct_rate": "32%",
+        "verified_rate": "37%",
+        "score": 45,
+        "status": "需補強"
+      },
+      {
+        "platform": "CTRun",
+        "total": 4,
+        "official_direct": 4,
+        "verified": 4,
+        "missing": 0,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "2026 VISOGE 夜跑派對 台中場",
+          "2026 山城星光馬拉松",
+          "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽"
+        ],
+        "complete_rate": "100%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 100,
+        "status": "穩定"
+      },
+      {
+        "platform": "bao-ming",
+        "total": 3,
+        "official_direct": 3,
+        "verified": 3,
+        "missing": 0,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "2026 BOBDOG RUN(台中場)",
+          "2026 松鶴越野",
+          "2027 第九屆龍虎鳳越野"
+        ],
+        "complete_rate": "100%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 100,
+        "status": "穩定"
+      },
+      {
+        "platform": "EventGo",
+        "total": 2,
+        "official_direct": 2,
+        "verified": 2,
+        "missing": 0,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "2026全台PAPAGO歡樂跑--西湖場",
+          "夏日馬拉松 - 苗栗鯉魚潭"
+        ],
+        "complete_rate": "100%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 100,
+        "status": "穩定"
+      },
+      {
+        "platform": "Focusline",
+        "total": 2,
+        "official_direct": 2,
+        "verified": 2,
+        "missing": 0,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "夏日馬拉松 - 南投埔里場",
+          "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
+        ],
+        "complete_rate": "100%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 100,
+        "status": "穩定"
+      },
+      {
+        "platform": "Lohas",
+        "total": 2,
+        "official_direct": 2,
+        "verified": 2,
+        "missing": 0,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "2026中興新村半程馬拉松-披興戴月的想你",
+          "2026 清水馬拉松嘉年華"
+        ],
+        "complete_rate": "100%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 100,
+        "status": "穩定"
+      },
+      {
+        "platform": "JoinNow",
+        "total": 2,
+        "official_direct": 2,
+        "verified": 2,
+        "missing": 1,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "2026第九屆幸福龍井活力健康路跑健走",
+          "2026浪漫台三線新店老街路跑賽"
+        ],
+        "complete_rate": "50%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 83,
+        "status": "穩定"
+      }
+    ]
   }
 }

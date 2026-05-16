@@ -4,6 +4,7 @@ const DEVICE_ID = getDeviceId();
 const FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:favorites`;
 const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
+const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
 const TODAY = "2026-05-15";
 
 const state = {
@@ -21,6 +22,7 @@ const state = {
   newsFavoritesOnly: false,
   trainingRaceKey: "",
   planWeek: 1,
+  completedPlanWeeks: new Set(),
 };
 
 const els = {
@@ -298,6 +300,74 @@ function savePlanSettings() {
   payload.trainingRaceKey = state.trainingRaceKey;
   payload.planWeek = state.planWeek;
   localStorage.setItem(PLAN_KEY, JSON.stringify(payload));
+}
+
+function planProgressSignature(plan) {
+  return [
+    plan.athleteName,
+    plan.goalProfile?.key || plan.goalProfile?.title,
+    plan.raceDateInput || "no-date",
+    plan.weekCount,
+    formatDuration(plan.targetFinish),
+    formatPace(plan.racePace),
+    plan.dayCount,
+  ].join("|");
+}
+
+function loadPlanProgress(signature) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PLAN_PROGRESS_KEY) || "{}");
+    if (stored.signature !== signature) {
+      state.completedPlanWeeks = new Set();
+      return state.completedPlanWeeks;
+    }
+    state.completedPlanWeeks = new Set((stored.completedWeeks || []).map(Number).filter(Boolean));
+  } catch {
+    state.completedPlanWeeks = new Set();
+  }
+  return state.completedPlanWeeks;
+}
+
+function savePlanProgress(signature) {
+  localStorage.setItem(PLAN_PROGRESS_KEY, JSON.stringify({
+    signature,
+    completedWeeks: [...state.completedPlanWeeks].sort((a, b) => a - b),
+    updatedAt: new Date().toISOString(),
+  }));
+}
+
+function weekAdjustmentFor(plan, completedWeeks) {
+  if (plan.selectedWeek <= 1) {
+    return {
+      status: "首週建立節奏",
+      note: "先把出門頻率與輕鬆跑完成度跑穩，不急著追配速。",
+      factor: 1,
+    };
+  }
+  if (completedWeeks.has(plan.selectedWeek - 1)) {
+    return {
+      status: "上週已完成",
+      note: "本週可以照原計畫推進；若疲勞偏高，重點課保留但總量降 10%。",
+      factor: 1,
+    };
+  }
+  return {
+    status: "上週未完成",
+    note: "本週自動降載約 10%，先補回規律與恢復，不把漏掉的課硬塞回來。",
+    factor: 0.9,
+  };
+}
+
+function adjustedTrainingWeek(week, adjustment) {
+  if (!week || adjustment.factor === 1) {
+    return week;
+  }
+  return {
+    ...week,
+    weeklyKm: Math.max(1, Math.round(week.weeklyKm * adjustment.factor)),
+    longRunKm: Math.max(1, Math.round(week.longRunKm * adjustment.factor)),
+    focus: `${week.focus}，降載調整`,
+  };
 }
 
 function normalizeControlValue(control, value) {
@@ -1550,6 +1620,14 @@ function renderPlan() {
   } = plan;
 
   state.planWeek = selectedWeek;
+  const progressSignature = planProgressSignature(plan);
+  const completedWeeks = loadPlanProgress(progressSignature);
+  const selectedWeekDone = completedWeeks.has(selectedWeek);
+  const completedCount = completedWeeks.size;
+  const completionPercent = Math.round((completedCount / Math.max(weekCount, 1)) * 100);
+  const adjustment = weekAdjustmentFor(plan, completedWeeks);
+  const displayWeek = adjustedTrainingWeek(currentWeek, adjustment);
+  const displaySchedule = buildTrainingSchedule(dayCount, els.planLevel?.value, priority, displayWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury);
 
   const priorityLabel = {
     finish: "穩定完賽",
@@ -1609,9 +1687,19 @@ function renderPlan() {
         ${riskNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
       </ul>
     </div>
+    <div class="plan-progress-panel">
+      <div>
+        <span>完成進度</span>
+        <strong>${escapeHtml(completedCount)} / ${escapeHtml(weekCount)} 週</strong>
+        <p>${escapeHtml(completionPercent)}% · ${escapeHtml(adjustment.status)}。${escapeHtml(adjustment.note)}</p>
+      </div>
+      <button class="${selectedWeekDone ? "active" : ""}" type="button" data-toggle-week-complete>
+        ${selectedWeekDone ? "取消本週完成" : "標記本週完成"}
+      </button>
+    </div>
     <div class="phase-table" aria-label="週數切換">
       ${weeklyBlocks.map((week) => `
-        <button class="${week.week === selectedWeek ? "active" : ""}" type="button" data-plan-week="${escapeHtml(week.week)}">
+        <button class="${week.week === selectedWeek ? "active" : ""} ${completedWeeks.has(week.week) ? "completed" : ""}" type="button" data-plan-week="${escapeHtml(week.week)}">
           <span>第 ${escapeHtml(week.week)} 週 · ${escapeHtml(week.phase)}</span>
           <strong>${escapeHtml(week.weeklyKm)} km</strong>
           <p>長跑 ${escapeHtml(week.longRunKm)} km · ${escapeHtml(week.focus)}</p>
@@ -1620,10 +1708,10 @@ function renderPlan() {
     </div>
     <div class="plan-week-title">
       <span>第 ${escapeHtml(selectedWeek)} 週執行課表</span>
-      <strong>${escapeHtml(currentWeek.weeklyKm)} km / 長跑 ${escapeHtml(currentWeek.longRunKm)} km</strong>
+      <strong>${escapeHtml(displayWeek.weeklyKm)} km / 長跑 ${escapeHtml(displayWeek.longRunKm)} km</strong>
     </div>
     <div class="plan-table" role="table" aria-label="每週課表">
-      ${schedule.map((item) => `
+      ${displaySchedule.map((item) => `
         <div class="plan-row" role="row">
           <span>${escapeHtml(item.day)}</span>
           <strong>${escapeHtml(item.type)}</strong>
@@ -1639,6 +1727,15 @@ function renderPlan() {
       savePlanSettings();
       renderPlan();
     });
+  });
+  els.planOutput.querySelector("[data-toggle-week-complete]")?.addEventListener("click", () => {
+    if (state.completedPlanWeeks.has(selectedWeek)) {
+      state.completedPlanWeeks.delete(selectedWeek);
+    } else {
+      state.completedPlanWeeks.add(selectedWeek);
+    }
+    savePlanProgress(progressSignature);
+    renderPlan();
   });
   els.planOutput.querySelector("[data-export-plan='calendar']")?.addEventListener("click", downloadPlanCalendar);
   els.planOutput.querySelector("[data-export-plan='garmin']")?.addEventListener("click", downloadGarminGuide);
