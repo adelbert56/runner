@@ -967,7 +967,7 @@ function venueForRace(race) {
 
 function mapQueryForRace(race, venue = venueForRace(race)) {
   const query = [venue, race.race_county].filter(hasText).join(" ");
-  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : "";
+  return query ? `https://maps.google.com/?q=${query.trim().replace(/\s+/g, "+")}` : "";
 }
 
 function normalizeStartTimeItems(value) {
