@@ -64,8 +64,17 @@ function cleanSummary(text) {
   if (!cleaned || cleaned.length < 18 || /國內外各大精選賽事|一手掌握|不漏接|預計\s*\d+\s*月份上市/.test(cleaned)) {
     return "";
   }
+  const lastSentenceEnd = Math.max(
+    cleaned.lastIndexOf("。"),
+    cleaned.lastIndexOf("！"),
+    cleaned.lastIndexOf("？"),
+    cleaned.lastIndexOf("."),
+  );
   const limit = 120;
   if (cleaned.length <= limit) {
+    if (lastSentenceEnd < 0 && cleaned.length > 70) {
+      return "";
+    }
     return /[。！？.!?]$/.test(cleaned) ? cleaned : `${cleaned}。`;
   }
   const clipped = cleaned.slice(0, limit);
@@ -97,9 +106,6 @@ function summarize(item, type) {
       速度訓練: "適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
       跑鞋新品: "先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
     }[category];
-    if (description) {
-      return `${source}重點：${description}跑者可判斷它屬於「${category}」定位，${shoeUse}`;
-    }
     return `這雙鞋目前以「${category}」定位收錄。${shoeUse}`;
   }
 
