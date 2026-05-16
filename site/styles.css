@@ -209,7 +209,7 @@ p {
 h1 {
   max-width: 840px;
   margin-bottom: 18px;
-  font-size: clamp(3rem, 7vw, 5.1rem);
+  font-size: clamp(2.7rem, 6.4vw, 4.85rem);
   line-height: 1.02;
   letter-spacing: 0;
 }
@@ -393,6 +393,23 @@ h3 {
   border: 0;
   background: none;
   cursor: pointer;
+}
+
+.share-list-button {
+  min-height: 40px;
+  padding: 8px 13px;
+  border: 1px solid rgba(21, 83, 56, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--green-dark);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.share-list-button::before {
+  margin-right: 6px;
+  content: "↗";
+  font-weight: 950;
 }
 
 .race-console {
@@ -1332,12 +1349,23 @@ h3 {
 
 .content-favorite {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 38px;
-  min-height: 38px;
+  top: 18px;
+  right: 18px;
+  width: 42px;
+  min-height: 42px;
+  border-color: rgba(21, 83, 56, 0.18);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 8px 18px rgba(31, 42, 36, 0.06);
+}
+
+.content-favorite span {
+  display: block;
+  font-size: 1.18rem;
+  line-height: 1;
+}
+
+.content-card-hidden {
+  display: none !important;
 }
 
 .review-grid article {
@@ -1604,14 +1632,6 @@ h3 {
 
 .academy-library article:nth-child(4)::before {
   background: #b66a3c;
-}
-
-.academy-library article:nth-child(5)::before {
-  background: #6f7f54;
-}
-
-.academy-library article:nth-child(6)::before {
-  background: #7c6b4e;
 }
 
 .academy-grid article:nth-child(1) {
@@ -2521,7 +2541,9 @@ h3 {
   }
 
   .hero h1 {
-    font-size: 2.7rem;
+    max-width: 330px;
+    font-size: 2.35rem;
+    line-height: 1.08;
   }
 
   .hero p:not(.eyebrow) {

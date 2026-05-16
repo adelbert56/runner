@@ -70,11 +70,13 @@ function inferShoeCategory(title) {
 
 function inferNewsCategory(title, description = "") {
   const text = `${title} ${description}`;
-  if (/賽事|報名|馬拉松|半馬|城市路跑|開放報名|完賽/i.test(text)) return "賽事資訊";
+  if (/賽事|報名|城市路跑|開放報名|完賽/i.test(title)) return "賽事資訊";
+  if (/新手|入門|初跑|跑姿|肌力|心率|乳酸閾值|跑步經濟性|跑者知識/i.test(text)) return "入門知識";
   if (/恢復|傷|睡眠|疲勞|伸展|保養|防曬|肌膚|休息/i.test(text)) return "恢復保養";
   if (/補給|飲食|碳水|蛋白|能量膠|水分|電解質/i.test(text)) return "補給";
   if (/跑鞋|鞋款|裝備|Nike|ASICS|Brooks|HOKA|PUMA|New Balance|Mizuno|On Cloud/i.test(text)) return "跑鞋裝備";
   if (/訓練|間歇|節奏|長跑|配速|課表|週跑量|跑量|肌力|坡跑/i.test(text)) return "訓練";
+  if (/賽事|報名|馬拉松|半馬|城市路跑|開放報名|完賽/i.test(text)) return "賽事資訊";
   return "跑步新聞";
 }
 

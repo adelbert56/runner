@@ -39,6 +39,30 @@ const sources = [
     priority: 3,
   },
   {
+    name: "KENLU",
+    url: "https://kenlu.net/tag/running/",
+    type: "跑鞋評測 / 裝備情報",
+    priority: 3,
+  },
+  {
+    name: "KENLU 越野",
+    url: "https://kenlu.net/tag/trail-run/",
+    type: "越野跑鞋 / 越野訓練",
+    priority: 3,
+  },
+  {
+    name: "運動科學網",
+    url: "https://www.sportscience.com.tw/",
+    type: "訓練知識 / 運動科學",
+    priority: 3,
+  },
+  {
+    name: "IR SPORTS",
+    url: "https://irsports.com.tw/",
+    type: "路跑活動 / 訓練資訊",
+    priority: 2,
+  },
+  {
     name: "udn 品牌",
     url: "https://branda.udn.com/branda/index",
     type: "品牌新品 / 運動消費",
@@ -54,6 +78,15 @@ const keywords = [
   "馬拉松",
   "半馬",
   "訓練",
+  "新手",
+  "入門",
+  "跑姿",
+  "肌力",
+  "心率",
+  "乳酸閾值",
+  "初跑",
+  "輪替",
+  "傷痛",
   "恢復",
   "補給",
   "碳板",
@@ -91,6 +124,13 @@ const blockedKeywords = [
   "D+AF",
   "Grace Gift",
   "蕾絲鞋",
+  "攀岩",
+  "匹克球",
+  "內臟脂肪",
+  "貝克漢",
+  "艾蜜莉",
+  "BTS",
+  "林書豪",
 ];
 
 function compact(text) {
@@ -116,7 +156,8 @@ function decodeHtml(text) {
 
 function absoluteUrl(href, baseUrl) {
   try {
-    return new URL(href, baseUrl).toString();
+    const parsed = new URL(href, baseUrl);
+    return /^https?:$/.test(parsed.protocol) ? parsed.toString() : "";
   } catch {
     return "";
   }
@@ -124,6 +165,9 @@ function absoluteUrl(href, baseUrl) {
 
 function scoreTitle(title, source) {
   if (blockedKeywords.some((keyword) => title.toLowerCase().includes(keyword.toLowerCase()))) {
+    return 0;
+  }
+  if (!/跑|馬拉松|半馬|跑鞋|慢跑|路跑|越野|HYROX/i.test(title)) {
     return 0;
   }
 
@@ -136,6 +180,9 @@ function scoreTitle(title, source) {
 function classify(title) {
   if (/跑鞋|慢跑鞋|碳板|ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Cloud/i.test(title)) {
     return "跑鞋新品";
+  }
+  if (/新手|入門|初跑|跑姿|肌力|心率|乳酸閾值/.test(title)) {
+    return "入門知識";
   }
   if (/恢復|伸展|傷|睡眠|疲勞/.test(title)) {
     return "恢復";
@@ -226,7 +273,7 @@ function extractLinks(html, source) {
     const url = absoluteUrl(match[1], source.url);
     const title = compact(match[2]);
 
-    if (!url || url.endsWith("#") || !title || title.length < 6 || title.length > 140) {
+    if (!url || url.endsWith("#") || /q=competition|act=info&cid=/i.test(url) || !title || title.length < 6 || title.length > 140) {
       continue;
     }
 

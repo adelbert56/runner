@@ -1474,7 +1474,7 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange
   ];
 
   if (dayCount >= 5) {
-    schedule.splice(2, 0, { day: "週三", type: "補量", work: `${Math.max(3, easyKm - 1)}km 輕鬆跑或跑走，${easyRange}` });
+    schedule.splice(1, 0, { day: "週三", type: "補量", work: `${Math.max(3, easyKm - 1)}km 輕鬆跑或跑走，${easyRange}` });
   }
 
   return schedule;
@@ -1964,7 +1964,9 @@ function applyContentLimit(containerSelector, itemSelector, limitValue, favorite
 
   cards.forEach((card) => {
     const index = eligible.indexOf(card);
-    card.hidden = index < start || index >= end;
+    const shouldHide = index < start || index >= end;
+    card.hidden = shouldHide;
+    card.classList.toggle("content-card-hidden", shouldHide);
   });
 
   return {
