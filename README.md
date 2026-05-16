@@ -2,13 +2,13 @@
 
 跑者廣場是一個以臺灣中部跑者為主的路跑資訊站，整理臺中、彰化、南投、苗栗賽事，並補充跑鞋新品、跑步新聞與練跑菜單工具。專案目前採靜態網站加 GitHub Actions 自動更新資料，適合小型社群或內部團體用低成本方式維護。
 
-公開網站：[https://adelbert56.github.io/runner/site/](https://adelbert56.github.io/runner/site/)
+公開網站：[https://adelbert56.github.io/runner/](https://adelbert56.github.io/runner/)
 
 ## 目前狀態
 
 - 倉庫狀態：Public
 - 網站部署：GitHub Pages
-- 賽事資料：每日自動爬蟲與品質檢查
+- 賽事資料：每週二、四自動爬蟲與品質檢查，也可手動執行
 - 跑鞋 / 新聞資料：每週自動收集候選內容並自動上架摘要
 - 本機預覽：`npm run dev`
 - 主要資料來源：運動筆記、iRunner、Lohas、CTRun、JoinNow、Focusline、bao-ming、EventGo，以及跑鞋 / 跑步內容來源
@@ -128,7 +128,7 @@ http://localhost:4173/site/
 | 指令 | 用途 |
 | --- | --- |
 | `npm run dev` | 啟動本機靜態網站預覽 |
-| `npm run check` | 檢查主要 JavaScript 檔案語法 |
+| `npm run check` | 檢查主要 JavaScript 檔案語法、前端資料載入與內容品質基線 |
 | `npm run data:apply` | 套用人工補充資料 |
 | `npm run data:sync` | 同步賽事資料到網站資料 |
 | `npm run data:quality` | 產生資料品質、待補、異常報告 |
@@ -227,7 +227,7 @@ npm run check
 用途：
 
 - 將 `site/` 部署到 GitHub Pages。
-- 部署完成後網站位於 [https://adelbert56.github.io/runner/site/](https://adelbert56.github.io/runner/site/)。
+- 部署完成後網站位於 [https://adelbert56.github.io/runner/](https://adelbert56.github.io/runner/)。
 
 ### Refresh race data
 
@@ -235,7 +235,7 @@ npm run check
 
 觸發：
 
-- 每天 06:30 Asia/Taipei
+- 每週二、四 18:00 Asia/Taipei
 - 手動執行
 
 用途：
@@ -282,6 +282,12 @@ npm run check
 3. `Build and deployment` 的 `Source` 選 `GitHub Actions`
 4. 回到 `Actions` 手動執行 `Deploy static site`，或推送一次 `main`
 
+若 GitHub README 頁面顯示的公開網站仍是舊網址，請確認 `README.md` 已推送到 `main`，正確網址應為：
+
+```text
+https://adelbert56.github.io/runner/
+```
+
 ## 資料維護原則
 
 - 人工補充資料優先權最高。
@@ -292,6 +298,25 @@ npm run check
 - 報名截止後降低追蹤頻率。
 - 賽事過期超過一個月收進歷史賽事邏輯。
 - 停辦、報名中、已截止、尚未開報等狀態必須清楚標色。
+
+## 收尾驗收清單
+
+專案要交付或暫告一段落時，至少跑完：
+
+```bash
+npm run data:refresh
+npm run content:refresh
+npm run ops:dashboard
+npm run check
+uv run python -m compileall scripts
+```
+
+驗收重點：
+
+- 賽事：`site/data/races.json` 可由 `runner/赛事/赛事数据库.json` 同步產生，品質報告與開報後待補報告能重建。
+- 入門與練跑：前端 `#academy`、`#training` 仍可正常顯示，不依賴外部 API。
+- 跑鞋與新聞：`site/data/content.json` 至少保留可用數量，摘要不過長、不重複。
+- GitHub Pages：`Deploy static site` 成功後公開網址為 `https://adelbert56.github.io/runner/`。
 
 ## 重要文件
 

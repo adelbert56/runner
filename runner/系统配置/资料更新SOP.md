@@ -2,7 +2,8 @@
 
 ## 自動排程
 
-- GitHub Actions `Refresh race data` 每天 06:30（Asia/Taipei）執行。
+- GitHub Actions `Refresh race data` 每週二、四 18:00（Asia/Taipei）執行，也可手動執行。
+- GitHub Actions `Collect content candidates` 每週一 09:00（Asia/Taipei）執行，也可手動執行。
 - 流程會先跑賽事清單爬蟲，再跑官方平台補資料，最後產生品質報告。
 - 每月追蹤賽事固定排在每月 1 號與 15 號檢查。
 
@@ -17,6 +18,16 @@
    - 套用人工補充。
    - 同步 `runner/赛事/赛事数据库.json` 到 `site/data/races.json`。
    - 重產資料品質、追蹤計畫與開報後待補報告。
+
+## 內容流程
+
+1. `npm run content:candidates`
+   - 收集跑鞋新品、跑步新聞與訓練文章候選資料。
+2. `npm run content:publish`
+   - 將候選內容整理成 `site/data/content.json`。
+   - 更新 `runner/内容/自动上架内容报告.md`。
+3. `npm run content:refresh`
+   - 一次執行候選收集與發布，適合本機收尾與 GitHub Actions。
 
 ## 人工待補原則
 
@@ -40,4 +51,4 @@
 2. 若有 Python 修改，執行 `uv run python -m compileall scripts`。
 3. 推送到 `main` 後，GitHub Pages 會自動部署。
 4. 若前端 CSS/JS 有修改，更新 `site/index.html` 的版本參數以避開瀏覽器快取。
-
+5. 收尾前建議再跑 `npm run ops:dashboard`，確認賽事、內容與待補數據都有反映到營運儀表板。

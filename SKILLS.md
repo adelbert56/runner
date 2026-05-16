@@ -11,11 +11,13 @@
 ## 主要架構
 
 - 前端：`site/` 靜態頁，資料讀 `site/data/races.json`。
+- 公開網站：`https://adelbert56.github.io/runner/`，不要再使用舊的 `adelbert56.github.io` 網址。
 - 賽事資料源：`runner/赛事/赛事数据库.json`。
+- 跑鞋 / 新聞資料源：`runner/内容/候选内容.json`，發布到 `site/data/content.json`。
 - 主爬蟲：`scripts/main.py`。
 - 官方平台補資料：`scripts/enrich_platforms.py` 與 `scripts/platforms/`。
 - 資料同步與報告：`npm run data:refresh`、`npm run data:quality`。
-- 自動排程：`.github/workflows/data-refresh.yml`，GitHub Actions 定期更新資料。
+- 自動排程：`.github/workflows/data-refresh.yml` 每週二、四 18:00 Asia/Taipei 更新賽事；`.github/workflows/content-candidates.yml` 每週一 09:00 Asia/Taipei 更新跑鞋 / 新聞。
 - 發布：`.github/workflows/pages.yml`，推送 `main` 後部署 GitHub Pages。
 
 ## 資料原則
@@ -53,6 +55,7 @@
 - 跑鞋與新聞以繁體中文為主，需有日期、排序、筆數顯示 10/25/50、收藏功能。
 - 跑鞋知識不能只像單鞋推薦，要整理成選鞋邏輯、使用情境、輪替策略、評測方法與換鞋時機。
 - 新聞與跑鞋資料適合用 RSS/Search/Crawler 定期補候選清單，再人工篩選或保守入庫。
+- `npm run content:refresh` 應同時重建候選報告、上架報告與 `site/data/content.json`；跑鞋、新聞數量不足時不要只改前端 fallback。
 
 ## 練跑菜單原則
 
@@ -69,6 +72,7 @@
 - 一般修改：`npm run check`。
 - Python 修改：`uv run python -m compileall scripts`。
 - 資料流程修改：`uv run python scripts/enrich_platforms.py --dry-run` 後再跑 `npm run data:refresh`。
+- 收尾驗證：`npm run data:refresh`、`npm run content:refresh`、`npm run ops:dashboard`、`npm run check`、`uv run python -m compileall scripts`。
 - 營運狀態檢查：`npm run ops:dashboard`，看賽事完整度、官方直連率、開報後待補與內容候選量。
 - UI 修改：啟動 `npm run dev`，依 `runner/系统配置/UI商品化验收标准.md` 用瀏覽器桌面與手機 viewport 截圖檢查。
 - CSS/JS 有變動時，更新 `site/index.html` 的版本參數，避免 GitHub Pages 快取讓使用者看舊版。
@@ -76,6 +80,7 @@
 ## Git 與檔案規則
 
 - 不提交 `.obsidian/workspace.json`，這類本機工作區狀態應留在 `.gitignore`。
+- 空的 `server.out.log`、`server.err.log` 與 `scripts/**/__pycache__` 可以清理；`.venv` 是本機依賴環境，除非要重建環境，否則不要當一般整理項目刪除。
 - 既有未提交的使用者變更不要順手 stage。
 - 若只改文件，提交時只 stage 相關文件。
 - 推送到 `main` 後確認 GitHub Pages 會由 workflow 自動部署。

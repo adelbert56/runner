@@ -1,19 +1,37 @@
 ---
 标题: MCP连接配置
-日期: 2026-05-15
+日期: 2026-05-16
 作者: 管理员
-状态: 规划中
+状态: 暂不启用
 ---
 
 # 跑者广场 - MCP配置
 
-本文档记录MCP（Model Context Protocol）连接的规划和配置。
+本文档记录跑者广场是否需要 MCP（Model Context Protocol）连接，以及未来启用时的边界。当前项目已经可以用本地 Python / Node 脚本与 GitHub Actions 完成资料更新，因此 MCP 只作为后续扩展方案，不是上线依赖。
 
 ## 当前阶段（v0.1）
 
-**状态**: 规划中（暂未启用）
+**状态**: 暂不启用
 
-目前通过**Python爬虫脚本**直接处理数据爬取和集成，无需外部MCP。
+目前通过本地脚本直接处理资料收集、整理和发布：
+
+- 赛事爬虫：`scripts/main.py`
+- 官方平台补资料：`scripts/enrich_platforms.py`、`scripts/platforms/`
+- 赛事同步与报告：`npm run data:refresh`
+- 跑鞋 / 新闻候选内容：`npm run content:refresh`
+- 营运仪表板：`npm run ops:dashboard`
+
+这些流程已经由 `.github/workflows/` 自动排程，不需要额外 MCP 服务。
+
+## 启用 MCP 前的判断标准
+
+只有出现下列情况才考虑启用 MCP：
+
+- Python parser 维护成本明显高于外部服务成本。
+- 需要稳定浏览器渲染、验证码处理或复杂 JavaScript 页面解析。
+- 需要跨装置收藏、会员、通知或资料库查询等后端能力。
+- GitHub Actions 执行时间、频率或并发需求超过目前静态站规模。
+- 有明确 API key、费用预算、失败重试策略和资料隐私边界。
 
 ---
 
@@ -129,6 +147,8 @@
 ### Phase 1-2（当前）
 - Python脚本爬虫 ✓
 - Obsidian本地存储 ✓
+- GitHub Actions 自动排程 ✓
+- GitHub Pages 静态发布 ✓
 - 无MCP依赖
 
 ### Phase 3
@@ -180,7 +200,7 @@ TELEGRAM_BOT_TOKEN=xxx
 1. **获取API密钥** - 向相应服务申请
 2. **更新配置文件** - 修改本文档 + .env
 3. **测试连接** - 运行集成测试
-4. **发布更新** - 更新Skills以使用新MCP
+4. **发布更新** - 更新 `SKILLS.md`、`第二大脑.md`、README 与 GitHub Actions
 5. **监控性能** - 定期检查MCP延迟和错误率
 
 ---
@@ -198,6 +218,17 @@ A: 可以，但建议分任务分配（如：运动笔记用MCP A，官网公告
 
 ---
 
-**最后更新**: 2026-05-15  
-**维护者**: 管理员  
+## 当前替代方案
+
+| 需求 | 当前做法 | MCP 是否必要 |
+| --- | --- | --- |
+| 赛事更新 | Python 爬虫 + 官方平台 adapters + GitHub Actions | 否 |
+| 跑鞋 / 新闻内容 | Node 候选内容收集 + 自动上架 JSON | 否 |
+| 资料品质报告 | Node scripts 输出 Markdown / JSON | 否 |
+| 静态网站发布 | GitHub Pages | 否 |
+| 个人收藏 | 浏览器 localStorage | 否 |
+| 跨装置同步 / 通知 | 尚未做，需要后端或第三方服务 | 未来再评估 |
+
+**最后更新**: 2026-05-16
+**维护者**: 管理员
 标签: `#系统` `#MCP` `#配置`
