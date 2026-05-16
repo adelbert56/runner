@@ -103,6 +103,24 @@ const monthNames = {
 };
 
 const weekdays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+const contentTypePrefix = {
+  shoe: "s",
+  news: "n",
+};
+
+const shareKindCode = {
+  races: "r",
+  shoe: "s",
+  news: "n",
+  all: "a",
+};
+
+const shareCodeKind = {
+  r: "races",
+  s: "shoe",
+  n: "news",
+  a: "all",
+};
 
 const difficultyClass = {
   "初級": "beginner",
@@ -257,6 +275,38 @@ function encodeSharePayload(payload) {
   return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
 }
 
+function shortHash(value) {
+  let hash = 2166136261;
+  const text = String(value || "");
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function encodeCompactShare(payload) {
+  const kind = shareKindCode[payload.kind] || "a";
+  const races = payload.races.map((key) => key.replace(/^r:/, "")).join(".");
+  const content = payload.content.map((key) => key.replace(":", "")).join(".");
+  return ["2", kind, races, content].join("~");
+}
+
+function decodeCompactShare(value) {
+  const [version, kindCode, races = "", content = ""] = String(value || "").split("~");
+  if (version !== "2") {
+    return null;
+  }
+  return {
+    version: 2,
+    kind: shareCodeKind[kindCode] || "all",
+    races: races ? races.split(".").filter(Boolean).map((key) => `r:${key}`) : [],
+    content: content
+      ? content.split(".").filter(Boolean).map((key) => `${key.slice(0, 1)}:${key.slice(1)}`)
+      : [],
+  };
+}
+
 function decodeSharePayload(value) {
   try {
     const padded = String(value || "").replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(String(value || "").length / 4) * 4, "=");
@@ -270,8 +320,8 @@ function decodeSharePayload(value) {
 
 function readSharedFavorites() {
   const params = new URLSearchParams(window.location.search);
-  const payload = decodeSharePayload(params.get("share"));
-  if (!payload || payload.version !== 1) {
+  const payload = decodeCompactShare(params.get("fav")) || decodeSharePayload(params.get("share"));
+  if (!payload || (payload.version !== 1 && payload.version !== 2)) {
     return;
   }
   if (Array.isArray(payload.races)) {
@@ -299,15 +349,20 @@ async function copyText(text) {
 }
 
 async function shareFavorites(kind, button) {
+  const prefix = contentTypePrefix[kind];
   const content = [...state.contentFavorites].filter((key) => (
-    kind === "all" || key.startsWith(`${kind}:`)
+    kind === "all"
+      ? key.startsWith("s:") || key.startsWith("n:")
+      : key.startsWith(`${prefix}:`)
   ));
+  const races = kind === "races" || kind === "all"
+    ? [...state.favorites].filter((key) => key.startsWith("r:"))
+    : [];
   const payload = {
-    version: 1,
+    version: 2,
     kind,
-    races: kind === "races" || kind === "all" ? [...state.favorites] : [],
+    races,
     content: kind === "races" ? [] : content,
-    createdAt: new Date().toISOString(),
   };
   if (!payload.races.length && !payload.content.length) {
     button.textContent = "尚無收藏";
@@ -318,7 +373,8 @@ async function shareFavorites(kind, button) {
   }
   const panel = kind === "shoe" ? "gear" : kind === "news" ? "news" : "races";
   const url = new URL(window.location.href);
-  url.searchParams.set("share", encodeSharePayload(payload));
+  url.searchParams.delete("share");
+  url.searchParams.set("fav", encodeCompactShare(payload));
   url.hash = panel;
   await copyText(url.toString());
   button.textContent = "已複製連結";
@@ -762,8 +818,28 @@ function getRegistrationStatusClass(race, status) {
   return "status-unknown";
 }
 
-function getRaceKey(race) {
+function legacyRaceKey(race) {
   return race.race_id || `${race.race_name}|${race.race_date}`;
+}
+
+function getRaceKey(race) {
+  return `r:${shortHash(legacyRaceKey(race))}`;
+}
+
+function migrateRaceFavorites() {
+  let changed = false;
+  state.races.forEach((race) => {
+    const legacyKey = legacyRaceKey(race);
+    const compactKey = getRaceKey(race);
+    if (state.favorites.has(legacyKey)) {
+      state.favorites.delete(legacyKey);
+      state.favorites.add(compactKey);
+      changed = true;
+    }
+  });
+  if (changed) {
+    saveFavorites();
+  }
 }
 
 function sortRaceForBoard(a, b) {
@@ -783,7 +859,7 @@ function isHistoricalRace(race) {
 }
 
 function isFavorite(race) {
-  return state.favorites.has(getRaceKey(race));
+  return state.favorites.has(getRaceKey(race)) || state.favorites.has(legacyRaceKey(race));
 }
 
 function isSourceLink(url) {
@@ -2014,6 +2090,17 @@ function sortContentCards(containerSelector, itemSelector, mode) {
 }
 
 function contentFavoriteKey(type, card) {
+  const prefix = contentTypePrefix[type] || type.slice(0, 1);
+  const explicitId = String(card.dataset.contentId || "").trim();
+  if (explicitId) {
+    return `${prefix}:${shortHash(explicitId)}`;
+  }
+  const title = String(card.dataset.title || "").replace(/\s+/g, " ").trim()
+    || String(card.querySelector("h3")?.textContent || card.textContent || "").replace(/\s+/g, " ").trim();
+  return `${prefix}:${shortHash(`${type}|${card.dataset.date || ""}|${title}`)}`;
+}
+
+function legacyContentFavoriteKey(type, card) {
   const title = String(card.dataset.title || "").replace(/\s+/g, " ").trim()
     || String(card.querySelector("h3")?.textContent || card.textContent || "").replace(/\s+/g, " ").trim();
   return `${type}:${card.dataset.date || ""}:${title}`;
@@ -2029,7 +2116,7 @@ function contentArticleHtml(item) {
   const category = item.category || (type === "shoe" ? "跑鞋新品" : "跑步新聞");
   const sourceText = item.source ? `${item.source} 來源` : "閱讀來源";
   return `
-    <article ${attr} data-auto-content="true" data-date="${escapeHtml(item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}">
+    <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}">
       <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>
       <span class="content-tag">${escapeHtml(category)}</span>
       <h3>${escapeHtml(item.title)}</h3>
@@ -2071,12 +2158,18 @@ async function loadPublishedContent() {
 
 function isContentFavorite(type, card) {
   const key = card.dataset.favoriteKey || contentFavoriteKey(type, card);
-  return state.contentFavorites.has(key);
+  return state.contentFavorites.has(key) || state.contentFavorites.has(legacyContentFavoriteKey(type, card));
 }
 
 function decorateContentFavorites(type, containerSelector, itemSelector) {
   document.querySelectorAll(`${containerSelector} ${itemSelector}`).forEach((card) => {
     const key = contentFavoriteKey(type, card);
+    const legacyKey = legacyContentFavoriteKey(type, card);
+    if (state.contentFavorites.has(legacyKey) && !state.contentFavorites.has(key)) {
+      state.contentFavorites.delete(legacyKey);
+      state.contentFavorites.add(key);
+      saveContentFavorites();
+    }
     card.dataset.favoriteKey = key;
     if (card.querySelector("[data-content-favorite]")) {
       card.querySelector("[data-content-favorite]").dataset.contentFavorite = key;
@@ -2437,6 +2530,7 @@ async function loadRaces() {
       }
       const races = await response.json();
       state.races = races.sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
+      migrateRaceFavorites();
       return;
     } catch (error) {
       lastError = error;
