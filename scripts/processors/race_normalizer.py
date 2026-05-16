@@ -82,6 +82,7 @@ def normalize(raw: dict) -> dict:
         "co_organizer": raw.get("co_organizer", ""),
         "fees": raw.get("fees", ""),
         "quota": raw.get("quota", ""),
+        "start_times": raw.get("start_times", ""),
         "verified_at": raw.get("verified_at", ""),
         "verification_note": raw.get("verification_note", ""),
         "source_platform": raw.get("source_platform", ""),

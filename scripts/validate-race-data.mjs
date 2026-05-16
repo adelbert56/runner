@@ -11,9 +11,12 @@ const openedGapReportPath = resolve(root, "runner/賽事/開報後待補資料�
 const openedGapJsonPath = resolve(root, "runner/賽事/開報後待補資料報告.json");
 const dateAnomalyReportPath = resolve(root, "runner/賽事/報名日期異常報告.md");
 const dateAnomalyJsonPath = resolve(root, "runner/賽事/報名日期異常報告.json");
+const startTimeQualityReportPath = resolve(root, "runner/賽事/起跑時間品質報告.md");
+const startTimeQualityJsonPath = resolve(root, "runner/賽事/起跑時間品質報告.json");
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+const strictMode = process.argv.includes("--strict") || process.env.RUNNER_QUALITY_STRICT === "1";
 
 const sourceDomains = ["running.biji.co"];
 
@@ -50,7 +53,6 @@ const fieldGroups = [
     key: "start_times",
     label: "各距離開跑時間",
     severity: "low",
-    optional: true,
     hasValue: (race) => firstText(race.start_times, race.distance_start_times, race.wave_start_times, race.start_time, race.event_time),
     hint: "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。",
   },
@@ -179,6 +181,202 @@ function formatDate(date) {
     return "";
   }
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function parseDistanceKm(value) {
+  const match = String(value || "").match(/(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : 0;
+}
+
+function formatDistanceNumber(km) {
+  if (!Number.isFinite(km) || km <= 0) {
+    return "";
+  }
+  return Number.isInteger(km) ? `${km}K` : `${Number(km.toFixed(4))}K`;
+}
+
+function distanceClassForKm(km) {
+  if (!Number.isFinite(km) || km <= 0) {
+    return "";
+  }
+  if (km > 43) {
+    return "超馬";
+  }
+  if (km >= 41.5) {
+    return "全馬";
+  }
+  if (km > 21.8) {
+    return "超半馬";
+  }
+  if (km >= 20.5) {
+    return "半馬";
+  }
+  return formatDistanceNumber(km);
+}
+
+function distanceLabelFor(value) {
+  const km = parseDistanceKm(value);
+  if (!km) {
+    return String(value || "").trim();
+  }
+  const className = distanceClassForKm(km);
+  if (["超馬", "全馬", "超半馬", "半馬"].includes(className)) {
+    return `${className}（${formatDistanceNumber(km)}）`;
+  }
+  return className;
+}
+
+function rawStartTimeText(race) {
+  const value = race.start_times || race.distance_start_times || race.wave_start_times || race.start_time || race.event_time || "";
+  if (!hasText(value)) {
+    return "";
+  }
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+function normalizeStartTimeRows(value) {
+  if (!hasText(value)) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => normalizeStartTimeRows(item));
+  }
+  if (typeof value === "object") {
+    return Object.entries(value).flatMap(([group, time]) => hasText(time) ? [{ group: String(group).trim(), time: normalizeClock(time), raw: `${group} ${time}` }] : []);
+  }
+  return String(value)
+    .split(/[、；;,\n]/)
+    .map((row) => row.trim())
+    .filter(Boolean)
+    .map((row) => {
+      const timeMatch = row.match(/([01]?\d|2[0-3])[:：][0-5]\d/);
+      const time = timeMatch ? normalizeClock(timeMatch[0]) : "";
+      const group = timeMatch
+        ? row.slice(0, timeMatch.index).replace(/\s*(?:起跑|鳴槍|出發)\s*$/u, "").trim()
+        : row.trim();
+      return { group, time, raw: row };
+    });
+}
+
+function normalizeClock(value) {
+  const match = String(value || "").match(/([01]?\d|2[0-3])[:：]([0-5]\d)/);
+  if (!match) {
+    return "";
+  }
+  return `${String(Number(match[1])).padStart(2, "0")}:${match[2]}`;
+}
+
+function hasRaceStartKeyword(value) {
+  return /起跑|鳴槍|出發|全馬|半馬|超馬|超半馬|挑戰組|健康組|健跑組|健走組|親子組|休閒組|\d+(?:\.\d+)?\s?(?:K|KM|km|公里)/u.test(String(value || ""));
+}
+
+function startTimeQualityIssues(race) {
+  if (isCancelledRace(race)) {
+    return [];
+  }
+  const rawText = rawStartTimeText(race);
+  if (!hasText(rawText)) {
+    return [];
+  }
+  const rows = normalizeStartTimeRows(race.start_times || race.distance_start_times || race.wave_start_times || race.start_time || race.event_time);
+  const distances = Array.isArray(race.distances) ? race.distances.filter(hasText) : [];
+  const issues = [];
+  const clockRows = rows.filter((row) => hasText(row.time));
+  const groupRows = clockRows.filter((row) => hasRaceStartKeyword(row.group));
+  const suspiciousRows = rows.filter((row) => /關門|完賽|頒獎|典禮|報到|寄物|暖身|結束|集合|開幕/u.test(row.raw) && !/起跑|鳴槍|出發/u.test(row.raw));
+
+  if (rows.length && !clockRows.length) {
+    issues.push({
+      key: "missing_clock",
+      severity: "high",
+      label: "起跑時間沒有時刻",
+      hint: "start_times 有值但沒有 HH:MM，通常是抓到組名或表格標題。",
+    });
+  }
+
+  if (distances.length > 1 && clockRows.length === 1 && !hasRaceStartKeyword(clockRows[0].group)) {
+    issues.push({
+      key: "multi_distance_single_generic_time",
+      severity: "medium",
+      label: "多距離只有單一泛用時間",
+      hint: "可能所有組別同時起跑，也可能只抓到活動時間；請回簡章確認是否要拆各組。",
+    });
+  }
+
+  if (distances.length > 1 && groupRows.length === 1 && clockRows.length === 1) {
+    issues.push({
+      key: "multi_distance_one_group_time",
+      severity: "medium",
+      label: "多距離只抓到一個組別時間",
+      hint: "組別數少於距離數，可能漏掉活動時序表或競賽資訊表。",
+    });
+  }
+
+  if (suspiciousRows.length) {
+    issues.push({
+      key: "non_start_schedule_text",
+      severity: "high",
+      label: "疑似抓到非起跑時程",
+      hint: `可疑列：${suspiciousRows.map((row) => row.raw).slice(0, 3).join("、")}`,
+    });
+  }
+
+  const timesByGroup = new Map();
+  for (const row of groupRows) {
+    const key = row.group.replace(/\s+/g, "");
+    if (!key) {
+      continue;
+    }
+    if (!timesByGroup.has(key)) {
+      timesByGroup.set(key, new Set());
+    }
+    timesByGroup.get(key).add(row.time);
+  }
+  const repeatedGroups = [...timesByGroup.entries()].filter(([, times]) => times.size > 1).map(([group]) => group);
+  if (repeatedGroups.length) {
+    issues.push({
+      key: "same_group_multiple_times",
+      severity: "high",
+      label: "同一組別出現多個起跑時間",
+      hint: `可疑組別：${repeatedGroups.slice(0, 4).join("、")}`,
+    });
+  }
+
+  const expectedDistanceLabels = distances.map(distanceLabelFor).filter(Boolean);
+  if (expectedDistanceLabels.length > 1 && groupRows.length > 1 && groupRows.length < Math.min(expectedDistanceLabels.length, 6)) {
+    issues.push({
+      key: "group_count_less_than_distance_count",
+      severity: "low",
+      label: "起跑組別少於距離數",
+      hint: `距離：${expectedDistanceLabels.join("、")}；起跑列：${groupRows.map((row) => row.group).join("、")}`,
+    });
+  }
+
+  return issues;
+}
+
+function maxSeverity(issues) {
+  const scores = { high: 3, medium: 2, low: 1 };
+  return Math.max(0, ...issues.map((issue) => scores[issue.severity] || 0));
+}
+
+function strictQualityFailures({ openedGaps, dateAnomalies, startTimeQualityItems }) {
+  const highStartTimeIssues = startTimeQualityItems.filter((item) => maxSeverity(item.issues) >= 3);
+  const failures = [];
+
+  for (const item of openedGaps) {
+    failures.push(`開報後仍缺核心欄位：${item.race_name}（${item.missing.map((missing) => missing.label).join("、")}）`);
+  }
+
+  for (const item of dateAnomalies) {
+    failures.push(`報名日期異常：${item.race_name}（${item.anomalies.map((issue) => issue.label).join("、")}）`);
+  }
+
+  for (const item of highStartTimeIssues) {
+    failures.push(`起跑時間高風險：${item.race_name}（${item.issues.filter((issue) => issue.severity === "high").map((issue) => issue.label).join("、")}）`);
+  }
+
+  return failures;
 }
 
 function addDays(date, days) {
@@ -488,6 +686,37 @@ function formatDateAnomalyReport(items) {
   return `${lines.join("\n")}\n`;
 }
 
+function formatStartTimeQualityReport(items) {
+  const generatedAt = new Date().toISOString();
+  const lines = [
+    "# 起跑時間品質報告",
+    "",
+    `產生時間：${generatedAt}`,
+    `追蹤基準日：${TODAY}`,
+    "",
+    "這份報告列出 start_times 已有值但品質可疑的賽事，目標是讓爬蟲規則能自動發現「抓到非起跑時程」、「多距離只抓到單一時間」、「同組別多時間」等問題。",
+    "",
+    `目前共 ${items.length} 場。`,
+    "",
+    "| 日期 | 賽事 | 距離 | 目前起跑時間 | 問題 | 建議 |",
+    "| --- | --- | --- | --- | --- | --- |",
+  ];
+
+  for (const item of items) {
+    lines.push([
+      item.race_date || "-",
+      item.race_name,
+      item.distances.join(" / ") || "-",
+      item.start_times || "-",
+      item.issues.map((issue) => issue.label).join("、"),
+      item.issues.map((issue) => issue.hint).join("；"),
+    ].map((value) => String(value).replaceAll("|", "｜")).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  }
+
+  lines.push("");
+  return `${lines.join("\n")}\n`;
+}
+
 function countBy(items, getKey) {
   return items.reduce((acc, item) => {
     const key = getKey(item);
@@ -654,6 +883,28 @@ async function main() {
     .sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)) || String(a.race_name).localeCompare(String(b.race_name)));
   await writeFile(dateAnomalyReportPath, formatDateAnomalyReport(dateAnomalies), "utf-8");
   await writeFile(dateAnomalyJsonPath, `${JSON.stringify(dateAnomalies, null, 2)}\n`, "utf-8");
+  const startTimeQualityItems = races
+    .map((race) => ({
+      race_id: race.race_id || "",
+      race_name: race.race_name || "",
+      race_date: race.race_date || "",
+      race_county: race.race_county || "",
+      distances: Array.isArray(race.distances) ? race.distances : [],
+      start_times: rawStartTimeText(race),
+      registration_link: race.registration_link || "",
+      official_event_url: race.official_event_url || "",
+      detail_url: race.detail_url || "",
+      issues: startTimeQualityIssues(race),
+    }))
+    .filter((item) => item.issues.length)
+    .sort((a, b) => {
+      const severity = { high: 3, medium: 2, low: 1 };
+      const aScore = Math.max(...a.issues.map((issue) => severity[issue.severity] || 0));
+      const bScore = Math.max(...b.issues.map((issue) => severity[issue.severity] || 0));
+      return bScore - aScore || String(a.race_date).localeCompare(String(b.race_date)) || String(a.race_name).localeCompare(String(b.race_name));
+    });
+  await writeFile(startTimeQualityReportPath, formatStartTimeQualityReport(startTimeQualityItems), "utf-8");
+  await writeFile(startTimeQualityJsonPath, `${JSON.stringify(startTimeQualityItems, null, 2)}\n`, "utf-8");
   await writeFile(trackingJsonPath, `${JSON.stringify(trackingItems.map((item) => ({
     race_id: item.race_id,
     race_name: item.race_name,
@@ -674,12 +925,27 @@ async function main() {
   console.log(`Due to crawl now: ${dueNow}`);
   console.log(`Opened registration gaps: ${openedGaps.length}`);
   console.log(`Registration date anomalies: ${dateAnomalies.length}`);
+  console.log(`Start time quality issues: ${startTimeQualityItems.length}`);
   console.log(`Missing official registration link: ${highPriority}`);
   console.log(`Wrote: ${queuePath}`);
   console.log(`Wrote: ${reportPath}`);
   console.log(`Wrote: ${trackingPath}`);
   console.log(`Wrote: ${openedGapReportPath}`);
   console.log(`Wrote: ${dateAnomalyReportPath}`);
+  console.log(`Wrote: ${startTimeQualityReportPath}`);
+
+  if (strictMode) {
+    const strictFailures = strictQualityFailures({ openedGaps, dateAnomalies, startTimeQualityItems });
+    if (strictFailures.length) {
+      console.error("Strict data quality gate failed:");
+      for (const failure of strictFailures) {
+        console.error(`- ${failure}`);
+      }
+      process.exitCode = 1;
+    } else {
+      console.log("Strict data quality gate: pass");
+    }
+  }
 }
 
 main().catch((error) => {

@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-05-16T11:57:08.500Z",
+  "generated_at": "2026-05-16T13:57:26.214Z",
   "basis_date": "2026-05-16",
   "races": {
     "total": 34,
     "follow_up_count": 13,
     "complete_count": 21,
     "complete_rate": "62%",
-    "official_direct_count": 21,
-    "official_direct_rate": "62%",
-    "verified_count": 22,
-    "verified_rate": "65%",
+    "official_direct_count": 34,
+    "official_direct_rate": "100%",
+    "verified_count": 34,
+    "verified_rate": "100%",
     "opened_gap_count": 0,
     "date_anomaly_count": 0,
     "due_now_count": 2,
@@ -33,32 +33,187 @@
       "跑鞋新品": 12,
       "跑步新聞": 6,
       "訓練": 4
-    }
+    },
+    "source_stable_count": 0,
+    "source_watch_count": 10,
+    "source_weak_count": 0,
+    "source_health": [
+      {
+        "checked_at": "2026-05-16",
+        "source": "運動筆記",
+        "url": "https://running.biji.co/",
+        "source_type": "跑步新聞",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 5,
+        "effective_priority": 5,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "動一動",
+        "url": "https://www.don1don.com/",
+        "source_type": "跑鞋新品 / 跑步專題",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 5,
+        "effective_priority": 5,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "Bounce",
+        "url": "https://bouncin.net/",
+        "source_type": "跑鞋新品",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 4,
+        "effective_priority": 4,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "Women's Health Taiwan",
+        "url": "https://www.womenshealthmag.com/tw/fitness/",
+        "source_type": "跑鞋選購 / 健康訓練",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 3,
+        "effective_priority": 3,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "HK01 跑步",
+        "url": "https://www.hk01.com/channel/跑步",
+        "source_type": "跑步裝備 / 跑步知識",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 3,
+        "effective_priority": 3,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "KENLU",
+        "url": "https://kenlu.net/tag/running/",
+        "source_type": "跑鞋評測 / 裝備情報",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 3,
+        "effective_priority": 3,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "KENLU 越野",
+        "url": "https://kenlu.net/tag/trail-run/",
+        "source_type": "越野跑鞋 / 越野訓練",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 3,
+        "effective_priority": 3,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "運動科學網",
+        "url": "https://www.sportscience.com.tw/",
+        "source_type": "訓練知識 / 運動科學",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 3,
+        "effective_priority": 3,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "IR SPORTS",
+        "url": "https://irsports.com.tw/",
+        "source_type": "路跑活動 / 訓練資訊",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 2,
+        "effective_priority": 2,
+        "error": "fetch failed"
+      },
+      {
+        "checked_at": "2026-05-16",
+        "source": "udn 品牌",
+        "url": "https://branda.udn.com/branda/index",
+        "source_type": "品牌新品 / 運動消費",
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
+        "base_priority": 2,
+        "effective_priority": 2,
+        "error": "fetch failed"
+      }
+    ]
   },
   "platform_stability": {
-    "stable_count": 6,
-    "watch_count": 0,
-    "weak_count": 1,
+    "stable_count": 7,
+    "watch_count": 1,
+    "weak_count": 0,
     "items": [
       {
-        "platform": "iRunner",
-        "total": 19,
-        "official_direct": 6,
-        "verified": 7,
+        "platform": "運動筆記",
+        "total": 14,
+        "official_direct": 14,
+        "verified": 14,
         "missing": 12,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
-          "第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
           "2026 KOF拳皇公益主題路跑",
-          "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0"
+          "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
+          "仁愛長庚合作聯盟醫院2026永慶盃路跑"
         ],
-        "complete_rate": "37%",
-        "official_direct_rate": "32%",
-        "verified_rate": "37%",
-        "score": 45,
-        "status": "需補強"
+        "complete_rate": "14%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 70,
+        "status": "可用需觀察"
+      },
+      {
+        "platform": "iRunner",
+        "total": 6,
+        "official_direct": 6,
+        "verified": 6,
+        "missing": 0,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
+          "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
+          "2026東城盃合歡山越野馬拉松"
+        ],
+        "complete_rate": "100%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 100,
+        "status": "穩定"
       },
       {
         "platform": "CTRun",
@@ -101,18 +256,17 @@
         "status": "穩定"
       },
       {
-        "platform": "Focusline",
-        "total": 3,
-        "official_direct": 3,
-        "verified": 3,
+        "platform": "EventGo",
+        "total": 2,
+        "official_direct": 2,
+        "verified": 2,
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
-          "夏日馬拉松 - 南投埔里場",
           "2026全台PAPAGO歡樂跑--西湖場",
-          "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
+          "夏日馬拉松 - 苗栗鯉魚潭"
         ],
         "complete_rate": "100%",
         "official_direct_rate": "100%",
@@ -159,7 +313,7 @@
         "status": "穩定"
       },
       {
-        "platform": "EventGo",
+        "platform": "Focusline",
         "total": 1,
         "official_direct": 1,
         "verified": 1,
@@ -168,7 +322,7 @@
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
-          "夏日馬拉松 - 苗栗鯉魚潭"
+          "夏日馬拉松 - 南投埔里場"
         ],
         "complete_rate": "100%",
         "official_direct_rate": "100%",

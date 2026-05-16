@@ -3,6 +3,7 @@ const LEGACY_FAVORITES_KEY = "runner-plaza:favorites";
 const DEVICE_ID = getDeviceId();
 const FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:favorites`;
 const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
+const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
 const TODAY = getTodayString();
@@ -22,6 +23,8 @@ const state = {
   newsFavoritesOnly: false,
   shoeCategory: "all",
   newsCategory: "all",
+  shoeLimit: "10",
+  newsLimit: "10",
   shoePage: 1,
   newsPage: 1,
   trainingRaceKey: "",
@@ -281,6 +284,35 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function keepTitleTerm(term) {
+  return term.split("").join("&#8288;");
+}
+
+function raceTitleHtml(value) {
+  const protectedTerms = [
+    "42.195km",
+    "21.0975km",
+    "馬拉松",
+    "半程馬拉松",
+    "路跑賽",
+    "接力賽",
+    "越野賽",
+    "觀光賽",
+    "全國",
+  ];
+  let title = escapeHtml(value);
+  protectedTerms
+    .sort((a, b) => b.length - a.length)
+    .forEach((term) => {
+      title = title.replaceAll(escapeHtml(term), keepTitleTerm(escapeHtml(term)));
+    });
+
+  return title
+    .replace(/\s+/g, " <wbr>")
+    .replace(/([、，,／/｜|：:－-])/g, "$1<wbr>")
+    .replace(/([—×])/g, "<wbr>$1<wbr>");
+}
+
 function encodeSharePayload(payload) {
   const json = JSON.stringify(payload);
   const bytes = new TextEncoder().encode(json);
@@ -425,6 +457,35 @@ function loadContentFavorites() {
 
 function saveContentFavorites() {
   localStorage.setItem(CONTENT_FAVORITES_KEY, JSON.stringify([...state.contentFavorites]));
+}
+
+function validContentLimit(value) {
+  const normalized = String(value || "").trim();
+  return ["10", "25", "50"].includes(normalized) ? normalized : "10";
+}
+
+function loadContentSettings() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CONTENT_SETTINGS_KEY) || "{}");
+    state.shoeLimit = validContentLimit(stored.shoeLimit);
+    state.newsLimit = validContentLimit(stored.newsLimit);
+  } catch {
+    state.shoeLimit = "10";
+    state.newsLimit = "10";
+  }
+  if (els.shoeLimit) {
+    els.shoeLimit.value = state.shoeLimit;
+  }
+  if (els.newsLimit) {
+    els.newsLimit.value = state.newsLimit;
+  }
+}
+
+function saveContentSettings() {
+  localStorage.setItem(CONTENT_SETTINGS_KEY, JSON.stringify({
+    shoeLimit: state.shoeLimit,
+    newsLimit: state.newsLimit,
+  }));
 }
 
 function getPlanControls() {
@@ -695,19 +756,48 @@ function parseDistanceKm(value) {
   return match ? Number(match[1]) : 0;
 }
 
+function formatDistanceNumber(km) {
+  if (!Number.isFinite(km) || km <= 0) {
+    return "";
+  }
+  return Number.isInteger(km) ? `${km}K` : `${km}K`;
+}
+
+function canonicalDistanceLabel(value) {
+  const text = String(value || "").replace("公里", "K").replace(/km/gi, "K").replace(/\s+/g, "").trim();
+  const km = parseDistanceKm(text);
+  if (!km) {
+    return text;
+  }
+  const distance = formatDistanceNumber(km);
+  if (km > 43) {
+    return `超馬（${distance}）`;
+  }
+  if (km >= 41.5) {
+    return "全馬";
+  }
+  if (km > 21.8) {
+    return `超半馬（${distance}）`;
+  }
+  if (km >= 20.5) {
+    return "半馬";
+  }
+  return distance;
+}
+
 function maxDistanceKm(race) {
   return Math.max(0, ...(race.distances || []).map(parseDistanceKm));
 }
 
 function distanceBucket(race) {
   const maxDistance = maxDistanceKm(race);
-  if (maxDistance >= 50) {
+  if (maxDistance > 43) {
     return "ultra";
   }
-  if (maxDistance >= 42) {
+  if (maxDistance >= 41.5) {
     return "marathon";
   }
-  if (maxDistance >= 21) {
+  if (maxDistance >= 20.5) {
     return "half";
   }
   if (maxDistance >= 10) {
@@ -989,7 +1079,7 @@ function normalizeStartTimeItems(value) {
       if (item && typeof item === "object") {
         const distance = firstText(item.distance, item.group, item.name, item.label);
         const time = firstText(item.time, item.start_time, item.starts_at, item.value);
-        return distance || time ? [`${distance}${distance && time ? " " : ""}${time}`] : [];
+        return distance || time ? [{ distance, time }] : [];
       }
       return [];
     });
@@ -999,22 +1089,78 @@ function normalizeStartTimeItems(value) {
       if (!hasText(time)) {
         return [];
       }
-      return [`${distance} ${String(time).trim()}`];
+      return [{ distance: String(distance).trim(), time: String(time).trim() }];
     });
   }
   return String(value)
     .split(/[、；;,\n]/)
     .map((item) => item.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(parseStartTimeText);
 }
 
 function getStartTimeItems(race) {
   return normalizeStartTimeItems(firstText(race.start_times, race.distance_start_times, race.wave_start_times, race.start_time, race.event_time));
 }
 
+function parseStartTimeText(text) {
+  const cleaned = String(text || "").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return { distance: "", time: "" };
+  }
+  const timeMatch = cleaned.match(/([01]?\d|2[0-3])[:：][0-5]\d/);
+  const time = timeMatch ? timeMatch[0].replace("：", ":") : "";
+  let distance = time
+    ? cleaned
+        .slice(0, timeMatch.index)
+        .replace(/\s*(?:起跑|鳴槍|出發)\s*$/u, "")
+        .trim()
+    : cleaned.replace(/[）)]?\s*(?:起跑|鳴槍|出發)\s*$/u, "").trim();
+  if (!/[（(]/.test(distance)) {
+    distance = distance.replace(/\s*[）)]$/u, "").trim();
+  }
+  distance = distance
+    .replace(/[（(]\s*/g, "（")
+    .replace(/\s*[）)]/g, "）")
+    .replace(/\s+（/g, "（");
+  return { distance: normalizeStartDistanceLabel(distance), time };
+}
+
+function normalizeStartDistanceLabel(value) {
+  let label = String(value || "").trim();
+  if (!label) {
+    return "";
+  }
+  label = label.replace(/\bKM\b/gi, "K").replace(/\bkm\b/g, "K");
+
+  const duplicate = label.match(/^(.+?)（\s*(\d+(?:\.\d+)?)\s*K\s*）$/i);
+  if (duplicate) {
+    const outerKm = parseDistanceKm(duplicate[1]);
+    const innerKm = Number(duplicate[2]);
+    if (outerKm && Math.abs(outerKm - innerKm) < 0.01) {
+      return canonicalDistanceLabel(duplicate[1]);
+    }
+  }
+
+  const semanticLabels = ["全馬", "半馬", "超馬", "超半馬", "挑戰組", "健康組", "健走組", "健跑組", "休閒組", "親子組", "身視障組"];
+  if (semanticLabels.some((semantic) => label.includes(semantic))) {
+    return label;
+  }
+
+  return canonicalDistanceLabel(label);
+}
+
+function startTimeText(item) {
+  if (typeof item === "string") {
+    const parsed = parseStartTimeText(item);
+    return [parsed.distance, parsed.time].filter(Boolean).join(" ");
+  }
+  return [normalizeStartDistanceLabel(item.distance), item.time].filter(Boolean).join(" ");
+}
+
 function formatStartTimes(race, fallback = "官方尚未提供各距離開跑時間") {
   const items = getStartTimeItems(race);
-  return items.length ? items.join("、") : fallback;
+  return items.length ? items.map(startTimeText).join("、") : fallback;
 }
 
 function renderStartTimes(race) {
@@ -1022,7 +1168,24 @@ function renderStartTimes(race) {
   if (!items.length) {
     return "";
   }
-  return `<ul class="start-time-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  return `<ul class="start-time-list">${items
+    .map((item) => {
+      const parsed = typeof item === "string" ? parseStartTimeText(item) : item;
+      const distance = normalizeStartDistanceLabel(parsed.distance) || "賽事";
+      const time = parsed.time || "待確認";
+      return `<li><span class="start-distance">${escapeHtml(distance)}</span><span class="start-time">${escapeHtml(time)}</span></li>`;
+    })
+    .join("")}</ul>`;
+}
+
+function factClassFor(label) {
+  const classMap = {
+    地點: "fact-venue",
+    開跑: "fact-start-times",
+    天氣: "fact-weather",
+    主辦: "fact-organizer",
+  };
+  return classMap[label] || "fact-generic";
 }
 
 function sourceLabelForRace(race) {
@@ -1242,31 +1405,30 @@ function renderStats() {
   const trackedUpcoming = state.races
     .filter((race) => isFavorite(race) && race.race_date >= TODAY && !isCancelledRace(race))
     .sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
-  const upcoming = trackedUpcoming[0] || state.races.find((race) => race.race_date >= TODAY && !isCancelledRace(race)) || state.races[0];
+  const upcoming = trackedUpcoming[0];
   if (!upcoming) {
     els.nextRace.textContent = "--";
     if (els.nextRaceCaption) {
       els.nextRaceCaption.textContent = "追蹤賽事";
     }
     if (els.nextRaceCountdown) {
-      els.nextRaceCountdown.textContent = "先收藏賽事";
+      els.nextRaceCountdown.textContent = "暫無追蹤賽事";
     }
     if (els.nextRaceLink) {
       els.nextRaceLink.removeAttribute("data-next-race");
       els.nextRaceLink.setAttribute("aria-label", "目前沒有追蹤賽事");
     }
     if (els.heroNextRace) {
-      els.heroNextRace.textContent = "--";
+      els.heroNextRace.textContent = "暫無追蹤";
     }
     return;
   }
   const date = formatDateParts(upcoming.race_date);
   const days = dateDiffDays(upcoming.race_date);
   const countdown = days === 0 ? "今天開跑" : days > 0 ? `倒數 ${days} 天` : "賽事已過";
-  const isTracked = trackedUpcoming.length > 0;
   els.nextRace.textContent = `${date.month}/${date.day}`;
   if (els.nextRaceCaption) {
-    els.nextRaceCaption.textContent = isTracked ? "追蹤賽事" : "下一場賽事";
+    els.nextRaceCaption.textContent = "追蹤賽事";
   }
   if (els.nextRaceCountdown) {
     els.nextRaceCountdown.textContent = `${countdown} · ${upcoming.race_name || "路跑賽事"}`;
@@ -1381,7 +1543,7 @@ function renderRaces() {
           </div>
           <div class="race-main">
             <div class="race-title-row">
-              <h3>${escapeHtml(race.race_name)}</h3>
+              <h3>${raceTitleHtml(race.race_name)}</h3>
             </div>
             <div class="race-summary-line">
               <span>${escapeHtml(race.race_county)}</span>
@@ -1398,7 +1560,7 @@ function renderRaces() {
             ${
               factItems.length || trustItems.length
                 ? `<details class="race-detail-panel">
-                    <summary>資料來源與場地</summary>
+                    <summary>賽事資訊</summary>
                     <div class="race-trust-line" aria-label="資料可信度">
                       ${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}
                     </div>
@@ -1406,7 +1568,7 @@ function renderRaces() {
                       factItems.length
                         ? `
                     <dl>
-                      ${factItems.map((item) => `<div><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : escapeHtml(item.value)}</dd></div>`).join("")}
+                      ${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : escapeHtml(item.value)}</dd></div>`).join("")}
                     </dl>
                         `
                         : ""
@@ -2413,7 +2575,7 @@ function updateContentList(type) {
       container: ".shoe-release-list",
       item: "[data-shoe-card]",
       sort: els.shoeSort?.value || "newest",
-      limit: els.shoeLimit?.value || "10",
+      limit: validContentLimit(els.shoeLimit?.value || state.shoeLimit),
       favoritesOnly: state.shoeFavoritesOnly,
       category: els.shoeCategory?.value || state.shoeCategory,
       filter: els.shoeFavoriteFilter,
@@ -2424,7 +2586,7 @@ function updateContentList(type) {
       container: ".news-list",
       item: "[data-news-card]",
       sort: els.newsSort?.value || "newest",
-      limit: els.newsLimit?.value || "10",
+      limit: validContentLimit(els.newsLimit?.value || state.newsLimit),
       favoritesOnly: state.newsFavoritesOnly,
       category: els.newsCategory?.value || state.newsCategory,
       filter: els.newsFavoriteFilter,
@@ -2437,9 +2599,11 @@ function updateContentList(type) {
   if (type === "shoe") {
     state.shoePage = pagination.page;
     state.shoeCategory = config.category;
+    state.shoeLimit = String(config.limit);
   } else {
     state.newsPage = pagination.page;
     state.newsCategory = config.category;
+    state.newsLimit = String(config.limit);
   }
   renderContentPagination(type, pagination);
   config.filter?.classList.toggle("active", config.favoritesOnly);
@@ -2516,20 +2680,28 @@ function bindEvents() {
   });
 
   els.shoeLimit?.addEventListener("change", () => {
+    state.shoeLimit = validContentLimit(els.shoeLimit.value);
+    els.shoeLimit.value = state.shoeLimit;
+    saveContentSettings();
     state.shoePage = 1;
     updateContentList("shoe");
   });
 
   els.newsLimit?.addEventListener("change", () => {
+    state.newsLimit = validContentLimit(els.newsLimit.value);
+    els.newsLimit.value = state.newsLimit;
+    saveContentSettings();
     state.newsPage = 1;
     updateContentList("news");
   });
 
   els.shoeLimitButtons.forEach((button) => {
     button.addEventListener("click", () => {
+      state.shoeLimit = validContentLimit(button.dataset.limitValue || "10");
       if (els.shoeLimit) {
-        els.shoeLimit.value = button.dataset.limitValue || "10";
+        els.shoeLimit.value = state.shoeLimit;
       }
+      saveContentSettings();
       state.shoePage = 1;
       updateContentList("shoe");
     });
@@ -2537,9 +2709,11 @@ function bindEvents() {
 
   els.newsLimitButtons.forEach((button) => {
     button.addEventListener("click", () => {
+      state.newsLimit = validContentLimit(button.dataset.limitValue || "10");
       if (els.newsLimit) {
-        els.newsLimit.value = button.dataset.limitValue || "10";
+        els.newsLimit.value = state.newsLimit;
       }
+      saveContentSettings();
       state.newsPage = 1;
       updateContentList("news");
     });
@@ -2738,6 +2912,7 @@ async function loadRaces() {
 async function init() {
   loadFavorites();
   loadContentFavorites();
+  loadContentSettings();
   readSharedFavorites();
   setupResponsiveDefaults();
   setupDurationPickers();

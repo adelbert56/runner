@@ -177,31 +177,176 @@ def first_quota_text(text: str) -> str:
     return "、".join(value.replace(" ", "") for value in values[:8])
 
 
+def _time_text(value: str) -> str:
+    match = re.search(r"([01]?\d|2[0-3])[:：][0-5]\d", value)
+    if not match:
+        return ""
+    hour, minute = match.group(0).replace("：", ":").split(":")
+    return f"{int(hour):02d}:{minute}"
+
+
+def _format_distance_number(km: float) -> str:
+    return f"{int(km)}K" if km == int(km) else f"{km:g}K"
+
+
+def _semantic_distance_label(value: str) -> str:
+    match = re.search(r"(\d+(?:\.\d+)?)", value)
+    if not match:
+        return compact_text(value)
+    km = float(match.group(1))
+    distance = _format_distance_number(km)
+    if km > 43:
+        return f"超馬組（{distance}）"
+    if km >= 41.5:
+        return f"全馬組（{distance}）"
+    if km > 21.8:
+        return f"超半馬組（{distance}）"
+    if km >= 20.5:
+        return f"半馬組（{distance}）"
+    return distance
+
+
+def _distance_groups(value: str) -> list[str]:
+    text = compact_text(value).replace("Ｋ", "K").replace("ｋ", "k")
+    label_pattern = r"(?:挑戰組|休閒組|健走組|健跑組|健康組|親子組|超半馬組|全馬組|身視障組)"
+    composite_pattern = rf"{label_pattern}\s*[（(]\s*\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)\s*[）)]"
+    group_pattern = rf"\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|半馬|全馬|{label_pattern}"
+    groups: list[str] = []
+    occupied: list[tuple[int, int]] = []
+    for match in re.finditer(composite_pattern, text):
+        group = compact_text(match.group(0))
+        group = re.sub(r"[（(]\s*", "（", group)
+        group = re.sub(r"\s*[）)]", "）", group)
+        group = re.sub(r"\s+（", "（", group)
+        groups.append(group)
+        occupied.append(match.span())
+    for match in re.finditer(group_pattern, text):
+        if any(start <= match.start() and match.end() <= end for start, end in occupied):
+            continue
+        group = compact_text(match.group(0)).replace(" ", "")
+        if re.search(r"k|km", group, flags=re.IGNORECASE):
+            group = _semantic_distance_label(group)
+        groups.append(group)
+    return list(dict.fromkeys(groups))
+
+
+def _normalize_distance_label(value: str) -> str:
+    distance = compact_text(value).replace(" ", "").upper()
+    return re.sub(r"KM$", "K", distance)
+
+
+def _group_label_from_line(value: str) -> str:
+    text = compact_text(value).replace("Ｋ", "K").replace("ｋ", "k")
+    match = re.search(
+        r"((?:挑戰組|休閒組|健走組|健跑組|健康組|親子組|超半馬組|全馬組|身視障組))\s*[-－]\s*(\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km))",
+        text,
+    )
+    if match:
+        group = match.group(1)
+        distance = _normalize_distance_label(match.group(2))
+        semantic = _semantic_distance_label(distance)
+        semantic_prefix = semantic.split("組", 1)[0] if "組" in semantic else ""
+        if semantic_prefix and semantic_prefix not in group:
+            group = semantic_prefix + "組"
+        return f"{group}（{distance}）"
+    groups = _distance_groups(text)
+    return groups[0] if groups else ""
+
+
+def _format_start_time(group: str, time: str) -> str:
+    return f"{group} 起跑 {time}"
+
+
+def _start_time_rows_from_column_table(lines: list[str]) -> list[str]:
+    rows: list[str] = []
+    time_only = re.compile(r"^\s*(?:[01]?\d|2[0-3])[:：][0-5]\d\s*$")
+    for index, line in enumerate(lines):
+        if line != "起跑時間":
+            continue
+
+        groups: list[str] = []
+        for candidate in reversed(lines[max(0, index - 12):index]):
+            if candidate in {"活動項目", "比賽項目", "競賽項目", "組別"}:
+                break
+            group = _group_label_from_line(candidate)
+            if group:
+                groups.append(group)
+        groups.reverse()
+        if len(groups) < 2:
+            continue
+
+        times: list[str] = []
+        for candidate in lines[index + 1:index + 1 + len(groups)]:
+            if not time_only.match(candidate):
+                break
+            times.append(_time_text(candidate))
+        if len(times) < 2:
+            continue
+
+        rows.extend(_format_start_time(group, time) for group, time in zip(groups, times))
+        break
+    return rows
+
+
+def _start_time_rows_from_schedule(lines: list[str]) -> list[str]:
+    rows: list[str] = []
+    time_only = re.compile(r"^\s*([01]?\d|2[0-3])[:：][0-5]\d(?:\s*[~～-]\s*(?:[01]?\d|2[0-3])[:：][0-5]\d)?\s*$")
+    start_keywords = ("起跑", "鳴槍", "出發")
+
+    for index, line in enumerate(lines):
+        if not time_only.match(line):
+            continue
+        time = _time_text(line)
+        if not time:
+            continue
+        for event_line in lines[index + 1:index + 3]:
+            if not any(keyword in event_line for keyword in start_keywords):
+                continue
+            for group in _distance_groups(event_line):
+                rows.append(_format_start_time(group, time))
+            break
+    return rows
+
+
 def extract_start_times(lines: list[str]) -> str:
+    table_rows = _start_time_rows_from_column_table(lines)
+    if table_rows:
+        return "、".join(dict.fromkeys(table_rows[:8]))
+
     direct = find_label_value(lines, ("開跑時間", "起跑時間", "鳴槍時間", "出發時間", "各組出發"))
-    if direct:
+    if direct and _time_text(direct):
         return direct
+
+    schedule_rows = _start_time_rows_from_schedule(lines)
+    if schedule_rows:
+        return "、".join(dict.fromkeys(schedule_rows[:8]))
 
     grouped: list[str] = []
     current_group = ""
     for index, line in enumerate(lines):
-        group_match = re.search(r"((?:\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km))|半馬|全馬|挑戰組|休閒組|健走組)", line)
-        if group_match and len(line) <= 32:
-            current_group = compact_text(group_match.group(1)).upper().replace(" ", "")
+        groups = _distance_groups(line)
+        if groups and len(line) <= 32:
+            current_group = groups[0]
         if current_group and "起跑" in line:
             for candidate in lines[index + 1:index + 4]:
-                time_match = re.search(r"([01]?\d|2[0-3])[:：][0-5]\d", candidate)
-                if time_match:
-                    grouped.append(f"{current_group} {time_match.group(0).replace('：', ':')}")
+                time = _time_text(candidate)
+                if time:
+                    grouped.append(_format_start_time(current_group, time))
                     break
         if len(grouped) >= 8:
             return "、".join(dict.fromkeys(grouped))
+    if grouped:
+        return "、".join(dict.fromkeys(grouped))
 
     text = " ".join(lines)
     snippets: list[str] = []
-    pattern = r"((?:\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|半馬|全馬|挑戰組|休閒組|健走組).{0,18}?(?:[01]?\d|2[0-3])[:：][0-5]\d)"
-    for match in re.finditer(pattern, text):
-        snippets.append(compact_text(match.group(1)).replace(" ：", " "))
+    pattern = r"((?:\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|半馬|全馬|挑戰組|休閒組|健走組).{0,30}?(?:起跑|鳴槍|出發).{0,30}?(?:[01]?\d|2[0-3])[:：][0-5]\d)"
+    for match in re.finditer(pattern, text, flags=re.IGNORECASE):
+        snippet = compact_text(match.group(1)).replace(" ：", " ")
+        time = _time_text(snippet)
+        groups = _distance_groups(snippet)
+        if time and groups:
+            snippets.extend(_format_start_time(group, time) for group in groups)
         if len(snippets) >= 8:
             break
     return "、".join(dict.fromkeys(snippets))

@@ -47,6 +47,9 @@ jobs:
       - name: Apply manual supplements and quality report
         run: npm run data:refresh
 
+      - name: Run strict data quality gate
+        run: npm run data:quality:strict
+
       - name: Update race weather forecast
         run: npm run data:weather
 
@@ -70,6 +73,8 @@ jobs:
             runner/賽事/開報後待補資料報告.json
             runner/賽事/報名日期異常報告.md
             runner/賽事/報名日期異常報告.json
+            runner/賽事/起跑時間品質報告.md
+            runner/賽事/起跑時間品質報告.json
             runner/賽事/爬蟲追蹤計畫.md
             runner/賽事/爬蟲追蹤計畫.json
             runner/賽事/平台爬蟲覆蓋報告.md

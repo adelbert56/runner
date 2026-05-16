@@ -11,6 +11,7 @@ const paths = {
   dateAnomalies: resolve(root, "runner/賽事/報名日期異常報告.json"),
   tracking: resolve(root, "runner/賽事/爬蟲追蹤計畫.json"),
   contentCandidates: resolve(root, "runner/內容/候選內容.json"),
+  contentSourceHealth: resolve(root, "runner/內容/內容來源健康度報告.json"),
   editorialContent: resolve(root, "runner/內容/人工精選內容.json"),
   publishedContent: resolve(root, "site/data/content.json"),
   siteHtml: resolve(root, "site/index.html"),
@@ -232,13 +233,14 @@ function statusLine(label, value, target, ok) {
 
 async function main() {
   const todayDate = parseDate(today);
-  const [races, queue, openedGaps, dateAnomalies, tracking, candidates, editorialContent, publishedContent] = await Promise.all([
+  const [races, queue, openedGaps, dateAnomalies, tracking, candidates, contentSourceHealth, editorialContent, publishedContent] = await Promise.all([
     readJson(paths.races),
     readJson(paths.qualityQueue),
     readJson(paths.openedGaps),
     readJson(paths.dateAnomalies),
     readJson(paths.tracking),
     readJson(paths.contentCandidates),
+    readJson(paths.contentSourceHealth),
     readJson(paths.editorialContent, []),
     readJson(paths.publishedContent, { items: [] }),
   ]);
@@ -257,6 +259,7 @@ async function main() {
   const shoeCards = publishedShoes.length || countContentCards(html, "shoe");
   const newsCards = publishedNews.length || countContentCards(html, "news");
   const platformStability = buildPlatformStability(races, queue, openedGaps, dateAnomalies, tracking);
+  const contentSourceWeak = contentSourceHealth.filter((item) => item.status === "需補強");
 
   const dashboard = {
     generated_at: new Date().toISOString(),
@@ -285,6 +288,10 @@ async function main() {
       candidate_count: contentPool.length,
       editorial_count: editorialContent.length,
       candidate_by_category: candidateByCategory,
+      source_stable_count: contentSourceHealth.filter((item) => item.status === "穩定").length,
+      source_watch_count: contentSourceHealth.filter((item) => item.status === "可用需觀察").length,
+      source_weak_count: contentSourceWeak.length,
+      source_health: contentSourceHealth,
     },
     platform_stability: {
       stable_count: platformStability.filter((item) => item.status === "穩定").length,
@@ -303,6 +310,7 @@ async function main() {
     statusLine("跑鞋上架量", `${shoeCards} 筆`, "至少 10 筆", shoeCards >= 10),
     statusLine("新聞上架量", `${newsCards} 筆`, "至少 10 筆", newsCards >= 10),
     statusLine("內容候選量", `${contentPool.length} 筆`, "至少 20 筆", contentPool.length >= 20),
+    statusLine("內容弱來源", `${contentSourceWeak.length} 個`, "0 個", contentSourceWeak.length === 0),
     statusLine("穩定平台數", `${dashboard.platform_stability.stable_count} 個`, "至少 3 個", dashboard.platform_stability.stable_count >= 3),
   ];
 
@@ -321,6 +329,9 @@ async function main() {
   }
   if (contentPool.length >= 20) {
     nextActions.push("內容候選已由 `npm run content:publish` 自動挑選上架；可抽查 `runner/內容/自動上架內容報告.md` 的來源品質。");
+  }
+  if (contentSourceWeak.length > 0) {
+    nextActions.push("內容來源已有連續失敗項目，先看 `runner/內容/內容來源健康度報告.md`，必要時替換來源 URL 或調整關鍵字。");
   }
   if (!nextActions.length) {
     nextActions.push("目前主要營運指標正常，下一步可做平台 parser 精準度與手機體驗細修。");
@@ -351,6 +362,12 @@ async function main() {
     "| 分類 | 筆數 |",
     "| --- | ---: |",
     ...Object.entries(candidateByCategory).sort((a, b) => b[1] - a[1]).map(([key, value]) => `| ${key} | ${value} |`),
+    "",
+    "## 內容來源健康度",
+    "",
+    "| 來源 | 狀態 | 候選 | 連續失敗 | 有效權重 |",
+    "| --- | --- | ---: | ---: | ---: |",
+    ...contentSourceHealth.map((item) => `| ${item.source} | ${item.status} | ${item.candidate_count} | ${item.consecutive_failures} | ${item.effective_priority} |`),
     "",
     "## 平台穩定度",
     "",

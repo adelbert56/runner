@@ -13,6 +13,11 @@ const LIMITS = {
   news: 18,
 };
 
+const MIN_PUBLISHED = {
+  shoe: 10,
+  news: 10,
+};
+
 const MIN_SCORE = {
   shoe: 4,
   news: 3,
@@ -241,6 +246,28 @@ function toPublishedItem(item) {
     summary: summarize(item, type),
     url: item.url,
     score: item.score,
+    source_origin: item.source_origin || "candidate",
+    published_at: today,
+    publish_status: "published",
+  };
+}
+
+function previousToPublishedItem(item) {
+  const type = item.type === "shoe" ? "shoe" : "news";
+  return {
+    id: item.id || `${type}-${slugify(normalizeUrl(item.url) || item.title)}`,
+    type,
+    title: String(item.title || "").trim(),
+    date: parseDate(item.date || item.published_at),
+    source: item.source || "上一版上架內容",
+    category: item.category || (type === "shoe" ? inferShoeCategory(item.title || "") : inferNewsCategory(item.title || "", item.summary)),
+    summary: cleanSummary(item.summary) || summarize({
+      title: item.title || "",
+      description: item.summary || "",
+    }, type),
+    url: item.url,
+    score: Math.max(MIN_SCORE[type], Number(item.score || MIN_SCORE[type]) - 1),
+    source_origin: "previous_published",
     published_at: today,
     publish_status: "published",
   };
@@ -253,7 +280,7 @@ function sortItems(items) {
   });
 }
 
-function pick(items, type) {
+function pick(items, type, limit = LIMITS[type]) {
   const seen = new Set();
   return sortItems(items.filter((item) => item.type === type && item.score >= MIN_SCORE[type]))
     .filter((item) => {
@@ -262,7 +289,27 @@ function pick(items, type) {
       seen.add(key);
       return true;
     })
-    .slice(0, LIMITS[type]);
+    .slice(0, limit);
+}
+
+function fillWithInventory(primary, inventory, type) {
+  const picked = pick(primary, type);
+  const seen = new Set(picked.map((item) => normalizeUrl(item.url)).filter(Boolean));
+
+  if (picked.length >= MIN_PUBLISHED[type]) {
+    return picked;
+  }
+
+  const fill = sortItems(inventory.filter((item) => item.type === type && item.score >= MIN_SCORE[type]))
+    .filter((item) => {
+      const key = normalizeUrl(item.url);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, LIMITS[type] - picked.length);
+
+  return [...picked, ...fill];
 }
 
 async function readJson(path, fallback) {
@@ -275,8 +322,13 @@ async function readJson(path, fallback) {
 
 function buildReport(published) {
   const rows = published.map((item) => (
-    `| ${item.type === "shoe" ? "跑鞋" : "新聞"} | ${item.score} | ${item.date} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${item.summary.replace(/\|/g, "／")} | [來源](${item.url}) |`
+    `| ${item.type === "shoe" ? "跑鞋" : "新聞"} | ${item.score} | ${item.date} | ${item.sourceOriginLabel || sourceOriginLabel(item.source_origin)} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${item.summary.replace(/\|/g, "／")} | [來源](${item.url}) |`
   ));
+  const sourceCounts = published.reduce((acc, item) => {
+    const key = sourceOriginLabel(item.source_origin);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
   return [
     "# 自動上架內容報告",
     "",
@@ -290,21 +342,35 @@ function buildReport(published) {
     ...SUMMARY_RULES.map((rule) => `- ${rule}`),
     "",
     `已上架：${published.length} 筆`,
+    `自動候選：${sourceCounts["自動候選"] || 0} 筆；上一版庫存補位：${sourceCounts["上一版庫存補位"] || 0} 筆；人工精選：${sourceCounts["人工精選"] || 0} 筆`,
     "",
-    "| 類型 | 分數 | 日期 | 來源 | 標題 | 摘要 | 連結 |",
-    "| --- | ---: | --- | --- | --- | --- | --- |",
+    "| 類型 | 分數 | 日期 | 上架來源 | 來源 | 標題 | 摘要 | 連結 |",
+    "| --- | ---: | --- | --- | --- | --- | --- | --- |",
     ...rows,
     "",
   ].join("\n");
 }
 
+function sourceOriginLabel(origin) {
+  if (origin === "editorial") return "人工精選";
+  if (origin === "previous_published") return "上一版庫存補位";
+  return "自動候選";
+}
+
 async function main() {
-  const raw = await readJson(candidatesPath, []);
-  const editorial = await readJson(editorialPath, []);
-  const normalized = [...raw, ...editorial].map(toPublishedItem);
+  const raw = (await readJson(candidatesPath, [])).map((item) => ({ ...item, source_origin: "candidate" }));
+  const editorial = (await readJson(editorialPath, [])).map((item) => ({ ...item, source_origin: "editorial" }));
+  const previousContent = await readJson(outputPath, { items: [] });
+  const normalized = raw.map(toPublishedItem);
+  const previousInventory = Array.isArray(previousContent.items) ? previousContent.items.map(previousToPublishedItem) : [];
+  const editorialInventory = editorial.map(toPublishedItem).map((item) => ({
+    ...item,
+    score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 2),
+  }));
+  const inventory = [...previousInventory, ...editorialInventory];
   const published = [
-    ...pick(normalized, "shoe"),
-    ...pick(normalized, "news"),
+    ...fillWithInventory(normalized, inventory, "shoe"),
+    ...fillWithInventory(normalized, inventory, "news"),
   ].sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.score - a.score);
 
   await mkdir(resolve(root, "site/data"), { recursive: true });

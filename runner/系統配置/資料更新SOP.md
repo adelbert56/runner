@@ -19,7 +19,10 @@
    - 套用人工補充。
    - 同步 `runner/賽事/賽事資料庫.json` 到 `site/data/races.json`。
    - 重產資料品質、追蹤計畫與開報後待補報告。
-4. `npm run data:weather`
+4. `npm run data:quality:strict`
+   - GitHub Actions 發布前品質閘門。
+   - 若開報後仍缺核心欄位、報名日期異常，或起跑時間抓到非起跑時程等高風險問題，流程會失敗並停止提交。
+5. `npm run data:weather`
    - 只處理距離賽事日 0 到 7 天內的賽事。
    - 依縣市座標查詢 Open-Meteo 當日預報，寫入 `weather_forecast`。
    - 前端只顯示符合賽事日期的預報，避免過早或過期天氣干擾。
@@ -55,7 +58,8 @@
 ## 發布檢查
 
 1. 執行 `npm run check`。
-2. 若有 Python 修改，執行 `uv run python -m compileall scripts`。
-3. 推送到 `main` 後，GitHub Pages 會自動部署。
-4. 若前端 CSS/JS 有修改，更新 `site/index.html` 的版本參數以避開瀏覽器快取。
-5. 收尾前建議再跑 `npm run ops:dashboard`，確認賽事、內容與待補數據都有反映到營運儀表板。
+2. 執行 `npm run data:quality:strict`，確認自動發布不會帶出高風險資料。
+3. 若有 Python 修改，執行 `uv run python -m compileall scripts`。
+4. 推送到 `main` 後，GitHub Pages 會自動部署。
+5. 若前端 CSS/JS 有修改，更新 `site/index.html` 的版本參數以避開瀏覽器快取。
+6. 收尾前建議再跑 `npm run ops:dashboard`，確認賽事、內容與待補數據都有反映到營運儀表板。

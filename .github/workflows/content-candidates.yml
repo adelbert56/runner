@@ -30,6 +30,9 @@ jobs:
       - name: Collect and publish running content
         run: npm run content:refresh
 
+      - name: Run strict content quality gate
+        run: npm run content:quality:strict
+
       - name: Build operational dashboard
         run: npm run ops:dashboard
 
@@ -43,7 +46,10 @@ jobs:
           file_pattern: |
             runner/內容/候選內容.json
             runner/內容/候選內容報告.md
+            runner/內容/內容來源健康度報告.md
+            runner/內容/內容來源健康度報告.json
             runner/內容/自動上架內容報告.md
+            runner/內容/內容品質報告.md
             site/data/content.json
             runner/系統配置/營運儀表板.md
             runner/系統配置/營運儀表板.json

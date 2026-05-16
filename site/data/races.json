@@ -21,10 +21,11 @@
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0",
     "official_event_url": "https://www.joinnow.com.tw/run-step1.php?cnt_id=135",
-    "source_platform": "JoinNow",
+    "source_platform": "JoinNow、運動筆記",
     "is_official_direct": true,
-    "verified_at": "2026-05-15",
-    "verification_note": "平台爬蟲自動查證：JoinNow"
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：JoinNow、運動筆記",
+    "start_times": "9K 起跑 16:00、健走組（3K） 起跑 16:00"
   },
   {
     "race_id": "067695b2-b3f2-4b47-951f-cb7934b17d81",
@@ -50,8 +51,22 @@
     "verified_at": "2026-05-15",
     "verification_note": "截圖顯示停辦通知。",
     "official_event_url": "https://bao-ming.com/eb/content/6890#32481",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "bao-ming、運動筆記",
+    "is_official_direct": true,
+    "weather_forecast": {
+      "forecast_for": "2026-05-16",
+      "updated_at": "2026-05-16T12:14:46.647Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "臺中市",
+      "summary": "臺中市縣市預報，毛毛雨，23-31°C，降雨機率 59%，最大風速 8 km/h",
+      "weather_code": 53,
+      "temperature_min_c": 22.6,
+      "temperature_max_c": 30.5,
+      "precipitation_probability_max": 59,
+      "wind_speed_max_kmh": 8.1
+    },
+    "start_times": "07:30"
   },
   {
     "race_id": "276e7a4e-b2f1-43ac-b7aa-462880d806b0",
@@ -86,13 +101,26 @@
     "quota": "LV5、LV3、LV2、LV1 各300名。",
     "verified_at": "2026-05-15",
     "verification_note": "官方報名頁顯示主辦、協辦、名額上限與報名費；運動筆記與跑寶島頁確認地點與各組起跑時間。",
-    "source_platform": "",
-    "is_official_direct": false,
+    "source_platform": "bao-ming、運動筆記",
+    "is_official_direct": true,
     "start_times": {
       "50km": "04:30",
       "20km": "08:00",
       "13km": "08:45",
       "7km": "09:30"
+    },
+    "weather_forecast": {
+      "forecast_for": "2026-05-17",
+      "updated_at": "2026-05-16T12:14:46.864Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "南投縣",
+      "summary": "南投縣縣市預報，降雨，18-28°C，降雨機率 100%，最大風速 8 km/h",
+      "weather_code": 80,
+      "temperature_min_c": 18.4,
+      "temperature_max_c": 28.1,
+      "precipitation_probability_max": 100,
+      "wind_speed_max_kmh": 8.1
     }
   },
   {
@@ -128,8 +156,8 @@
     "quota": "21K、10K、5K、3K 各1000人。",
     "verified_at": "2026-05-15",
     "verification_note": "官方頁：https://lohasnet.tw/ChungHsingVillage2026/；活動地點、主辦、報名費用、開放名額與各組起跑時間皆可查。",
-    "source_platform": "",
-    "is_official_direct": false,
+    "source_platform": "Lohas、運動筆記",
+    "is_official_direct": true,
     "start_times": {
       "21km": "06:00",
       "10km": "06:10",
@@ -167,9 +195,13 @@
     "fees": "42K 雲海組 1600元；21K 綠野組 1300元；42K 雲海永續組 1300元；21K 綠野永續組 1000元；晶片押金各100元。",
     "quota": "限制名額800人。",
     "verified_at": "2026-05-15",
-    "verification_note": "Focusline 官方活動頁：https://www.focusline.com.tw/260613IB；頁面顯示報名時間 2026-01-13 09:00 起至 2026-04-19 23:59 止，報名表顯示費用、晶片押金與限制名額800人。",
-    "source_platform": "",
-    "is_official_direct": false
+    "verification_note": "Focusline 官方活動頁：https://www.focusline.com.tw/260613IB 與運動筆記賽事頁；頁面顯示報名時間 2026-01-13 09:00 起至 2026-04-19 23:59 止，報名表顯示費用、晶片押金、限制名額800人與各組起跑時間。",
+    "source_platform": "Focusline、運動筆記",
+    "is_official_direct": true,
+    "start_times": {
+      "42km": "05:00",
+      "21km": "05:30"
+    }
   },
   {
     "race_id": "36a2f943-8b2a-4f42-88b9-deaba669ce63",
@@ -201,8 +233,9 @@
     "quota": "官方頁未標示名額。",
     "verified_at": "2026-05-15",
     "verification_note": "EventGo 顯示地點、地址與主辦；Focusline 為報名入口。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "EventGo、Focusline、運動筆記",
+    "is_official_direct": true,
+    "start_times": "全馬 起跑 05:00、半馬 起跑 05:00"
   },
   {
     "race_id": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
@@ -234,8 +267,9 @@
     "quota": "接力賽組限額250隊。",
     "verified_at": "2026-05-15",
     "verification_note": "iRunner 活動簡章顯示主辦、地點、費用與隊數限額。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "start_times": "11：00"
   },
   {
     "race_id": "e975fd2f-602a-4336-8b13-97d0eff460a4",
@@ -267,8 +301,9 @@
     "quota": "限制名額800人。",
     "verified_at": "2026-05-15",
     "verification_note": "運動筆記與 EventGo 顯示地點、主辦、報名時間、費用與限制名額。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "EventGo、運動筆記",
+    "is_official_direct": true,
+    "start_times": "42K 起跑 05:00、21K 起跑 05:30"
   },
   {
     "race_id": "f666760d-e82e-4d02-8542-4b537d1295c0",
@@ -295,7 +330,10 @@
     "start_location": "台中市烏日區光華街1號",
     "verified_at": "2026-05-15",
     "verification_note": "截圖顯示停賽、報名時間與場地。",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "start_times": "3.5K 起跑 08:30、3.5K 起跑 08:45、3.5K 起跑 09:00",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12989&subtitle=2026+KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91",
+    "source_platform": "運動筆記"
   },
   {
     "race_id": "fd352db7-c2bd-4f58-829f-b2f73c5e7583",
@@ -328,8 +366,9 @@
     "verified_at": "2026-05-15",
     "verification_note": "官方頁顯示活動地點、主辦承辦、報名時間、費用與晶片押金。",
     "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=311&Register=true&ActionStr=Create&Team=false",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "CTRun、運動筆記",
+    "is_official_direct": true,
+    "start_times": "10公里 起跑 17:00、3公里 起跑 17:10"
   },
   {
     "race_id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
@@ -358,15 +397,18 @@
     "fees": "路跑組 300元。",
     "quota": "官方頁未標示總名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "官方活動頁 https://irunner.biji.co/RunForDAD2026 顯示活動日期、時間、地點與賽事單位；報名頁顯示報名起迄 2026-05-10 12:00:00 至 2026-06-30 23:59:00，路跑組費用300元。",
+    "verification_note": "官方活動頁 https://irunner.biji.co/RunForDAD2026 顯示活動日期、時間、地點、賽事單位與路跑組起跑時間；報名頁顯示報名起迄 2026-05-10 12:00:00 至 2026-06-30 23:59:00，路跑組費用300元。",
     "organizer": "中華民國舒康樂活運動協會",
     "co_organizer": "承辦：彰化縣馬拉松路跑協會；協辦：彰化縣城鄉創意發展協會、彰化縣田中觀光商圈發展協會",
     "supervising_organizer": "運動部、彰化縣政府",
     "sponsor": "赤印品牌襪、泰山企業",
     "market_organizer": "Run For Daddy 暖心市集主辦單位：彰化縣田中觀光商圈發展協會",
     "event_time": "2026-08-02 08:00-11:00",
-    "is_official_direct": false,
-    "source_platform": ""
+    "is_official_direct": true,
+    "source_platform": "iRunner、運動筆記",
+    "start_times": {
+      "3km": "09:00"
+    }
   },
   {
     "race_id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
@@ -398,9 +440,14 @@
     "fees": "44.5K 2000元、26K 2000元、10K 1100元；晶片押金各100元。",
     "quota": "44.5K、26K、10K 各600人。",
     "verified_at": "2026-05-15",
-    "verification_note": "iRunner 報名頁顯示費用與限額；運動筆記賽事頁顯示主辦與地點。",
-    "source_platform": "",
-    "is_official_direct": false
+    "verification_note": "iRunner 報名頁顯示費用與限額；運動筆記賽事頁顯示主辦、地點、路線與各組起跑時間。",
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "start_times": {
+      "超馬組（44.5K）": "06:00",
+      "超半馬組（26K）": "06:10",
+      "健康組（10K）": "06:20"
+    }
   },
   {
     "race_id": "a6e6b4c2-8596-4e22-af67-7849a9ff7b58",
@@ -434,9 +481,16 @@
     "fees": "53.5K 1250元、42.8K 1150元、21.4K 1000元、10.7K 700元、5K 600元；晶片押金各100元。",
     "quota": "官方頁未標示名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "一起報名頁顯示活動地點、日期、報名期限、各組費用與晶片押金。",
-    "source_platform": "",
-    "is_official_direct": false
+    "verification_note": "一起報名頁顯示活動地點、日期、報名期限、各組費用、晶片押金與活動時程起跑時間。",
+    "source_platform": "JoinNow、運動筆記",
+    "is_official_direct": true,
+    "start_times": {
+      "超馬組（53.5K）": "05:00",
+      "全馬組（42.8K）": "05:00",
+      "半馬組（21.4K）": "07:00",
+      "健跑組（10.7K）": "07:00",
+      "親子組（5K）": "07:00"
+    }
   },
   {
     "race_id": "0cbfb0b7-c08d-44f8-a648-6ea360f29597",
@@ -469,9 +523,15 @@
     "fees": "50K 2200元、43K 1400元、24K 1200元、10K 900元；各組另收晶片押金100元。",
     "quota": "50K 250人、43K 450人、24K 350人、10K 300人。",
     "verified_at": "2026-05-15",
-    "verification_note": "運動筆記頁顯示費用與限額；EventGo 顯示地址與主辦。",
-    "source_platform": "",
-    "is_official_direct": false
+    "verification_note": "運動筆記頁顯示費用、限額與起跑時間；EventGo 顯示地址與主辦。",
+    "source_platform": "運動筆記、Focusline",
+    "is_official_direct": true,
+    "start_times": {
+      "超馬組（50K）": "06:00",
+      "全馬組（43K）": "06:00",
+      "超半馬組（24K）": "06:00",
+      "健康組（10K）": "06:10"
+    }
   },
   {
     "race_id": "9435cbf4-7877-40a1-a6ec-34e4bf08a34f",
@@ -493,7 +553,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13041",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=%E4%BB%81%E6%84%9B%E9%95%B7%E5%BA%9A%E5%90%88%E4%BD%9C%E8%81%AF%E7%9B%9F%E9%86%AB%E9%99%A22026%E6%B0%B8%E6%85%B6%E7%9B%83%E8%B7%AF%E8%B7%91",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13041&subtitle=%E4%BB%81%E6%84%9B%E9%95%B7%E5%BA%9A%E5%90%88%E4%BD%9C%E8%81%AF%E7%9B%9F%E9%86%AB%E9%99%A22026%E6%B0%B8%E6%85%B6%E7%9B%83%E8%B7%AF%E8%B7%91",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "269e9045-3335-4a6b-b2c7-aef66050c677",
@@ -527,9 +591,15 @@
     "fees": "42K 1100元、42K雙人組1800元、21K 900元、21K雙人組1600元。",
     "quota": "官方頁未標示名額。",
     "verified_at": "2026-05-15",
-    "verification_note": "全統活動頁顯示會場地點、主辦承辦與活動組別費用。",
-    "source_platform": "",
-    "is_official_direct": false
+    "verification_note": "全統活動頁顯示會場地點、主辦承辦、活動組別費用與活動時序起跑時間。",
+    "source_platform": "CTRun、運動筆記",
+    "is_official_direct": true,
+    "start_times": {
+      "全馬組（42K）": "16:30",
+      "半馬組（21K）": "17:30",
+      "健跑組（9K）": "18:30",
+      "親子組（3K）": "18:40"
+    }
   },
   {
     "race_id": "ed5e0139-3f43-4eac-b756-798e109005d8",
@@ -562,9 +632,16 @@
     "fees": "全馬組1400元、超半馬組1200元、挑戰組1000元、親子組700元；前三組含晶片押金100元。",
     "quota": "全馬組、超半馬組、挑戰組、親子組各1500人。",
     "verified_at": "2026-05-15",
-    "verification_note": "iRunner 活動簡章顯示地點、報名費用與各組預計名額。",
-    "source_platform": "",
-    "is_official_direct": false
+    "verification_note": "iRunner 活動簡章顯示地點、報名費用、各組預計名額與起跑時間。",
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "start_times": {
+      "全馬組（42K）": "06:05",
+      "超半馬組（24K）": "06:05",
+      "挑戰組（10K）": "06:15",
+      "親子組（5K）": "06:20",
+      "身視障組": "06:00"
+    }
   },
   {
     "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
@@ -586,7 +663,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13042",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%85%AC%E5%8B%9D%E7%9B%83",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13042&subtitle=2026%E5%85%AC%E5%8B%9D%E7%9B%83",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "3a39e33f-f3ce-44c1-860f-5e4142df7dcd",
@@ -619,8 +700,9 @@
     "quota": "官方頁未標示總名額。",
     "verified_at": "2026-05-15",
     "verification_note": "官方頁與全統活動頁顯示組別、費用與晶片押金。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "CTRun、運動筆記",
+    "is_official_direct": true,
+    "start_times": "21K 起跑 06:30、10K 起跑 06:45、休閒組（4K） 起跑 07:00"
   },
   {
     "race_id": "86798062-ad4b-423e-8176-4807d0eb553e",
@@ -641,7 +723,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13050&subtitle=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "b2667ebb-500b-435d-90ec-9978a2f8b0b1",
@@ -665,7 +751,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13034&subtitle=2026+%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "c22e79f8-5375-4bd8-978c-1551c8b9cc7d",
@@ -700,8 +790,9 @@
     "quota": "42K 1000名、22K 1000名、10K 800名、5K 500名。",
     "verified_at": "2026-05-15",
     "verification_note": "全統活動頁顯示會場、主辦、費用與名額。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "CTRun、運動筆記",
+    "is_official_direct": true,
+    "start_times": "42.195K 起跑 06:10、22K 起跑 06:10、10K 起跑 06:20、5K 起跑 06:20"
   },
   {
     "race_id": "0e285ab6-7707-4faf-88db-c50e4628f9ab",
@@ -735,8 +826,9 @@
     "quota": "42K 1000人、23K 1000人、12K 1500人、4K 1500人。",
     "verified_at": "2026-05-15",
     "verification_note": "樂活官方頁顯示活動地點、費用、晶片押金與開放名額。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "Lohas、運動筆記",
+    "is_official_direct": true,
+    "start_times": "全馬組（42.195K） 起跑 06:00、超半馬組（23K） 起跑 06:10、挑戰組（12K） 起跑 06:20、健康組（5K） 起跑 06:30"
   },
   {
     "race_id": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
@@ -770,8 +862,9 @@
     "quota": "總名額6000人：42K 1000名、29K 4000名、6K 1000名。",
     "verified_at": "2026-05-15",
     "verification_note": "iRunner 活動簡章顯示會場、主辦、報名費用與總名額。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "start_times": "全馬組（42K） 起跑 06:30、超半馬組（29K） 起跑 06:35、健走組（6K） 起跑 06:40"
   },
   {
     "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
@@ -794,7 +887,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12929",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "4deefa08-b316-4d29-8842-a5e9848f396c",
@@ -817,7 +914,12 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12900",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "start_times": "9K 起跑 06:10、挑戰組（5K） 起跑 06:50、3K 起跑 07:10",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12900&subtitle=2026+%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
@@ -839,7 +941,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13045",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13045&subtitle=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "86139039-c643-4bf9-ad9f-e66ca5239784",
@@ -863,7 +969,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12934",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "af9de05e-9895-478a-bcc6-92587d8c2382",
@@ -874,7 +984,7 @@
       "42.195km",
       "21.0975km",
       "10km",
-      "3km"
+      "5km"
     ],
     "difficulty": "中級",
     "registration_status": "報名中",
@@ -894,11 +1004,17 @@
     "venue": "臺中市中央公園",
     "start_location": "臺中市中央公園（臺中市西屯區中科路2966號）",
     "organizer": "麗晨建設、臺灣大腳丫長跑協會",
-    "fees": "42K 1300元、42K永續組600元、21K 1000元、21K永續組400元、10K 750元、3K 400元；晶片押金各100元。",
+    "fees": "42.195K 1700元、42.195K永續組800元、21.0975K 1200元、21.0975K永續組600元、10K 1000元、5K 600元；晶片押金各100元。",
     "quota": "官方頁未標示總名額。",
-    "verification_note": "運動筆記頁顯示地點與主辦；iRunner 活動簡章顯示費用與晶片押金。",
-    "source_platform": "",
-    "is_official_direct": false
+    "verification_note": "運動筆記頁顯示地點與主辦；iRunner 活動簡章顯示競賽距離、起跑時間、費用與晶片押金。",
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "start_times": {
+      "全馬組（42.195K）": "06:00",
+      "半馬組（21.0975K）": "06:20",
+      "10K": "06:50",
+      "5K": "07:05"
+    }
   },
   {
     "race_id": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
@@ -922,7 +1038,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12997",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12997&subtitle=%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "ea131e34-b3e9-4bc4-b626-c5345c26cb59",
@@ -946,7 +1066,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13031",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
@@ -970,7 +1094,11 @@
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   },
   {
     "race_id": "0929827f-0b09-441f-bb20-f42815b1bcb4",
@@ -1006,8 +1134,9 @@
     "quota": "依報名項目上限。",
     "verified_at": "2026-05-15",
     "verification_note": "EventGo 活動頁整理伊貝特報名資訊，顯示地點、報名起訖、費用與限額說明。",
-    "source_platform": "",
-    "is_official_direct": false
+    "source_platform": "bao-ming、運動筆記",
+    "is_official_direct": true,
+    "start_times": "100K 起跑 04:00、74K 起跑 04:00、43K 起跑 06:00、26K 起跑 07:00、16K 起跑 08:00、9K 起跑 09:00"
   },
   {
     "race_id": "7609d890-e7fe-426b-b5e7-ea9419d2ff54",
@@ -1033,6 +1162,10 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "scraped_at": "2026-05-16T11:07:32.348923+00:00",
-    "is_official_direct": false
+    "is_official_direct": true,
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12976&subtitle=2027%E7%AC%AC%E4%B9%9D%E5%B1%86%E8%87%BA%E4%B8%AD%E8%B3%87%E8%A8%8A%E7%9B%83%E5%85%AC%E7%9B%8A%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "source_platform": "運動筆記",
+    "verified_at": "2026-05-16",
+    "verification_note": "平台爬蟲自動查證：運動筆記"
   }
 ]

@@ -1,5 +1,6 @@
 """Scraper configuration for Runner Plaza."""
 
+import re
 from pathlib import Path
 
 # ─── Paths ───────────────────────────────────────────────────────────────────
@@ -61,11 +62,13 @@ DIFFICULTY_MAP = {
 def infer_difficulty(distances: list[str]) -> str:
     """Infer difficulty from distance list."""
     text = " ".join(distances).upper()
-    if any(k in text for k in ("越野", "TRAIL", "登山", "100K", "50K", "60K")):
+    values = [float(value) for value in re.findall(r"(\d+(?:\.\d+)?)\s*(?:K|KM|公里)?", text)]
+    max_distance = max(values, default=0)
+    if any(k in text for k in ("越野", "TRAIL", "登山")) or max_distance > 43:
         return "高級"
-    if any(k in text for k in ("42", "全馬")):
+    if max_distance >= 41.5 or "全馬" in text:
         return "中級"
-    if any(k in text for k in ("21", "半馬")):
+    if max_distance >= 20.5 or "半馬" in text or "超半馬" in text:
         return "中級"
     if any(k in text for k in ("10K", "9K", "8K")):
         return "初級"

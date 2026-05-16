@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re
 import time
 from collections import Counter
 from datetime import datetime
@@ -19,7 +20,7 @@ import requests
 
 from config import REQUEST_HEADERS, REQUEST_TIMEOUT, ROOT_DIR
 from platforms import baoming, ctrun, eventgo, focusline, irunner, joinnow, lohas
-from platforms.common import has_text, host_of
+from platforms.common import generic_extract, has_text, host_of
 
 logger = logging.getLogger("enrich_platforms")
 
@@ -37,20 +38,27 @@ ENRICH_FIELDS = (
     "co_organizer",
     "fees",
     "quota",
+    "start_times",
     "registration_status",
     "registration_note",
 )
 SAFE_AUTO_FIELDS = {
     "registration_opens_at",
     "registration_deadline",
+    "start_times",
     "registration_note",
 }
 
 PlatformParser = Callable[[str, dict, str], dict]
 
 
+def biji_extract(html: str, race: dict, url: str) -> dict:
+    return generic_extract(html, race)
+
+
 PLATFORMS: list[tuple[str, tuple[str, ...], PlatformParser]] = [
     ("iRunner", ("irunner.biji.co",), irunner.extract),
+    ("運動筆記", ("running.biji.co",), biji_extract),
     ("Lohas", ("lohasnet.tw",), lohas.extract),
     ("bao-ming", ("bao-ming.com",), baoming.extract),
     ("EventGo", ("eventgo.tw",), eventgo.extract),
@@ -76,7 +84,7 @@ def race_key(race: dict) -> str:
 
 def candidate_urls(race: dict) -> list[str]:
     urls = []
-    for field in ("official_event_url", "registration_link"):
+    for field in ("official_event_url", "registration_link", "detail_url"):
         url = str(race.get(field, "")).strip()
         if url and url not in urls:
             urls.append(url)
@@ -101,12 +109,66 @@ def fetch_html(session: requests.Session, url: str) -> str:
     return response.text
 
 
-def should_replace(field: str, current: object, incoming: object) -> bool:
+def should_replace(field: str, current: object, incoming: object, *, preferred: bool = False) -> bool:
     if not has_text(incoming):
         return False
+    if field == "start_times":
+        current_quality = start_time_quality(current)
+        incoming_quality = start_time_quality(incoming)
+        if preferred and incoming_quality >= 10 and incoming_quality + 15 >= current_quality:
+            return True
+        if has_redundant_start_time_rows(current) and incoming_quality >= 20:
+            return True
+        if current_quality < 10:
+            return incoming_quality > current_quality
+        return incoming_quality >= current_quality + 10
     if field == "registration_note" and not has_text(current):
         return True
     return not has_text(current) or str(current).strip() in {"未知", "待確認", "報名時間未定"}
+
+
+def start_time_quality(value: object) -> int:
+    if not has_text(value):
+        return 0
+    if isinstance(value, dict):
+        text = " ".join(f"{key} {item}" for key, item in value.items())
+    elif isinstance(value, list):
+        text = " ".join(str(item) for item in value)
+    else:
+        text = str(value)
+    time_count = len(re.findall(r"([01]?\d|2[0-3])[:：][0-5]\d", text))
+    distance_count = len(re.findall(r"\d+(?:\.\d+)?\s?(?:K|KM|公里|km)|半馬|全馬|挑戰組|休閒組|健走組", text, flags=re.IGNORECASE))
+    start_bonus = 1 if any(keyword in text for keyword in ("起跑", "鳴槍", "出發")) else 0
+    return time_count * 10 + min(distance_count, 8) + start_bonus
+
+
+def has_redundant_start_time_rows(value: object) -> bool:
+    if not has_text(value):
+        return False
+    rows = re.split(r"[、；;,\n]", str(value))
+    groups_by_time: dict[str, list[str]] = {}
+    for row in rows:
+        time_match = re.search(r"([01]?\d|2[0-3])[:：][0-5]\d", row)
+        if not time_match:
+            continue
+        time = time_match.group(0).replace("：", ":")
+        group = row[:time_match.start()].replace("起跑", "").strip()
+        groups_by_time.setdefault(time, []).append(group)
+
+    generic_groups = ("挑戰組", "休閒組", "健走組", "健康組")
+    for groups in groups_by_time.values():
+        has_generic = any(group in generic_groups for group in groups)
+        has_distance = any(re.search(r"\d+(?:\.\d+)?\s?(?:K|KM|公里|km)", group, flags=re.IGNORECASE) for group in groups)
+        has_composite = any(any(label in group for label in generic_groups) and re.search(r"\d", group) for group in groups)
+        if has_generic and has_distance and not has_composite:
+            return True
+    times_by_group: dict[str, set[str]] = {}
+    for time, groups in groups_by_time.items():
+        for group in groups:
+            times_by_group.setdefault(group, set()).add(time)
+    if any(group and len(times) > 1 for group, times in times_by_group.items()):
+        return True
+    return False
 
 
 def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False) -> tuple[dict, list[str], list[str]]:
@@ -133,7 +195,8 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
         for field in ENRICH_FIELDS:
             if field not in SAFE_AUTO_FIELDS:
                 continue
-            if should_replace(field, updated.get(field), details.get(field)):
+            preferred = field == "start_times" and url == str(race.get("official_event_url", "")).strip()
+            if should_replace(field, updated.get(field), details.get(field), preferred=preferred):
                 updated[field] = details[field]
                 changed.append(field)
 

@@ -6,6 +6,8 @@ const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
 const outputDir = resolve(root, "runner/內容");
 const jsonPath = resolve(outputDir, "候選內容.json");
 const reportPath = resolve(outputDir, "候選內容報告.md");
+const sourceHealthJsonPath = resolve(outputDir, "內容來源健康度報告.json");
+const sourceHealthReportPath = resolve(outputDir, "內容來源健康度報告.md");
 
 const sources = [
   {
@@ -174,7 +176,7 @@ function scoreTitle(title, source) {
   const keywordScore = keywords.reduce((sum, keyword) => (
     title.toLowerCase().includes(keyword.toLowerCase()) ? sum + 1 : sum
   ), 0);
-  return keywordScore + source.priority;
+  return keywordScore + (source.effectivePriority ?? source.priority);
 }
 
 function classify(title) {
@@ -314,6 +316,40 @@ async function fetchSource(source) {
   return extractLinks(await response.text(), source);
 }
 
+async function readJson(path, fallback) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch {
+    return fallback;
+  }
+}
+
+function priorHealthBySource(items) {
+  return new Map((Array.isArray(items) ? items : []).map((item) => [item.source, item]));
+}
+
+function sourceStatus({ ok, candidateCount, consecutiveFailures }) {
+  if (!ok && consecutiveFailures >= 3) {
+    return "需補強";
+  }
+  if (!ok || candidateCount === 0 || consecutiveFailures > 0) {
+    return "可用需觀察";
+  }
+  return "穩定";
+}
+
+function effectivePriority(source, priorHealth) {
+  const status = priorHealth?.status || "新來源";
+  const consecutiveFailures = Number(priorHealth?.consecutive_failures || 0);
+  if (status === "穩定") {
+    return source.priority + 1;
+  }
+  if (consecutiveFailures >= 3 || status === "需補強") {
+    return Math.max(1, source.priority - 1);
+  }
+  return source.priority;
+}
+
 async function enrichTitles(items) {
   const enriched = [];
   for (const item of items.slice(0, 60)) {
@@ -344,7 +380,7 @@ function buildReport(items, errors) {
     `產生時間：${new Date().toISOString()}`,
     `查詢基準日：${today}`,
     "",
-    "這份清單由 GitHub Actions 定期整理，只是候選內容；上架前仍需確認來源、日期與跑者決策價值。",
+    "這份清單由 GitHub Actions 定期整理，會交由自動上架規則挑選；來源、日期與跑者決策價值會在發布品質檢查中驗證。",
     "",
     `候選筆數：${items.length}`,
     "",
@@ -363,15 +399,41 @@ function buildReport(items, errors) {
   return `${lines.join("\n")}\n`;
 }
 
+function buildSourceHealthReport(items) {
+  const lines = [
+    "# 內容來源健康度報告",
+    "",
+    `產生時間：${new Date().toISOString()}`,
+    `查詢基準日：${today}`,
+    "",
+    "這份報告追蹤跑鞋與跑步內容來源的抓取狀態。下一輪候選收集會依狀態調整有效權重：穩定來源加權，連續失敗來源降權。",
+    "",
+    "| 來源 | 狀態 | 候選 | 連續失敗 | 基礎權重 | 有效權重 | 錯誤 |",
+    "| --- | --- | ---: | ---: | ---: | ---: | --- |",
+    ...items.map((item) => `| ${item.source} | ${item.status} | ${item.candidate_count} | ${item.consecutive_failures} | ${item.base_priority} | ${item.effective_priority} | ${String(item.error || "-").replaceAll("|", "｜")} |`),
+    "",
+  ];
+  return `${lines.join("\n")}`;
+}
+
 async function main() {
   const results = [];
   const errors = [];
+  const previousHealth = priorHealthBySource(await readJson(sourceHealthJsonPath, []));
+  const runtimeSources = sources.map((source) => ({
+    ...source,
+    effectivePriority: effectivePriority(source, previousHealth.get(source.name)),
+  }));
+  const sourceRuns = [];
 
-  for (const source of sources) {
+  for (const source of runtimeSources) {
     try {
-      results.push(...await fetchSource(source));
+      const sourceResults = await fetchSource(source);
+      results.push(...sourceResults);
+      sourceRuns.push({ source, ok: true, candidateCount: sourceResults.length, error: "" });
     } catch (error) {
       errors.push({ source: source.name, message: error.message });
+      sourceRuns.push({ source, ok: false, candidateCount: 0, error: error.message });
     }
   }
 
@@ -385,10 +447,30 @@ async function main() {
     }
   }
   await mkdir(outputDir, { recursive: true });
+  const sourceHealth = sourceRuns.map((run) => {
+    const previous = previousHealth.get(run.source.name);
+    const consecutiveFailures = run.ok ? 0 : Number(previous?.consecutive_failures || 0) + 1;
+    return {
+      checked_at: today,
+      source: run.source.name,
+      url: run.source.url,
+      source_type: run.source.type,
+      status: sourceStatus({ ok: run.ok, candidateCount: run.candidateCount, consecutiveFailures }),
+      ok: run.ok,
+      candidate_count: run.candidateCount,
+      consecutive_failures: consecutiveFailures,
+      base_priority: run.source.priority,
+      effective_priority: run.source.effectivePriority,
+      error: run.error,
+    };
+  });
   await writeFile(jsonPath, `${JSON.stringify(candidates, null, 2)}\n`, "utf8");
   await writeFile(reportPath, buildReport(candidates, errors), "utf8");
+  await writeFile(sourceHealthJsonPath, `${JSON.stringify(sourceHealth, null, 2)}\n`, "utf8");
+  await writeFile(sourceHealthReportPath, buildSourceHealthReport(sourceHealth), "utf8");
 
   console.log(`Content candidates: ${candidates.length}`);
+  console.log(`Content source issues: ${sourceHealth.filter((item) => item.status !== "穩定").length}`);
   if (errors.length) {
     console.log(`Source errors: ${errors.length}`);
   }
