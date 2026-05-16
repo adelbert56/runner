@@ -2276,7 +2276,7 @@ function updateContentList(type) {
   renderContentPagination(type, pagination);
   config.filter?.classList.toggle("active", config.favoritesOnly);
   if (config.filter) {
-    config.filter.textContent = config.favoritesOnly ? `顯示全部${config.label}` : "只看收藏";
+    config.filter.textContent = config.favoritesOnly ? "全部" : "收藏";
   }
   const limitButtons = type === "shoe" ? els.shoeLimitButtons : els.newsLimitButtons;
   limitButtons.forEach((button) => {
