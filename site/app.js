@@ -1964,6 +1964,41 @@ function renderPlan() {
         ${riskNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
       </ul>
     </div>
+    <div class="plan-progress-panel">
+      <div>
+        <span>完成進度</span>
+        <strong>${escapeHtml(completedCount)} / ${escapeHtml(weekCount)} 週</strong>
+        <p>${escapeHtml(completionPercent)}% · ${escapeHtml(adjustment.status)}。${escapeHtml(adjustment.note)}</p>
+      </div>
+      <button class="${selectedWeekDone ? "active" : ""}" type="button" data-toggle-week-complete>
+        ${selectedWeekDone ? "取消本週完成" : "標記本週完成"}
+      </button>
+    </div>
+    <div class="plan-week-title">
+      <span>第 ${escapeHtml(selectedWeek)} 週執行課表</span>
+      <strong>${escapeHtml(displayWeek.weeklyKm)} km / 長跑 ${escapeHtml(displayWeek.longRunKm)} km</strong>
+    </div>
+    <div class="plan-table" role="table" aria-label="每週課表">
+      ${displaySchedule.map((item) => `
+        <div class="plan-row" role="row">
+          <span>${escapeHtml(item.day)}</span>
+          <strong>${escapeHtml(item.type)}</strong>
+          <p>${escapeHtml(item.work)}</p>
+        </div>
+      `).join("")}
+    </div>
+    <div class="training-output-section">
+      <span class="form-section-title">切換週數</span>
+    </div>
+    <div class="phase-table" aria-label="週數切換">
+      ${weeklyBlocks.map((week) => `
+        <button class="${week.week === selectedWeek ? "active" : ""} ${completedWeeks.has(week.week) ? "completed" : ""}" type="button" data-plan-week="${escapeHtml(week.week)}">
+          <span>第 ${escapeHtml(week.week)} 週 · ${escapeHtml(week.phase)}</span>
+          <strong>${escapeHtml(week.weeklyKm)} km</strong>
+          <p>長跑 ${escapeHtml(week.longRunKm)} km · ${escapeHtml(week.focus)}</p>
+        </button>
+      `).join("")}
+    </div>
     <div class="coach-panel">
       <div class="coach-header">
         <div>
@@ -1999,38 +2034,6 @@ function renderPlan() {
           <button type="button" data-coach-question="taper">賽前一週</button>
         </div>
       </div>
-    </div>
-    <div class="plan-progress-panel">
-      <div>
-        <span>完成進度</span>
-        <strong>${escapeHtml(completedCount)} / ${escapeHtml(weekCount)} 週</strong>
-        <p>${escapeHtml(completionPercent)}% · ${escapeHtml(adjustment.status)}。${escapeHtml(adjustment.note)}</p>
-      </div>
-      <button class="${selectedWeekDone ? "active" : ""}" type="button" data-toggle-week-complete>
-        ${selectedWeekDone ? "取消本週完成" : "標記本週完成"}
-      </button>
-    </div>
-    <div class="phase-table" aria-label="週數切換">
-      ${weeklyBlocks.map((week) => `
-        <button class="${week.week === selectedWeek ? "active" : ""} ${completedWeeks.has(week.week) ? "completed" : ""}" type="button" data-plan-week="${escapeHtml(week.week)}">
-          <span>第 ${escapeHtml(week.week)} 週 · ${escapeHtml(week.phase)}</span>
-          <strong>${escapeHtml(week.weeklyKm)} km</strong>
-          <p>長跑 ${escapeHtml(week.longRunKm)} km · ${escapeHtml(week.focus)}</p>
-        </button>
-      `).join("")}
-    </div>
-    <div class="plan-week-title">
-      <span>第 ${escapeHtml(selectedWeek)} 週執行課表</span>
-      <strong>${escapeHtml(displayWeek.weeklyKm)} km / 長跑 ${escapeHtml(displayWeek.longRunKm)} km</strong>
-    </div>
-    <div class="plan-table" role="table" aria-label="每週課表">
-      ${displaySchedule.map((item) => `
-        <div class="plan-row" role="row">
-          <span>${escapeHtml(item.day)}</span>
-          <strong>${escapeHtml(item.type)}</strong>
-          <p>${escapeHtml(item.work)}</p>
-        </div>
-      `).join("")}
     </div>
   `;
 
