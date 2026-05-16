@@ -11,7 +11,7 @@
     <link rel="shortcut icon" href="./favicon.ico?v=20260515-icon1">
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=20260515-icon1">
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=20260515-icon1">
-    <link rel="stylesheet" href="./styles.css?v=20260516-system1">
+    <link rel="stylesheet" href="./styles.css?v=20260516-product2">
   </head>
   <body>
     <header class="site-header">
@@ -179,14 +179,15 @@
                   <option value="category">用途分類</option>
                 </select>
               </label>
-              <label class="content-sort">
+              <div class="content-sort content-limit-control">
                 <span>顯示</span>
-                <select id="shoe-limit" aria-label="跑鞋顯示筆數">
-                  <option value="10">10 筆</option>
-                  <option value="25">25 筆</option>
-                  <option value="50">50 筆</option>
-                </select>
-              </label>
+                <input id="shoe-limit" type="hidden" value="10">
+                <div class="limit-segment" role="group" aria-label="跑鞋顯示筆數">
+                  <button class="active" type="button" data-content-limit="shoe" data-limit-value="10">10</button>
+                  <button type="button" data-content-limit="shoe" data-limit-value="25">25</button>
+                  <button type="button" data-content-limit="shoe" data-limit-value="50">50</button>
+                </div>
+              </div>
             </div>
             <div class="content-action-row">
               <button class="toggle-button content-favorite-filter" type="button" id="shoe-favorite-filter">只看收藏</button>
@@ -597,14 +598,15 @@
                   <option value="oldest">由舊到新</option>
                 </select>
               </label>
-              <label class="content-sort">
+              <div class="content-sort content-limit-control">
                 <span>顯示</span>
-                <select id="news-limit" aria-label="新聞顯示筆數">
-                  <option value="10">10 筆</option>
-                  <option value="25">25 筆</option>
-                  <option value="50">50 筆</option>
-                </select>
-              </label>
+                <input id="news-limit" type="hidden" value="10">
+                <div class="limit-segment" role="group" aria-label="新聞顯示筆數">
+                  <button class="active" type="button" data-content-limit="news" data-limit-value="10">10</button>
+                  <button type="button" data-content-limit="news" data-limit-value="25">25</button>
+                  <button type="button" data-content-limit="news" data-limit-value="50">50</button>
+                </div>
+              </div>
             </div>
             <div class="content-action-row">
               <button class="toggle-button content-favorite-filter" type="button" id="news-favorite-filter">只看收藏</button>
@@ -702,6 +704,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260516-system1"></script>
+    <script src="./app.js?v=20260516-product2"></script>
   </body>
 </html>

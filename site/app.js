@@ -76,6 +76,8 @@ const els = {
   newsSort: document.querySelector("#news-sort"),
   shoeLimit: document.querySelector("#shoe-limit"),
   newsLimit: document.querySelector("#news-limit"),
+  shoeLimitButtons: document.querySelectorAll("[data-content-limit='shoe']"),
+  newsLimitButtons: document.querySelectorAll("[data-content-limit='news']"),
   shoeFavoriteFilter: document.querySelector("#shoe-favorite-filter"),
   newsFavoriteFilter: document.querySelector("#news-favorite-filter"),
   shoePagination: document.querySelector("#shoe-pagination"),
@@ -2180,6 +2182,12 @@ function updateContentList(type) {
   if (config.filter) {
     config.filter.textContent = config.favoritesOnly ? `顯示全部${config.label}` : "只看收藏";
   }
+  const limitButtons = type === "shoe" ? els.shoeLimitButtons : els.newsLimitButtons;
+  limitButtons.forEach((button) => {
+    const active = button.dataset.limitValue === String(config.limit);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
   updateContentFavoriteButtons();
 }
 
@@ -2251,6 +2259,26 @@ function bindEvents() {
   els.newsLimit?.addEventListener("change", () => {
     state.newsPage = 1;
     updateContentList("news");
+  });
+
+  els.shoeLimitButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (els.shoeLimit) {
+        els.shoeLimit.value = button.dataset.limitValue || "10";
+      }
+      state.shoePage = 1;
+      updateContentList("shoe");
+    });
+  });
+
+  els.newsLimitButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (els.newsLimit) {
+        els.newsLimit.value = button.dataset.limitValue || "10";
+      }
+      state.newsPage = 1;
+      updateContentList("news");
+    });
   });
 
   els.shoeFavoriteFilter?.addEventListener("click", () => {
