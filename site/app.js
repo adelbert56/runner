@@ -20,6 +20,8 @@ const state = {
   favoritesOnly: false,
   shoeFavoritesOnly: false,
   newsFavoritesOnly: false,
+  shoePage: 1,
+  newsPage: 1,
   trainingRaceKey: "",
   planWeek: 1,
   completedPlanWeeks: new Set(),
@@ -71,6 +73,8 @@ const els = {
   newsLimit: document.querySelector("#news-limit"),
   shoeFavoriteFilter: document.querySelector("#shoe-favorite-filter"),
   newsFavoriteFilter: document.querySelector("#news-favorite-filter"),
+  shoePagination: document.querySelector("#shoe-pagination"),
+  newsPagination: document.querySelector("#news-pagination"),
 };
 
 const monthNames = {
@@ -1784,7 +1788,7 @@ function contentArticleHtml(item) {
   return `
     <article ${attr} data-auto-content="true" data-date="${escapeHtml(item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}">
       <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>
-      ${type === "shoe" ? `<span>${escapeHtml(category)}</span>` : ""}
+      <span class="content-tag">${escapeHtml(category)}</span>
       <h3>${escapeHtml(item.title)}</h3>
       <p>${escapeHtml(item.summary)}</p>
       <a class="sub-link" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(sourceText)}</a>
@@ -1852,18 +1856,38 @@ function updateContentFavoriteButtons() {
   });
 }
 
-function applyContentLimit(containerSelector, itemSelector, limitValue, favoritesOnly = false, type = "") {
+function applyContentLimit(containerSelector, itemSelector, limitValue, favoritesOnly = false, type = "", page = 1) {
   const cards = [...document.querySelectorAll(`${containerSelector} ${itemSelector}`)];
   const limit = Number(limitValue) || 10;
-  let visibleIndex = 0;
+  const eligible = cards.filter((card) => !favoritesOnly || isContentFavorite(type, card));
+  const totalPages = Math.max(1, Math.ceil(eligible.length / limit));
+  const safePage = clampNumber(Number(page) || 1, 1, totalPages);
+  const start = (safePage - 1) * limit;
+  const end = start + limit;
+
   cards.forEach((card) => {
-    const blockedByFavorite = favoritesOnly && !isContentFavorite(type, card);
-    const blockedByLimit = visibleIndex >= limit;
-    card.hidden = blockedByFavorite || blockedByLimit;
-    if (!blockedByFavorite) {
-      visibleIndex += 1;
-    }
+    const index = eligible.indexOf(card);
+    card.hidden = index < start || index >= end;
   });
+
+  return {
+    page: safePage,
+    totalPages,
+    total: eligible.length,
+    limit,
+  };
+}
+
+function renderContentPagination(type, pagination) {
+  const target = type === "shoe" ? els.shoePagination : els.newsPagination;
+  if (!target) {
+    return;
+  }
+  target.innerHTML = `
+    <button type="button" data-content-page="${escapeHtml(type)}" data-direction="prev" ${pagination.page <= 1 ? "disabled" : ""}>上一頁</button>
+    <span>第 ${escapeHtml(pagination.page)} / ${escapeHtml(pagination.totalPages)} 頁 · 共 ${escapeHtml(pagination.total)} 筆</span>
+    <button type="button" data-content-page="${escapeHtml(type)}" data-direction="next" ${pagination.page >= pagination.totalPages ? "disabled" : ""}>下一頁</button>
+  `;
 }
 
 function updateContentList(type) {
@@ -1876,6 +1900,7 @@ function updateContentList(type) {
       favoritesOnly: state.shoeFavoritesOnly,
       filter: els.shoeFavoriteFilter,
       label: "跑鞋",
+      page: state.shoePage,
     }
     : {
       container: ".news-list",
@@ -1885,10 +1910,17 @@ function updateContentList(type) {
       favoritesOnly: state.newsFavoritesOnly,
       filter: els.newsFavoriteFilter,
       label: "新聞",
+      page: state.newsPage,
     };
 
   sortContentCards(config.container, config.item, config.sort);
-  applyContentLimit(config.container, config.item, config.limit, config.favoritesOnly, type);
+  const pagination = applyContentLimit(config.container, config.item, config.limit, config.favoritesOnly, type, config.page);
+  if (type === "shoe") {
+    state.shoePage = pagination.page;
+  } else {
+    state.newsPage = pagination.page;
+  }
+  renderContentPagination(type, pagination);
   config.filter?.classList.toggle("active", config.favoritesOnly);
   if (config.filter) {
     config.filter.textContent = config.favoritesOnly ? `顯示全部${config.label}` : "只看收藏";
@@ -1937,32 +1969,51 @@ function bindEvents() {
   }
 
   els.shoeSort?.addEventListener("change", () => {
+    state.shoePage = 1;
     updateContentList("shoe");
   });
 
   els.newsSort?.addEventListener("change", () => {
+    state.newsPage = 1;
     updateContentList("news");
   });
 
   els.shoeLimit?.addEventListener("change", () => {
+    state.shoePage = 1;
     updateContentList("shoe");
   });
 
   els.newsLimit?.addEventListener("change", () => {
+    state.newsPage = 1;
     updateContentList("news");
   });
 
   els.shoeFavoriteFilter?.addEventListener("click", () => {
     state.shoeFavoritesOnly = !state.shoeFavoritesOnly;
+    state.shoePage = 1;
     updateContentList("shoe");
   });
 
   els.newsFavoriteFilter?.addEventListener("click", () => {
     state.newsFavoritesOnly = !state.newsFavoritesOnly;
+    state.newsPage = 1;
     updateContentList("news");
   });
 
   document.addEventListener("click", (event) => {
+    const pageButton = event.target.closest("[data-content-page]");
+    if (pageButton) {
+      const type = pageButton.dataset.contentPage;
+      const direction = pageButton.dataset.direction === "next" ? 1 : -1;
+      if (type === "shoe") {
+        state.shoePage += direction;
+      } else {
+        state.newsPage += direction;
+      }
+      updateContentList(type);
+      return;
+    }
+
     const button = event.target.closest("[data-content-favorite]");
     if (!button) {
       return;

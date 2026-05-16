@@ -94,7 +94,6 @@ function cleanSummary(text) {
 function summarize(item, type) {
   const description = cleanSummary(item.description);
   const title = item.title.replace(/\s+/g, " ").trim();
-  const source = item.source ? `${item.source}：` : "";
 
   if (type === "shoe") {
     const category = inferShoeCategory(title);
@@ -111,12 +110,12 @@ function summarize(item, type) {
 
   if (description) {
     if (/賽事|報名|路跑|馬拉松|半馬/i.test(title)) {
-      return `${source}賽事重點：${description}可用來判斷報名時程、距離或是否值得排進年度目標。`;
+      return `賽事重點：${description}可用來判斷報名時程、距離或是否值得排進年度目標。`;
     }
     if (/訓練|間歇|節奏|長跑|配速|課表|恢復/i.test(title)) {
-      return `${source}訓練重點：${description}建議對照自己的週跑量、疲勞與目標賽事距離後再採用。`;
+      return `訓練重點：${description}建議對照自己的週跑量、疲勞與目標賽事距離後再採用。`;
     }
-    return `${source}重點：${description}已保留和訓練、裝備或賽事決策相關的資訊，方便快速判斷是否深入閱讀。`;
+    return `重點：${description}已保留和訓練、裝備或賽事決策相關的資訊，方便快速判斷是否深入閱讀。`;
   }
 
   if (/訓練|間歇|節奏|長跑|半馬|馬拉松/i.test(title)) {
