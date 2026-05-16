@@ -6,6 +6,7 @@ __pycache__/
 server.out.log
 server.err.log
 node_modules/
+output/
 .DS_Store
 Thumbs.db
 runner/.obsidian/workspace.json
