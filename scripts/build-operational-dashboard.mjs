@@ -314,10 +314,10 @@ async function main() {
     nextActions.push("先修 `runner/赛事/报名日期异常报告.md`，日期邏輯錯誤會直接誤導報名狀態。");
   }
   if (dueNow.length > 0) {
-    nextActions.push("依 `runner/赛事/爬虫追踪计划.md` 的「現在該重爬」修平台 parser 或補人工資料。");
+    nextActions.push("`runner/赛事/爬虫追踪计划.md` 已把到期項目列入「現在該重爬」；GitHub Actions 會定期自動重查，若重查後仍缺再修平台 parser 或補人工資料。");
   }
   if (officialDirectCount / Math.max(races.length, 1) < 0.8) {
-    nextActions.push("提高官方報名直連率，避免卡片只留下運動筆記或待補連結。");
+    nextActions.push("官方直連率未達 80% 的賽事已進追蹤節奏；等待自動重查補齊，只有開報後仍缺才人工介入。");
   }
   if (contentPool.length >= 20) {
     nextActions.push("內容候選已由 `npm run content:publish` 自動挑選上架；可抽查 `runner/内容/自动上架内容报告.md` 的來源品質。");

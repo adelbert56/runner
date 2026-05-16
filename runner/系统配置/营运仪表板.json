@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-16T11:08:35.059Z",
+  "generated_at": "2026-05-16T11:19:05.636Z",
   "basis_date": "2026-05-16",
   "races": {
     "total": 34,
@@ -101,35 +101,17 @@
         "status": "穩定"
       },
       {
-        "platform": "EventGo",
-        "total": 2,
-        "official_direct": 2,
-        "verified": 2,
-        "missing": 0,
-        "opened_gap": 0,
-        "date_anomaly": 0,
-        "due_now": 0,
-        "sample_races": [
-          "2026全台PAPAGO歡樂跑--西湖場",
-          "夏日馬拉松 - 苗栗鯉魚潭"
-        ],
-        "complete_rate": "100%",
-        "official_direct_rate": "100%",
-        "verified_rate": "100%",
-        "score": 100,
-        "status": "穩定"
-      },
-      {
         "platform": "Focusline",
-        "total": 2,
-        "official_direct": 2,
-        "verified": 2,
+        "total": 3,
+        "official_direct": 3,
+        "verified": 3,
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
           "夏日馬拉松 - 南投埔里場",
+          "2026全台PAPAGO歡樂跑--西湖場",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
         ],
         "complete_rate": "100%",
@@ -174,6 +156,24 @@
         "official_direct_rate": "100%",
         "verified_rate": "100%",
         "score": 83,
+        "status": "穩定"
+      },
+      {
+        "platform": "EventGo",
+        "total": 1,
+        "official_direct": 1,
+        "verified": 1,
+        "missing": 0,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "夏日馬拉松 - 苗栗鯉魚潭"
+        ],
+        "complete_rate": "100%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 100,
         "status": "穩定"
       }
     ]
