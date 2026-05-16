@@ -76,7 +76,8 @@
 │   └── 系统配置/
 │       ├── 资料更新SOP.md
 │       ├── 营运仪表板.md
-│       └── 内容来源与爬虫规划.md
+│       ├── 内容来源与爬虫规划.md
+│       └── UI商品化验收标准.md
 ├── .github/workflows/
 │   ├── pages.yml                 # 部署網站
 │   ├── data-refresh.yml          # 賽事資料更新
@@ -137,6 +138,22 @@ http://localhost:4173/site/
 | `npm run content:publish` | 將候選內容整理成網站資料 |
 | `npm run content:refresh` | 收集並發布跑鞋 / 新聞內容 |
 | `npm run ops:dashboard` | 產生營運儀表板 |
+
+## UI 商品化驗收
+
+這個專案的 UI 目標不是臨時公告欄，而是可公開使用的跑者資訊產品。任何 UI 調整都必須先遵守：
+
+```text
+runner/系统配置/UI商品化验收标准.md
+```
+
+核心要求：
+
+- 維持設計系統一致性，不用補丁式 CSS 修單點問題。
+- 跑鞋、新聞、入門、練跑、賽事卡片使用一致的卡片、按鈕、標籤、間距與資訊層級。
+- 手機版優先，至少檢查 `#races`、`#academy`、`#training`、`#gear`、`#news`。
+- UI 修改後用 Playwright 或瀏覽器實際截圖檢查手機與桌面版。
+- CSS/JS 有改動時，更新 `site/index.html` 的版本參數，避免 GitHub Pages 快取。
 
 ## 賽事資料更新
 
