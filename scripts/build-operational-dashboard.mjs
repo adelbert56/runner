@@ -112,7 +112,7 @@ function buildPlatformStability(races, queue, openedGaps, dateAnomalies, trackin
   const missingSet = new Set(queue.map(rowKey));
   const openGapSet = new Set(openedGaps.map(rowKey));
   const anomalySet = new Set(dateAnomalies.map(rowKey));
-  const dueSet = new Set(tracking.filter((item) => item.tracking?.status === "due_now").map(rowKey));
+  const dueSet = new Set(tracking.filter((item) => ["due_now", "pre_race_recheck"].includes(item.tracking?.status)).map(rowKey));
   const stats = new Map();
 
   races.forEach((race) => {
@@ -247,7 +247,7 @@ async function main() {
   const officialDirectCount = races.filter(isOfficialDirect).length;
   const verifiedCount = races.filter((race) => hasText(race.verified_at)).length;
   const openGapCount = openedGaps.length;
-  const dueNow = tracking.filter((item) => item.tracking?.status === "due_now");
+  const dueNow = tracking.filter((item) => ["due_now", "pre_race_recheck"].includes(item.tracking?.status));
   const monthly = tracking.filter((item) => item.tracking?.cadence === "monthly_1_15");
   const contentPool = [...candidates, ...editorialContent];
   const candidateByCategory = countBy(contentPool, (item) => item.category);

@@ -32,7 +32,10 @@ const state = {
 const els = {
   raceCount: document.querySelector("#race-count"),
   favoriteCount: document.querySelector("#favorite-count"),
+  nextRaceLink: document.querySelector("#next-race-link"),
   nextRace: document.querySelector("#next-race"),
+  nextRaceCaption: document.querySelector("#next-race-caption"),
+  nextRaceCountdown: document.querySelector("#next-race-countdown"),
   heroNextRace: document.querySelector("#hero-next-race"),
   search: document.querySelector("#race-search"),
   raceList: document.querySelector("#race-list"),
@@ -853,6 +856,10 @@ function getRaceKey(race) {
   return `r:${shortHash(legacyRaceKey(race))}`;
 }
 
+function raceDomId(race) {
+  return `race-${getRaceKey(race).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
 function migrateRaceFavorites() {
   let changed = false;
   state.races.forEach((race) => {
@@ -1232,16 +1239,42 @@ function getVisibleRaces() {
 function renderStats() {
   els.raceCount.textContent = String(state.races.length);
   els.favoriteCount.textContent = String(state.favorites.size);
-  const upcoming = state.races.find((race) => race.race_date >= TODAY) || state.races[0];
+  const trackedUpcoming = state.races
+    .filter((race) => isFavorite(race) && race.race_date >= TODAY && !isCancelledRace(race))
+    .sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
+  const upcoming = trackedUpcoming[0] || state.races.find((race) => race.race_date >= TODAY && !isCancelledRace(race)) || state.races[0];
   if (!upcoming) {
     els.nextRace.textContent = "--";
+    if (els.nextRaceCaption) {
+      els.nextRaceCaption.textContent = "追蹤賽事";
+    }
+    if (els.nextRaceCountdown) {
+      els.nextRaceCountdown.textContent = "先收藏賽事";
+    }
+    if (els.nextRaceLink) {
+      els.nextRaceLink.removeAttribute("data-next-race");
+      els.nextRaceLink.setAttribute("aria-label", "目前沒有追蹤賽事");
+    }
     if (els.heroNextRace) {
       els.heroNextRace.textContent = "--";
     }
     return;
   }
   const date = formatDateParts(upcoming.race_date);
+  const days = dateDiffDays(upcoming.race_date);
+  const countdown = days === 0 ? "今天開跑" : days > 0 ? `倒數 ${days} 天` : "賽事已過";
+  const isTracked = trackedUpcoming.length > 0;
   els.nextRace.textContent = `${date.month}/${date.day}`;
+  if (els.nextRaceCaption) {
+    els.nextRaceCaption.textContent = isTracked ? "追蹤賽事" : "下一場賽事";
+  }
+  if (els.nextRaceCountdown) {
+    els.nextRaceCountdown.textContent = `${countdown} · ${upcoming.race_name || "路跑賽事"}`;
+  }
+  if (els.nextRaceLink) {
+    els.nextRaceLink.dataset.nextRace = getRaceKey(upcoming);
+    els.nextRaceLink.setAttribute("aria-label", `查看${upcoming.race_name || "下一場賽事"}，${countdown}`);
+  }
   if (els.heroNextRace) {
     els.heroNextRace.textContent = date.full.replaceAll("/", ".");
   }
@@ -1338,7 +1371,7 @@ function renderRaces() {
       ].filter(Boolean);
 
       return `
-        <article class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""}">
+        <article id="${escapeHtml(raceDomId(race))}" class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""}">
           <div class="date-block" aria-label="${escapeHtml(date.full)}">
             <div>
               <span>${escapeHtml(date.year)}</span>
@@ -2601,6 +2634,30 @@ function bindEvents() {
     state.favoritesOnly = !state.favoritesOnly;
     state.month = "all";
     render();
+  });
+
+  els.nextRaceLink?.addEventListener("click", (event) => {
+    const key = els.nextRaceLink.dataset.nextRace;
+    if (!key) {
+      return;
+    }
+    event.preventDefault();
+    state.county = "all";
+    state.difficulty = "all";
+    state.registration = "all";
+    state.distance = "all";
+    state.month = "all";
+    state.query = "";
+    state.favoritesOnly = false;
+    els.search.value = "";
+    setActivePanel("races");
+    render();
+    requestAnimationFrame(() => {
+      const race = state.races.find((item) => getRaceKey(item) === key);
+      const card = race ? document.getElementById(raceDomId(race)) : null;
+      card?.scrollIntoView({ behavior: "smooth", block: "center" });
+      card?.querySelector("details")?.setAttribute("open", "");
+    });
   });
 
   els.clearFilters.addEventListener("click", () => {

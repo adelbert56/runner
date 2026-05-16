@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-16T11:41:11.676Z",
+  "generated_at": "2026-05-16T11:57:08.500Z",
   "basis_date": "2026-05-16",
   "races": {
     "total": 34,
@@ -12,7 +12,7 @@
     "verified_rate": "65%",
     "opened_gap_count": 0,
     "date_anomaly_count": 0,
-    "due_now_count": 0,
+    "due_now_count": 2,
     "monthly_tracking_count": 11,
     "state_counts": {
       "已截止": 5,
@@ -88,7 +88,7 @@
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 0,
+        "due_now": 1,
         "sample_races": [
           "2026 BOBDOG RUN(台中場)",
           "2026 松鶴越野",
@@ -128,7 +128,7 @@
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 0,
+        "due_now": 1,
         "sample_races": [
           "2026中興新村半程馬拉松-披興戴月的想你",
           "2026 清水馬拉松嘉年華"

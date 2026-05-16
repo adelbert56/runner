@@ -241,6 +241,18 @@ function trackingPlanForRace(race, missing, todayText = TODAY) {
     };
   }
 
+  if (raceDate && daysToRace >= 0 && daysToRace <= 14) {
+    return {
+      status: "pre_race_recheck",
+      status_label: "賽前 14 天複查",
+      next_check_date: todayText,
+      cadence: "every_3_days_until_race",
+      reason: missing.length
+        ? `距離賽事 ${daysToRace} 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：${missingLabels}。`
+        : `距離賽事 ${daysToRace} 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。`,
+    };
+  }
+
   if (!missing.length) {
     return {
       status: "complete",
@@ -612,15 +624,16 @@ function formatTrackingPlan(queue) {
 async function main() {
   const raw = await readFile(dataPath, "utf-8");
   const races = JSON.parse(raw);
-  const queue = races
+  const allItems = races
     .map(buildQueueItem)
-    .filter((item) => item.missing.length)
     .sort((a, b) => b.priority_score - a.priority_score || String(a.race_date).localeCompare(String(b.race_date)) || String(a.race_name).localeCompare(String(b.race_name)));
+  const queue = allItems.filter((item) => item.missing.length);
+  const trackingItems = allItems.filter((item) => item.missing.length || item.tracking.status === "pre_race_recheck");
 
   await mkdir(dirname(queuePath), { recursive: true });
   await writeFile(queuePath, `${JSON.stringify(queue, null, 2)}\n`, "utf-8");
   await writeFile(reportPath, formatReport(races, queue), "utf-8");
-  await writeFile(trackingPath, formatTrackingPlan(queue), "utf-8");
+  await writeFile(trackingPath, formatTrackingPlan(trackingItems), "utf-8");
   const openedGaps = openedGapItems(queue);
   await writeFile(openedGapReportPath, formatOpenedGapReport(openedGaps), "utf-8");
   await writeFile(openedGapJsonPath, `${JSON.stringify(openedGaps, null, 2)}\n`, "utf-8");
@@ -641,7 +654,7 @@ async function main() {
     .sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)) || String(a.race_name).localeCompare(String(b.race_name)));
   await writeFile(dateAnomalyReportPath, formatDateAnomalyReport(dateAnomalies), "utf-8");
   await writeFile(dateAnomalyJsonPath, `${JSON.stringify(dateAnomalies, null, 2)}\n`, "utf-8");
-  await writeFile(trackingJsonPath, `${JSON.stringify(queue.map((item) => ({
+  await writeFile(trackingJsonPath, `${JSON.stringify(trackingItems.map((item) => ({
     race_id: item.race_id,
     race_name: item.race_name,
     race_date: item.race_date,
@@ -655,7 +668,7 @@ async function main() {
   })), null, 2)}\n`, "utf-8");
 
   const highPriority = queue.filter((item) => item.missing.some((missing) => missing.severity === "high")).length;
-  const dueNow = queue.filter((item) => item.tracking.status === "due_now").length;
+  const dueNow = trackingItems.filter((item) => ["due_now", "pre_race_recheck"].includes(item.tracking.status)).length;
   console.log(`Races: ${races.length}`);
   console.log(`Needs follow-up: ${queue.length}`);
   console.log(`Due to crawl now: ${dueNow}`);

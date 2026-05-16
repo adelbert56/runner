@@ -423,5 +423,53 @@
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12944",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%B9%9D%E5%B1%86%E5%B9%B8%E7%A6%8F%E9%BE%8D%E4%BA%95%E6%B4%BB%E5%8A%9B%E5%81%A5%E5%BA%B7%E8%B7%AF%E8%B7%91%E5%81%A5%E8%B5%B0"
     }
+  },
+  {
+    "race_id": "276e7a4e-b2f1-43ac-b7aa-462880d806b0",
+    "race_name": "2026 松鶴越野",
+    "race_date": "2026-05-17",
+    "race_county": "南投縣",
+    "source_platform": "運動筆記",
+    "is_official_direct": true,
+    "priority_score": 0,
+    "tracking": {
+      "status": "pre_race_recheck",
+      "status_label": "賽前 14 天複查",
+      "next_check_date": "2026-05-16",
+      "cadence": "every_3_days_until_race",
+      "reason": "距離賽事 1 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+    },
+    "missing": [],
+    "current_links": {
+      "registration_link": "https://bao-ming.com/eb/content/6866#reg",
+      "official_event_url": "https://www.paobaodao.com/tw/race/mountain-wow-songhe-trail-run/",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12902&subtitle=2026+%E6%9D%BE%E9%B6%B4%E8%B6%8A%E9%87%8E",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12902",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%9D%BE%E9%B6%B4%E8%B6%8A%E9%87%8E"
+    }
+  },
+  {
+    "race_id": "8e5e1e97-3b00-411d-b7b1-11f6ed0fdd25",
+    "race_name": "2026中興新村半程馬拉松-披興戴月的想你",
+    "race_date": "2026-05-24",
+    "race_county": "南投縣",
+    "source_platform": "運動筆記",
+    "is_official_direct": true,
+    "priority_score": 0,
+    "tracking": {
+      "status": "pre_race_recheck",
+      "status_label": "賽前 14 天複查",
+      "next_check_date": "2026-05-16",
+      "cadence": "every_3_days_until_race",
+      "reason": "距離賽事 8 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+    },
+    "missing": [],
+    "current_links": {
+      "registration_link": "https://signup.lohasnet.tw/signup/4115",
+      "official_event_url": "https://lohasnet.tw/ChungHsingVillage2026/",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12520&subtitle=2026%E4%B8%AD%E8%88%88%E6%96%B0%E6%9D%91%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE-%E6%8A%AB%E8%88%88%E6%88%B4%E6%9C%88%E7%9A%84%E6%83%B3%E4%BD%A0",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12520",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E4%B8%AD%E8%88%88%E6%96%B0%E6%9D%91%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE-%E6%8A%AB%E8%88%88%E6%88%B4%E6%9C%88%E7%9A%84%E6%83%B3%E4%BD%A0"
+    }
   }
 ]
