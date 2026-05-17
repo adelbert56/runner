@@ -6,6 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
+const DATA_VERSION = "20260517-weather2";
 const TODAY = getTodayString();
 
 const state = {
@@ -2485,7 +2486,7 @@ function renderAutoContent(items) {
 
 async function loadPublishedContent() {
   try {
-    const response = await fetch("./data/content.json");
+    const response = await fetch(`./data/content.json?v=${DATA_VERSION}`, { cache: "no-cache" });
     if (!response.ok) {
       return;
     }
@@ -2895,12 +2896,12 @@ function bindEvents() {
 }
 
 async function loadRaces() {
-  const dataPaths = ["./data/races.json", "../runner/賽事/賽事資料庫.json"];
+  const dataPaths = [`./data/races.json?v=${DATA_VERSION}`, "../runner/賽事/賽事資料庫.json"];
   let lastError;
 
   for (const path of dataPaths) {
     try {
-      const response = await fetch(path);
+      const response = await fetch(path, { cache: "no-cache" });
       if (!response.ok) {
         throw new Error(`Race data request failed: ${response.status}`);
       }
