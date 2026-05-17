@@ -1,12 +1,13 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const candidatesPath = resolve(root, "runner/內容/候選內容.json");
 const editorialPath = resolve(root, "runner/內容/人工精選內容.json");
 const outputPath = resolve(root, "site/data/content.json");
 const reportPath = resolve(root, "runner/內容/自動上架內容報告.md");
-const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+const today = process.env.RUNNER_TODAY || todayInTaipei();
 
 const LIMITS = {
   shoe: 16,

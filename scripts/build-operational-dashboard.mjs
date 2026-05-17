@@ -1,8 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
-const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+const today = process.env.RUNNER_TODAY || todayInTaipei();
 
 const paths = {
   races: resolve(root, "site/data/races.json"),

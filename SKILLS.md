@@ -73,6 +73,7 @@
 ## 驗證流程
 
 - 一般修改：`npm run check`。
+- 自動化規則修改：`npm run check` 必須跑過 `scripts/validate-automation-rules.mjs`，它會檢查台灣日期、workflow cron、auto-commit file pattern、Pages 發布來源、資料快取版本與賽事資料同步。
 - Python 修改：`uv run python -m compileall scripts`。
 - 資料流程修改：`uv run python scripts/enrich_platforms.py --dry-run` 後再跑 `npm run data:refresh`。
 - 收尾驗證：`npm run data:refresh`、`npm run content:refresh`、`npm run ops:dashboard`、`npm run check`、`npm run data:quality:strict`、`npm run content:quality:strict`、`uv run python -m compileall scripts`。
@@ -102,3 +103,4 @@
 - Codex 本機沙盒常會讓外部 HTTP 顯示 `fetch failed`；內容或官方來源是否真的壞，要用 GitHub Actions 或授權網路執行結果判斷。
 - 排程觀察時，如果 GitHub Actions 成功但沒有 auto-commit，通常代表資料無變動；不要誤判成排程失效。
 - 早上執行的 GitHub Actions 不能用 UTC 日期判斷台灣「今天」。天氣、賽前倒數、開報窗口這類邏輯要用 Asia/Taipei 日期，否則 07:00 排程會把今天算成前一天。
+- `scripts/lib/time.mjs` 是 Node 自動化腳本的台灣日期來源；不要在新的資料/內容/儀表板腳本重新寫 `new Date().toISOString().slice(0, 10)` 當業務日期。
