@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 const raceDbPath = resolve(root, "runner/賽事/賽事資料庫.json");
 const siteDataPath = resolve(root, "site/data/races.json");
-const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+const TODAY = process.env.RUNNER_TODAY || todayInTaipei();
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const countyCoordinates = {
@@ -14,6 +14,17 @@ const countyCoordinates = {
   南投縣: { latitude: 23.9609, longitude: 120.9719, label: "南投縣" },
   苗栗縣: { latitude: 24.5602, longitude: 120.8214, label: "苗栗縣" },
 };
+
+function todayInTaipei() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
 
 function parseDate(value) {
   const date = new Date(`${String(value || "").slice(0, 10)}T00:00:00+08:00`);
