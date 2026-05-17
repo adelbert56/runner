@@ -1,12 +1,13 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const raceDbPaths = [
   resolve(root, "runner/賽事/賽事資料庫.json"),
   resolve(root, "site/data/races.json"),
 ];
-const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+const TODAY = process.env.RUNNER_TODAY || todayInTaipei();
 const OVERWRITE = process.argv.includes("--overwrite");
 
 function hasText(value) {

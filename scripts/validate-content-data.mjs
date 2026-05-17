@@ -1,10 +1,11 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const contentPath = resolve(root, "site/data/content.json");
 const reportPath = resolve(root, "runner/內容/內容品質報告.md");
-const today = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+const today = process.env.RUNNER_TODAY || todayInTaipei();
 const strictMode = process.argv.includes("--strict") || process.env.RUNNER_CONTENT_STRICT === "1";
 
 const MIN_COUNTS = {

@@ -8,6 +8,7 @@ server.err.log
 node_modules/
 output/
 .codex-rescues/
+debug.log
 .DS_Store
 Thumbs.db
 runner/.obsidian/workspace.json

@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const dataPath = resolve(root, "site/data/races.json");
@@ -15,7 +16,7 @@ const startTimeQualityReportPath = resolve(root, "runner/賽事/起跑時間品�
 const startTimeQualityJsonPath = resolve(root, "runner/賽事/起跑時間品質報告.json");
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const TODAY = process.env.RUNNER_TODAY || new Date().toISOString().slice(0, 10);
+const TODAY = process.env.RUNNER_TODAY || todayInTaipei();
 const strictMode = process.argv.includes("--strict") || process.env.RUNNER_QUALITY_STRICT === "1";
 
 const sourceDomains = ["running.biji.co"];

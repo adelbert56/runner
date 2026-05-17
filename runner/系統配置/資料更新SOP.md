@@ -60,6 +60,7 @@
 ## 發布檢查
 
 1. 執行 `npm run check`。
+   - 這會同時執行 `scripts/validate-automation-rules.mjs`，檢查排程、台灣日期、資料快取、Pages 發布來源與 auto-commit file pattern。
 2. 執行 `npm run data:quality:strict`，確認自動發布不會帶出高風險資料。
 3. 若有 Python 修改，執行 `uv run python -m compileall scripts`。
 4. 推送到 `main` 後，GitHub Pages 會自動部署。
