@@ -101,3 +101,4 @@
 - 若使用者反覆指出同類問題，將它升級成固定驗證項目。
 - Codex 本機沙盒常會讓外部 HTTP 顯示 `fetch failed`；內容或官方來源是否真的壞，要用 GitHub Actions 或授權網路執行結果判斷。
 - 排程觀察時，如果 GitHub Actions 成功但沒有 auto-commit，通常代表資料無變動；不要誤判成排程失效。
+- 早上執行的 GitHub Actions 不能用 UTC 日期判斷台灣「今天」。天氣、賽前倒數、開報窗口這類邏輯要用 Asia/Taipei 日期，否則 07:00 排程會把今天算成前一天。

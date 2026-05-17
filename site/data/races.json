@@ -53,19 +53,6 @@
     "official_event_url": "https://bao-ming.com/eb/content/6890#32481",
     "source_platform": "bao-ming、運動筆記",
     "is_official_direct": true,
-    "weather_forecast": {
-      "forecast_for": "2026-05-16",
-      "updated_at": "2026-05-16T12:14:46.647Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "臺中市",
-      "summary": "臺中市縣市預報，毛毛雨，23-31°C，降雨機率 59%，最大風速 8 km/h",
-      "weather_code": 53,
-      "temperature_min_c": 22.6,
-      "temperature_max_c": 30.5,
-      "precipitation_probability_max": 59,
-      "wind_speed_max_kmh": 8.1
-    },
     "start_times": "07:30"
   },
   {
@@ -111,16 +98,16 @@
     },
     "weather_forecast": {
       "forecast_for": "2026-05-17",
-      "updated_at": "2026-05-16T12:14:46.864Z",
+      "updated_at": "2026-05-17T03:19:47.909Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "南投縣",
-      "summary": "南投縣縣市預報，降雨，18-28°C，降雨機率 100%，最大風速 8 km/h",
-      "weather_code": 80,
-      "temperature_min_c": 18.4,
-      "temperature_max_c": 28.1,
-      "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 8.1
+      "summary": "南投縣縣市預報，降雨，18-29°C，降雨機率 99%，最大風速 10 km/h",
+      "weather_code": 61,
+      "temperature_min_c": 17.5,
+      "temperature_max_c": 28.8,
+      "precipitation_probability_max": 99,
+      "wind_speed_max_kmh": 10.1
     }
   },
   {
@@ -163,6 +150,19 @@
       "10km": "06:10",
       "5km": "06:20",
       "3km": "06:30"
+    },
+    "weather_forecast": {
+      "forecast_for": "2026-05-24",
+      "updated_at": "2026-05-17T03:19:48.141Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "南投縣",
+      "summary": "南投縣縣市預報，毛毛雨，20-30°C，降雨機率 39%，最大風速 8 km/h",
+      "weather_code": 51,
+      "temperature_min_c": 19.7,
+      "temperature_max_c": 29.7,
+      "precipitation_probability_max": 39,
+      "wind_speed_max_kmh": 7.9
     }
   },
   {
