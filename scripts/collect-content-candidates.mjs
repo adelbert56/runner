@@ -148,17 +148,6 @@ function compact(text) {
     .trim();
 }
 
-function normalizeUrl(url) {
-  try {
-    const parsed = new URL(url);
-    parsed.hash = "";
-    parsed.search = "";
-    return parsed.toString().replace(/\/$/, "");
-  } catch {
-    return String(url || "").replace(/[?#].*$/, "").replace(/\/$/, "");
-  }
-}
-
 function decodeHtml(text) {
   return compact(text)
     .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
@@ -251,28 +240,6 @@ function extractMetaDescription(html) {
   return "";
 }
 
-function extractMetaDate(html) {
-  const metaPatterns = [
-    /<meta[^>]+property=["']article:published_time["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<meta[^>]+property=["']article:modified_time["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<meta[^>]+property=["']og:updated_time["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<meta[^>]+name=["']pubdate["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<meta[^>]+name=["']date["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<time[^>]+datetime=["']([^"']+)["'][^>]*>/i,
-    /"datePublished"\s*:\s*"([^"]+)"/i,
-    /"dateModified"\s*:\s*"([^"]+)"/i,
-  ];
-
-  for (const pattern of metaPatterns) {
-    const match = html.match(pattern);
-    if (!match?.[1]) continue;
-    const text = decodeHtml(match[1]);
-    const dateMatch = text.match(/\d{4}-\d{2}-\d{2}/);
-    if (dateMatch) return dateMatch[0];
-  }
-  return "";
-}
-
 async function fetchArticleMetadata(item) {
   try {
     const response = await fetch(item.url, {
@@ -288,12 +255,10 @@ async function fetchArticleMetadata(item) {
     const html = await response.text();
     const title = extractMetaTitle(html);
     const description = extractMetaDescription(html);
-    const articleDate = extractMetaDate(html);
     return {
       ...item,
       title: title && title.length >= 6 ? title : item.title,
       description: description || item.description || "",
-      article_date: articleDate || item.article_date || "",
       category: classify(title && title.length >= 6 ? title : item.title),
       score: title && title.length >= 6 ? Math.max(item.score, scoreTitle(title, { priority: item.score - 1 })) : item.score,
     };
@@ -328,7 +293,6 @@ function extractLinks(html, source) {
       url,
       category: classify(title),
       score,
-      article_date: "",
       suggested_for: "待判斷",
       runner_takeaway: "待代理人摘要",
       publish_status: "candidate",
@@ -344,7 +308,6 @@ async function fetchSource(source) {
       "accept": "text/html,application/xhtml+xml",
       "user-agent": "RunnerPlazaContentBot/0.1 (+https://github.com/adelbert56/runner)",
     },
-    signal: AbortSignal.timeout(12000),
   });
 
   if (!response.ok) {
@@ -401,7 +364,7 @@ function dedupe(items) {
   return items
     .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
     .filter((item) => {
-      const key = normalizeUrl(item.url);
+      const key = item.url.replace(/[?#].*$/, "");
       if (seen.has(key)) {
         return false;
       }
@@ -422,9 +385,9 @@ function buildReport(items, errors) {
     "",
     `候選筆數：${items.length}`,
     "",
-    "| 分數 | 日期 | 分類 | 來源 | 標題 | 摘要 | 連結 |",
-    "| ---: | --- | --- | --- | --- | --- | --- |",
-    ...items.map((item) => `| ${item.score} | ${item.article_date || item.checked_at} | ${item.category} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${(item.description || "").replace(/\|/g, "／")} | [來源](${item.url}) |`),
+    "| 分數 | 分類 | 來源 | 標題 | 摘要 | 連結 |",
+    "| ---: | --- | --- | --- | --- | --- |",
+    ...items.map((item) => `| ${item.score} | ${item.category} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${(item.description || "").replace(/\|/g, "／")} | [來源](${item.url}) |`),
   ];
 
   if (errors.length) {
