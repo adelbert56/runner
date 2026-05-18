@@ -241,7 +241,7 @@ function toPublishedItem(item) {
     id: `${type}-${slugify(normalizedUrl || title)}`,
     type,
     title,
-    date: parseDate(item.checked_at),
+    date: parseDate(item.article_date || item.checked_at),
     source: item.source,
     category: type === "shoe" ? inferShoeCategory(title) : inferNewsCategory(title, item.description),
     summary: summarize(item, type),
@@ -362,7 +362,7 @@ async function main() {
   const raw = (await readJson(candidatesPath, [])).map((item) => ({ ...item, source_origin: "candidate" }));
   const editorial = (await readJson(editorialPath, [])).map((item) => ({ ...item, source_origin: "editorial" }));
   const previousContent = await readJson(outputPath, { items: [] });
-  const normalized = raw.map(toPublishedItem);
+  const normalized = raw.filter((item) => item.article_date).map(toPublishedItem);
   const previousInventory = Array.isArray(previousContent.items) ? previousContent.items.map(previousToPublishedItem) : [];
   const editorialInventory = editorial.map(toPublishedItem).map((item) => ({
     ...item,
