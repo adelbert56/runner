@@ -104,6 +104,15 @@ assertCheck(dataWorkflow.includes("runner/系統配置/營運儀表板.json") &&
 assertCheck(contentWorkflow.includes("site/data/content.json") && contentWorkflow.includes("runner/內容/內容品質報告.md"), "content auto-commit includes published content and quality report");
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
 
+for (const [name, workflow] of [
+  ["weather", weatherWorkflow],
+  ["race data", dataWorkflow],
+  ["content", contentWorkflow],
+]) {
+  assertCheck(workflow.includes("pages: write") && workflow.includes("id-token: write"), `${name} workflow can deploy Pages after scheduled updates`);
+  assertCheck(workflow.includes("actions/upload-pages-artifact@v3") && workflow.includes("actions/deploy-pages@v4"), `${name} workflow deploys Pages directly`);
+}
+
 assertCheck(
   includesInOrder(dataWorkflow, [
     "Run race scrapers",
@@ -111,15 +120,27 @@ assertCheck(
     "Apply manual supplements and quality report",
     "Run strict data quality gate",
     "Update race weather forecast",
+    "Sync site race data",
     "Build operational dashboard",
     "Validate generated files",
     "Commit data updates",
+    "Setup Pages",
+    "Upload site",
+    "Deploy",
   ]),
-  "race data workflow validates generated files before commit"
+  "race data workflow syncs, validates, commits, and deploys in order"
 );
 assertCheck(
-  includesInOrder(weatherWorkflow, ["Update race weather forecast", "Validate generated files", "Commit weather updates"]),
-  "weather workflow validates generated files before commit"
+  includesInOrder(weatherWorkflow, [
+    "Update race weather forecast",
+    "Sync site race data",
+    "Validate generated files",
+    "Commit weather updates",
+    "Setup Pages",
+    "Upload site",
+    "Deploy",
+  ]),
+  "weather workflow syncs, validates, commits, and deploys in order"
 );
 assertCheck(
   includesInOrder(contentWorkflow, [
@@ -128,8 +149,11 @@ assertCheck(
     "Build operational dashboard",
     "Validate scripts",
     "Commit content candidates",
+    "Setup Pages",
+    "Upload site",
+    "Deploy",
   ]),
-  "content workflow validates generated files before commit"
+  "content workflow validates, commits, and deploys in order"
 );
 
 const failed = checks.filter((check) => !check.ok);

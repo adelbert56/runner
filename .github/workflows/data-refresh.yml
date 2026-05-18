@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: race-data-refresh
@@ -15,6 +17,9 @@ concurrency:
 
 jobs:
   refresh:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -53,6 +58,9 @@ jobs:
       - name: Update race weather forecast
         run: npm run data:weather
 
+      - name: Sync site race data
+        run: npm run data:sync
+
       - name: Build operational dashboard
         run: npm run ops:dashboard
 
@@ -83,3 +91,15 @@ jobs:
             runner/系統配置/營運儀表板.md
             runner/系統配置/營運儀表板.json
             site/data/races.json
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
