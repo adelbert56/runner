@@ -148,6 +148,17 @@ function compact(text) {
     .trim();
 }
 
+function normalizeUrl(url) {
+  try {
+    const parsed = new URL(url);
+    parsed.hash = "";
+    parsed.search = "";
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return String(url || "").replace(/[?#].*$/, "").replace(/\/$/, "");
+  }
+}
+
 function decodeHtml(text) {
   return compact(text)
     .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
@@ -155,6 +166,67 @@ function decodeHtml(text) {
     .replace(/&#39;/g, "'")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">");
+}
+
+function monthNumber(month) {
+  const months = {
+    jan: "01",
+    feb: "02",
+    mar: "03",
+    apr: "04",
+    may: "05",
+    jun: "06",
+    jul: "07",
+    aug: "08",
+    sep: "09",
+    sept: "09",
+    oct: "10",
+    nov: "11",
+    dec: "12",
+  };
+  return months[String(month || "").toLowerCase().replace(/[^a-z]/g, "").slice(0, 4)]
+    || months[String(month || "").toLowerCase().replace(/[^a-z]/g, "").slice(0, 3)]
+    || "";
+}
+
+function normalizeDateText(text) {
+  const value = decodeHtml(text);
+  const iso = value.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
+  if (iso) {
+    return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  }
+
+  const zh = value.match(/\b(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\b/);
+  if (zh) {
+    return `${zh[1]}-${String(zh[2]).padStart(2, "0")}-${String(zh[3]).padStart(2, "0")}`;
+  }
+
+  const english = value.match(/\b(\d{1,2})\s+([A-Za-z]{3,9})\.?,?\s+(20\d{2})\b/);
+  if (english) {
+    const month = monthNumber(english[2]);
+    return month ? `${english[3]}-${month}-${String(english[1]).padStart(2, "0")}` : "";
+  }
+
+  return "";
+}
+
+function extractDateText(html) {
+  const datePatterns = [
+    /<meta[^>]+(?:property|name|itemprop)=["'](?:article:published_time|article:modified_time|og:updated_time|pubdate|date|datePublished|dateModified)["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name|itemprop)=["'](?:article:published_time|article:modified_time|og:updated_time|pubdate|date|datePublished|dateModified)["'][^>]*>/i,
+    /<time[^>]+datetime=["']([^"']+)["'][^>]*>/i,
+    /"datePublished"\s*:\s*"([^"]+)"/i,
+    /"dateModified"\s*:\s*"([^"]+)"/i,
+    /\b20\d{2}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日\b/i,
+    /\b\d{1,2}\s+[A-Za-z]{3,9}\.?,?\s+20\d{2}\b/i,
+  ];
+
+  for (const pattern of datePatterns) {
+    const match = html.match(pattern);
+    const date = normalizeDateText(match?.[1] || match?.[0] || "");
+    if (date) return date;
+  }
+  return "";
 }
 
 function absoluteUrl(href, baseUrl) {
@@ -240,6 +312,10 @@ function extractMetaDescription(html) {
   return "";
 }
 
+function extractMetaDate(html) {
+  return extractDateText(html);
+}
+
 async function fetchArticleMetadata(item) {
   try {
     const response = await fetch(item.url, {
@@ -255,10 +331,12 @@ async function fetchArticleMetadata(item) {
     const html = await response.text();
     const title = extractMetaTitle(html);
     const description = extractMetaDescription(html);
+    const articleDate = extractMetaDate(html);
     return {
       ...item,
       title: title && title.length >= 6 ? title : item.title,
       description: description || item.description || "",
+      article_date: articleDate || item.article_date || "",
       category: classify(title && title.length >= 6 ? title : item.title),
       score: title && title.length >= 6 ? Math.max(item.score, scoreTitle(title, { priority: item.score - 1 })) : item.score,
     };
@@ -285,6 +363,8 @@ function extractLinks(html, source) {
       continue;
     }
 
+    const nearby = html.slice(Math.max(0, match.index - 500), Math.min(html.length, anchorPattern.lastIndex + 700));
+
     links.push({
       checked_at: today,
       source: source.name,
@@ -293,6 +373,7 @@ function extractLinks(html, source) {
       url,
       category: classify(title),
       score,
+      article_date: extractDateText(nearby),
       suggested_for: "待判斷",
       runner_takeaway: "待代理人摘要",
       publish_status: "candidate",
@@ -308,6 +389,7 @@ async function fetchSource(source) {
       "accept": "text/html,application/xhtml+xml",
       "user-agent": "RunnerPlazaContentBot/0.1 (+https://github.com/adelbert56/runner)",
     },
+    signal: AbortSignal.timeout(12000),
   });
 
   if (!response.ok) {
@@ -364,7 +446,7 @@ function dedupe(items) {
   return items
     .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
     .filter((item) => {
-      const key = item.url.replace(/[?#].*$/, "");
+      const key = normalizeUrl(item.url);
       if (seen.has(key)) {
         return false;
       }
@@ -385,9 +467,9 @@ function buildReport(items, errors) {
     "",
     `候選筆數：${items.length}`,
     "",
-    "| 分數 | 分類 | 來源 | 標題 | 摘要 | 連結 |",
-    "| ---: | --- | --- | --- | --- | --- |",
-    ...items.map((item) => `| ${item.score} | ${item.category} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${(item.description || "").replace(/\|/g, "／")} | [來源](${item.url}) |`),
+    "| 分數 | 日期 | 分類 | 來源 | 標題 | 摘要 | 連結 |",
+    "| ---: | --- | --- | --- | --- | --- | --- |",
+    ...items.map((item) => `| ${item.score} | ${item.article_date || item.checked_at} | ${item.category} | ${item.source} | ${item.title.replace(/\|/g, "／")} | ${(item.description || "").replace(/\|/g, "／")} | [來源](${item.url}) |`),
   ];
 
   if (errors.length) {

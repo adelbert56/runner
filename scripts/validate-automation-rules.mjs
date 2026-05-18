@@ -77,6 +77,16 @@ assertCheck(
   "site date calculations use Asia/Taipei today"
 );
 assertCheck(raceDbRaw === siteRaceRaw, "runner race database and site race data are identical");
+assertCheck(contentCandidateScript.includes("function extractMetaDate"), "content crawler extracts source article dates");
+assertCheck(contentCandidateScript.includes("article_date"), "content candidates preserve source article dates");
+assertCheck(
+  publishContentScript.includes("parseDate(item.article_date || item.checked_at)"),
+  "published content dates prefer source article date before checked date"
+);
+assertCheck(
+  publishContentScript.includes("raw.filter((item) => item.article_date).map(toPublishedItem)"),
+  "auto-published content skips candidates without source article dates"
+);
 
 const dateSensitiveScripts = [
   ["scripts/update-race-weather.mjs", weatherScript],
