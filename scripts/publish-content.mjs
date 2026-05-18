@@ -241,7 +241,7 @@ function toPublishedItem(item) {
     id: `${type}-${slugify(normalizedUrl || title)}`,
     type,
     title,
-    date: parseDate(item.checked_at),
+    date: parseDate(item.article_date || item.checked_at),
     source: item.source,
     category: type === "shoe" ? inferShoeCategory(title) : inferNewsCategory(title, item.description),
     summary: summarize(item, type),
