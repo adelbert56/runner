@@ -3,8 +3,8 @@ name: Collect content candidates
 on:
   workflow_dispatch:
   schedule:
-    # 09:00 Asia/Taipei every Monday.
-    - cron: "0 1 * * 1"
+    # 09:00 Asia/Taipei every Monday, Wednesday, and Friday.
+    - cron: "0 1 * * 1,3,5"
 
 permissions:
   contents: write
