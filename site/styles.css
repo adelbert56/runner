@@ -228,10 +228,11 @@ h1 {
 }
 
 .announcement-strip {
-  position: relative;
-  z-index: 3;
+  position: sticky;
+  top: 82px;
+  z-index: 70;
   width: min(1120px, calc(100% - 48px));
-  margin: -28px auto 0;
+  margin: 10px auto 0;
 }
 
 .ticker-shell {
@@ -275,7 +276,7 @@ h1 {
   gap: 12px;
   padding: 0 12px;
   white-space: nowrap;
-  animation: ticker-scroll 58s linear infinite;
+  animation: ticker-scroll 112s linear infinite;
 }
 
 .ticker-shell:hover .ticker-track,
@@ -3426,6 +3427,7 @@ h3 {
 
   .announcement-strip {
     width: calc(100% - 24px);
+    top: 72px;
     margin-top: 10px;
   }
 
@@ -3443,7 +3445,7 @@ h3 {
   .ticker-track {
     gap: 8px;
     padding: 0 8px;
-    animation-duration: 66s;
+    animation-duration: 132s;
   }
 
   .ticker-item {
