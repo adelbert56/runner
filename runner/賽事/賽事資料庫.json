@@ -143,16 +143,16 @@
     },
     "weather_forecast": {
       "forecast_for": "2026-05-24",
-      "updated_at": "2026-05-19T12:40:28.180Z",
+      "updated_at": "2026-05-19T23:53:26.667Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "南投縣",
-      "summary": "南投縣縣市預報，毛毛雨，20-31°C，降雨機率 59%，最大風速 10 km/h",
+      "summary": "南投縣縣市預報，毛毛雨，19-31°C，降雨機率 63%，最大風速 10 km/h",
       "weather_code": 51,
-      "temperature_min_c": 20.4,
-      "temperature_max_c": 31.2,
-      "precipitation_probability_max": 59,
-      "wind_speed_max_kmh": 9.7
+      "temperature_min_c": 18.8,
+      "temperature_max_c": 31.1,
+      "precipitation_probability_max": 63,
+      "wind_speed_max_kmh": 9.9
     },
     "first_seen_at": "2026-05-16"
   },
