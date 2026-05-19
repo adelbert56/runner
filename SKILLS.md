@@ -30,6 +30,7 @@
 - 平台解析要保守：沒抓準就寫入待補或報告，不要用泛用文字硬塞主辦、費用、名額。
 - 每筆重要賽事盡量保留 `verified_at`、`source_platform`、`is_official_direct`、`verification_note` 與缺漏欄位。
 - 已開報但還缺地點、主辦、費用、名額時，要進「開報後待補資料」報告，因為這通常代表爬蟲規則不足。
+- 同一場賽事可能被不同來源抓成短名與完整副標題，例如 `2026 臺中國際馬拉松` 與 `2026臺中國際馬拉松-酷城市．酷運動 水岸花都`。人工補充必須為所有 crawler 可能輸出的名稱建立同日期 alias，否則 GitHub Actions 會在 strict quality gate 被同一場賽事的另一個名稱卡住。
 - 停辦、報名中、即將截止、已截止、賽事已過期都要用狀態與顏色分清楚。
 - 過期超過一個月的賽事收進歷史；近期過期可以留在清單但視覺弱化。
 
@@ -76,6 +77,7 @@
 - 自動化規則修改：`npm run check` 必須跑過 `scripts/validate-automation-rules.mjs`，它會檢查台灣日期、workflow cron、auto-commit file pattern、Pages 發布來源、資料快取版本與賽事資料同步。
 - Python 修改：`uv run python -m compileall scripts`。
 - 資料流程修改：`uv run python scripts/enrich_platforms.py --dry-run` 後再跑 `npm run data:refresh`。
+- 手動或排程爬蟲驗證不能只看 `Run race scrapers` 成功。必須確認整個 `Refresh race data` run 結論為 success，且 `Run strict data quality gate`、`Commit data updates`、`Deploy` 都通過；若 strict gate 失敗，代表資料沒有部署，前台不會更新。
 - 收尾驗證：`npm run data:refresh`、`npm run content:refresh`、`npm run ops:dashboard`、`npm run check`、`npm run data:quality:strict`、`npm run content:quality:strict`、`uv run python -m compileall scripts`。
 - 營運狀態檢查：`npm run ops:dashboard`，看賽事完整度、官方直連率、開報後待補與內容候選量。
 - 上線判斷優先看「上線可用完整度、開報後待補、報名日期異常、內容品質、UI layout」。原始完整度包含遠期尚未開報賽事，只能作為長期追蹤，不應單獨阻擋上線。
@@ -102,5 +104,7 @@
 - 若使用者反覆指出同類問題，將它升級成固定驗證項目。
 - Codex 本機沙盒常會讓外部 HTTP 顯示 `fetch failed`；內容或官方來源是否真的壞，要用 GitHub Actions 或授權網路執行結果判斷。
 - 排程觀察時，如果 GitHub Actions 成功但沒有 auto-commit，通常代表資料無變動；不要誤判成排程失效。
+- 排程觀察時，如果 GitHub Actions 根本沒有該時段的 run，不能說「爬蟲有跑」。先用 `gh run list --workflow data-refresh.yml` 確認，再視需要手動 `gh workflow run data-refresh.yml --ref main`。手動跑完也要看最終 conclusion，不要只看中途 step。
+- 2026-05-19 的事故紀錄：週二 18:00 的 `Refresh race data` 沒有自動出現 run；手動觸發後 scraper 抓到 `+1 new`，但 strict gate 因兩個臺中國際馬拉松名稱缺官方連結、精確地點、主辦、費用、名額而失敗。修正方式是補 `runner/賽事/人工補充.json` 的短名與完整名 alias，重跑後才完成品質、公告、auto-commit 與 Pages deploy。
 - 早上執行的 GitHub Actions 不能用 UTC 日期判斷台灣「今天」。天氣、賽前倒數、開報窗口這類邏輯要用 Asia/Taipei 日期，否則 07:00 排程會把今天算成前一天。
 - `scripts/lib/time.mjs` 是 Node 自動化腳本的台灣日期來源；不要在新的資料/內容/儀表板腳本重新寫 `new Date().toISOString().slice(0, 10)` 當業務日期。

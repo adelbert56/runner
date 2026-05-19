@@ -22,6 +22,7 @@
 4. `npm run data:quality:strict`
    - GitHub Actions 發布前品質閘門。
    - 若開報後仍缺核心欄位、報名日期異常，或起跑時間抓到非起跑時程等高風險問題，流程會失敗並停止提交。
+   - 注意：`Run race scrapers` 成功只代表有抓資料，不代表網站已更新。只有 strict gate、auto-commit 與 Pages deploy 都成功，才算完整更新。
 5. `npm run data:weather`
    - 只處理距離賽事日 0 到 7 天內的賽事。
    - 依縣市座標查詢 Open-Meteo 當日預報，寫入 `weather_forecast`。
@@ -42,6 +43,7 @@
 - 只有平台爬蟲抓不到或欄位仍缺時，才進人工待補清單。
 - 人工查到的欄位寫入 `runner/賽事/人工補充.json`。
 - 補完後執行 `npm run data:refresh`。
+- 若同一場賽事有多個名稱版本，人工補充要為同日期的短名、完整副標題、平台標題各建立一筆。例：`2026 臺中國際馬拉松` 與 `2026臺中國際馬拉松-酷城市．酷運動 水岸花都` 都要補，避免其中一個名稱在 GitHub Actions strict gate 繼續失敗。
 
 ## 查證欄位
 
@@ -67,6 +69,14 @@
 5. 若前端 CSS/JS 有修改，更新 `site/index.html` 的版本參數以避開瀏覽器快取。
 6. 收尾前建議再跑 `npm run ops:dashboard`，確認賽事、內容與待補數據都有反映到營運儀表板。
 7. 上線判斷優先看「上線可用完整度、開報後待補、報名日期異常、內容品質」；原始資料完整度包含遠期尚未開報賽事，未達 80% 不一定代表不能上線。
+
+## GitHub Actions 排程判讀
+
+- 問「今天爬蟲有沒有跑」時，先查 `gh run list --workflow data-refresh.yml`，不要只看 workflow 啟用狀態或本地資料日期。
+- 預定時間沒有 run：記錄為「未觸發」，可手動 `gh workflow run data-refresh.yml --ref main`。
+- Run 成功但無 commit：通常是資料無變動，仍要看 log 是否有 `Commit data updates` 顯示 no changes。
+- Run 失敗在 `Run strict data quality gate`：代表爬蟲有執行，但資料未發布。先看 `Opened registration gaps`、日期異常與起跑時間報告，再補 parser 或 `runner/賽事/人工補充.json`。
+- 完整成功定義：workflow conclusion success，且 `Run strict data quality gate`、`Build announcement and automation data`、`Commit data updates`、`Deploy` 都通過。
 
 ## 本機沙盒與來源健康度
 
