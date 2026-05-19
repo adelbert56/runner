@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260516-pro16";
+const DATA_VERSION = "20260516-pro17";
 const TODAY = getTodayString();
 
 const state = {
@@ -42,7 +42,7 @@ const els = {
   nextRaceCountdown: document.querySelector("#next-race-countdown"),
   nextRaceName: document.querySelector("#next-race-name"),
   heroNextRace: document.querySelector("#hero-next-race"),
-  announcementTicker: document.querySelector("#announcement-ticker"),
+  announcementBoard: document.querySelector("#announcement-board"),
   search: document.querySelector("#race-search"),
   raceList: document.querySelector("#race-list"),
   monthList: document.querySelector("#month-list"),
@@ -1520,7 +1520,7 @@ function buildAnnouncementItems() {
       return;
     }
     seen.add(itemKey);
-    items.push({ key, text });
+    items.push({ key, type, text });
   };
 
   getLatestCrawlerRaces().forEach((race) => {
@@ -1538,23 +1538,35 @@ function buildAnnouncementItems() {
     addRaceItem(race, "ending", `快截止：${formatTickerRaceName(race)}｜${formatShortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
   });
 
-  runnerTickerLines.forEach((text) => items.push({ text }));
-  return items.length ? items : [{ text: "公告：目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。" }];
+  runnerTickerLines.forEach((text) => items.push({ type: "talk", text }));
+  return items.length ? items : [{ type: "notice", text: "公告：目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。" }];
 }
 
-function renderAnnouncementTicker() {
-  if (!els.announcementTicker) {
+function getAnnouncementMeta(type) {
+  const meta = {
+    latest: { label: "最新爬蟲", tone: "primary" },
+    opening: { label: "快開報", tone: "blue" },
+    ending: { label: "快截止", tone: "warning" },
+    talk: { label: "跑者碎念", tone: "muted" },
+    notice: { label: "公告", tone: "muted" },
+  };
+  return meta[type] || meta.notice;
+}
+
+function renderAnnouncementBoard() {
+  if (!els.announcementBoard) {
     return;
   }
 
-  const repeatedItems = [...buildAnnouncementItems(), ...buildAnnouncementItems()];
-  els.announcementTicker.innerHTML = repeatedItems
+  const items = buildAnnouncementItems();
+  els.announcementBoard.innerHTML = items
     .map((item) => {
-      const content = `<span>${escapeHtml(item.text)}</span>`;
-      if (!item.key) {
-        return `<span class="ticker-item">${content}</span>`;
-      }
-      return `<button class="ticker-item ticker-button" type="button" data-ticker-race="${escapeHtml(item.key)}">${content}</button>`;
+      const meta = getAnnouncementMeta(item.type);
+      const tag = `<span class="announcement-tag announcement-tag-${escapeHtml(meta.tone)}">${escapeHtml(meta.label)}</span>`;
+      const content = `${tag}<span>${escapeHtml(item.text)}</span>`;
+      return item.key
+        ? `<button class="announcement-card" type="button" data-announcement-race="${escapeHtml(item.key)}">${content}</button>`
+        : `<div class="announcement-card announcement-card-static">${content}</div>`;
     })
     .join("");
 }
@@ -2876,8 +2888,8 @@ function bindEvents() {
 
     const button = event.target.closest("[data-content-favorite]");
     if (!button) {
-      const tickerRace = event.target.closest("[data-ticker-race]");
-      if (tickerRace) {
+      const announcementRace = event.target.closest("[data-announcement-race]");
+      if (announcementRace) {
         event.preventDefault();
         state.county = "all";
         state.difficulty = "all";
@@ -2890,7 +2902,7 @@ function bindEvents() {
         setActivePanel("races");
         render();
         requestAnimationFrame(() => {
-          const race = state.races.find((item) => getRaceKey(item) === tickerRace.dataset.tickerRace);
+          const race = state.races.find((item) => getRaceKey(item) === announcementRace.dataset.announcementRace);
           const card = race ? document.getElementById(raceDomId(race)) : null;
           card?.scrollIntoView({ behavior: "smooth", block: "center" });
           card?.querySelector("details")?.setAttribute("open", "");
@@ -3062,7 +3074,7 @@ async function init() {
   setActivePanel(window.location.hash.replace("#", "") || "races", false);
   try {
     await loadRaces();
-    renderAnnouncementTicker();
+    renderAnnouncementBoard();
     renderStats();
     render();
     renderPlan();

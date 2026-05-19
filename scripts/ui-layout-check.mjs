@@ -10,6 +10,7 @@ const screenshotDir = resolve(root, "output/playwright");
 
 const panels = [
   { id: "races", label: "賽事" },
+  { id: "announcements", label: "公告" },
   { id: "gear", label: "跑鞋" },
   { id: "academy", label: "入門" },
   { id: "training", label: "練跑" },
