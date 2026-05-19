@@ -227,6 +227,106 @@ h1 {
   font-size: clamp(1.04rem, 1.8vw, 1.22rem);
 }
 
+.announcement-strip {
+  position: relative;
+  z-index: 3;
+  width: min(1120px, calc(100% - 48px));
+  margin: -28px auto 0;
+}
+
+.ticker-shell {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  overflow: hidden;
+  min-height: 54px;
+  border: 1px solid rgba(245, 200, 76, 0.5);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(21, 83, 56, 0.96), rgba(31, 42, 36, 0.94)),
+    var(--green-dark);
+  color: #fffdf8;
+  box-shadow: 0 16px 34px rgba(21, 83, 56, 0.2);
+}
+
+.ticker-label {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  min-width: 78px;
+  padding: 0 18px;
+  background: var(--yellow);
+  color: #172319;
+  font-size: 0.82rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.ticker-viewport {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ticker-track {
+  display: inline-flex;
+  width: max-content;
+  min-width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  white-space: nowrap;
+  animation: ticker-scroll 58s linear infinite;
+}
+
+.ticker-shell:hover .ticker-track,
+.ticker-shell:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.08);
+  color: inherit;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.ticker-item::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--yellow);
+}
+
+.ticker-button {
+  cursor: pointer;
+}
+
+.ticker-button:hover,
+.ticker-button:focus-visible {
+  background: rgba(255, 253, 248, 0.16);
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 .button {
   display: inline-flex;
   min-height: 44px;
@@ -3324,6 +3424,34 @@ h3 {
     line-height: 1.6;
   }
 
+  .announcement-strip {
+    width: calc(100% - 24px);
+    margin-top: 10px;
+  }
+
+  .ticker-shell {
+    min-height: 48px;
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .ticker-label {
+    min-width: 58px;
+    padding: 0 10px;
+    font-size: 0.72rem;
+  }
+
+  .ticker-track {
+    gap: 8px;
+    padding: 0 8px;
+    animation-duration: 66s;
+  }
+
+  .ticker-item {
+    min-height: 34px;
+    padding: 6px 9px;
+    font-size: 0.82rem;
+  }
+
   .section {
     padding: 34px 20px;
   }
@@ -4055,5 +4183,13 @@ h3 {
     font-size: 0.78rem;
     justify-content: center;
     text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    width: auto;
+    overflow-x: auto;
+    animation: none;
   }
 }
