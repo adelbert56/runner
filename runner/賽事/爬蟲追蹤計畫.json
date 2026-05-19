@@ -12,7 +12,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 126 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 124 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -45,7 +45,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 140 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 138 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -78,7 +78,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 153 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 151 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -99,39 +99,6 @@
     }
   },
   {
-    "race_id": "b2667ebb-500b-435d-90ec-9978a2f8b0b1",
-    "race_name": "2026 臺中國際馬拉松",
-    "race_date": "2026-10-18",
-    "race_county": "臺中市",
-    "source_platform": "運動筆記",
-    "is_official_direct": false,
-    "priority_score": 20,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-06-01",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 154 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      "official_registration_link",
-      "registration_opens_at",
-      "registration_deadline",
-      "precise_location",
-      "start_times",
-      "organizer",
-      "fees",
-      "quota"
-    ],
-    "current_links": {
-      "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13034&subtitle=2026+%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13034&subtitle=2026+%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE"
-    }
-  },
-  {
     "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
     "race_name": "2026台灣米倉田中馬拉松",
     "race_date": "2026-11-08",
@@ -144,7 +111,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 175 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 173 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -177,7 +144,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 182 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 180 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -210,7 +177,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 182 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 180 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -243,7 +210,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 210 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 208 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -276,7 +243,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 216 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 214 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -309,7 +276,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 216 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 214 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -342,7 +309,7 @@
       "status_label": "未來再查",
       "next_check_date": "2026-07-21",
       "cadence": "future",
-      "reason": "距離賽事 245 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 243 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       "official_registration_link",
@@ -375,7 +342,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 182 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 180 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -405,7 +372,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-05-17",
+      "next_check_date": "2026-05-19",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },
@@ -424,27 +391,30 @@
     }
   },
   {
-    "race_id": "276e7a4e-b2f1-43ac-b7aa-462880d806b0",
-    "race_name": "2026 松鶴越野",
-    "race_date": "2026-05-17",
-    "race_county": "南投縣",
-    "source_platform": "bao-ming、運動筆記",
+    "race_id": "b2667ebb-500b-435d-90ec-9978a2f8b0b1",
+    "race_name": "2026 臺中國際馬拉松",
+    "race_date": "2026-10-18",
+    "race_county": "臺中市",
+    "source_platform": "運動筆記",
     "is_official_direct": true,
-    "priority_score": 0,
+    "priority_score": 6,
     "tracking": {
-      "status": "pre_race_recheck",
-      "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-05-17",
-      "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 0 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 152 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
-    "missing": [],
+    "missing": [
+      "registration_opens_at",
+      "registration_deadline"
+    ],
     "current_links": {
-      "registration_link": "https://bao-ming.com/eb/content/6866#reg",
-      "official_event_url": "https://www.paobaodao.com/tw/race/mountain-wow-songhe-trail-run/",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12902&subtitle=2026+%E6%9D%BE%E9%B6%B4%E8%B6%8A%E9%87%8E",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12902",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%9D%BE%E9%B6%B4%E8%B6%8A%E9%87%8E"
+      "registration_link": "https://signup.lohasnet.tw/signup/4247",
+      "official_event_url": "https://lohasnet.tw/Taichungmarathon2026/",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13034&subtitle=2026+%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE"
     }
   },
   {
@@ -458,9 +428,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-05-17",
+      "next_check_date": "2026-05-19",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 7 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "reason": "距離賽事 5 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
     },
     "missing": [],
     "current_links": {
