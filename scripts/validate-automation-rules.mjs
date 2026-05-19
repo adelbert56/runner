@@ -45,6 +45,7 @@ const [
   contentWorkflow,
   quipsWorkflow,
   pagesWorkflow,
+  ciWorkflow,
 ] = await Promise.all([
   text("package.json"),
   text("site/index.html"),
@@ -66,6 +67,7 @@ const [
   text(".github/workflows/content-candidates.yml"),
   text(".github/workflows/runner-quips-refresh.yml"),
   text(".github/workflows/pages.yml"),
+  text(".github/workflows/ci.yml"),
 ]);
 
 const packageJson = JSON.parse(packageJsonRaw);
@@ -133,7 +135,19 @@ assertCheck(dataWorkflow.includes("site/data/announcements.json") && quipsWorkfl
 assertCheck(dataWorkflow.includes("site/data/automation-health.json") && contentWorkflow.includes("site/data/automation-health.json"), "automation health data is committed by scheduled workflows");
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
 assertCheck(pagesWorkflow.includes("actions/setup-node@v4"), "Pages deploy installs Node before derived data builds");
+assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");
 assertCheck(pagesWorkflow.includes("npm run announcements:build") && pagesWorkflow.includes("npm run automation:health"), "Pages deploy rebuilds derived site data");
+
+for (const [name, workflow] of [
+  ["ci", ciWorkflow],
+  ["weather", weatherWorkflow],
+  ["race data", dataWorkflow],
+  ["content", contentWorkflow],
+  ["runner quips", quipsWorkflow],
+  ["pages", pagesWorkflow],
+]) {
+  assertCheck(workflow.includes('FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"'), `${name} workflow opts into Node 24 action runtime`);
+}
 
 for (const [name, workflow] of [
   ["weather", weatherWorkflow],
