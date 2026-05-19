@@ -11,7 +11,7 @@
     <link rel="shortcut icon" href="./favicon.ico?v=20260515-icon1">
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=20260515-icon1">
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=20260515-icon1">
-    <link rel="stylesheet" href="./styles.css?v=20260516-pro16">
+    <link rel="stylesheet" href="./styles.css?v=20260516-pro18">
   </head>
   <body>
     <header class="site-header">
@@ -31,6 +31,7 @@
       </a>
       <nav class="main-nav" aria-label="主要導覽">
         <a href="#races" data-panel-link="races">賽事</a>
+        <a href="#announcements" data-panel-link="announcements">公告</a>
         <a href="#academy" data-panel-link="academy">入門</a>
         <a href="#training" data-panel-link="training">練跑</a>
         <a href="#gear" data-panel-link="gear">跑鞋</a>
@@ -77,17 +78,19 @@
         </div>
       </section>
 
-      <section class="announcement-strip" aria-label="公告跑馬燈">
-        <div class="ticker-shell">
-          <span class="ticker-label">公告</span>
-          <div class="ticker-viewport">
-            <div class="ticker-track" id="announcement-ticker" aria-live="polite">
-              <span class="ticker-item">整理最新爬蟲公告中...</span>
-            </div>
+      <section class="section announcement-section page-panel" id="announcements" aria-labelledby="announcements-title" data-panel="announcements">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">公告中心</p>
+            <h2 id="announcements-title">賽事公告與提醒</h2>
+            <p class="section-lead">集中整理最新爬蟲批次、快開報、快截止，以及一點跑者碎念，不再佔用賽事列表版面。</p>
           </div>
         </div>
+
+        <div class="announcement-console" id="announcement-board" aria-live="polite">
+          <div class="empty-state">公告整理中...</div>
+        </div>
       </section>
-      <div class="announcement-spacer" aria-hidden="true"></div>
 
       <section class="section race-section page-panel active" id="races" aria-labelledby="races-title" data-panel="races">
         <div class="section-heading">
@@ -733,6 +736,6 @@
 
     <button class="back-top" type="button" id="back-top" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <script src="./app.js?v=20260516-pro16"></script>
+    <script src="./app.js?v=20260516-pro18"></script>
   </body>
 </html>

@@ -35,6 +35,7 @@ assertCheck(/const TODAY = getTodayString\(\)/.test(app), "front-end uses getTod
 assertCheck(/shoeContainer\.innerHTML = shoes\.map/.test(app), "published shoe content replaces static fallback when JSON loads");
 assertCheck(/newsContainer\.innerHTML = news\.map/.test(app), "published news content replaces static fallback when JSON loads");
 assertCheck(/\?v=20260516-pro\d+/.test(html), "asset version parameter was bumped");
+assertCheck(/runner-quips\.json\?v=\$\{DATA_VERSION\}/.test(app), "runner quips load from scheduled data file");
 assertCheck(items.length >= 10, `published content count is usable (${items.length})`);
 assertCheck(shoeCount >= 10, `published shoe count reaches target (${shoeCount})`);
 assertCheck(newsCount >= 10, `published news count reaches target (${newsCount})`);

@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260516-pro16";
+const DATA_VERSION = "20260516-pro18";
 const TODAY = getTodayString();
 
 const state = {
@@ -42,7 +42,7 @@ const els = {
   nextRaceCountdown: document.querySelector("#next-race-countdown"),
   nextRaceName: document.querySelector("#next-race-name"),
   heroNextRace: document.querySelector("#hero-next-race"),
-  announcementTicker: document.querySelector("#announcement-ticker"),
+  announcementBoard: document.querySelector("#announcement-board"),
   search: document.querySelector("#race-search"),
   raceList: document.querySelector("#race-list"),
   monthList: document.querySelector("#month-list"),
@@ -1451,13 +1451,40 @@ function renderStats() {
   }
 }
 
-const runnerTickerLines = [
-  "跑者碎念：配速可以慢，按下報名的手速不要太慢。",
-  "跑者碎念：跑步最難的不是上坡，是出門前那五分鐘。",
-  "跑者碎念：半馬是半馬，半夜買鞋不是訓練。",
-  "跑者碎念：補給要練，藉口不用，已經很熟。",
-  "跑者碎念：先收藏再說，腿會不會答應晚點再談。",
+const fallbackRunnerQuips = [
+  "配速可以慢，按下報名的手速不要太慢。",
+  "跑步最難的不是上坡，是出門前那五分鐘。",
+  "半馬是半馬，半夜買鞋不是訓練。",
+  "補給要練，藉口不用，已經很熟。",
+  "先收藏再說，腿會不會答應晚點再談。",
+  "今天先看賽事，明天再跟膝蓋談判。",
+  "報名費刷下去，訓練計畫就突然變得很真實。",
+  "長跑沒有捷徑，但補給站可以當精神捷徑。",
+  "手錶說恢復不足，腦袋說新鞋到了。",
+  "成績可以慢慢來，起床鬧鐘不能每次都棄賽。",
+  "先把 3K 跑舒服，再跟 21K 講人生規劃。",
+  "跑前熱身五分鐘，跑後滑手機半小時，很均衡。",
+  "如果今天不想跑，至少可以把明天的藉口先刪掉。",
+  "坡度會過去，截報日不會等你。",
+  "跑量不是全部，但完全沒有跑量也很誠實。",
+  "收藏賽事不用配速，報名前才需要勇氣。",
+  "跑步最公平，偷懶的公里數都會記得很清楚。",
+  "補水要小口，買裝備的理由可以很大口。",
+  "每次說輕鬆跑，最後都在跟自己談判。",
+  "完賽獎牌會閃，隔天樓梯也會很有存在感。",
+  "今晚早睡是訓練的一部分，滑到半夜也是一種失誤。",
 ];
+let runnerQuips = fallbackRunnerQuips;
+
+const announcementTypePriority = {
+  new: 10,
+  opening: 20,
+  ending: 30,
+  closing: 40,
+  closed: 50,
+  talk: 90,
+  notice: 100,
+};
 
 function dateValue(dateText) {
   if (!dateText) {
@@ -1481,11 +1508,13 @@ function getLatestCrawlerRaces() {
   const upcoming = state.races.filter((race) => String(race.race_date) >= TODAY && !isCancelledRace(race));
   const latestScrapedAt = upcoming.reduce((latest, race) => Math.max(latest, dateValue(race.scraped_at)), 0);
   const oneDay = 24 * 60 * 60 * 1000;
+  const maxClosedDays = 14;
   const latestBatch = latestScrapedAt
     ? upcoming.filter((race) => latestScrapedAt - dateValue(race.scraped_at) <= oneDay)
     : upcoming;
 
   return latestBatch
+    .filter((race) => getRegistrationDisplayStatus(race) !== "已截止" || daysUntil(String(race.scraped_at || "").slice(0, 10)) >= -maxClosedDays)
     .sort((a, b) => dateValue(b.scraped_at) - dateValue(a.scraped_at) || sortRaceForBoard(a, b))
     .slice(0, 4);
 }
@@ -1510,51 +1539,105 @@ function getRegistrationEndingSoonRaces() {
     .slice(0, 3);
 }
 
+function getAnnouncementPriority(item) {
+  return Math.min(...(item.types || ["notice"]).map((type) => announcementTypePriority[type] || 100));
+}
+
+function rotateDailyItems(items, count) {
+  if (items.length <= count) {
+    return items;
+  }
+  const dayIndex = Math.max(0, dateDiffDays("2026-01-01") || 0);
+  const start = dayIndex % items.length;
+  return Array.from({ length: count }, (_, index) => items[(start + index) % items.length]);
+}
+
 function buildAnnouncementItems() {
-  const seen = new Set();
+  const raceItems = new Map();
   const items = [];
-  const addRaceItem = (race, type, text) => {
+  const addRaceItem = (race, type, detail) => {
     const key = getRaceKey(race);
-    const itemKey = `${type}:${key}`;
-    if (seen.has(itemKey)) {
-      return;
+    const item = raceItems.get(key) || {
+      key,
+      types: [],
+      title: formatTickerRaceName(race),
+      details: [],
+    };
+    if (!item.types.includes(type)) {
+      item.types.push(type);
     }
-    seen.add(itemKey);
-    items.push({ key, text });
+    if (detail && !item.details.includes(detail)) {
+      item.details.push(detail);
+    }
+    raceItems.set(key, item);
   };
 
   getLatestCrawlerRaces().forEach((race) => {
     const scrapedDate = race.scraped_at ? race.scraped_at.slice(0, 10).replaceAll("-", "/") : "最新批次";
-    addRaceItem(race, "latest", `最新爬蟲：${scrapedDate} 收到 ${formatTickerRaceName(race)}｜${getRegistrationDisplayStatus(race)}`);
+    const status = getRegistrationDisplayStatus(race);
+    addRaceItem(race, status === "已截止" ? "closed" : "new", `${scrapedDate} 收到`);
   });
 
   getRegistrationOpeningSoonRaces().forEach((race) => {
     const days = daysUntil(race.registration_opens_at);
-    addRaceItem(race, "opening", `快開報：${formatTickerRaceName(race)}｜${formatShortDate(race.registration_opens_at)} 開放報名｜倒數 ${days} 天`);
+    addRaceItem(race, "opening", `${formatShortDate(race.registration_opens_at)} 開放報名｜倒數 ${days} 天`);
   });
 
   getRegistrationEndingSoonRaces().forEach((race) => {
     const days = daysUntil(race.registration_deadline);
-    addRaceItem(race, "ending", `快截止：${formatTickerRaceName(race)}｜${formatShortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
+    addRaceItem(race, days <= 7 ? "ending" : "closing", `${formatShortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
   });
 
-  runnerTickerLines.forEach((text) => items.push({ text }));
-  return items.length ? items : [{ text: "公告：目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。" }];
+  items.push(
+    ...[...raceItems.values()].map((item) => ({
+      ...item,
+      types: item.types.sort((a, b) => announcementTypePriority[a] - announcementTypePriority[b]),
+    })).sort((a, b) => getAnnouncementPriority(a) - getAnnouncementPriority(b) || a.title.localeCompare(b.title, "zh-Hant"))
+  );
+  rotateDailyItems(runnerQuips, 2).forEach((text) => items.push({ types: ["talk"], title: text, details: ["每日更新"] }));
+  return items.length ? items : [{ types: ["notice"], title: "目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。", details: [] }];
 }
 
-function renderAnnouncementTicker() {
-  if (!els.announcementTicker) {
+function getAnnouncementMeta(type) {
+  const meta = {
+    new: { label: "新增賽事", tone: "primary" },
+    closed: { label: "已截止", tone: "closed" },
+    opening: { label: "報名開始", tone: "blue" },
+    ending: { label: "快截止", tone: "warning" },
+    closing: { label: "即將截止", tone: "warning" },
+    talk: { label: "跑者碎念", tone: "muted" },
+    notice: { label: "公告", tone: "muted" },
+  };
+  return meta[type] || meta.notice;
+}
+
+function renderAnnouncementBoard() {
+  if (!els.announcementBoard) {
     return;
   }
 
-  const repeatedItems = [...buildAnnouncementItems(), ...buildAnnouncementItems()];
-  els.announcementTicker.innerHTML = repeatedItems
+  const items = buildAnnouncementItems();
+  els.announcementBoard.innerHTML = items
     .map((item) => {
-      const content = `<span>${escapeHtml(item.text)}</span>`;
-      if (!item.key) {
-        return `<span class="ticker-item">${content}</span>`;
-      }
-      return `<button class="ticker-item ticker-button" type="button" data-ticker-race="${escapeHtml(item.key)}">${content}</button>`;
+      const tags = (item.types || ["notice"])
+        .map((type) => {
+          const meta = getAnnouncementMeta(type);
+          return `<span class="announcement-tag announcement-tag-${escapeHtml(meta.tone)}">${escapeHtml(meta.label)}</span>`;
+        })
+        .join("");
+      const details = item.details?.length
+        ? `<span class="announcement-detail">${escapeHtml(item.details.join("　"))}</span>`
+        : "";
+      const content = `
+        <span class="announcement-tags">${tags}</span>
+        <span class="announcement-content">
+          <strong class="announcement-title">${escapeHtml(item.title)}</strong>
+          ${details}
+        </span>
+      `;
+      return item.key
+        ? `<button class="announcement-card" type="button" data-announcement-race="${escapeHtml(item.key)}">${content}</button>`
+        : `<div class="announcement-card announcement-card-static">${content}</div>`;
     })
     .join("");
 }
@@ -2606,6 +2689,23 @@ async function loadPublishedContent() {
   }
 }
 
+async function loadRunnerQuips() {
+  try {
+    const response = await fetch(`./data/runner-quips.json?v=${DATA_VERSION}`, { cache: "no-cache" });
+    if (!response.ok) {
+      return;
+    }
+    const data = await response.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+    const validItems = items.map((item) => String(item || "").trim()).filter(Boolean);
+    if (validItems.length) {
+      runnerQuips = validItems;
+    }
+  } catch (error) {
+    console.info("Runner quips data not available", error);
+  }
+}
+
 function isContentFavorite(type, card) {
   const key = card.dataset.favoriteKey || contentFavoriteKey(type, card);
   return state.contentFavorites.has(key) || state.contentFavorites.has(legacyContentFavoriteKey(type, card));
@@ -2876,8 +2976,8 @@ function bindEvents() {
 
     const button = event.target.closest("[data-content-favorite]");
     if (!button) {
-      const tickerRace = event.target.closest("[data-ticker-race]");
-      if (tickerRace) {
+      const announcementRace = event.target.closest("[data-announcement-race]");
+      if (announcementRace) {
         event.preventDefault();
         state.county = "all";
         state.difficulty = "all";
@@ -2890,7 +2990,7 @@ function bindEvents() {
         setActivePanel("races");
         render();
         requestAnimationFrame(() => {
-          const race = state.races.find((item) => getRaceKey(item) === tickerRace.dataset.tickerRace);
+          const race = state.races.find((item) => getRaceKey(item) === announcementRace.dataset.announcementRace);
           const card = race ? document.getElementById(raceDomId(race)) : null;
           card?.scrollIntoView({ behavior: "smooth", block: "center" });
           card?.querySelector("details")?.setAttribute("open", "");
@@ -3056,13 +3156,14 @@ async function init() {
   setupDurationPickers();
   bindEvents();
   await loadPublishedContent();
+  await loadRunnerQuips();
   initContentSorting();
   loadPlanSettings();
   syncDurationPickersFromInputs();
   setActivePanel(window.location.hash.replace("#", "") || "races", false);
   try {
     await loadRaces();
-    renderAnnouncementTicker();
+    renderAnnouncementBoard();
     renderStats();
     render();
     renderPlan();

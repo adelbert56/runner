@@ -35,11 +35,13 @@ const [
   contentCandidateScript,
   publishContentScript,
   contentQualityScript,
+  runnerQuipsScript,
   raceDbRaw,
   siteRaceRaw,
   weatherWorkflow,
   dataWorkflow,
   contentWorkflow,
+  quipsWorkflow,
   pagesWorkflow,
 ] = await Promise.all([
   text("package.json"),
@@ -52,11 +54,13 @@ const [
   text("scripts/collect-content-candidates.mjs"),
   text("scripts/publish-content.mjs"),
   text("scripts/validate-content-data.mjs"),
+  text("scripts/refresh-runner-quips.mjs"),
   text("runner/賽事/賽事資料庫.json"),
   text("site/data/races.json"),
   text(".github/workflows/weather-refresh.yml"),
   text(".github/workflows/data-refresh.yml"),
   text(".github/workflows/content-candidates.yml"),
+  text(".github/workflows/runner-quips-refresh.yml"),
   text(".github/workflows/pages.yml"),
 ]);
 
@@ -96,6 +100,7 @@ const dateSensitiveScripts = [
   ["scripts/collect-content-candidates.mjs", contentCandidateScript],
   ["scripts/publish-content.mjs", publishContentScript],
   ["scripts/validate-content-data.mjs", contentQualityScript],
+  ["scripts/refresh-runner-quips.mjs", runnerQuipsScript],
 ];
 
 for (const [path, content] of dateSensitiveScripts) {
@@ -109,15 +114,18 @@ for (const [path, content] of dateSensitiveScripts) {
 assertCheck(weatherWorkflow.includes('cron: "0 23 * * *"'), "weather workflow runs at 07:00 Asia/Taipei");
 assertCheck(dataWorkflow.includes('cron: "0 10 * * 2,4"'), "race data workflow runs at 18:00 Asia/Taipei Tuesday/Thursday");
 assertCheck(contentWorkflow.includes('cron: "0 1 * * 1,3,5"'), "content workflow runs at 09:00 Asia/Taipei Monday/Wednesday/Friday");
+assertCheck(quipsWorkflow.includes('cron: "0 2 * * 1"'), "runner quips workflow runs at 10:00 Asia/Taipei Monday");
 assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && weatherWorkflow.includes("site/data/races.json"), "weather auto-commit includes both race data outputs");
 assertCheck(dataWorkflow.includes("runner/系統配置/營運儀表板.json") && dataWorkflow.includes("site/data/races.json"), "race data auto-commit includes dashboard and site data");
 assertCheck(contentWorkflow.includes("site/data/content.json") && contentWorkflow.includes("runner/內容/內容品質報告.md"), "content auto-commit includes published content and quality report");
+assertCheck(quipsWorkflow.includes("site/data/runner-quips.json") && quipsWorkflow.includes("runner/內容/跑者碎念候補.json"), "runner quips workflow commits active and backlog data");
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
 
 for (const [name, workflow] of [
   ["weather", weatherWorkflow],
   ["race data", dataWorkflow],
   ["content", contentWorkflow],
+  ["runner quips", quipsWorkflow],
 ]) {
   assertCheck(workflow.includes("pages: write") && workflow.includes("id-token: write"), `${name} workflow can deploy Pages after scheduled updates`);
   assertCheck(workflow.includes("actions/upload-pages-artifact@v3") && workflow.includes("actions/deploy-pages@v4"), `${name} workflow deploys Pages directly`);
@@ -164,6 +172,17 @@ assertCheck(
     "Deploy",
   ]),
   "content workflow validates, commits, and deploys in order"
+);
+assertCheck(
+  includesInOrder(quipsWorkflow, [
+    "Promote runner quips",
+    "Validate scripts",
+    "Commit runner quips",
+    "Setup Pages",
+    "Upload site",
+    "Deploy",
+  ]),
+  "runner quips workflow validates, commits, and deploys in order"
 );
 
 const failed = checks.filter((check) => !check.ok);
