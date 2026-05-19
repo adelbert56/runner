@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260516-pro17";
+const DATA_VERSION = "20260516-pro18";
 const TODAY = getTodayString();
 
 const state = {
@@ -1451,7 +1451,7 @@ function renderStats() {
   }
 }
 
-const runnerTickerLines = [
+const fallbackRunnerQuips = [
   "配速可以慢，按下報名的手速不要太慢。",
   "跑步最難的不是上坡，是出門前那五分鐘。",
   "半馬是半馬，半夜買鞋不是訓練。",
@@ -1474,6 +1474,7 @@ const runnerTickerLines = [
   "完賽獎牌會閃，隔天樓梯也會很有存在感。",
   "今晚早睡是訓練的一部分，滑到半夜也是一種失誤。",
 ];
+let runnerQuips = fallbackRunnerQuips;
 
 const announcementTypePriority = {
   new: 10,
@@ -1507,11 +1508,13 @@ function getLatestCrawlerRaces() {
   const upcoming = state.races.filter((race) => String(race.race_date) >= TODAY && !isCancelledRace(race));
   const latestScrapedAt = upcoming.reduce((latest, race) => Math.max(latest, dateValue(race.scraped_at)), 0);
   const oneDay = 24 * 60 * 60 * 1000;
+  const maxClosedDays = 14;
   const latestBatch = latestScrapedAt
     ? upcoming.filter((race) => latestScrapedAt - dateValue(race.scraped_at) <= oneDay)
     : upcoming;
 
   return latestBatch
+    .filter((race) => getRegistrationDisplayStatus(race) !== "已截止" || daysUntil(String(race.scraped_at || "").slice(0, 10)) >= -maxClosedDays)
     .sort((a, b) => dateValue(b.scraped_at) - dateValue(a.scraped_at) || sortRaceForBoard(a, b))
     .slice(0, 4);
 }
@@ -1591,7 +1594,7 @@ function buildAnnouncementItems() {
       types: item.types.sort((a, b) => announcementTypePriority[a] - announcementTypePriority[b]),
     })).sort((a, b) => getAnnouncementPriority(a) - getAnnouncementPriority(b) || a.title.localeCompare(b.title, "zh-Hant"))
   );
-  rotateDailyItems(runnerTickerLines, 2).forEach((text) => items.push({ types: ["talk"], title: text, details: ["每日更新"] }));
+  rotateDailyItems(runnerQuips, 2).forEach((text) => items.push({ types: ["talk"], title: text, details: ["每日更新"] }));
   return items.length ? items : [{ types: ["notice"], title: "目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。", details: [] }];
 }
 
@@ -2686,6 +2689,23 @@ async function loadPublishedContent() {
   }
 }
 
+async function loadRunnerQuips() {
+  try {
+    const response = await fetch(`./data/runner-quips.json?v=${DATA_VERSION}`, { cache: "no-cache" });
+    if (!response.ok) {
+      return;
+    }
+    const data = await response.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+    const validItems = items.map((item) => String(item || "").trim()).filter(Boolean);
+    if (validItems.length) {
+      runnerQuips = validItems;
+    }
+  } catch (error) {
+    console.info("Runner quips data not available", error);
+  }
+}
+
 function isContentFavorite(type, card) {
   const key = card.dataset.favoriteKey || contentFavoriteKey(type, card);
   return state.contentFavorites.has(key) || state.contentFavorites.has(legacyContentFavoriteKey(type, card));
@@ -3136,6 +3156,7 @@ async function init() {
   setupDurationPickers();
   bindEvents();
   await loadPublishedContent();
+  await loadRunnerQuips();
   initContentSorting();
   loadPlanSettings();
   syncDurationPickersFromInputs();

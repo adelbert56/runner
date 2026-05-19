@@ -1,0 +1,59 @@
+name: Refresh runner quips
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 10:00 Asia/Taipei every Monday.
+    - cron: "0 2 * * 1"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: runner-quips-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Promote runner quips
+        run: npm run quips:refresh
+
+      - name: Validate scripts
+        run: npm run check
+
+      - name: Commit runner quips
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(content): refresh runner quips"
+          file_pattern: |
+            site/data/runner-quips.json
+            runner/內容/跑者碎念候補.json
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
