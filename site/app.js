@@ -1452,11 +1452,11 @@ function renderStats() {
 }
 
 const runnerTickerLines = [
-  "跑者碎念：配速可以慢，按下報名的手速不要太慢。",
-  "跑者碎念：跑步最難的不是上坡，是出門前那五分鐘。",
-  "跑者碎念：半馬是半馬，半夜買鞋不是訓練。",
-  "跑者碎念：補給要練，藉口不用，已經很熟。",
-  "跑者碎念：先收藏再說，腿會不會答應晚點再談。",
+  "配速可以慢，按下報名的手速不要太慢。",
+  "跑步最難的不是上坡，是出門前那五分鐘。",
+  "半馬是半馬，半夜買鞋不是訓練。",
+  "補給要練，藉口不用，已經很熟。",
+  "先收藏再說，腿會不會答應晚點再談。",
 ];
 
 function dateValue(dateText) {
@@ -1511,35 +1511,43 @@ function getRegistrationEndingSoonRaces() {
 }
 
 function buildAnnouncementItems() {
-  const seen = new Set();
+  const raceItems = new Map();
   const items = [];
-  const addRaceItem = (race, type, text) => {
+  const addRaceItem = (race, type, detail) => {
     const key = getRaceKey(race);
-    const itemKey = `${type}:${key}`;
-    if (seen.has(itemKey)) {
-      return;
+    const item = raceItems.get(key) || {
+      key,
+      types: [],
+      title: formatTickerRaceName(race),
+      details: [],
+    };
+    if (!item.types.includes(type)) {
+      item.types.push(type);
     }
-    seen.add(itemKey);
-    items.push({ key, type, text });
+    if (detail && !item.details.includes(detail)) {
+      item.details.push(detail);
+    }
+    raceItems.set(key, item);
   };
 
   getLatestCrawlerRaces().forEach((race) => {
     const scrapedDate = race.scraped_at ? race.scraped_at.slice(0, 10).replaceAll("-", "/") : "最新批次";
-    addRaceItem(race, "latest", `最新爬蟲：${scrapedDate} 收到 ${formatTickerRaceName(race)}｜${getRegistrationDisplayStatus(race)}`);
+    addRaceItem(race, "latest", `${scrapedDate} 收到｜${getRegistrationDisplayStatus(race)}`);
   });
 
   getRegistrationOpeningSoonRaces().forEach((race) => {
     const days = daysUntil(race.registration_opens_at);
-    addRaceItem(race, "opening", `快開報：${formatTickerRaceName(race)}｜${formatShortDate(race.registration_opens_at)} 開放報名｜倒數 ${days} 天`);
+    addRaceItem(race, "opening", `${formatShortDate(race.registration_opens_at)} 開放報名｜倒數 ${days} 天`);
   });
 
   getRegistrationEndingSoonRaces().forEach((race) => {
     const days = daysUntil(race.registration_deadline);
-    addRaceItem(race, "ending", `快截止：${formatTickerRaceName(race)}｜${formatShortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
+    addRaceItem(race, "ending", `${formatShortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
   });
 
-  runnerTickerLines.forEach((text) => items.push({ type: "talk", text }));
-  return items.length ? items : [{ type: "notice", text: "公告：目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。" }];
+  items.push(...raceItems.values());
+  runnerTickerLines.forEach((text) => items.push({ types: ["talk"], title: text, details: [] }));
+  return items.length ? items : [{ types: ["notice"], title: "目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。", details: [] }];
 }
 
 function getAnnouncementMeta(type) {
@@ -1561,9 +1569,22 @@ function renderAnnouncementBoard() {
   const items = buildAnnouncementItems();
   els.announcementBoard.innerHTML = items
     .map((item) => {
-      const meta = getAnnouncementMeta(item.type);
-      const tag = `<span class="announcement-tag announcement-tag-${escapeHtml(meta.tone)}">${escapeHtml(meta.label)}</span>`;
-      const content = `${tag}<span>${escapeHtml(item.text)}</span>`;
+      const tags = (item.types || ["notice"])
+        .map((type) => {
+          const meta = getAnnouncementMeta(type);
+          return `<span class="announcement-tag announcement-tag-${escapeHtml(meta.tone)}">${escapeHtml(meta.label)}</span>`;
+        })
+        .join("");
+      const details = item.details?.length
+        ? `<span class="announcement-detail">${escapeHtml(item.details.join("　"))}</span>`
+        : "";
+      const content = `
+        <span class="announcement-tags">${tags}</span>
+        <span class="announcement-content">
+          <strong class="announcement-title">${escapeHtml(item.title)}</strong>
+          ${details}
+        </span>
+      `;
       return item.key
         ? `<button class="announcement-card" type="button" data-announcement-race="${escapeHtml(item.key)}">${content}</button>`
         : `<div class="announcement-card announcement-card-static">${content}</div>`;

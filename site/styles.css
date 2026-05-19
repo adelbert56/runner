@@ -242,7 +242,7 @@ h1 {
 
 .announcement-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(94px, auto) minmax(0, 1fr);
   align-items: start;
   gap: 12px;
   width: 100%;
@@ -257,6 +257,36 @@ h1 {
   line-height: 1.55;
   text-align: left;
   box-shadow: var(--shadow-soft);
+}
+
+.announcement-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.announcement-content {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.announcement-title,
+.announcement-detail {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.announcement-title {
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+
+.announcement-detail {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 850;
 }
 
 .announcement-card:not(.announcement-card-static) {
