@@ -337,6 +337,67 @@ h1 {
   color: var(--muted);
 }
 
+.automation-health {
+  display: grid;
+  gap: 14px;
+  max-width: var(--content-max);
+  margin: 22px auto 0;
+  padding: 18px;
+  border: 1px solid rgba(31, 42, 36, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.9);
+}
+
+.automation-health-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.automation-health-heading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.16rem;
+}
+
+.automation-health-heading > span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.automation-health-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.automation-health-card {
+  display: grid;
+  gap: 6px;
+  min-height: 130px;
+  padding: 14px;
+  border: 1px solid rgba(31, 42, 36, 0.1);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.automation-health-card strong {
+  color: var(--green-dark);
+  font-size: 0.98rem;
+}
+
+.automation-health-card span,
+.automation-health-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
 .button {
   display: inline-flex;
   min-height: 44px;
@@ -3182,6 +3243,7 @@ h3 {
   .plan-hero dl,
   .profile-summary,
   .training-summary,
+  .automation-health-grid,
   .phase-table {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -3444,6 +3506,20 @@ h3 {
   .announcement-tag {
     width: max-content;
     max-width: 100%;
+  }
+
+  .automation-health {
+    padding: 14px;
+  }
+
+  .automation-health-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .automation-health-grid {
+    grid-template-columns: 1fr;
   }
 
   .section {

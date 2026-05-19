@@ -32,6 +32,8 @@ const [
   officialRaceScript,
   raceQualityScript,
   dashboardScript,
+  announcementsScript,
+  automationHealthScript,
   contentCandidateScript,
   publishContentScript,
   contentQualityScript,
@@ -51,6 +53,8 @@ const [
   text("scripts/enrich-official-race-data.mjs"),
   text("scripts/validate-race-data.mjs"),
   text("scripts/build-operational-dashboard.mjs"),
+  text("scripts/build-announcements.mjs"),
+  text("scripts/build-automation-health.mjs"),
   text("scripts/collect-content-candidates.mjs"),
   text("scripts/publish-content.mjs"),
   text("scripts/validate-content-data.mjs"),
@@ -75,7 +79,11 @@ assertCheck(
 assertCheck(appVersion && appVersion === scriptVersion, `app data version matches index asset version (${appVersion})`);
 assertCheck(appJs.includes("races.json?v=${DATA_VERSION}"), "race data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("content.json?v=${DATA_VERSION}"), "content data fetch uses DATA_VERSION cache busting");
+assertCheck(appJs.includes("announcements.json?v=${DATA_VERSION}"), "announcement data fetch uses DATA_VERSION cache busting");
+assertCheck(appJs.includes("automation-health.json?v=${DATA_VERSION}"), "automation health fetch uses DATA_VERSION cache busting");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
+assertCheck(!appJs.includes("function buildAnnouncementItems"), "front end does not build announcements from race data");
+assertCheck(raceDbRaw.includes('"first_seen_at"'), "race data includes first_seen_at tracking");
 assertCheck(
   appJs.includes('timeZone: "Asia/Taipei"') && appJs.includes("const TODAY = getTodayString();"),
   "site date calculations use Asia/Taipei today"
@@ -97,6 +105,8 @@ const dateSensitiveScripts = [
   ["scripts/enrich-official-race-data.mjs", officialRaceScript],
   ["scripts/validate-race-data.mjs", raceQualityScript],
   ["scripts/build-operational-dashboard.mjs", dashboardScript],
+  ["scripts/build-announcements.mjs", announcementsScript],
+  ["scripts/build-automation-health.mjs", automationHealthScript],
   ["scripts/collect-content-candidates.mjs", contentCandidateScript],
   ["scripts/publish-content.mjs", publishContentScript],
   ["scripts/validate-content-data.mjs", contentQualityScript],
@@ -119,7 +129,11 @@ assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && we
 assertCheck(dataWorkflow.includes("runner/系統配置/營運儀表板.json") && dataWorkflow.includes("site/data/races.json"), "race data auto-commit includes dashboard and site data");
 assertCheck(contentWorkflow.includes("site/data/content.json") && contentWorkflow.includes("runner/內容/內容品質報告.md"), "content auto-commit includes published content and quality report");
 assertCheck(quipsWorkflow.includes("site/data/runner-quips.json") && quipsWorkflow.includes("runner/內容/跑者碎念候補.json"), "runner quips workflow commits active and backlog data");
+assertCheck(dataWorkflow.includes("site/data/announcements.json") && quipsWorkflow.includes("site/data/announcements.json"), "announcement data is rebuilt by race and quips workflows");
+assertCheck(dataWorkflow.includes("site/data/automation-health.json") && contentWorkflow.includes("site/data/automation-health.json"), "automation health data is committed by scheduled workflows");
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
+assertCheck(pagesWorkflow.includes("actions/setup-node@v4"), "Pages deploy installs Node before derived data builds");
+assertCheck(pagesWorkflow.includes("npm run announcements:build") && pagesWorkflow.includes("npm run automation:health"), "Pages deploy rebuilds derived site data");
 
 for (const [name, workflow] of [
   ["weather", weatherWorkflow],
@@ -140,6 +154,7 @@ assertCheck(
     "Update race weather forecast",
     "Sync site race data",
     "Build operational dashboard",
+    "Build announcement and automation data",
     "Validate generated files",
     "Commit data updates",
     "Setup Pages",
@@ -152,6 +167,7 @@ assertCheck(
   includesInOrder(weatherWorkflow, [
     "Update race weather forecast",
     "Sync site race data",
+    "Build announcement and automation data",
     "Validate generated files",
     "Commit weather updates",
     "Setup Pages",
@@ -165,6 +181,7 @@ assertCheck(
     "Collect and publish running content",
     "Run strict content quality gate",
     "Build operational dashboard",
+    "Build automation health data",
     "Validate scripts",
     "Commit content candidates",
     "Setup Pages",
@@ -176,6 +193,7 @@ assertCheck(
 assertCheck(
   includesInOrder(quipsWorkflow, [
     "Promote runner quips",
+    "Build announcement and automation data",
     "Validate scripts",
     "Commit runner quips",
     "Setup Pages",

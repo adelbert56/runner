@@ -50,8 +50,11 @@ def merge(existing: dict[str, dict], new_races: list[dict]) -> tuple[list[dict],
                 "",
             )
             if stale_key:
+                race["first_seen_at"] = merged[stale_key].get("first_seen_at") or merged[stale_key].get("scraped_at", "")[:10]
                 del merged[stale_key]
                 updated += 1
+            else:
+                race["first_seen_at"] = race.get("first_seen_at") or race.get("scraped_at", "")[:10]
             merged[key] = race
             added += 1
         else:
@@ -84,6 +87,7 @@ def merge(existing: dict[str, dict], new_races: list[dict]) -> tuple[list[dict],
                     old[field] = race.get(field, "")
                     updated += 1
             old["scraped_at"] = race["scraped_at"]
+            old["first_seen_at"] = old.get("first_seen_at") or race.get("first_seen_at") or race.get("scraped_at", "")[:10]
             merged[key] = old
 
     result = sorted(merged.values(), key=lambda r: r.get("race_date", ""))

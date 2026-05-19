@@ -38,6 +38,9 @@ jobs:
       - name: Sync site race data
         run: npm run data:sync
 
+      - name: Build announcement and automation data
+        run: npm run announcements:build && npm run automation:health
+
       - name: Validate generated files
         run: npm run check
 
@@ -48,6 +51,8 @@ jobs:
           file_pattern: |
             runner/賽事/賽事資料庫.json
             site/data/races.json
+            site/data/announcements.json
+            site/data/automation-health.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

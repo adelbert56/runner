@@ -63,6 +63,7 @@ def normalize(raw: dict) -> dict:
         raw.get("registration_status", ""),
         raw.get("race_date", ""),
     )
+    scraped_at = datetime.now(tz=timezone.utc).isoformat()
     return {
         "race_id": str(uuid.uuid4()),
         "race_name": raw.get("race_name", "").strip(),
@@ -93,7 +94,8 @@ def normalize(raw: dict) -> dict:
         "detail_url": raw.get("detail_url", ""),
         "source": raw.get("source", ""),
         "source_url": raw.get("source_url", ""),
-        "scraped_at": datetime.now(tz=timezone.utc).isoformat(),
+        "first_seen_at": scraped_at[:10],
+        "scraped_at": scraped_at,
     }
 
 

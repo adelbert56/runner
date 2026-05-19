@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-05-19",
+  "retention": {
+    "closed_notice_days": 14,
+    "daily_quips": 2
+  },
+  "type_meta": {
+    "new": {
+      "label": "新增賽事",
+      "tone": "primary"
+    },
+    "opening": {
+      "label": "報名開始",
+      "tone": "blue"
+    },
+    "ending": {
+      "label": "快截止",
+      "tone": "warning"
+    },
+    "closing": {
+      "label": "即將截止",
+      "tone": "warning"
+    },
+    "closed": {
+      "label": "已截止",
+      "tone": "closed"
+    },
+    "talk": {
+      "label": "跑者碎念",
+      "tone": "muted"
+    },
+    "notice": {
+      "label": "公告",
+      "tone": "muted"
+    }
+  },
+  "items": [
+    {
+      "id": "36a2f943-8b2a-4f42-88b9-deaba669ce63",
+      "race_key": "36a2f943-8b2a-4f42-88b9-deaba669ce63",
+      "title": "06/21 苗栗縣｜2026全台PAPAGO歡樂跑--西湖場",
+      "types": [
+        "new",
+        "closing"
+      ],
+      "details": [
+        "2026/05/16 收到",
+        "05/30 截止｜剩 11 天"
+      ],
+      "race_date": "2026-06-21",
+      "first_seen_at": "2026-05-16"
+    },
+    {
+      "id": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
+      "race_key": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
+      "title": "07/05 臺中市｜第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
+      "types": [
+        "new",
+        "closing"
+      ],
+      "details": [
+        "2026/05/16 收到",
+        "05/31 截止｜剩 12 天"
+      ],
+      "race_date": "2026-07-05",
+      "first_seen_at": "2026-05-16"
+    },
+    {
+      "id": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
+      "race_key": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
+      "title": "11/01 南投縣｜2026日月潭環湖馬拉松",
+      "types": [
+        "closing"
+      ],
+      "details": [
+        "05/31 截止｜剩 12 天"
+      ],
+      "race_date": "2026-11-01",
+      "first_seen_at": "2026-05-16"
+    },
+    {
+      "id": "8e5e1e97-3b00-411d-b7b1-11f6ed0fdd25",
+      "race_key": "8e5e1e97-3b00-411d-b7b1-11f6ed0fdd25",
+      "title": "05/24 南投縣｜2026中興新村半程馬拉松-披興戴月的想你",
+      "types": [
+        "closed"
+      ],
+      "details": [
+        "2026/05/16 收到"
+      ],
+      "race_date": "2026-05-24",
+      "first_seen_at": "2026-05-16"
+    },
+    {
+      "id": "9c8b1fb8-30e6-4b6c-b7cf-6608dc1ffec4",
+      "race_key": "9c8b1fb8-30e6-4b6c-b7cf-6608dc1ffec4",
+      "title": "06/13 南投縣｜夏日馬拉松 - 南投埔里場",
+      "types": [
+        "closed"
+      ],
+      "details": [
+        "2026/05/16 收到"
+      ],
+      "race_date": "2026-06-13",
+      "first_seen_at": "2026-05-16"
+    },
+    {
+      "id": "quip-2026-05-19-0",
+      "title": "配速可以慢，按下報名的手速不要太慢。",
+      "types": [
+        "talk"
+      ],
+      "details": [
+        "每日更新"
+      ]
+    },
+    {
+      "id": "quip-2026-05-19-1",
+      "title": "跑步最難的不是上坡，是出門前那五分鐘。",
+      "types": [
+        "talk"
+      ],
+      "details": [
+        "每日更新"
+      ]
+    }
+  ]
+}
