@@ -41,6 +41,9 @@ jobs:
       - name: Build operational dashboard
         run: npm run ops:dashboard
 
+      - name: Build automation health data
+        run: npm run automation:health
+
       - name: Validate scripts
         run: npm run check
 
@@ -58,6 +61,7 @@ jobs:
             site/data/content.json
             runner/系統配置/營運儀表板.md
             runner/系統配置/營運儀表板.json
+            site/data/automation-health.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

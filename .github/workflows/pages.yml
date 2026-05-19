@@ -28,10 +28,17 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Prepare race data
         run: |
           mkdir -p site/data
           cp "runner/賽事/賽事資料庫.json" site/data/races.json
+          npm run announcements:build
+          npm run automation:health
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3

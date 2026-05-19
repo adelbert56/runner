@@ -35,6 +35,9 @@ jobs:
       - name: Promote runner quips
         run: npm run quips:refresh
 
+      - name: Build announcement and automation data
+        run: npm run announcements:build && npm run automation:health
+
       - name: Validate scripts
         run: npm run check
 
@@ -45,6 +48,8 @@ jobs:
           file_pattern: |
             site/data/runner-quips.json
             runner/內容/跑者碎念候補.json
+            site/data/announcements.json
+            site/data/automation-health.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
