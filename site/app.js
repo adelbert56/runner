@@ -1459,6 +1459,16 @@ const runnerTickerLines = [
   "先收藏再說，腿會不會答應晚點再談。",
 ];
 
+const announcementTypePriority = {
+  new: 10,
+  opening: 20,
+  ending: 30,
+  closing: 40,
+  closed: 50,
+  talk: 90,
+  notice: 100,
+};
+
 function dateValue(dateText) {
   if (!dateText) {
     return 0;
@@ -1510,6 +1520,19 @@ function getRegistrationEndingSoonRaces() {
     .slice(0, 3);
 }
 
+function getAnnouncementPriority(item) {
+  return Math.min(...(item.types || ["notice"]).map((type) => announcementTypePriority[type] || 100));
+}
+
+function rotateDailyItems(items, count) {
+  if (items.length <= count) {
+    return items;
+  }
+  const dayIndex = Math.max(0, dateDiffDays("2026-01-01") || 0);
+  const start = dayIndex % items.length;
+  return Array.from({ length: count }, (_, index) => items[(start + index) % items.length]);
+}
+
 function buildAnnouncementItems() {
   const raceItems = new Map();
   const items = [];
@@ -1543,11 +1566,16 @@ function buildAnnouncementItems() {
 
   getRegistrationEndingSoonRaces().forEach((race) => {
     const days = daysUntil(race.registration_deadline);
-    addRaceItem(race, "ending", `${formatShortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
+    addRaceItem(race, days <= 7 ? "ending" : "closing", `${formatShortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
   });
 
-  items.push(...raceItems.values());
-  runnerTickerLines.forEach((text) => items.push({ types: ["talk"], title: text, details: [] }));
+  items.push(
+    ...[...raceItems.values()].map((item) => ({
+      ...item,
+      types: item.types.sort((a, b) => announcementTypePriority[a] - announcementTypePriority[b]),
+    })).sort((a, b) => getAnnouncementPriority(a) - getAnnouncementPriority(b) || a.title.localeCompare(b.title, "zh-Hant"))
+  );
+  rotateDailyItems(runnerTickerLines, 2).forEach((text) => items.push({ types: ["talk"], title: text, details: ["每日更新"] }));
   return items.length ? items : [{ types: ["notice"], title: "目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。", details: [] }];
 }
 
@@ -1555,8 +1583,9 @@ function getAnnouncementMeta(type) {
   const meta = {
     new: { label: "新增賽事", tone: "primary" },
     closed: { label: "已截止", tone: "closed" },
-    opening: { label: "快開報", tone: "blue" },
+    opening: { label: "報名開始", tone: "blue" },
     ending: { label: "快截止", tone: "warning" },
+    closing: { label: "即將截止", tone: "warning" },
     talk: { label: "跑者碎念", tone: "muted" },
     notice: { label: "公告", tone: "muted" },
   };
