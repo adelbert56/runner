@@ -1532,7 +1532,8 @@ function buildAnnouncementItems() {
 
   getLatestCrawlerRaces().forEach((race) => {
     const scrapedDate = race.scraped_at ? race.scraped_at.slice(0, 10).replaceAll("-", "/") : "最新批次";
-    addRaceItem(race, "latest", `${scrapedDate} 收到｜${getRegistrationDisplayStatus(race)}`);
+    const status = getRegistrationDisplayStatus(race);
+    addRaceItem(race, status === "已截止" ? "closed" : "new", `${scrapedDate} 收到`);
   });
 
   getRegistrationOpeningSoonRaces().forEach((race) => {
@@ -1552,7 +1553,8 @@ function buildAnnouncementItems() {
 
 function getAnnouncementMeta(type) {
   const meta = {
-    latest: { label: "最新爬蟲", tone: "primary" },
+    new: { label: "新增賽事", tone: "primary" },
+    closed: { label: "已截止", tone: "closed" },
     opening: { label: "快開報", tone: "blue" },
     ending: { label: "快截止", tone: "warning" },
     talk: { label: "跑者碎念", tone: "muted" },

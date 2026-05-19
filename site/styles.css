@@ -327,6 +327,11 @@ h1 {
   color: #6a4a00;
 }
 
+.announcement-tag-closed {
+  background: #ece7dc;
+  color: #5d574b;
+}
+
 .announcement-tag-muted {
   background: var(--panel-strong);
   color: var(--muted);
