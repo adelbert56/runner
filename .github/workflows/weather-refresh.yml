@@ -15,6 +15,9 @@ concurrency:
   group: race-weather-refresh
   cancel-in-progress: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   refresh-weather:
     environment:
