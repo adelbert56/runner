@@ -15,7 +15,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 124 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 123 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -105,7 +105,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 138 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 137 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -195,7 +195,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 151 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 150 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -285,7 +285,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 173 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 172 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -375,7 +375,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 180 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 179 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -465,7 +465,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 180 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 179 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -540,6 +540,96 @@
     }
   },
   {
+    "race_id": "205c284e-77bf-4224-8cda-79cd7bd819a9",
+    "race_name": "2026母子鱷魚40週年-突破前行馬拉松",
+    "race_date": "2026-12-13",
+    "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 207 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "precise_location",
+        "label": "精確地點",
+        "severity": "medium",
+        "hint": "補 venue 或 start_location，不要只到縣市。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "organizer",
+        "label": "主辦單位",
+        "severity": "medium",
+        "hint": "補 organizer 或 host。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12997&subtitle=2026%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4-%E7%AA%81%E7%A0%B4%E5%89%8D%E8%A1%8C%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12997&subtitle=2026%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4-%E7%AA%81%E7%A0%B4%E5%89%8D%E8%A1%8C%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12997",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4-%E7%AA%81%E7%A0%B4%E5%89%8D%E8%A1%8C%E9%A6%AC%E6%8B%89%E6%9D%BE"
+    },
+    "suggested_override": {
+      "race_name": "2026母子鱷魚40週年-突破前行馬拉松",
+      "race_date": "2026-12-13",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
     "race_id": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
     "race_name": "母子鱷魚40週年馬拉松",
     "race_date": "2026-12-13",
@@ -555,7 +645,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 208 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 207 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -630,96 +720,6 @@
     }
   },
   {
-    "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
-    "race_name": "2026第二屆食安盃馬拉松",
-    "race_date": "2026-12-19",
-    "race_county": "臺中市",
-    "registration_opens_at": "",
-    "registration_deadline": "",
-    "registration_status": "報名時間未定",
-    "source_platform": "運動筆記",
-    "is_official_direct": false,
-    "priority_score": 20,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-06-01",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 214 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      {
-        "key": "official_registration_link",
-        "label": "官方報名連結",
-        "severity": "high",
-        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
-      },
-      {
-        "key": "registration_opens_at",
-        "label": "開報時間",
-        "severity": "medium",
-        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "registration_deadline",
-        "label": "報名截止時間",
-        "severity": "medium",
-        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "precise_location",
-        "label": "精確地點",
-        "severity": "medium",
-        "hint": "補 venue 或 start_location，不要只到縣市。"
-      },
-      {
-        "key": "start_times",
-        "label": "各距離開跑時間",
-        "severity": "low",
-        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
-      },
-      {
-        "key": "organizer",
-        "label": "主辦單位",
-        "severity": "medium",
-        "hint": "補 organizer 或 host。"
-      },
-      {
-        "key": "fees",
-        "label": "費用",
-        "severity": "low",
-        "hint": "補 fees，可用字串或分組物件。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE"
-    },
-    "suggested_override": {
-      "race_name": "2026第二屆食安盃馬拉松",
-      "race_date": "2026-12-19",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
     "race_id": "ea131e34-b3e9-4bc4-b626-c5345c26cb59",
     "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
     "race_date": "2026-12-19",
@@ -735,7 +735,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 214 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 213 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -810,6 +810,96 @@
     }
   },
   {
+    "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
+    "race_name": "2026第二屆食安盃馬拉松",
+    "race_date": "2026-12-19",
+    "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 213 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "precise_location",
+        "label": "精確地點",
+        "severity": "medium",
+        "hint": "補 venue 或 start_location，不要只到縣市。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "organizer",
+        "label": "主辦單位",
+        "severity": "medium",
+        "hint": "補 organizer 或 host。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE"
+    },
+    "suggested_override": {
+      "race_name": "2026第二屆食安盃馬拉松",
+      "race_date": "2026-12-19",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
     "race_id": "7609d890-e7fe-426b-b5e7-ea9419d2ff54",
     "race_name": "2027第九屆臺中資訊盃公益馬拉松",
     "race_date": "2027-01-17",
@@ -823,9 +913,9 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2026-07-21",
+      "next_check_date": "2026-07-20",
       "cadence": "future",
-      "reason": "距離賽事 243 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 242 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       {
@@ -915,7 +1005,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 180 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 179 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -997,7 +1087,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-05-19",
+      "next_check_date": "2026-05-20",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },
@@ -1037,60 +1127,6 @@
     "suggested_override": {
       "race_name": "2026第九屆幸福龍井活力健康路跑健走",
       "race_date": "2026-05-09",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
-    "race_id": "b2667ebb-500b-435d-90ec-9978a2f8b0b1",
-    "race_name": "2026 臺中國際馬拉松",
-    "race_date": "2026-10-18",
-    "race_county": "臺中市",
-    "registration_opens_at": "",
-    "registration_deadline": "",
-    "registration_status": "報名中",
-    "source_platform": "運動筆記",
-    "is_official_direct": true,
-    "priority_score": 6,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-06-01",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 152 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      {
-        "key": "registration_opens_at",
-        "label": "開報時間",
-        "severity": "medium",
-        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "registration_deadline",
-        "label": "報名截止時間",
-        "severity": "medium",
-        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "https://signup.lohasnet.tw/signup/4247",
-      "official_event_url": "https://lohasnet.tw/Taichungmarathon2026/",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13034&subtitle=2026+%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE"
-    },
-    "suggested_override": {
-      "race_name": "2026 臺中國際馬拉松",
-      "race_date": "2026-10-18",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",

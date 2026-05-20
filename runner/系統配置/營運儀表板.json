@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-05-20T01:26:41.860Z",
+  "generated_at": "2026-05-20T01:44:35.303Z",
   "basis_date": "2026-05-20",
   "races": {
-    "total": 35,
+    "total": 36,
     "follow_up_count": 13,
-    "complete_count": 22,
-    "complete_rate": "63%",
+    "complete_count": 23,
+    "complete_rate": "64%",
     "launch_blocking_gap_count": 0,
-    "launch_ready_count": 35,
+    "launch_ready_count": 36,
     "launch_ready_rate": "100%",
     "official_direct_count": 23,
-    "official_direct_rate": "66%",
-    "verified_count": 35,
+    "official_direct_rate": "64%",
+    "verified_count": 36,
     "verified_rate": "100%",
     "opened_gap_count": 0,
     "date_anomaly_count": 0,
@@ -21,7 +21,7 @@
       "已截止": 6,
       "停辦": 2,
       "報名中": 16,
-      "報名時間未定": 11
+      "報名時間未定": 12
     }
   },
   "content": {
@@ -183,10 +183,10 @@
     "items": [
       {
         "platform": "運動筆記",
-        "total": 13,
+        "total": 14,
         "official_direct": 1,
-        "verified": 13,
-        "missing": 11,
+        "verified": 14,
+        "missing": 12,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
@@ -195,8 +195,8 @@
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
           "仁愛長庚合作聯盟醫院2026永慶盃路跑"
         ],
-        "complete_rate": "15%",
-        "official_direct_rate": "8%",
+        "complete_rate": "14%",
+        "official_direct_rate": "7%",
         "verified_rate": "100%",
         "score": 47,
         "status": "需補強"
@@ -246,7 +246,7 @@
         "total": 4,
         "official_direct": 4,
         "verified": 4,
-        "missing": 1,
+        "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 1,
@@ -255,10 +255,10 @@
           "2026 臺中國際馬拉松",
           "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
         ],
-        "complete_rate": "75%",
+        "complete_rate": "100%",
         "official_direct_rate": "100%",
         "verified_rate": "100%",
-        "score": 91,
+        "score": 100,
         "status": "穩定"
       },
       {
