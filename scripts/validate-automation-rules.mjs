@@ -133,6 +133,12 @@ assertCheck(contentWorkflow.includes("site/data/content.json") && contentWorkflo
 assertCheck(quipsWorkflow.includes("site/data/runner-quips.json") && quipsWorkflow.includes("runner/內容/跑者碎念候補.json"), "runner quips workflow commits active and backlog data");
 assertCheck(dataWorkflow.includes("site/data/announcements.json") && quipsWorkflow.includes("site/data/announcements.json"), "announcement data is rebuilt by race and quips workflows");
 assertCheck(dataWorkflow.includes("site/data/automation-health.json") && contentWorkflow.includes("site/data/automation-health.json"), "automation health data is committed by scheduled workflows");
+assertCheck(!dataWorkflow.includes("git-auto-commit-action") && !weatherWorkflow.includes("git-auto-commit-action"), "race workflows avoid pattern-based auto-commit action");
+assertCheck(!contentWorkflow.includes("git-auto-commit-action") && !quipsWorkflow.includes("git-auto-commit-action"), "content workflows avoid pattern-based auto-commit action");
+assertCheck(dataWorkflow.includes("git add --") && dataWorkflow.includes('"runner/系統配置/營運儀表板.md"'), "race data workflow stages dashboard reports explicitly");
+assertCheck(weatherWorkflow.includes("git add --") && weatherWorkflow.includes('"site/data/races.json"'), "weather workflow stages site data explicitly");
+assertCheck(contentWorkflow.includes("git add --") && contentWorkflow.includes('"runner/系統配置/營運儀表板.md"'), "content workflow stages dashboard reports explicitly");
+assertCheck(quipsWorkflow.includes("git add --") && quipsWorkflow.includes('"site/data/announcements.json"'), "runner quips workflow stages announcement data explicitly");
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
 assertCheck(pagesWorkflow.includes("actions/setup-node@v4"), "Pages deploy installs Node before derived data builds");
 assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");

@@ -74,31 +74,38 @@ jobs:
         run: npm run check
 
       - name: Commit data updates
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore(data): refresh race data"
-          file_pattern: |
-            runner/賽事/賽事資料庫.json
-            runner/賽事/中部賽事列表.md
-            runner/賽事/爬蟲日誌.md
-            runner/賽事/待補資料佇列.json
-            runner/賽事/資料品質報告.md
-            runner/賽事/開報後待補資料報告.md
-            runner/賽事/開報後待補資料報告.json
-            runner/賽事/報名日期異常報告.md
-            runner/賽事/報名日期異常報告.json
-            runner/賽事/起跑時間品質報告.md
-            runner/賽事/起跑時間品質報告.json
-            runner/賽事/爬蟲追蹤計畫.md
-            runner/賽事/爬蟲追蹤計畫.json
-            runner/賽事/平台爬蟲覆蓋報告.md
-            runner/賽事/平台穩定度報告.md
-            runner/賽事/平台穩定度報告.json
-            runner/系統配置/營運儀表板.md
-            runner/系統配置/營運儀表板.json
-            site/data/races.json
-            site/data/announcements.json
-            site/data/automation-health.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            "runner/賽事/賽事資料庫.json" \
+            "runner/賽事/中部賽事列表.md" \
+            "runner/賽事/爬蟲日誌.md" \
+            "runner/賽事/待補資料佇列.json" \
+            "runner/賽事/資料品質報告.md" \
+            "runner/賽事/開報後待補資料報告.md" \
+            "runner/賽事/開報後待補資料報告.json" \
+            "runner/賽事/報名日期異常報告.md" \
+            "runner/賽事/報名日期異常報告.json" \
+            "runner/賽事/起跑時間品質報告.md" \
+            "runner/賽事/起跑時間品質報告.json" \
+            "runner/賽事/爬蟲追蹤計畫.md" \
+            "runner/賽事/爬蟲追蹤計畫.json" \
+            "runner/賽事/平台爬蟲覆蓋報告.md" \
+            "runner/賽事/平台穩定度報告.md" \
+            "runner/賽事/平台穩定度報告.json" \
+            "runner/系統配置/營運儀表板.md" \
+            "runner/系統配置/營運儀表板.json" \
+            "site/data/races.json" \
+            "site/data/announcements.json" \
+            "site/data/automation-health.json"
+          if git diff --cached --quiet; then
+            echo "No race data changes to commit."
+          else
+            git commit -m "chore(data): refresh race data"
+            git pull --rebase --autostash
+            git push
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
