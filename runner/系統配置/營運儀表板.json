@@ -1,74 +1,77 @@
 {
-  "generated_at": "2026-05-16T15:56:14.761Z",
-  "basis_date": "2026-05-16",
+  "generated_at": "2026-05-20T01:26:41.860Z",
+  "basis_date": "2026-05-20",
   "races": {
-    "total": 34,
+    "total": 35,
     "follow_up_count": 13,
-    "complete_count": 21,
-    "complete_rate": "62%",
+    "complete_count": 22,
+    "complete_rate": "63%",
     "launch_blocking_gap_count": 0,
-    "launch_ready_count": 34,
+    "launch_ready_count": 35,
     "launch_ready_rate": "100%",
-    "official_direct_count": 21,
-    "official_direct_rate": "62%",
-    "verified_count": 34,
+    "official_direct_count": 23,
+    "official_direct_rate": "66%",
+    "verified_count": 35,
     "verified_rate": "100%",
     "opened_gap_count": 0,
     "date_anomaly_count": 0,
-    "due_now_count": 2,
+    "due_now_count": 1,
     "monthly_tracking_count": 11,
     "state_counts": {
-      "已截止": 5,
+      "已截止": 6,
       "停辦": 2,
-      "報名中": 15,
-      "報名時間未定": 12
+      "報名中": 16,
+      "報名時間未定": 11
     }
   },
   "content": {
     "shoe_cards": 12,
-    "news_cards": 10,
+    "news_cards": 11,
     "newest_shoe_date": "2026-05-16",
     "newest_news_date": "2026-05-16",
-    "published_count": 22,
-    "candidate_count": 22,
+    "published_count": 23,
+    "candidate_count": 31,
     "editorial_count": 3,
     "candidate_by_category": {
       "跑鞋新品": 12,
-      "跑步新聞": 6,
-      "訓練": 4
+      "跑步新聞": 9,
+      "訓練": 5,
+      "入門知識": 1,
+      "恢復": 3,
+      "補給": 1
     },
     "source_stable_count": 7,
     "source_watch_count": 3,
     "source_weak_count": 0,
     "source_health": [
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "運動筆記",
         "url": "https://running.biji.co/",
         "source_type": "跑步新聞",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 5,
+        "candidate_count": 11,
         "consecutive_failures": 0,
         "base_priority": 5,
-        "effective_priority": 5,
+        "effective_priority": 6,
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "動一動",
         "url": "https://www.don1don.com/",
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 9,
+        "candidate_count": 15,
         "consecutive_failures": 0,
         "base_priority": 5,
-        "effective_priority": 5,
+        "effective_priority": 6,
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "Bounce",
         "url": "https://bouncin.net/",
         "source_type": "跑鞋新品",
@@ -77,24 +80,24 @@
         "candidate_count": 2,
         "consecutive_failures": 0,
         "base_priority": 4,
-        "effective_priority": 4,
+        "effective_priority": 5,
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "Women's Health Taiwan",
         "url": "https://www.womenshealthmag.com/tw/fitness/",
         "source_type": "跑鞋選購 / 健康訓練",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 2,
+        "candidate_count": 6,
         "consecutive_failures": 0,
         "base_priority": 3,
-        "effective_priority": 3,
+        "effective_priority": 4,
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "HK01 跑步",
         "url": "https://www.hk01.com/channel/跑步",
         "source_type": "跑步裝備 / 跑步知識",
@@ -103,11 +106,11 @@
         "candidate_count": 5,
         "consecutive_failures": 0,
         "base_priority": 3,
-        "effective_priority": 3,
+        "effective_priority": 4,
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "KENLU",
         "url": "https://kenlu.net/tag/running/",
         "source_type": "跑鞋評測 / 裝備情報",
@@ -120,7 +123,7 @@
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "KENLU 越野",
         "url": "https://kenlu.net/tag/trail-run/",
         "source_type": "越野跑鞋 / 越野訓練",
@@ -133,33 +136,33 @@
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "運動科學網",
         "url": "https://www.sportscience.com.tw/",
         "source_type": "訓練知識 / 運動科學",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 4,
+        "candidate_count": 6,
         "consecutive_failures": 0,
         "base_priority": 3,
-        "effective_priority": 3,
+        "effective_priority": 4,
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "IR SPORTS",
         "url": "https://irsports.com.tw/",
         "source_type": "路跑活動 / 訓練資訊",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 1,
+        "candidate_count": 2,
         "consecutive_failures": 0,
         "base_priority": 2,
-        "effective_priority": 2,
+        "effective_priority": 3,
         "error": ""
       },
       {
-        "checked_at": "2026-05-16",
+        "checked_at": "2026-05-18",
         "source": "udn 品牌",
         "url": "https://branda.udn.com/branda/index",
         "source_type": "品牌新品 / 運動消費",
@@ -180,10 +183,10 @@
     "items": [
       {
         "platform": "運動筆記",
-        "total": 14,
+        "total": 13,
         "official_direct": 1,
-        "verified": 14,
-        "missing": 12,
+        "verified": 13,
+        "missing": 11,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
@@ -192,8 +195,8 @@
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
           "仁愛長庚合作聯盟醫院2026永慶盃路跑"
         ],
-        "complete_rate": "14%",
-        "official_direct_rate": "7%",
+        "complete_rate": "15%",
+        "official_direct_rate": "8%",
         "verified_rate": "100%",
         "score": 47,
         "status": "需補強"
@@ -239,6 +242,26 @@
         "status": "穩定"
       },
       {
+        "platform": "Lohas",
+        "total": 4,
+        "official_direct": 4,
+        "verified": 4,
+        "missing": 1,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 1,
+        "sample_races": [
+          "2026中興新村半程馬拉松-披興戴月的想你",
+          "2026 臺中國際馬拉松",
+          "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
+        ],
+        "complete_rate": "75%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 91,
+        "status": "穩定"
+      },
+      {
         "platform": "bao-ming",
         "total": 3,
         "official_direct": 3,
@@ -246,7 +269,7 @@
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 0,
         "sample_races": [
           "2026 BOBDOG RUN(台中場)",
           "2026 松鶴越野",
@@ -270,25 +293,6 @@
         "sample_races": [
           "2026全台PAPAGO歡樂跑--西湖場",
           "夏日馬拉松 - 苗栗鯉魚潭"
-        ],
-        "complete_rate": "100%",
-        "official_direct_rate": "100%",
-        "verified_rate": "100%",
-        "score": 100,
-        "status": "穩定"
-      },
-      {
-        "platform": "Lohas",
-        "total": 2,
-        "official_direct": 2,
-        "verified": 2,
-        "missing": 0,
-        "opened_gap": 0,
-        "date_anomaly": 0,
-        "due_now": 1,
-        "sample_races": [
-          "2026中興新村半程馬拉松-披興戴月的想你",
-          "2026 清水馬拉松嘉年華"
         ],
         "complete_rate": "100%",
         "official_direct_rate": "100%",

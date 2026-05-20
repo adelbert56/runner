@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-05-16T15:56:14.761Z",
-  "basis_date": "2026-05-16",
+  "generated_at": "2026-05-20T01:26:41.860Z",
+  "basis_date": "2026-05-20",
   "items": [
     {
       "platform": "運動筆記",
-      "total": 14,
+      "total": 13,
       "official_direct": 1,
-      "verified": 14,
-      "missing": 12,
+      "verified": 13,
+      "missing": 11,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 0,
@@ -16,8 +16,8 @@
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
         "仁愛長庚合作聯盟醫院2026永慶盃路跑"
       ],
-      "complete_rate": "14%",
-      "official_direct_rate": "7%",
+      "complete_rate": "15%",
+      "official_direct_rate": "8%",
       "verified_rate": "100%",
       "score": 47,
       "status": "需補強"
@@ -63,6 +63,26 @@
       "status": "穩定"
     },
     {
+      "platform": "Lohas",
+      "total": 4,
+      "official_direct": 4,
+      "verified": 4,
+      "missing": 1,
+      "opened_gap": 0,
+      "date_anomaly": 0,
+      "due_now": 1,
+      "sample_races": [
+        "2026中興新村半程馬拉松-披興戴月的想你",
+        "2026 臺中國際馬拉松",
+        "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
+      ],
+      "complete_rate": "75%",
+      "official_direct_rate": "100%",
+      "verified_rate": "100%",
+      "score": 91,
+      "status": "穩定"
+    },
+    {
       "platform": "bao-ming",
       "total": 3,
       "official_direct": 3,
@@ -70,7 +90,7 @@
       "missing": 0,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 BOBDOG RUN(台中場)",
         "2026 松鶴越野",
@@ -94,25 +114,6 @@
       "sample_races": [
         "2026全台PAPAGO歡樂跑--西湖場",
         "夏日馬拉松 - 苗栗鯉魚潭"
-      ],
-      "complete_rate": "100%",
-      "official_direct_rate": "100%",
-      "verified_rate": "100%",
-      "score": 100,
-      "status": "穩定"
-    },
-    {
-      "platform": "Lohas",
-      "total": 2,
-      "official_direct": 2,
-      "verified": 2,
-      "missing": 0,
-      "opened_gap": 0,
-      "date_anomaly": 0,
-      "due_now": 1,
-      "sample_races": [
-        "2026中興新村半程馬拉松-披興戴月的想你",
-        "2026 清水馬拉松嘉年華"
       ],
       "complete_rate": "100%",
       "official_direct_rate": "100%",
