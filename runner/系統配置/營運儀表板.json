@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-20T01:47:47.521Z",
+  "generated_at": "2026-05-20T05:05:32.127Z",
   "basis_date": "2026-05-20",
   "races": {
     "total": 36,
@@ -30,15 +30,15 @@
     "newest_shoe_date": "2026-05-16",
     "newest_news_date": "2026-05-16",
     "published_count": 23,
-    "candidate_count": 36,
+    "candidate_count": 34,
     "editorial_count": 3,
     "candidate_by_category": {
+      "跑鞋新品": 14,
       "補給": 2,
-      "跑鞋新品": 13,
-      "訓練": 8,
-      "跑步新聞": 9,
-      "恢復": 3,
-      "入門知識": 1
+      "入門知識": 2,
+      "訓練": 7,
+      "跑步新聞": 6,
+      "恢復": 3
     },
     "source_stable_count": 6,
     "source_watch_count": 4,
@@ -52,9 +52,9 @@
         "status": "可用需觀察",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 1,
+        "consecutive_failures": 2,
         "base_priority": 5,
-        "effective_priority": 6,
+        "effective_priority": 5,
         "error": "403 Forbidden"
       },
       {
@@ -64,7 +64,7 @@
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 18,
+        "candidate_count": 20,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -142,7 +142,7 @@
         "source_type": "訓練知識 / 運動科學",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 6,
+        "candidate_count": 7,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,

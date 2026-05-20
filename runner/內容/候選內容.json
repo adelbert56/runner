@@ -1,6 +1,20 @@
 [
   {
     "checked_at": "2026-05-20",
+    "source": "動一動",
+    "source_type": "跑鞋新品 / 跑步專題",
+    "title": "豪雨開跑也不怕 BROOKS GTX 防水跑鞋系列全面迎戰台灣雨季",
+    "url": "https://www.don1don.com/archives/233837/%e8%b1%aa%e9%9b%a8%e9%96%8b%e8%b7%91%e4%b9%9f%e4%b8%8d%e6%80%95-brooks-gtx-%e9%98%b2%e6%b0%b4%e8%b7%91%e9%9e%8b%e7%b3%bb%e5%88%97%e5%85%a8%e9%9d%a2%e8%bf%8e%e6%88%b0%e5%8f%b0%e7%81%a3%e9%9b%a8",
+    "category": "跑鞋新品",
+    "score": 11,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "面對台灣即將進入的梅雨季節與夏季午後雷陣雨帶來的高濕度環境，跑者的日常訓練也迎來更多挑戰。從濕滑積水的城市街道，到雨後泥濘的戶外路線，鞋襪浸濕後的不適感、步態不穩與抓地力下降，往往成為影響訓練品質的關鍵。美"
+  },
+  {
+    "checked_at": "2026-05-20",
     "source": "Women's Health Taiwan",
     "source_type": "跑鞋選購 / 健康訓練",
     "title": "跑步補給怎麼吃才對？實測「連續血糖監測器」揭秘：馬拉松、半馬跑者必懂",
@@ -29,17 +43,17 @@
   },
   {
     "checked_at": "2026-05-20",
-    "source": "動一動",
-    "source_type": "跑鞋新品 / 跑步專題",
-    "title": "為什麼練馬拉松要做重量訓練？",
-    "url": "https://www.don1don.com/archives/221943/%e7%82%ba%e4%bb%80%e9%ba%bc%e7%b7%b4%e9%a6%ac%e6%8b%89%e6%9d%be%e8%a6%81%e5%81%9a%e9%87%8d%e9%87%8f%e8%a8%93%e7%b7%b4%ef%bc%9f",
-    "category": "訓練",
+    "source": "Women's Health Taiwan",
+    "source_type": "跑鞋選購 / 健康訓練",
+    "title": "別再亂跑了！「依目標設計」跑步訓練計畫，新手到半馬直接選",
+    "url": "https://www.womenshealthmag.com/tw/fitness/running/a71011131/running-training-plan/",
+    "category": "入門知識",
     "score": 9,
     "article_date": "",
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "馬拉松跑者，有執行重量訓練者，已經不是少數，但為什麼要？看似理所當然的事情其實最難答，來挑戰看看。 做重量訓練，例如 4組 5次 85%1RM 的六角槓硬舉，可以促進下肢肌肉的力量提升、剛性提升、肌肉與肌腱的圍度些微提升"
+    "description": "依不同目標設計的跑步訓練計畫，從新手入門到半馬挑戰，照需求選擇最適合你的課表。"
   },
   {
     "checked_at": "2026-05-20",
@@ -85,31 +99,17 @@
   },
   {
     "checked_at": "2026-05-20",
-    "source": "動一動",
-    "source_type": "跑鞋新品 / 跑步專題",
-    "title": "為什麼練馬拉松要做重量訓練？ - Don1Don",
-    "url": "https://www.don1don.com/archives/221716/%e7%82%ba%e4%bb%80%e9%ba%bc%e7%b7%b4%e9%a6%ac%e6%8b%89%e6%9d%be%e8%a6%81%e5%81%9a%e9%87%8d%e9%87%8f%e8%a8%93%e7%b7%b4%ef%bc%9f-2",
-    "category": "訓練",
-    "score": 8,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "馬拉松跑者，有執行重量訓練者，已經不是少數，但為什麼要？看似理所當然的事情其實最難答，來挑戰看看。 做重量訓練 [&hellip;]"
-  },
-  {
-    "checked_at": "2026-05-20",
-    "source": "動一動",
-    "source_type": "跑鞋新品 / 跑步專題",
-    "title": "豪雨開跑也不怕 BROOKS GTX 防水跑鞋系列全面迎戰台灣雨季",
-    "url": "https://www.don1don.com/archives/233837/%e8%b1%aa%e9%9b%a8%e9%96%8b%e8%b7%91%e4%b9%9f%e4%b8%8d%e6%80%95-brooks-gtx-%e9%98%b2%e6%b0%b4%e8%b7%91%e9%9e%8b%e7%b3%bb%e5%88%97%e5%85%a8%e9%9d%a2%e8%bf%8e%e6%88%b0%e5%8f%b0%e7%81%a3%e9%9b%a8",
+    "source": "運動科學網",
+    "source_type": "訓練知識 / 運動科學",
+    "title": "破二馬拉松, 碳板跑鞋, 跑步經濟性, Adidas Pro E - Sportscience 運動科學網",
+    "url": "https://www.sportscience.com.tw/article/detail/%E7%A0%B4%E4%BA%8C%E9%A6%AC%E6%8B%89%E6%9D%BE,%20%E7%A2%B3%E6%9D%BF%E8%B7%91%E9%9E%8B,%20%E8%B7%91%E6%AD%A5%E7%B6%93%E6%BF%9F%E6%80%A7,%20Adidas%20Pro%20Evo3,%20%E9%A6%AC%E6%8B%89%E6%9D%BE%E4%B8%96%E7%95%8C%E7%B4%80%E9%8C%84",
     "category": "跑鞋新品",
     "score": 8,
     "article_date": "",
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "面對台灣即將進入的梅雨季節與夏季午後雷陣雨帶來的高濕度環境，跑者的日常訓練也迎來更多挑戰。從濕滑積水的城市街道，到雨後泥濘的戶外路線，鞋襪浸濕後的不適感、步態不穩與抓地力下降，往往成為影響訓練品質的關鍵。美"
+    "description": "2026倫敦馬拉松首次於正式賽事突破兩小時。本文解析碳板跑鞋、PEBA中底與Adidas Pro Evo3等科技，如何推動人類極限再進化。"
   },
   {
     "checked_at": "2026-05-20",
@@ -227,29 +227,15 @@
     "checked_at": "2026-05-20",
     "source": "動一動",
     "source_type": "跑鞋新品 / 跑步專題",
-    "title": "前方三百公尺有大砲 跑者如何留下美好的運動照片",
-    "url": "https://www.don1don.com/archives/222574/%e5%89%8d%e6%96%b9%e4%b8%89%e7%99%be%e5%85%ac%e5%b0%ba%e6%9c%89%e5%a4%a7%e7%a0%b2-%e8%b7%91%e8%80%85%e5%a6%82%e4%bd%95%e7%95%99%e4%b8%8b%e7%be%8e%e5%a5%bd%e7%9a%84%e9%81%8b%e5%8b%95%e7%85%a7%e7%89%87",
-    "category": "跑步新聞",
+    "title": "第五屆長明賞5月23日登場 打造台灣長跑年度榮耀舞台",
+    "url": "https://www.don1don.com/archives/233848/%e7%ac%ac%e4%ba%94%e5%b1%86%e9%95%b7%e6%98%8e%e8%b3%9e5%e6%9c%8823%e6%97%a5%e7%99%bb%e5%a0%b4%e3%80%80%e6%89%93%e9%80%a0%e5%8f%b0%e7%81%a3%e9%95%b7%e8%b7%91%e5%b9%b4%e5%ba%a6%e6%a6%ae%e8%80%80",
+    "category": "訓練",
     "score": 6,
     "article_date": "",
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "很多時候，完賽隔天要選購照片時，心情總是滿滿尷尬。照片上的你可能面露難色、腳步蹣跚、滿頭的汗水，儘管有說法是辛苦的照片越顯得盡力，但照片無論是收藏或貼到社群媒體上總是為難。若說跑步過程中被攝影的照片很難看，跑者也要負一部分責任，相"
-  },
-  {
-    "checked_at": "2026-05-20",
-    "source": "動一動",
-    "source_type": "跑鞋新品 / 跑步專題",
-    "title": "卓溪的壯麗相遇跑者的熱情 卓溪Masial祝福公益路跑開始報名 - Don1Don",
-    "url": "https://www.don1don.com/archives/221191/%e5%8d%93%e6%ba%aa%e7%9a%84%e5%a3%af%e9%ba%97%e7%9b%b8%e9%81%87%e8%b7%91%e8%80%85%e7%9a%84%e7%86%b1%e6%83%85-%e5%8d%93%e6%ba%aamasial%e7%a5%9d%e7%a6%8f%e5%85%ac%e7%9b%8a%e8%b7%af%e8%b7%91%e9%96%8b",
-    "category": "跑步新聞",
-    "score": 6,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "在布農族語中「Masial」意為「很好、很棒」。今年，花蓮縣卓溪鄉公所首度推出『2025卓溪Masial祝福公 [&hellip;]"
+    "description": "台灣長跑界年度重要盛事「長明賞頒獎典禮」，將於2026年5月23日於微風南山藝文展演中心舉行。這項被視為台灣長跑運動員最高榮譽之一的獎項，今年邁入第五屆，持續為台灣長跑菁英運動員打造一個被看見與被肯定的舞台。"
   },
   {
     "checked_at": "2026-05-20",
@@ -362,20 +348,6 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "超慢跑跑對才能有效又不傷膝蓋、關節！"
-  },
-  {
-    "checked_at": "2026-05-20",
-    "source": "Women's Health Taiwan",
-    "source_type": "跑鞋選購 / 健康訓練",
-    "title": "「超慢跑節拍器」APP 6款推薦：掌握180bpm幫你穩定步頻，Threads網友推薦「這款」超可愛",
-    "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/g63046033/slow-jogging-app/",
-    "category": "跑步新聞",
-    "score": 4,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "快下載起來，一起運動！"
   },
   {
     "checked_at": "2026-05-20",
