@@ -276,6 +276,8 @@ function previousToPublishedItem(item) {
 
 function sortItems(items) {
   return items.sort((a, b) => {
+    const originDiff = sourceOriginRank(b.source_origin) - sourceOriginRank(a.source_origin);
+    if (originDiff !== 0) return originDiff;
     if (b.score !== a.score) return b.score - a.score;
     return String(b.date).localeCompare(String(a.date)) || a.title.localeCompare(b.title);
   });
@@ -358,6 +360,12 @@ function sourceOriginLabel(origin) {
   return "自動候選";
 }
 
+function sourceOriginRank(origin) {
+  if (origin === "candidate") return 3;
+  if (origin === "editorial") return 2;
+  return 1;
+}
+
 async function main() {
   const raw = (await readJson(candidatesPath, [])).map((item) => ({ ...item, source_origin: "candidate" }));
   const editorial = (await readJson(editorialPath, [])).map((item) => ({ ...item, source_origin: "editorial" }));
@@ -372,7 +380,13 @@ async function main() {
   const published = [
     ...fillWithInventory(normalized, inventory, "shoe"),
     ...fillWithInventory(normalized, inventory, "news"),
-  ].sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.score - a.score);
+  ].sort((a, b) => {
+    const typeDiff = a.type.localeCompare(b.type);
+    if (typeDiff !== 0) return typeDiff;
+    const originDiff = sourceOriginRank(b.source_origin) - sourceOriginRank(a.source_origin);
+    if (originDiff !== 0) return originDiff;
+    return String(b.date).localeCompare(String(a.date)) || b.score - a.score;
+  });
 
   await mkdir(resolve(root, "site/data"), { recursive: true });
   await mkdir(resolve(root, "runner/內容"), { recursive: true });

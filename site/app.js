@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260516-pro19";
+const DATA_VERSION = "20260520-content-origin1";
 const TODAY = getTodayString();
 
 const state = {
@@ -2484,6 +2484,11 @@ function sortContentCards(containerSelector, itemSelector, mode) {
     return;
   }
 
+  const originRank = {
+    candidate: 3,
+    editorial: 2,
+    previous_published: 1,
+  };
   const cards = [...container.querySelectorAll(itemSelector)];
   const sorted = cards.sort((a, b) => {
     if (mode === "oldest") {
@@ -2493,6 +2498,8 @@ function sortContentCards(containerSelector, itemSelector, mode) {
       return String(a.dataset.category || "").localeCompare(String(b.dataset.category || ""))
         || String(a.dataset.title || a.textContent || "").localeCompare(String(b.dataset.title || b.textContent || ""));
     }
+    const originDiff = (originRank[b.dataset.sourceOrigin] || 0) - (originRank[a.dataset.sourceOrigin] || 0);
+    if (originDiff !== 0) return originDiff;
     return String(b.dataset.date || "").localeCompare(String(a.dataset.date || ""));
   });
 
@@ -2525,10 +2532,19 @@ function contentArticleHtml(item) {
   const attr = type === "shoe" ? "data-shoe-card" : "data-news-card";
   const category = item.category || (type === "shoe" ? "跑鞋新品" : "跑步新聞");
   const sourceText = item.source ? `${item.source} 來源` : "閱讀來源";
+  const sourceOrigin = item.source_origin || "candidate";
+  const originLabel = sourceOrigin === "editorial"
+    ? "精選"
+    : sourceOrigin === "previous_published"
+      ? "庫存"
+      : "新抓到";
   return `
-    <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}">
+    <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}" data-source-origin="${escapeHtml(sourceOrigin)}">
       <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>
-      <span class="content-tag">${escapeHtml(category)}</span>
+      <div class="content-tag-row">
+        <span class="content-tag">${escapeHtml(category)}</span>
+        <span class="content-origin-tag" data-origin="${escapeHtml(sourceOrigin)}">${escapeHtml(originLabel)}</span>
+      </div>
       <h3>${escapeHtml(item.title)}</h3>
       <p>${escapeHtml(item.summary)}</p>
       <a class="sub-link" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(sourceText)}</a>

@@ -101,6 +101,10 @@ assertCheck(
   publishContentScript.includes("raw.filter((item) => item.article_date).map(toPublishedItem)"),
   "auto-published content skips candidates without source article dates"
 );
+assertCheck(
+  publishContentScript.includes("function sourceOriginRank") && appJs.includes("data-source-origin") && appJs.includes("content-origin-tag"),
+  "published content surfaces newly crawled items ahead of inventory"
+);
 
 const dateSensitiveScripts = [
   ["scripts/update-race-weather.mjs", weatherScript],
