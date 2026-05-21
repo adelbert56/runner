@@ -132,6 +132,10 @@ assertCheck(
   dataWorkflow.includes('cron: "0 10 * * 2,4"') && dataWorkflow.includes('cron: "30 11 * * 2,4"') && dataWorkflow.includes('cron: "0 13 * * 2,4"'),
   "race data workflow has primary and backup Tuesday/Thursday schedules"
 );
+assertCheck(
+  dataWorkflow.includes("Check same-day refresh guard") && dataWorkflow.includes("should_run=false") && dataWorkflow.includes("steps.refresh-guard.outputs.should_run == 'true'"),
+  "race data backup schedules skip after a same-day successful refresh"
+);
 assertCheck(contentWorkflow.includes('cron: "0 1 * * 1,3,5"'), "content workflow runs at 09:00 Asia/Taipei Monday/Wednesday/Friday");
 assertCheck(quipsWorkflow.includes('cron: "0 2 * * 1"'), "runner quips workflow runs at 10:00 Asia/Taipei Monday");
 assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && weatherWorkflow.includes("site/data/races.json"), "weather auto-commit includes both race data outputs");
