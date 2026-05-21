@@ -128,7 +128,10 @@ for (const [path, content] of dateSensitiveScripts) {
 }
 
 assertCheck(weatherWorkflow.includes('cron: "0 23 * * *"'), "weather workflow runs at 07:00 Asia/Taipei");
-assertCheck(dataWorkflow.includes('cron: "0 10 * * 2,4"'), "race data workflow runs at 18:00 Asia/Taipei Tuesday/Thursday");
+assertCheck(
+  dataWorkflow.includes('cron: "0 10 * * 2,4"') && dataWorkflow.includes('cron: "30 11 * * 2,4"') && dataWorkflow.includes('cron: "0 13 * * 2,4"'),
+  "race data workflow has primary and backup Tuesday/Thursday schedules"
+);
 assertCheck(contentWorkflow.includes('cron: "0 1 * * 1,3,5"'), "content workflow runs at 09:00 Asia/Taipei Monday/Wednesday/Friday");
 assertCheck(quipsWorkflow.includes('cron: "0 2 * * 1"'), "runner quips workflow runs at 10:00 Asia/Taipei Monday");
 assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && weatherWorkflow.includes("site/data/races.json"), "weather auto-commit includes both race data outputs");
