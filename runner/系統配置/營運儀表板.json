@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-22T06:23:57.507Z",
+  "generated_at": "2026-05-22T06:33:57.804Z",
   "basis_date": "2026-05-22",
   "races": {
     "total": 36,
@@ -25,11 +25,11 @@
     }
   },
   "content": {
-    "shoe_cards": 15,
-    "news_cards": 20,
+    "shoe_cards": 12,
+    "news_cards": 11,
     "newest_shoe_date": "2026-05-20",
     "newest_news_date": "2026-06-05",
-    "published_count": 35,
+    "published_count": 23,
     "candidate_count": 34,
     "editorial_count": 3,
     "candidate_by_category": {
@@ -52,7 +52,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 5,
+        "consecutive_failures": 6,
         "base_priority": 5,
         "effective_priority": 4,
         "error": "403 Forbidden"
@@ -64,7 +64,7 @@
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 16,
+        "candidate_count": 15,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,

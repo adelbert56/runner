@@ -7,7 +7,7 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 5,
+    "consecutive_failures": 6,
     "base_priority": 5,
     "effective_priority": 4,
     "error": "403 Forbidden"
@@ -19,7 +19,7 @@
     "source_type": "跑鞋新品 / 跑步專題",
     "status": "穩定",
     "ok": true,
-    "candidate_count": 16,
+    "candidate_count": 15,
     "consecutive_failures": 0,
     "base_priority": 5,
     "effective_priority": 6,
