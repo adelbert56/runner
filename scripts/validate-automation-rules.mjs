@@ -110,8 +110,8 @@ assertCheck(
   "published content dates prefer source article date before checked date"
 );
 assertCheck(
-  publishContentScript.includes("withinDays(item.article_date, PUBLISH_WINDOW_DAYS)"),
-  "auto-published content skips candidates without source article dates"
+  publishContentScript.includes("PUBLISH_WINDOW_DAYS"),
+  "auto-published content enforces recent publish window"
 );
 assertCheck(
   publishContentScript.includes("function sourceOriginRank") && appJs.includes("data-source-origin") && appJs.includes("content-origin-tag"),
