@@ -104,11 +104,13 @@ assertCheck(
 assertCheck(contentCandidateScript.includes("function extractMetaDate"), "content crawler extracts source article dates");
 assertCheck(contentCandidateScript.includes("article_date"), "content candidates preserve source article dates");
 assertCheck(
-  publishContentScript.includes("parseDate(item.article_date || item.checked_at)"),
+  publishContentScript.includes("normalizeIsoDate(item.article_date)")
+    && publishContentScript.includes("normalizeIsoDate(item.checked_at)")
+    && publishContentScript.includes("parseDate(normalizedArticleDate || normalizedCheckedAt)"),
   "published content dates prefer source article date before checked date"
 );
 assertCheck(
-  publishContentScript.includes("raw.filter((item) => item.article_date).map(toPublishedItem)"),
+  publishContentScript.includes("withinDays(item.article_date, PUBLISH_WINDOW_DAYS)"),
   "auto-published content skips candidates without source article dates"
 );
 assertCheck(
