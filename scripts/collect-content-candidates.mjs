@@ -24,6 +24,12 @@ const sources = [
     priority: 5,
   },
   {
+    name: "運動視界",
+    url: "https://www.sportsv.net/tags/running",
+    type: "跑步新聞 / 訓練知識",
+    priority: 4,
+  },
+  {
     name: "動一動",
     url: "https://www.don1don.com/",
     type: "跑鞋新品 / 跑步專題",
@@ -34,6 +40,12 @@ const sources = [
     url: "https://bouncin.net/",
     type: "跑鞋新品",
     priority: 4,
+  },
+  {
+    name: "Runner's World Taiwan",
+    url: "https://www.runnersworld.com.tw/",
+    type: "跑步新聞 / 訓練知識",
+    priority: 3,
   },
   {
     name: "Women's Health Taiwan",
