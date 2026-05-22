@@ -11,6 +11,7 @@ const reportPath = resolve(outputDir, "候選內容報告.md");
 const sourceHealthJsonPath = resolve(outputDir, "內容來源健康度報告.json");
 const sourceHealthReportPath = resolve(outputDir, "內容來源健康度報告.md");
 const ARCHIVE_RETENTION_DAYS = 183;
+const PREFERRED_WINDOW_DAYS = 92;
 
 const sources = [
   {
@@ -261,6 +262,9 @@ function scoreTitle(title, source) {
 }
 
 function classify(title) {
+  if (/為什麼|怎麼|如何|真的|是否|原理|解析|入門|新手|課表|訓練|跑姿|重量訓練|肌力|恢復|補給|乳酸|心率|傷痛|疼痛|比較省力|效率/i.test(title)) {
+    return "入門知識";
+  }
   if (/跑鞋|慢跑鞋|碳板|ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Cloud/i.test(title)) {
     return "跑鞋新品";
   }
@@ -471,6 +475,20 @@ function parseTaipeiDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function withinDays(value, windowDays) {
+  const date = parseTaipeiDate(value);
+  if (!date) return false;
+  const cutoff = new Date(`${today}T00:00:00+08:00`);
+  cutoff.setDate(cutoff.getDate() - windowDays);
+  const upperBound = new Date(`${today}T23:59:59+08:00`);
+  return date >= cutoff && date <= upperBound;
+}
+
+function isPreferredWindowCandidate(item) {
+  const dateText = item.article_date || item.checked_at || "";
+  return withinDays(dateText, PREFERRED_WINDOW_DAYS);
+}
+
 function mergeCandidate(previous, current) {
   const merged = { ...(previous || {}), ...(current || {}) };
   merged.article_date = current.article_date || previous?.article_date || "";
@@ -569,7 +587,8 @@ async function main() {
   }
 
   const enrichedCandidates = await enrichTitles(results);
-  let candidatesAll = dedupe(enrichedCandidates, 200);
+  const preferredCandidates = enrichedCandidates.filter(isPreferredWindowCandidate);
+  let candidatesAll = dedupe(preferredCandidates, 200);
   let candidates = candidatesAll.slice(0, 40);
   if (!candidates.length && errors.length) {
     try {
