@@ -198,6 +198,11 @@ function normalizeDateText(text) {
     return `${iso[1]}-${iso[2]}-${iso[3]}`;
   }
 
+  const slash = value.match(/\b(20\d{2})[\/.](\d{1,2})[\/.](\d{1,2})\b/);
+  if (slash) {
+    return `${slash[1]}-${String(slash[2]).padStart(2, "0")}-${String(slash[3]).padStart(2, "0")}`;
+  }
+
   const zh = value.match(/\b(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\b/);
   if (zh) {
     return `${zh[1]}-${String(zh[2]).padStart(2, "0")}-${String(zh[3]).padStart(2, "0")}`;
@@ -220,6 +225,7 @@ function extractDateText(html) {
     /"datePublished"\s*:\s*"([^"]+)"/i,
     /"dateModified"\s*:\s*"([^"]+)"/i,
     /\b20\d{2}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日\b/i,
+    /\b20\d{2}[\/.]\d{1,2}[\/.]\d{1,2}\b/i,
     /\b\d{1,2}\s+[A-Za-z]{3,9}\.?,?\s+20\d{2}\b/i,
   ];
 
