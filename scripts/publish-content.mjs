@@ -407,7 +407,7 @@ async function main() {
   const archiveRaw = await readJson(candidatesArchivePath, { items: [] });
   const archiveItems = Array.isArray(archiveRaw?.items) ? archiveRaw.items : (Array.isArray(archiveRaw) ? archiveRaw : []);
   const normalized = raw
-    .filter((item) => withinDays(item.article_date, PUBLISH_WINDOW_DAYS))
+    .filter((item) => withinDays(item.article_date, PUBLISH_WINDOW_DAYS) || (!item.article_date && withinDays(item.checked_at, PUBLISH_WINDOW_DAYS)))
     .map(toPublishedItem);
   const previousInventory = (Array.isArray(previousContent.items) ? previousContent.items : [])
     .filter((item) => withinDays(item.date || item.published_at, PUBLISH_WINDOW_DAYS))
