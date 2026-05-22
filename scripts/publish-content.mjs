@@ -4,10 +4,12 @@ import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const candidatesPath = resolve(root, "runner/內容/候選內容.json");
+const candidatesArchivePath = resolve(root, "runner/內容/候選內容庫.json");
 const editorialPath = resolve(root, "runner/內容/人工精選內容.json");
 const outputPath = resolve(root, "site/data/content.json");
 const reportPath = resolve(root, "runner/內容/自動上架內容報告.md");
 const today = process.env.RUNNER_TODAY || todayInTaipei();
+const ARCHIVE_RETENTION_DAYS = 183;
 
 const LIMITS = {
   shoe: 16,
@@ -55,6 +57,20 @@ function parseDate(value) {
   const text = String(value || "");
   const match = text.match(/\d{4}-\d{2}-\d{2}/);
   return match ? match[0] : today;
+}
+
+function parseTaipeiDate(value) {
+  const text = String(value || "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+  const date = new Date(`${text}T00:00:00+08:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function withinRetention(item, retentionDays) {
+  const cutoff = new Date(`${today}T00:00:00+08:00`);
+  cutoff.setDate(cutoff.getDate() - retentionDays);
+  const lastSeen = parseTaipeiDate(item.last_seen_at || item.checked_at || item.article_date || "");
+  return lastSeen ? lastSeen >= cutoff : true;
 }
 
 function inferType(item) {
@@ -356,13 +372,15 @@ function buildReport(published) {
 
 function sourceOriginLabel(origin) {
   if (origin === "editorial") return "人工精選";
+  if (origin === "archive") return "半年留存庫";
   if (origin === "previous_published") return "上一版庫存補位";
   return "自動候選";
 }
 
 function sourceOriginRank(origin) {
-  if (origin === "candidate") return 3;
-  if (origin === "editorial") return 2;
+  if (origin === "candidate") return 4;
+  if (origin === "editorial") return 3;
+  if (origin === "archive") return 2;
   return 1;
 }
 
@@ -370,13 +388,23 @@ async function main() {
   const raw = (await readJson(candidatesPath, [])).map((item) => ({ ...item, source_origin: "candidate" }));
   const editorial = (await readJson(editorialPath, [])).map((item) => ({ ...item, source_origin: "editorial" }));
   const previousContent = await readJson(outputPath, { items: [] });
+  const archiveRaw = await readJson(candidatesArchivePath, { items: [] });
+  const archiveItems = Array.isArray(archiveRaw?.items) ? archiveRaw.items : (Array.isArray(archiveRaw) ? archiveRaw : []);
   const normalized = raw.filter((item) => item.article_date).map(toPublishedItem);
   const previousInventory = Array.isArray(previousContent.items) ? previousContent.items.map(previousToPublishedItem) : [];
+  const archiveInventory = archiveItems
+    .filter((item) => item.article_date && withinRetention(item, ARCHIVE_RETENTION_DAYS))
+    .map((item) => ({ ...item, source_origin: "archive" }))
+    .map(toPublishedItem)
+    .map((item) => ({
+      ...item,
+      score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 1),
+    }));
   const editorialInventory = editorial.map(toPublishedItem).map((item) => ({
     ...item,
     score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 2),
   }));
-  const inventory = [...previousInventory, ...editorialInventory];
+  const inventory = [...archiveInventory, ...previousInventory, ...editorialInventory];
   const published = [
     ...fillWithInventory(normalized, inventory, "shoe"),
     ...fillWithInventory(normalized, inventory, "news"),

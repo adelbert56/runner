@@ -6,9 +6,11 @@ const root = resolve(import.meta.dirname, "..");
 const today = process.env.RUNNER_TODAY || todayInTaipei();
 const outputDir = resolve(root, "runner/內容");
 const jsonPath = resolve(outputDir, "候選內容.json");
+const archivePath = resolve(outputDir, "候選內容庫.json");
 const reportPath = resolve(outputDir, "候選內容報告.md");
 const sourceHealthJsonPath = resolve(outputDir, "內容來源健康度報告.json");
 const sourceHealthReportPath = resolve(outputDir, "內容來源健康度報告.md");
+const ARCHIVE_RETENTION_DAYS = 183;
 
 const sources = [
   {
@@ -441,7 +443,7 @@ async function enrichTitles(items) {
   return enriched;
 }
 
-function dedupe(items) {
+function dedupe(items, limit = 40) {
   const seen = new Set();
   return items
     .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
@@ -453,7 +455,47 @@ function dedupe(items) {
       seen.add(key);
       return true;
     })
-    .slice(0, 40);
+    .slice(0, limit);
+}
+
+function parseTaipeiDate(value) {
+  const text = String(value || "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+  const date = new Date(`${text}T00:00:00+08:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function mergeCandidate(previous, current) {
+  const merged = { ...(previous || {}), ...(current || {}) };
+  merged.article_date = current.article_date || previous?.article_date || "";
+  merged.description = current.description || previous?.description || "";
+  merged.source_type = current.source_type || previous?.source_type || "";
+  merged.category = current.category || previous?.category || "";
+  merged.score = Math.max(Number(previous?.score || 0), Number(current.score || 0));
+  merged.checked_at = current.checked_at || previous?.checked_at || today;
+  merged.first_seen_at = previous?.first_seen_at || today;
+  merged.last_seen_at = today;
+  merged.seen_count = Number(previous?.seen_count || 0) + 1;
+  return merged;
+}
+
+function normalizeArchive(raw) {
+  if (Array.isArray(raw)) {
+    return { generated_at: new Date().toISOString(), retention_days: ARCHIVE_RETENTION_DAYS, items: raw };
+  }
+  if (raw && typeof raw === "object" && Array.isArray(raw.items)) {
+    return { ...raw, items: raw.items };
+  }
+  return { generated_at: new Date().toISOString(), retention_days: ARCHIVE_RETENTION_DAYS, items: [] };
+}
+
+function applyRetention(items, retentionDays) {
+  const cutoff = new Date(`${today}T00:00:00+08:00`);
+  cutoff.setDate(cutoff.getDate() - retentionDays);
+  return items.filter((item) => {
+    const lastSeen = parseTaipeiDate(item.last_seen_at || item.checked_at || "");
+    return lastSeen ? lastSeen >= cutoff : true;
+  });
 }
 
 function buildReport(items, errors) {
@@ -520,16 +562,32 @@ async function main() {
     }
   }
 
-  let candidates = dedupe(await enrichTitles(results));
+  const enrichedCandidates = await enrichTitles(results);
+  let candidatesAll = dedupe(enrichedCandidates, 200);
+  let candidates = candidatesAll.slice(0, 40);
   if (!candidates.length && errors.length) {
     try {
       candidates = JSON.parse(await readFile(jsonPath, "utf8"));
+      candidatesAll = candidates;
       errors.push({ source: "fallback", message: "本次來源抓取失敗，保留上一版候選內容，避免清空前台素材。" });
     } catch {
       // Keep empty candidates when there is no previous file.
     }
   }
   await mkdir(outputDir, { recursive: true });
+
+  const previousArchive = normalizeArchive(await readJson(archivePath, null));
+  const archiveByUrl = new Map(
+    previousArchive.items.map((item) => [normalizeUrl(item.url), item]).filter(([key]) => key),
+  );
+  for (const item of candidatesAll) {
+    const key = normalizeUrl(item.url);
+    if (!key) continue;
+    archiveByUrl.set(key, mergeCandidate(archiveByUrl.get(key), item));
+  }
+  const archivedItems = applyRetention([...archiveByUrl.values()], ARCHIVE_RETENTION_DAYS)
+    .sort((a, b) => String(b.last_seen_at || "").localeCompare(String(a.last_seen_at || "")) || b.score - a.score);
+
   const sourceHealth = sourceRuns.map((run) => {
     const previous = previousHealth.get(run.source.name);
     const consecutiveFailures = run.ok ? 0 : Number(previous?.consecutive_failures || 0) + 1;
@@ -548,11 +606,17 @@ async function main() {
     };
   });
   await writeFile(jsonPath, `${JSON.stringify(candidates, null, 2)}\n`, "utf8");
+  await writeFile(
+    archivePath,
+    `${JSON.stringify({ generated_at: new Date().toISOString(), retention_days: ARCHIVE_RETENTION_DAYS, items: archivedItems }, null, 2)}\n`,
+    "utf8",
+  );
   await writeFile(reportPath, buildReport(candidates, errors), "utf8");
   await writeFile(sourceHealthJsonPath, `${JSON.stringify(sourceHealth, null, 2)}\n`, "utf8");
   await writeFile(sourceHealthReportPath, buildSourceHealthReport(sourceHealth), "utf8");
 
   console.log(`Content candidates: ${candidates.length}`);
+  console.log(`Content archive items: ${archivedItems.length}`);
   console.log(`Content source issues: ${sourceHealth.filter((item) => item.status !== "穩定").length}`);
   if (errors.length) {
     console.log(`Source errors: ${errors.length}`);
