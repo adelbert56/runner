@@ -7,7 +7,7 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 6,
+    "consecutive_failures": 7,
     "base_priority": 5,
     "effective_priority": 4,
     "error": "403 Forbidden"
