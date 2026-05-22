@@ -7,7 +7,7 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 10,
+    "consecutive_failures": 11,
     "base_priority": 5,
     "effective_priority": 4,
     "error": "403 Forbidden"
@@ -19,10 +19,10 @@
     "source_type": "跑步新聞 / 訓練知識",
     "status": "穩定",
     "ok": true,
-    "candidate_count": 2,
+    "candidate_count": 5,
     "consecutive_failures": 0,
     "base_priority": 4,
-    "effective_priority": 4,
+    "effective_priority": 5,
     "error": ""
   },
   {
@@ -32,10 +32,10 @@
     "source_type": "跑鞋新品 / 跑步專題",
     "status": "穩定",
     "ok": true,
-    "candidate_count": 7,
+    "candidate_count": 15,
     "consecutive_failures": 0,
     "base_priority": 5,
-    "effective_priority": 5,
+    "effective_priority": 6,
     "error": ""
   },
   {
@@ -59,7 +59,7 @@
     "status": "可用需觀察",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 1,
+    "consecutive_failures": 2,
     "base_priority": 3,
     "effective_priority": 3,
     "error": "fetch failed"
