@@ -12,6 +12,9 @@ const sourceHealthJsonPath = resolve(outputDir, "內容來源健康度報告.jso
 const sourceHealthReportPath = resolve(outputDir, "內容來源健康度報告.md");
 const ARCHIVE_RETENTION_DAYS = 183;
 const PREFERRED_WINDOW_DAYS = 92;
+const ENRICH_LIMIT = 120;
+const CANDIDATES_ALL_LIMIT = 400;
+const CANDIDATE_OUTPUT_LIMIT = 80;
 
 const sources = [
   {
@@ -447,7 +450,7 @@ function effectivePriority(source, priorHealth) {
 
 async function enrichTitles(items) {
   const enriched = [];
-  for (const item of items.slice(0, 60)) {
+  for (const item of items.slice(0, ENRICH_LIMIT)) {
     enriched.push(await fetchArticleMetadata(item));
   }
   return enriched;
@@ -588,8 +591,8 @@ async function main() {
 
   const enrichedCandidates = await enrichTitles(results);
   const preferredCandidates = enrichedCandidates.filter(isPreferredWindowCandidate);
-  let candidatesAll = dedupe(preferredCandidates, 200);
-  let candidates = candidatesAll.slice(0, 40);
+  let candidatesAll = dedupe(preferredCandidates, CANDIDATES_ALL_LIMIT);
+  let candidates = candidatesAll.slice(0, CANDIDATE_OUTPUT_LIMIT);
   if (!candidates.length && errors.length) {
     try {
       candidates = JSON.parse(await readFile(jsonPath, "utf8"));
