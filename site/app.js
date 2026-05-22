@@ -24,7 +24,7 @@ const state = {
   newsFavoritesOnly: false,
   shoeCategory: "all",
   newsCategory: "all",
-  shoeLimit: "10",
+  shoeLimit: "25",
   newsLimit: "10",
   shoePage: 1,
   newsPage: 1,
@@ -2498,9 +2498,11 @@ function sortContentCards(containerSelector, itemSelector, mode) {
       return String(a.dataset.category || "").localeCompare(String(b.dataset.category || ""))
         || String(a.dataset.title || a.textContent || "").localeCompare(String(b.dataset.title || b.textContent || ""));
     }
+    const dateDiff = String(b.dataset.date || "").localeCompare(String(a.dataset.date || ""));
+    if (dateDiff !== 0) return dateDiff;
     const originDiff = (originRank[b.dataset.sourceOrigin] || 0) - (originRank[a.dataset.sourceOrigin] || 0);
     if (originDiff !== 0) return originDiff;
-    return String(b.dataset.date || "").localeCompare(String(a.dataset.date || ""));
+    return String(a.dataset.title || a.textContent || "").localeCompare(String(b.dataset.title || b.textContent || ""));
   });
 
   sorted.forEach((card) => container.appendChild(card));
