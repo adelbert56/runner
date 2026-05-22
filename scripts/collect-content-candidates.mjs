@@ -343,13 +343,16 @@ function extractMetaDate(html) {
   return extractDateText(html);
 }
 
+const DEFAULT_HEADERS = {
+  accept: "text/html,application/xhtml+xml",
+  "accept-language": "zh-TW,zh;q=0.9,en;q=0.8",
+  "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+};
+
 async function fetchArticleMetadata(item) {
   try {
     const response = await fetch(item.url, {
-      headers: {
-        "accept": "text/html,application/xhtml+xml",
-        "user-agent": "RunnerPlazaContentBot/0.1 (+https://github.com/adelbert56/runner)",
-      },
+      headers: DEFAULT_HEADERS,
       signal: AbortSignal.timeout(10000),
     });
     if (!response.ok) {
@@ -412,10 +415,7 @@ function extractLinks(html, source) {
 
 async function fetchSource(source) {
   const response = await fetch(source.url, {
-    headers: {
-      "accept": "text/html,application/xhtml+xml",
-      "user-agent": "RunnerPlazaContentBot/0.1 (+https://github.com/adelbert56/runner)",
-    },
+    headers: DEFAULT_HEADERS,
     signal: AbortSignal.timeout(12000),
   });
 
