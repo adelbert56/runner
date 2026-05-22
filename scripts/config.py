@@ -19,6 +19,25 @@ CENTRAL_TAIWAN_COUNTIES = {
     "苗栗縣", "苗栗县",
 }
 
+# ─── Event type filter ───────────────────────────────────────────────────────
+NON_RUNNING_EVENT_KEYWORDS = (
+    "單車", "自行車", "鐵馬", "騎乘", "自行車賽", "單車逍遙遊",
+    "bike", "bicycle", "cycling",
+)
+
+RUNNING_EVENT_KEYWORDS = (
+    "跑", "路跑", "馬拉松", "半馬", "全馬", "超馬", "越野跑",
+    "健跑", "夜跑", "接力", "公益跑", "k", "km", "公里",
+)
+
+
+def is_running_event(name: str, distances: list[str] | None = None) -> bool:
+    """Reject non-running activities that appear in race listing sources."""
+    text = f"{name or ''} {' '.join(distances or [])}".lower()
+    if any(keyword.lower() in text for keyword in NON_RUNNING_EVENT_KEYWORDS):
+        return False
+    return any(keyword.lower() in text for keyword in RUNNING_EVENT_KEYWORDS)
+
 # ─── Source definitions ───────────────────────────────────────────────────────
 SOURCES = {
     "sports_note": {

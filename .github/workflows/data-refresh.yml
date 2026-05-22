@@ -29,7 +29,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check same-day refresh guard
+      - name: Check recent refresh guard
         id: refresh-guard
         env:
           GH_TOKEN: ${{ github.token }}
@@ -42,12 +42,12 @@ jobs:
             exit 0
           fi
 
-          today="$(TZ=Asia/Taipei date +%F)"
+          lookback_hours=18
           runs_json="$(gh run list --repo "$REPOSITORY" --workflow data-refresh.yml --branch main --status success --limit 20 --json databaseId,createdAt)"
-          prior_count="$(printf '%s' "$runs_json" | jq --arg today "$today" --argjson current "$CURRENT_RUN_ID" '[.[] | select(.databaseId != $current) | select((.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601 + 28800 | strftime("%Y-%m-%d")) == $today)] | length')"
+          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600))] | length')"
 
           if [ "$prior_count" -gt 0 ]; then
-            echo "Race data already refreshed on $today Asia/Taipei; skipping backup run."
+            echo "Race data already refreshed within the last ${lookback_hours} hours; skipping backup run."
             echo "should_run=false" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=true" >> "$GITHUB_OUTPUT"

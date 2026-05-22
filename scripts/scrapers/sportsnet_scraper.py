@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SOURCES, CENTRAL_TAIWAN_COUNTIES, REQUEST_HEADERS,
-    REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty
+    REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty, is_running_event
 )
 
 logger = logging.getLogger(__name__)
@@ -135,6 +135,9 @@ def scrape() -> list[dict]:
             continue  # not in central Taiwan
 
         distances = detail.get("distances", [])
+        if not is_running_event(item["race_name"], distances):
+            logger.info(f"Skipping non-running event: {item['race_name']}")
+            continue
         races.append({
             "race_name": item["race_name"],
             "race_date": item["race_date"],

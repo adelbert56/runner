@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SOURCES, CENTRAL_TAIWAN_COUNTIES, REQUEST_HEADERS,
-    REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty
+    REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty, is_running_event
 )
 
 logger = logging.getLogger(__name__)
@@ -403,6 +403,9 @@ def scrape() -> list[dict]:
 
         # ─── Distances ────────────────────────────────────────────────────
         distances = _extract_distances(item)
+        if not is_running_event(race_name, distances):
+            logger.info(f"Skipping non-running event: {race_name}")
+            continue
 
         # ─── Registration status ──────────────────────────────────────────
         status_el = item.select_one("div.competition-status")

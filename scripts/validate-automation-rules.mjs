@@ -40,6 +40,9 @@ const [
   runnerQuipsScript,
   raceDbRaw,
   siteRaceRaw,
+  pythonConfig,
+  sportsNoteScraper,
+  sportsnetScraper,
   weatherWorkflow,
   dataWorkflow,
   contentWorkflow,
@@ -62,6 +65,9 @@ const [
   text("scripts/refresh-runner-quips.mjs"),
   text("runner/賽事/賽事資料庫.json"),
   text("site/data/races.json"),
+  text("scripts/config.py"),
+  text("scripts/scrapers/sports_note_scraper.py"),
+  text("scripts/scrapers/sportsnet_scraper.py"),
   text(".github/workflows/weather-refresh.yml"),
   text(".github/workflows/data-refresh.yml"),
   text(".github/workflows/content-candidates.yml"),
@@ -91,6 +97,10 @@ assertCheck(
   "site date calculations use Asia/Taipei today"
 );
 assertCheck(raceDbRaw === siteRaceRaw, "runner race database and site race data are identical");
+assertCheck(
+  pythonConfig.includes("NON_RUNNING_EVENT_KEYWORDS") && sportsNoteScraper.includes("is_running_event") && sportsnetScraper.includes("is_running_event"),
+  "race scrapers filter non-running events before quality gates"
+);
 assertCheck(contentCandidateScript.includes("function extractMetaDate"), "content crawler extracts source article dates");
 assertCheck(contentCandidateScript.includes("article_date"), "content candidates preserve source article dates");
 assertCheck(
@@ -133,10 +143,14 @@ assertCheck(
   "race data workflow has primary and backup Tuesday/Thursday schedules"
 );
 assertCheck(
-  dataWorkflow.includes("Check same-day refresh guard") && dataWorkflow.includes("should_run=false") && dataWorkflow.includes("steps.refresh-guard.outputs.should_run == 'true'"),
-  "race data backup schedules skip after a same-day successful refresh"
+  dataWorkflow.includes("Check recent refresh guard") && dataWorkflow.includes("lookback_hours=18"),
+  "race data backup schedules handle delayed cross-midnight runs"
 );
 assertCheck(contentWorkflow.includes('cron: "0 1 * * 1,3,5"'), "content workflow runs at 09:00 Asia/Taipei Monday/Wednesday/Friday");
+assertCheck(
+  contentWorkflow.includes('cron: "0 3 * * 1,3,5"') && contentWorkflow.includes('cron: "0 5 * * 1,3,5"') && contentWorkflow.includes("Check recent content refresh guard"),
+  "content workflow has backup schedules and duplicate guard"
+);
 assertCheck(quipsWorkflow.includes('cron: "0 2 * * 1"'), "runner quips workflow runs at 10:00 Asia/Taipei Monday");
 assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && weatherWorkflow.includes("site/data/races.json"), "weather auto-commit includes both race data outputs");
 assertCheck(dataWorkflow.includes("runner/系統配置/營運儀表板.json") && dataWorkflow.includes("site/data/races.json"), "race data auto-commit includes dashboard and site data");
