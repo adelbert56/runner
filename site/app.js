@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260520-content-origin1";
+const DATA_VERSION = "20260522-recent-content1";
 const TODAY = getTodayString();
 
 const state = {
