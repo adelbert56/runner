@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-22T06:22:36.369Z",
+  "generated_at": "2026-05-22T06:23:57.507Z",
   "basis_date": "2026-05-22",
   "races": {
     "total": 36,
@@ -26,10 +26,10 @@
   },
   "content": {
     "shoe_cards": 15,
-    "news_cards": 18,
+    "news_cards": 20,
     "newest_shoe_date": "2026-05-20",
     "newest_news_date": "2026-06-05",
-    "published_count": 33,
+    "published_count": 35,
     "candidate_count": 34,
     "editorial_count": 3,
     "candidate_by_category": {
@@ -52,7 +52,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 4,
+        "consecutive_failures": 5,
         "base_priority": 5,
         "effective_priority": 4,
         "error": "403 Forbidden"

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-22T06:22:35.864Z",
+  "generated_at": "2026-05-22T06:23:57.029Z",
   "items": [
     {
       "id": "news-bouncin-net-p-news-events-5979-brooks-evolution-running-camp-registration",
@@ -240,6 +240,34 @@
       "publish_status": "published"
     },
     {
+      "id": "news-irsports-com-tw-w-bd-1548",
+      "type": "news",
+      "title": "學員故事｜從雲端墜落地面：美術老師 KT 重生初半馬 | 部落格 | IR SPORTS 跑創運動",
+      "date": "2024-11-00",
+      "source": "IR SPORTS",
+      "category": "賽事資訊",
+      "summary": "初半馬故事適合作為新手備賽參考，重點在循序累積、穩定完成課表與避免臨時硬拉長跑。",
+      "url": "https://irsports.com.tw/w/bd/1548",
+      "score": 4,
+      "source_origin": "candidate",
+      "published_at": "2026-05-22",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-irsports-com-tw-w-bd-1529",
+      "type": "news",
+      "title": "跑者健康｜吃再多能量膠也沒用？背後可能是血糖問題 | 部落格 | IR SPORTS 跑創運動",
+      "date": "2024-11-00",
+      "source": "IR SPORTS",
+      "category": "補給",
+      "summary": "補給文章可用於長跑與比賽前演練。不要比賽當天第一次嘗試新補給，避免腸胃或配速失控。",
+      "url": "https://irsports.com.tw/w/bd/1529",
+      "score": 3,
+      "source_origin": "candidate",
+      "published_at": "2026-05-22",
+      "publish_status": "published"
+    },
+    {
       "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a42700951-alien-wen",
       "type": "news",
       "title": "【WH戶外衝一波】戶外精靈温貞菱的快樂祕方：「如果你有停滯不前的感覺，就去跑步吧！」",
@@ -444,7 +472,7 @@
       "category": "防水",
       "summary": "這雙鞋目前以「防水」定位收錄。適合雨天、通勤慢跑與濕冷環境，夏季長跑要留意悶熱與排汗。",
       "url": "https://bouncin.net/p/news/new-stuff/5971/brooks-gore-tex-running-shoes-collection",
-      "score": 8,
+      "score": 7,
       "source_origin": "previous_published",
       "published_at": "2026-05-22",
       "publish_status": "published"
@@ -458,7 +486,7 @@
       "category": "長距離緩震",
       "summary": "這雙鞋目前以「長距離緩震」定位收錄。適合長跑、恢復跑與累積里程，挑選時要看後段穩定，不只看剛試穿的彈感。",
       "url": "https://bouncin.net/p/news/new-stuff/5965/mizuno-neo-vista-3-running-shoes",
-      "score": 6,
+      "score": 5,
       "source_origin": "previous_published",
       "published_at": "2026-05-22",
       "publish_status": "published"
