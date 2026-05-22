@@ -25,7 +25,7 @@ const state = {
   shoeCategory: "all",
   newsCategory: "all",
   shoeLimit: "25",
-  newsLimit: "10",
+  newsLimit: "25",
   shoePage: 1,
   newsPage: 1,
   trainingRaceKey: "",
@@ -465,7 +465,7 @@ function saveContentFavorites() {
 
 function validContentLimit(value) {
   const normalized = String(value || "").trim();
-  return ["10", "25", "50"].includes(normalized) ? normalized : "10";
+  return ["10", "25", "50"].includes(normalized) ? normalized : "25";
 }
 
 function loadContentSettings() {
@@ -475,7 +475,7 @@ function loadContentSettings() {
     state.newsLimit = validContentLimit(stored.newsLimit);
   } catch {
     state.shoeLimit = "10";
-    state.newsLimit = "10";
+    state.newsLimit = "25";
   }
   if (els.shoeLimit) {
     els.shoeLimit.value = state.shoeLimit;

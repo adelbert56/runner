@@ -211,17 +211,24 @@ function normalizeDateText(text) {
   const value = decodeHtml(text);
   const iso = value.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
   if (iso) {
+    if (iso[2] === "00" || iso[3] === "00") return "";
     return `${iso[1]}-${iso[2]}-${iso[3]}`;
   }
 
   const slash = value.match(/\b(20\d{2})[\/.](\d{1,2})[\/.](\d{1,2})\b/);
   if (slash) {
-    return `${slash[1]}-${String(slash[2]).padStart(2, "0")}-${String(slash[3]).padStart(2, "0")}`;
+    const month = String(slash[2]).padStart(2, "0");
+    const day = String(slash[3]).padStart(2, "0");
+    if (month === "00" || day === "00") return "";
+    return `${slash[1]}-${month}-${day}`;
   }
 
   const zh = value.match(/\b(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\b/);
   if (zh) {
-    return `${zh[1]}-${String(zh[2]).padStart(2, "0")}-${String(zh[3]).padStart(2, "0")}`;
+    const month = String(zh[2]).padStart(2, "0");
+    const day = String(zh[3]).padStart(2, "0");
+    if (month === "00" || day === "00") return "";
+    return `${zh[1]}-${month}-${day}`;
   }
 
   const english = value.match(/\b(\d{1,2})\s+([A-Za-z]{3,9})\.?,?\s+(20\d{2})\b/);
@@ -393,8 +400,6 @@ function extractLinks(html, source) {
       continue;
     }
 
-    const nearby = html.slice(Math.max(0, match.index - 500), Math.min(html.length, anchorPattern.lastIndex + 700));
-
     links.push({
       checked_at: today,
       source: source.name,
@@ -403,7 +408,9 @@ function extractLinks(html, source) {
       url,
       category: classify(title),
       score,
-      article_date: extractDateText(nearby),
+      // Prefer extracting a reliable published date from the article page itself.
+      // Some listing pages embed unrelated historical timestamps that pollute the timeline.
+      article_date: "",
       suggested_for: "待判斷",
       runner_takeaway: "待代理人摘要",
       publish_status: "candidate",
