@@ -12,8 +12,8 @@ const today = process.env.RUNNER_TODAY || todayInTaipei();
 const ARCHIVE_RETENTION_DAYS = 183;
 
 const LIMITS = {
-  shoe: 16,
-  news: 18,
+  shoe: 30,
+  news: 40,
 };
 
 const MIN_PUBLISHED = {
