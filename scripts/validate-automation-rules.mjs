@@ -165,7 +165,7 @@ assertCheck(weatherWorkflow.includes("git add --") && weatherWorkflow.includes('
 assertCheck(contentWorkflow.includes("git add --") && contentWorkflow.includes('"runner/系統配置/營運儀表板.md"'), "content workflow stages dashboard reports explicitly");
 assertCheck(quipsWorkflow.includes("git add --") && quipsWorkflow.includes('"site/data/announcements.json"'), "runner quips workflow stages announcement data explicitly");
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
-assertCheck(pagesWorkflow.includes("actions/setup-node@v4"), "Pages deploy installs Node before derived data builds");
+assertCheck(pagesWorkflow.includes("actions/setup-node@v6"), "Pages deploy installs Node before derived data builds");
 assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");
 assertCheck(pagesWorkflow.includes("npm run announcements:build") && pagesWorkflow.includes("npm run automation:health"), "Pages deploy rebuilds derived site data");
 
