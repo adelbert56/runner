@@ -75,7 +75,8 @@ function withinDays(value, windowDays) {
   if (!date) return false;
   const cutoff = new Date(`${today}T00:00:00+08:00`);
   cutoff.setDate(cutoff.getDate() - windowDays);
-  return date >= cutoff;
+  const upperBound = new Date(`${today}T23:59:59+08:00`);
+  return date >= cutoff && date <= upperBound;
 }
 
 function withinRetention(item, retentionDays) {
