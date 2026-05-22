@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-22T06:46:00.986Z",
+  "generated_at": "2026-05-22T07:19:48.980Z",
   "items": [
     {
       "id": "news-www-womenshealthmag-com-tw-fitness-running-a71011131-running-training-plan",
@@ -11,20 +11,6 @@
       "summary": "這篇適合作為課表調整參考。重點不是照抄強度，而是確認自己目前週跑量、恢復能力與目標賽事距離。",
       "url": "https://www.womenshealthmag.com/tw/fitness/running/a71011131/running-training-plan/",
       "score": 9,
-      "source_origin": "candidate",
-      "published_at": "2026-05-22",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-www-don1don-com-archives-237190-brita-e6-94-9c-e6-89-8b-e6-a3-ae-e6-9e-97-e8-b7-",
-      "type": "news",
-      "title": "BRITA 攜手森林跑站「好水跑站」 開啟補水新日常",
-      "date": "2026-05-21",
-      "source": "動一動",
-      "category": "跑步新聞",
-      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://www.don1don.com/archives/237190/brita-%e6%94%9c%e6%89%8b%e6%a3%ae%e6%9e%97%e8%b7%91%e7%ab%99%e3%80%8c%e5%a5%bd%e6%b0%b4%e8%b7%91%e7%ab%99%e3%80%8d%e5%bf%ab%e9%96%83%e5%ba%97-%e9%96%8b%e5%95%9f%e8%a3%9c%e6%b0%b4%e6%96%b0%e6%97%a5",
-      "score": 6,
       "source_origin": "candidate",
       "published_at": "2026-05-22",
       "publish_status": "published"
@@ -138,6 +124,20 @@
       "url": "https://www.sportscience.com.tw/article/detail/%E6%83%B3%E8%B7%91%E5%BE%97%E6%9B%B4%E5%BF%AB%EF%BC%9F%E6%8F%AD%E5%AF%86%E9%A0%82%E5%B0%96%E9%A6%AC%E6%8B%89%E6%9D%BE%E9%81%B8%E6%89%8B%E7%9A%84%E3%80%8C%E9%87%91%E5%AD%97%E5%A1%94%E3%80%8D%E8%A8%93%E7%B7%B4%E6%B3%95%E5%89%87",
       "score": 7,
       "source_origin": "candidate",
+      "published_at": "2026-05-22",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-www-don1don-com-archives-237190-brita-e6-94-9c-e6-89-8b-e6-a3-ae-e6-9e-97-e8-b7-",
+      "type": "news",
+      "title": "BRITA 攜手森林跑站「好水跑站」 開啟補水新日常",
+      "date": "2026-05-21",
+      "source": "動一動",
+      "category": "跑步新聞",
+      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
+      "url": "https://www.don1don.com/archives/237190/brita-%e6%94%9c%e6%89%8b%e6%a3%ae%e6%9e%97%e8%b7%91%e7%ab%99%e3%80%8c%e5%a5%bd%e6%b0%b4%e8%b7%91%e7%ab%99%e3%80%8d%e5%bf%ab%e9%96%83%e5%ba%97-%e9%96%8b%e5%95%9f%e8%a3%9c%e6%b0%b4%e6%96%b0%e6%97%a5",
+      "score": 5,
+      "source_origin": "archive",
       "published_at": "2026-05-22",
       "publish_status": "published"
     },
