@@ -10,6 +10,7 @@ const outputPath = resolve(root, "site/data/content.json");
 const reportPath = resolve(root, "runner/內容/自動上架內容報告.md");
 const today = process.env.RUNNER_TODAY || todayInTaipei();
 const ARCHIVE_RETENTION_DAYS = 183;
+const PUBLISH_WINDOW_DAYS = 92;
 
 const LIMITS = {
   shoe: 30,
@@ -53,17 +54,28 @@ function slugify(value) {
     .slice(0, 80);
 }
 
-function parseDate(value) {
-  const text = String(value || "");
-  const match = text.match(/\d{4}-\d{2}-\d{2}/);
-  return match ? match[0] : today;
-}
-
 function parseTaipeiDate(value) {
   const text = String(value || "").slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
   const date = new Date(`${text}T00:00:00+08:00`);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function normalizeIsoDate(value) {
+  const text = String(value || "").match(/\d{4}-\d{2}-\d{2}/)?.[0] || "";
+  return parseTaipeiDate(text) ? text : "";
+}
+
+function parseDate(value) {
+  return normalizeIsoDate(value) || today;
+}
+
+function withinDays(value, windowDays) {
+  const date = parseTaipeiDate(normalizeIsoDate(value));
+  if (!date) return false;
+  const cutoff = new Date(`${today}T00:00:00+08:00`);
+  cutoff.setDate(cutoff.getDate() - windowDays);
+  return date >= cutoff;
 }
 
 function withinRetention(item, retentionDays) {
@@ -253,11 +265,13 @@ function toPublishedItem(item) {
   const type = inferType(item);
   const normalizedUrl = normalizeUrl(item.url);
   const title = String(item.title || "").trim();
+  const normalizedArticleDate = normalizeIsoDate(item.article_date);
+  const normalizedCheckedAt = normalizeIsoDate(item.checked_at);
   return {
     id: `${type}-${slugify(normalizedUrl || title)}`,
     type,
     title,
-    date: parseDate(item.article_date || item.checked_at),
+    date: parseDate(normalizedArticleDate || normalizedCheckedAt),
     source: item.source,
     category: type === "shoe" ? inferShoeCategory(title) : inferNewsCategory(title, item.description),
     summary: summarize(item, type),
@@ -271,11 +285,12 @@ function toPublishedItem(item) {
 
 function previousToPublishedItem(item) {
   const type = item.type === "shoe" ? "shoe" : "news";
+  const normalizedDate = normalizeIsoDate(item.date || item.published_at);
   return {
     id: item.id || `${type}-${slugify(normalizeUrl(item.url) || item.title)}`,
     type,
     title: String(item.title || "").trim(),
-    date: parseDate(item.date || item.published_at),
+    date: parseDate(normalizedDate),
     source: item.source || "上一版上架內容",
     category: item.category || (type === "shoe" ? inferShoeCategory(item.title || "") : inferNewsCategory(item.title || "", item.summary)),
     summary: cleanSummary(item.summary) || summarize({
@@ -390,17 +405,24 @@ async function main() {
   const previousContent = await readJson(outputPath, { items: [] });
   const archiveRaw = await readJson(candidatesArchivePath, { items: [] });
   const archiveItems = Array.isArray(archiveRaw?.items) ? archiveRaw.items : (Array.isArray(archiveRaw) ? archiveRaw : []);
-  const normalized = raw.filter((item) => item.article_date).map(toPublishedItem);
-  const previousInventory = Array.isArray(previousContent.items) ? previousContent.items.map(previousToPublishedItem) : [];
+  const normalized = raw
+    .filter((item) => withinDays(item.article_date, PUBLISH_WINDOW_DAYS))
+    .map(toPublishedItem);
+  const previousInventory = (Array.isArray(previousContent.items) ? previousContent.items : [])
+    .filter((item) => withinDays(item.date || item.published_at, PUBLISH_WINDOW_DAYS))
+    .map(previousToPublishedItem);
   const archiveInventory = archiveItems
-    .filter((item) => item.article_date && withinRetention(item, ARCHIVE_RETENTION_DAYS))
+    .filter((item) => item.article_date && withinRetention(item, ARCHIVE_RETENTION_DAYS) && withinDays(item.article_date, PUBLISH_WINDOW_DAYS))
     .map((item) => ({ ...item, source_origin: "archive" }))
     .map(toPublishedItem)
     .map((item) => ({
       ...item,
       score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 1),
     }));
-  const editorialInventory = editorial.map(toPublishedItem).map((item) => ({
+  const editorialInventory = editorial
+    .filter((item) => withinDays(item.article_date || item.checked_at, PUBLISH_WINDOW_DAYS))
+    .map(toPublishedItem)
+    .map((item) => ({
     ...item,
     score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 2),
   }));
