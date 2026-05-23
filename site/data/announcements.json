@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-23",
+  "generated_at": "2026-05-24",
   "retention": {
     "closed_notice_days": 14,
     "daily_quips": 2
@@ -69,7 +69,7 @@
         "ending"
       ],
       "details": [
-        "05/30 截止｜剩 7 天"
+        "05/30 截止｜剩 6 天"
       ],
       "race_date": "2026-06-21",
       "first_seen_at": "2026-05-16"
@@ -79,10 +79,10 @@
       "race_key": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
       "title": "07/05 臺中市｜第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
       "types": [
-        "closing"
+        "ending"
       ],
       "details": [
-        "05/31 截止｜剩 8 天"
+        "05/31 截止｜剩 7 天"
       ],
       "race_date": "2026-07-05",
       "first_seen_at": "2026-05-16"
@@ -92,16 +92,16 @@
       "race_key": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
       "title": "11/01 南投縣｜2026日月潭環湖馬拉松",
       "types": [
-        "closing"
+        "ending"
       ],
       "details": [
-        "05/31 截止｜剩 8 天"
+        "05/31 截止｜剩 7 天"
       ],
       "race_date": "2026-11-01",
       "first_seen_at": "2026-05-16"
     },
     {
-      "id": "quip-2026-05-23-0",
+      "id": "quip-2026-05-24-0",
       "title": "配速可以慢，按下報名的手速不要太慢。",
       "types": [
         "talk"
@@ -111,7 +111,7 @@
       ]
     },
     {
-      "id": "quip-2026-05-23-1",
+      "id": "quip-2026-05-24-1",
       "title": "跑步最難的不是上坡，是出門前那五分鐘。",
       "types": [
         "talk"
