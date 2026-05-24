@@ -8,6 +8,7 @@ server.err.log
 node_modules/
 output/
 .codex-rescues/
+.codex_home/
 debug.log
 .DS_Store
 Thumbs.db

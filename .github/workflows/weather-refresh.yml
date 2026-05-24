@@ -12,8 +12,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: race-weather-refresh
-  cancel-in-progress: false
+  group: race-weather-refresh-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

@@ -12,8 +12,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: runner-quips-refresh
-  cancel-in-progress: false
+  group: runner-quips-refresh-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

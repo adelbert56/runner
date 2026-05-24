@@ -15,8 +15,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: content-candidates
-  cancel-in-progress: false
+  group: content-candidates-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -34,6 +34,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           CURRENT_RUN_ID: ${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
           REPOSITORY: ${{ github.repository }}
         run: |
           if [ "$EVENT_NAME" != "schedule" ]; then
@@ -41,12 +42,23 @@ jobs:
             exit 0
           fi
 
-          lookback_hours=18
-          runs_json="$(gh run list --repo "$REPOSITORY" --workflow content-candidates.yml --branch main --status success --limit 20 --json databaseId,createdAt)"
+          primary_cron="0 1 * * 1,3,5"
+
+          if [ "$SCHEDULE" = "$primary_cron" ]; then
+            echo "Primary schedule trigger ($SCHEDULE); continuing."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Backup triggers should avoid repeated commits when the primary run already happened
+          # (even if it later failed during Pages deployment). The backups exist mainly to cover
+          # delayed/skipped cron delivery, not to retry failed executions.
+          lookback_hours=8
+          runs_json="$(gh run list --repo "$REPOSITORY" --workflow content-candidates.yml --branch main --status completed --limit 20 --json databaseId,createdAt)"
           prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600))] | length')"
 
           if [ "$prior_count" -gt 0 ]; then
-            echo "Content already refreshed within the last ${lookback_hours} hours; skipping backup run."
+            echo "Content workflow already ran within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
             echo "should_run=false" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=true" >> "$GITHUB_OUTPUT"
