@@ -47,6 +47,7 @@ const [
   dataWorkflow,
   contentWorkflow,
   quipsWorkflow,
+  messageCloudWorkflow,
   pagesWorkflow,
   ciWorkflow,
 ] = await Promise.all([
@@ -72,6 +73,7 @@ const [
   text(".github/workflows/data-refresh.yml"),
   text(".github/workflows/content-candidates.yml"),
   text(".github/workflows/runner-quips-refresh.yml"),
+  text(".github/workflows/message-cloud-refresh.yml"),
   text(".github/workflows/pages.yml"),
   text(".github/workflows/ci.yml"),
 ]);
@@ -90,6 +92,7 @@ assertCheck(appJs.includes("content.json?v=${DATA_VERSION}"), "content data fetc
 assertCheck(appJs.includes("announcements.json?v=${DATA_VERSION}"), "announcement data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("message-cloud.json?v=${DATA_VERSION}"), "message cloud data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("automation-health.json?v=${DATA_VERSION}"), "automation health fetch uses DATA_VERSION cache busting");
+assertCheck(packageJson.scripts["message-cloud:build"] === "node scripts/build-message-cloud.mjs", "message cloud has a GitHub issue build script");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
 assertCheck(!appJs.includes("function buildAnnouncementItems"), "front end does not build announcements from race data");
 assertCheck(raceDbRaw.includes('"first_seen_at"'), "race data includes first_seen_at tracking");
@@ -172,6 +175,14 @@ assertCheck(
   quipsWorkflow.includes("Check recent quips refresh guard") && quipsWorkflow.includes("--status success"),
   "runner quips backup schedules retry until a recent success exists"
 );
+assertCheck(
+  messageCloudWorkflow.includes('cron: "17 6 * * *"') && messageCloudWorkflow.includes('MESSAGE_CLOUD_ISSUE_NUMBER: "34"'),
+  "message cloud workflow refreshes the GitHub issue source daily"
+);
+assertCheck(
+  messageCloudWorkflow.includes("issues: read") && messageCloudWorkflow.includes("npm run message-cloud:build"),
+  "message cloud workflow can read issue comments and build data"
+);
 assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && weatherWorkflow.includes("site/data/races.json"), "weather auto-commit includes both race data outputs");
 assertCheck(dataWorkflow.includes("runner/系統配置/營運儀表板.json") && dataWorkflow.includes("site/data/races.json"), "race data auto-commit includes dashboard and site data");
 assertCheck(contentWorkflow.includes("site/data/content.json") && contentWorkflow.includes("runner/內容/內容品質報告.md"), "content auto-commit includes published content and quality report");
@@ -184,6 +195,7 @@ assertCheck(dataWorkflow.includes("git add --") && dataWorkflow.includes('"runne
 assertCheck(weatherWorkflow.includes("git add --") && weatherWorkflow.includes('"site/data/races.json"'), "weather workflow stages site data explicitly");
 assertCheck(contentWorkflow.includes("git add --") && contentWorkflow.includes('"runner/系統配置/營運儀表板.md"'), "content workflow stages dashboard reports explicitly");
 assertCheck(quipsWorkflow.includes("git add --") && quipsWorkflow.includes('"site/data/announcements.json"'), "runner quips workflow stages announcement data explicitly");
+assertCheck(messageCloudWorkflow.includes("git add --") && messageCloudWorkflow.includes('"site/data/message-cloud.json"'), "message cloud workflow stages site data explicitly");
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
 assertCheck(pagesWorkflow.includes("actions/setup-node@v6"), "Pages deploy installs Node before derived data builds");
 assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");
@@ -195,6 +207,7 @@ for (const [name, workflow] of [
   ["race data", dataWorkflow],
   ["content", contentWorkflow],
   ["runner quips", quipsWorkflow],
+  ["message cloud", messageCloudWorkflow],
   ["pages", pagesWorkflow],
 ]) {
   assertCheck(workflow.includes('FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"'), `${name} workflow opts into Node 24 action runtime`);
@@ -205,6 +218,7 @@ for (const [name, workflow] of [
   ["race data", dataWorkflow],
   ["content", contentWorkflow],
   ["runner quips", quipsWorkflow],
+  ["message cloud", messageCloudWorkflow],
 ]) {
   assertCheck(workflow.includes("pages: write") && workflow.includes("id-token: write"), `${name} workflow can deploy Pages after scheduled updates`);
   assertCheck(workflow.includes("actions/upload-pages-artifact@v3") && workflow.includes("actions/deploy-pages@v4"), `${name} workflow deploys Pages directly`);
@@ -266,6 +280,17 @@ assertCheck(
     "Deploy",
   ]),
   "runner quips workflow validates, commits, and deploys in order"
+);
+assertCheck(
+  includesInOrder(messageCloudWorkflow, [
+    "Build message cloud",
+    "Validate scripts",
+    "Commit message cloud",
+    "Setup Pages",
+    "Upload site",
+    "Deploy",
+  ]),
+  "message cloud workflow validates, commits, and deploys in order"
 );
 
 const failed = checks.filter((check) => !check.ok);

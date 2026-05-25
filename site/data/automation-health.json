@@ -25,9 +25,16 @@
     {
       "id": "runner-quips-refresh",
       "name": "跑者碎念",
-      "schedule": "週一 10:00 Asia/Taipei",
+      "schedule": "週一 10:23 Asia/Taipei，含備援",
       "workflow": ".github/workflows/runner-quips-refresh.yml",
       "purpose": "從候補池補充跑者碎念並部署"
+    },
+    {
+      "id": "message-cloud-refresh",
+      "name": "文字雲留言",
+      "schedule": "每日 14:17 Asia/Taipei",
+      "workflow": ".github/workflows/message-cloud-refresh.yml",
+      "purpose": "整理 GitHub Issue 留言並更新公告頁文字雲"
     }
   ]
 }

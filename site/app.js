@@ -1497,7 +1497,10 @@ function renderMessageCloud(data = { messages: [] }) {
     .slice(0, 48);
 
   if (els.messageCloudUpdated) {
-    els.messageCloudUpdated.textContent = data.generated_at ? `更新 ${escapeHtml(data.generated_at)}` : "等待留言";
+    const updated = data.generated_at ? `更新 ${escapeHtml(data.generated_at)}` : "等待留言";
+    els.messageCloudUpdated.innerHTML = data.source_url
+      ? `${updated}<a href="${escapeHtml(data.source_url)}" target="_blank" rel="noreferrer">我要留言</a>`
+      : updated;
   }
 
   els.messageCloud.innerHTML = visibleMessages.length

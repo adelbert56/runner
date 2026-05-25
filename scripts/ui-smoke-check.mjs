@@ -37,6 +37,7 @@ assertCheck(/newsContainer\.innerHTML = news\.map/.test(app), "published news co
 assertCheck(/\?v=20260525-message-cloud\d+/.test(html), "asset version parameter was bumped");
 assertCheck(/announcements\.json\?v=\$\{DATA_VERSION\}/.test(app), "announcements load from scheduled data file");
 assertCheck(/message-cloud\.json\?v=\$\{DATA_VERSION\}/.test(app), "message cloud loads from scheduled data file");
+assertCheck(/source_url/.test(app) && /我要留言/.test(app), "message cloud links to GitHub issue comments");
 assertCheck(items.length >= 10, `published content count is usable (${items.length})`);
 assertCheck(shoeCount >= 10, `published shoe count reaches target (${shoeCount})`);
 assertCheck(newsCount >= 10, `published news count reaches target (${newsCount})`);

@@ -363,10 +363,28 @@ h1 {
 }
 
 .message-cloud-heading span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   flex: 0 0 auto;
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 850;
+}
+
+.message-cloud-heading a {
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid rgba(21, 83, 56, 0.18);
+  border-radius: 8px;
+  background: #e7f2eb;
+  color: var(--green-dark);
+  text-decoration: none;
+}
+
+.message-cloud-heading a:hover {
+  border-color: rgba(21, 83, 56, 0.32);
+  background: #dcece2;
 }
 
 .message-cloud {
