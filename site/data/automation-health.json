@@ -32,7 +32,7 @@
     {
       "id": "message-cloud-refresh",
       "name": "文字雲留言",
-      "schedule": "每日 14:17 Asia/Taipei",
+      "schedule": "每日 12:07、18:07 Asia/Taipei",
       "workflow": ".github/workflows/message-cloud-refresh.yml",
       "purpose": "整理 GitHub Issue 留言並更新公告頁文字雲"
     }

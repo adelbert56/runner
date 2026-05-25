@@ -11,6 +11,10 @@ const sourceUrl = `https://github.com/${repo}/issues/${issueNumber}`;
 const targetCloudSize = 24;
 const maxCloudSize = 48;
 const maxMessagesPerUser = 8;
+const updateSlots = [
+  { hour: 12, minute: 7 },
+  { hour: 18, minute: 7 },
+];
 const blockedPatterns = [
   /加\s*(line|賴)/i,
   /line\s*id/i,
@@ -183,12 +187,14 @@ function nextUpdateLabel(now = new Date()) {
     hour12: false,
   }).formatToParts(now);
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  const shouldUseTomorrow = Number(values.hour) > 14 || (Number(values.hour) === 14 && Number(values.minute) >= 17);
+  const currentMinutes = Number(values.hour) * 60 + Number(values.minute);
+  const nextSlot = updateSlots.find((slot) => currentMinutes < slot.hour * 60 + slot.minute) || updateSlots[0];
+  const shouldUseTomorrow = currentMinutes >= updateSlots.at(-1).hour * 60 + updateSlots.at(-1).minute;
   const date = new Date(Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day) + (shouldUseTomorrow ? 1 : 0)));
   const yyyy = date.getUTCFullYear();
   const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(date.getUTCDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd} 14:17 Asia/Taipei`;
+  return `${yyyy}-${mm}-${dd} ${String(nextSlot.hour).padStart(2, "0")}:${String(nextSlot.minute).padStart(2, "0")} Asia/Taipei`;
 }
 
 const comments = await fetchIssueComments();
@@ -201,6 +207,7 @@ const output = {
   next_update_at: nextUpdateLabel(),
   policy: {
     max_visible_items: maxCloudSize,
+    refresh_schedule: "每日約 12:00、18:00 Asia/Taipei",
     target_items_before_seed_retirement: targetCloudSize,
     max_messages_per_user: maxMessagesPerUser,
     seed_messages_retire_as_issue_messages_grow: true,

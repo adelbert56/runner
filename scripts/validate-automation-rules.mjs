@@ -176,8 +176,8 @@ assertCheck(
   "runner quips backup schedules retry until a recent success exists"
 );
 assertCheck(
-  messageCloudWorkflow.includes('cron: "17 6 * * *"') && messageCloudWorkflow.includes('MESSAGE_CLOUD_ISSUE_NUMBER: "34"'),
-  "message cloud workflow refreshes the GitHub issue source daily"
+  messageCloudWorkflow.includes('cron: "7 4 * * *"') && messageCloudWorkflow.includes('cron: "7 10 * * *"') && messageCloudWorkflow.includes('MESSAGE_CLOUD_ISSUE_NUMBER: "34"'),
+  "message cloud workflow refreshes the GitHub issue source twice daily"
 );
 assertCheck(
   messageCloudWorkflow.includes("issues: read") && messageCloudWorkflow.includes("npm run message-cloud:build"),

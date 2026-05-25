@@ -3,8 +3,10 @@ name: Refresh message cloud
 on:
   workflow_dispatch:
   schedule:
-    # 14:17 Asia/Taipei daily.
-    - cron: "17 6 * * *"
+    # Around 12:00 and 18:00 Asia/Taipei daily.
+    # Avoid exact :00 because GitHub scheduled workflows are more likely to be delayed there.
+    - cron: "7 4 * * *"
+    - cron: "7 10 * * *"
 
 permissions:
   contents: write
