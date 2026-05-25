@@ -88,6 +88,7 @@ assertCheck(appVersion && appVersion === scriptVersion, `app data version matche
 assertCheck(appJs.includes("races.json?v=${DATA_VERSION}"), "race data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("content.json?v=${DATA_VERSION}"), "content data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("announcements.json?v=${DATA_VERSION}"), "announcement data fetch uses DATA_VERSION cache busting");
+assertCheck(appJs.includes("message-cloud.json?v=${DATA_VERSION}"), "message cloud data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("automation-health.json?v=${DATA_VERSION}"), "automation health fetch uses DATA_VERSION cache busting");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
 assertCheck(!appJs.includes("function buildAnnouncementItems"), "front end does not build announcements from race data");

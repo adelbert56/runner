@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260522-recent-content1";
+const DATA_VERSION = "20260525-message-cloud1";
 const TODAY = getTodayString();
 
 const state = {
@@ -43,6 +43,8 @@ const els = {
   nextRaceName: document.querySelector("#next-race-name"),
   heroNextRace: document.querySelector("#hero-next-race"),
   announcementBoard: document.querySelector("#announcement-board"),
+  messageCloud: document.querySelector("#message-cloud"),
+  messageCloudUpdated: document.querySelector("#message-cloud-updated"),
   automationHealth: document.querySelector("#automation-health"),
   search: document.querySelector("#race-search"),
   raceList: document.querySelector("#race-list"),
@@ -1484,6 +1486,36 @@ function renderAnnouncementBoard(data = { items: [], type_meta: {} }) {
     .join("") || `<div class="empty-state">目前沒有新的公告。</div>`;
 }
 
+function renderMessageCloud(data = { messages: [] }) {
+  if (!els.messageCloud) {
+    return;
+  }
+
+  const messages = Array.isArray(data.messages) ? data.messages : [];
+  const visibleMessages = messages
+    .filter((item) => String(item.text || "").trim())
+    .slice(0, 48);
+
+  if (els.messageCloudUpdated) {
+    els.messageCloudUpdated.textContent = data.generated_at ? `更新 ${escapeHtml(data.generated_at)}` : "等待留言";
+  }
+
+  els.messageCloud.innerHTML = visibleMessages.length
+    ? visibleMessages
+        .map((item, index) => {
+          const weight = Number(item.weight || 1);
+          const size = weight >= 5 ? "xl" : weight >= 3 ? "lg" : weight >= 2 ? "md" : "sm";
+          const tone = ["primary", "blue", "warning", "muted"][index % 4];
+          return `
+            <span class="message-cloud-item message-cloud-${size} message-cloud-${tone}">
+              ${escapeHtml(item.text)}
+            </span>
+          `;
+        })
+        .join("")
+    : `<div class="empty-state">目前沒有留言。</div>`;
+}
+
 function renderAutomationHealth(data = { workflows: [] }) {
   if (!els.automationHealth) {
     return;
@@ -2595,6 +2627,19 @@ async function loadAnnouncements() {
   }
 }
 
+async function loadMessageCloud() {
+  try {
+    const response = await fetch(`./data/message-cloud.json?v=${DATA_VERSION}`, { cache: "no-cache" });
+    if (!response.ok) {
+      return;
+    }
+    const data = await response.json();
+    renderMessageCloud(data);
+  } catch (error) {
+    console.info("Message cloud data not available", error);
+  }
+}
+
 async function loadAutomationHealth() {
   try {
     const response = await fetch(`./data/automation-health.json?v=${DATA_VERSION}`, { cache: "no-cache" });
@@ -3060,6 +3105,7 @@ async function init() {
   bindEvents();
   await loadPublishedContent();
   await loadAnnouncements();
+  await loadMessageCloud();
   await loadAutomationHealth();
   initContentSorting();
   loadPlanSettings();
