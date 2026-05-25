@@ -362,6 +362,15 @@ h1 {
   line-height: 1.25;
 }
 
+.message-cloud-note {
+  max-width: 620px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
 .message-cloud-heading span {
   display: inline-flex;
   align-items: center;
