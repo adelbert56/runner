@@ -374,11 +374,17 @@ h1 {
 .message-cloud-heading span {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
   flex: 0 0 auto;
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 850;
+}
+
+.message-cloud-next {
+  color: #6a4a00;
 }
 
 .message-cloud-heading a {

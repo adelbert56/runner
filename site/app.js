@@ -1498,9 +1498,10 @@ function renderMessageCloud(data = { messages: [] }) {
 
   if (els.messageCloudUpdated) {
     const updated = data.generated_at ? `更新 ${escapeHtml(data.generated_at)}` : "等待留言";
+    const nextUpdate = data.next_update_at ? `<span class="message-cloud-next">下次 ${escapeHtml(data.next_update_at.replace(" Asia/Taipei", ""))}</span>` : "";
     els.messageCloudUpdated.innerHTML = data.source_url
-      ? `${updated}<a href="${escapeHtml(data.source_url)}" target="_blank" rel="noreferrer">我要留言</a>`
-      : updated;
+      ? `${updated}${nextUpdate}<a href="${escapeHtml(data.source_url)}" target="_blank" rel="noreferrer">我要留言</a>`
+      : `${updated}${nextUpdate}`;
   }
 
   els.messageCloud.innerHTML = visibleMessages.length
@@ -1512,8 +1513,9 @@ function renderMessageCloud(data = { messages: [] }) {
           const tilt = ["left", "right", "flat", "left-soft", "right-soft"][index % 5];
           const depth = ["front", "middle", "back"][index % 3];
           const shape = ["hero", "wide", "compact", "lift", "drop", "quiet"][index % 6];
+          const originLabel = item.origin === "issue" ? "跑者留言" : "跑者碎念底稿";
           return `
-            <span class="message-cloud-item message-cloud-${size} message-cloud-${tone} message-cloud-${tilt} message-cloud-${depth} message-cloud-${shape}" style="--cloud-order: ${index};">
+            <span class="message-cloud-item message-cloud-${size} message-cloud-${tone} message-cloud-${tilt} message-cloud-${depth} message-cloud-${shape}" style="--cloud-order: ${index};" title="${escapeHtml(originLabel)}">
               ${escapeHtml(item.text)}
             </span>
           `;

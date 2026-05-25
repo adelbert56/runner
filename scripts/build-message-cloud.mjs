@@ -10,6 +10,15 @@ const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
 const sourceUrl = `https://github.com/${repo}/issues/${issueNumber}`;
 const targetCloudSize = 24;
 const maxCloudSize = 48;
+const maxMessagesPerUser = 8;
+const blockedPatterns = [
+  /加\s*(line|賴)/i,
+  /line\s*id/i,
+  /博弈|博彩|賭場|賭博/,
+  /色情|約炮|援交/,
+  /貸款|代操|投資群|虛擬貨幣/,
+  /免費領|點擊領|私訊我/,
+];
 
 const fallbackMessages = [
   { text: "報名不要拖", weight: 5 },
@@ -42,11 +51,32 @@ function cleanLine(line) {
     .trim();
 }
 
+function messageKey(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[，、。！？!?,.;:；：\s"'「」『』()（）[\]【】]/g, "")
+    .trim();
+}
+
+function isAllowedMessage(text) {
+  const value = String(text || "").trim();
+  if (!value || value.length < 2 || value.length > 32) {
+    return false;
+  }
+  if (/([!?！？。~～])\1{2,}/.test(value)) {
+    return false;
+  }
+  if (/(.)\1{5,}/.test(value)) {
+    return false;
+  }
+  return !blockedPatterns.some((pattern) => pattern.test(value));
+}
+
 function extractMessages(body) {
   const lines = String(body || "")
     .split(/\r?\n/)
     .map(cleanLine)
-    .filter((line) => line.length >= 2 && line.length <= 32)
+    .filter(isAllowedMessage)
     .filter((line) => !/^(@|\/|<!--)/.test(line));
 
   if (lines.length) {
@@ -54,7 +84,7 @@ function extractMessages(body) {
   }
 
   const compact = cleanLine(body);
-  return compact.length >= 2 && compact.length <= 32 ? [compact] : [];
+  return isAllowedMessage(compact) ? [compact] : [];
 }
 
 function reactionWeight(comment) {
@@ -99,20 +129,31 @@ async function readExistingMessages() {
 }
 
 function mergeMessage(bucket, text, weight, origin = "issue") {
-  const current = bucket.get(text) || { text, weight: 0, origin };
+  const key = messageKey(text);
+  if (!key) {
+    return;
+  }
+  const current = bucket.get(key) || { text, weight: 0, origin };
   current.weight = Math.min(5, Math.max(current.weight, weight));
   current.origin = current.origin === "issue" ? "issue" : origin;
-  bucket.set(text, current);
+  bucket.set(key, current);
 }
 
 function buildCloud(comments) {
   const bucket = new Map();
+  const authorCounts = new Map();
 
   comments
     .filter((comment) => comment.user?.type !== "Bot")
     .forEach((comment) => {
+      const author = comment.user?.login || "anonymous";
       const weight = reactionWeight(comment);
       extractMessages(comment.body).forEach((text) => {
+        const used = authorCounts.get(author) || 0;
+        if (used >= maxMessagesPerUser) {
+          return;
+        }
+        authorCounts.set(author, used + 1);
         mergeMessage(bucket, text, weight, "issue");
       });
     });
@@ -131,6 +172,25 @@ function buildCloud(comments) {
     .slice(0, maxCloudSize);
 }
 
+function nextUpdateLabel(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const shouldUseTomorrow = Number(values.hour) > 14 || (Number(values.hour) === 14 && Number(values.minute) >= 17);
+  const date = new Date(Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day) + (shouldUseTomorrow ? 1 : 0)));
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} 14:17 Asia/Taipei`;
+}
+
 const comments = await fetchIssueComments();
 const messages = buildCloud(comments);
 const output = {
@@ -138,6 +198,13 @@ const output = {
   source: "github_issue",
   issue_number: issueNumber,
   source_url: sourceUrl,
+  next_update_at: nextUpdateLabel(),
+  policy: {
+    max_visible_items: maxCloudSize,
+    target_items_before_seed_retirement: targetCloudSize,
+    max_messages_per_user: maxMessagesPerUser,
+    seed_messages_retire_as_issue_messages_grow: true,
+  },
   messages: messages.length ? messages : await readExistingMessages(),
 };
 

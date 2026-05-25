@@ -3,6 +3,13 @@
   "source": "github_issue",
   "issue_number": 34,
   "source_url": "https://github.com/adelbert56/runner/issues/34",
+  "next_update_at": "2026-05-26 14:17 Asia/Taipei",
+  "policy": {
+    "max_visible_items": 48,
+    "target_items_before_seed_retirement": 24,
+    "max_messages_per_user": 8,
+    "seed_messages_retire_as_issue_messages_grow": true
+  },
   "messages": [
     {
       "text": "這裡是留言板嗎?!",
