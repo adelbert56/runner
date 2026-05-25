@@ -8,6 +8,8 @@ const repo = process.env.GITHUB_REPOSITORY || "adelbert56/runner";
 const issueNumber = Number(process.env.MESSAGE_CLOUD_ISSUE_NUMBER || 34);
 const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
 const sourceUrl = `https://github.com/${repo}/issues/${issueNumber}`;
+const targetCloudSize = 24;
+const maxCloudSize = 48;
 
 const fallbackMessages = [
   { text: "報名不要拖", weight: 5 },
@@ -17,7 +19,15 @@ const fallbackMessages = [
   { text: "看到坡先不要罵", weight: 3 },
   { text: "鞋帶綁好再出門", weight: 4 },
   { text: "天氣熱就放過自己", weight: 3 },
+  { text: "完賽照要先想姿勢", weight: 2 },
+  { text: "半馬不是半條命", weight: 4 },
+  { text: "今天不拚命 明天還能跑", weight: 3 },
+  { text: "別被關門車追著談戀愛", weight: 2 },
   { text: "早餐不要亂實驗", weight: 5 },
+  { text: "報名費會變成動力", weight: 3 },
+  { text: "跑完再說不跑了", weight: 4 },
+  { text: "補水不是灌水", weight: 2 },
+  { text: "今天的我先謝謝終點的我", weight: 3 },
 ];
 
 function cleanLine(line) {
@@ -88,22 +98,37 @@ async function readExistingMessages() {
   }
 }
 
+function mergeMessage(bucket, text, weight, origin = "issue") {
+  const current = bucket.get(text) || { text, weight: 0, origin };
+  current.weight = Math.min(5, Math.max(current.weight, weight));
+  current.origin = current.origin === "issue" ? "issue" : origin;
+  bucket.set(text, current);
+}
+
 function buildCloud(comments) {
   const bucket = new Map();
+
   comments
     .filter((comment) => comment.user?.type !== "Bot")
     .forEach((comment) => {
       const weight = reactionWeight(comment);
       extractMessages(comment.body).forEach((text) => {
-        const current = bucket.get(text) || { text, weight: 0 };
-        current.weight = Math.min(5, current.weight + weight);
-        bucket.set(text, current);
+        mergeMessage(bucket, text, weight, "issue");
       });
     });
 
+  const issueMessages = [...bucket.values()]
+    .sort((a, b) => Number(b.origin === "issue") - Number(a.origin === "issue") || b.weight - a.weight || a.text.localeCompare(b.text, "zh-Hant"))
+    .slice(0, maxCloudSize);
+
+  const seedSlots = Math.max(0, targetCloudSize - issueMessages.length);
+  fallbackMessages.slice(0, seedSlots).forEach((message) => {
+    mergeMessage(bucket, message.text, message.weight, "seed");
+  });
+
   return [...bucket.values()]
-    .sort((a, b) => b.weight - a.weight || a.text.localeCompare(b.text, "zh-Hant"))
-    .slice(0, 48);
+    .sort((a, b) => Number(b.origin === "issue") - Number(a.origin === "issue") || b.weight - a.weight || a.text.localeCompare(b.text, "zh-Hant"))
+    .slice(0, maxCloudSize);
 }
 
 const comments = await fetchIssueComments();
