@@ -3,12 +3,14 @@ name: Refresh race data
 on:
   workflow_dispatch:
   schedule:
-    # Primary: 18:00 Asia/Taipei every Tuesday and Thursday.
-    - cron: "0 10 * * 2,4"
+    # Primary: 18:17 Asia/Taipei every Tuesday and Thursday.
+    # Avoid :00 because GitHub scheduled workflows are more likely to be delayed there.
+    - cron: "17 10 * * 2,4"
     # Backups: GitHub scheduled workflows can be delayed or skipped under load.
     # These keep the twice-weekly crawler from depending on a single cron slot.
-    - cron: "30 11 * * 2,4"
-    - cron: "0 13 * * 2,4"
+    - cron: "47 11 * * 2,4"
+    - cron: "17 13 * * 2,4"
+    - cron: "47 15 * * 2,4"
 
 permissions:
   contents: write
@@ -43,7 +45,7 @@ jobs:
             exit 0
           fi
 
-          primary_cron="0 10 * * 2,4"
+          primary_cron="17 10 * * 2,4"
 
           if [ "$SCHEDULE" = "$primary_cron" ]; then
             echo "Primary schedule trigger ($SCHEDULE); continuing."
@@ -51,14 +53,13 @@ jobs:
             exit 0
           fi
 
-          # Backups should only guard against skipped cron delivery; avoid repeated commits if a
-          # run already happened recently (even if it later failed during Pages deployment).
+          # Backups retry unless a recent run finished successfully.
           lookback_hours=18
-          runs_json="$(gh run list --repo "$REPOSITORY" --workflow data-refresh.yml --branch main --status completed --limit 20 --json databaseId,createdAt)"
+          runs_json="$(gh run list --repo "$REPOSITORY" --workflow data-refresh.yml --branch main --status success --limit 20 --json databaseId,createdAt)"
           prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600))] | length')"
 
           if [ "$prior_count" -gt 0 ]; then
-            echo "Race data workflow already ran within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
+            echo "Race data workflow already succeeded within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
             echo "should_run=false" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=true" >> "$GITHUB_OUTPUT"

@@ -3,11 +3,13 @@ name: Collect content candidates
 on:
   workflow_dispatch:
   schedule:
-    # Primary: 09:00 Asia/Taipei every Monday, Wednesday, and Friday.
-    - cron: "0 1 * * 1,3,5"
+    # Primary: 09:17 Asia/Taipei every Monday, Wednesday, and Friday.
+    # Avoid :00 because GitHub scheduled workflows are more likely to be delayed there.
+    - cron: "17 1 * * 1,3,5"
     # Backups: GitHub scheduled workflows can be delayed or skipped under load.
-    - cron: "0 3 * * 1,3,5"
-    - cron: "0 5 * * 1,3,5"
+    - cron: "37 2 * * 1,3,5"
+    - cron: "17 4 * * 1,3,5"
+    - cron: "47 5 * * 1,3,5"
 
 permissions:
   contents: write
@@ -42,7 +44,7 @@ jobs:
             exit 0
           fi
 
-          primary_cron="0 1 * * 1,3,5"
+          primary_cron="17 1 * * 1,3,5"
 
           if [ "$SCHEDULE" = "$primary_cron" ]; then
             echo "Primary schedule trigger ($SCHEDULE); continuing."
@@ -50,15 +52,13 @@ jobs:
             exit 0
           fi
 
-          # Backup triggers should avoid repeated commits when the primary run already happened
-          # (even if it later failed during Pages deployment). The backups exist mainly to cover
-          # delayed/skipped cron delivery, not to retry failed executions.
+          # Backups retry unless a recent run finished successfully.
           lookback_hours=8
-          runs_json="$(gh run list --repo "$REPOSITORY" --workflow content-candidates.yml --branch main --status completed --limit 20 --json databaseId,createdAt)"
+          runs_json="$(gh run list --repo "$REPOSITORY" --workflow content-candidates.yml --branch main --status success --limit 20 --json databaseId,createdAt)"
           prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600))] | length')"
 
           if [ "$prior_count" -gt 0 ]; then
-            echo "Content workflow already ran within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
+            echo "Content workflow already succeeded within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
             echo "should_run=false" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=true" >> "$GITHUB_OUTPUT"

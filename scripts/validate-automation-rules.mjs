@@ -139,21 +139,38 @@ for (const [path, content] of dateSensitiveScripts) {
   );
 }
 
-assertCheck(weatherWorkflow.includes('cron: "0 23 * * *"'), "weather workflow runs at 07:00 Asia/Taipei");
 assertCheck(
-  dataWorkflow.includes('cron: "0 10 * * 2,4"') && dataWorkflow.includes('cron: "30 11 * * 2,4"') && dataWorkflow.includes('cron: "0 13 * * 2,4"'),
-  "race data workflow has primary and backup Tuesday/Thursday schedules"
+  weatherWorkflow.includes('cron: "23 23 * * *"') && weatherWorkflow.includes('cron: "37 0 * * *"') && weatherWorkflow.includes('cron: "7 3 * * *"'),
+  "weather workflow uses staggered daily primary and backup schedules"
 );
 assertCheck(
-  dataWorkflow.includes("Check recent refresh guard") && dataWorkflow.includes("lookback_hours=18"),
-  "race data backup schedules handle delayed cross-midnight runs"
+  weatherWorkflow.includes("Check recent weather refresh guard") && weatherWorkflow.includes("--status success"),
+  "weather backup schedules retry until a recent success exists"
 );
-assertCheck(contentWorkflow.includes('cron: "0 1 * * 1,3,5"'), "content workflow runs at 09:00 Asia/Taipei Monday/Wednesday/Friday");
 assertCheck(
-  contentWorkflow.includes('cron: "0 3 * * 1,3,5"') && contentWorkflow.includes('cron: "0 5 * * 1,3,5"') && contentWorkflow.includes("Check recent content refresh guard"),
-  "content workflow has backup schedules and duplicate guard"
+  dataWorkflow.includes('cron: "17 10 * * 2,4"') && dataWorkflow.includes('cron: "47 11 * * 2,4"') && dataWorkflow.includes('cron: "17 13 * * 2,4"') && dataWorkflow.includes('cron: "47 15 * * 2,4"'),
+  "race data workflow has staggered primary and backup Tuesday/Thursday schedules"
 );
-assertCheck(quipsWorkflow.includes('cron: "0 2 * * 1"'), "runner quips workflow runs at 10:00 Asia/Taipei Monday");
+assertCheck(
+  dataWorkflow.includes("Check recent refresh guard") && dataWorkflow.includes("lookback_hours=18") && dataWorkflow.includes("--status success"),
+  "race data backup schedules retry until a recent success exists"
+);
+assertCheck(
+  contentWorkflow.includes('cron: "17 1 * * 1,3,5"') && contentWorkflow.includes('cron: "37 2 * * 1,3,5"') && contentWorkflow.includes('cron: "17 4 * * 1,3,5"') && contentWorkflow.includes('cron: "47 5 * * 1,3,5"'),
+  "content workflow has staggered Monday/Wednesday/Friday primary and backup schedules"
+);
+assertCheck(
+  contentWorkflow.includes("Check recent content refresh guard") && contentWorkflow.includes("lookback_hours=8") && contentWorkflow.includes("--status success"),
+  "content backup schedules retry until a recent success exists"
+);
+assertCheck(
+  quipsWorkflow.includes('cron: "23 2 * * 1"') && quipsWorkflow.includes('cron: "53 3 * * 1"') && quipsWorkflow.includes('cron: "23 5 * * 1"'),
+  "runner quips workflow has staggered Monday primary and backup schedules"
+);
+assertCheck(
+  quipsWorkflow.includes("Check recent quips refresh guard") && quipsWorkflow.includes("--status success"),
+  "runner quips backup schedules retry until a recent success exists"
+);
 assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && weatherWorkflow.includes("site/data/races.json"), "weather auto-commit includes both race data outputs");
 assertCheck(dataWorkflow.includes("runner/系統配置/營運儀表板.json") && dataWorkflow.includes("site/data/races.json"), "race data auto-commit includes dashboard and site data");
 assertCheck(contentWorkflow.includes("site/data/content.json") && contentWorkflow.includes("runner/內容/內容品質報告.md"), "content auto-commit includes published content and quality report");

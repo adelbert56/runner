@@ -3,8 +3,12 @@ name: Refresh runner quips
 on:
   workflow_dispatch:
   schedule:
-    # 10:00 Asia/Taipei every Monday.
-    - cron: "0 2 * * 1"
+    # Primary: 10:23 Asia/Taipei every Monday.
+    # Avoid :00 because GitHub scheduled workflows are more likely to be delayed there.
+    - cron: "23 2 * * 1"
+    # Backups: keep the weekly refresh from depending on a single cron slot.
+    - cron: "53 3 * * 1"
+    - cron: "23 5 * * 1"
 
 permissions:
   contents: write
@@ -25,26 +29,65 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check recent quips refresh guard
+        id: refresh-guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "$EVENT_NAME" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          primary_cron="23 2 * * 1"
+
+          if [ "$SCHEDULE" = "$primary_cron" ]; then
+            echo "Primary schedule trigger ($SCHEDULE); continuing."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          lookback_hours=8
+          runs_json="$(gh run list --repo "$REPOSITORY" --workflow runner-quips-refresh.yml --branch main --status success --limit 20 --json databaseId,createdAt)"
+          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600))] | length')"
+
+          if [ "$prior_count" -gt 0 ]; then
+            echo "Runner quips workflow already succeeded within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout
+        if: steps.refresh-guard.outputs.should_run == 'true'
         uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node
+        if: steps.refresh-guard.outputs.should_run == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: "22"
 
       - name: Promote runner quips
+        if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run quips:refresh
 
       - name: Build announcement and automation data
+        if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run announcements:build && npm run automation:health
 
       - name: Validate scripts
+        if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run check
 
       - name: Commit runner quips
+        if: steps.refresh-guard.outputs.should_run == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -62,13 +105,16 @@ jobs:
           fi
 
       - name: Setup Pages
+        if: steps.refresh-guard.outputs.should_run == 'true'
         uses: actions/configure-pages@v5
 
       - name: Upload site
+        if: steps.refresh-guard.outputs.should_run == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
       - name: Deploy
+        if: steps.refresh-guard.outputs.should_run == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
