@@ -339,8 +339,8 @@ h1 {
 
 .message-cloud-panel {
   max-width: var(--content-max);
-  margin: 22px auto 0;
-  padding: 18px;
+  margin: 28px auto 0;
+  padding: clamp(18px, 2.4vw, 28px);
   border: 1px solid rgba(31, 42, 36, 0.12);
   border-radius: 8px;
   background: rgba(255, 253, 248, 0.92);
@@ -388,68 +388,202 @@ h1 {
 }
 
 .message-cloud {
-  display: flex;
-  flex-wrap: wrap;
+  position: relative;
+  display: grid;
+  grid-auto-flow: dense;
+  grid-auto-rows: minmax(44px, auto);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: center;
-  gap: 10px;
-  min-height: 142px;
-  padding: 16px;
+  justify-items: center;
+  gap: 16px 18px;
+  min-height: 430px;
+  padding: 50px 46px;
   border: 1px solid rgba(31, 42, 36, 0.1);
   border-radius: 8px;
+  overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(231, 242, 235, 0.74), rgba(255, 253, 248, 0.94)),
+    radial-gradient(circle at 18% 20%, rgba(255, 240, 194, 0.58), transparent 26%),
+    radial-gradient(circle at 82% 78%, rgba(205, 231, 237, 0.54), transparent 30%),
+    radial-gradient(circle at 48% 46%, rgba(231, 242, 235, 0.72), transparent 34%),
+    linear-gradient(135deg, rgba(231, 242, 235, 0.78), rgba(255, 253, 248, 0.94)),
     #fffdf8;
 }
 
+.message-cloud::before {
+  position: absolute;
+  inset: 18px;
+  border: 1px dashed rgba(21, 83, 56, 0.12);
+  border-radius: 8px;
+  content: "";
+  pointer-events: none;
+}
+
+.message-cloud::after {
+  position: absolute;
+  inset: 42px 54px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.34);
+  content: "";
+  filter: blur(1px);
+  pointer-events: none;
+}
+
 .message-cloud-item {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  min-height: 36px;
+  justify-content: center;
+  min-height: 32px;
   max-width: 100%;
-  padding: 6px 12px;
-  border: 1px solid rgba(31, 42, 36, 0.1);
-  border-radius: 8px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
   font-weight: 950;
-  line-height: 1.35;
+  line-height: 1.05;
+  text-align: center;
   overflow-wrap: anywhere;
-  box-shadow: 0 8px 22px rgba(20, 55, 39, 0.08);
+  letter-spacing: 0;
+  transform: translateY(calc((var(--cloud-order) % 3) * 3px));
+  text-shadow:
+    0 1px 0 rgba(255, 253, 248, 0.78),
+    0 10px 22px rgba(20, 55, 39, 0.12);
+  transition: color 0.16s ease, opacity 0.16s ease, transform 0.16s ease;
+}
+
+.message-cloud-item:hover {
+  z-index: 3;
+  transform: translateY(-2px) scale(1.03);
+  opacity: 1;
 }
 
 .message-cloud-sm {
-  font-size: 0.92rem;
+  font-size: 1rem;
+  font-weight: 800;
+  opacity: 0.88;
 }
 
 .message-cloud-md {
-  font-size: 1.04rem;
+  font-size: 1.22rem;
+  font-weight: 900;
 }
 
 .message-cloud-lg {
-  font-size: 1.18rem;
+  font-size: 1.55rem;
+  font-weight: 950;
 }
 
 .message-cloud-xl {
-  font-size: 1.34rem;
+  min-height: 56px;
+  padding: 4px 8px;
+  font-size: 2.32rem;
+  font-weight: 1000;
+  line-height: 1.2;
 }
 
 .message-cloud-primary {
-  background: #e7f2eb;
   color: var(--green-dark);
 }
 
 .message-cloud-blue {
-  background: var(--blue);
   color: #295d6a;
 }
 
 .message-cloud-warning {
-  background: #fff0c2;
   color: #6a4a00;
 }
 
 .message-cloud-muted {
-  background: var(--panel-strong);
   color: var(--muted);
+}
+
+.message-cloud-left {
+  transform: rotate(-5deg) translateY(calc((var(--cloud-order) % 3) * 5px));
+}
+
+.message-cloud-right {
+  transform: rotate(5deg) translateY(calc((var(--cloud-order) % 3) * 5px));
+}
+
+.message-cloud-left-soft {
+  transform: rotate(-2deg) translateY(calc((var(--cloud-order) % 3) * 5px));
+}
+
+.message-cloud-right-soft {
+  transform: rotate(2deg) translateY(calc((var(--cloud-order) % 3) * 5px));
+}
+
+.message-cloud-item:nth-child(4n + 1) {
+  margin-inline: 10px;
+}
+
+.message-cloud-item:nth-child(5n + 2) {
+  margin-top: 18px;
+}
+
+.message-cloud-item:nth-child(6n + 3) {
+  margin-bottom: 16px;
+}
+
+.message-cloud-front {
+  z-index: 2;
+}
+
+.message-cloud-middle {
+  z-index: 1;
+}
+
+.message-cloud-back {
+  opacity: 0.84;
+}
+
+.message-cloud-hero {
+  grid-column: span 4;
+  align-self: end;
+  justify-self: end;
+}
+
+.message-cloud-wide {
+  grid-column: span 4;
+  align-self: center;
+  justify-self: start;
+}
+
+.message-cloud-compact {
+  grid-column: span 2;
+  align-self: start;
+}
+
+.message-cloud-lift {
+  grid-column: span 3;
+  align-self: start;
+  margin-bottom: 22px;
+}
+
+.message-cloud-drop {
+  grid-column: span 3;
+  align-self: end;
+  margin-top: 24px;
+}
+
+.message-cloud-quiet {
+  grid-column: span 2;
+  align-self: center;
+  font-weight: 760;
+}
+
+.message-cloud-item:nth-child(7n + 1) {
+  grid-column: span 5;
+}
+
+.message-cloud-item:nth-child(8n + 4) {
+  justify-self: end;
+}
+
+.message-cloud-item:nth-child(9n + 6) {
+  justify-self: start;
 }
 
 .automation-health {
@@ -3684,19 +3818,53 @@ h3 {
   }
 
   .message-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     gap: 8px;
-    min-height: 120px;
+    min-height: 150px;
     padding: 12px;
   }
 
-  .message-cloud-item {
-    min-height: 32px;
-    padding: 5px 10px;
+  .message-cloud::before {
+    inset: 8px;
   }
 
-  .message-cloud-lg,
+  .message-cloud-item {
+    grid-column: auto;
+    justify-self: auto;
+    align-self: auto;
+    min-height: 32px;
+    padding: 5px 10px;
+    margin: 0;
+    transform: none;
+  }
+
+  .message-cloud-item:hover {
+    transform: none;
+  }
+
+  .message-cloud-sm {
+    font-size: 0.84rem;
+  }
+
+  .message-cloud-md {
+    font-size: 0.94rem;
+  }
+
+  .message-cloud-lg {
+    font-size: 1.04rem;
+  }
+
   .message-cloud-xl {
-    font-size: 1.08rem;
+    font-size: 1.16rem;
+  }
+
+  .message-cloud-left,
+  .message-cloud-right,
+  .message-cloud-left-soft,
+  .message-cloud-right-soft {
+    transform: none;
   }
 
   .automation-health {

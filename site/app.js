@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260525-message-cloud1";
+const DATA_VERSION = "20260525-message-cloud2";
 const TODAY = getTodayString();
 
 const state = {
@@ -1509,8 +1509,11 @@ function renderMessageCloud(data = { messages: [] }) {
           const weight = Number(item.weight || 1);
           const size = weight >= 5 ? "xl" : weight >= 3 ? "lg" : weight >= 2 ? "md" : "sm";
           const tone = ["primary", "blue", "warning", "muted"][index % 4];
+          const tilt = ["left", "right", "flat", "left-soft", "right-soft"][index % 5];
+          const depth = ["front", "middle", "back"][index % 3];
+          const shape = ["hero", "wide", "compact", "lift", "drop", "quiet"][index % 6];
           return `
-            <span class="message-cloud-item message-cloud-${size} message-cloud-${tone}">
+            <span class="message-cloud-item message-cloud-${size} message-cloud-${tone} message-cloud-${tilt} message-cloud-${depth} message-cloud-${shape}" style="--cloud-order: ${index};">
               ${escapeHtml(item.text)}
             </span>
           `;
