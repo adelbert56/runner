@@ -1749,9 +1749,15 @@ function renderRaces() {
       els.raceList.querySelectorAll("[data-calendar-menu]").forEach((control) => {
         control.setAttribute("aria-expanded", "false");
       });
+      els.raceList.querySelectorAll(".race-card.calendar-open").forEach((card) => {
+        card.classList.remove("calendar-open");
+      });
       if (options) {
         options.hidden = expanded;
         button.setAttribute("aria-expanded", expanded ? "false" : "true");
+        if (!expanded) {
+          button.closest(".race-card")?.classList.add("calendar-open");
+        }
       }
     });
   });

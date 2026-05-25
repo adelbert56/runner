@@ -1154,6 +1154,16 @@ h3 {
   background: #edf5ef;
 }
 
+.race-card.calendar-open {
+  z-index: 30;
+  overflow: visible;
+}
+
+.race-card.calendar-open .race-actions,
+.race-card.calendar-open .calendar-menu {
+  overflow: visible;
+}
+
 .favorite-button.active {
   border-color: #f0b429;
   background: #fff1bc;
