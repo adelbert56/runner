@@ -215,7 +215,6 @@ for (const [name, workflow] of [
 
 for (const [name, workflow] of [
   ["weather", weatherWorkflow],
-  ["race data", dataWorkflow],
   ["content", contentWorkflow],
   ["runner quips", quipsWorkflow],
   ["message cloud", messageCloudWorkflow],
@@ -236,11 +235,8 @@ assertCheck(
     "Build announcement and automation data",
     "Validate generated files",
     "Commit data updates",
-    "Setup Pages",
-    "Upload site",
-    "Deploy",
   ]),
-  "race data workflow syncs, validates, commits, and deploys in order"
+  "race data workflow syncs, validates, and commits in order"
 );
 assertCheck(
   includesInOrder(weatherWorkflow, [
