@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-05-21T11:24:30.526Z",
-  "basis_date": "2026-05-21",
+  "generated_at": "2026-05-26T14:26:35.127Z",
+  "basis_date": "2026-05-26",
   "items": [
     {
       "platform": "運動筆記",
-      "total": 14,
+      "total": 15,
       "official_direct": 1,
-      "verified": 14,
-      "missing": 12,
+      "verified": 15,
+      "missing": 13,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 0,
+      "due_now": 1,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
         "仁愛長庚合作聯盟醫院2026永慶盃路跑"
       ],
-      "complete_rate": "14%",
+      "complete_rate": "13%",
       "official_direct_rate": "7%",
       "verified_rate": "100%",
-      "score": 47,
+      "score": 46,
       "status": "需補強"
     },
     {
@@ -70,7 +70,7 @@
       "missing": 0,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026中興新村半程馬拉松-披興戴月的想你",
         "2026 臺中國際馬拉松",
@@ -84,22 +84,22 @@
     },
     {
       "platform": "bao-ming",
-      "total": 3,
-      "official_direct": 3,
-      "verified": 3,
-      "missing": 0,
-      "opened_gap": 0,
+      "total": 4,
+      "official_direct": 4,
+      "verified": 4,
+      "missing": 1,
+      "opened_gap": 1,
       "date_anomaly": 0,
-      "due_now": 0,
+      "due_now": 1,
       "sample_races": [
         "2026 BOBDOG RUN(台中場)",
         "2026 松鶴越野",
-        "2027 第九屆龍虎鳳越野"
+        "2026 HOT DOG Trail 台中系列活動-熱血接力賽"
       ],
-      "complete_rate": "100%",
+      "complete_rate": "75%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 100,
+      "score": 91,
       "status": "穩定"
     },
     {
