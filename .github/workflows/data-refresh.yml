@@ -19,6 +19,7 @@ on:
     - cron: "47 15 * * 2,4"
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
