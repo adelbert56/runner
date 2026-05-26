@@ -14,8 +14,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: race-data-refresh-${{ github.ref }}
@@ -26,9 +24,6 @@ env:
 
 jobs:
   refresh:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Check recent refresh guard
@@ -164,18 +159,3 @@ jobs:
             git pull --rebase --autostash
             git push
           fi
-
-      - name: Setup Pages
-        if: steps.refresh-guard.outputs.should_run == 'true'
-        uses: actions/configure-pages@v5
-
-      - name: Upload site
-        if: steps.refresh-guard.outputs.should_run == 'true'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-      - name: Deploy
-        if: steps.refresh-guard.outputs.should_run == 'true'
-        id: deployment
-        uses: actions/deploy-pages@v4
