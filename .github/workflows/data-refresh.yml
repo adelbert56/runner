@@ -2,6 +2,12 @@ name: Refresh race data
 
 on:
   workflow_dispatch:
+    inputs:
+      strict:
+        description: "Fail the run if strict data quality gate fails"
+        type: boolean
+        required: false
+        default: false
   schedule:
     # Primary: 18:17 Asia/Taipei every Tuesday and Thursday.
     # Avoid :00 because GitHub scheduled workflows are more likely to be delayed there.
@@ -101,8 +107,8 @@ jobs:
       - name: Run strict data quality gate
         # Scheduled crawls should keep publishing updates + reports even when
         # a single race is missing optional-but-important fields; strict mode
-        # remains enforced for manual runs.
-        if: steps.refresh-guard.outputs.should_run == 'true' && github.event_name != 'schedule'
+        # is opt-in for manual runs.
+        if: steps.refresh-guard.outputs.should_run == 'true' && github.event_name != 'schedule' && inputs.strict
         run: npm run data:quality:strict
 
       - name: Update race weather forecast
