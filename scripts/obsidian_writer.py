@@ -1,5 +1,6 @@
 """Write scraped race data back into Obsidian Markdown files."""
 
+import json
 import re
 import logging
 from collections import defaultdict
@@ -8,7 +9,7 @@ from pathlib import Path
 
 import sys
 sys.path.insert(0, str(Path(__file__).parent))
-from config import RACE_LIST_MD, SCRAPE_LOG_MD
+from config import RACE_LIST_MD, SCRAPE_LOG_MD, SCRAPE_STATUS_JSON
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +102,18 @@ def append_scrape_log(
     errors: list[str],
 ) -> None:
     """Append a run summary to 爬蟲日誌.md."""
+    status_payload = {
+        "scrape_date": scrape_date,
+        "added": added,
+        "updated": updated,
+        "total": total,
+        "sources": sources,
+        "errors": errors,
+        "has_errors": bool(errors),
+    }
+    SCRAPE_STATUS_JSON.parent.mkdir(parents=True, exist_ok=True)
+    SCRAPE_STATUS_JSON.write_text(f"{json.dumps(status_payload, ensure_ascii=False, indent=2)}\n", encoding="utf-8")
+
     error_section = ""
     if errors:
         error_section = "\n**錯誤**:\n" + "\n".join(f"- {e}" for e in errors)

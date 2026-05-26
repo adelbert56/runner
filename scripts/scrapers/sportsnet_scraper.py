@@ -12,8 +12,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SOURCES, CENTRAL_TAIWAN_COUNTIES, REQUEST_HEADERS,
-    REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty, is_running_event
+    REQUEST_RETRIES, REQUEST_RETRY_BACKOFF_SECONDS, REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty, is_running_event
 )
+from http_client import request_text
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +44,18 @@ def _parse_date(raw: str) -> str:
 def _fetch_race_detail(url: str, session: requests.Session) -> dict:
     """Fetch detail page for county and distance info."""
     try:
-        resp = session.get(url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        resp.encoding = "utf-8"
+        html = request_text(
+            session,
+            url,
+            timeout=REQUEST_TIMEOUT,
+            retries=REQUEST_RETRIES,
+            backoff_seconds=REQUEST_RETRY_BACKOFF_SECONDS,
+        )
     except requests.RequestException as e:
         logger.warning(f"Detail fetch failed {url}: {e}")
         return {}
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+    soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text()
 
     # County extraction
@@ -112,13 +117,17 @@ def scrape() -> list[dict]:
     for list_url in RACE_LIST_URLS:
         logger.info(f"Fetching {list_url}")
         try:
-            resp = session.get(list_url, timeout=REQUEST_TIMEOUT)
-            resp.raise_for_status()
-            resp.encoding = "utf-8"
+            html = request_text(
+                session,
+                list_url,
+                timeout=REQUEST_TIMEOUT,
+                retries=REQUEST_RETRIES,
+                backoff_seconds=REQUEST_RETRY_BACKOFF_SECONDS,
+            )
         except requests.RequestException as e:
             logger.warning(f"Failed to fetch {list_url}: {e}")
             continue
-        raw_items.extend(_parse_race_list_page(resp.text))
+        raw_items.extend(_parse_race_list_page(html))
         time.sleep(REQUEST_DELAY)
 
     races = []

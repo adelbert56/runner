@@ -14,8 +14,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SOURCES, CENTRAL_TAIWAN_COUNTIES, REQUEST_HEADERS,
-    REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty, is_running_event
+    REQUEST_RETRIES, REQUEST_RETRY_BACKOFF_SECONDS, REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty, is_running_event
 )
+from http_client import request_text
 
 logger = logging.getLogger(__name__)
 
@@ -241,10 +242,14 @@ def _fetch_facebook_text(links: list[str], session: requests.Session) -> str:
     for link in links[:3]:
         for url in (link, _facebook_mobile_url(link)):
             try:
-                resp = session.get(url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
-                if resp.status_code >= 400:
-                    continue
-                soup = BeautifulSoup(resp.text, "html.parser")
+                html = request_text(
+                    session,
+                    url,
+                    timeout=REQUEST_TIMEOUT,
+                    retries=REQUEST_RETRIES,
+                    backoff_seconds=REQUEST_RETRY_BACKOFF_SECONDS,
+                )
+                soup = BeautifulSoup(html, "html.parser")
                 text = soup.get_text(" ", strip=True)
                 if "登入" in text[:200] or "Log in" in text[:200]:
                     continue
@@ -283,14 +288,18 @@ def _fetch_detail_soup(detail_url: str, session: requests.Session) -> tuple[Beau
         return None, "未提供賽事詳情頁"
 
     try:
-        resp = session.get(detail_url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        resp.encoding = "utf-8"
+        html = request_text(
+            session,
+            detail_url,
+            timeout=REQUEST_TIMEOUT,
+            retries=REQUEST_RETRIES,
+            backoff_seconds=REQUEST_RETRY_BACKOFF_SECONDS,
+        )
     except requests.RequestException as e:
         logger.warning(f"Failed to fetch detail page {detail_url}: {e}")
         return None, "賽事詳情頁讀取失敗"
 
-    return BeautifulSoup(resp.text, "html.parser"), ""
+    return BeautifulSoup(html, "html.parser"), ""
 
 
 def _extract_official_registration_link(
@@ -352,17 +361,18 @@ def scrape() -> list[dict]:
     session.headers.update(REQUEST_HEADERS)
 
     try:
-        resp = session.get(
+        html = request_text(
+            session,
             SOURCE_URL,
             timeout=REQUEST_TIMEOUT,
+            retries=REQUEST_RETRIES,
+            backoff_seconds=REQUEST_RETRY_BACKOFF_SECONDS,
         )
-        resp.raise_for_status()
-        resp.encoding = "utf-8"
     except requests.RequestException as e:
         logger.error(f"Failed to fetch 運動筆記: {e}")
         return []
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+    soup = BeautifulSoup(html, "html.parser")
 
     # Select all non-header rows from competition list
     all_rows = soup.select("div.competition-list-row")

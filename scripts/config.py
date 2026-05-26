@@ -10,6 +10,7 @@ RACE_LIST_MD = OBSIDIAN_VAULT / "賽事" / "中部賽事列表.md"
 RACE_DB_JSON = OBSIDIAN_VAULT / "賽事" / "賽事資料庫.json"
 RACE_MANUAL_OVERRIDES_JSON = OBSIDIAN_VAULT / "賽事" / "人工補充.json"
 SCRAPE_LOG_MD = OBSIDIAN_VAULT / "賽事" / "爬蟲日誌.md"
+SCRAPE_STATUS_JSON = OBSIDIAN_VAULT / "賽事" / "爬蟲最後狀態.json"
 
 # ─── Central Taiwan counties filter ──────────────────────────────────────────
 CENTRAL_TAIWAN_COUNTIES = {
@@ -68,6 +69,8 @@ REQUEST_HEADERS = {
 }
 REQUEST_TIMEOUT = 30
 REQUEST_DELAY = 2  # seconds between requests
+REQUEST_RETRIES = 3
+REQUEST_RETRY_BACKOFF_SECONDS = 1.5
 
 # ─── Difficulty mapping ───────────────────────────────────────────────────────
 DIFFICULTY_MAP = {

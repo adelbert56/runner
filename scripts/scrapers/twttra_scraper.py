@@ -12,8 +12,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SOURCES, CENTRAL_TAIWAN_COUNTIES, REQUEST_HEADERS,
-    REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty
+    REQUEST_RETRIES, REQUEST_RETRY_BACKOFF_SECONDS, REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty
 )
+from http_client import request_text
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +25,13 @@ SOURCE_URL = SOURCES["twttra"]["url"]
 
 def _fetch_html(url: str, session: requests.Session) -> str:
     try:
-        resp = session.get(url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        resp.encoding = "utf-8"
-        return resp.text
+        return request_text(
+            session,
+            url,
+            timeout=REQUEST_TIMEOUT,
+            retries=REQUEST_RETRIES,
+            backoff_seconds=REQUEST_RETRY_BACKOFF_SECONDS,
+        )
     except requests.RequestException as e:
         logger.warning(f"Fetch failed {url}: {e}")
         return ""

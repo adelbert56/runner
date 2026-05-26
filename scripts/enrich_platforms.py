@@ -18,7 +18,14 @@ from typing import Callable
 
 import requests
 
-from config import REQUEST_HEADERS, REQUEST_TIMEOUT, ROOT_DIR
+from config import (
+    REQUEST_HEADERS,
+    REQUEST_RETRIES,
+    REQUEST_RETRY_BACKOFF_SECONDS,
+    REQUEST_TIMEOUT,
+    ROOT_DIR,
+)
+from http_client import request_text
 from platforms import baoming, ctrun, eventgo, focusline, irunner, joinnow, lohas
 from platforms.common import generic_extract, has_text, host_of
 
@@ -112,10 +119,13 @@ def save_races(path: Path, races: list[dict]) -> None:
 
 
 def fetch_html(session: requests.Session, url: str) -> str:
-    response = session.get(url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
-    response.raise_for_status()
-    response.encoding = response.apparent_encoding or "utf-8"
-    return response.text
+    return request_text(
+        session,
+        url,
+        timeout=REQUEST_TIMEOUT,
+        retries=REQUEST_RETRIES,
+        backoff_seconds=REQUEST_RETRY_BACKOFF_SECONDS,
+    )
 
 
 def should_replace(field: str, current: object, incoming: object, *, preferred: bool = False) -> bool:
