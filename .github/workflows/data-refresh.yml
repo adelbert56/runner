@@ -133,6 +133,7 @@ jobs:
 
       - name: Commit data updates
         if: steps.refresh-guard.outputs.should_run == 'true'
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -160,8 +161,17 @@ jobs:
             "site/data/automation-health.json"
           if git diff --cached --quiet; then
             echo "No race data changes to commit."
+            echo "did_push=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "chore(data): refresh race data"
             git pull --rebase --autostash
             git push
+            echo "did_push=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Trigger Pages deploy
+        if: steps.refresh-guard.outputs.should_run == 'true' && steps.commit.outputs.did_push == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh workflow run --repo "$REPOSITORY" pages.yml --ref main
