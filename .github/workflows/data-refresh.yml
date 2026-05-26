@@ -21,10 +21,11 @@ on:
 permissions:
   actions: write
   contents: write
+  issues: write
 
 concurrency:
   group: race-data-refresh-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -57,8 +58,8 @@ jobs:
 
           # Backups retry unless a recent run finished successfully.
           lookback_hours=18
-          runs_json="$(gh run list --repo "$REPOSITORY" --workflow data-refresh.yml --branch main --status success --limit 20 --json databaseId,createdAt)"
-          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600))] | length')"
+          runs_json="$(gh run list --repo "$REPOSITORY" --workflow data-refresh.yml --branch main --limit 30 --json databaseId,createdAt,status,conclusion)"
+          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600)) | select((.conclusion == "success") or (.status == "in_progress") or (.status == "queued"))] | length')"
 
           if [ "$prior_count" -gt 0 ]; then
             echo "Race data workflow already succeeded within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
@@ -132,6 +133,41 @@ jobs:
         if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run check
 
+      - name: Report scraper errors
+        if: steps.refresh-guard.outputs.should_run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          status_file="runner/賽事/爬蟲最後狀態.json"
+          if [ ! -f "$status_file" ]; then
+            echo "No scrape status file found; skipping issue report."
+            exit 0
+          fi
+
+          has_errors="$(jq -r '.has_errors // false' "$status_file")"
+          if [ "$has_errors" != "true" ]; then
+            echo "No scraper errors."
+            exit 0
+          fi
+
+          scrape_date="$(jq -r '.scrape_date // ""' "$status_file")"
+          errors="$(jq -r '.errors[]? // empty' "$status_file" | head -n 20)"
+          body=$(
+            printf '%s\n\n%s\n\n%s\n' \
+              "Scraper reported errors on ${scrape_date:-unknown date}." \
+              "Run: ${RUN_URL}" \
+              "${errors:-"(no error details)"}"
+          )
+
+          existing_number="$(gh issue list --repo "$REPOSITORY" --state open --search "Race crawler health" --json number,title --jq '.[0].number // empty')"
+          if [ -z "$existing_number" ]; then
+            gh issue create --repo "$REPOSITORY" --title "Race crawler health" --body "$body"
+          else
+            gh issue comment --repo "$REPOSITORY" "$existing_number" --body "$body"
+          fi
+
       - name: Commit data updates
         if: steps.refresh-guard.outputs.should_run == 'true'
         id: commit
@@ -142,6 +178,7 @@ jobs:
             "runner/賽事/賽事資料庫.json" \
             "runner/賽事/中部賽事列表.md" \
             "runner/賽事/爬蟲日誌.md" \
+            "runner/賽事/爬蟲最後狀態.json" \
             "runner/賽事/待補資料佇列.json" \
             "runner/賽事/資料品質報告.md" \
             "runner/賽事/開報後待補資料報告.md" \
