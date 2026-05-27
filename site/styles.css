@@ -3118,6 +3118,23 @@ h3 {
   line-height: 1.55;
 }
 
+.plan-method-card ul {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.half-plan-card {
+  border-color: rgba(245, 200, 76, 0.46);
+  background:
+    linear-gradient(135deg, rgba(245, 200, 76, 0.16), rgba(21, 83, 56, 0.08)),
+    #fffdf8;
+}
+
 .risk-panel {
   margin-bottom: 12px;
   padding: 14px;

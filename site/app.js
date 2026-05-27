@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260525-message-cloud8";
+const DATA_VERSION = "20260525-message-cloud9";
 const TODAY = getTodayString();
 
 const state = {
@@ -238,6 +238,17 @@ const runWalkStages = [
   { title: "跑走 4:1", work: "走 1 分鐘 + 跑 4 分鐘，重複 5 回合，共約 25 分鐘", cue: "開始建立連續跑感覺。" },
   { title: "連續慢跑", work: "連續慢跑 20-30 分鐘；需要時每 10 分鐘走 1 分鐘", cue: "能穩定完成後再拉長時間。" },
 ];
+
+const halfMarathonStrategy = {
+  title: "半馬 12 週目標策略",
+  summary: "半馬不是臨時抱佛腳的距離；建議至少保留 12 週，讓長跑、低強度跑與恢復逐步累積。",
+  points: [
+    "80% 訓練維持能說話的慢跑強度，20% 才放在節奏、坡跑或目標配速。",
+    "每週一次長跑是核心，從目前可承受距離開始，賽前 2-3 週推到約 16km。",
+    "每 1-2 週加入 60 秒坡跑或腿力訓練，強化心肺與下肢穩定。",
+    "比賽日採負分段：前半比目標配速略慢，後半再逐步加速。",
+  ],
+};
 
 function getTodayString() {
   try {
@@ -1975,6 +1986,12 @@ function buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longR
   if (goalProfile.distanceKm >= 21 && weeklyKm < 18) {
     notes.push("目前週跑量偏低，半馬以上目標先求穩定累積，不建議每週都做間歇。");
   }
+  if (isHalfMarathonGoal(goalProfile) && weekCount < 12) {
+    notes.push("半馬建議保留至少 12 週準備；若週期不足，請把目標調成穩定完賽，避免臨時暴增長跑。");
+  }
+  if (isHalfMarathonGoal(goalProfile) && longRunKm < 5) {
+    notes.push("第一次半馬建議先能連續完成約 5km，再進入 12 週半馬週期。");
+  }
   if (longRunKm < goalProfile.distanceKm * 0.35 && goalProfile.distanceKm >= 21) {
     notes.push("目前最長跑距離偏短，長跑要逐步增加，避免單週暴增。");
   }
@@ -2017,13 +2034,22 @@ function supportWorkoutFor(priority, injury) {
   return "徒手肌力 20-25 分鐘：深蹲、臀橋、棒式、髖部活動，讓跑步更輕鬆。";
 }
 
-function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience) {
+function isHalfMarathonGoal(goalProfile) {
+  return goalProfile?.distanceKm >= 20.5 && goalProfile?.distanceKm < 22;
+}
+
+function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience, goalProfile) {
   const isCautious = intensity === "safe" || injury === "recovering";
+  const isHalf = isHalfMarathonGoal(goalProfile);
   const longRunLabel = weekdayLabels[longRunDay] || "週日";
   const useRunWalk = shouldUseRunWalk(level, experience, priority, injury);
   const runWalk = runWalkStageForWeek(currentWeek.week, currentWeek.weekCount || 12, injury);
   const quality = useRunWalk
     ? `${runWalk.title}：${runWalk.work}`
+    : isHalf && currentWeek.phase === "打底"
+      ? `坡跑 6 組 × 60 秒，上坡穩定出力、下坡走回恢復；前後各慢跑 10 分鐘`
+      : isHalf && currentWeek.phase === "專項"
+        ? `半馬目標配速 3 × 8 分鐘，組間慢跑 3 分鐘，控制在 ${tempoRange}`
     : injury === "recovering"
       ? `有氧穩定跑 20-30 分鐘，${easyRange}`
       : level === "advanced" && priority === "pb" && intensity === "push"
@@ -2032,7 +2058,9 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange
           ? `漸進跑 20 分鐘，最後 5 分鐘接近 ${tempoRange}`
           : `節奏跑 ${isCautious ? "12-18" : "15-25"} 分鐘，${tempoRange}`;
   const recovery = "伸展、活動度或完整休息";
-  const support = supportWorkoutFor(priority, injury);
+  const support = isHalf
+    ? `${supportWorkoutFor(priority, injury)} 可用騎車、游泳或快走替代一堂恢復跑，降低衝擊。`
+    : supportWorkoutFor(priority, injury);
   const easyKm = Math.max(3, Math.round((currentWeek.weeklyKm - currentWeek.longRunKm) / Math.max(2, dayCount - 1)));
 
   if (dayCount <= 3) {
@@ -2131,7 +2159,8 @@ function buildPlan(profileInput) {
   const currentWeek = weeklyBlocks[selectedWeek - 1];
   const usesRunWalk = shouldUseRunWalk(level, safeExperience, priority, safeInjury);
   const runWalkStage = runWalkStageForWeek(selectedWeek, weekCount, safeInjury);
-  const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, safeLongRunDay, safeIntensity, safeInjury, safeExperience);
+  const usesHalfStrategy = isHalfMarathonGoal(goalProfile);
+  const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, safeLongRunDay, safeIntensity, safeInjury, safeExperience, goalProfile);
   const riskNotes = buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longRunKm, priority, safeExperience, safeInjury, safeIntensity);
   const progression = buildProgression(weekCount, raceWindow);
 
@@ -2164,6 +2193,7 @@ function buildPlan(profileInput) {
     riskNotes,
     usesRunWalk,
     runWalkStage,
+    usesHalfStrategy,
   };
 }
 
@@ -2229,6 +2259,10 @@ function buildCoachInsights(plan) {
     strengths.push("目前課表採跑走交替，會先建立頻率與耐受度，再逐步增加連續跑時間。");
     nextActions.push(`本週跑走階段是「${plan.runWalkStage.title}」，能穩定完成再進下一階段。`);
   }
+  if (plan.usesHalfStrategy) {
+    strengths.push("半馬課表已把長跑、慢跑比例、坡跑與賽前減量拆開，不只看單次配速。");
+    nextActions.push("半馬長跑不要每週硬衝；賽前 2-3 週到高峰後就開始保留體力。");
+  }
   if (plan.raceWindow && plan.raceWindow.days <= 21) {
     risks.push("距離目標賽事很近，現在重點是維持手感與恢復，不適合大幅增加跑量。");
     score -= 6;
@@ -2287,6 +2321,7 @@ function buildPlanCalendar(plan) {
       plan.intensity,
       plan.injury,
       plan.experience,
+      plan.goalProfile,
     );
     schedule.forEach((item, itemIndex) => {
       const date = new Date(weekStart.getTime() + itemIndex * 86400000);
@@ -2331,6 +2366,7 @@ function buildGarminGuide(plan) {
       plan.intensity,
       plan.injury,
       plan.experience,
+      plan.goalProfile,
     );
     rows.push(`第 ${week.week} 週｜${week.phase}｜${week.weeklyKm} km｜長跑 ${week.longRunKm} km`);
     schedule.forEach((item) => rows.push(`- ${item.day} ${item.type}：${item.work}`));
@@ -2395,6 +2431,7 @@ function renderPlan() {
     riskNotes,
     usesRunWalk,
     runWalkStage,
+    usesHalfStrategy,
   } = plan;
 
   state.planWeek = selectedWeek;
@@ -2405,7 +2442,7 @@ function renderPlan() {
   const completionPercent = Math.round((completedCount / Math.max(weekCount, 1)) * 100);
   const adjustment = weekAdjustmentFor(plan, completedWeeks);
   const displayWeek = adjustedTrainingWeek(currentWeek, adjustment);
-  const displaySchedule = buildTrainingSchedule(dayCount, els.planLevel?.value, priority, displayWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience);
+  const displaySchedule = buildTrainingSchedule(dayCount, els.planLevel?.value, priority, displayWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience, goalProfile);
 
   const priorityLabel = {
     finish: "穩定完賽",
@@ -2463,6 +2500,14 @@ function renderPlan() {
         <span>新手跑走進階</span>
         <strong>${escapeHtml(runWalkStage.title)}</strong>
         <p>${escapeHtml(runWalkStage.work)}。完成這一階段覺得穩、隔天恢復正常，再進入下一階段。</p>
+      </div>
+    ` : usesHalfStrategy ? `
+      <div class="plan-method-card half-plan-card">
+        <span>${escapeHtml(halfMarathonStrategy.title)}</span>
+        <strong>${escapeHtml(halfMarathonStrategy.summary)}</strong>
+        <ul>
+          ${halfMarathonStrategy.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+        </ul>
       </div>
     ` : `
       <div class="plan-method-card">
