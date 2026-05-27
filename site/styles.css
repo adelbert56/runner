@@ -1020,35 +1020,18 @@ h3 {
 }
 
 .month-panel {
-  position: fixed;
-  top: 96px;
-  bottom: 24px;
-  left: 8px;
-  z-index: 20;
-  width: 70px;
-  max-height: calc(100dvh - 120px);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 10px;
+  position: static;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  overscroll-behavior: auto;
+  padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 8px;
   background:
     linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.96)),
     var(--paper);
-  box-shadow: 0 14px 34px rgba(31, 42, 36, 0.12);
-  scrollbar-width: none;
-  transition: width 0.18s ease, box-shadow 0.18s ease;
-}
-
-.month-panel:hover,
-.month-panel:focus-within {
-  width: 220px;
-  box-shadow: 0 18px 42px rgba(31, 42, 36, 0.16);
-}
-
-.month-panel::-webkit-scrollbar {
-  display: none;
+  box-shadow: 0 8px 20px rgba(31, 42, 36, 0.05);
 }
 
 .month-panel h3 {
@@ -1057,38 +1040,12 @@ h3 {
 }
 
 .month-index-panel summary {
-  display: grid;
-  min-height: 32px;
-  place-items: center;
-  margin-bottom: 8px;
-  border-radius: 12px;
-  background: rgba(21, 83, 56, 0.07);
+  margin-bottom: 14px;
   color: var(--ink);
   cursor: pointer;
-  font-size: 0;
+  font-size: 1rem;
   font-weight: 950;
   list-style: none;
-}
-
-.month-index-panel summary::before {
-  content: "月份";
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  writing-mode: vertical-rl;
-}
-
-.month-panel:hover .month-index-panel summary,
-.month-panel:focus-within .month-index-panel summary {
-  justify-content: start;
-  min-height: 30px;
-  padding: 0 4px;
-  background: transparent;
-  font-size: 1rem;
-}
-
-.month-panel:hover .month-index-panel summary::before,
-.month-panel:focus-within .month-index-panel summary::before {
-  content: none;
 }
 
 .month-index-panel summary::-webkit-details-marker {
@@ -1103,12 +1060,12 @@ h3 {
 
 .month-list button {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
   align-items: center;
   width: 100%;
   min-height: 42px;
-  padding: 7px 6px;
+  padding: 8px 8px 8px 12px;
   border: 1px solid transparent;
   border-radius: 12px;
   background: var(--panel-strong);
@@ -1118,41 +1075,17 @@ h3 {
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
 
-.month-panel:hover .month-list button,
-.month-panel:focus-within .month-list button {
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px;
-  min-height: 42px;
-  padding: 7px 8px 7px 12px;
-}
-
 .month-label {
   overflow: hidden;
-  font-size: 0;
+  font-size: 0.94rem;
   line-height: 1.1;
-  text-align: center;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.month-label::after {
-  content: attr(data-short);
-  font-size: 0.94rem;
-}
-
-.month-panel:hover .month-label,
-.month-panel:focus-within .month-label {
-  font-size: 0.94rem;
-  text-align: left;
-}
-
-.month-panel:hover .month-label::after,
-.month-panel:focus-within .month-label::after {
-  content: none;
-}
-
 .month-count {
-  display: none;
+  display: inline-flex;
   min-width: 40px;
   min-height: 26px;
   align-items: baseline;
@@ -1163,11 +1096,6 @@ h3 {
   background: rgba(255, 253, 248, 0.86);
   color: var(--green-dark);
   font-variant-numeric: tabular-nums;
-}
-
-.month-panel:hover .month-count,
-.month-panel:focus-within .month-count {
-  display: inline-flex;
 }
 
 .month-count strong {
@@ -1191,6 +1119,115 @@ h3 {
 .month-list button.active .month-count {
   background: rgba(255, 255, 255, 0.94);
   color: var(--green-dark);
+}
+
+@media (min-width: 961px) {
+  .month-panel {
+    position: fixed;
+    top: 96px;
+    bottom: 24px;
+    left: 8px;
+    z-index: 20;
+    width: 70px;
+    max-height: calc(100dvh - 120px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 14px 34px rgba(31, 42, 36, 0.12);
+    scrollbar-width: none;
+    transition: width 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .month-panel:hover,
+  .month-panel:focus-within {
+    width: 220px;
+    box-shadow: 0 18px 42px rgba(31, 42, 36, 0.16);
+  }
+
+  .month-panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .month-index-panel summary {
+    display: grid;
+    min-height: 32px;
+    place-items: center;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: rgba(21, 83, 56, 0.07);
+    font-size: 0;
+  }
+
+  .month-index-panel summary::before {
+    content: "月份";
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    writing-mode: vertical-rl;
+  }
+
+  .month-panel:hover .month-index-panel summary,
+  .month-panel:focus-within .month-index-panel summary {
+    justify-content: start;
+    min-height: 30px;
+    padding: 0 4px;
+    background: transparent;
+    font-size: 1rem;
+  }
+
+  .month-panel:hover .month-index-panel summary::before,
+  .month-panel:focus-within .month-index-panel summary::before {
+    content: none;
+  }
+
+  .month-list {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .month-list button {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 7px 6px;
+  }
+
+  .month-panel:hover .month-list button,
+  .month-panel:focus-within .month-list button {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 7px 8px 7px 12px;
+  }
+
+  .month-label {
+    font-size: 0;
+    text-align: center;
+  }
+
+  .month-label::after {
+    content: attr(data-short);
+    font-size: 0.94rem;
+  }
+
+  .month-panel:hover .month-label,
+  .month-panel:focus-within .month-label {
+    font-size: 0.94rem;
+    text-align: left;
+  }
+
+  .month-panel:hover .month-label::after,
+  .month-panel:focus-within .month-label::after {
+    content: none;
+  }
+
+  .month-count {
+    display: none;
+  }
+
+  .month-panel:hover .month-count,
+  .month-panel:focus-within .month-count {
+    display: inline-flex;
+  }
 }
 
 .race-results {
