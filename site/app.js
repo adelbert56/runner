@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260525-message-cloud3";
+const DATA_VERSION = "20260525-message-cloud4";
 const TODAY = getTodayString();
 
 const state = {
@@ -1571,12 +1571,13 @@ function renderMonths() {
 
   const total = source.length;
   const buttons = [
-    `<button type="button" class="${state.month === "all" ? "active" : ""}" data-month="all"><span>全部</span><span>${total}</span></button>`,
+    `<button type="button" class="${state.month === "all" ? "active" : ""}" data-month="all" aria-label="全部賽事，共 ${total} 場"><span class="month-label">全部</span><span class="month-count"><strong>${total}</strong><small>場</small></span></button>`,
     ...Object.keys(counts)
       .sort()
       .map((month) => {
         const active = state.month === month ? "active" : "";
-        return `<button type="button" class="${active}" data-month="${month}"><span>${monthNames[month] || `${month}月`}</span><span>${counts[month]}</span></button>`;
+        const label = monthNames[month] || `${month}月`;
+        return `<button type="button" class="${active}" data-month="${month}" aria-label="${escapeHtml(label)}賽事，共 ${counts[month]} 場"><span class="month-label">${escapeHtml(label)}</span><span class="month-count"><strong>${counts[month]}</strong><small>場</small></span></button>`;
       }),
   ];
 
