@@ -914,19 +914,20 @@ h3 {
 .race-console {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.96)),
-    var(--paper);
-  box-shadow: var(--shadow-soft);
+  padding: 0;
 }
 
 .race-tools {
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.96)),
+    var(--paper);
+  box-shadow: var(--shadow-soft);
 }
 
 .search-box,
@@ -3576,6 +3577,23 @@ h3 {
   .shoe-spotlight,
   .training-system {
     grid-template-columns: 1fr;
+  }
+
+  .race-console {
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(248, 244, 235, 0.96)),
+      var(--paper);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .race-tools {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .month-panel {
