@@ -279,7 +279,6 @@ function setActivePanel(panelId, updateHash = true) {
   if (updateHash && window.location.hash !== `#${nextPanel}`) {
     history.pushState(null, "", `#${nextPanel}`);
   }
-  updateMonthPanelPosition();
 }
 
 function escapeHtml(value) {
@@ -652,42 +651,6 @@ function setupResponsiveDefaults() {
   if (monthIndex) {
     monthIndex.open = !compact;
   }
-}
-
-function updateMonthPanelPosition() {
-  const panel = document.querySelector(".month-panel");
-  const layout = document.querySelector(".race-layout");
-  const racesSection = document.querySelector("#races");
-  if (!panel || !layout || !racesSection || typeof window.matchMedia !== "function") {
-    return;
-  }
-
-  const desktop = window.matchMedia("(min-width: 961px)").matches;
-  panel.classList.remove("viewport-sticky", "viewport-bottom");
-  panel.style.removeProperty("--month-panel-left");
-  panel.style.removeProperty("--month-panel-width");
-  if (!desktop || !racesSection.classList.contains("active")) {
-    return;
-  }
-
-  const layoutRect = layout.getBoundingClientRect();
-  const panelRect = panel.getBoundingClientRect();
-  const topOffset = 92;
-  const bottomGap = 20;
-  const sectionBottom = racesSection.getBoundingClientRect().bottom;
-
-  if (layoutRect.top > topOffset) {
-    return;
-  }
-
-  if (sectionBottom <= panelRect.height + topOffset + bottomGap) {
-    panel.classList.add("viewport-bottom");
-    return;
-  }
-
-  panel.style.setProperty("--month-panel-left", `${Math.round(layoutRect.left)}px`);
-  panel.style.setProperty("--month-panel-width", `${Math.round(panelRect.width)}px`);
-  panel.classList.add("viewport-sticky");
 }
 
 function syncDurationPickersFromInputs() {
@@ -2850,7 +2813,6 @@ function render() {
   els.favoriteFilter.textContent = state.favoritesOnly ? "顯示全部賽事" : "只看收藏";
   renderMonths();
   renderRaces();
-  updateMonthPanelPosition();
 }
 
 function bindEvents() {
@@ -2865,9 +2827,6 @@ function bindEvents() {
   window.addEventListener("hashchange", () => {
     setActivePanel(window.location.hash.replace("#", ""), false);
   });
-  window.addEventListener("scroll", updateMonthPanelPosition, { passive: true });
-  window.addEventListener("resize", updateMonthPanelPosition);
-
   if (els.backTop) {
     window.addEventListener("scroll", () => {
       els.backTop.classList.toggle("visible", window.scrollY > 420);
@@ -3170,7 +3129,6 @@ async function init() {
     renderStats();
     render();
     renderPlan();
-    updateMonthPanelPosition();
   } catch (error) {
     console.error(error);
     els.resultCount.textContent = "資料載入失敗";
