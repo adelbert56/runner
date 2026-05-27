@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260525-message-cloud7";
+const DATA_VERSION = "20260525-message-cloud8";
 const TODAY = getTodayString();
 
 const state = {
@@ -229,6 +229,15 @@ const weekdayLabels = {
   sat: "週六",
   sun: "週日",
 };
+
+const runWalkStages = [
+  { title: "步行打底", work: "快走 30 分鐘，能完整說話，不追配速", cue: "先把固定出門變成習慣。" },
+  { title: "跑走 1:4", work: "走 4 分鐘 + 跑 1 分鐘，重複 5 回合，共約 25-30 分鐘", cue: "跑段保持舒服，喘就延長走路。" },
+  { title: "跑走 2:3", work: "走 3 分鐘 + 跑 2 分鐘，重複 5 回合，共約 25 分鐘", cue: "只有前一階段穩定完成再進階。" },
+  { title: "跑走 3:2", work: "走 2 分鐘 + 跑 3 分鐘，重複 5 回合，共約 25 分鐘", cue: "跑姿放鬆，保留餘裕。" },
+  { title: "跑走 4:1", work: "走 1 分鐘 + 跑 4 分鐘，重複 5 回合，共約 25 分鐘", cue: "開始建立連續跑感覺。" },
+  { title: "連續慢跑", work: "連續慢跑 20-30 分鐘；需要時每 10 分鐘走 1 分鐘", cue: "能穩定完成後再拉長時間。" },
+];
 
 function getTodayString() {
   try {
@@ -1946,6 +1955,7 @@ function buildWeeklyBlocks(weekCount, targets, goalProfile) {
 
     return {
       week,
+      weekCount: safeWeekCount,
       phase,
       weeklyKm,
       longRunKm,
@@ -1986,32 +1996,60 @@ function buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longR
   return notes.length ? notes : ["強度日之間至少隔 48 小時；若疼痛改成休息或步行，菜單要讓身體吸收而不是硬撐。"];
 }
 
-function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury) {
+function shouldUseRunWalk(level, experience, priority, injury) {
+  return level === "beginner" || experience === "rookie" || priority === "habit" || injury === "recovering";
+}
+
+function runWalkStageForWeek(week, weekCount, injury) {
+  const stageCount = injury === "recovering" ? 4 : runWalkStages.length;
+  const step = Math.max(1, Math.ceil(weekCount / stageCount));
+  const stageIndex = clampNumber(Math.ceil(week / step), 1, stageCount) - 1;
+  return runWalkStages[stageIndex];
+}
+
+function supportWorkoutFor(priority, injury) {
+  if (injury === "recovering") {
+    return "徒手肌力 15-20 分鐘：臀橋、鳥狗、側棒式、提踵；全程無痛才做。";
+  }
+  if (priority === "pb") {
+    return "徒手肌力 25 分鐘：深蹲、弓箭步、核心棒式、提踵，幫助跑姿穩定。";
+  }
+  return "徒手肌力 20-25 分鐘：深蹲、臀橋、棒式、髖部活動，讓跑步更輕鬆。";
+}
+
+function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience) {
   const isCautious = intensity === "safe" || injury === "recovering";
   const longRunLabel = weekdayLabels[longRunDay] || "週日";
-  const quality = injury === "recovering"
-    ? `有氧穩定跑 20-30 分鐘，${easyRange}`
-    : level === "advanced" && priority === "pb" && intensity === "push"
-    ? `間歇 4-6 組，${intervalRange}`
-    : priority === "habit"
-      ? `漸進跑 20 分鐘，最後 5 分鐘接近 ${tempoRange}`
-      : `節奏跑 ${isCautious ? "12-18" : "15-25"} 分鐘，${tempoRange}`;
-  const recovery = "伸展、肌力或完整休息";
+  const useRunWalk = shouldUseRunWalk(level, experience, priority, injury);
+  const runWalk = runWalkStageForWeek(currentWeek.week, currentWeek.weekCount || 12, injury);
+  const quality = useRunWalk
+    ? `${runWalk.title}：${runWalk.work}`
+    : injury === "recovering"
+      ? `有氧穩定跑 20-30 分鐘，${easyRange}`
+      : level === "advanced" && priority === "pb" && intensity === "push"
+        ? `間歇 4-6 組，${intervalRange}`
+        : priority === "habit"
+          ? `漸進跑 20 分鐘，最後 5 分鐘接近 ${tempoRange}`
+          : `節奏跑 ${isCautious ? "12-18" : "15-25"} 分鐘，${tempoRange}`;
+  const recovery = "伸展、活動度或完整休息";
+  const support = supportWorkoutFor(priority, injury);
   const easyKm = Math.max(3, Math.round((currentWeek.weeklyKm - currentWeek.longRunKm) / Math.max(2, dayCount - 1)));
 
   if (dayCount <= 3) {
     return [
-      { day: "第 1 跑", type: "輕鬆", work: `${easyKm}km，${easyRange}` },
-      { day: "第 2 跑", type: "重點", work: quality },
-      { day: longRunLabel, type: "長跑", work: `${currentWeek.longRunKm}km，${longRange}` },
+      { day: "第 1 跑", type: useRunWalk ? "跑走" : "輕鬆", work: useRunWalk ? quality : `${easyKm}km，${easyRange}` },
+      { day: "第 2 跑", type: useRunWalk ? "輕鬆" : "重點", work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
+      { day: longRunLabel, type: "長跑", work: useRunWalk ? `跑走長課 ${Math.max(30, currentWeek.longRunKm * 7)} 分鐘，跑段全程可聊天` : `${currentWeek.longRunKm}km，${longRange}` },
+      { day: "支援日", type: "徒手", work: support },
     ];
   }
 
   const schedule = [
-    { day: "週二", type: "輕鬆", work: `${easyKm}km，${easyRange}` },
-    { day: "週四", type: "重點", work: quality },
+    { day: "週二", type: useRunWalk ? "跑走" : "輕鬆", work: useRunWalk ? quality : `${easyKm}km，${easyRange}` },
+    { day: "週四", type: useRunWalk ? "輕鬆" : "重點", work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
     { day: "週五", type: "恢復", work: dayCount >= 4 ? `短恢復跑 25-35 分鐘，${easyRange}` : recovery },
     { day: longRunLabel, type: "長跑", work: `${currentWeek.longRunKm}km，${longRange}` },
+    { day: "支援日", type: "徒手", work: support },
   ];
 
   if (dayCount >= 5) {
@@ -2091,7 +2129,9 @@ function buildPlan(profileInput) {
   const weeklyBlocks = buildWeeklyBlocks(weekCount, targets, goalProfile);
   const selectedWeek = clampNumber(Number(selectedWeekInput) || 1, 1, weekCount);
   const currentWeek = weeklyBlocks[selectedWeek - 1];
-  const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, safeLongRunDay, safeIntensity, safeInjury);
+  const usesRunWalk = shouldUseRunWalk(level, safeExperience, priority, safeInjury);
+  const runWalkStage = runWalkStageForWeek(selectedWeek, weekCount, safeInjury);
+  const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, safeLongRunDay, safeIntensity, safeInjury, safeExperience);
   const riskNotes = buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longRunKm, priority, safeExperience, safeInjury, safeIntensity);
   const progression = buildProgression(weekCount, raceWindow);
 
@@ -2122,6 +2162,8 @@ function buildPlan(profileInput) {
     selectedWeek,
     targets,
     riskNotes,
+    usesRunWalk,
+    runWalkStage,
   };
 }
 
@@ -2183,6 +2225,10 @@ function buildCoachInsights(plan) {
   if (plan.priority === "habit") {
     nextActions.push("把完成率放在第一順位，連續 3 週有跑比單週跑很猛更重要。");
   }
+  if (plan.usesRunWalk) {
+    strengths.push("目前課表採跑走交替，會先建立頻率與耐受度，再逐步增加連續跑時間。");
+    nextActions.push(`本週跑走階段是「${plan.runWalkStage.title}」，能穩定完成再進下一階段。`);
+  }
   if (plan.raceWindow && plan.raceWindow.days <= 21) {
     risks.push("距離目標賽事很近，現在重點是維持手感與恢復，不適合大幅增加跑量。");
     score -= 6;
@@ -2240,6 +2286,7 @@ function buildPlanCalendar(plan) {
       plan.longRunDay,
       plan.intensity,
       plan.injury,
+      plan.experience,
     );
     schedule.forEach((item, itemIndex) => {
       const date = new Date(weekStart.getTime() + itemIndex * 86400000);
@@ -2283,6 +2330,7 @@ function buildGarminGuide(plan) {
       plan.longRunDay,
       plan.intensity,
       plan.injury,
+      plan.experience,
     );
     rows.push(`第 ${week.week} 週｜${week.phase}｜${week.weeklyKm} km｜長跑 ${week.longRunKm} km`);
     schedule.forEach((item) => rows.push(`- ${item.day} ${item.type}：${item.work}`));
@@ -2345,6 +2393,8 @@ function renderPlan() {
     selectedWeek,
     targets,
     riskNotes,
+    usesRunWalk,
+    runWalkStage,
   } = plan;
 
   state.planWeek = selectedWeek;
@@ -2355,7 +2405,7 @@ function renderPlan() {
   const completionPercent = Math.round((completedCount / Math.max(weekCount, 1)) * 100);
   const adjustment = weekAdjustmentFor(plan, completedWeeks);
   const displayWeek = adjustedTrainingWeek(currentWeek, adjustment);
-  const displaySchedule = buildTrainingSchedule(dayCount, els.planLevel?.value, priority, displayWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury);
+  const displaySchedule = buildTrainingSchedule(dayCount, els.planLevel?.value, priority, displayWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience);
 
   const priorityLabel = {
     finish: "穩定完賽",
@@ -2408,6 +2458,19 @@ function renderPlan() {
       <strong>${escapeHtml(goalProfile.focus)}</strong>
       <p>${escapeHtml(progression)} 依照 ${escapeHtml(experienceLabel)}、${escapeHtml(injuryLabel)}、${escapeHtml(intensityLabel)} 調整跑量與強度。${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
     </div>
+    ${usesRunWalk ? `
+      <div class="plan-method-card">
+        <span>新手跑走進階</span>
+        <strong>${escapeHtml(runWalkStage.title)}</strong>
+        <p>${escapeHtml(runWalkStage.work)}。完成這一階段覺得穩、隔天恢復正常，再進入下一階段。</p>
+      </div>
+    ` : `
+      <div class="plan-method-card">
+        <span>訓練結構</span>
+        <strong>一週一堂重點課，其餘保留輕鬆跑</strong>
+        <p>避免每趟都跑快；強度課、長跑與恢復日分開，讓身體吸收訓練。</p>
+      </div>
+    `}
     <div class="plan-export-actions" aria-label="課表匯出">
       <button class="export-button" type="button" data-export-plan="calendar">匯出行事曆</button>
       <button class="export-button" type="button" data-export-plan="garmin">Garmin 建課摘要</button>

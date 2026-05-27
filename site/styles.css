@@ -3088,6 +3088,36 @@ h3 {
   color: var(--muted);
 }
 
+.plan-method-card {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid rgba(21, 83, 56, 0.14);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(21, 83, 56, 0.08), rgba(245, 200, 76, 0.12)),
+    #fffdf8;
+}
+
+.plan-method-card span {
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.plan-method-card strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.plan-method-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .risk-panel {
   margin-bottom: 12px;
   padding: 14px;
