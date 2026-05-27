@@ -163,6 +163,13 @@ function registrationDateAnomalies(race) {
       hint: "截止日通常不應晚於賽事日，需確認是否年份解析錯誤。",
     });
   }
+  if (deadline && raceDate && formatDate(deadline) === formatDate(raceDate) && /報名中|即將截止|未開始/.test(String(race.registration_status || "")) && !/當日報名|現場報名|單日報名/.test(note)) {
+    anomalies.push({
+      key: "deadline_equals_race_date",
+      label: "截止日等於賽事日",
+      hint: "常見原因是把賽事日期誤存成報名截止日；請回官方頁確認報名期間。",
+    });
+  }
   return anomalies;
 }
 

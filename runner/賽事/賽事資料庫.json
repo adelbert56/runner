@@ -778,7 +778,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "scraped_at": "2026-05-16T11:07:32.348541+00:00",
-    "registration_note": "人工查證：樂活報名網官方活動頁與報名頁；官方頁顯示報名入口與報名截止倒數。",
+    "registration_note": "人工查證：樂活報名網官方活動頁與報名頁；報名期間為 2026-05-17 11:00 至 2026-08-16 23:59，若額滿則提前截止。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
@@ -786,7 +786,7 @@
     "official_event_url": "https://lohasnet.tw/Taichungmarathon2026/",
     "source_platform": "Lohas、運動筆記",
     "verified_at": "2026-05-19",
-    "verification_note": "樂活官方頁 https://lohasnet.tw/Taichungmarathon2026/ 顯示活動日期、地點、主辦單位、報名入口、各組費用、開放名額與起跑時間。",
+    "verification_note": "樂活官方頁 https://lohasnet.tw/Taichungmarathon2026/ 顯示活動日期、地點、主辦單位、報名期間、報名入口、各組費用、開放名額與起跑時間。",
     "first_seen_at": "2026-05-16",
     "venue": "臺中市大明高級中等學校",
     "start_location": "臺中市大明高級中等學校（臺中市潭子區潭興路一段168號）",
@@ -799,7 +799,7 @@
       "11km": "06:20",
       "4km": "06:30"
     },
-    "registration_deadline": "2026-10-18",
+    "registration_deadline": "2026-08-16",
     "registration_opens_at": "2026-05-17"
   },
   {
@@ -817,7 +817,7 @@
     "registration_status": "報名中",
     "registration_link": "https://signup.lohasnet.tw/signup/4247",
     "official_event_url": "https://lohasnet.tw/Taichungmarathon2026/",
-    "registration_note": "人工查證：樂活報名網官方活動頁與報名頁；官方頁顯示報名入口與報名截止倒數。",
+    "registration_note": "人工查證：樂活報名網官方活動頁與報名頁；報名期間為 2026-05-17 11:00 至 2026-08-16 23:59，若額滿則提前截止。",
     "registration_opens_at": "2026-05-17",
     "registration_deadline": "2026-08-16",
     "venue": "臺中市大明高級中等學校",
@@ -833,7 +833,7 @@
       "4km": "06:30"
     },
     "verified_at": "2026-05-19",
-    "verification_note": "樂活官方頁 https://lohasnet.tw/Taichungmarathon2026/ 顯示活動日期、地點、主辦單位、報名入口、各組費用、開放名額與起跑時間。",
+    "verification_note": "樂活官方頁 https://lohasnet.tw/Taichungmarathon2026/ 顯示活動日期、地點、主辦單位、報名期間、報名入口、各組費用、開放名額與起跑時間。",
     "source_platform": "Lohas、運動筆記",
     "is_official_direct": true,
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",

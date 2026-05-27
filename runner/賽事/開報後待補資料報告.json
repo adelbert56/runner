@@ -13,7 +13,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-05-26",
+      "next_check_date": "2026-05-27",
       "cadence": "weekly",
       "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額。"
     },
