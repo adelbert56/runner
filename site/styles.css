@@ -1012,16 +1012,19 @@ h3 {
 }
 
 .race-layout {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
 }
 
 .month-panel {
-  position: fixed;
+  position: sticky;
   top: 92px;
-  left: max(14px, calc((100vw - 1120px) / 2 - 236px));
   z-index: 12;
-  width: 220px;
+  align-self: start;
+  width: 100%;
   max-height: calc(100dvh - 112px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1031,6 +1034,20 @@ h3 {
   background: var(--surface);
   box-shadow: 0 8px 20px rgba(31, 42, 36, 0.05);
   scrollbar-gutter: stable;
+}
+
+.month-panel.viewport-sticky {
+  position: fixed;
+  left: var(--month-panel-left, 0px);
+  width: var(--month-panel-width, 220px);
+}
+
+.month-panel.viewport-bottom {
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 }
 
 .month-panel h3 {
