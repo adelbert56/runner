@@ -1013,14 +1013,15 @@ h3 {
 
 .race-layout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .month-panel {
-  position: sticky;
+  position: fixed;
   top: 92px;
-  align-self: start;
+  left: max(14px, calc((100vw - 1120px) / 2 - 236px));
+  z-index: 12;
+  width: 220px;
   max-height: calc(100dvh - 112px);
   overflow-y: auto;
   overscroll-behavior: contain;
