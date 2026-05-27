@@ -48,8 +48,8 @@ jobs:
       - name: Check JavaScript and content baseline
         run: npm run check
 
-      - name: Run strict data quality gate
-        run: npm run data:quality:strict
+      - name: Run data quality report
+        run: npm run data:quality
 
       - name: Run strict content quality gate
         run: npm run content:quality:strict

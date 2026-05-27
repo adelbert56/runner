@@ -1,0 +1,89 @@
+name: Workflow run monitor
+
+on:
+  workflow_run:
+    workflows:
+      - Refresh race weather
+      - Refresh race data
+      - Collect content candidates
+      - Refresh runner quips
+      - CI
+      - Deploy static site
+    types:
+      - completed
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: workflow-run-monitor
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open/update issue on failure
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        uses: actions/github-script@v7
+        env:
+          MONITOR_CONFIG_PATH: .github/workflow-run-monitor.json
+        with:
+          script: |
+            const fs = require("fs");
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const configPath = process.env.MONITOR_CONFIG_PATH || ".github/workflow-run-monitor.json";
+            const config = fs.existsSync(configPath)
+              ? JSON.parse(fs.readFileSync(configPath, "utf8"))
+              : { issue_labels: ["automation"], title_prefix: "Workflow failure:" };
+
+            const run = context.payload.workflow_run;
+            const name = run.name || "unknown";
+            const conclusion = run.conclusion || "unknown";
+            const status = run.status || "unknown";
+            const htmlUrl = run.html_url || "(no url)";
+            const createdAt = run.created_at || "(unknown)";
+
+            const title = `${config.title_prefix || "Workflow failure:"} ${name}`;
+            const body =
+              `偵測到 workflow 失敗：\n` +
+              `- name: ${name}\n` +
+              `- status: ${status}\n` +
+              `- conclusion: ${conclusion}\n` +
+              `- created_at: ${createdAt}\n` +
+              `- url: ${htmlUrl}\n`;
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = issues.find(i => i.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+              });
+              core.setFailed(`Workflow failed; commented on issue #${existing.number}`);
+              return;
+            }
+
+            const created = await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels: config.issue_labels || ["automation"],
+            });
+
+            core.setFailed(`Workflow failed; opened issue #${created.data.number}`);
+

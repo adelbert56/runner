@@ -1,0 +1,5 @@
+{
+  "title_prefix": "Workflow failure:",
+  "issue_labels": ["automation", "workflow-failure"]
+}
+

@@ -1,0 +1,48 @@
+{
+  "issue_title": "Schedule audit failure",
+  "issue_labels": ["automation", "schedule-audit"],
+  "pages_url": null,
+  "expected_workflows": [
+    {
+      "name": "Refresh race weather",
+      "path": ".github/workflows/weather-refresh.yml",
+      "expected_event": "schedule",
+      "require_schedule": true,
+      "max_age_minutes": 1560
+    },
+    {
+      "name": "Refresh race data",
+      "path": ".github/workflows/data-refresh.yml",
+      "expected_event": "schedule",
+      "require_schedule": true,
+      "max_age_minutes": 4320
+    },
+    {
+      "name": "Collect content candidates",
+      "path": ".github/workflows/content-candidates.yml",
+      "expected_event": "schedule",
+      "require_schedule": true,
+      "max_age_minutes": 2400
+    },
+    {
+      "name": "Refresh runner quips",
+      "path": ".github/workflows/runner-quips-refresh.yml",
+      "expected_event": "schedule",
+      "require_schedule": true,
+      "max_age_minutes": 10560
+    },
+    {
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "expected_event": "push",
+      "max_age_minutes": 10080
+    },
+    {
+      "name": "Deploy static site",
+      "path": ".github/workflows/pages.yml",
+      "expected_event": "push",
+      "require_schedule": false,
+      "max_age_minutes": 1560
+    }
+  ]
+}

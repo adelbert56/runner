@@ -1,0 +1,225 @@
+name: Schedule audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 00:20 Asia/Taipei (UTC+8) = 16:20 UTC (previous day)
+    - cron: "20 16 * * *"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+concurrency:
+  group: schedule-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Audit scheduled workflows
+        uses: actions/github-script@v7
+        env:
+          AUDIT_CONFIG_PATH: .github/schedule-audit.json
+          TZ: Asia/Taipei
+        with:
+          script: |
+            const fs = require("fs");
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const configPath = process.env.AUDIT_CONFIG_PATH || ".github/schedule-audit.json";
+            if (!fs.existsSync(configPath)) {
+              core.setFailed(`Missing audit config: ${configPath}`);
+              return;
+            }
+
+            const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+            const now = new Date();
+
+            function toIso(date) {
+              return date.toISOString();
+            }
+
+            function minutes(n) {
+              return n * 60 * 1000;
+            }
+
+            async function listWorkflows() {
+              const workflows = [];
+              let page = 1;
+              while (true) {
+                const resp = await github.request("GET /repos/{owner}/{repo}/actions/workflows", {
+                  owner,
+                  repo,
+                  per_page: 100,
+                  page,
+                });
+                workflows.push(...resp.data.workflows);
+                if (resp.data.workflows.length < 100) break;
+                page += 1;
+              }
+              return workflows;
+            }
+
+            async function getWorkflowFileText(path) {
+              try {
+                const resp = await github.request("GET /repos/{owner}/{repo}/contents/{path}", {
+                  owner,
+                  repo,
+                  path,
+                });
+                if (resp.data && resp.data.type === "file" && resp.data.content) {
+                  return Buffer.from(resp.data.content, resp.data.encoding || "base64").toString("utf8");
+                }
+              } catch (e) {
+                return null;
+              }
+              return null;
+            }
+
+            async function getLatestRunForWorkflowId(workflow_id) {
+              const resp = await github.request(
+                "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs",
+                { owner, repo, workflow_id, per_page: 1 }
+              );
+              return resp.data.workflow_runs?.[0] || null;
+            }
+
+            function formatFinding(name, latestRun, maxAgeMinutes, expectedEvent) {
+              if (!latestRun) {
+                return `- ${name}: 找不到任何 run（可能 workflow 被停用或名稱不匹配）`;
+              }
+              const createdAt = new Date(latestRun.created_at);
+              const ageMin = Math.floor((now - createdAt) / 60000);
+              const conclusion = latestRun.conclusion ?? "in_progress";
+              const status = latestRun.status ?? "unknown";
+              const event = latestRun.event ?? "unknown";
+              const url = latestRun.html_url ?? "(no url)";
+              const okAge = ageMin <= maxAgeMinutes;
+              const okConclusion = conclusion === "success" || conclusion === null;
+              const okStatus = status === "completed" || status === "in_progress";
+              const okEvent = expectedEvent ? event === expectedEvent : true;
+              const ok = okAge && okConclusion && okStatus && okEvent;
+              const flag = ok ? "OK" : "BAD";
+              return `- ${name}: ${flag}（latest=${toIso(createdAt)} age=${ageMin}m event=${event} status=${status} conclusion=${conclusion} url=${url}）`;
+            }
+
+            const workflows = await listWorkflows();
+            const byName = new Map(workflows.map(w => [w.name, w]));
+            const byPath = new Map(workflows.map(w => [w.path, w]));
+
+            function resolveWorkflow(expected) {
+              if (expected.path && byPath.has(expected.path)) return byPath.get(expected.path);
+              if (expected.name && byName.has(expected.name)) return byName.get(expected.name);
+              // fallback: allow "name" to be a path-like value
+              if (expected.name && byPath.has(expected.name)) return byPath.get(expected.name);
+              return null;
+            }
+
+            const findings = [];
+            let badCount = 0;
+
+            for (const item of config.expected_workflows || []) {
+              const wf = resolveWorkflow(item);
+              const latestRun = wf ? await getLatestRunForWorkflowId(wf.id) : null;
+              const maxAgeMinutes = item.max_age_minutes ?? 24 * 60 + 120;
+              const expectedEvent = item.expected_event ?? null;
+              const requireSchedule = item.require_schedule ?? (expectedEvent === "schedule");
+              const display = item.name || item.path || "(unnamed workflow)";
+              const stateNote = wf ? ` state=${wf.state}` : "";
+              const baseLine = `${formatFinding(display, latestRun, maxAgeMinutes, expectedEvent)}${stateNote}`;
+              let scheduleNote = "";
+              if (wf && requireSchedule) {
+                const txt = await getWorkflowFileText(wf.path);
+                if (!txt) {
+                  scheduleNote = " schedule=unknown";
+                  badCount += 1;
+                } else {
+                  const hasSchedule = /\bon\s*:\s*[\s\S]*\bschedule\s*:/m.test(txt) && /\bcron\s*:/m.test(txt);
+                  scheduleNote = ` schedule=${hasSchedule ? "present" : "missing"}`;
+                  if (!hasSchedule) badCount += 1;
+                }
+              }
+
+              const line = `${baseLine}${scheduleNote}`;
+              findings.push(line);
+              if (!wf || wf.state !== "active" || line.includes(": BAD") || line.includes("找不到任何 run")) badCount += 1;
+            }
+
+            async function checkUrl(url) {
+              try {
+                const resp = await fetch(url, { redirect: "follow" });
+                return { ok: resp.ok, status: resp.status };
+              } catch (e) {
+                return { ok: false, status: "fetch_error" };
+              }
+            }
+
+            if (config.pages_url) {
+              const r = await checkUrl(config.pages_url);
+              const line = `- GitHub Pages: ${r.ok ? "OK" : "BAD"}（url=${config.pages_url} status=${r.status}）`;
+              findings.push(line);
+              if (!r.ok) badCount += 1;
+            }
+
+            const title = config.issue_title || "Schedule audit failure";
+            const workflowIndex =
+              "\n\n---\n可用 workflows（name → path → state）：\n" +
+              workflows
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(w => `- ${w.name} → ${w.path} → ${w.state}`)
+                .join("\n") +
+              "\n";
+
+            const bodyHeader =
+              `自我稽核時間（UTC）: ${toIso(now)}\n` +
+              `設定檔: ${configPath}\n\n` +
+              `結果：\n${findings.join("\n")}\n`;
+
+            if (badCount === 0) {
+              core.info("All checks OK");
+              core.summary.addHeading("Schedule audit: OK");
+              core.summary.addRaw(bodyHeader + workflowIndex);
+              await core.summary.write();
+              return;
+            }
+
+            core.warning(`Detected ${badCount} failing checks`);
+
+            // De-dup: if an open issue with same title exists, just comment.
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = issues.find(i => i.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body: bodyHeader + workflowIndex,
+              });
+              core.setFailed(`Audit failed; commented on issue #${existing.number}`);
+              return;
+            }
+
+            const created = await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body: bodyHeader + workflowIndex,
+              labels: config.issue_labels || ["automation", "schedule-audit"],
+            });
+
+            core.setFailed(`Audit failed; opened issue #${created.data.number}`);
