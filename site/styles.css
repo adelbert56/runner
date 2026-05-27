@@ -1020,11 +1020,15 @@ h3 {
   position: sticky;
   top: 92px;
   align-self: start;
+  max-height: calc(100dvh - 112px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: 0 8px 20px rgba(31, 42, 36, 0.05);
+  scrollbar-gutter: stable;
 }
 
 .month-panel h3 {
@@ -3576,6 +3580,9 @@ h3 {
 
   .month-panel {
     position: static;
+    max-height: none;
+    overflow: visible;
+    overscroll-behavior: auto;
   }
 
   .plan-builder {
