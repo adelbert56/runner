@@ -48,15 +48,9 @@ jobs:
             exit 0
           fi
 
-          primary_cron="17 10 * * 2,4"
-
-          if [ "$SCHEDULE" = "$primary_cron" ]; then
-            echo "Primary schedule trigger ($SCHEDULE); continuing."
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          # Backups retry unless a recent run finished successfully.
+          # Scheduled runs can arrive hours late. All schedule slots, including
+          # the primary slot, skip when another refresh already succeeded or is
+          # actively running in the current window.
           lookback_hours=18
           runs_json="$(gh run list --repo "$REPOSITORY" --workflow data-refresh.yml --branch main --limit 30 --json databaseId,createdAt,status,conclusion)"
           prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600)) | select((.conclusion == "success") or (.status == "in_progress") or (.status == "queued"))] | length')"
