@@ -1,7 +1,7 @@
 {
   "issue_title": "Schedule audit failure",
   "issue_labels": ["automation", "schedule-audit"],
-  "pages_url": null,
+  "pages_url": "https://adelbert56.github.io/runner/",
   "expected_workflows": [
     {
       "name": "Refresh race weather",

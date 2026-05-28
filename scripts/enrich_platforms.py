@@ -24,6 +24,7 @@ from config import (
     REQUEST_RETRY_BACKOFF_SECONDS,
     REQUEST_TIMEOUT,
     ROOT_DIR,
+    SCRAPE_STATUS_JSON,
 )
 from http_client import request_text
 from platforms import baoming, ctrun, eventgo, focusline, irunner, joinnow, lohas
@@ -276,6 +277,35 @@ def write_report(stats: dict) -> None:
     REPORT_MD.write_text(f"{chr(10).join(lines)}\n", encoding="utf-8")
 
 
+def update_scrape_status_with_enrichment_errors(stats: dict) -> None:
+    """Surface platform enrichment failures to the workflow error reporter."""
+    if not stats["errors"]:
+        return
+
+    status = {}
+    if SCRAPE_STATUS_JSON.exists():
+        try:
+            status = json.loads(SCRAPE_STATUS_JSON.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            status = {}
+
+    enrichment_errors = [f"{key}: {error}" for key, error in stats["errors"][:30]]
+    existing_errors = status.get("errors")
+    if not isinstance(existing_errors, list):
+        existing_errors = []
+
+    status.update(
+        {
+            "enrichment_errors": enrichment_errors,
+            "has_enrichment_errors": True,
+            "has_errors": True,
+            "errors": list(dict.fromkeys([*existing_errors, *enrichment_errors])),
+        }
+    )
+    SCRAPE_STATUS_JSON.parent.mkdir(parents=True, exist_ok=True)
+    SCRAPE_STATUS_JSON.write_text(f"{json.dumps(status, ensure_ascii=False, indent=2)}\n", encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Enrich races from official registration platforms.")
     parser.add_argument("--dry-run", action="store_true", help="Fetch and parse without writing JSON files")
@@ -314,6 +344,7 @@ def main() -> None:
         save_races(RACE_DB_JSON, next_races)
         save_races(SITE_RACE_JSON, next_races)
         write_report(stats)
+        update_scrape_status_with_enrichment_errors(stats)
 
     print(f"Races scanned: {stats['total']}")
     print(f"Supported platform hits: {stats['matched']}")

@@ -50,6 +50,8 @@ const [
   messageCloudWorkflow,
   pagesWorkflow,
   ciWorkflow,
+  scheduleAuditConfigRaw,
+  httpClientScript,
 ] = await Promise.all([
   text("package.json"),
   text("site/index.html"),
@@ -76,9 +78,12 @@ const [
   text(".github/workflows/message-cloud-refresh.yml"),
   text(".github/workflows/pages.yml"),
   text(".github/workflows/ci.yml"),
+  text(".github/schedule-audit.json"),
+  text("scripts/http_client.py"),
 ]);
 
 const packageJson = JSON.parse(packageJsonRaw);
+const scheduleAuditConfig = JSON.parse(scheduleAuditConfigRaw);
 const appVersion = appJs.match(/const DATA_VERSION = "([^"]+)"/)?.[1] || "";
 const scriptVersion = indexHtml.match(/app\.js\?v=([^"]+)"/)?.[1] || "";
 
@@ -93,6 +98,8 @@ assertCheck(appJs.includes("announcements.json?v=${DATA_VERSION}"), "announcemen
 assertCheck(appJs.includes("message-cloud.json?v=${DATA_VERSION}"), "message cloud data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("automation-health.json?v=${DATA_VERSION}"), "automation health fetch uses DATA_VERSION cache busting");
 assertCheck(packageJson.scripts["message-cloud:build"] === "node scripts/build-message-cloud.mjs", "message cloud has a GitHub issue build script");
+assertCheck(scheduleAuditConfig.pages_url === "https://adelbert56.github.io/runner/", "schedule audit checks the public GitHub Pages URL");
+assertCheck(httpClientScript.includes("522") && httpClientScript.includes("Retry-After"), "HTTP scraper retry policy handles Cloudflare/transient failures");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
 assertCheck(!appJs.includes("function buildAnnouncementItems"), "front end does not build announcements from race data");
 assertCheck(raceDbRaw.includes('"first_seen_at"'), "race data includes first_seen_at tracking");

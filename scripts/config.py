@@ -67,10 +67,10 @@ REQUEST_HEADERS = {
     ),
     "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
 }
-REQUEST_TIMEOUT = 30
+REQUEST_TIMEOUT = 45
 REQUEST_DELAY = 2  # seconds between requests
-REQUEST_RETRIES = 3
-REQUEST_RETRY_BACKOFF_SECONDS = 1.5
+REQUEST_RETRIES = 4
+REQUEST_RETRY_BACKOFF_SECONDS = 2.0
 
 # ─── Difficulty mapping ───────────────────────────────────────────────────────
 DIFFICULTY_MAP = {

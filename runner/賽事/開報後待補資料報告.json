@@ -7,15 +7,15 @@
     "registration_opens_at": "2026-04-17",
     "registration_deadline": "2026-08-10",
     "registration_status": "已截止",
-    "source_platform": "bao-ming、運動筆記",
+    "source_platform": "運動筆記",
     "is_official_direct": true,
-    "priority_score": 8,
+    "priority_score": 9,
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-05-27",
+      "next_check_date": "2026-05-28",
       "cadence": "weekly",
-      "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額。"
+      "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額、資料查證時間。"
     },
     "missing": [
       {
@@ -41,6 +41,12 @@
         "label": "名額",
         "severity": "low",
         "hint": "補 quota 或 participant_limit。"
+      },
+      {
+        "key": "verified_at",
+        "label": "資料查證時間",
+        "severity": "low",
+        "hint": "補 verified_at，表示人工或爬蟲最後查證日。"
       }
     ],
     "current_links": {
