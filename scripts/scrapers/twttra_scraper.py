@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SOURCES, CENTRAL_TAIWAN_COUNTIES, REQUEST_HEADERS,
-    REQUEST_RETRIES, REQUEST_RETRY_BACKOFF_SECONDS, REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty
+    REQUEST_RETRIES, REQUEST_RETRY_BACKOFF_SECONDS, REQUEST_TIMEOUT, REQUEST_DELAY, infer_difficulty, is_running_event
 )
 from http_client import request_text
 
@@ -86,6 +86,9 @@ def _parse_race_page(url: str, html: str) -> dict | None:
     # Distances
     distances = re.findall(r"\d+(?:\.\d+)?\s*[Kk][Mm]?", text)
     distances = list(dict.fromkeys(distances))[:5]
+    if not is_running_event(name, distances):
+        logger.info(f"Skipping non-running event: {name}")
+        return None
 
     # Registration link
     reg_link = url

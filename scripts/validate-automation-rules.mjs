@@ -43,6 +43,7 @@ const [
   pythonConfig,
   sportsNoteScraper,
   sportsnetScraper,
+  twttraScraper,
   weatherWorkflow,
   dataWorkflow,
   contentWorkflow,
@@ -71,6 +72,7 @@ const [
   text("scripts/config.py"),
   text("scripts/scrapers/sports_note_scraper.py"),
   text("scripts/scrapers/sportsnet_scraper.py"),
+  text("scripts/scrapers/twttra_scraper.py"),
   text(".github/workflows/weather-refresh.yml"),
   text(".github/workflows/data-refresh.yml"),
   text(".github/workflows/content-candidates.yml"),
@@ -99,6 +101,12 @@ assertCheck(appJs.includes("message-cloud.json?v=${DATA_VERSION}"), "message clo
 assertCheck(appJs.includes("automation-health.json?v=${DATA_VERSION}"), "automation health fetch uses DATA_VERSION cache busting");
 assertCheck(packageJson.scripts["message-cloud:build"] === "node scripts/build-message-cloud.mjs", "message cloud has a GitHub issue build script");
 assertCheck(scheduleAuditConfig.pages_url === "https://adelbert56.github.io/runner/", "schedule audit checks the public GitHub Pages URL");
+const raceScheduleAudit = scheduleAuditConfig.expected_workflows.find((workflow) => workflow.path === ".github/workflows/data-refresh.yml");
+assertCheck(
+  raceScheduleAudit?.max_age_minutes_by_local_weekday?.["3"] <= 430
+    && raceScheduleAudit?.max_age_minutes_by_local_weekday?.["5"] <= 430,
+  "schedule audit catches missed Tuesday/Thursday race data windows by next Taipei morning"
+);
 assertCheck(httpClientScript.includes("522") && httpClientScript.includes("Retry-After"), "HTTP scraper retry policy handles Cloudflare/transient failures");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
 assertCheck(!appJs.includes("function buildAnnouncementItems"), "front end does not build announcements from race data");
@@ -109,7 +117,10 @@ assertCheck(
 );
 assertCheck(raceDbRaw === siteRaceRaw, "runner race database and site race data are identical");
 assertCheck(
-  pythonConfig.includes("NON_RUNNING_EVENT_KEYWORDS") && sportsNoteScraper.includes("is_running_event") && sportsnetScraper.includes("is_running_event"),
+  pythonConfig.includes("NON_RUNNING_EVENT_KEYWORDS")
+    && sportsNoteScraper.includes("is_running_event")
+    && sportsnetScraper.includes("is_running_event")
+    && twttraScraper.includes("is_running_event"),
   "race scrapers filter non-running events before quality gates"
 );
 assertCheck(contentCandidateScript.includes("function extractMetaDate"), "content crawler extracts source article dates");

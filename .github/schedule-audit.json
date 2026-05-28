@@ -15,7 +15,11 @@
       "path": ".github/workflows/data-refresh.yml",
       "expected_event": "schedule",
       "require_schedule": true,
-      "max_age_minutes": 4320
+      "max_age_minutes": 4320,
+      "max_age_minutes_by_local_weekday": {
+        "3": 430,
+        "5": 430
+      }
     },
     {
       "name": "Collect content candidates",
