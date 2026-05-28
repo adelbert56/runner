@@ -51,6 +51,14 @@ jobs:
               return n * 60 * 1000;
             }
 
+            function localWeekday(date, timeZone) {
+              const weekday = new Intl.DateTimeFormat("en-US", {
+                timeZone,
+                weekday: "short",
+              }).format(date);
+              return { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[weekday];
+            }
+
             async function listWorkflows() {
               const workflows = [];
               let page = 1;
@@ -111,6 +119,15 @@ jobs:
               return `- ${name}: ${flag}（latest=${toIso(createdAt)} age=${ageMin}m event=${event} status=${status} conclusion=${conclusion} url=${url}）`;
             }
 
+            function maxAgeForItem(item) {
+              const base = item.max_age_minutes ?? 24 * 60 + 120;
+              const weekdayRules = item.max_age_minutes_by_local_weekday || null;
+              if (!weekdayRules || typeof weekdayRules !== "object") return base;
+              const timeZone = item.timezone || process.env.TZ || "UTC";
+              const weekday = localWeekday(now, timeZone);
+              return Number(weekdayRules[String(weekday)] ?? base);
+            }
+
             const workflows = await listWorkflows();
             const byName = new Map(workflows.map(w => [w.name, w]));
             const byPath = new Map(workflows.map(w => [w.path, w]));
@@ -129,7 +146,7 @@ jobs:
             for (const item of config.expected_workflows || []) {
               const wf = resolveWorkflow(item);
               const latestRun = wf ? await getLatestRunForWorkflowId(wf.id) : null;
-              const maxAgeMinutes = item.max_age_minutes ?? 24 * 60 + 120;
+              const maxAgeMinutes = maxAgeForItem(item);
               const expectedEvent = item.expected_event ?? null;
               const requireSchedule = item.require_schedule ?? (expectedEvent === "schedule");
               const display = item.name || item.path || "(unnamed workflow)";
