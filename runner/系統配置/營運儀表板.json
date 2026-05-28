@@ -1,27 +1,28 @@
 {
-  "generated_at": "2026-05-27T05:43:26.366Z",
-  "basis_date": "2026-05-27",
+  "generated_at": "2026-05-28T14:09:36.705Z",
+  "basis_date": "2026-05-28",
   "races": {
-    "total": 38,
-    "follow_up_count": 15,
+    "total": 40,
+    "follow_up_count": 17,
     "complete_count": 23,
-    "complete_rate": "61%",
-    "launch_blocking_gap_count": 2,
+    "complete_rate": "57%",
+    "launch_blocking_gap_count": 4,
     "launch_ready_count": 36,
-    "launch_ready_rate": "95%",
+    "launch_ready_rate": "90%",
     "official_direct_count": 24,
-    "official_direct_rate": "63%",
-    "verified_count": 38,
+    "official_direct_rate": "60%",
+    "verified_count": 40,
     "verified_rate": "100%",
     "opened_gap_count": 1,
     "date_anomaly_count": 0,
-    "due_now_count": 2,
+    "due_now_count": 3,
     "monthly_tracking_count": 11,
     "state_counts": {
       "已截止": 6,
       "停辦": 2,
       "報名中": 17,
-      "報名時間未定": 13
+      "報名時間未定": 13,
+      "尚未開報": 2
     }
   },
   "content": {
@@ -201,26 +202,26 @@
     ]
   },
   "platform_stability": {
-    "stable_count": 7,
-    "watch_count": 0,
+    "stable_count": 6,
+    "watch_count": 1,
     "weak_count": 1,
     "items": [
       {
         "platform": "運動筆記",
-        "total": 15,
+        "total": 16,
         "official_direct": 1,
-        "verified": 15,
-        "missing": 13,
+        "verified": 16,
+        "missing": 14,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 2,
         "sample_races": [
           "2026 KOF拳皇公益主題路跑",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
           "仁愛長庚合作聯盟醫院2026永慶盃路跑"
         ],
         "complete_rate": "13%",
-        "official_direct_rate": "7%",
+        "official_direct_rate": "6%",
         "verified_rate": "100%",
         "score": 46,
         "status": "需補強"
@@ -345,21 +346,22 @@
       },
       {
         "platform": "Focusline",
-        "total": 1,
+        "total": 2,
         "official_direct": 1,
-        "verified": 1,
-        "missing": 0,
+        "verified": 2,
+        "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
-          "夏日馬拉松 - 南投埔里場"
+          "夏日馬拉松 - 南投埔里場",
+          "2027南投縣仁愛鄉原住民三鐵挑戰賽"
         ],
-        "complete_rate": "100%",
-        "official_direct_rate": "100%",
+        "complete_rate": "50%",
+        "official_direct_rate": "50%",
         "verified_rate": "100%",
-        "score": 100,
-        "status": "穩定"
+        "score": 70,
+        "status": "可用需觀察"
       }
     ]
   }
