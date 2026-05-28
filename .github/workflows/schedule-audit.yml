@@ -119,7 +119,7 @@ jobs:
               const event = latestRun.event ?? "unknown";
               const url = latestRun.html_url ?? "(no url)";
               const okAge = ageMin <= maxAgeMinutes;
-              const okConclusion = conclusion === "success" || conclusion === null;
+              const okConclusion = conclusion === "success" || conclusion === "in_progress";
               const okStatus = status === "completed" || status === "in_progress";
               const okEvent = expectedEvent ? event === expectedEvent : true;
               const ok = okAge && okConclusion && okStatus && okEvent;
