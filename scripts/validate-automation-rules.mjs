@@ -183,6 +183,10 @@ assertCheck(
   "race data backup schedules retry until a recent success exists"
 );
 assertCheck(
+  !dataWorkflow.includes('Primary schedule trigger ($SCHEDULE); continuing.'),
+  "race data primary schedule also skips when a recent refresh already exists"
+);
+assertCheck(
   contentWorkflow.includes('cron: "17 1 * * 1,3,5"') && contentWorkflow.includes('cron: "37 2 * * 1,3,5"') && contentWorkflow.includes('cron: "17 4 * * 1,3,5"') && contentWorkflow.includes('cron: "47 5 * * 1,3,5"'),
   "content workflow has staggered Monday/Wednesday/Friday primary and backup schedules"
 );
