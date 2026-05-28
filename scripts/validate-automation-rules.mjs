@@ -107,6 +107,10 @@ assertCheck(
     && raceScheduleAudit?.max_age_minutes_by_local_weekday?.["5"] <= 430,
   "schedule audit catches missed Tuesday/Thursday race data windows by next Taipei morning"
 );
+assertCheck(
+  raceScheduleAudit?.recovery_events?.includes("workflow_dispatch"),
+  "schedule audit accepts manual race data recovery runs in the same freshness window"
+);
 assertCheck(httpClientScript.includes("522") && httpClientScript.includes("Retry-After"), "HTTP scraper retry policy handles Cloudflare/transient failures");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
 assertCheck(!appJs.includes("function buildAnnouncementItems"), "front end does not build announcements from race data");

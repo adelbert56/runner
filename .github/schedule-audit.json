@@ -16,6 +16,7 @@
       "expected_event": "schedule",
       "require_schedule": true,
       "max_age_minutes": 4320,
+      "recovery_events": ["workflow_dispatch"],
       "max_age_minutes_by_local_weekday": {
         "3": 430,
         "5": 430
