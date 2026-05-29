@@ -3274,10 +3274,12 @@ async function init() {
   setupResponsiveDefaults();
   setupDurationPickers();
   bindEvents();
-  await loadPublishedContent();
-  await loadAnnouncements();
-  await loadMessageCloud();
-  await loadAutomationHealth();
+  await Promise.allSettled([
+    loadPublishedContent(),
+    loadAnnouncements(),
+    loadMessageCloud(),
+    loadAutomationHealth(),
+  ]);
   initContentSorting();
   loadPlanSettings();
   syncDurationPickersFromInputs();
