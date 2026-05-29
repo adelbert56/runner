@@ -10,7 +10,16 @@ function firstSeenDate(race) {
   return String(race.first_seen_at || race.scraped_at || todayInTaipei()).slice(0, 10);
 }
 
-const races = JSON.parse(await readFile(source, "utf-8"));
+let races;
+try {
+  races = JSON.parse(await readFile(source, "utf-8"));
+} catch {
+  console.warn(`Source not found: ${source}. Writing empty races.json.`);
+  await mkdir(dirname(target), { recursive: true });
+  await writeFile(target, "[]\n", "utf-8");
+  process.exit(0);
+}
+
 const normalized = races.map((race) => ({
   ...race,
   first_seen_at: firstSeenDate(race),

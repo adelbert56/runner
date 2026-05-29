@@ -106,13 +106,19 @@ function rotateDaily(items, count) {
   return Array.from({ length: count }, (_, index) => items[(start + index) % items.length]);
 }
 
-const [racesRaw, quipsRaw] = await Promise.all([
-  readFile(paths.races, "utf-8"),
-  readFile(paths.quips, "utf-8"),
-]);
+async function readJson(path, fallback) {
+  try {
+    return JSON.parse(await readFile(path, "utf-8"));
+  } catch {
+    console.warn(`Missing or invalid: ${path}. Using fallback.`);
+    return fallback;
+  }
+}
 
-const races = JSON.parse(racesRaw);
-const quips = JSON.parse(quipsRaw);
+const [races, quips] = await Promise.all([
+  readJson(paths.races, []),
+  readJson(paths.quips, { quips: [] }),
+]);
 const raceItems = new Map();
 
 function addRaceAnnouncement(race, type, detail) {

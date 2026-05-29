@@ -246,7 +246,10 @@ async function main() {
     readJson(paths.editorialContent, []),
     readJson(paths.publishedContent, { items: [] }),
   ]);
-  const html = await readFile(paths.siteHtml, "utf-8");
+  const html = await readFile(paths.siteHtml, "utf-8").catch(() => {
+    console.warn(`Missing: ${paths.siteHtml}. Card counts will use published data only.`);
+    return "";
+  });
 
   const officialDirectCount = races.filter(isOfficialDirect).length;
   const verifiedCount = races.filter((race) => hasText(race.verified_at)).length;
