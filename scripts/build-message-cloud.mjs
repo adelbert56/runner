@@ -143,6 +143,24 @@ function mergeMessage(bucket, text, weight, origin = "issue") {
   bucket.set(key, current);
 }
 
+const maxCommentList = 15;
+
+function buildCommentList(comments) {
+  return comments
+    .filter((c) => c.user?.type !== "Bot")
+    .filter((c) => !blockedPatterns.some((p) => p.test(c.body || "")))
+    .map((c) => ({ ...c, body: cleanLine(c.body).slice(0, 300).trim() }))
+    .filter((c) => c.body)
+    .slice(-maxCommentList)
+    .reverse()
+    .map((c) => ({
+      author: c.user?.login || "anonymous",
+      avatar_url: c.user?.avatar_url ? `${c.user.avatar_url}${c.user.avatar_url.includes("?") ? "&" : "?"}s=40` : "",
+      created_at: c.created_at || "",
+      body: c.body,
+    }));
+}
+
 function buildCloud(comments) {
   const bucket = new Map();
   const authorCounts = new Map();
@@ -199,6 +217,7 @@ function nextUpdateLabel(now = new Date()) {
 
 const comments = await fetchIssueComments();
 const messages = buildCloud(comments);
+const commentList = buildCommentList(comments);
 const output = {
   generated_at: todayInTaipei(),
   source: "github_issue",
@@ -213,7 +232,8 @@ const output = {
     seed_messages_retire_as_issue_messages_grow: true,
   },
   messages: messages.length ? messages : await readExistingMessages(),
+  comments: commentList,
 };
 
 await writeFile(outputPath, `${JSON.stringify(output, null, 2)}\n`, "utf8");
-console.log(`Built ${output.messages.length} message cloud items from issue #${issueNumber}.`);
+console.log(`Built ${output.messages.length} message cloud items and ${output.comments.length} comment list entries from issue #${issueNumber}.`);

@@ -6,7 +6,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
-const DATA_VERSION = "20260525-message-cloud9";
+const DATA_VERSION = "20260529-message-list1";
 const TODAY = getTodayString();
 
 const state = {
@@ -45,6 +45,7 @@ const els = {
   announcementBoard: document.querySelector("#announcement-board"),
   messageCloud: document.querySelector("#message-cloud"),
   messageCloudUpdated: document.querySelector("#message-cloud-updated"),
+  messageList: document.querySelector("#message-list"),
   automationHealth: document.querySelector("#automation-health"),
   search: document.querySelector("#race-search"),
   raceList: document.querySelector("#race-list"),
@@ -1542,6 +1543,54 @@ function renderMessageCloud(data = { messages: [] }) {
         })
         .join("")
     : `<div class="empty-state">目前沒有留言。</div>`;
+
+  if (els.messageList) {
+    const comments = Array.isArray(data.comments) ? data.comments : [];
+    if (comments.length === 0) {
+      els.messageList.innerHTML = `<div class="message-list-empty">還沒有留言，<a href="${escapeHtml(data.source_url || "")}" target="_blank" rel="noreferrer">來留下第一則</a>！</div>`;
+    } else {
+      els.messageList.innerHTML = `
+        <div class="message-list-header">最新留言</div>
+        <div class="message-list-items">
+          ${comments.map((c) => {
+            const ago = relativeTime(c.created_at);
+            const avatarHtml = c.avatar_url
+              ? `<img class="message-list-avatar" src="${escapeHtml(c.avatar_url)}" alt="${escapeHtml(c.author)}" loading="lazy" width="36" height="36">`
+              : `<span class="message-list-avatar message-list-avatar-fallback">${escapeHtml((c.author || "?")[0].toUpperCase())}</span>`;
+            const bodyLines = escapeHtml(c.body || "").replace(/\n/g, "<br>");
+            return `
+              <article class="message-list-item">
+                ${avatarHtml}
+                <div class="message-list-content">
+                  <div class="message-list-meta">
+                    <span class="message-list-author">${escapeHtml(c.author || "匿名")}</span>
+                    <span class="message-list-time">${escapeHtml(ago)}</span>
+                  </div>
+                  <p class="message-list-body">${bodyLines}</p>
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+  }
+}
+
+function relativeTime(isoString) {
+  if (!isoString) return "";
+  const diff = Date.now() - new Date(isoString).getTime();
+  if (!Number.isFinite(diff)) return "";
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 2) return "剛剛";
+  if (minutes < 60) return `${minutes} 分鐘前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} 小時前`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} 天前`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} 個月前`;
+  return `${Math.floor(months / 12)} 年前`;
 }
 
 function renderAutomationHealth(data = { workflows: [] }) {

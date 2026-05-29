@@ -601,6 +601,106 @@ h1 {
   justify-self: start;
 }
 
+.message-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(31, 42, 36, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.78);
+}
+
+.message-list-header {
+  color: var(--ink);
+  font-size: 0.96rem;
+  font-weight: 950;
+}
+
+.message-list-items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.message-list-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 88px;
+  padding: 12px;
+  border: 1px solid rgba(31, 42, 36, 0.1);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.message-list-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: #e7f2eb;
+}
+
+.message-list-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green-dark);
+  font-size: 0.9rem;
+  font-weight: 950;
+}
+
+.message-list-content {
+  min-width: 0;
+}
+
+.message-list-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.message-list-author {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-list-time {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.message-list-body {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 780;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.message-list-empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.message-list-empty a {
+  color: var(--green-dark);
+  font-weight: 950;
+}
+
 .automation-health {
   display: grid;
   gap: 14px;
@@ -4143,6 +4243,14 @@ h3 {
   .message-cloud-left-soft,
   .message-cloud-right-soft {
     transform: none;
+  }
+
+  .message-list {
+    padding: 12px;
+  }
+
+  .message-list-items {
+    grid-template-columns: 1fr;
   }
 
   .automation-health {
