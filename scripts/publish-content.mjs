@@ -70,6 +70,12 @@ function parseDate(value) {
   return normalizeIsoDate(value) || today;
 }
 
+function stableContentDate(item) {
+  return normalizeIsoDate(item.article_date)
+    || normalizeIsoDate(item.first_seen_at)
+    || normalizeIsoDate(item.checked_at);
+}
+
 function withinDays(value, windowDays) {
   const date = parseTaipeiDate(normalizeIsoDate(value));
   if (!date) return false;
@@ -266,13 +272,11 @@ function toPublishedItem(item) {
   const type = inferType(item);
   const normalizedUrl = normalizeUrl(item.url);
   const title = String(item.title || "").trim();
-  const normalizedArticleDate = normalizeIsoDate(item.article_date);
-  const normalizedCheckedAt = normalizeIsoDate(item.checked_at);
   return {
     id: `${type}-${slugify(normalizedUrl || title)}`,
     type,
     title,
-    date: parseDate(normalizedArticleDate || normalizedCheckedAt),
+    date: parseDate(stableContentDate(item)),
     source: item.source,
     category: type === "shoe" ? inferShoeCategory(title) : inferNewsCategory(title, item.description),
     summary: summarize(item, type),
@@ -301,8 +305,22 @@ function previousToPublishedItem(item) {
     url: item.url,
     score: Math.max(MIN_SCORE[type], Number(item.score || MIN_SCORE[type]) - 1),
     source_origin: "previous_published",
-    published_at: today,
+    published_at: normalizeIsoDate(item.published_at) || today,
     publish_status: "published",
+  };
+}
+
+function mergeArchiveFields(item, archiveByUrl) {
+  const archived = archiveByUrl.get(normalizeUrl(item.url)) || {};
+  const articleDate = normalizeIsoDate(item.article_date)
+    ? item.article_date
+    : (normalizeIsoDate(archived.article_date) ? archived.article_date : "");
+  return {
+    ...archived,
+    ...item,
+    article_date: articleDate,
+    first_seen_at: item.first_seen_at || archived.first_seen_at || item.checked_at || today,
+    last_seen_at: item.last_seen_at || archived.last_seen_at || item.checked_at || today,
   };
 }
 
@@ -406,14 +424,18 @@ async function main() {
   const previousContent = await readJson(outputPath, { items: [] });
   const archiveRaw = await readJson(candidatesArchivePath, { items: [] });
   const archiveItems = Array.isArray(archiveRaw?.items) ? archiveRaw.items : (Array.isArray(archiveRaw) ? archiveRaw : []);
+  const archiveByUrl = new Map(
+    archiveItems.map((item) => [normalizeUrl(item.url), item]).filter(([key]) => key),
+  );
   const normalized = raw
-    .filter((item) => withinDays(item.article_date, PUBLISH_WINDOW_DAYS) || (!item.article_date && withinDays(item.checked_at, PUBLISH_WINDOW_DAYS)))
+    .map((item) => mergeArchiveFields(item, archiveByUrl))
+    .filter((item) => withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map(toPublishedItem);
   const previousInventory = (Array.isArray(previousContent.items) ? previousContent.items : [])
     .filter((item) => withinDays(item.date || item.published_at, PUBLISH_WINDOW_DAYS))
     .map(previousToPublishedItem);
   const archiveInventory = archiveItems
-    .filter((item) => item.article_date && withinRetention(item, ARCHIVE_RETENTION_DAYS) && withinDays(item.article_date, PUBLISH_WINDOW_DAYS))
+    .filter((item) => withinRetention(item, ARCHIVE_RETENTION_DAYS) && withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map((item) => ({ ...item, source_origin: "archive" }))
     .map(toPublishedItem)
     .map((item) => ({
@@ -421,7 +443,7 @@ async function main() {
       score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 1),
     }));
   const editorialInventory = editorial
-    .filter((item) => withinDays(item.article_date || item.checked_at, PUBLISH_WINDOW_DAYS))
+    .filter((item) => withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map(toPublishedItem)
     .map((item) => ({
     ...item,

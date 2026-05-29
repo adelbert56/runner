@@ -140,8 +140,9 @@ assertCheck(contentCandidateScript.includes("article_date"), "content candidates
 assertCheck(
   publishContentScript.includes("normalizeIsoDate(item.article_date)")
     && publishContentScript.includes("normalizeIsoDate(item.checked_at)")
-    && publishContentScript.includes("parseDate(normalizedArticleDate || normalizedCheckedAt)"),
-  "published content dates prefer source article date before checked date"
+    && publishContentScript.includes("normalizeIsoDate(item.first_seen_at)")
+    && publishContentScript.includes("date: parseDate(stableContentDate(item))"),
+  "published content dates prefer source article date before stable first-seen date"
 );
 assertCheck(
   publishContentScript.includes("PUBLISH_WINDOW_DAYS"),
