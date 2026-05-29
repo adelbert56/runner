@@ -166,9 +166,7 @@ jobs:
         if: steps.refresh-guard.outputs.should_run == 'true'
         id: commit
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- \
+          bash .github/scripts/commit-generated.sh "chore(data): refresh race data" \
             "runner/賽事/賽事資料庫.json" \
             "runner/賽事/中部賽事列表.md" \
             "runner/賽事/爬蟲日誌.md" \
@@ -191,15 +189,6 @@ jobs:
             "site/data/races.json" \
             "site/data/announcements.json" \
             "site/data/automation-health.json"
-          if git diff --cached --quiet; then
-            echo "No race data changes to commit."
-            echo "did_push=false" >> "$GITHUB_OUTPUT"
-          else
-            git commit -m "chore(data): refresh race data"
-            git pull --rebase --autostash
-            git push
-            echo "did_push=true" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Trigger Pages deploy
         if: steps.refresh-guard.outputs.should_run == 'true' && steps.commit.outputs.did_push == 'true'

@@ -99,9 +99,7 @@ jobs:
       - name: Commit content candidates
         if: steps.refresh-guard.outputs.should_run == 'true'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- \
+          bash .github/scripts/commit-generated.sh "chore(content): refresh running content candidates" \
             "runner/內容/候選內容.json" \
             "runner/內容/候選內容庫.json" \
             "runner/內容/候選內容報告.md" \
@@ -113,13 +111,6 @@ jobs:
             "runner/系統配置/營運儀表板.md" \
             "runner/系統配置/營運儀表板.json" \
             "site/data/automation-health.json"
-          if git diff --cached --quiet; then
-            echo "No content changes to commit."
-          else
-            git commit -m "chore(content): refresh running content candidates"
-            git pull --rebase --autostash
-            git push
-          fi
 
       - name: Setup Pages
         if: steps.refresh-guard.outputs.should_run == 'true'
