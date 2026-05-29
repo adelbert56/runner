@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-28",
+  "generated_at": "2026-05-29",
   "source": "github_issue",
   "issue_number": 34,
   "source_url": "https://github.com/adelbert56/runner/issues/34",
-  "next_update_at": "2026-05-29 12:07 Asia/Taipei",
+  "next_update_at": "2026-05-29 18:07 Asia/Taipei",
   "policy": {
     "max_visible_items": 48,
     "refresh_schedule": "每日約 12:00、18:00 Asia/Taipei",
@@ -116,6 +116,38 @@
       "text": "補水不是灌水",
       "weight": 2,
       "origin": "seed"
+    }
+  ],
+  "comments": [
+    {
+      "author": "adelbert56",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104144887?v=4&s=40",
+      "created_at": "2026-05-25T07:57:28Z",
+      "body": "ε=ε=ε=┌(； ・＿・)┘"
+    },
+    {
+      "author": "adelbert56",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104144887?v=4&s=40",
+      "created_at": "2026-05-25T07:57:02Z",
+      "body": "你不需要很厲害才開始，你要開始才能變得厲害~"
+    },
+    {
+      "author": "adelbert56",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104144887?v=4&s=40",
+      "created_at": "2026-05-25T07:56:49Z",
+      "body": "跑步不難，難的是穿上跑鞋出門的那一刻!"
+    },
+    {
+      "author": "adelbert56",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104144887?v=4&s=40",
+      "created_at": "2026-05-25T07:55:59Z",
+      "body": "跑就對了問這麼多幹嘛!"
+    },
+    {
+      "author": "adelbert56",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104144887?v=4&s=40",
+      "created_at": "2026-05-25T07:32:32Z",
+      "body": "這裡是留言板嗎?!"
     }
   ]
 }
