@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-29T05:41:02.512Z",
+  "generated_at": "2026-05-29T05:47:13.780Z",
   "basis_date": "2026-05-29",
   "races": {
     "total": 40,
@@ -51,7 +51,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 14,
+        "consecutive_failures": 15,
         "base_priority": 5,
         "effective_priority": 4,
         "error": "403 Forbidden"
@@ -103,7 +103,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 5,
+        "consecutive_failures": 6,
         "base_priority": 3,
         "effective_priority": 2,
         "error": "fetch failed"
@@ -140,12 +140,12 @@
         "url": "https://kenlu.net/tag/running/",
         "source_type": "跑鞋評測 / 裝備情報",
         "status": "可用需觀察",
-        "ok": false,
+        "ok": true,
         "candidate_count": 0,
-        "consecutive_failures": 1,
+        "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 3,
-        "error": "The operation was aborted due to timeout"
+        "error": ""
       },
       {
         "checked_at": "2026-05-29",
@@ -153,12 +153,12 @@
         "url": "https://kenlu.net/tag/trail-run/",
         "source_type": "越野跑鞋 / 越野訓練",
         "status": "可用需觀察",
-        "ok": false,
+        "ok": true,
         "candidate_count": 0,
-        "consecutive_failures": 1,
+        "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 3,
-        "error": "The operation was aborted due to timeout"
+        "error": ""
       },
       {
         "checked_at": "2026-05-29",
