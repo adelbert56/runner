@@ -24,6 +24,12 @@ function includesInOrder(content, labels) {
   return true;
 }
 
+function workflowCommitsGeneratedFiles(workflow, files) {
+  return workflow.includes("bash .github/scripts/commit-generated.sh")
+    && commitGeneratedScript.includes("git add --")
+    && files.every((file) => workflow.includes(file));
+}
+
 const [
   packageJsonRaw,
   indexHtml,
@@ -53,6 +59,7 @@ const [
   ciWorkflow,
   scheduleAuditConfigRaw,
   httpClientScript,
+  commitGeneratedScript,
 ] = await Promise.all([
   text("package.json"),
   text("site/index.html"),
@@ -82,6 +89,7 @@ const [
   text(".github/workflows/ci.yml"),
   text(".github/schedule-audit.json"),
   text("scripts/http_client.py"),
+  text(".github/scripts/commit-generated.sh"),
 ]);
 
 const packageJson = JSON.parse(packageJsonRaw);
@@ -223,15 +231,28 @@ assertCheck(dataWorkflow.includes("site/data/automation-health.json") && content
 assertCheck(!dataWorkflow.includes("git-auto-commit-action") && !weatherWorkflow.includes("git-auto-commit-action"), "race workflows avoid pattern-based auto-commit action");
 assertCheck(!contentWorkflow.includes("git-auto-commit-action") && !quipsWorkflow.includes("git-auto-commit-action"), "content workflows avoid pattern-based auto-commit action");
 assertCheck(
-  dataWorkflow.includes("git add --")
-    && dataWorkflow.includes('"runner/系統配置/營運儀表板.md"')
-    && dataWorkflow.includes('"runner/賽事/爬蟲最後狀態.json"'),
+  workflowCommitsGeneratedFiles(dataWorkflow, [
+    '"runner/系統配置/營運儀表板.md"',
+    '"runner/賽事/爬蟲最後狀態.json"',
+  ]),
   "race data workflow stages dashboard reports explicitly"
 );
-assertCheck(weatherWorkflow.includes("git add --") && weatherWorkflow.includes('"site/data/races.json"'), "weather workflow stages site data explicitly");
-assertCheck(contentWorkflow.includes("git add --") && contentWorkflow.includes('"runner/系統配置/營運儀表板.md"'), "content workflow stages dashboard reports explicitly");
-assertCheck(quipsWorkflow.includes("git add --") && quipsWorkflow.includes('"site/data/announcements.json"'), "runner quips workflow stages announcement data explicitly");
-assertCheck(messageCloudWorkflow.includes("git add --") && messageCloudWorkflow.includes('"site/data/message-cloud.json"'), "message cloud workflow stages site data explicitly");
+assertCheck(
+  workflowCommitsGeneratedFiles(weatherWorkflow, ['"site/data/races.json"']),
+  "weather workflow stages site data explicitly"
+);
+assertCheck(
+  workflowCommitsGeneratedFiles(contentWorkflow, ['"runner/系統配置/營運儀表板.md"']),
+  "content workflow stages dashboard reports explicitly"
+);
+assertCheck(
+  workflowCommitsGeneratedFiles(quipsWorkflow, ['"site/data/announcements.json"']),
+  "runner quips workflow stages announcement data explicitly"
+);
+assertCheck(
+  workflowCommitsGeneratedFiles(messageCloudWorkflow, ['"site/data/message-cloud.json"']),
+  "message cloud workflow stages site data explicitly"
+);
 assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site/data/races.json'), "Pages deploy publishes canonical race database");
 assertCheck(pagesWorkflow.includes("actions/setup-node@v6"), "Pages deploy installs Node before derived data builds");
 assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");
