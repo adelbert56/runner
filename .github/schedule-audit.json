@@ -8,7 +8,8 @@
       "path": ".github/workflows/weather-refresh.yml",
       "expected_event": "schedule",
       "require_schedule": true,
-      "max_age_minutes": 1560
+      "max_age_minutes": 1560,
+      "recovery_events": ["workflow_dispatch"]
     },
     {
       "name": "Refresh race data",
@@ -27,14 +28,16 @@
       "path": ".github/workflows/content-candidates.yml",
       "expected_event": "schedule",
       "require_schedule": true,
-      "max_age_minutes": 2400
+      "max_age_minutes": 2400,
+      "recovery_events": ["workflow_dispatch"]
     },
     {
       "name": "Refresh runner quips",
       "path": ".github/workflows/runner-quips-refresh.yml",
       "expected_event": "schedule",
       "require_schedule": true,
-      "max_age_minutes": 10560
+      "max_age_minutes": 10560,
+      "recovery_events": ["workflow_dispatch"]
     },
     {
       "name": "CI",

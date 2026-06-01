@@ -55,6 +55,7 @@ const [
   contentWorkflow,
   quipsWorkflow,
   messageCloudWorkflow,
+  automationOrchestratorWorkflow,
   pagesWorkflow,
   ciWorkflow,
   scheduleAuditConfigRaw,
@@ -85,6 +86,7 @@ const [
   text(".github/workflows/content-candidates.yml"),
   text(".github/workflows/runner-quips-refresh.yml"),
   text(".github/workflows/message-cloud-refresh.yml"),
+  text(".github/workflows/automation-orchestrator.yml"),
   text(".github/workflows/pages.yml"),
   text(".github/workflows/ci.yml"),
   text(".github/schedule-audit.json"),
@@ -118,6 +120,16 @@ assertCheck(
 assertCheck(
   raceScheduleAudit?.recovery_events?.includes("workflow_dispatch"),
   "schedule audit accepts manual race data recovery runs in the same freshness window"
+);
+assertCheck(
+  scheduleAuditConfig.expected_workflows
+    .filter((workflow) => [
+      ".github/workflows/weather-refresh.yml",
+      ".github/workflows/content-candidates.yml",
+      ".github/workflows/runner-quips-refresh.yml",
+    ].includes(workflow.path))
+    .every((workflow) => workflow.recovery_events?.includes("workflow_dispatch")),
+  "schedule audit accepts orchestrator recovery dispatches for scheduled content/weather workflows"
 );
 assertCheck(httpClientScript.includes("522") && httpClientScript.includes("Retry-After"), "HTTP scraper retry policy handles Cloudflare/transient failures");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
@@ -179,8 +191,12 @@ assertCheck(
   "weather workflow uses staggered daily primary and backup schedules"
 );
 assertCheck(
-  weatherWorkflow.includes("Check recent weather refresh guard") && weatherWorkflow.includes("--status success"),
-  "weather backup schedules retry until a recent success exists"
+  weatherWorkflow.includes("Check recent weather refresh guard")
+    && weatherWorkflow.includes("--json databaseId,createdAt,status,conclusion")
+    && weatherWorkflow.includes('.conclusion == "success"')
+    && weatherWorkflow.includes('.status == "in_progress"')
+    && weatherWorkflow.includes('.status == "queued"'),
+  "weather schedule slots skip when a recent refresh already exists or is running"
 );
 assertCheck(
   dataWorkflow.includes('cron: "17 10 * * 2,4"') && dataWorkflow.includes('cron: "47 11 * * 2,4"') && dataWorkflow.includes('cron: "17 13 * * 2,4"') && dataWorkflow.includes('cron: "47 15 * * 2,4"'),
@@ -204,20 +220,44 @@ assertCheck(
   "content workflow has staggered Monday/Wednesday/Friday primary and backup schedules"
 );
 assertCheck(
-  contentWorkflow.includes("Check recent content refresh guard") && contentWorkflow.includes("lookback_hours=8") && contentWorkflow.includes("--status success"),
-  "content backup schedules retry until a recent success exists"
+  contentWorkflow.includes("Check recent content refresh guard")
+    && contentWorkflow.includes("lookback_hours=8")
+    && contentWorkflow.includes("--json databaseId,createdAt,status,conclusion")
+    && contentWorkflow.includes('.conclusion == "success"')
+    && contentWorkflow.includes('.status == "in_progress"')
+    && contentWorkflow.includes('.status == "queued"')
+    && !contentWorkflow.includes('Primary schedule trigger ($SCHEDULE); continuing.'),
+  "content schedule slots skip when a recent refresh already exists or is running"
 );
 assertCheck(
   quipsWorkflow.includes('cron: "23 2 * * 1"') && quipsWorkflow.includes('cron: "53 3 * * 1"') && quipsWorkflow.includes('cron: "23 5 * * 1"'),
   "runner quips workflow has staggered Monday primary and backup schedules"
 );
 assertCheck(
-  quipsWorkflow.includes("Check recent quips refresh guard") && quipsWorkflow.includes("--status success"),
-  "runner quips backup schedules retry until a recent success exists"
+  quipsWorkflow.includes("Check recent quips refresh guard")
+    && quipsWorkflow.includes("--json databaseId,createdAt,status,conclusion")
+    && quipsWorkflow.includes('.conclusion == "success"')
+    && quipsWorkflow.includes('.status == "in_progress"')
+    && quipsWorkflow.includes('.status == "queued"')
+    && !quipsWorkflow.includes('Primary schedule trigger ($SCHEDULE); continuing.'),
+  "runner quips schedule slots skip when a recent refresh already exists or is running"
 );
 assertCheck(
   messageCloudWorkflow.includes('cron: "7 4 * * *"') && messageCloudWorkflow.includes('cron: "7 10 * * *"') && messageCloudWorkflow.includes('MESSAGE_CLOUD_ISSUE_NUMBER: "34"'),
   "message cloud workflow refreshes the GitHub issue source twice daily"
+);
+assertCheck(
+  automationOrchestratorWorkflow.includes('cron: "*/30 * * * *"')
+    && automationOrchestratorWorkflow.includes("workflow_run:")
+    && automationOrchestratorWorkflow.includes("node scripts/automation-orchestrator.mjs"),
+  "automation orchestrator runs as a high-frequency heartbeat and workflow-run backfill"
+);
+assertCheck(
+  automationOrchestratorWorkflow.includes("actions: write")
+    && automationOrchestratorWorkflow.includes("Refresh runner quips")
+    && automationOrchestratorWorkflow.includes("Collect content candidates")
+    && automationOrchestratorWorkflow.includes("Refresh race data"),
+  "automation orchestrator can dispatch missed runner quips, content, and race data workflows"
 );
 assertCheck(
   messageCloudWorkflow.includes("issues: read") && messageCloudWorkflow.includes("npm run message-cloud:build"),
@@ -266,6 +306,7 @@ for (const [name, workflow] of [
   ["content", contentWorkflow],
   ["runner quips", quipsWorkflow],
   ["message cloud", messageCloudWorkflow],
+  ["automation orchestrator", automationOrchestratorWorkflow],
   ["pages", pagesWorkflow],
 ]) {
   assertCheck(workflow.includes('FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"'), `${name} workflow opts into Node 24 action runtime`);

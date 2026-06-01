@@ -43,17 +43,9 @@ jobs:
             exit 0
           fi
 
-          primary_cron="23 23 * * *"
-
-          if [ "$SCHEDULE" = "$primary_cron" ]; then
-            echo "Primary schedule trigger ($SCHEDULE); continuing."
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           lookback_hours=6
-          runs_json="$(gh run list --repo "$REPOSITORY" --workflow weather-refresh.yml --branch main --status success --limit 20 --json databaseId,createdAt)"
-          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600))] | length')"
+          runs_json="$(gh run list --repo "$REPOSITORY" --workflow weather-refresh.yml --branch main --limit 20 --json databaseId,createdAt,status,conclusion)"
+          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" --argjson lookback "$lookback_hours" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= ($lookback * 3600)) | select((.conclusion == "success") or (.status == "in_progress") or (.status == "queued"))] | length')"
 
           if [ "$prior_count" -gt 0 ]; then
             echo "Weather workflow already succeeded within the last ${lookback_hours} hours; skipping backup trigger ($SCHEDULE)."
