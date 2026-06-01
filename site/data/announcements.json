@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-31",
+  "generated_at": "2026-06-01",
   "retention": {
     "closed_notice_days": 14,
     "daily_quips": 2
@@ -58,39 +58,26 @@
       ],
       "details": [
         "2026/05/28 收到",
-        "06/08 開放報名｜倒數 8 天"
+        "06/08 開放報名｜倒數 7 天"
       ],
       "race_date": "2026-10-25",
       "first_seen_at": "2026-05-28"
     },
     {
-      "id": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
-      "race_key": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
-      "title": "07/05 臺中市｜第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
+      "id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
+      "race_key": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
+      "title": "09/04 南投縣｜2026東城盃合歡山越野馬拉松",
       "types": [
-        "ending"
+        "closing"
       ],
       "details": [
-        "05/31 截止｜剩 0 天"
+        "06/15 截止｜剩 14 天"
       ],
-      "race_date": "2026-07-05",
+      "race_date": "2026-09-04",
       "first_seen_at": "2026-05-16"
     },
     {
-      "id": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
-      "race_key": "a23890fd-56ab-4dba-82be-61d2a0fe5df8",
-      "title": "11/01 南投縣｜2026日月潭環湖馬拉松",
-      "types": [
-        "ending"
-      ],
-      "details": [
-        "05/31 截止｜剩 0 天"
-      ],
-      "race_date": "2026-11-01",
-      "first_seen_at": "2026-05-16"
-    },
-    {
-      "id": "quip-2026-05-31-0",
+      "id": "quip-2026-06-01-0",
       "title": "配速可以慢，按下報名的手速不要太慢。",
       "types": [
         "talk"
@@ -100,7 +87,7 @@
       ]
     },
     {
-      "id": "quip-2026-05-31-1",
+      "id": "quip-2026-06-01-1",
       "title": "跑步最難的不是上坡，是出門前那五分鐘。",
       "types": [
         "talk"
