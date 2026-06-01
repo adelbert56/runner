@@ -1,0 +1,49 @@
+name: Automation orchestrator
+
+on:
+  workflow_dispatch:
+  schedule:
+    # High-frequency heartbeat. If one GitHub cron is delayed or skipped,
+    # the next heartbeat still backfills due automations in the same local window.
+    - cron: "*/30 * * * *"
+  workflow_run:
+    workflows:
+      - Refresh race weather
+      - Refresh race data
+      - Collect content candidates
+      - Refresh runner quips
+      - Refresh message cloud
+      - CI
+      - Deploy static site
+    types:
+      - completed
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: automation-orchestrator
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  orchestrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Dispatch missed due automations
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          ORCHESTRATOR_BRANCH: main
+        run: node scripts/automation-orchestrator.mjs
