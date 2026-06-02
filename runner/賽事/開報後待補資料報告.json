@@ -13,7 +13,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-05-28",
+      "next_check_date": "2026-06-02",
       "cadence": "weekly",
       "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額。"
     },
@@ -53,6 +53,90 @@
     "suggested_override": {
       "race_name": "2026 HOT DOG Trail 台中系列活動-熱血接力賽",
       "race_date": "2026-08-30",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "86139039-c643-4bf9-ad9f-e66ca5239784",
+    "race_name": "2026鹿港馬拉松",
+    "race_date": "2026-11-15",
+    "race_county": "彰化縣",
+    "registration_opens_at": "2026-06-01",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "priority_score": 17,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-06-02",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、報名截止時間、精確地點、各距離開跑時間、主辦單位、費用、名額。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "precise_location",
+        "label": "精確地點",
+        "severity": "medium",
+        "hint": "補 venue 或 start_location，不要只到縣市。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "organizer",
+        "label": "主辦單位",
+        "severity": "medium",
+        "hint": "補 organizer 或 host。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12934",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE"
+    },
+    "suggested_override": {
+      "race_name": "2026鹿港馬拉松",
+      "race_date": "2026-11-15",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",

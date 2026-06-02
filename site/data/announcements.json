@@ -53,15 +53,54 @@
       "race_key": "027109af-8571-4410-9a36-918ecc9d4a3f",
       "title": "10/25 臺中市｜2026 海綿寶寶人生馬拉松-人生市場謎-臺中場",
       "types": [
-        "new",
-        "opening"
+        "new"
       ],
       "details": [
-        "2026/05/28 收到",
-        "06/08 開放報名｜倒數 6 天"
+        "2026/05/28 收到"
       ],
       "race_date": "2026-10-25",
       "first_seen_at": "2026-05-28"
+    },
+    {
+      "id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
+      "race_key": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
+      "title": "11/08 彰化縣｜2026台灣米倉田中馬拉松",
+      "types": [
+        "opening",
+        "closing"
+      ],
+      "details": [
+        "06/03 開放報名｜倒數 1 天",
+        "06/15 截止｜剩 13 天"
+      ],
+      "race_date": "2026-11-08",
+      "first_seen_at": "2026-05-16"
+    },
+    {
+      "id": "205c284e-77bf-4224-8cda-79cd7bd819a9",
+      "race_key": "205c284e-77bf-4224-8cda-79cd7bd819a9",
+      "title": "12/13 臺中市｜2026母子鱷魚40週年-突破前行馬拉松",
+      "types": [
+        "opening"
+      ],
+      "details": [
+        "06/05 開放報名｜倒數 3 天"
+      ],
+      "race_date": "2026-12-13",
+      "first_seen_at": "2026-05-20"
+    },
+    {
+      "id": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
+      "race_key": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
+      "title": "12/13 臺中市｜母子鱷魚40週年馬拉松",
+      "types": [
+        "opening"
+      ],
+      "details": [
+        "06/05 開放報名｜倒數 3 天"
+      ],
+      "race_date": "2026-12-13",
+      "first_seen_at": "2026-05-16"
     },
     {
       "id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
