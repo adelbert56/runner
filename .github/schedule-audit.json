@@ -50,7 +50,8 @@
       "path": ".github/workflows/pages.yml",
       "expected_event": "push",
       "require_schedule": false,
-      "max_age_minutes": 1560
+      "max_age_minutes": 4320,
+      "recovery_events": ["workflow_dispatch"]
     }
   ]
 }
