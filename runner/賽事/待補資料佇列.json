@@ -13,9 +13,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "weekly",
-      "reason": "距離賽事 110 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 108 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -105,7 +105,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 124 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 122 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -195,7 +195,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 137 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 135 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -270,6 +270,96 @@
     }
   },
   {
+    "race_id": "b861d413-e83b-476d-a325-47c41b83f3ff",
+    "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
+    "race_date": "2026-10-25",
+    "race_county": "彰化縣",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-06-15",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 143 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "precise_location",
+        "label": "精確地點",
+        "severity": "medium",
+        "hint": "補 venue 或 start_location，不要只到縣市。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "organizer",
+        "label": "主辦單位",
+        "severity": "medium",
+        "hint": "補 organizer 或 host。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13075&subtitle=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E+2026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13075&subtitle=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E+2026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13075",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E%202026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
+    },
+    "suggested_override": {
+      "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
+      "race_date": "2026-10-25",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
     "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
     "race_name": "2026國聚慵懶跑者聚樂部",
     "race_date": "2026-11-15",
@@ -285,7 +375,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 166 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 164 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -375,7 +465,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 200 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 198 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -465,7 +555,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 200 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 198 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -555,7 +645,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 229 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 227 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -645,7 +735,7 @@
       "status_label": "未來再查",
       "next_check_date": "2027-06-07",
       "cadence": "future",
-      "reason": "距離賽事 551 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 549 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       {
@@ -735,7 +825,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 166 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 164 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -817,7 +907,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、報名截止時間、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
@@ -901,7 +991,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
@@ -979,7 +1069,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1051,7 +1141,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1123,7 +1213,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1267,7 +1357,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },
@@ -1333,7 +1423,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-02",
+      "next_check_date": "2026-06-04",
       "cadence": "weekly",
       "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額。"
     },
