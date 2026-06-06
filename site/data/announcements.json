@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-05",
+  "generated_at": "2026-06-06",
   "retention": {
     "closed_notice_days": 14,
     "daily_quips": 2
@@ -56,36 +56,10 @@
         "opening"
       ],
       "details": [
-        "06/08 開放報名｜倒數 3 天"
+        "06/08 開放報名｜倒數 2 天"
       ],
       "race_date": "2026-10-25",
       "first_seen_at": "2026-05-28"
-    },
-    {
-      "id": "205c284e-77bf-4224-8cda-79cd7bd819a9",
-      "race_key": "205c284e-77bf-4224-8cda-79cd7bd819a9",
-      "title": "12/13 臺中市｜2026母子鱷魚40週年-突破前行馬拉松",
-      "types": [
-        "opening"
-      ],
-      "details": [
-        "06/05 開放報名｜倒數 0 天"
-      ],
-      "race_date": "2026-12-13",
-      "first_seen_at": "2026-05-20"
-    },
-    {
-      "id": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
-      "race_key": "da2a9c71-fe62-4266-b1ce-5fb122c66411",
-      "title": "12/13 臺中市｜母子鱷魚40週年馬拉松",
-      "types": [
-        "opening"
-      ],
-      "details": [
-        "06/05 開放報名｜倒數 0 天"
-      ],
-      "race_date": "2026-12-13",
-      "first_seen_at": "2026-05-16"
     },
     {
       "id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
@@ -95,7 +69,7 @@
         "closing"
       ],
       "details": [
-        "06/15 截止｜剩 10 天"
+        "06/15 截止｜剩 9 天"
       ],
       "race_date": "2026-09-04",
       "first_seen_at": "2026-05-16"
@@ -108,13 +82,13 @@
         "closing"
       ],
       "details": [
-        "06/15 截止｜剩 10 天"
+        "06/15 截止｜剩 9 天"
       ],
       "race_date": "2026-11-08",
       "first_seen_at": "2026-05-16"
     },
     {
-      "id": "quip-2026-06-05-0",
+      "id": "quip-2026-06-06-0",
       "title": "配速可以慢，按下報名的手速不要太慢。",
       "types": [
         "talk"
@@ -124,7 +98,7 @@
       ]
     },
     {
-      "id": "quip-2026-06-05-1",
+      "id": "quip-2026-06-06-1",
       "title": "跑步最難的不是上坡，是出門前那五分鐘。",
       "types": [
         "talk"
