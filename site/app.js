@@ -2733,19 +2733,26 @@ function formatContentDate(date) {
   return String(date || TODAY).replaceAll("-", ".");
 }
 
+function contentOriginLabel(sourceOrigin, publishedAt, date) {
+  if (sourceOrigin === "editorial") {
+    return "精選";
+  }
+  if (sourceOrigin === "previous_published") {
+    return "庫存";
+  }
+  const ageDays = dateDiffDays(publishedAt || date);
+  return ageDays !== null && ageDays <= 1 ? "新抓到" : "候選";
+}
+
 function contentArticleHtml(item) {
   const type = item.type === "shoe" ? "shoe" : "news";
   const attr = type === "shoe" ? "data-shoe-card" : "data-news-card";
   const category = item.category || (type === "shoe" ? "跑鞋新品" : "跑步新聞");
   const sourceText = item.source ? `${item.source} 來源` : "閱讀來源";
   const sourceOrigin = item.source_origin || "candidate";
-  const originLabel = sourceOrigin === "editorial"
-    ? "精選"
-    : sourceOrigin === "previous_published"
-      ? "庫存"
-      : "新抓到";
+  const originLabel = contentOriginLabel(sourceOrigin, item.published_at, item.date);
   return `
-    <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}" data-source-origin="${escapeHtml(sourceOrigin)}">
+    <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-published-at="${escapeHtml(item.published_at || item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}" data-source-origin="${escapeHtml(sourceOrigin)}">
       <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>
       <div class="content-tag-row">
         <span class="content-tag">${escapeHtml(category)}</span>
