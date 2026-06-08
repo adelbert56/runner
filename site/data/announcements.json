@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-07",
+  "generated_at": "2026-06-08",
   "retention": {
     "closed_notice_days": 14,
     "daily_quips": 2
@@ -56,7 +56,7 @@
         "opening"
       ],
       "details": [
-        "06/08 開放報名｜倒數 1 天"
+        "06/08 開放報名｜倒數 0 天"
       ],
       "race_date": "2026-10-25",
       "first_seen_at": "2026-05-28"
@@ -66,10 +66,10 @@
       "race_key": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
       "title": "09/04 南投縣｜2026東城盃合歡山越野馬拉松",
       "types": [
-        "closing"
+        "ending"
       ],
       "details": [
-        "06/15 截止｜剩 8 天"
+        "06/15 截止｜剩 7 天"
       ],
       "race_date": "2026-09-04",
       "first_seen_at": "2026-05-16"
@@ -79,16 +79,16 @@
       "race_key": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
       "title": "11/08 彰化縣｜2026台灣米倉田中馬拉松",
       "types": [
-        "closing"
+        "ending"
       ],
       "details": [
-        "06/15 截止｜剩 8 天"
+        "06/15 截止｜剩 7 天"
       ],
       "race_date": "2026-11-08",
       "first_seen_at": "2026-05-16"
     },
     {
-      "id": "quip-2026-06-07-0",
+      "id": "quip-2026-06-08-0",
       "title": "配速可以慢，按下報名的手速不要太慢。",
       "types": [
         "talk"
@@ -98,7 +98,7 @@
       ]
     },
     {
-      "id": "quip-2026-06-07-1",
+      "id": "quip-2026-06-08-1",
       "title": "跑步最難的不是上坡，是出門前那五分鐘。",
       "types": [
         "talk"
