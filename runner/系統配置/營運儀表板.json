@@ -1,28 +1,29 @@
 {
-  "generated_at": "2026-06-08T01:37:45.946Z",
-  "basis_date": "2026-06-08",
+  "generated_at": "2026-06-09T10:33:53.879Z",
+  "basis_date": "2026-06-09",
   "races": {
-    "total": 41,
-    "follow_up_count": 18,
+    "total": 43,
+    "follow_up_count": 20,
     "complete_count": 23,
-    "complete_rate": "56%",
-    "launch_blocking_gap_count": 8,
+    "complete_rate": "53%",
+    "launch_blocking_gap_count": 10,
     "launch_ready_count": 33,
-    "launch_ready_rate": "80%",
+    "launch_ready_rate": "77%",
     "official_direct_count": 24,
-    "official_direct_rate": "59%",
-    "verified_count": 41,
+    "official_direct_rate": "56%",
+    "verified_count": 43,
     "verified_rate": "100%",
-    "opened_gap_count": 3,
+    "opened_gap_count": 6,
     "date_anomaly_count": 0,
-    "due_now_count": 8,
+    "due_now_count": 10,
     "monthly_tracking_count": 8,
     "state_counts": {
-      "已截止": 9,
+      "歷史": 1,
       "停辦": 2,
+      "已截止": 8,
       "報名中": 18,
-      "報名時間未定": 11,
-      "尚未開報": 1
+      "報名時間未定": 12,
+      "尚未開報": 2
     }
   },
   "content": {
@@ -210,22 +211,22 @@
     "items": [
       {
         "platform": "運動筆記",
-        "total": 16,
+        "total": 18,
         "official_direct": 1,
-        "verified": 16,
-        "missing": 14,
-        "opened_gap": 2,
+        "verified": 18,
+        "missing": 16,
+        "opened_gap": 4,
         "date_anomaly": 0,
-        "due_now": 5,
+        "due_now": 6,
         "sample_races": [
           "2026 KOF拳皇公益主題路跑",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
           "仁愛長庚合作聯盟醫院2026永慶盃路跑"
         ],
-        "complete_rate": "13%",
+        "complete_rate": "11%",
         "official_direct_rate": "6%",
         "verified_rate": "100%",
-        "score": 46,
+        "score": 45,
         "status": "需補強"
       },
       {
@@ -254,7 +255,7 @@
         "official_direct": 4,
         "verified": 5,
         "missing": 1,
-        "opened_gap": 0,
+        "opened_gap": 1,
         "date_anomaly": 0,
         "due_now": 1,
         "sample_races": [
@@ -316,7 +317,7 @@
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 0,
+        "due_now": 1,
         "sample_races": [
           "2026全台PAPAGO歡樂跑--西湖場",
           "夏日馬拉松 - 苗栗鯉魚潭"
