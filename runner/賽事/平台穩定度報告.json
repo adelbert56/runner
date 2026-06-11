@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-06-09T10:33:53.879Z",
-  "basis_date": "2026-06-09",
+  "generated_at": "2026-06-11T11:57:27.308Z",
+  "basis_date": "2026-06-11",
   "items": [
     {
       "platform": "運動筆記",
-      "total": 18,
+      "total": 17,
       "official_direct": 1,
-      "verified": 18,
-      "missing": 16,
+      "verified": 17,
+      "missing": 15,
       "opened_gap": 4,
       "date_anomaly": 0,
       "due_now": 6,
@@ -16,10 +16,10 @@
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
         "仁愛長庚合作聯盟醫院2026永慶盃路跑"
       ],
-      "complete_rate": "11%",
+      "complete_rate": "12%",
       "official_direct_rate": "6%",
       "verified_rate": "100%",
-      "score": 45,
+      "score": 46,
       "status": "需補強"
     },
     {
@@ -44,22 +44,22 @@
     },
     {
       "platform": "Lohas",
-      "total": 5,
-      "official_direct": 4,
-      "verified": 5,
-      "missing": 1,
-      "opened_gap": 1,
+      "total": 6,
+      "official_direct": 5,
+      "verified": 6,
+      "missing": 2,
+      "opened_gap": 2,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 2,
       "sample_races": [
         "2026中興新村半程馬拉松-披興戴月的想你",
-        "2026 臺中國際馬拉松",
-        "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
+        "2026年FUN電多巴胺路跑嘉年華",
+        "2026 臺中國際馬拉松"
       ],
-      "complete_rate": "80%",
-      "official_direct_rate": "80%",
+      "complete_rate": "67%",
+      "official_direct_rate": "83%",
       "verified_rate": "100%",
-      "score": 88,
+      "score": 84,
       "status": "穩定"
     },
     {

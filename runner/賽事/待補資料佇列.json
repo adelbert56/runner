@@ -13,9 +13,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "weekly",
-      "reason": "距離賽事 103 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 101 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -103,9 +103,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "weekly",
-      "reason": "距離賽事 117 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 115 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -195,7 +195,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 124 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 122 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -270,96 +270,6 @@
     }
   },
   {
-    "race_id": "86798062-ad4b-423e-8176-4807d0eb553e",
-    "race_name": "2026年FUN電多巴胺路跑嘉年華",
-    "race_date": "2026-10-17",
-    "race_county": "臺中市",
-    "registration_opens_at": "",
-    "registration_deadline": "",
-    "registration_status": "報名時間未定",
-    "source_platform": "運動筆記",
-    "is_official_direct": false,
-    "priority_score": 20,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 130 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      {
-        "key": "official_registration_link",
-        "label": "官方報名連結",
-        "severity": "high",
-        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
-      },
-      {
-        "key": "registration_opens_at",
-        "label": "開報時間",
-        "severity": "medium",
-        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "registration_deadline",
-        "label": "報名截止時間",
-        "severity": "medium",
-        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "precise_location",
-        "label": "精確地點",
-        "severity": "medium",
-        "hint": "補 venue 或 start_location，不要只到縣市。"
-      },
-      {
-        "key": "start_times",
-        "label": "各距離開跑時間",
-        "severity": "low",
-        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
-      },
-      {
-        "key": "organizer",
-        "label": "主辦單位",
-        "severity": "medium",
-        "hint": "補 organizer 或 host。"
-      },
-      {
-        "key": "fees",
-        "label": "費用",
-        "severity": "low",
-        "hint": "補 fees，可用字串或分組物件。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13050&subtitle=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13050&subtitle=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF"
-    },
-    "suggested_override": {
-      "race_name": "2026年FUN電多巴胺路跑嘉年華",
-      "race_date": "2026-10-17",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
     "race_id": "b861d413-e83b-476d-a325-47c41b83f3ff",
     "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
     "race_date": "2026-10-25",
@@ -375,7 +285,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 138 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 136 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -465,7 +375,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 159 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 157 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -555,7 +465,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 193 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 191 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -645,7 +555,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 193 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 191 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -735,7 +645,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 222 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 220 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -825,7 +735,7 @@
       "status_label": "未來再查",
       "next_check_date": "2027-06-07",
       "cadence": "future",
-      "reason": "距離賽事 544 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 542 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       {
@@ -915,7 +825,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-06-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 159 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 157 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -997,7 +907,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、報名截止時間、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
@@ -1081,7 +991,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
@@ -1237,7 +1147,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1309,7 +1219,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1381,7 +1291,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1525,7 +1435,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },
@@ -1591,7 +1501,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-09",
+      "next_check_date": "2026-06-11",
       "cadence": "weekly",
       "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額。"
     },
@@ -1631,6 +1541,72 @@
     "suggested_override": {
       "race_name": "2026 HOT DOG Trail 台中系列活動-熱血接力賽",
       "race_date": "2026-08-30",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "86798062-ad4b-423e-8176-4807d0eb553e",
+    "race_name": "2026年FUN電多巴胺路跑嘉年華",
+    "race_date": "2026-10-17",
+    "race_county": "臺中市",
+    "registration_opens_at": "2026-06-10",
+    "registration_deadline": "2026-07-31",
+    "registration_status": "已截止",
+    "source_platform": "Lohas、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 8,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-06-11",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額。"
+    },
+    "missing": [
+      {
+        "key": "precise_location",
+        "label": "精確地點",
+        "severity": "medium",
+        "hint": "補 venue 或 start_location，不要只到縣市。"
+      },
+      {
+        "key": "organizer",
+        "label": "主辦單位",
+        "severity": "medium",
+        "hint": "補 organizer 或 host。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "https://signup.lohasnet.tw/signup/4253",
+      "official_event_url": "https://lohasnet.tw/DopamineFunRun2026/",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13050&subtitle=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF"
+    },
+    "suggested_override": {
+      "race_name": "2026年FUN電多巴胺路跑嘉年華",
+      "race_date": "2026-10-17",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",
