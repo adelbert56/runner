@@ -20,9 +20,7 @@ const mimeTypes = {
 
 function resolveRequestPath(url) {
   const decoded = decodeURIComponent(new URL(url, `http://localhost:${port}`).pathname);
-  const requested = normalize(
-    decoded === "/" || decoded === "/site/" ? "/site/index.html" : decoded
-  );
+  const requested = normalize(decoded === "/site/" ? "/site/index.html" : decoded);
   const filePath = resolve(join(root, requested));
   if (!filePath.startsWith(root)) {
     return null;
@@ -31,6 +29,13 @@ function resolveRequestPath(url) {
 }
 
 const server = createServer((req, res) => {
+  const decoded = decodeURIComponent(new URL(req.url || "/", `http://localhost:${port}`).pathname);
+  if (decoded === "/") {
+    res.writeHead(302, { location: "/site/" });
+    res.end();
+    return;
+  }
+
   const filePath = resolveRequestPath(req.url || "/");
   if (!filePath || !existsSync(filePath) || !statSync(filePath).isFile()) {
     res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
