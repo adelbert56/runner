@@ -180,20 +180,7 @@
       "42km": "05:00",
       "21km": "05:30"
     },
-    "first_seen_at": "2026-05-16",
-    "weather_forecast": {
-      "forecast_for": "2026-06-13",
-      "updated_at": "2026-06-13T00:15:16.803Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "南投縣",
-      "summary": "南投縣縣市預報，降雨，20-29°C，降雨機率 100%，最大風速 12 km/h",
-      "weather_code": 81,
-      "temperature_min_c": 19.8,
-      "temperature_max_c": 29.3,
-      "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 12.2
-    }
+    "first_seen_at": "2026-05-16"
   },
   {
     "race_id": "36a2f943-8b2a-4f42-88b9-deaba669ce63",
@@ -228,7 +215,20 @@
     "source_platform": "EventGo、Focusline、運動筆記",
     "is_official_direct": true,
     "start_times": "全馬 起跑 05:00、半馬 起跑 05:00",
-    "first_seen_at": "2026-05-16"
+    "first_seen_at": "2026-05-16",
+    "weather_forecast": {
+      "forecast_for": "2026-06-21",
+      "updated_at": "2026-06-14T01:39:24.441Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "苗栗縣",
+      "summary": "苗栗縣縣市預報，多雲，27-31°C，降雨機率 20%，最大風速 25 km/h",
+      "weather_code": 3,
+      "temperature_min_c": 26.7,
+      "temperature_max_c": 30.8,
+      "precipitation_probability_max": 20,
+      "wind_speed_max_kmh": 25
+    }
   },
   {
     "race_id": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
