@@ -16,6 +16,13 @@ const ENRICH_LIMIT = 120;
 const CANDIDATES_ALL_LIMIT = 400;
 const CANDIDATE_OUTPUT_LIMIT = 80;
 
+function buildBijiCategoryUrls(labelId, maxPage = 6) {
+  return Array.from({ length: maxPage }, (_, index) => {
+    const page = index + 1;
+    return `https://running.biji.co/index.php?q=news&label=${labelId}${page > 1 ? `&page=${page}` : ""}`;
+  });
+}
+
 const sources = [
   {
     name: "運動筆記",
@@ -23,6 +30,13 @@ const sources = [
     entryUrls: [
       "https://running.biji.co/",
       "https://running.biji.co/index.php?q=news",
+      ...buildBijiCategoryUrls(1),
+      ...buildBijiCategoryUrls(22147),
+      "https://running.biji.co/index.php?label=1&q=news",
+      "https://running.biji.co/index.php?label=2&q=news",
+    ],
+    allowUrlPatterns: [
+      /running\.biji\.co\/index\.php\?.*act=info&id=/i,
     ],
     type: "跑步新聞 / 跑鞋專題",
     priority: 5,
@@ -199,6 +213,7 @@ const blockedKeywords = [
   "艾蜜莉",
   "BTS",
   "林書豪",
+  "Instagram",
 ];
 
 function compact(text) {
