@@ -2733,6 +2733,15 @@ function formatContentDate(date) {
   return String(date || TODAY).replaceAll("-", ".");
 }
 
+function formatContentOriginDate(date) {
+  const value = String(date || "").slice(0, 10);
+  if (!value) {
+    return "";
+  }
+  const [, month = "", day = ""] = value.split("-");
+  return month && day ? `${month}/${day}` : value.replaceAll("-", "/");
+}
+
 function contentOriginLabel(sourceOrigin, publishedAt, date) {
   if (sourceOrigin === "editorial") {
     return "精選";
@@ -2740,8 +2749,13 @@ function contentOriginLabel(sourceOrigin, publishedAt, date) {
   if (sourceOrigin === "previous_published") {
     return "庫存";
   }
-  const ageDays = dateDiffDays(publishedAt || date);
-  return ageDays !== null && ageDays <= 1 ? "新抓到" : "候選";
+  const sourceDate = date || publishedAt;
+  const ageDays = dateDiffDays(sourceDate);
+  const sourceDateLabel = formatContentOriginDate(sourceDate);
+  if (ageDays === 0) {
+    return sourceDateLabel ? `新抓到 · ${sourceDateLabel}` : "新抓到";
+  }
+  return sourceDateLabel ? `候選 · ${sourceDateLabel}` : "候選";
 }
 
 function contentArticleHtml(item) {
@@ -2752,7 +2766,7 @@ function contentArticleHtml(item) {
   const sourceOrigin = item.source_origin || "candidate";
   const originLabel = contentOriginLabel(sourceOrigin, item.published_at, item.date);
   return `
-    <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-published-at="${escapeHtml(item.published_at || item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}" data-source-origin="${escapeHtml(sourceOrigin)}">
+    <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-published-at="${escapeHtml(item.published_at || item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}" data-source-origin="${escapeHtml(sourceOrigin)}" data-source-date="${escapeHtml(item.date || item.published_at || TODAY)}">
       <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>
       <div class="content-tag-row">
         <span class="content-tag">${escapeHtml(category)}</span>
