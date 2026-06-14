@@ -335,7 +335,7 @@ function scoreTitle(title, source) {
   if (blockedKeywords.some((keyword) => title.toLowerCase().includes(keyword.toLowerCase()))) {
     return 0;
   }
-  if (!/跑|馬拉松|半馬|跑鞋|慢跑|路跑|越野|HYROX|鞋評|開箱|評測|上市速報|裝備|選鞋|鞋款|實著|新品|running|runner|runners|marathon|trail|shoe|shoes|trainer|training|recovery|workout|gear|review/i.test(title)) {
+  if (!/跑|馬拉松|半馬|鞋|慢跑|路跑|越野|HYROX|開箱|評測|上市速報|裝備|選鞋|實著|新品|ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|running|runner|runners|marathon|trail|shoe|shoes|trainer|training|recovery|workout|gear|review/i.test(title)) {
     return 0;
   }
 
