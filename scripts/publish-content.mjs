@@ -27,6 +27,8 @@ const MIN_SCORE = {
   news: 3,
 };
 
+const MAX_ENGLISH_NEWS = 8;
+
 const SUMMARY_RULES = [
   "類別用標籤呈現，摘要不要重複來源名稱。",
   "摘要不使用「重點：」「訓練重點：」「賽事重點：」這種開頭。",
@@ -98,6 +100,19 @@ function inferType(item) {
   const eventOnlySignal = /賽事|報名|馬拉松|半馬|UTMB|開放報名|城市路跑/i.test(text) && !hasShoeSignal;
   if (item.category === "跑鞋新品" && hasShoeSignal && !eventOnlySignal) return "shoe";
   return "news";
+}
+
+function isEnglishNewsItem(item) {
+  const source = String(item.source || "");
+  const url = String(item.url || "");
+  return /Runner's World/i.test(source) || /runnersworld\.com/i.test(url);
+}
+
+function contentLanguageRank(item) {
+  if (item.type === "news" && isEnglishNewsItem(item)) {
+    return 1;
+  }
+  return 0;
 }
 
 function inferShoeCategory(title) {
@@ -326,6 +341,8 @@ function mergeArchiveFields(item, archiveByUrl) {
 
 function sortItems(items) {
   return items.sort((a, b) => {
+    const languageDiff = contentLanguageRank(a) - contentLanguageRank(b);
+    if (languageDiff !== 0) return languageDiff;
     const originDiff = sourceOriginRank(b.source_origin) - sourceOriginRank(a.source_origin);
     if (originDiff !== 0) return originDiff;
     if (b.score !== a.score) return b.score - a.score;
@@ -335,32 +352,53 @@ function sortItems(items) {
 
 function pick(items, type, limit = LIMITS[type]) {
   const seen = new Set();
-  return sortItems(items.filter((item) => item.type === type && item.score >= MIN_SCORE[type]))
-    .filter((item) => {
-      const key = normalizeUrl(item.url);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(0, limit);
+  let englishCount = 0;
+  const picked = [];
+
+  for (const item of sortItems(items.filter((entry) => entry.type === type && entry.score >= MIN_SCORE[type]))) {
+    const key = normalizeUrl(item.url);
+    if (!key || seen.has(key)) continue;
+    if (type === "news" && isEnglishNewsItem(item) && englishCount >= MAX_ENGLISH_NEWS) {
+      continue;
+    }
+    seen.add(key);
+    picked.push(item);
+    if (type === "news" && isEnglishNewsItem(item)) {
+      englishCount += 1;
+    }
+    if (picked.length >= limit) {
+      break;
+    }
+  }
+
+  return picked;
 }
 
 function fillWithInventory(primary, inventory, type) {
   const picked = pick(primary, type);
   const seen = new Set(picked.map((item) => normalizeUrl(item.url)).filter(Boolean));
+  let englishCount = picked.filter((item) => type === "news" && isEnglishNewsItem(item)).length;
 
   if (picked.length >= MIN_PUBLISHED[type]) {
     return picked;
   }
 
-  const fill = sortItems(inventory.filter((item) => item.type === type && item.score >= MIN_SCORE[type]))
-    .filter((item) => {
-      const key = normalizeUrl(item.url);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(0, LIMITS[type] - picked.length);
+  const fill = [];
+  for (const item of sortItems(inventory.filter((entry) => entry.type === type && entry.score >= MIN_SCORE[type]))) {
+    const key = normalizeUrl(item.url);
+    if (!key || seen.has(key)) continue;
+    if (type === "news" && isEnglishNewsItem(item) && englishCount >= MAX_ENGLISH_NEWS) {
+      continue;
+    }
+    seen.add(key);
+    fill.push(item);
+    if (type === "news" && isEnglishNewsItem(item)) {
+      englishCount += 1;
+    }
+    if (picked.length + fill.length >= LIMITS[type]) {
+      break;
+    }
+  }
 
   return [...picked, ...fill];
 }
