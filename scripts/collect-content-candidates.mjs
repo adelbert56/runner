@@ -213,11 +213,18 @@ function compact(text) {
     .trim();
 }
 
+const TRACKING_PARAMS = /^(utm_|fbclid|gclid|label|subtitle)/i;
+
 function normalizeUrl(url) {
   try {
     const parsed = new URL(url);
     parsed.hash = "";
-    parsed.search = "";
+    for (const key of [...parsed.searchParams.keys()]) {
+      if (TRACKING_PARAMS.test(key)) {
+        parsed.searchParams.delete(key);
+      }
+    }
+    parsed.searchParams.sort();
     return parsed.toString().replace(/\/$/, "");
   } catch {
     return String(url || "").replace(/[?#].*$/, "").replace(/\/$/, "");
