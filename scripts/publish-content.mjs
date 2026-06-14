@@ -27,7 +27,7 @@ const MIN_SCORE = {
   news: 3,
 };
 
-const MAX_ENGLISH_NEWS = 8;
+const MAX_ENGLISH_NEWS = 6;
 
 const SUMMARY_RULES = [
   "類別用標籤呈現，摘要不要重複來源名稱。",
@@ -494,9 +494,13 @@ async function main() {
   ].sort((a, b) => {
     const typeDiff = a.type.localeCompare(b.type);
     if (typeDiff !== 0) return typeDiff;
+    const languageDiff = contentLanguageRank(a) - contentLanguageRank(b);
+    if (languageDiff !== 0) return languageDiff;
     const originDiff = sourceOriginRank(b.source_origin) - sourceOriginRank(a.source_origin);
     if (originDiff !== 0) return originDiff;
-    return String(b.date).localeCompare(String(a.date)) || b.score - a.score;
+    const dateDiff = String(b.date).localeCompare(String(a.date));
+    if (dateDiff !== 0) return dateDiff;
+    return b.score - a.score;
   });
 
   await mkdir(resolve(root, "site/data"), { recursive: true });
