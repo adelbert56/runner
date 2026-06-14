@@ -345,9 +345,12 @@ function scoreTitle(title, source) {
   return keywordScore + (source.effectivePriority ?? source.priority);
 }
 
+const SOCIAL_PLATFORM_TITLES = /^(instagram|facebook|youtube|line|twitter|x|tiktok|threads)$/i;
+
 function isGenericTitle(title, source) {
   const normalizedTitle = String(title || "").trim().replace(/\s+/g, " ");
   if (!normalizedTitle) return true;
+  if (SOCIAL_PLATFORM_TITLES.test(normalizedTitle)) return true;
   if (normalizedTitle === source.name) return true;
   if (source.name === "Bounce" && /^bounce$/i.test(normalizedTitle)) return true;
   if (source.name === "Runner's World" && /(?:^|\s)runner(?:\s|$)|\/\s*runner\s*$/i.test(normalizedTitle)) return true;
