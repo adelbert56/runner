@@ -20,36 +20,56 @@ const sources = [
   {
     name: "運動筆記",
     url: "https://running.biji.co/",
-    type: "跑步新聞",
+    entryUrls: [
+      "https://running.biji.co/",
+      "https://running.biji.co/index.php?q=news",
+    ],
+    type: "跑步新聞 / 跑鞋專題",
     priority: 5,
-  },
-  {
-    name: "運動視界",
-    url: "https://www.sportsv.net/tags/running",
-    type: "跑步新聞 / 訓練知識",
-    priority: 4,
   },
   {
     name: "動一動",
     url: "https://www.don1don.com/",
+    entryUrls: [
+      "https://www.don1don.com/",
+    ],
     type: "跑鞋新品 / 跑步專題",
     priority: 5,
   },
   {
     name: "Bounce",
     url: "https://bouncin.net/",
+    entryUrls: [
+      "https://bouncin.net/category/trend",
+    ],
+    allowUrlPatterns: [
+      /\/p\//i,
+    ],
     type: "跑鞋新品",
     priority: 4,
   },
   {
-    name: "Runner's World Taiwan",
-    url: "https://www.runnersworld.com.tw/",
-    type: "跑步新聞 / 訓練知識",
+    name: "Runner's World",
+    url: "https://www.runnersworld.com/",
+    entryUrls: [
+      "https://www.runnersworld.com/rss/gear.xml",
+      "https://www.runnersworld.com/rss/training.xml",
+      "https://www.runnersworld.com/gear/",
+      "https://www.runnersworld.com/training/",
+    ],
+    allowUrlPatterns: [
+      /\/(gear|training|beginner|news|runners-stories)\/[ag]\d+/i,
+    ],
+    type: "英文跑鞋評測 / 訓練知識",
     priority: 3,
   },
   {
     name: "Women's Health Taiwan",
     url: "https://www.womenshealthmag.com/tw/fitness/",
+    entryUrls: [
+      "https://www.womenshealthmag.com/tw/fitness/",
+      "https://www.womenshealthmag.com/tw/fashion/equipment/",
+    ],
     type: "跑鞋選購 / 健康訓練",
     priority: 3,
   },
@@ -61,13 +81,22 @@ const sources = [
   },
   {
     name: "KENLU",
-    url: "https://kenlu.net/tag/running/",
+    url: "https://kenlu.net/",
+    entryUrls: [
+      "https://kenlu.net/",
+      "https://kenlu.net/category/review/",
+      "https://kenlu.net/category/news/release/",
+      "https://kenlu.net/tag/trail-hiking-shoes/",
+    ],
     type: "跑鞋評測 / 裝備情報",
     priority: 3,
   },
   {
     name: "KENLU 越野",
     url: "https://kenlu.net/tag/trail-run/",
+    entryUrls: [
+      "https://kenlu.net/tag/trail-hiking-shoes/",
+    ],
     type: "越野跑鞋 / 越野訓練",
     priority: 3,
   },
@@ -83,13 +112,9 @@ const sources = [
     type: "路跑活動 / 訓練資訊",
     priority: 2,
   },
-  {
-    name: "udn 品牌",
-    url: "https://branda.udn.com/branda/index",
-    type: "品牌新品 / 運動消費",
-    priority: 2,
-  },
 ];
+
+const sourceByName = new Map(sources.map((source) => [source.name, source]));
 
 const keywords = [
   "跑鞋",
@@ -112,6 +137,15 @@ const keywords = [
   "補給",
   "碳板",
   "越野",
+  "鞋評",
+  "開箱",
+  "上市速報",
+  "評測",
+  "裝備",
+  "選鞋",
+  "鞋款",
+  "實著",
+  "新品",
   "ASICS",
   "Nike",
   "NIKE",
@@ -123,6 +157,19 @@ const keywords = [
   "New Balance",
   "On",
   "Cloud",
+  "running",
+  "runner",
+  "runners",
+  "marathon",
+  "trail",
+  "shoe",
+  "shoes",
+  "trainer",
+  "training",
+  "recovery",
+  "workout",
+  "gear",
+  "review",
 ];
 
 const blockedKeywords = [
@@ -269,11 +316,26 @@ function absoluteUrl(href, baseUrl) {
   }
 }
 
+function extractHref(tag) {
+  if (!tag) return "";
+  const match = String(tag).match(/\bhref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+  return match?.[1] || match?.[2] || match?.[3] || "";
+}
+
+function isAllowedSourceUrl(url, source) {
+  if (!url) return false;
+  const patterns = Array.isArray(source.allowUrlPatterns) ? source.allowUrlPatterns : null;
+  if (!patterns || !patterns.length) {
+    return true;
+  }
+  return patterns.some((pattern) => pattern.test(url));
+}
+
 function scoreTitle(title, source) {
   if (blockedKeywords.some((keyword) => title.toLowerCase().includes(keyword.toLowerCase()))) {
     return 0;
   }
-  if (!/跑|馬拉松|半馬|跑鞋|慢跑|路跑|越野|HYROX/i.test(title)) {
+  if (!/跑|馬拉松|半馬|跑鞋|慢跑|路跑|越野|HYROX|鞋評|開箱|評測|上市速報|裝備|選鞋|鞋款|實著|新品|running|runner|runners|marathon|trail|shoe|shoes|trainer|training|recovery|workout|gear|review/i.test(title)) {
     return 0;
   }
 
@@ -283,23 +345,104 @@ function scoreTitle(title, source) {
   return keywordScore + (source.effectivePriority ?? source.priority);
 }
 
+function isGenericTitle(title, source) {
+  const normalizedTitle = String(title || "").trim().replace(/\s+/g, " ");
+  if (!normalizedTitle) return true;
+  if (normalizedTitle === source.name) return true;
+  if (source.name === "Bounce" && /^bounce$/i.test(normalizedTitle)) return true;
+  if (source.name === "Runner's World" && /(?:^|\s)runner(?:\s|$)|\/\s*runner\s*$/i.test(normalizedTitle)) return true;
+  return false;
+}
+
+function isCrawlableArticleUrl(url, source) {
+  return isAllowedSourceUrl(url, source);
+}
+
+function looksBrokenTitle(title) {
+  return /(?:\bShouldn|\bWouldn|\bCouldn|\bDidn|\bIsn|\bWasn)\b$/i.test(title)
+    || /(?:\|\s*It)$/.test(title)
+    || /(?:\bRunner\s*$)/i.test(title);
+}
+
+function isRejectedTitle(title, source) {
+  if (source.name !== "Runner's World") {
+    return false;
+  }
+  return /(?:gift|gifts|headphones?|earbuds?|earphones?|sunglasses?|glasses|hats?|caps?|treadmill|hydration packs?|hydration pack|heart rate monitors?|heart rate monitor)/i.test(title);
+}
+
+function normalizeTitleCandidate(title, source) {
+  return decodeHtml(title)
+    .replace(/\s*[｜|│]\s*(動一動|Don1Don|Bounce|HK01|Women's Health|運動筆記|Runner's World|Runner).*$/i, "")
+    .replace(/\s*-\s*(KENLU.net|Runner's World).*$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractTitleCandidates(html) {
+  const candidates = [];
+  const add = (value) => {
+    const candidate = compact(value || "");
+    if (candidate) candidates.push(candidate);
+  };
+
+  const patterns = [
+    /<h1[^>]*>([\s\S]*?)<\/h1>/i,
+    /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["'][^>]*>/i,
+    /<meta[^>]+name=["']twitter:title["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+name=["']title["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<title[^>]*>([\s\S]*?)<\/title>/i,
+    /"headline"\s*:\s*"([^"]+)"/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      add(match[1]);
+    }
+  }
+
+  return candidates;
+}
+
+function choosePreferredTitle(html, source, fallbackTitle = "") {
+  const candidates = extractTitleCandidates(html);
+  if (fallbackTitle) {
+    candidates.push(fallbackTitle);
+  }
+
+  for (const candidate of candidates) {
+    const title = normalizeTitleCandidate(candidate, source);
+    if (!title || title.length < 6 || title.length > 140) {
+      continue;
+    }
+    if (isGenericTitle(title, source) || looksBrokenTitle(title) || isRejectedTitle(title, source)) {
+      continue;
+    }
+    return title;
+  }
+
+  return normalizeTitleCandidate(fallbackTitle, source);
+}
+
 function classify(title) {
   if (/為什麼|怎麼|如何|真的|是否|原理|解析|入門|新手|課表|訓練|跑姿|重量訓練|肌力|恢復|補給|乳酸|心率|傷痛|疼痛|比較省力|效率/i.test(title)) {
     return "入門知識";
   }
-  if (/跑鞋|慢跑鞋|碳板|ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Cloud/i.test(title)) {
+  if (/跑鞋|慢跑鞋|碳板|ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Cloud|鞋評|開箱|上市速報|評測|裝備|鞋款|實著|新品|running|runner|runners|marathon|trail|shoe|shoes|trainer|training|recovery|workout|gear|review/i.test(title)) {
     return "跑鞋新品";
   }
-  if (/新手|入門|初跑|跑姿|肌力|心率|乳酸閾值/.test(title)) {
+  if (/新手|入門|初跑|跑姿|肌力|心率|乳酸閾值|how to|beginner|return to running/i.test(title)) {
     return "入門知識";
   }
-  if (/恢復|伸展|傷|睡眠|疲勞/.test(title)) {
+  if (/恢復|伸展|傷|睡眠|疲勞|recovery|recover|injur|rest|soreness/i.test(title)) {
     return "恢復";
   }
-  if (/補給|飲食|碳水|蛋白|能量膠/.test(title)) {
+  if (/補給|飲食|碳水|蛋白|能量膠|fuel|nutrition|hydration|gel|electrolyte/i.test(title)) {
     return "補給";
   }
-  if (/訓練|間歇|節奏|長跑|半馬|馬拉松/.test(title)) {
+  if (/訓練|間歇|節奏|長跑|半馬|馬拉松|training|workout|speed|tempo|long run|interval|pace|mile/i.test(title)) {
     return "訓練";
   }
   return "跑步新聞";
@@ -366,7 +509,8 @@ async function fetchArticleMetadata(item) {
       return item;
     }
     const html = await response.text();
-    const title = extractMetaTitle(html);
+    const source = sourceByName.get(item.source) || item;
+    const title = choosePreferredTitle(html, source, item.title);
     const description = extractMetaDescription(html);
     const articleDate = extractMetaDate(html);
     return {
@@ -382,16 +526,75 @@ async function fetchArticleMetadata(item) {
   }
 }
 
+function extractFeedLinks(xml, source) {
+  const links = [];
+  const itemPattern = /<item\b[\s\S]*?<\/item>/gi;
+  const entryPattern = /<entry\b[\s\S]*?<\/entry>/gi;
+
+  const addLink = (url, title) => {
+    const absolute = absoluteUrl(url, source.url);
+    if (!absolute || absolute.endsWith("#") || !title || title.length < 6 || title.length > 140 || !isCrawlableArticleUrl(absolute, source) || isRejectedTitle(title, source)) {
+      return;
+    }
+    const score = scoreTitle(title, source);
+    if (score <= source.priority) {
+      return;
+    }
+    links.push({
+      checked_at: today,
+      source: source.name,
+      source_type: source.type,
+      title,
+      url: absolute,
+      category: classify(title),
+      score,
+      article_date: "",
+      suggested_for: "待判斷",
+      runner_takeaway: "待代理人摘要",
+      publish_status: "candidate",
+    });
+  };
+
+  for (const match of xml.matchAll(itemPattern)) {
+    const item = match[0];
+    const title = compact(item.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "");
+    const url = compact(item.match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1] || extractHref(item.match(/<link\b[^>]*\/?>/i)?.[0] || ""));
+    if (isGenericTitle(title, source) || isRejectedTitle(title, source) || !isCrawlableArticleUrl(url, source)) {
+      continue;
+    }
+    addLink(url, title);
+  }
+
+  for (const match of xml.matchAll(entryPattern)) {
+    const entry = match[0];
+    const title = compact(entry.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "");
+    const url = compact(
+      extractHref(entry.match(/<link\b[^>]*\/?>/i)?.[0] || "")
+      || entry.match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1]
+      || "",
+    );
+    if (isGenericTitle(title, source) || isRejectedTitle(title, source) || !isCrawlableArticleUrl(url, source)) {
+      continue;
+    }
+    addLink(url, title);
+  }
+
+  return links;
+}
+
 function extractLinks(html, source) {
   const links = [];
-  const anchorPattern = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  const anchorPattern = /<a\b[^>]*href\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a>/gi;
   let match;
 
   while ((match = anchorPattern.exec(html))) {
-    const url = absoluteUrl(match[1], source.url);
-    const title = compact(match[2]);
+    const url = absoluteUrl(extractHref(match[0]) || match[1], source.url);
+    const title = compact(match[4] || "");
 
     if (!url || url.endsWith("#") || /q=competition|act=info&cid=/i.test(url) || !title || title.length < 6 || title.length > 140) {
+      continue;
+    }
+    if (isGenericTitle(title, source) || isRejectedTitle(title, source) || !isCrawlableArticleUrl(url, source)) {
       continue;
     }
 
@@ -420,17 +623,53 @@ function extractLinks(html, source) {
   return links;
 }
 
-async function fetchSource(source) {
-  const response = await fetch(source.url, {
-    headers: DEFAULT_HEADERS,
-    signal: AbortSignal.timeout(12000),
-  });
+function sourceEntryUrls(source) {
+  const urls = [
+    source.url,
+    ...(Array.isArray(source.entryUrls) ? source.entryUrls : []),
+  ];
+  return [...new Set(urls.map((url) => absoluteUrl(url, source.url)).filter(Boolean))];
+}
 
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
+function extractSourceLinks(text, source) {
+  if (/<(?:rss|feed|channel|item|entry)\b/i.test(text)) {
+    const feedLinks = extractFeedLinks(text, source);
+    if (feedLinks.length) {
+      return feedLinks;
+    }
+  }
+  return extractLinks(text, source);
+}
+
+async function fetchSource(source) {
+  const results = [];
+  const entryErrors = [];
+
+  for (const entryUrl of sourceEntryUrls(source)) {
+    try {
+      const response = await fetch(entryUrl, {
+        headers: DEFAULT_HEADERS,
+        signal: AbortSignal.timeout(12000),
+      });
+
+      if (!response.ok) {
+        entryErrors.push(`${entryUrl}: ${response.status} ${response.statusText}`);
+        continue;
+      }
+
+      const body = await response.text();
+      const entrySource = { ...source, url: entryUrl };
+      results.push(...extractSourceLinks(body, entrySource));
+    } catch (error) {
+      entryErrors.push(`${entryUrl}: ${error.message}`);
+    }
   }
 
-  return extractLinks(await response.text(), source);
+  if (!results.length) {
+    throw new Error(entryErrors[0] || `No crawlable entry URLs for ${source.name}`);
+  }
+
+  return results;
 }
 
 async function readJson(path, fallback) {
