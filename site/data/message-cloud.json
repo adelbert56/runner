@@ -3,7 +3,7 @@
   "source": "github_issue",
   "issue_number": 34,
   "source_url": "https://github.com/adelbert56/runner/issues/34",
-  "next_update_at": "2026-06-16 18:07 Asia/Taipei",
+  "next_update_at": "2026-06-17 12:07 Asia/Taipei",
   "policy": {
     "max_visible_items": 48,
     "refresh_schedule": "每日約 12:00、18:00 Asia/Taipei",
@@ -24,6 +24,16 @@
     },
     {
       "text": "跑步不難，難的是穿上跑鞋出門的那一刻!",
+      "weight": 2,
+      "origin": "issue"
+    },
+    {
+      "text": "跑得久的才是真正的跑者!",
+      "weight": 2,
+      "origin": "issue"
+    },
+    {
+      "text": "跑得快不一定跑的久!!",
       "weight": 2,
       "origin": "issue"
     },
@@ -120,10 +130,16 @@
   ],
   "comments": [
     {
-      "author": "DADDY-DION",
-      "avatar_url": "https://avatars.githubusercontent.com/u/263277276?v=4&s=40",
-      "created_at": "2026-06-03T05:57:05Z",
-      "body": "這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小這沙小"
+      "author": "adelbert56",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104144887?v=4&s=40",
+      "created_at": "2026-06-16T12:18:41Z",
+      "body": "跑得久的才是真正的跑者!"
+    },
+    {
+      "author": "adelbert56",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104144887?v=4&s=40",
+      "created_at": "2026-06-16T12:18:09Z",
+      "body": "跑得快不一定跑的久!!"
     },
     {
       "author": "adelbert56",
