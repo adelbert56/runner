@@ -37,6 +37,7 @@ const state = {
 
 const els = {
   raceCount: document.querySelector("#race-count"),
+  trackedCount: document.querySelector("#tracked-count"),
   favoriteCount: document.querySelector("#favorite-count"),
   registeredCount: document.querySelector("#registered-count"),
   nextRaceLink: document.querySelector("#next-race-link"),
@@ -1452,6 +1453,9 @@ function getVisibleRaces() {
 
 function renderStats() {
   els.raceCount.textContent = String(state.races.length);
+  if (els.trackedCount) {
+    els.trackedCount.textContent = String(state.races.filter((race) => isTrackedRace(race)).length);
+  }
   els.favoriteCount.textContent = String(state.favorites.size);
   if (els.registeredCount) {
     els.registeredCount.textContent = String(state.registeredRaces.size);

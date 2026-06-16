@@ -71,15 +71,20 @@
           </span>
           <span class="stat-subcaption" id="next-race-name">先收藏賽事</span>
         </a>
-        <div class="stat-card">
-          <span class="stat-label">收藏</span>
-          <strong id="favorite-count">0</strong>
-          <span class="stat-caption">我的收藏</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">已報名</span>
-          <strong id="registered-count">0</strong>
-          <span class="stat-caption">我的報名</span>
+        <div class="stat-card stat-card-tracked">
+          <span class="stat-label">我的賽事</span>
+          <strong id="tracked-count">0</strong>
+          <span class="stat-caption">收藏與報名整併檢視</span>
+          <div class="stat-mini-grid" aria-label="收藏與報名統計">
+            <div class="stat-mini">
+              <span>收藏</span>
+              <strong id="favorite-count">0</strong>
+            </div>
+            <div class="stat-mini">
+              <span>已報名</span>
+              <strong id="registered-count">0</strong>
+            </div>
+          </div>
         </div>
       </section>
 

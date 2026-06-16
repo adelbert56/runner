@@ -805,7 +805,7 @@ h1 {
 
 .stats-strip {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   width: min(1120px, calc(100% - 48px));
   margin: -36px auto 0;
@@ -838,6 +838,10 @@ h1 {
 .stat-card-link:hover {
   transform: translateY(-2px);
   border-color: rgba(21, 83, 56, 0.32);
+}
+
+.stat-card-tracked {
+  gap: 10px;
 }
 
 .stat-card::before {
@@ -924,6 +928,36 @@ h1 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.stat-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.stat-mini {
+  display: grid;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1px solid rgba(21, 83, 56, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.stat-mini span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stat-mini strong {
+  color: var(--green-dark);
+  font-size: 1.35rem;
+  line-height: 1;
 }
 
 .page-panel {
@@ -3948,10 +3982,6 @@ h3 {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .stats-strip .stat-card:nth-child(5) {
-    grid-column: 1 / -1;
-  }
-
   .race-layout,
   .feature-card,
   .shoe-spotlight,
@@ -4404,10 +4434,6 @@ h3 {
     gap: 10px;
   }
 
-  .stats-strip .stat-card:nth-child(5) {
-    grid-column: 1 / -1;
-  }
-
   .stat-card {
     min-height: 110px;
     gap: 7px;
@@ -4447,6 +4473,18 @@ h3 {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+
+  .stat-mini-grid {
+    gap: 6px;
+  }
+
+  .stat-mini {
+    padding: 9px 10px;
+  }
+
+  .stat-mini strong {
+    font-size: 1.2rem;
   }
 
   .path-ladder {
