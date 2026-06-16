@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-14",
+  "generated_at": "2026-06-16",
   "retention": {
     "closed_notice_days": 14,
     "daily_quips": 2
@@ -53,42 +53,44 @@
       "race_key": "041df865-ee5a-471a-aef9-72a1afa768cc",
       "title": "12/13 苗栗縣｜2026 通霄濱海追風馬拉松",
       "types": [
-        "new"
+        "new",
+        "opening"
       ],
       "details": [
-        "2026/06/09 收到"
+        "2026/06/09 收到",
+        "06/30 開放報名｜倒數 14 天"
       ],
       "race_date": "2026-12-13",
       "first_seen_at": "2026-06-09"
     },
     {
-      "id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
-      "race_key": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
-      "title": "09/04 南投縣｜2026東城盃合歡山越野馬拉松",
+      "id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
+      "race_key": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
+      "title": "08/02 彰化縣｜2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
       "types": [
-        "ending"
+        "closing"
       ],
       "details": [
-        "06/15 截止｜剩 1 天"
+        "06/30 截止｜剩 14 天"
       ],
-      "race_date": "2026-09-04",
+      "race_date": "2026-08-02",
       "first_seen_at": "2026-05-16"
     },
     {
-      "id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
-      "race_key": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
-      "title": "11/08 彰化縣｜2026台灣米倉田中馬拉松",
+      "id": "ed5e0139-3f43-4eac-b756-798e109005d8",
+      "race_key": "ed5e0139-3f43-4eac-b756-798e109005d8",
+      "title": "10/04 南投縣｜2026 Puli Power 埔里山城派對馬拉松",
       "types": [
-        "ending"
+        "closing"
       ],
       "details": [
-        "06/15 截止｜剩 1 天"
+        "06/30 截止｜剩 14 天"
       ],
-      "race_date": "2026-11-08",
+      "race_date": "2026-10-04",
       "first_seen_at": "2026-05-16"
     },
     {
-      "id": "quip-2026-06-14-0",
+      "id": "quip-2026-06-16-0",
       "title": "配速可以慢，按下報名的手速不要太慢。",
       "types": [
         "talk"
@@ -98,7 +100,7 @@
       ]
     },
     {
-      "id": "quip-2026-06-14-1",
+      "id": "quip-2026-06-16-1",
       "title": "跑步最難的不是上坡，是出門前那五分鐘。",
       "types": [
         "talk"

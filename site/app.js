@@ -1796,7 +1796,7 @@ function renderRaces() {
                 aria-pressed="${registered ? "true" : "false"}"
                 aria-label="${registered ? "取消已報名" : "標記已報名"}"
                 title="${registered ? "取消已報名" : "標記已報名"}"
-              ><span aria-hidden="true">${registered ? "☑" : "☐"}</span><span>已報名</span></button>
+              ><span class="registration-toggle__icon" aria-hidden="true">${registered ? "✓" : ""}</span><span class="registration-toggle__label">已報名</span></button>
               <button
                 class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
                 type="button"

@@ -115,6 +115,7 @@ const sources = [
 ];
 
 const sourceByName = new Map(sources.map((source) => [source.name, source]));
+const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i];
 
 const keywords = [
   "跑鞋",
@@ -641,6 +642,73 @@ function sourceEntryUrls(source) {
   return [...new Set(urls.map((url) => absoluteUrl(url, source.url)).filter(Boolean))];
 }
 
+function isEnglishSource(source) {
+  const text = `${source?.name || ""} ${source?.url || ""}`;
+  return ENGLISH_SOURCE_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function sourceLanguageRank(source) {
+  return isEnglishSource(source) ? 1 : 0;
+}
+
+function candidatePreference(item) {
+  const source = sourceByName.get(item.source) || {};
+  return {
+    languageRank: sourceLanguageRank(source),
+    priority: Number(source.effectivePriority ?? source.priority ?? 0),
+    score: Number(item.score || 0),
+    articleDate: parseTaipeiDate(item.article_date || item.checked_at || "")?.getTime() || 0,
+    descriptionLength: String(item.description || "").length,
+    titleLength: String(item.title || "").length,
+    sourceName: String(item.source || ""),
+    title: String(item.title || ""),
+  };
+}
+
+function compareCandidates(a, b) {
+  const left = candidatePreference(a);
+  const right = candidatePreference(b);
+  return (
+    left.languageRank - right.languageRank
+    || right.priority - left.priority
+    || right.score - left.score
+    || right.articleDate - left.articleDate
+    || right.descriptionLength - left.descriptionLength
+    || right.titleLength - left.titleLength
+    || left.sourceName.localeCompare(right.sourceName)
+    || left.title.localeCompare(right.title)
+  );
+}
+
+function mergeCandidateRecords(previous, current) {
+  if (!previous) {
+    return { ...current };
+  }
+  const preferred = compareCandidates(current, previous) < 0 ? current : previous;
+  const secondary = preferred === current ? previous : current;
+  const previousSeenCount = Number(previous.seen_count || 1);
+  const currentSeenCount = Number(current.seen_count || 1);
+  const sourceAliases = new Set([
+    ...(Array.isArray(previous.source_aliases) ? previous.source_aliases : []),
+    previous.source,
+    ...(Array.isArray(current.source_aliases) ? current.source_aliases : []),
+    current.source,
+  ].filter(Boolean));
+  return {
+    ...secondary,
+    ...preferred,
+    title: preferred.title || secondary.title || "",
+    description: preferred.description || secondary.description || "",
+    article_date: preferred.article_date || secondary.article_date || "",
+    score: Math.max(Number(previous.score || 0), Number(current.score || 0)),
+    checked_at: current.checked_at || previous.checked_at || today,
+    source_aliases: [...sourceAliases],
+    first_seen_at: previous.first_seen_at || current.first_seen_at || today,
+    last_seen_at: today,
+    seen_count: previousSeenCount + currentSeenCount,
+  };
+}
+
 function extractSourceLinks(text, source) {
   if (/<(?:rss|feed|channel|item|entry)\b/i.test(text)) {
     const feedLinks = extractFeedLinks(text, source);
@@ -725,17 +793,14 @@ async function enrichTitles(items) {
 }
 
 function dedupe(items, limit = 40) {
-  const seen = new Set();
-  return items
-    .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
-    .filter((item) => {
-      const key = normalizeUrl(item.url);
-      if (seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
-    })
+  const merged = new Map();
+  for (const item of items) {
+    const key = normalizeUrl(item.url);
+    if (!key) continue;
+    merged.set(key, mergeCandidateRecords(merged.get(key), item));
+  }
+  return [...merged.values()]
+    .sort(compareCandidates)
     .slice(0, limit);
 }
 

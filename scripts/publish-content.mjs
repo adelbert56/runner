@@ -36,6 +36,8 @@ const SUMMARY_RULES = [
   "來源描述太籠統時使用決策型摘要，避免硬塞無資訊量文字。",
 ];
 
+const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i];
+
 function normalizeUrl(url) {
   try {
     const parsed = new URL(url);
@@ -113,6 +115,37 @@ function contentLanguageRank(item) {
     return 1;
   }
   return 0;
+}
+
+function sourceLanguageRank(item) {
+  const sourceText = `${item.source || ""} ${item.url || ""}`;
+  return ENGLISH_SOURCE_PATTERNS.some((pattern) => pattern.test(sourceText)) ? 1 : 0;
+}
+
+function publishedPreference(item) {
+  return {
+    languageRank: sourceLanguageRank(item),
+    originRank: sourceOriginRank(item.source_origin),
+    score: Number(item.score || 0),
+    typeRank: item.type === "shoe" ? 0 : 1,
+    dateValue: parseTaipeiDate(item.date || item.published_at || "")?.getTime() || 0,
+    title: String(item.title || ""),
+    source: String(item.source || ""),
+  };
+}
+
+function comparePublishedItems(a, b) {
+  const left = publishedPreference(a);
+  const right = publishedPreference(b);
+  return (
+    left.languageRank - right.languageRank
+    || right.originRank - left.originRank
+    || right.score - left.score
+    || left.typeRank - right.typeRank
+    || right.dateValue - left.dateValue
+    || left.source.localeCompare(right.source)
+    || left.title.localeCompare(right.title)
+  );
 }
 
 function inferShoeCategory(title) {
@@ -456,6 +489,41 @@ function sourceOriginRank(origin) {
   return 1;
 }
 
+function mergePublishedRecords(previous, current) {
+  if (!previous) {
+    return { ...current };
+  }
+  const preferred = comparePublishedItems(current, previous) < 0 ? current : previous;
+  const secondary = preferred === current ? previous : current;
+  const sourceAliases = new Set([
+    ...(Array.isArray(previous.source_aliases) ? previous.source_aliases : []),
+    previous.source,
+    ...(Array.isArray(current.source_aliases) ? current.source_aliases : []),
+    current.source,
+  ].filter(Boolean));
+  return {
+    ...secondary,
+    ...preferred,
+    title: preferred.title || secondary.title || "",
+    summary: preferred.summary || secondary.summary || "",
+    category: preferred.category || secondary.category || "",
+    score: Math.max(Number(previous.score || 0), Number(current.score || 0)),
+    source_origin: preferred.source_origin || secondary.source_origin || "candidate",
+    published_at: preferred.published_at || secondary.published_at || today,
+    source_aliases: [...sourceAliases],
+  };
+}
+
+function dedupePublishedRecords(items) {
+  const merged = new Map();
+  for (const item of items) {
+    const key = normalizeUrl(item.url);
+    if (!key) continue;
+    merged.set(key, mergePublishedRecords(merged.get(key), item));
+  }
+  return [...merged.values()].sort(comparePublishedItems);
+}
+
 async function main() {
   const raw = (await readJson(candidatesPath, [])).map((item) => ({ ...item, source_origin: "candidate" }));
   const editorial = (await readJson(editorialPath, [])).map((item) => ({ ...item, source_origin: "editorial" }));
@@ -487,10 +555,10 @@ async function main() {
     ...item,
     score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 2),
   }));
-  const inventory = [...archiveInventory, ...previousInventory, ...editorialInventory];
+  const inventory = dedupePublishedRecords([...normalized, ...archiveInventory, ...previousInventory, ...editorialInventory]);
   const published = [
-    ...fillWithInventory(normalized, inventory, "shoe"),
-    ...fillWithInventory(normalized, inventory, "news"),
+    ...fillWithInventory(inventory, inventory, "shoe"),
+    ...fillWithInventory(inventory, inventory, "news"),
   ].sort((a, b) => {
     const typeDiff = a.type.localeCompare(b.type);
     if (typeDiff !== 0) return typeDiff;

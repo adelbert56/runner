@@ -13,9 +13,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "weekly",
-      "reason": "距離賽事 101 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 96 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -103,9 +103,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "weekly",
-      "reason": "距離賽事 115 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 110 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -191,11 +191,11 @@
     "is_official_direct": false,
     "priority_score": 20,
     "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 122 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-06-16",
+      "cadence": "weekly",
+      "reason": "距離賽事 117 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -283,9 +283,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
+      "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 136 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 131 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -339,7 +339,7 @@
     ],
     "current_links": {
       "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13075&subtitle=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E+2026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
+      "official_event_url": "",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13075&subtitle=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E+2026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13075",
       "facebook_search_url": "https://www.facebook.com/search/top?q=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E%202026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
@@ -373,9 +373,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
+      "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 157 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 152 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -450,96 +450,6 @@
     }
   },
   {
-    "race_id": "ea131e34-b3e9-4bc4-b626-c5345c26cb59",
-    "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
-    "race_date": "2026-12-19",
-    "race_county": "彰化縣",
-    "registration_opens_at": "",
-    "registration_deadline": "",
-    "registration_status": "報名時間未定",
-    "source_platform": "運動筆記",
-    "is_official_direct": false,
-    "priority_score": 20,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 191 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      {
-        "key": "official_registration_link",
-        "label": "官方報名連結",
-        "severity": "high",
-        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
-      },
-      {
-        "key": "registration_opens_at",
-        "label": "開報時間",
-        "severity": "medium",
-        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "registration_deadline",
-        "label": "報名截止時間",
-        "severity": "medium",
-        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "precise_location",
-        "label": "精確地點",
-        "severity": "medium",
-        "hint": "補 venue 或 start_location，不要只到縣市。"
-      },
-      {
-        "key": "start_times",
-        "label": "各距離開跑時間",
-        "severity": "low",
-        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
-      },
-      {
-        "key": "organizer",
-        "label": "主辦單位",
-        "severity": "medium",
-        "hint": "補 organizer 或 host。"
-      },
-      {
-        "key": "fees",
-        "label": "費用",
-        "severity": "low",
-        "hint": "補 fees，可用字串或分組物件。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13031",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91"
-    },
-    "suggested_override": {
-      "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
-      "race_date": "2026-12-19",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
     "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
     "race_name": "2026第二屆食安盃馬拉松",
     "race_date": "2026-12-19",
@@ -553,9 +463,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
+      "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 191 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 186 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -630,6 +540,96 @@
     }
   },
   {
+    "race_id": "ea131e34-b3e9-4bc4-b626-c5345c26cb59",
+    "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
+    "race_date": "2026-12-19",
+    "race_county": "彰化縣",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "priority_score": 20,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-07-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 186 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "precise_location",
+        "label": "精確地點",
+        "severity": "medium",
+        "hint": "補 venue 或 start_location，不要只到縣市。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "organizer",
+        "label": "主辦單位",
+        "severity": "medium",
+        "hint": "補 organizer 或 host。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13031",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91"
+    },
+    "suggested_override": {
+      "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
+      "race_date": "2026-12-19",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
     "race_id": "7609d890-e7fe-426b-b5e7-ea9419d2ff54",
     "race_name": "2027第九屆臺中資訊盃公益馬拉松",
     "race_date": "2027-01-17",
@@ -643,9 +643,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
+      "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 220 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 215 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -733,9 +733,9 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-07",
+      "next_check_date": "2027-06-08",
       "cadence": "future",
-      "reason": "距離賽事 542 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 537 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       {
@@ -789,7 +789,7 @@
     ],
     "current_links": {
       "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13065&subtitle=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "official_event_url": "",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13065&subtitle=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13065",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE"
@@ -823,9 +823,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-06-15",
+      "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 157 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 152 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -907,7 +907,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、報名截止時間、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
@@ -991,7 +991,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
@@ -1035,7 +1035,7 @@
     ],
     "current_links": {
       "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
+      "official_event_url": "",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13066",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4"
@@ -1067,11 +1067,11 @@
     "is_official_direct": false,
     "priority_score": 14,
     "tracking": {
-      "status": "wait_until_open_window",
-      "status_label": "等待接近開報",
-      "next_check_date": "2026-06-15",
-      "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-06-29，開報前 14 天再開始追蹤。"
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-06-16",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
     "missing": [
       {
@@ -1145,11 +1145,11 @@
     "is_official_direct": false,
     "priority_score": 13,
     "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-06-16",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：官方報名連結、精確地點、主辦單位、費用、名額。保留供歷史資料補齊。"
     },
     "missing": [
       {
@@ -1219,7 +1219,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1291,7 +1291,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -1363,9 +1363,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-08-02",
+      "next_check_date": "2026-08-03",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
     },
     "missing": [
       {
@@ -1435,7 +1435,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：精確地點、主辦單位、費用、名額。除非要補歷史資料，優先度較低。"
     },
@@ -1501,7 +1501,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "weekly",
       "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額。"
     },
@@ -1567,7 +1567,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額。"
     },

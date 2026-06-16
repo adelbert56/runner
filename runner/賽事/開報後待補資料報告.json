@@ -11,11 +11,11 @@
     "is_official_direct": false,
     "priority_score": 13,
     "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-06-16",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：官方報名連結、精確地點、主辦單位、費用、名額。保留供歷史資料補齊。"
     },
     "missing": [
       {
@@ -85,7 +85,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
@@ -129,7 +129,7 @@
     ],
     "current_links": {
       "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
+      "official_event_url": "",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13066",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4"
@@ -163,7 +163,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：精確地點、主辦單位、費用、名額。"
     },
@@ -229,7 +229,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "weekly",
       "reason": "開報日已過，仍缺：精確地點、主辦單位、費用、名額。"
     },
@@ -295,7 +295,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -367,7 +367,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、精確地點、主辦單位、費用、名額。"
     },
@@ -439,7 +439,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-11",
+      "next_check_date": "2026-06-16",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、報名截止時間、精確地點、各距離開跑時間、主辦單位、費用、名額。"
     },
