@@ -55,6 +55,7 @@ const els = {
   raceList: document.querySelector("#race-list"),
   monthList: document.querySelector("#month-list"),
   resultCount: document.querySelector("#result-count"),
+  resultHint: document.querySelector("#result-hint"),
   favoriteFilter: document.querySelector("#favorite-filter"),
   clearFilters: document.querySelector("#clear-filters"),
   countyButtons: document.querySelectorAll("[data-county]"),
@@ -1690,6 +1691,46 @@ function renderMonths() {
   });
 }
 
+function getRaceAssistantHint(races) {
+  const parts = [];
+
+  if (state.favoritesOnly) {
+    parts.push("只看我的賽事");
+  } else if (state.registration === "history") {
+    parts.push("正在查看歷史賽事");
+  } else if (state.registration !== "all") {
+    parts.push(`報名狀態：${state.registration === "open" ? "可報名" : state.registration === "soon" ? "即將截止" : state.registration === "closed" ? "已截止" : "全部"}`);
+  }
+
+  if (state.county !== "all") {
+    parts.push(state.county.replace("市", "").replace("縣", ""));
+  }
+  if (state.month !== "all") {
+    parts.push(`${monthNames[state.month] || state.month}檔`);
+  }
+  if (state.query) {
+    parts.push(`關鍵字「${state.query}」`);
+  }
+
+  const scope = parts.length ? parts.join("・") : "全部賽事";
+  const favoriteCount = state.races.filter((race) => isFavorite(race)).length;
+  const registeredCount = state.races.filter((race) => isRegisteredRace(race)).length;
+
+  if (state.favoritesOnly) {
+    return `我先幫你把 ${races.length} 場我的賽事整理好，收藏與已報名會優先顯示。`;
+  }
+
+  if (state.registration === "history") {
+    return `歷史清單共有 ${races.length} 場，適合拿來查資料或回看舊紀錄。`;
+  }
+
+  if (state.query || state.county !== "all" || state.month !== "all" || state.registration !== "all") {
+    return `目前聚焦 ${scope}，共 ${races.length} 場。收藏 ${favoriteCount} 場，已報名 ${registeredCount} 場。`;
+  }
+
+  return `目前顯示 ${races.length} 場，我會先把即將截止、可報名和我的賽事排在前面。`;
+}
+
 function renderRaces() {
   const races = getVisibleRaces();
   els.resultCount.textContent = state.favoritesOnly
@@ -1697,6 +1738,9 @@ function renderRaces() {
     : state.registration === "history"
       ? `歷史賽事 ${races.length} 場`
       : `目前顯示 ${races.length} 場`;
+  if (els.resultHint) {
+    els.resultHint.textContent = getRaceAssistantHint(races);
+  }
 
   if (!races.length) {
     els.raceList.innerHTML = `<div class="empty-state">${state.favoritesOnly ? "還沒有我的賽事符合條件。" : "沒有符合條件的賽事。"}</div>`;
@@ -3047,7 +3091,7 @@ function render() {
   setActiveButtons(els.registrationButtons, "registration", state.registration);
   setActiveButtons(els.distanceButtons, "distance", state.distance);
   els.favoriteFilter.classList.toggle("active", state.favoritesOnly);
-  els.favoriteFilter.textContent = state.favoritesOnly ? "顯示全部賽事" : "我的賽事";
+  els.favoriteFilter.textContent = state.favoritesOnly ? "顯示全部" : "我的賽事";
   renderMonths();
   renderRaces();
 }
