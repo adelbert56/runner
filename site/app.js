@@ -38,6 +38,7 @@ const state = {
 const els = {
   raceCount: document.querySelector("#race-count"),
   favoriteCount: document.querySelector("#favorite-count"),
+  registeredCount: document.querySelector("#registered-count"),
   nextRaceLink: document.querySelector("#next-race-link"),
   nextRace: document.querySelector("#next-race"),
   nextRaceCaption: document.querySelector("#next-race-caption"),
@@ -1032,6 +1033,10 @@ function isRegisteredRace(race) {
   return state.registeredRaces.has(getRaceKey(race));
 }
 
+function isTrackedRace(race) {
+  return isFavorite(race) || isRegisteredRace(race);
+}
+
 function isSourceLink(url) {
   try {
     const host = new URL(url).hostname.toLowerCase();
@@ -1421,7 +1426,7 @@ function getVisibleRaces() {
     const matchesHistoryScope = state.registration === "history" ? historical : !historical;
     const matchesDistance = state.distance === "all" || distanceBucket(race) === state.distance || (state.distance === "marathon" && ["marathon", "ultra"].includes(distanceBucket(race)));
     const matchesMonth = state.month === "all" || monthOf(race) === state.month;
-    const matchesFavorite = !state.favoritesOnly || isFavorite(race);
+    const matchesFavorite = !state.favoritesOnly || isTrackedRace(race);
     const haystack = [
       race.race_name,
       race.race_county,
@@ -1448,8 +1453,11 @@ function getVisibleRaces() {
 function renderStats() {
   els.raceCount.textContent = String(state.races.length);
   els.favoriteCount.textContent = String(state.favorites.size);
+  if (els.registeredCount) {
+    els.registeredCount.textContent = String(state.registeredRaces.size);
+  }
   const trackedUpcoming = state.races
-    .filter((race) => isFavorite(race) && race.race_date >= TODAY && !isCancelledRace(race))
+    .filter((race) => isTrackedRace(race) && race.race_date >= TODAY && !isCancelledRace(race))
     .sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
   const upcoming = trackedUpcoming[0];
   if (!upcoming) {
@@ -1649,7 +1657,7 @@ function renderMonths() {
   const source = state.races.filter((race) => {
     const historical = isHistoricalRace(race);
     const matchesHistoryScope = state.registration === "history" ? historical : !historical;
-    return matchesHistoryScope && (!state.favoritesOnly || isFavorite(race));
+    return matchesHistoryScope && (!state.favoritesOnly || isTrackedRace(race));
   });
   const counts = source.reduce((acc, race) => {
     const month = monthOf(race);
@@ -1681,13 +1689,13 @@ function renderMonths() {
 function renderRaces() {
   const races = getVisibleRaces();
   els.resultCount.textContent = state.favoritesOnly
-    ? `收藏清單 ${races.length} 場`
+    ? `我的賽事 ${races.length} 場`
     : state.registration === "history"
       ? `歷史賽事 ${races.length} 場`
-    : `目前顯示 ${races.length} 場`;
+      : `目前顯示 ${races.length} 場`;
 
   if (!races.length) {
-    els.raceList.innerHTML = `<div class="empty-state">${state.favoritesOnly ? "還沒有收藏符合條件的賽事。" : "沒有符合條件的賽事。"}</div>`;
+    els.raceList.innerHTML = `<div class="empty-state">${state.favoritesOnly ? "還沒有我的賽事符合條件。" : "沒有符合條件的賽事。"}</div>`;
     return;
   }
 
@@ -1735,6 +1743,14 @@ function renderRaces() {
             : ["連結待補", "warning"],
         verifiedAt ? [`${formatShortDate(verifiedAt) || verifiedAt} 查證`, "verified"] : ["待查證", "warning"],
         sourcePlatform ? [`來源 ${sourcePlatform}`, "source"] : null,
+      ].filter(Boolean);
+      const detailLinks = [
+        !registrationTarget.url && race.facebook_search_url
+          ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>`
+          : "",
+        race.detail_url && registrationTarget.url !== race.detail_url
+          ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>`
+          : "",
       ].filter(Boolean);
 
       return `
@@ -1819,10 +1835,7 @@ function renderRaces() {
                 ? `<button class="train-button" type="button" data-train-race="${escapeHtml(key)}">用這場排課</button>`
                 : `<button class="train-button" type="button" disabled>${escapeHtml(disabledTrainingLabel)}</button>`
             }
-            <div class="detail-actions">
-              ${!registrationTarget.url && race.facebook_search_url ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>` : ""}
-              ${race.detail_url && registrationTarget.url !== race.detail_url ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>` : ""}
-            </div>
+            ${detailLinks.length ? `<div class="detail-actions">${detailLinks.join("")}</div>` : ""}
           </div>
         </article>
       `;
@@ -3030,7 +3043,7 @@ function render() {
   setActiveButtons(els.registrationButtons, "registration", state.registration);
   setActiveButtons(els.distanceButtons, "distance", state.distance);
   els.favoriteFilter.classList.toggle("active", state.favoritesOnly);
-  els.favoriteFilter.textContent = state.favoritesOnly ? "顯示全部賽事" : "只看收藏";
+  els.favoriteFilter.textContent = state.favoritesOnly ? "顯示全部賽事" : "我的賽事";
   renderMonths();
   renderRaces();
 }
