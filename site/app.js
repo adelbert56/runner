@@ -1420,13 +1420,15 @@ function useRaceForTraining(race) {
 }
 
 function getVisibleRaces() {
+  return getBoardRaces();
+}
+
+function getBoardRaces() {
   const query = state.query.trim().toLowerCase();
   return state.races.filter((race) => {
-    const historical = isHistoricalRace(race);
     const matchesCounty = state.county === "all" || race.race_county === state.county;
     const matchesDifficulty = state.difficulty === "all" || race.difficulty === state.difficulty;
     const matchesRegistration = state.registration === "all" || registrationBucket(race) === state.registration;
-    const matchesHistoryScope = state.registration === "history" ? historical : !historical;
     const matchesDistance = state.distance === "all" || distanceBucket(race) === state.distance || (state.distance === "marathon" && ["marathon", "ultra"].includes(distanceBucket(race)));
     const matchesMonth = state.month === "all" || monthOf(race) === state.month;
     const matchesFavorite = !state.favoritesOnly || isTrackedRace(race);
@@ -1444,13 +1446,153 @@ function getVisibleRaces() {
       matchesCounty &&
       matchesDifficulty &&
       matchesRegistration &&
-      matchesHistoryScope &&
       matchesDistance &&
       matchesMonth &&
       matchesFavorite &&
       (!query || haystack.includes(query))
     );
   }).sort(sortRaceForBoard);
+}
+
+function renderRaceCard(race) {
+  const key = getRaceKey(race);
+  const date = formatDateParts(race.race_date);
+  const distances = (race.distances || ["距離待確認"]).join(" / ");
+  const status = getRegistrationDisplayStatus(race);
+  const statusClass = getRegistrationStatusClass(race, status);
+  const difficulty = race.difficulty || "初級";
+  const cls = difficultyClass[difficulty] || "";
+  const registrationTarget = getRegistrationTarget(race);
+  const note = race.registration_note || "未提供官方報名連結，待人工補連結";
+  const opensAt = formatShortDate(race.registration_opens_at) || "待確認";
+  const deadline = formatShortDate(race.registration_deadline) || "待確認";
+  const datesNeedCheck = hasSuspiciousRegistrationDates(race);
+  const scheduleOpenText = datesNeedCheck ? "待查證" : opensAt;
+  const favorite = isFavorite(race);
+  const registered = isRegisteredRace(race);
+  const decision = raceDecisionText(race, registrationTarget);
+  const cancelled = isCancelledRace(race);
+  const raceDays = dateDiffDays(race.race_date);
+  const expired = raceDays !== null && raceDays < 0;
+  const canPlanTraining = !cancelled && raceDays !== null && raceDays >= 0;
+  const disabledTrainingLabel = cancelled ? "活動停辦" : "賽事已過";
+  const venue = venueForRace(race);
+  const mapLink = mapQueryForRace(race, venue);
+  const startTimes = formatStartTimes(race, "");
+  const weather = weatherSummaryForRace(race);
+  const organizer = race.organizer || race.host || race.organizer_name || "";
+  const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
+  const factItems = [
+    venue ? { label: "地點", value: venue, action: mapLink ? { href: mapLink, label: "導航" } : null } : null,
+    startTimes ? { label: "開跑", value: startTimes } : null,
+    weather ? { label: "天氣", value: weather } : null,
+    organizer ? { label: "主辦", value: organizer } : null,
+  ].filter(Boolean);
+  const sourcePlatform = race.source_platform || race.source || "";
+  const trustItems = [
+    registrationTarget.kind === "official"
+      ? ["官方直連", "trusted"]
+      : registrationTarget.url
+        ? ["公開資訊", "neutral"]
+        : ["連結待補", "warning"],
+    verifiedAt ? [`${formatShortDate(verifiedAt) || verifiedAt} 查證`, "verified"] : ["待查證", "warning"],
+    sourcePlatform ? [`來源 ${sourcePlatform}`, "source"] : null,
+  ].filter(Boolean);
+  const detailLinks = [
+    !registrationTarget.url && race.facebook_search_url
+      ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>`
+      : "",
+    race.detail_url && registrationTarget.url !== race.detail_url
+      ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>`
+      : "",
+  ].filter(Boolean);
+
+  return `
+    <article id="${escapeHtml(raceDomId(race))}" class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""}">
+      <div class="date-block" aria-label="${escapeHtml(date.full)}">
+        <div>
+          <span>${escapeHtml(date.year)}</span>
+          <strong>${escapeHtml(date.month)}/${escapeHtml(date.day)}</strong>
+          <em>${escapeHtml(date.weekday)}</em>
+        </div>
+      </div>
+      <div class="race-main">
+        <div class="race-title-row">
+          <h3>${raceTitleHtml(race.race_name)}</h3>
+        </div>
+        <div class="race-summary-line">
+          <span>${escapeHtml(race.race_county)}</span>
+          <span class="${cls}">${escapeHtml(difficulty)}</span>
+          <span class="race-status ${statusClass}">${escapeHtml(status)}</span>
+        </div>
+        <p class="race-distance">${escapeHtml(distances)}</p>
+        <div class="race-schedule" aria-label="報名時間">
+          <span class="${datesNeedCheck ? "schedule-warning" : ""}"><strong>開報</strong>${escapeHtml(scheduleOpenText)}</span>
+          <span><strong>截止</strong>${escapeHtml(deadline)}</span>
+        </div>
+        ${datesNeedCheck ? `<p class="race-data-warning">報名起訖日期邏輯待查證</p>` : ""}
+        <div class="race-insight">${escapeHtml(decision)}</div>
+        ${
+          factItems.length || trustItems.length
+            ? `<details class="race-detail-panel">
+                <summary>賽事資訊</summary>
+                <div class="race-trust-line" aria-label="資料可信度">
+                  ${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}
+                </div>
+                ${
+                  factItems.length
+                    ? `
+                <dl>
+                  ${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : escapeHtml(item.value)}</dd></div>`).join("")}
+                </dl>
+                    `
+                    : ""
+                }
+              </details>`
+            : ""
+        }
+      </div>
+      <div class="race-actions">
+        <div class="primary-action-row">
+          ${
+            registrationTarget.url
+              ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
+              : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
+          }
+          <button
+            class="registration-toggle race-registered ${registered ? "active" : ""}"
+            type="button"
+            data-registered="${escapeHtml(key)}"
+            aria-pressed="${registered ? "true" : "false"}"
+            aria-label="${registered ? "取消已報名" : "標記已報名"}"
+            title="${registered ? "取消已報名" : "標記已報名"}"
+          ><span class="registration-toggle__icon" aria-hidden="true">${registered ? "✓" : ""}</span><span class="registration-toggle__label">已報名</span></button>
+          <button
+            class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
+            type="button"
+            data-favorite="${escapeHtml(key)}"
+            aria-pressed="${favorite ? "true" : "false"}"
+            aria-label="${favorite ? "取消收藏" : "加入收藏"}"
+            title="${favorite ? "取消收藏" : "加入收藏"}"
+          ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
+        </div>
+        <div class="calendar-menu">
+          <button class="calendar-button" type="button" data-calendar-menu="${escapeHtml(key)}" aria-expanded="false">加入行事曆</button>
+          <div class="calendar-options" data-calendar-options="${escapeHtml(key)}" hidden>
+            <a href="${escapeHtml(buildGoogleCalendarUrl(race))}" target="_blank" rel="noreferrer">Google Calendar</a>
+            <button type="button" data-calendar-download="${escapeHtml(key)}">下載 ICS</button>
+            <button type="button" data-calendar-copy="${escapeHtml(key)}">複製資訊</button>
+          </div>
+        </div>
+        ${
+          canPlanTraining
+            ? `<button class="train-button" type="button" data-train-race="${escapeHtml(key)}">用這場排課</button>`
+            : `<button class="train-button" type="button" disabled>${escapeHtml(disabledTrainingLabel)}</button>`
+        }
+        ${detailLinks.length ? `<div class="detail-actions">${detailLinks.join("")}</div>` : ""}
+      </div>
+    </article>
+  `;
 }
 
 function renderStats() {
@@ -1765,32 +1907,51 @@ function renderRaceTodo() {
     return;
   }
 
+  const groups = [
+    { key: "today", title: "今天要處理", items: todos.filter(({ days }) => days === 0) },
+    { key: "week", title: "7 天內", items: todos.filter(({ days }) => days > 0 && days <= 7) },
+    { key: "month", title: "30 天內", items: todos.filter(({ days }) => days > 7 && days <= 30) },
+  ];
+  const priorityItems = todos.filter(({ race }) => isFavorite(race) && isRegisteredRace(race));
+
   els.raceTodo.innerHTML = `
     <article class="race-todo-card">
       <div class="race-todo-head">
         <div>
           <p class="race-todo-kicker">我的賽事待辦</p>
           <h3>${todos.length} 場已報名賽事快開跑</h3>
-          <p>我先幫你拉出 30 天內的已報名場次，讓你直接看下一步要準備什麼。</p>
+          <p>我先幫你拉出 30 天內的已報名場次，優先清單會先放收藏且已報名的賽事，讓你不用自己判斷。</p>
         </div>
-        <span class="race-todo-meta">已報名 ${registeredCount} 場</span>
+        <span class="race-todo-meta">已報名 ${registeredCount} 場 · 收藏且已報名 ${favoriteRegistered} 場</span>
       </div>
-      <div class="race-todo-list">
-        ${todos.map(({ race, days }) => {
-          const key = getRaceKey(race);
-          const date = formatDateParts(race.race_date);
-          const status = getRegistrationDisplayStatus(race);
-          const distanceText = (race.distances || []).slice(0, 2).join(" / ") || "距離待確認";
-          const countdown = days === 0 ? "今天開跑" : `倒數 ${days} 天`;
-          return `
-            <button type="button" class="race-todo-item" data-race-todo="${escapeHtml(key)}">
-              <span class="race-todo-date">${escapeHtml(date.month)}/${escapeHtml(date.day)}</span>
-              <span class="race-todo-name">${raceTitleHtml(race.race_name)}</span>
-              <span class="race-todo-meta">${escapeHtml(distanceText)} · ${escapeHtml(status)} · ${escapeHtml(countdown)}</span>
-            </button>
-          `;
-        }).join("")}
+      <div class="race-todo-section">
+        <div class="race-todo-section-head">
+          <span>優先清單</span>
+          <em>收藏＋已報名</em>
+        </div>
+        <div class="race-todo-list">
+          ${
+            priorityItems.length
+              ? priorityItems.map(({ race, days }) => todoItemHtml(race, days, "priority")).join("")
+              : `<div class="race-todo-emptyline">目前還沒有同時收藏且已報名的賽事。</div>`
+          }
+        </div>
       </div>
+      ${groups.map((group) => `
+        <div class="race-todo-section">
+          <div class="race-todo-section-head">
+            <span>${escapeHtml(group.title)}</span>
+            <em>${escapeHtml(String(group.items.length))} 場</em>
+          </div>
+          <div class="race-todo-list">
+            ${
+              group.items.length
+                ? group.items.map(({ race, days }) => todoItemHtml(race, days)).join("")
+                : `<div class="race-todo-emptyline">沒有符合這個時間範圍的已報名賽事。</div>`
+            }
+          </div>
+        </div>
+      `).join("")}
     </article>
   `;
 
@@ -1820,165 +1981,84 @@ function renderRaceTodo() {
   });
 }
 
+function todoItemHtml(race, days, variant = "") {
+  const key = getRaceKey(race);
+  const date = formatDateParts(race.race_date);
+  const status = getRegistrationDisplayStatus(race);
+  const distanceText = (race.distances || []).slice(0, 2).join(" / ") || "距離待確認";
+  const countdown = days === 0 ? "今天開跑" : `倒數 ${days} 天`;
+  const isPriority = variant === "priority" || (isFavorite(race) && isRegisteredRace(race));
+  return `
+    <button type="button" class="race-todo-item ${isPriority ? "race-todo-priority" : ""}" data-race-todo="${escapeHtml(key)}">
+      <span class="race-todo-date">${escapeHtml(date.month)}/${escapeHtml(date.day)}</span>
+      <span class="race-todo-name">${raceTitleHtml(race.race_name)}</span>
+      <span class="race-todo-meta">${isPriority ? "優先" : ""}${isPriority ? " · " : ""}${escapeHtml(distanceText)} · ${escapeHtml(status)} · ${escapeHtml(countdown)}</span>
+    </button>
+  `;
+}
+
+function getTodaySuggestion(currentRaces, historyRaces, todoItems) {
+  const prioritySoon = todoItems.find(({ race, days }) => isFavorite(race) && isRegisteredRace(race) && days <= 7);
+  if (prioritySoon) {
+    return "今天建議：先處理已報名快開跑";
+  }
+  const urgentOpen = currentRaces.find((race) => registrationBucket(race) === "soon");
+  if (urgentOpen) {
+    return "今天建議：先看即將截止";
+  }
+  const todayRace = todoItems.find(({ days }) => days === 0);
+  if (todayRace) {
+    return "今天建議：先確認今天開跑";
+  }
+  if (currentRaces.length) {
+    return `今天建議：先看 ${currentRaces.length} 場現在賽事`;
+  }
+  if (historyRaces.length) {
+    return "今天建議：歷史賽事已收起";
+  }
+  return "今天建議：先看我的賽事待辦";
+}
+
 function renderRaces() {
-  const races = getVisibleRaces();
+  const boardRaces = getBoardRaces();
+  const currentRaces = state.registration === "history"
+    ? []
+    : boardRaces.filter((race) => !isHistoricalRace(race));
+  const historyRaces = state.registration === "history"
+    ? boardRaces
+    : boardRaces.filter((race) => isHistoricalRace(race));
+  const todoItems = getRaceTodoItems();
+  const visibleCount = state.registration === "history" ? historyRaces.length : currentRaces.length;
+
   els.resultCount.textContent = state.favoritesOnly
-    ? `我的賽事 ${races.length} 場`
+    ? `我的賽事 ${visibleCount} 場`
     : state.registration === "history"
-      ? `歷史賽事 ${races.length} 場`
-      : `目前顯示 ${races.length} 場`;
+      ? `歷史賽事 ${visibleCount} 場`
+      : `目前顯示 ${visibleCount} 場`;
   if (els.resultHint) {
-    els.resultHint.textContent = getRaceAssistantHint(races);
+    els.resultHint.textContent = getTodaySuggestion(currentRaces, historyRaces, todoItems);
   }
   renderRaceTodo();
 
-  if (!races.length) {
+  if (!currentRaces.length && !historyRaces.length) {
     els.raceList.innerHTML = `<div class="empty-state">${state.favoritesOnly ? "還沒有我的賽事符合條件。" : "沒有符合條件的賽事。"}</div>`;
     return;
   }
 
-  els.raceList.innerHTML = races
-    .map((race) => {
-      const key = getRaceKey(race);
-      const date = formatDateParts(race.race_date);
-      const distances = (race.distances || ["距離待確認"]).join(" / ");
-      const status = getRegistrationDisplayStatus(race);
-      const statusClass = getRegistrationStatusClass(race, status);
-      const difficulty = race.difficulty || "初級";
-      const cls = difficultyClass[difficulty] || "";
-      const registrationTarget = getRegistrationTarget(race);
-      const note = race.registration_note || "未提供官方報名連結，待人工補連結";
-      const opensAt = formatShortDate(race.registration_opens_at) || "待確認";
-      const deadline = formatShortDate(race.registration_deadline) || "待確認";
-      const datesNeedCheck = hasSuspiciousRegistrationDates(race);
-      const scheduleOpenText = datesNeedCheck ? "待查證" : opensAt;
-      const favorite = isFavorite(race);
-      const registered = isRegisteredRace(race);
-      const decision = raceDecisionText(race, registrationTarget);
-      const cancelled = isCancelledRace(race);
-      const raceDays = dateDiffDays(race.race_date);
-      const expired = raceDays !== null && raceDays < 0;
-      const canPlanTraining = !cancelled && raceDays !== null && raceDays >= 0;
-      const disabledTrainingLabel = cancelled ? "活動停辦" : "賽事已過";
-      const venue = venueForRace(race);
-      const mapLink = mapQueryForRace(race, venue);
-      const startTimes = formatStartTimes(race, "");
-      const weather = weatherSummaryForRace(race);
-      const organizer = race.organizer || race.host || race.organizer_name || "";
-      const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
-      const factItems = [
-        venue ? { label: "地點", value: venue, action: mapLink ? { href: mapLink, label: "導航" } : null } : null,
-        startTimes ? { label: "開跑", value: startTimes } : null,
-        weather ? { label: "天氣", value: weather } : null,
-        organizer ? { label: "主辦", value: organizer } : null,
-      ].filter(Boolean);
-      const sourcePlatform = race.source_platform || race.source || "";
-      const trustItems = [
-        registrationTarget.kind === "official"
-          ? ["官方直連", "trusted"]
-          : registrationTarget.url
-            ? ["公開資訊", "neutral"]
-            : ["連結待補", "warning"],
-        verifiedAt ? [`${formatShortDate(verifiedAt) || verifiedAt} 查證`, "verified"] : ["待查證", "warning"],
-        sourcePlatform ? [`來源 ${sourcePlatform}`, "source"] : null,
-      ].filter(Boolean);
-      const detailLinks = [
-        !registrationTarget.url && race.facebook_search_url
-          ? `<a class="sub-link" href="${escapeHtml(race.facebook_search_url)}" target="_blank" rel="noreferrer">臉書</a>`
-          : "",
-        race.detail_url && registrationTarget.url !== race.detail_url
-          ? `<a class="sub-link" href="${escapeHtml(race.detail_url)}" target="_blank" rel="noreferrer">詳情</a>`
-          : "",
-      ].filter(Boolean);
+  const currentHtml = currentRaces.map(renderRaceCard).join("");
+  const historyHtml = historyRaces.length && state.registration !== "history"
+    ? `
+      <details class="history-races">
+        <summary>歷史賽事已收起 · ${escapeHtml(String(historyRaces.length))} 場</summary>
+        <p class="history-races-note">預設收起舊賽事，只有需要回查時再展開。</p>
+        <div class="history-race-list">
+          ${historyRaces.map(renderRaceCard).join("")}
+        </div>
+      </details>
+    `
+    : historyRaces.map(renderRaceCard).join("");
 
-      return `
-        <article id="${escapeHtml(raceDomId(race))}" class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""}">
-          <div class="date-block" aria-label="${escapeHtml(date.full)}">
-            <div>
-              <span>${escapeHtml(date.year)}</span>
-              <strong>${escapeHtml(date.month)}/${escapeHtml(date.day)}</strong>
-              <em>${escapeHtml(date.weekday)}</em>
-            </div>
-          </div>
-          <div class="race-main">
-            <div class="race-title-row">
-              <h3>${raceTitleHtml(race.race_name)}</h3>
-            </div>
-            <div class="race-summary-line">
-              <span>${escapeHtml(race.race_county)}</span>
-              <span class="${cls}">${escapeHtml(difficulty)}</span>
-              <span class="race-status ${statusClass}">${escapeHtml(status)}</span>
-            </div>
-            <p class="race-distance">${escapeHtml(distances)}</p>
-            <div class="race-schedule" aria-label="報名時間">
-              <span class="${datesNeedCheck ? "schedule-warning" : ""}"><strong>開報</strong>${escapeHtml(scheduleOpenText)}</span>
-              <span><strong>截止</strong>${escapeHtml(deadline)}</span>
-            </div>
-            ${datesNeedCheck ? `<p class="race-data-warning">報名起訖日期邏輯待查證</p>` : ""}
-            <div class="race-insight">${escapeHtml(decision)}</div>
-            ${
-              factItems.length || trustItems.length
-                ? `<details class="race-detail-panel">
-                    <summary>賽事資訊</summary>
-                    <div class="race-trust-line" aria-label="資料可信度">
-                      ${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}
-                    </div>
-                    ${
-                      factItems.length
-                        ? `
-                    <dl>
-                      ${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : escapeHtml(item.value)}</dd></div>`).join("")}
-                    </dl>
-                        `
-                        : ""
-                    }
-                  </details>`
-                : ""
-            }
-          </div>
-          <div class="race-actions">
-            <div class="primary-action-row">
-              ${
-                registrationTarget.url
-                  ? `<a class="register-link ${registrationTarget.kind !== "official" ? "fallback" : ""}" href="${escapeHtml(registrationTarget.url)}" target="_blank" rel="noreferrer">${escapeHtml(registrationTarget.label)}</a>`
-                  : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
-              }
-              <button
-                class="registration-toggle race-registered ${registered ? "active" : ""}"
-                type="button"
-                data-registered="${escapeHtml(key)}"
-                aria-pressed="${registered ? "true" : "false"}"
-                aria-label="${registered ? "取消已報名" : "標記已報名"}"
-                title="${registered ? "取消已報名" : "標記已報名"}"
-              ><span class="registration-toggle__icon" aria-hidden="true">${registered ? "✓" : ""}</span><span class="registration-toggle__label">已報名</span></button>
-              <button
-                class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
-                type="button"
-                data-favorite="${escapeHtml(key)}"
-                aria-pressed="${favorite ? "true" : "false"}"
-                aria-label="${favorite ? "取消收藏" : "加入收藏"}"
-                title="${favorite ? "取消收藏" : "加入收藏"}"
-              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
-            </div>
-            <div class="calendar-menu">
-              <button class="calendar-button" type="button" data-calendar-menu="${escapeHtml(key)}" aria-expanded="false">加入行事曆</button>
-              <div class="calendar-options" data-calendar-options="${escapeHtml(key)}" hidden>
-                <a href="${escapeHtml(buildGoogleCalendarUrl(race))}" target="_blank" rel="noreferrer">Google Calendar</a>
-                <button type="button" data-calendar-download="${escapeHtml(key)}">下載 ICS</button>
-                <button type="button" data-calendar-copy="${escapeHtml(key)}">複製資訊</button>
-              </div>
-            </div>
-            ${
-              canPlanTraining
-                ? `<button class="train-button" type="button" data-train-race="${escapeHtml(key)}">用這場排課</button>`
-                : `<button class="train-button" type="button" disabled>${escapeHtml(disabledTrainingLabel)}</button>`
-            }
-            ${detailLinks.length ? `<div class="detail-actions">${detailLinks.join("")}</div>` : ""}
-          </div>
-        </article>
-      `;
-    })
-    .join("");
+  els.raceList.innerHTML = `${currentHtml}${historyHtml}`;
 
   els.raceList.querySelectorAll("[data-favorite]").forEach((button) => {
     button.addEventListener("click", () => {
