@@ -1501,6 +1501,46 @@ h3 {
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
+.registration-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 122px;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid rgba(21, 83, 56, 0.16);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.registration-toggle span[aria-hidden="true"] {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.registration-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.registration-toggle.active {
+  border-color: #0f6a43;
+  background: #def0e6;
+  color: var(--green-dark);
+  box-shadow: inset 0 0 0 1px rgba(15, 106, 67, 0.08);
+}
+
+.registration-toggle:focus-visible {
+  outline: 3px solid rgba(36, 114, 79, 0.28);
+  outline-offset: 2px;
+}
+
 .race-favorite {
   position: static;
   z-index: 1;
@@ -1921,7 +1961,7 @@ h3 {
 .primary-action-row {
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1fr) 44px;
+  grid-template-columns: minmax(0, 1fr) minmax(122px, max-content) 44px;
   gap: 8px;
   align-items: stretch;
 }
@@ -4750,6 +4790,7 @@ h3 {
   }
 
   .favorite-button,
+  .registration-toggle,
   .calendar-button,
   .train-button {
     min-height: 34px;
@@ -4761,6 +4802,11 @@ h3 {
   .register-link,
   .calendar-button {
     width: 100%;
+  }
+
+  .registration-toggle {
+    width: 100%;
+    min-width: 0;
   }
 
   .race-favorite {

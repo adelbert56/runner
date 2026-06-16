@@ -2,6 +2,7 @@ const DEVICE_KEY = "runner-plaza:device-id";
 const LEGACY_FAVORITES_KEY = "runner-plaza:favorites";
 const DEVICE_ID = getDeviceId();
 const FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:favorites`;
+const REGISTERED_RACES_KEY = `runner-plaza:${DEVICE_ID}:registered-races`;
 const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
@@ -18,6 +19,7 @@ const state = {
   month: "all",
   query: "",
   favorites: new Set(),
+  registeredRaces: new Set(),
   contentFavorites: new Set(),
   favoritesOnly: false,
   shoeFavoritesOnly: false,
@@ -471,6 +473,19 @@ function loadFavorites() {
 
 function saveFavorites() {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify([...state.favorites]));
+}
+
+function loadRegisteredRaces() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(REGISTERED_RACES_KEY) || "[]");
+    state.registeredRaces = new Set(Array.isArray(stored) ? stored : []);
+  } catch {
+    state.registeredRaces = new Set();
+  }
+}
+
+function saveRegisteredRaces() {
+  localStorage.setItem(REGISTERED_RACES_KEY, JSON.stringify([...state.registeredRaces]));
 }
 
 function loadContentFavorites() {
@@ -1011,6 +1026,10 @@ function isHistoricalRace(race) {
 
 function isFavorite(race) {
   return state.favorites.has(getRaceKey(race)) || state.favorites.has(legacyRaceKey(race));
+}
+
+function isRegisteredRace(race) {
+  return state.registeredRaces.has(getRaceKey(race));
 }
 
 function isSourceLink(url) {
@@ -1688,6 +1707,7 @@ function renderRaces() {
       const datesNeedCheck = hasSuspiciousRegistrationDates(race);
       const scheduleOpenText = datesNeedCheck ? "待查證" : opensAt;
       const favorite = isFavorite(race);
+      const registered = isRegisteredRace(race);
       const decision = raceDecisionText(race, registrationTarget);
       const cancelled = isCancelledRace(race);
       const raceDays = dateDiffDays(race.race_date);
@@ -1770,6 +1790,14 @@ function renderRaces() {
                   : `<span class="register-link disabled" title="${escapeHtml(note)}">${escapeHtml(registrationTarget.label)}</span>`
               }
               <button
+                class="registration-toggle race-registered ${registered ? "active" : ""}"
+                type="button"
+                data-registered="${escapeHtml(key)}"
+                aria-pressed="${registered ? "true" : "false"}"
+                aria-label="${registered ? "取消已報名" : "標記已報名"}"
+                title="${registered ? "取消已報名" : "標記已報名"}"
+              ><span aria-hidden="true">${registered ? "☑" : "☐"}</span><span>已報名</span></button>
+              <button
                 class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
                 type="button"
                 data-favorite="${escapeHtml(key)}"
@@ -1811,6 +1839,19 @@ function renderRaces() {
       }
       saveFavorites();
       renderStats();
+      render();
+    });
+  });
+
+  els.raceList.querySelectorAll("[data-registered]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.registered;
+      if (state.registeredRaces.has(key)) {
+        state.registeredRaces.delete(key);
+      } else {
+        state.registeredRaces.add(key);
+      }
+      saveRegisteredRaces();
       render();
     });
   });
@@ -3289,6 +3330,7 @@ async function loadRaces() {
 
 async function init() {
   loadFavorites();
+  loadRegisteredRaces();
   loadContentFavorites();
   loadContentSettings();
   readSharedFavorites();
