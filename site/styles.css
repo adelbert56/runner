@@ -1459,6 +1459,117 @@ h3 {
   color: var(--green-dark);
 }
 
+.race-todo {
+  margin: 0 0 14px;
+}
+
+.race-todo-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid rgba(21, 83, 56, 0.12);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(36, 114, 79, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(245, 250, 246, 0.96));
+  box-shadow: var(--shadow-soft);
+}
+
+.race-todo-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.race-todo-kicker {
+  margin: 0 0 6px;
+  color: var(--green-dark);
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.race-todo-head h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.08rem;
+}
+
+.race-todo-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.race-todo-meta {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(36, 114, 79, 0.09);
+  color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.race-todo-list {
+  display: grid;
+  gap: 10px;
+}
+
+.race-todo-item {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  gap: 10px 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(31, 42, 36, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(31, 42, 36, 0.04);
+}
+
+.race-todo-item:hover,
+.race-todo-item:focus-visible {
+  border-color: rgba(21, 83, 56, 0.2);
+  transform: translateY(-1px);
+}
+
+.race-todo-date {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: rgba(36, 114, 79, 0.08);
+  color: var(--green-dark);
+  font-size: 0.95rem;
+  font-weight: 950;
+  letter-spacing: 0.02em;
+}
+
+.race-todo-name {
+  min-width: 0;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.race-todo-item .race-todo-meta {
+  justify-self: end;
+  background: rgba(255, 253, 248, 0.96);
+  color: var(--muted);
+}
+
 .race-list {
   display: grid;
   gap: 14px;
@@ -4697,6 +4808,31 @@ h3 {
 
   .result-actions .share-list-button::before {
     margin-right: 3px;
+  }
+
+  .race-todo {
+    margin-bottom: 10px;
+  }
+
+  .race-todo-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .race-todo-head {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .race-todo-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .race-todo-date,
+  .race-todo-item .race-todo-meta {
+    justify-self: start;
   }
 
   .race-filter-panel {

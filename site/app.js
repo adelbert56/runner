@@ -56,6 +56,7 @@ const els = {
   monthList: document.querySelector("#month-list"),
   resultCount: document.querySelector("#result-count"),
   resultHint: document.querySelector("#result-hint"),
+  raceTodo: document.querySelector("#race-todo"),
   favoriteFilter: document.querySelector("#favorite-filter"),
   clearFilters: document.querySelector("#clear-filters"),
   countyButtons: document.querySelectorAll("[data-county]"),
@@ -1728,7 +1729,95 @@ function getRaceAssistantHint(races) {
     return `目前聚焦 ${scope}，共 ${races.length} 場。收藏 ${favoriteCount} 場，已報名 ${registeredCount} 場。`;
   }
 
-  return `目前顯示 ${races.length} 場，我會先把即將截止、可報名和我的賽事排在前面。`;
+  return "我會先把即將截止、可報名和我的賽事排在前面。";
+}
+
+function getRaceTodoItems() {
+  const horizonDays = 30;
+  return state.races
+    .filter((race) => isRegisteredRace(race) && !isCancelledRace(race))
+    .map((race) => ({ race, days: dateDiffDays(race.race_date) }))
+    .filter(({ days }) => days !== null && days >= 0 && days <= horizonDays)
+    .sort((a, b) => a.days - b.days)
+    .slice(0, 4);
+}
+
+function renderRaceTodo() {
+  if (!els.raceTodo) {
+    return;
+  }
+  const todos = getRaceTodoItems();
+  const registeredCount = state.races.filter((race) => isRegisteredRace(race)).length;
+  const favoriteRegistered = state.races.filter((race) => isTrackedRace(race) && isRegisteredRace(race)).length;
+
+  if (!todos.length) {
+    els.raceTodo.innerHTML = `
+      <article class="race-todo-card race-todo-empty">
+        <div class="race-todo-head">
+          <div>
+            <p class="race-todo-kicker">我的賽事待辦</p>
+            <h3>目前沒有快開跑的已報名賽事</h3>
+            <p>已報名 ${registeredCount} 場，收藏且已報名 ${favoriteRegistered} 場。等有接近開跑的場次，我會自動幫你提到最前面。</p>
+          </div>
+        </div>
+      </article>
+    `;
+    return;
+  }
+
+  els.raceTodo.innerHTML = `
+    <article class="race-todo-card">
+      <div class="race-todo-head">
+        <div>
+          <p class="race-todo-kicker">我的賽事待辦</p>
+          <h3>${todos.length} 場已報名賽事快開跑</h3>
+          <p>我先幫你拉出 30 天內的已報名場次，讓你直接看下一步要準備什麼。</p>
+        </div>
+        <span class="race-todo-meta">已報名 ${registeredCount} 場</span>
+      </div>
+      <div class="race-todo-list">
+        ${todos.map(({ race, days }) => {
+          const key = getRaceKey(race);
+          const date = formatDateParts(race.race_date);
+          const status = getRegistrationDisplayStatus(race);
+          const distanceText = (race.distances || []).slice(0, 2).join(" / ") || "距離待確認";
+          const countdown = days === 0 ? "今天開跑" : `倒數 ${days} 天`;
+          return `
+            <button type="button" class="race-todo-item" data-race-todo="${escapeHtml(key)}">
+              <span class="race-todo-date">${escapeHtml(date.month)}/${escapeHtml(date.day)}</span>
+              <span class="race-todo-name">${raceTitleHtml(race.race_name)}</span>
+              <span class="race-todo-meta">${escapeHtml(distanceText)} · ${escapeHtml(status)} · ${escapeHtml(countdown)}</span>
+            </button>
+          `;
+        }).join("")}
+      </div>
+    </article>
+  `;
+
+  els.raceTodo.querySelectorAll("[data-race-todo]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.raceTodo;
+      const race = state.races.find((item) => getRaceKey(item) === key);
+      if (!race) {
+        return;
+      }
+      state.county = "all";
+      state.difficulty = "all";
+      state.registration = "all";
+      state.distance = "all";
+      state.month = "all";
+      state.query = "";
+      state.favoritesOnly = false;
+      els.search.value = "";
+      setActivePanel("races");
+      render();
+      requestAnimationFrame(() => {
+        const card = document.getElementById(raceDomId(race));
+        card?.scrollIntoView({ behavior: "smooth", block: "center" });
+        card?.querySelector("details")?.setAttribute("open", "");
+      });
+    });
+  });
 }
 
 function renderRaces() {
@@ -1741,6 +1830,7 @@ function renderRaces() {
   if (els.resultHint) {
     els.resultHint.textContent = getRaceAssistantHint(races);
   }
+  renderRaceTodo();
 
   if (!races.length) {
     els.raceList.innerHTML = `<div class="empty-state">${state.favoritesOnly ? "還沒有我的賽事符合條件。" : "沒有符合條件的賽事。"}</div>`;
