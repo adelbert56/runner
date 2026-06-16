@@ -1012,6 +1012,26 @@ function migrateRaceFavorites() {
   }
 }
 
+function syncRaceFavorites() {
+  const validKeys = new Set();
+  state.races.forEach((race) => {
+    validKeys.add(getRaceKey(race));
+    validKeys.add(legacyRaceKey(race));
+  });
+
+  let changed = false;
+  [...state.favorites].forEach((key) => {
+    if (!validKeys.has(key)) {
+      state.favorites.delete(key);
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    saveFavorites();
+  }
+}
+
 function sortRaceForBoard(a, b) {
   const aUpcoming = String(a.race_date) >= TODAY;
   const bUpcoming = String(b.race_date) >= TODAY;
@@ -3550,6 +3570,7 @@ async function loadRaces() {
       const races = await response.json();
       state.races = races.sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)));
       migrateRaceFavorites();
+      syncRaceFavorites();
       return;
     } catch (error) {
       lastError = error;
