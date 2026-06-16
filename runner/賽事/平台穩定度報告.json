@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-06-11T11:57:27.308Z",
-  "basis_date": "2026-06-11",
+  "generated_at": "2026-06-16T11:02:11.509Z",
+  "basis_date": "2026-06-16",
   "items": [
     {
       "platform": "運動筆記",
-      "total": 17,
+      "total": 19,
       "official_direct": 1,
-      "verified": 17,
-      "missing": 15,
-      "opened_gap": 4,
+      "verified": 19,
+      "missing": 17,
+      "opened_gap": 5,
       "date_anomaly": 0,
-      "due_now": 6,
+      "due_now": 8,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
         "仁愛長庚合作聯盟醫院2026永慶盃路跑"
       ],
-      "complete_rate": "12%",
-      "official_direct_rate": "6%",
+      "complete_rate": "11%",
+      "official_direct_rate": "5%",
       "verified_rate": "100%",
-      "score": 46,
+      "score": 45,
       "status": "需補強"
     },
     {
@@ -47,20 +47,20 @@
       "total": 6,
       "official_direct": 5,
       "verified": 6,
-      "missing": 2,
-      "opened_gap": 2,
+      "missing": 3,
+      "opened_gap": 3,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 3,
       "sample_races": [
         "2026中興新村半程馬拉松-披興戴月的想你",
         "2026年FUN電多巴胺路跑嘉年華",
-        "2026 臺中國際馬拉松"
+        "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
       ],
-      "complete_rate": "67%",
+      "complete_rate": "50%",
       "official_direct_rate": "83%",
       "verified_rate": "100%",
-      "score": 84,
-      "status": "穩定"
+      "score": 78,
+      "status": "可用需觀察"
     },
     {
       "platform": "CTRun",
@@ -148,7 +148,7 @@
       "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "夏日馬拉松 - 南投埔里場",
         "2027南投縣仁愛鄉原住民三鐵挑戰賽"
