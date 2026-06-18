@@ -1,6 +1,7 @@
+// 注意：可編輯的 收款明細.xlsx 由 scripts/init-payment-xlsx.mjs 專管，
+// 本腳本只產 md + svg，不碰 xlsx，避免蓋掉內含公式的 Excel。
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import ExcelJS from "exceljs";
 import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -9,7 +10,6 @@ const paths = {
   source: resolve(root, "runner/賽事/收款明細.json"),
   database: resolve(root, "runner/賽事/賽事資料庫.json"),
   md: resolve(root, "runner/賽事/收款明細.md"),
-  xlsx: resolve(root, "runner/賽事/收款明細.xlsx"),
   svg: resolve(root, "runner/賽事/收款明細.svg"),
 };
 
@@ -72,6 +72,7 @@ function buildModel(source, raceIndex) {
         paid: p?.paid === true,
         registered: p?.registered === true,
         paid_date: p?.paid_date ?? "",
+        size: p?.size ?? "",
         note: p?.note ?? "",
       };
     });
@@ -101,15 +102,15 @@ function renderMarkdown(model) {
   const blocks = model.races.map((race) => {
     const rows = race.payments.length
       ? race.payments.map(
-          (p) => `| ${p.name} | ${p.amount} | ${p.paid ? "✅" : "❌"} | ${p.registered ? "✅" : "⬜"} | ${shortDate(p.paid_date)} | ${p.note} |`,
+          (p) => `| ${p.name} | ${p.amount} | ${p.paid ? "✅" : "❌"} | ${p.registered ? "✅" : "⬜"} | ${shortDate(p.paid_date)} | ${p.size} | ${p.note} |`,
         )
-      : ["| _（無資料）_ |  |  |  |  |  |"];
+      : ["| _（無資料）_ |  |  |  |  |  |  |"];
     return [
       `## ${race.race_name}${race.race_date ? ` (${race.race_date})` : ""}`,
       `> 報名金額合計 ${race.total} / 已收 ${race.received} / 未收 ${race.unpaid} / 已幫報名 ${race.registeredCount}人`,
       "",
-      "| 人名 | 報名金額 | 已付 | 已報名 | 付款日 | 備註 |",
-      "|------|------:|:---:|:-----:|--------|------|",
+      "| 人名 | 報名金額 | 已付 | 已報名 | 付款日 | 衣服尺寸 | 備註 |",
+      "|------|------:|:---:|:-----:|--------|:---:|------|",
       ...rows,
     ].join("\n");
   });
@@ -125,71 +126,6 @@ function renderMarkdown(model) {
   ].join("\n");
 }
 
-// ---------- Excel（exceljs，上色）----------
-async function writeXlsx(model) {
-  const wb = new ExcelJS.Workbook();
-  wb.creator = "build-payment-sheet";
-  const ws = wb.addWorksheet("收款明細");
-
-  ws.columns = [
-    { header: "賽事", key: "race", width: 28 },
-    { header: "日期", key: "date", width: 12 },
-    { header: "人名", key: "name", width: 12 },
-    { header: "報名金額", key: "amount", width: 10 },
-    { header: "已付", key: "paid", width: 8 },
-    { header: "已報名", key: "registered", width: 8 },
-    { header: "付款日", key: "paid_date", width: 12 },
-    { header: "備註", key: "note", width: 20 },
-  ];
-
-  const header = ws.getRow(1);
-  header.font = { bold: true, color: { argb: "FFFFFFFF" } };
-  header.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF2F5597" } };
-  header.alignment = { vertical: "middle", horizontal: "center" };
-
-  const green = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD7F0D7" } };
-  const red = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFAD7D7" } };
-
-  for (const race of model.races) {
-    for (const p of race.payments) {
-      const row = ws.addRow({
-        race: race.race_name,
-        date: race.race_date,
-        name: p.name,
-        amount: p.amount,
-        paid: p.paid ? "✅" : "",
-        registered: p.registered ? "✅" : "",
-        paid_date: shortDate(p.paid_date),
-        note: p.note,
-      });
-      row.getCell("paid").fill = p.paid ? green : red;
-      row.getCell("paid").alignment = { horizontal: "center" };
-      row.getCell("registered").alignment = { horizontal: "center" };
-    }
-    // 每場小計列
-    const subtotal = ws.addRow({
-      race: `${race.race_name} 小計`,
-      amount: race.total,
-      paid: `已收 ${race.received}`,
-      registered: `未收 ${race.unpaid}`,
-    });
-    subtotal.font = { bold: true };
-    subtotal.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF2F2F2" } };
-  }
-
-  // 總計列
-  const grand = ws.addRow({
-    race: "★ 全部總計",
-    amount: model.grandTotal,
-    paid: `已收 ${model.grandReceived}`,
-    registered: `未收 ${model.grandTotal - model.grandReceived}`,
-  });
-  grand.font = { bold: true, size: 12 };
-  grand.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE699" } };
-
-  await wb.xlsx.writeFile(paths.xlsx);
-}
-
 // ---------- SVG（圖像）----------
 function renderSvg(model) {
   const rowH = 30;
@@ -200,7 +136,8 @@ function renderSvg(model) {
     { label: "已付", w: 70, align: "middle" },
     { label: "已報名", w: 80, align: "middle" },
     { label: "付款日", w: 90, align: "start", x: 10 },
-    { label: "備註", w: 180, align: "start", x: 10 },
+    { label: "尺寸", w: 60, align: "middle" },
+    { label: "備註", w: 170, align: "start", x: 10 },
   ];
   const width = cols.reduce((s, c) => s + c.w, 0) + 40; // 20 padding each side
   const left = 20;
@@ -246,7 +183,7 @@ function renderSvg(model) {
       const bg = idx % 2 ? "#f6f8fc" : "#ffffff";
       parts.push(`<rect x="${left}" y="${y}" width="${width - 40}" height="${rowH}" fill="${bg}"/>`);
       if (p) {
-        const cells = [p.name, String(p.amount), p.paid ? "✅" : "❌", p.registered ? "✅" : "⬜", shortDate(p.paid_date), p.note];
+        const cells = [p.name, String(p.amount), p.paid ? "✅" : "❌", p.registered ? "✅" : "⬜", shortDate(p.paid_date), p.size, p.note];
         cells.forEach((val, i) => {
           const color = i === 2 ? (p.paid ? "#2e7d32" : "#c62828") : "#222222";
           parts.push(`<text x="${textX(i)}" y="${y + 20}" font-size="12" fill="${color}" text-anchor="${anchor(cols[i].align)}">${escapeXml(val)}</text>`);
@@ -274,6 +211,5 @@ const model = buildModel(source, buildRaceIndex(database));
 
 await writeFile(paths.md, renderMarkdown(model), "utf-8");
 await writeFile(paths.svg, renderSvg(model), "utf-8");
-await writeXlsx(model);
 
-console.log(`產出 ${model.races.length} 場 → md / svg / xlsx。總計已收 ${model.grandReceived} / 總金額 ${model.grandTotal}。`);
+console.log(`產出 ${model.races.length} 場 → md / svg。總計已收 ${model.grandReceived} / 總金額 ${model.grandTotal}。`);

@@ -34,6 +34,7 @@ ws.columns = [
   { key: "paid", width: 8 },
   { key: "registered", width: 9 },
   { key: "paid_date", width: 14 },
+  { key: "size", width: 10 },
   { key: "note", width: 22 },
 ];
 
@@ -53,13 +54,14 @@ for (const race of races) {
       paid: p?.paid === true ? "是" : "否",
       registered: p?.registered === true ? "是" : "否",
       paid_date: p?.paid_date ?? "",
+      size: p?.size ?? "",
       note: p?.note ?? "",
     });
   }
 }
 
 // ---- 標題 ----
-ws.mergeCells("A1:G1");
+ws.mergeCells("A1:H1");
 const title = ws.getCell("A1");
 title.value = "賽程收款明細表";
 title.font = { bold: true, size: 18, color: { argb: "FF1F3864" } };
@@ -88,7 +90,7 @@ for (const addr of ["B2", "D2", "F2", "B3"]) {
 ws.getCell("C3").font = { italic: true, color: { argb: "FF888888" }, size: 9 };
 
 // ---- 表頭 ----
-const headers = ["賽事", "姓名", "報名金額", "已付", "已報名", "付款日", "備註"];
+const headers = ["賽事", "姓名", "報名金額", "已付", "已報名", "付款日", "衣服尺寸", "備註"];
 const hr = ws.getRow(HEADER_ROW);
 headers.forEach((h, i) => {
   const c = hr.getCell(i + 1);
@@ -111,7 +113,9 @@ rows.forEach((r, idx) => {
   row.getCell(6).value = r.paid_date;
   row.getCell(4).alignment = { horizontal: "center" };
   row.getCell(5).alignment = { horizontal: "center" };
-  row.getCell(7).value = r.note;
+  row.getCell(7).value = r.size;
+  row.getCell(7).alignment = { horizontal: "center" };
+  row.getCell(8).value = r.note;
 });
 
 // ---- 下拉選單：已付 / 已報名 = 是 / 否 ----
@@ -135,7 +139,7 @@ ws.addConditionalFormatting({
 });
 
 // ---- 篩選 ----
-ws.autoFilter = { from: { row: HEADER_ROW, column: 1 }, to: { row: HEADER_ROW, column: 7 } };
+ws.autoFilter = { from: { row: HEADER_ROW, column: 1 }, to: { row: HEADER_ROW, column: 8 } };
 
 await wb.xlsx.writeFile(paths.out);
 console.log(`已產出可編輯 Excel：${paths.out}（${rows.length} 筆）。之後直接在 Excel 編輯即可。`);

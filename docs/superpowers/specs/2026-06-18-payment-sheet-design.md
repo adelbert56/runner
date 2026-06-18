@@ -59,7 +59,10 @@ runner/賽事/收款明細.svg     ← 圖像（瀏覽器開可另存 PNG）
 | `paid` | payment | 是 | 是否已收到錢 |
 | `registered` | payment | 是 | 是否已幫他報名 |
 | `paid_date` | payment | 選填 | 付款日期 |
-| `note` | payment | 選填 | 備註（組別、衣服尺寸等） |
+| `size` | payment | 選填 | 衣服尺寸（M/L/XL…） |
+| `note` | payment | 選填 | 備註（組別、距離等） |
+
+**主要編輯方式**：`npm run payment:init` 產生內含公式/下拉/紅綠上色的可編輯 `收款明細.xlsx`，之後平常只在 Excel 改（總計自動算，免指令）。`收款明細.json` 為種子來源；`payment:build` 另出 `.md`/`.svg`（不碰 xlsx，避免蓋掉公式）。
 
 ## 2. 建置腳本 `scripts/build-payment-sheet.mjs`
 

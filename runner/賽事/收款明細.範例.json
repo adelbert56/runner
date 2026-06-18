@@ -1,27 +1,13 @@
 {
-  "_說明": "複製本檔為 收款明細.json 後填真實資料（真實檔已 gitignore，只留本機）。執行 npm run payment:build 產出 .md / .xlsx / .svg。",
+  "_說明": "種子資料。執行 npm run payment:init 會用 收款明細.json 產出可直接編輯的 收款明細.xlsx（含公式/下拉/上色），之後平常只在 Excel 編輯即可，不必再跑指令。真實檔 收款明細.json/.xlsx/.md/.svg 已 gitignore，只留本機。",
   "races": [
     {
       "race_id": "",
       "race_name": "範例賽事（請改成真實資料）",
       "race_date": "2026-05-09",
       "payments": [
-        {
-          "name": "小明",
-          "amount": 860,
-          "paid": true,
-          "registered": true,
-          "paid_date": "2026-03-01",
-          "note": "M號"
-        },
-        {
-          "name": "阿華",
-          "amount": 860,
-          "paid": false,
-          "registered": false,
-          "paid_date": "",
-          "note": ""
-        }
+        { "name": "小明", "amount": 860, "paid": true,  "registered": true,  "paid_date": "2026-03-01", "size": "M", "note": "半馬" },
+        { "name": "阿華", "amount": 860, "paid": false, "registered": false, "paid_date": "",           "size": "L", "note": "" }
       ]
     }
   ]
