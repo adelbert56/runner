@@ -208,7 +208,7 @@ def _semantic_distance_label(value: str) -> str:
 
 def _distance_groups(value: str) -> list[str]:
     text = compact_text(value).replace("Ｋ", "K").replace("ｋ", "k")
-    label_pattern = r"(?:挑戰組|休閒組|健走組|健跑組|健康組|親子組|超半馬組|全馬組|身視障組)"
+    label_pattern = r"(?:全程馬拉松組|半程馬拉松組|友善樂跑組|挑戰組|休閒組|健走組|健跑組|健康組|親子組|超半馬組|全馬組|身視障組)"
     composite_pattern = rf"{label_pattern}\s*[（(]\s*\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)\s*[）)]"
     group_pattern = rf"\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|半馬|全馬|{label_pattern}"
     groups: list[str] = []
@@ -308,29 +308,54 @@ def _start_time_rows_from_schedule(lines: list[str]) -> list[str]:
     return rows
 
 
+def _start_time_rows_from_inline(lines: list[str]) -> list[str]:
+    """Handle lines where group name, time, and start keyword appear together (e.g. biji.co '組名 AM HH:MM 起跑')."""
+    rows: list[str] = []
+    start_keywords = ("起跑", "鳴槍", "出發")
+    for line in lines:
+        if not any(kw in line for kw in start_keywords):
+            continue
+        time = _time_text(line)
+        if not time:
+            continue
+        groups = _distance_groups(line)
+        for group in groups:
+            rows.append(_format_start_time(group, time))
+    return rows
+
+
 def extract_start_times(lines: list[str]) -> str:
     table_rows = _start_time_rows_from_column_table(lines)
     if table_rows:
         return "、".join(dict.fromkeys(table_rows[:8]))
 
     direct = find_label_value(lines, ("開跑時間", "起跑時間", "鳴槍時間", "出發時間", "各組出發"))
-    if direct and _time_text(direct):
+    # Only return direct immediately when it carries group context, not just a bare time.
+    # A bare time (e.g. "06:20") from a column header should fall through to richer parsers.
+    direct_has_group = direct and _time_text(direct) and _distance_groups(direct)
+    if direct_has_group:
         return direct
 
     schedule_rows = _start_time_rows_from_schedule(lines)
     if schedule_rows:
         return "、".join(dict.fromkeys(schedule_rows[:8]))
 
+    inline_rows = _start_time_rows_from_inline(lines)
+    if inline_rows:
+        return "、".join(dict.fromkeys(inline_rows[:8]))
+
     grouped: list[str] = []
     current_group = ""
+    _structural_labels = {"起跑時間", "開跑時間", "出發時間", "鳴槍時間", "各組出發", "起跑地點"}
     for index, line in enumerate(lines):
         groups = _distance_groups(line)
         if groups and len(line) <= 32:
             current_group = groups[0]
-        if current_group and "起跑" in line:
+        if current_group and "起跑" in line and line not in _structural_labels:
             for candidate in lines[index + 1:index + 4]:
                 time = _time_text(candidate)
-                if time:
+                # Reject times buried in long lines (route descriptions, gate times, etc.)
+                if time and len(candidate) <= 20:
                     grouped.append(_format_start_time(current_group, time))
                     break
         if len(grouped) >= 8:
@@ -349,7 +374,10 @@ def extract_start_times(lines: list[str]) -> str:
             snippets.extend(_format_start_time(group, time) for group in groups)
         if len(snippets) >= 8:
             break
-    return "、".join(dict.fromkeys(snippets))
+    if snippets:
+        return "、".join(dict.fromkeys(snippets))
+    # Last resort: bare time from label (e.g. "起跑時間: 06:20" with no group info)
+    return direct if (direct and _time_text(direct)) else ""
 
 
 def status_from_text(text: str) -> str:
