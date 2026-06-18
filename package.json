@@ -26,7 +26,8 @@
     "content:refresh": "npm run content:candidates && npm run content:publish && npm run content:quality",
     "quips:refresh": "node scripts/refresh-runner-quips.mjs",
     "ops:dashboard": "node scripts/build-operational-dashboard.mjs",
-    "payment:build": "node scripts/build-payment-sheet.mjs"
+    "payment:build": "node scripts/build-payment-sheet.mjs",
+    "payment:init": "node scripts/init-payment-xlsx.mjs"
   },
   "dependencies": {
     "exceljs": "^4.4.0"

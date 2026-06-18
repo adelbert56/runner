@@ -52,7 +52,10 @@ site/index.html + site/app.js + site/styles.css  ← 靜態前端
 
 | 工具 | 指令 | 說明 |
 |------|------|------|
-| 賽程收款明細表 | `npm run payment:build` | 代收報名費對帳。讀 `runner/賽事/收款明細.json`（含真名金流，**已 gitignore，只留本機**），產出 `.md`（Obsidian）/`.xlsx`（exceljs 上色）/`.svg`（圖像）。範本：`收款明細.範例.json`。腳本 `scripts/build-payment-sheet.mjs`。 |
+| 賽程收款明細表（主） | 直接編 `收款明細.xlsx` | **使用者主要用這個**：可編輯 Excel，內建公式（總金額/已收/未收自動算）、已付/已報名下拉、紅綠上色、賽事篩選。圖像＝Excel 截圖。產生器 `scripts/init-payment-xlsx.mjs`（`npm run payment:init`，**重跑會用 JSON 覆蓋 Excel，平常別跑**）。 |
+| 賽程收款明細表（舊管線） | `npm run payment:build` | 從 `收款明細.json` 產 `.md`（Obsidian）/`.svg`/`.xlsx`。Excel 改當主來源後此管線少用，跑它會蓋掉 Excel 手改。腳本 `scripts/build-payment-sheet.mjs`。 |
+
+收款檔（`收款明細.json/.md/.xlsx/.svg`）含真名金流，**全部 gitignore，只留本機**；只有 `收款明細.範例.json` 進 git。
 
 ---
 
