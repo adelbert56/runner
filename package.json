@@ -25,6 +25,10 @@
     "content:quality:strict": "node scripts/validate-content-data.mjs --strict",
     "content:refresh": "npm run content:candidates && npm run content:publish && npm run content:quality",
     "quips:refresh": "node scripts/refresh-runner-quips.mjs",
-    "ops:dashboard": "node scripts/build-operational-dashboard.mjs"
+    "ops:dashboard": "node scripts/build-operational-dashboard.mjs",
+    "payment:build": "node scripts/build-payment-sheet.mjs"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
   }
 }

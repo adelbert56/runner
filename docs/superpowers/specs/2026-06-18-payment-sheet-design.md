@@ -9,13 +9,17 @@
 
 ## 架構
 
-兩個檔案，單向資料流：
+單向資料流，三種產出：
 
 ```
-runner/賽事/收款明細.json   ← 手動編輯（資料來源）
-        ↓  node scripts/build-payment-sheet.mjs
-runner/賽事/收款明細.md      ← 產出，Obsidian 檢視
+runner/賽事/收款明細.json   ← 手動編輯（資料來源，gitignore，只留本機）
+        ↓  node scripts/build-payment-sheet.mjs（npm run payment:build）
+runner/賽事/收款明細.md      ← Obsidian 檢視
+runner/賽事/收款明細.xlsx    ← Excel（exceljs，已付綠/未付紅、小計+總計列）
+runner/賽事/收款明細.svg     ← 圖像（瀏覽器開可另存 PNG）
 ```
+
+`收款明細.範例.json` 進 git 當範本；真實 `.json` 與三種產出都 gitignore（含真名金流，只在本機/Obsidian）。
 
 ## 1. 資料來源 `runner/賽事/收款明細.json`
 
@@ -105,6 +109,11 @@ runner/賽事/收款明細.md      ← 產出，Obsidian 檢視
 - 手動：放一筆範例資料跑腳本，檢查 Markdown 與彙總數字正確。
 - 邊界：空 `payments`、缺 `amount`（當 0 並警告）、缺 `paid_date`/`note`（留空）。
 
+## 匯出（方便收錢）
+
+- **Excel** `.xlsx`：exceljs 產出，表頭深藍、已付綠底/未付紅底、每場小計列、最後全部總計列（黃底）。可直接傳/印給朋友對帳。
+- **圖像** `.svg`：完整明細表，標題列深藍、隔列淺底、已付綠勾未付紅叉。瀏覽器開即可截圖或另存 PNG。
+
 ## 不做（YAGNI）
 
-網站顯示、CI 排程、Google 表單輸入、前端密碼、報名費/郵資拆帳。皆因僅本機使用、操作者自行結算而排除。
+網站顯示、CI 排程、Google 表單輸入、前端密碼、報名費/郵資拆帳、自動產 PNG（用 SVG 替代，免 puppeteer）。皆因僅本機使用、操作者自行結算而排除。

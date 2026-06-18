@@ -13,3 +13,9 @@ debug.log
 .DS_Store
 Thumbs.db
 runner/.obsidian/workspace.json
+
+# 收款明細含真名金流，只留本機；範本 收款明細.範例.json 才進 git
+runner/賽事/收款明細.json
+runner/賽事/收款明細.md
+runner/賽事/收款明細.xlsx
+runner/賽事/收款明細.svg
