@@ -33,7 +33,7 @@ site/index.html + site/app.js + site/styles.css  ← 靜態前端
 
 | 檔案 | 觸發時間 (Asia/Taipei) | 功能 |
 |------|----------------------|------|
-| `data-refresh.yml` | 每日 06:07、12:07、18:07、00:07 | 主流程：抓賽事 + 建所有 JSON |
+| `data-refresh.yml` | **週二、週四**（UTC 10:17/11:47/13:17/15:47 四個備援時段，≈台北 18:17/19:47/21:17/23:47） | 主流程：抓賽事 + 建所有 JSON。**一週兩次，非每日**（GitHub 排程會延遲/掉，故同日多時段備援） |
 | `message-cloud-refresh.yml` | 每日 12:07、18:07 | 更新 Issue #34 留言板資料 |
 | `weather-refresh.yml` | 每日 06:07、18:07 | 更新天氣資料 |
 | `runner-quips-refresh.yml` | 每日 00:07 | 更新跑者碎念語錄 |
