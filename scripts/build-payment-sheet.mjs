@@ -2,12 +2,14 @@
 // 本腳本只產 md + svg，不碰 xlsx，避免蓋掉內含公式的 Excel。
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import ExcelJS from "exceljs";
 import { todayInTaipei } from "./lib/time.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const today = process.env.RUNNER_TODAY || todayInTaipei();
 const paths = {
   source: resolve(root, "runner/賽事/收款明細.json"),
+  xlsx: resolve(root, "runner/賽事/收款明細.xlsx"),
   database: resolve(root, "runner/賽事/賽事資料庫.json"),
   md: resolve(root, "runner/賽事/收款明細.md"),
   svg: resolve(root, "runner/賽事/收款明細.svg"),
@@ -25,6 +27,20 @@ async function readJson(path, fallback) {
 function num(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
+}
+
+function normalizeText(value) {
+  return String(value ?? "").trim();
+}
+
+function excelDateToIso(value) {
+  if (!value) return "";
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  const text = normalizeText(value);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+  return text;
 }
 
 function shortDate(value) {
@@ -47,6 +63,68 @@ function buildRaceIndex(database) {
     if (race?.race_id) index.set(race.race_id, race);
   }
   return index;
+}
+
+function truthyCell(value) {
+  const text = normalizeText(value).toLowerCase();
+  return text === "是" || text === "true" || text === "yes" || text === "y" || text === "1";
+}
+
+async function readXlsxSource(path) {
+  try {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(path);
+    const worksheet = workbook.getWorksheet("收款明細") ?? workbook.worksheets[0];
+    if (!worksheet) {
+      console.warn(`警告：${path} 沒有工作表，改用 JSON。`);
+      return null;
+    }
+
+    const races = [];
+    const raceMap = new Map();
+    for (let rowNumber = 6; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+      const row = worksheet.getRow(rowNumber);
+      const raceName = normalizeText(row.getCell(1).value);
+      const name = normalizeText(row.getCell(2).value);
+      const amountRaw = row.getCell(3).value;
+      const paidRaw = row.getCell(4).value;
+      const registeredRaw = row.getCell(5).value;
+      const paidDateRaw = row.getCell(6).value;
+      const size = normalizeText(row.getCell(7).value);
+      const note = normalizeText(row.getCell(8).value);
+      const isCompletelyBlank = !raceName && !name && !amountRaw && !paidRaw && !registeredRaw && !paidDateRaw && !size && !note;
+
+      if (isCompletelyBlank) {
+        continue;
+      }
+
+      if (!raceName && !name) {
+        continue;
+      }
+
+      const payment = {
+        name,
+        amount: num(amountRaw),
+        paid: truthyCell(paidRaw),
+        registered: truthyCell(registeredRaw),
+        paid_date: excelDateToIso(paidDateRaw),
+        size,
+        note,
+      };
+
+      if (!raceMap.has(raceName)) {
+        const race = { race_id: "", race_name: raceName || "未命名賽事", race_date: "", payments: [] };
+        raceMap.set(raceName, race);
+        races.push(race);
+      }
+      raceMap.get(raceName).payments.push(payment);
+    }
+
+    return { races };
+  } catch (error) {
+    console.error(`讀取失敗 ${path}: ${error.message}`);
+    return null;
+  }
 }
 
 // 把來源整理成結構化資料（之後三種輸出共用）
@@ -99,6 +177,14 @@ function buildModel(source, raceIndex) {
 
 // ---------- Markdown（Obsidian）----------
 function renderMarkdown(model) {
+  const showSummary = model.races.length > 1;
+  const summaryRows = showSummary
+    ? [
+        "| 賽事 | 總額 | 已收 | 未收 | 已報名 |",
+        "|------|----:|----:|----:|------:|",
+        ...model.races.map((race) => `| ${race.race_name}${race.race_date ? ` (${race.race_date})` : ""} | ${race.total} | ${race.received} | ${race.unpaid} | ${race.registeredCount} |`),
+      ]
+    : [];
   const blocks = model.races.map((race) => {
     const rows = race.payments.length
       ? race.payments.map(
@@ -116,11 +202,12 @@ function renderMarkdown(model) {
   });
 
   return [
-    "<!-- 此檔由 scripts/build-payment-sheet.mjs 自動產生，請勿手改；改 收款明細.json -->",
+    "<!-- 此檔由 scripts/build-payment-sheet.mjs 自動產生，請勿手改；優先改 收款明細.xlsx，若無 Excel 才退回 收款明細.json -->",
     "# 賽程收款明細表",
     `> 產生時間：${today}`,
     `> **總計已收 ${model.grandReceived} / 總金額 ${model.grandTotal}**`,
     "",
+    showSummary ? "## 多賽事摘要\n" + summaryRows.join("\n") + "\n" : "",
     model.races.length ? blocks.join("\n\n") : "_目前沒有收款資料。請編輯 收款明細.json 後重跑。_",
     "",
   ].join("\n");
@@ -130,6 +217,8 @@ function renderMarkdown(model) {
 function renderSvg(model) {
   const rowH = 30;
   const headH = 56;
+  const showSummary = model.races.length > 1;
+  const summaryHeadH = 28;
   const cols = [
     { label: "人名", w: 130, align: "start", x: 14 },
     { label: "報名金額", w: 100, align: "end" },
@@ -141,19 +230,66 @@ function renderSvg(model) {
   ];
   const width = cols.reduce((s, c) => s + c.w, 0) + 40; // 20 padding each side
   const left = 20;
+  const summaryCols = [
+    { label: "賽事", w: 310, align: "start", x: 12 },
+    { label: "總額", w: 90, align: "end" },
+    { label: "已收", w: 90, align: "end" },
+    { label: "未收", w: 90, align: "end" },
+    { label: "已報名", w: 90, align: "middle" },
+  ];
+  const summaryWidth = summaryCols.reduce((s, c) => s + c.w, 0);
+  const summaryRows = Math.max(model.races.length, 1);
+  const summaryBlockH = showSummary ? 66 + summaryRows * rowH : 0;
 
   // 計算列數
   let rowCount = 0;
   for (const race of model.races) rowCount += 1 /*title*/ + 1 /*header*/ + Math.max(race.payments.length, 1) + 1 /*subtotal*/;
-  const height = headH + rowCount * rowH + 30;
+  const height = headH + summaryBlockH + rowCount * rowH + 30;
 
   const parts = [];
+  const anchor = (a) => (a === "end" ? "end" : a === "middle" ? "middle" : "start");
   parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" font-family="-apple-system,'Microsoft JhengHei',sans-serif">`);
   parts.push(`<rect width="${width}" height="${height}" fill="#ffffff"/>`);
   parts.push(`<text x="${left}" y="28" font-size="20" font-weight="700" fill="#1f3864">賽程收款明細表</text>`);
   parts.push(`<text x="${width - 20}" y="28" font-size="13" fill="#1f3864" text-anchor="end">總計已收 ${model.grandReceived} / 總金額 ${model.grandTotal}（${today}）</text>`);
+  if (showSummary) {
+    parts.push(`<rect x="${left}" y="${headH - 8}" width="${summaryWidth}" height="${summaryHeadH}" fill="#d9e1f2"/>`);
+    parts.push(`<text x="${left + 12}" y="${headH + 11}" font-size="13" font-weight="700" fill="#1f3864">多賽事摘要</text>`);
 
-  let y = headH;
+    const summaryCellX = (i) => left + summaryCols.slice(0, i).reduce((s, c) => s + c.w, 0);
+    const summaryTextX = (i) => {
+      const c = summaryCols[i];
+      const start = summaryCellX(i);
+      if (c.align === "end") return start + c.w - 12;
+      if (c.align === "middle") return start + c.w / 2;
+      return start + (c.x ?? 12);
+    };
+
+    let summaryY = headH + 20;
+    parts.push(`<rect x="${left}" y="${summaryY}" width="${summaryWidth}" height="${rowH}" fill="#1f3864"/>`);
+    summaryCols.forEach((c, i) => {
+      parts.push(`<text x="${summaryTextX(i)}" y="${summaryY + 20}" font-size="12" font-weight="700" fill="#ffffff" text-anchor="${anchor(c.align)}">${escapeXml(c.label)}</text>`);
+    });
+    summaryY += rowH;
+
+    model.races.forEach((race, idx) => {
+      const bg = idx % 2 ? "#f6f8fc" : "#ffffff";
+      parts.push(`<rect x="${left}" y="${summaryY}" width="${summaryWidth}" height="${rowH}" fill="${bg}"/>`);
+      const cells = [
+        `${race.race_name}${race.race_date ? ` (${race.race_date})` : ""}`,
+        String(race.total),
+        String(race.received),
+        String(race.unpaid),
+        `${race.registeredCount}人`,
+      ];
+      cells.forEach((val, i) => {
+        parts.push(`<text x="${summaryTextX(i)}" y="${summaryY + 20}" font-size="12" fill="#222222" text-anchor="${anchor(summaryCols[i].align)}">${escapeXml(val)}</text>`);
+      });
+      summaryY += rowH;
+    });
+  }
+
+  let y = headH + summaryBlockH;
   const cellX = (i) => left + cols.slice(0, i).reduce((s, c) => s + c.w, 0);
   const textX = (i) => {
     const c = cols[i];
@@ -162,7 +298,6 @@ function renderSvg(model) {
     if (c.align === "middle") return start + c.w / 2;
     return start + (c.x ?? 12);
   };
-  const anchor = (a) => (a === "end" ? "end" : a === "middle" ? "middle" : "start");
 
   for (const race of model.races) {
     // 賽事標題列
@@ -205,7 +340,7 @@ function renderSvg(model) {
 }
 
 // ---------- main ----------
-const source = await readJson(paths.source, { races: [] });
+const source = (await readXlsxSource(paths.xlsx)) ?? (await readJson(paths.source, { races: [] }));
 const database = await readJson(paths.database, []);
 const model = buildModel(source, buildRaceIndex(database));
 
