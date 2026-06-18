@@ -48,6 +48,14 @@ site/index.html + site/app.js + site/styles.css  ← 靜態前端
 
 ---
 
+## 本機工具（不進 CI）
+
+| 工具 | 指令 | 說明 |
+|------|------|------|
+| 賽程收款明細表 | `npm run payment:build` | 代收報名費對帳。讀 `runner/賽事/收款明細.json`（含真名金流，**已 gitignore，只留本機**），產出 `.md`（Obsidian）/`.xlsx`（exceljs 上色）/`.svg`（圖像）。範本：`收款明細.範例.json`。腳本 `scripts/build-payment-sheet.mjs`。 |
+
+---
+
 ## 已修復的已知問題（不需要重新調查）
 
 | 日期 | 問題 | 修法 | Commit |
