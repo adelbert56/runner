@@ -35,9 +35,10 @@ site/index.html + site/app.js + site/styles.css  ← 靜態前端
 |------|----------------------|------|
 | `data-refresh.yml` | **週二、週四**（UTC 10:17/11:47/13:17/15:47 四個備援時段，≈台北 18:17/19:47/21:17/23:47） | 主流程：抓賽事 + 建所有 JSON。**一週兩次，非每日**（GitHub 排程會延遲/掉，故同日多時段備援） |
 | `message-cloud-refresh.yml` | 每日 12:07、18:07 | 更新 Issue #34 留言板資料 |
-| `weather-refresh.yml` | 每日 06:07、18:07 | 更新天氣資料 |
-| `runner-quips-refresh.yml` | 每日 00:07 | 更新跑者碎念語錄 |
-| `content-candidates.yml` | 每日排程 | 收集內容候選 |
+| `weather-refresh.yml` | 每日 07:23、08:37、11:07 | 更新天氣資料（前兩個為主備、第三個為補跑） |
+| `runner-quips-refresh.yml` | 每週一 10:23、11:53、13:23 | 更新跑者碎念語錄 |
+| `content-candidates.yml` | 週一、三、五 09:17、10:37、12:17、13:47 | 收集內容候選 |
+| `automation-orchestrator.yml` | 每 30 分鐘 + 重要 workflow 完成後 | 補派發錯過的自動化任務 |
 | `schedule-audit.yml` | 每日 00:20 | 健康檢查，失敗開 Issue |
 | `workflow-run-monitor.yml` | workflow_run 觸發 | 監控其他 workflow 執行結果 |
 | `ci.yml` | PR / push | 驗證、lint |
@@ -53,7 +54,7 @@ site/index.html + site/app.js + site/styles.css  ← 靜態前端
 | 工具 | 指令 | 說明 |
 |------|------|------|
 | 賽程收款明細表（主） | 直接編 `收款明細.xlsx` | **使用者主要用這個**：可編輯 Excel，內建公式（總金額/已收/未收自動算）、已付/已報名下拉、紅綠上色、賽事篩選。圖像＝Excel 截圖。產生器 `scripts/init-payment-xlsx.mjs`（`npm run payment:init`，**重跑會用 JSON 覆蓋 Excel，平常別跑**）。 |
-| 賽程收款明細表（舊管線） | `npm run payment:build` | 從 `收款明細.json` 產 `.md`（Obsidian）/`.svg`/`.xlsx`。Excel 改當主來源後此管線少用，跑它會蓋掉 Excel 手改。腳本 `scripts/build-payment-sheet.mjs`。 |
+| 賽程收款明細表（舊管線） | `npm run payment:build` | 目前**優先讀 `收款明細.xlsx`** 產 `.md`（Obsidian）/`.svg`；找不到 Excel 才退回 `收款明細.json`。腳本 `scripts/build-payment-sheet.mjs`。 |
 
 收款檔（`收款明細.json/.md/.xlsx/.svg`）含真名金流，**全部 gitignore，只留本機**；只有 `收款明細.範例.json` 進 git。
 
@@ -91,7 +92,7 @@ site/index.html 不存在 → build-operational-dashboard.mjs 用 "" fallback
 ## 未完成事項
 
 - [ ] Issue #35「Refresh race data failure」→ root cause 已修，需手動關閉
-- [ ] 所有 workflow 沒有 `on: failure` 通知機制（只有 schedule-audit 會開 Issue）
+- [ ] `workflow-run-monitor.yml` 已涵蓋主要 workflow 失敗通報，但未做更細的分類或升級策略
 - [ ] Python scrapers (`scrapers/`) 已寫但需確認是否真的在 CI 跑
 
 ---

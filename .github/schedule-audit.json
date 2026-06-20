@@ -28,7 +28,29 @@
       "path": ".github/workflows/content-candidates.yml",
       "expected_event": "schedule",
       "require_schedule": true,
-      "max_age_minutes": 2400,
+      "max_age_minutes": 4320,
+      "recovery_events": ["workflow_dispatch"],
+      "max_age_minutes_by_local_weekday": {
+        "0": 3840,
+        "2": 3840,
+        "4": 3840,
+        "6": 3840
+      }
+    },
+    {
+      "name": "Refresh message cloud",
+      "path": ".github/workflows/message-cloud-refresh.yml",
+      "expected_event": "schedule",
+      "require_schedule": true,
+      "max_age_minutes": 1080,
+      "recovery_events": ["workflow_dispatch"]
+    },
+    {
+      "name": "Automation orchestrator",
+      "path": ".github/workflows/automation-orchestrator.yml",
+      "expected_event": "schedule",
+      "require_schedule": true,
+      "max_age_minutes": 90,
       "recovery_events": ["workflow_dispatch"]
     },
     {

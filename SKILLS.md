@@ -18,7 +18,7 @@
 - 主爬蟲：`scripts/main.py`。
 - 官方平台補資料：`scripts/enrich_platforms.py` 與 `scripts/platforms/`。
 - 資料同步與報告：`npm run data:refresh`、`npm run data:quality`。
-- 自動排程：`.github/workflows/data-refresh.yml` 每週二、四 18:00 Asia/Taipei 更新賽事；`.github/workflows/weather-refresh.yml` 每天 07:00 Asia/Taipei 更新賽前天氣；`.github/workflows/content-candidates.yml` 每週一 09:00 Asia/Taipei 更新跑鞋 / 新聞。
+- 自動排程：`.github/workflows/data-refresh.yml` 每週二、四 18:17 起多時段備援更新賽事；`.github/workflows/weather-refresh.yml` 每天 07:23、08:37、11:07 Asia/Taipei 更新賽前天氣；`.github/workflows/content-candidates.yml` 每週一、三、五 09:17、10:37、12:17、13:47 Asia/Taipei 更新跑鞋 / 新聞。
 - 品質檢查：`.github/workflows/ci.yml` 會跑 JS、資料品質、內容品質、Python compileall 與 UI layout。
 - 發布：`.github/workflows/pages.yml`，推送 `main` 後部署 GitHub Pages。
 
@@ -106,5 +106,5 @@
 - 排程觀察時，如果 GitHub Actions 成功但沒有 auto-commit，通常代表資料無變動；不要誤判成排程失效。
 - 排程觀察時，如果 GitHub Actions 根本沒有該時段的 run，不能說「爬蟲有跑」。先用 `gh run list --workflow data-refresh.yml` 確認，再視需要手動 `gh workflow run data-refresh.yml --ref main`。手動跑完也要看最終 conclusion，不要只看中途 step。
 - 2026-05-19 的事故紀錄：週二 18:00 的 `Refresh race data` 沒有自動出現 run；手動觸發後 scraper 抓到 `+1 new`，但 strict gate 因兩個臺中國際馬拉松名稱缺官方連結、精確地點、主辦、費用、名額而失敗。修正方式是補 `runner/賽事/人工補充.json` 的短名與完整名 alias，重跑後才完成品質、公告、auto-commit 與 Pages deploy。
-- 早上執行的 GitHub Actions 不能用 UTC 日期判斷台灣「今天」。天氣、賽前倒數、開報窗口這類邏輯要用 Asia/Taipei 日期，否則 07:00 排程會把今天算成前一天。
+- 早上執行的 GitHub Actions 不能用 UTC 日期判斷台灣「今天」。天氣、賽前倒數、開報窗口這類邏輯要用 Asia/Taipei 日期，否則早晨排程會把今天算成前一天。
 - `scripts/lib/time.mjs` 是 Node 自動化腳本的台灣日期來源；不要在新的資料/內容/儀表板腳本重新寫 `new Date().toISOString().slice(0, 10)` 當業務日期。

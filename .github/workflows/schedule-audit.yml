@@ -228,7 +228,30 @@ jobs:
               `設定檔: ${configPath}\n\n` +
               `結果：\n${findings.join("\n")}\n`;
 
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = issues.find(i => i.title === title);
+
             if (badCount === 0) {
+              if (existing) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  body: bodyHeader + "\n目前所有排程檢查皆已恢復正常，關閉此 issue。\n" + workflowIndex,
+                });
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  state: "closed",
+                  state_reason: "completed",
+                });
+              }
               core.info("All checks OK");
               core.summary.addHeading("Schedule audit: OK");
               core.summary.addRaw(bodyHeader + workflowIndex);
@@ -237,15 +260,6 @@ jobs:
             }
 
             core.warning(`Detected ${badCount} failing checks`);
-
-            // De-dup: if an open issue with same title exists, just comment.
-            const issues = await github.paginate(github.rest.issues.listForRepo, {
-              owner,
-              repo,
-              state: "open",
-              per_page: 100,
-            });
-            const existing = issues.find(i => i.title === title);
 
             if (existing) {
               await github.rest.issues.createComment({

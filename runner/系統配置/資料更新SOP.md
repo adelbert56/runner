@@ -2,9 +2,9 @@
 
 ## 自動排程
 
-- GitHub Actions `Refresh race data` 每週二、四 18:00（Asia/Taipei）執行，也可手動執行。
-- GitHub Actions `Refresh race weather` 每天 07:00（Asia/Taipei）執行，只更新 7 天內賽事的當日預報。
-- GitHub Actions `Collect content candidates` 每週一 09:00（Asia/Taipei）執行，也可手動執行。
+- GitHub Actions `Refresh race data` 每週二、四 18:17 起以多時段備援執行，也可手動執行。
+- GitHub Actions `Refresh race weather` 每天 07:23、08:37、11:07（Asia/Taipei）執行，只更新 7 天內賽事的當日預報。
+- GitHub Actions `Collect content candidates` 每週一、三、五 09:17、10:37、12:17、13:47（Asia/Taipei）執行，也可手動執行。
 - 流程會先跑賽事清單爬蟲，再跑官方平台補資料，最後產生品質報告。
 - 每月追蹤賽事固定排在每月 1 號與 15 號檢查。
 

@@ -9,7 +9,7 @@
 - 倉庫狀態：Public
 - 網站部署：GitHub Pages
 - 賽事資料：每週二、四自動爬蟲與品質檢查，也可手動執行
-- 跑鞋 / 新聞資料：每週自動收集候選內容並自動上架摘要
+- 跑鞋 / 新聞資料：每週一、三、五自動收集候選內容並自動上架摘要
 - 本機預覽：`npm run dev`
 - 主要資料來源：運動筆記、iRunner、Lohas、CTRun、JoinNow、Focusline、bao-ming、EventGo，以及跑鞋 / 跑步內容來源
 
@@ -86,7 +86,12 @@
 │   ├── ci.yml                    # 品質檢查與 UI layout 驗證
 │   ├── data-refresh.yml          # 賽事資料更新
 │   ├── weather-refresh.yml       # 賽前天氣更新
-│   └── content-candidates.yml    # 跑鞋 / 新聞候選內容更新
+│   ├── content-candidates.yml    # 跑鞋 / 新聞候選內容更新
+│   ├── message-cloud-refresh.yml # 留言板文字雲更新
+│   ├── runner-quips-refresh.yml  # 跑者碎念更新
+│   ├── automation-orchestrator.yml # 補派發錯過的自動化任務
+│   ├── schedule-audit.yml        # 排程自我稽核
+│   └── workflow-run-monitor.yml  # workflow 失敗即時通報
 ├── package.json
 ├── pyproject.toml
 └── README.md
@@ -274,7 +279,7 @@ npm run check
 
 觸發：
 
-- 每天 07:00 Asia/Taipei
+- 每天 07:23、08:37、11:07 Asia/Taipei
 - 手動執行
 
 用途：
@@ -289,7 +294,7 @@ npm run check
 
 觸發：
 
-- 每週一 09:00 Asia/Taipei
+- 每週一、三、五 09:17、10:37、12:17、13:47 Asia/Taipei
 - 手動執行
 
 用途：
@@ -299,16 +304,88 @@ npm run check
 - 更新營運儀表板。
 - 有變更時自動提交 `chore(content): refresh running content candidates`。
 
+### Refresh message cloud
+
+檔案：`.github/workflows/message-cloud-refresh.yml`
+
+觸發：
+
+- 每天 12:07、18:07 Asia/Taipei
+- 手動執行
+
+用途：
+
+- 更新留言板與文字雲資料 `site/data/message-cloud.json`。
+- 有變更時自動提交 `chore(site): refresh message cloud`。
+
+### Refresh runner quips
+
+檔案：`.github/workflows/runner-quips-refresh.yml`
+
+觸發：
+
+- 每週一 10:23、11:53、13:23 Asia/Taipei
+- 手動執行
+
+用途：
+
+- 更新 `site/data/runner-quips.json` 與相關公告資料。
+
+### Automation orchestrator
+
+檔案：`.github/workflows/automation-orchestrator.yml`
+
+觸發：
+
+- 每 30 分鐘
+- 主要 workflow 完成後
+- 手動執行
+
+用途：
+
+- 補派發因 GitHub cron 延遲或漏跑而錯過的自動化任務。
+
+### Schedule audit
+
+檔案：`.github/workflows/schedule-audit.yml`
+
+觸發：
+
+- 每天 00:20 Asia/Taipei
+- 手動執行
+
+用途：
+
+- 稽核定時 workflow 是否仍有排程、最近是否有正常執行。
+- 失敗時開啟或更新 `Schedule audit failure` issue。
+
+### Workflow run monitor
+
+檔案：`.github/workflows/workflow-run-monitor.yml`
+
+觸發：
+
+- 指定 workflow 完成後
+
+用途：
+
+- 在主要 workflow 失敗時立即開啟或更新 `Workflow failure: <workflow name>` issue。
+
 ## 如何確認 GitHub 上自動化正常
 
 1. 進入 GitHub 倉庫：[https://github.com/adelbert56/runner](https://github.com/adelbert56/runner)
 2. 點選 `Actions`
-3. 查看五個 workflow：
+3. 查看主要 workflow：
    - `CI`
    - `Deploy static site`
    - `Refresh race data`
    - `Refresh race weather`
    - `Collect content candidates`
+   - `Refresh message cloud`
+   - `Refresh runner quips`
+   - `Automation orchestrator`
+   - `Schedule audit`
+   - `Workflow run monitor`
 4. 綠色勾勾代表該次成功。
 5. 若資料或內容排程成功且有資料變更，GitHub Actions bot 會自動新增 commit。
 
