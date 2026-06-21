@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>跑者廣場圖示</title>
+  <defs>
+    <linearGradient id="bg" x1="12" y1="10" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#314a7a"/>
+      <stop offset="1" stop-color="#18253f"/>
+    </linearGradient>
+    <linearGradient id="route" x1="10" y1="43" x2="50" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f4c76a"/>
+      <stop offset="1" stop-color="#f39b4a"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bg)"/>
+  <path d="M13 44c6-7 13-8 20-4 8 6 15 6 20-1" fill="none" stroke="url(#route)" stroke-linecap="round" stroke-width="4"/>
+  <circle cx="28" cy="18" r="5.25" fill="#f7f9ff"/>
+  <path d="M30 25l-8 8 10 4 7-8" fill="none" stroke="#f7f9ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <path d="M31 37l-8 11" fill="none" stroke="#f7f9ff" stroke-linecap="round" stroke-width="4"/>
+  <path d="M33 37l12 10" fill="none" stroke="#f7f9ff" stroke-linecap="round" stroke-width="4"/>
+  <path d="M22 32l-7-5" fill="none" stroke="#f7f9ff" stroke-linecap="round" stroke-width="4"/>
+</svg>
