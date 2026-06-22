@@ -33,35 +33,109 @@
     /* === Layout === */
     .view { display: none; }
     .view.active { display: block; }
-    .container { max-width: 1080px; margin: 0 auto; padding: 24px 20px 28px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 20px 28px; }
 
     .trainer-page { padding-bottom: 56px; }
     .trainer-hero {
-      max-width: 1180px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 34px 20px 12px;
+      padding: 28px 20px 10px;
     }
     .trainer-hero-shell {
-      padding: 28px clamp(20px, 3vw, 34px);
-      border: var(--card-border, 1px solid rgba(31, 42, 36, 0.11));
-      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      padding: 26px clamp(20px, 3vw, 34px);
+      border: 1px solid rgba(31, 42, 36, 0.11);
+      border-radius: 24px;
       background:
-        radial-gradient(circle at top right, rgba(245, 200, 76, 0.22), transparent 24%),
-        linear-gradient(135deg, rgba(231, 242, 235, 0.92), rgba(255, 253, 248, 0.98));
-      box-shadow: var(--c-shadow-soft);
+        radial-gradient(circle at 88% 18%, rgba(245, 200, 76, 0.32), transparent 16%),
+        radial-gradient(circle at 8% 92%, rgba(36, 114, 79, 0.1), transparent 18%),
+        linear-gradient(135deg, rgba(231, 242, 235, 0.94), rgba(255, 253, 248, 0.99) 58%, rgba(250, 244, 223, 0.94));
+      box-shadow: 0 20px 48px rgba(31, 42, 36, 0.08);
+    }
+    .trainer-hero-shell::after {
+      content: '';
+      position: absolute;
+      inset: auto -80px -120px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(36, 114, 79, 0.12), transparent 68%);
+      pointer-events: none;
+    }
+    .trainer-hero-layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+    .trainer-hero-main { min-width: 0; }
+    .trainer-hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.84);
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      color: var(--c-primary-hover);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
     .trainer-hero-title {
-      margin: 8px 0 10px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1.06;
+      margin: 14px 0 12px;
+      max-width: 10ch;
+      font-size: clamp(2rem, 3.6vw, 3rem);
+      line-height: 1.02;
+      letter-spacing: -0.025em;
       color: var(--c-text);
+      font-weight: 950;
     }
     .trainer-hero-copy {
-      max-width: 760px;
+      max-width: 720px;
       margin: 0;
       color: var(--c-text-muted);
-      font-size: 1rem;
-      line-height: 1.7;
+      font-size: 0.98rem;
+      line-height: 1.72;
+      font-weight: 700;
+    }
+    .trainer-hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .trainer-stat {
+      padding: 14px 14px 12px;
+      border-radius: 18px;
+      background: rgba(255, 253, 248, 0.88);
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      box-shadow: 0 10px 20px rgba(31, 42, 36, 0.04);
+    }
+    .trainer-stat-label {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--c-text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .trainer-stat-value {
+      margin-top: 6px;
+      font-size: 22px;
+      line-height: 1.08;
+      font-weight: 950;
+      color: var(--c-text);
+      letter-spacing: -0.03em;
+    }
+    .trainer-stat-sub {
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--c-text-muted);
       font-weight: 700;
     }
     .trainer-hero-points {
@@ -73,20 +147,97 @@
     .trainer-point {
       display: inline-flex;
       align-items: center;
-      min-height: 34px;
-      padding: 7px 12px;
+      min-height: 38px;
+      padding: 8px 14px;
       border-radius: 999px;
-      background: rgba(255, 253, 248, 0.88);
-      border: 1px solid rgba(31, 42, 36, 0.1);
+      background: rgba(255, 253, 248, 0.9);
+      border: 1px solid rgba(31, 42, 36, 0.08);
       color: var(--c-text);
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       font-weight: 850;
-      box-shadow: 0 8px 18px rgba(31, 42, 36, 0.06);
+      line-height: 1.3;
+      box-shadow: 0 12px 24px rgba(31, 42, 36, 0.05);
+    }
+    .trainer-hero-side {
+      display: grid;
+      gap: 12px;
+      align-content: stretch;
+    }
+    .trainer-side-card {
+      padding: 16px 16px 15px;
+      border-radius: 20px;
+      background: rgba(255, 253, 248, 0.86);
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      box-shadow: 0 10px 22px rgba(31, 42, 36, 0.05);
+      backdrop-filter: blur(6px);
+    }
+    .trainer-side-kicker {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: var(--c-primary-hover);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .trainer-side-title {
+      font-size: 17px;
+      line-height: 1.2;
+      font-weight: 900;
+      color: var(--c-text);
+    }
+    .trainer-side-copy {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--c-text-muted);
+      line-height: 1.65;
+      font-weight: 700;
+    }
+    .trainer-side-metric {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      margin-top: 12px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #edf5ef;
+      color: var(--c-primary-hover);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .trainer-side-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .trainer-side-list {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .trainer-side-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(247, 243, 234, 0.88);
+      border: 1px solid rgba(31, 42, 36, 0.06);
+    }
+    .trainer-side-item b {
+      font-size: 13px;
+      color: var(--c-text);
+      font-weight: 900;
+    }
+    .trainer-side-item span {
+      font-size: 13px;
+      color: var(--c-text-muted);
+      font-weight: 700;
+      text-align: right;
     }
 
     /* === Cards === */
-    .card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; box-shadow: var(--c-shadow); }
-    .card-title { font-size: 20px; font-weight: 700; margin-bottom: 18px; line-height: 1.4; }
+    .card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 18px; padding: 24px; margin-bottom: 20px; box-shadow: var(--c-shadow); }
+    .card-title { font-size: 22px; font-weight: 850; margin-bottom: 18px; line-height: 1.3; letter-spacing: -0.02em; }
 
     /* === Buttons === */
     .btn { padding: 11px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 14px; font-weight: 600; line-height: 1.35; transition: opacity 0.15s; }
@@ -296,79 +447,160 @@
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
     /* === Toolbar === */
-    .plan-toolbar { background: var(--c-surface); border-bottom: 1px solid var(--c-border); padding: 12px 16px; display: flex; gap: 10px; align-items: center; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
-    .plan-toolbar .tab { padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid transparent; color: var(--c-text-muted); font-size: 14px; cursor: pointer; background: transparent; }
-    .plan-toolbar .tab.active { border-color: var(--c-border); background: var(--c-surface2); color: var(--c-text); }
+    .plan-toolbar {
+      max-width: 1400px;
+      margin: 0 auto 18px;
+      background: rgba(255, 253, 248, 0.88);
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      border-radius: 18px;
+      padding: 10px 14px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      flex-wrap: wrap;
+      box-shadow: 0 14px 30px rgba(31, 42, 36, 0.06);
+      backdrop-filter: blur(10px);
+    }
+    .plan-toolbar .tab {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      color: var(--c-text-muted);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      background: transparent;
+    }
+    .plan-toolbar .tab.active {
+      border-color: rgba(36, 114, 79, 0.14);
+      background: #edf5ef;
+      color: var(--c-primary-hover);
+      box-shadow: inset 0 0 0 1px rgba(36, 114, 79, 0.05);
+    }
     .plan-toolbar .spacer { flex: 1; }
-    .guide-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .guide-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .guide-chip { padding: 8px 12px; border-radius: 999px; border: 1px solid var(--c-border); background: #f7f3ea; color: var(--c-text); font-size: 13px; font-weight: 700; cursor: pointer; }
     .guide-chip:hover { border-color: var(--c-primary); color: var(--c-primary-hover); }
     .guide-hero {
+      display: grid;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
       border: 1px solid rgba(31, 42, 36, 0.08);
-      border-radius: 22px;
-      background: linear-gradient(180deg, #ffffff, #f7fbff);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(255, 208, 88, 0.24), transparent 34%),
+        linear-gradient(135deg, #f3fbf7 0%, #ffffff 58%, #fffaf0 100%);
       box-shadow: 0 20px 42px rgba(20, 56, 114, 0.1);
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
     .guide-hero-image {
       display: block;
       width: 100%;
-      aspect-ratio: 3 / 4;
+      height: 100%;
+      min-height: 220px;
       object-fit: cover;
       background: #f3f7fd;
     }
     .guide-hero-copy {
-      padding: 16px 18px 18px;
-      border-top: 1px solid rgba(31, 42, 36, 0.08);
+      padding: 22px 24px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .guide-hero-title {
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 900;
       color: var(--c-text);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .guide-hero-text {
-      font-size: 14px;
+      font-size: 15px;
       color: var(--c-text-muted);
-      line-height: 1.7;
+      line-height: 1.8;
     }
-    .guide-asset-stack { display: grid; gap: 18px; }
+    .guide-asset-stack { display: grid; gap: 20px; }
     .guide-asset-card {
       border: 1px solid rgba(31, 42, 36, 0.08);
-      border-radius: 22px;
+      border-radius: 24px;
       background: linear-gradient(180deg, #ffffff, #fbfcfe);
-      padding: 14px;
+      padding: 18px;
       box-shadow: 0 12px 30px rgba(20, 56, 114, 0.08);
     }
     .guide-asset-title {
-      font-size: 16px;
+      font-size: 19px;
       font-weight: 900;
       color: var(--c-text);
-      margin-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .guide-asset-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(250px, 0.85fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .guide-asset-visual {
+      display: grid;
+      gap: 12px;
     }
     .guide-action-list {
-      margin: 0 0 12px;
-      padding-left: 18px;
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
       color: var(--c-text);
       font-size: 14px;
       line-height: 1.75;
       font-weight: 700;
     }
-    .guide-action-list li + li { margin-top: 4px; }
+    .guide-action-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #f7f9f6;
+      border: 1px solid rgba(36, 114, 79, 0.08);
+    }
+    .guide-action-list li + li { margin-top: 8px; }
+    .guide-action-index {
+      flex: 0 0 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #24724f, #1b5b40);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(36, 114, 79, 0.18);
+    }
+    .guide-action-text { flex: 1; }
     .guide-asset-image {
       display: block;
       width: 100%;
       height: auto;
-      border-radius: 16px;
+      border-radius: 20px;
       background: #f6f8fb;
       border: 1px solid rgba(31, 42, 36, 0.08);
+      box-shadow: 0 14px 28px rgba(20, 56, 114, 0.08);
+    }
+    .guide-asset-note {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--c-text-muted);
+      background: #fffaf1;
+      border: 1px solid rgba(214, 162, 65, 0.18);
+      border-radius: 14px;
+      padding: 10px 12px;
     }
     .guide-asset-caption {
       font-size: 13px;
       color: var(--c-text-muted);
       line-height: 1.65;
-      margin-top: 10px;
+      margin-top: 0;
     }
 
     /* === Week Nav === */
@@ -394,18 +626,24 @@
     @media (max-width: 720px) {
       .container { padding: 18px 14px 22px; }
       .card { padding: 20px 16px; }
-      .trainer-hero { padding-top: 24px; }
+      .trainer-hero { padding-top: 20px; }
       .trainer-hero-shell { padding: 22px 16px; }
+      .trainer-hero-layout { grid-template-columns: 1fr; }
+      .trainer-hero-title { max-width: none; }
+      .trainer-hero-stats { grid-template-columns: 1fr; }
+      .trainer-side-row { grid-template-columns: 1fr; }
       .week-calendar { grid-template-columns: 1fr; }
       .progress-stats { grid-template-columns: 1fr; }
       .export-bar .btn { flex: 1 1 100%; }
       .plan-toolbar .spacer { display: none; }
       .plan-toolbar .btn,
       .plan-toolbar .tab { flex: 1 1 auto; text-align: center; }
-      .guide-actions { width: 100%; }
       .guide-chip { flex: 1 1 calc(33.33% - 6px); text-align: center; }
-      .guide-hero-copy { padding: 14px 14px 16px; }
-      .guide-asset-card { padding: 12px; }
+      .guide-hero { grid-template-columns: 1fr; }
+      .guide-hero-image { min-height: 180px; }
+      .guide-hero-copy { padding: 16px 16px 18px; }
+      .guide-asset-card { padding: 14px; }
+      .guide-asset-layout { grid-template-columns: 1fr; }
     }
 
     /* === Print === */
@@ -446,16 +684,7 @@
 
 <main class="trainer-page" id="top">
   <section class="trainer-hero" aria-labelledby="trainer-hero-title">
-    <div class="trainer-hero-shell">
-      <p class="eyebrow">跑者廣場訓練工具</p>
-      <h1 class="trainer-hero-title" id="trainer-hero-title">按你的週跑量與可訓練日，生成更像真人教練的課表</h1>
-      <p class="trainer-hero-copy">這裡不只看目標距離，還會一起考慮每週訓練天數、長跑上限、最近成績與目前跑量。半馬課表已改成更保守的進程，長跑也會和一般輕鬆跑明確區分。</p>
-      <div class="trainer-hero-points">
-        <span class="trainer-point">半馬課表已收斂週量上限</span>
-        <span class="trainer-point">休息日整合肌力 / 核心</span>
-        <span class="trainer-point">熱身・主課・收操分段顯示</span>
-      </div>
-    </div>
+    <div class="trainer-hero-shell" id="trainer-hero-shell"></div>
   </section>
 
   <!-- Views -->
@@ -478,7 +707,8 @@
 // STORAGE
 // ============================================================
 const STORAGE_KEY = 'runner-trainer-v1';
-const PLAN_SCHEMA_VERSION = 6;
+const PLAN_SCHEMA_VERSION = 7;
+const GUIDE_ASSET_VERSION = 3;
 
 function loadData() {
   try {
@@ -549,6 +779,77 @@ function renderGoalBrief(goal) {
         <div class="mode-brief-item"><b>生成重點</b><span>${meta.focus}</span></div>
         <div class="mode-brief-item"><b>手機手冊用途</b><span>${meta.exportUse}</span></div>
       </div>
+    </div>`;
+}
+
+function renderHeroPanel() {
+  const shell = document.getElementById('trainer-hero-shell');
+  if (!shell) return;
+  const profile = appData.profile;
+  const hasPlan = Boolean(profile && appData.plan && appData.plan.length);
+  const meta = profile ? (GOAL_META[profile.goal] || GOAL_META.half) : GOAL_META.half;
+  const week = hasPlan ? (appData.plan[currentWeek - 1] || appData.plan[0]) : null;
+  const totalWeeks = hasPlan ? appData.plan.length : null;
+  const phaseText = week ? `${week.phaseLabel}` : '建立你的個人手冊';
+  const progressText = hasPlan ? `第 ${currentWeek} / ${totalWeeks} 週` : '尚未建立';
+  const targetDateText = profile?.targetDate || '先設定模式與比賽日';
+  const paceText = profile?.racePaceSec ? `${secToPace(profile.racePaceSec)}/km` : '完成設定後帶入';
+  const weeklyTarget = week?.targetKm ? `${week.targetKm} km` : '依可訓練日生成';
+  shell.innerHTML = `
+    <div class="trainer-hero-layout">
+      <div class="trainer-hero-main">
+        <div class="trainer-hero-kicker">Runner Planner</div>
+        <h1 class="trainer-hero-title" id="trainer-hero-title">${hasPlan ? `${meta.label} 訓練手冊` : '把訓練變成真的能照著跑的手冊'}</h1>
+        <p class="trainer-hero-copy">${hasPlan ? `${meta.handbook} 這週目前落在「${phaseText}」，課表會把主課、長跑、恢復跑與休息日分開安排。` : '不是只排距離，而是一起考慮每週訓練天數、長跑上限、恢復節奏與近期能力，生成更像真人教練在帶的週計畫。'}</p>
+        <div class="trainer-hero-stats">
+          <div class="trainer-stat">
+            <div class="trainer-stat-label">目前模式</div>
+            <div class="trainer-stat-value">${meta.label}</div>
+            <div class="trainer-stat-sub">${hasPlan ? meta.cardDesc : '入門 / 半馬 / 全馬 / 傷後重建'}</div>
+          </div>
+          <div class="trainer-stat">
+            <div class="trainer-stat-label">本週進度</div>
+            <div class="trainer-stat-value">${progressText}</div>
+            <div class="trainer-stat-sub">${hasPlan ? phaseText : '先完成設定後開始'}</div>
+          </div>
+          <div class="trainer-stat">
+            <div class="trainer-stat-label">本週目標</div>
+            <div class="trainer-stat-value">${weeklyTarget}</div>
+            <div class="trainer-stat-sub">${hasPlan ? `目標配速 ${paceText}` : '會依你的條件自動估算'}</div>
+          </div>
+        </div>
+        <div class="trainer-hero-points">
+          <span class="trainer-point">目標日 ${targetDateText}</span>
+          <span class="trainer-point">${hasPlan ? '休息日會輪替肌力與恢復' : '每週檢查一次就能微調'}</span>
+          <span class="trainer-point">${hasPlan ? '圖解改成先看清單再對圖' : '熱身・主課・收操會分段顯示'}</span>
+        </div>
+      </div>
+      <aside class="trainer-hero-side" aria-label="功能重點">
+        <div class="trainer-side-card">
+          <div class="trainer-side-kicker">This Week</div>
+          <div class="trainer-side-title">${hasPlan ? '先看今天卡片，再用週評估修正方向' : '先建立你的模式，再讓系統開始排週計畫'}</div>
+          <div class="trainer-side-copy">${hasPlan ? '每天只要照今天那張卡執行。真的需要調整時，用週評估和完成紀錄去修，不需要每天填一大堆表單。' : '設定目標、訓練日、週跑量與配速後，系統才會把主課、長跑、恢復跑和休息日拆開安排。'}</div>
+          <div class="trainer-side-metric">${hasPlan ? `本週階段：${phaseText}` : '建立後才會出現本週資訊'}</div>
+        </div>
+        <div class="trainer-side-row">
+          <div class="trainer-side-card">
+            <div class="trainer-side-kicker">Quick View</div>
+            <div class="trainer-side-title">你會看到什麼</div>
+            <div class="trainer-side-list">
+              <div class="trainer-side-item"><b>主課</b><span>${hasPlan ? '依模式與週期改變' : '節奏 / 長跑 / 恢復分流'}</span></div>
+              <div class="trainer-side-item"><b>圖解</b><span>先看清單，再對教學海報</span></div>
+            </div>
+          </div>
+          <div class="trainer-side-card">
+            <div class="trainer-side-kicker">Adjustment</div>
+            <div class="trainer-side-title">怎麼微調</div>
+            <div class="trainer-side-list">
+              <div class="trainer-side-item"><b>評估頻率</b><span>每週一次</span></div>
+              <div class="trainer-side-item"><b>調整依據</b><span>完成率、疲勞、近期檢測</span></div>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>`;
 }
 
@@ -636,6 +937,7 @@ const GUIDE_LIBRARY = {
         src: 'assets/trainer-guides/warmup-dynamic.png',
         alt: '跑前動態暖身海報',
         caption: '建議在輕鬆跑、節奏跑、長跑前都先做一輪。',
+        figures: [['walk','步行暖身'],['calf_foot','小腿動態'],['mobility','髖關節繞圈'],['lunge','弓箭步轉體'],['run_easy','原地高抬腿']],
         items: [
           '腳踝繞圈 30 秒 / 邊',
           '小腿動態伸展 10 次 / 邊',
@@ -660,6 +962,7 @@ const GUIDE_LIBRARY = {
         src: 'assets/trainer-guides/cooldown-static.png',
         alt: '跑後收操伸展海報',
         caption: '長跑日與節奏課後優先使用，降低臀腿與足底緊繃。',
+        figures: [['calf_foot','小腿伸展'],['glute_stretch','臀肌伸展'],['stretch','髂脛束放鬆'],['foam_roll','足底按摩']],
         items: [
           '小腿伸展 45 秒 / 邊',
           '臀肌伸展 45 秒 / 邊',
@@ -682,6 +985,7 @@ const GUIDE_LIBRARY = {
         src: 'assets/trainer-guides/muscle-a.png',
         alt: '跑者肌力訓練A海報',
         caption: '臀腿穩定主軸：臀橋、分腿蹲、側棒式、小腿提踵。',
+        figures: [['bridge','臀橋'],['lunge','分腿蹲'],['hip_flexor','羅馬尼亞硬舉'],['plank','側棒式'],['calf_foot','小腿提踵'],['single_balance','單腳站平衡']],
         items: [
           '臀橋 3×12',
           '分腿蹲 3×8 / 邊',
@@ -696,6 +1000,7 @@ const GUIDE_LIBRARY = {
         src: 'assets/trainer-guides/muscle-b.png',
         alt: '跑者肌力訓練B海報',
         caption: '核心與足踝主軸：死蟲、Bird Dog、蚌殼式、短足訓練。',
+        figures: [['foam_roll','死蟲'],['plank','Bird Dog'],['clam','蚌殼式'],['walk','彈力帶側走'],['calf_foot','脛前肌抬腳'],['calf_foot','短足訓練']],
         items: [
           '死蟲 3×10 / 邊',
           'Bird Dog 3×10 / 邊',
@@ -713,6 +1018,7 @@ const GUIDE_LIBRARY = {
 // SETUP VIEW
 // ============================================================
 function renderSetupView() {
+  renderHeroPanel();
   const el = document.getElementById('view-setup');
   const hasExistingPlan = Boolean(appData.profile && appData.plan && appData.plan.length);
   const goalCards = ['5k10k', 'half', 'full', 'rehab'].map(goal => {
@@ -944,6 +1250,12 @@ function secToTime(sec) {
 
 function todayStr() {
   return new Date().toISOString().split('T')[0];
+}
+
+function guideAssetUrl(src) {
+  if (!src) return '';
+  const sep = src.includes('?') ? '&' : '?';
+  return `${src}${sep}v=${GUIDE_ASSET_VERSION}`;
 }
 
 function fitnessLevel(profile) {
@@ -1244,7 +1556,7 @@ function calcLongRunKm(targetKm, numTrain, maxMins, easyPaceSec, isTaper, goal) 
   return Math.round(km * 10) / 10;
 }
 
-function calcWorkoutKm(type, targetKm, goal, longKm) {
+function calcWorkoutKm(type, targetKm, goal, longKm, focus = '') {
   const sharesByGoal = {
     '5k10k': { interval: 0.13, tempo: 0.17, easy: 0.2 },
     half: { interval: 0.12, tempo: 0.16, easy: 0.2 },
@@ -1253,7 +1565,24 @@ function calcWorkoutKm(type, targetKm, goal, longKm) {
   };
   const goalShares = sharesByGoal[goal] || sharesByGoal.half;
   const share = goalShares[type] ?? 0.16;
-  const baseKm = targetKm * share;
+  const focusFactor = type !== 'easy'
+    ? 1
+    : focus === 'recovery'
+      ? 0.78
+      : focus === 'rebuild'
+        ? 0.72
+        : focus === 'marathon'
+          ? 1.08
+          : focus === 'fueling'
+            ? 0.96
+      : focus === 'prelong'
+        ? 0.88
+        : focus === 'progression'
+          ? 0.95
+            : focus === 'strides'
+            ? 0.9
+            : 1;
+  const baseKm = targetKm * share * focusFactor;
   const capped = longKm ? Math.min(baseKm, Math.max(longKm - 2, longKm * 0.78)) : baseKm;
   return Math.max(Math.round(capped * 10) / 10, type === 'interval' ? 4 : 5);
 }
@@ -1269,34 +1598,113 @@ function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, ha
   const canUseTempo = qualityReady && profile.goal !== 'rehab';
   const canUseInterval = canUseTempo && canUseIntervalBySeason(weekStart);
   const phaseBucket = ['base', 'light'].includes(phaseName) ? 'base' : ['peak', 'taper'].includes(phaseName) ? phaseName : 'build';
-  const rotation = weekNum % 3;
-  const mainWorkout = !canUseTempo || phaseBucket === 'base'
+  const rotation = weekNum % 4;
+  const easyFocusCycle = ['recovery', 'aerobic', 'prelong', 'progression'];
+  const qualityType = !canUseTempo || phaseBucket === 'base'
     ? 'easy'
-    : canUseInterval && (phaseBucket === 'peak' || rotation === 1)
+    : canUseInterval && (phaseBucket === 'peak' || rotation === 2)
       ? 'interval'
       : 'tempo';
+  const qualityFocus = qualityType === 'interval'
+    ? (phaseBucket === 'peak' ? 'specific' : rotation % 2 === 0 ? 'economy' : 'cruise')
+    : qualityType === 'tempo'
+      ? (phaseBucket === 'base' ? 'steady' : rotation % 2 === 0 ? 'cruise' : 'progression')
+      : 'aerobic';
 
-  if (numTrain <= 2) return ['easy'];
+  if (profile.goal === 'rehab') {
+    const rehabSessions = [
+      { type: 'easy', focus: 'recovery', label: '恢復跑' },
+      { type: 'easy', focus: rotation % 2 === 0 ? 'rebuild' : 'aerobic', label: rotation % 2 === 0 ? '跑走重建' : '穩定慢跑' },
+      { type: 'easy', focus: 'prelong', label: '輕鬆喚醒' },
+      { type: 'easy', focus: 'recovery', label: '恢復跑' }
+    ];
+    return rehabSessions.slice(0, Math.max(1, numTrain - 1));
+  }
+
+  if (profile.goal === 'full') {
+    const fullQuality = qualityType === 'interval'
+      ? { type: 'tempo', focus: 'marathon', label: '馬拉松穩定主課' }
+      : qualityType === 'tempo'
+        ? { type: 'tempo', focus: rotation % 2 === 0 ? 'marathon' : 'cruise', label: rotation % 2 === 0 ? '馬拉松穩定主課' : '巡航節奏主課' }
+        : { type: 'easy', focus: 'marathon', label: '馬拉松穩定跑' };
+    const fullSessions = [
+      { type: 'easy', focus: 'recovery', label: '恢復跑' },
+      fullQuality,
+      { type: 'easy', focus: 'aerobic', label: '補充有氧' },
+      { type: 'easy', focus: rotation % 2 === 0 ? 'fueling' : 'prelong', label: rotation % 2 === 0 ? '補給演練跑' : '長跑前喚醒' }
+    ];
+    return fullSessions.slice(0, Math.max(1, numTrain - 1));
+  }
+
+  if (profile.goal === '5k10k') {
+    const entryQuality = qualityType === 'interval'
+      ? { type: 'interval', focus: rotation % 2 === 0 ? 'economy' : 'cruise', label: '速度感主課' }
+      : qualityType === 'tempo'
+        ? { type: 'tempo', focus: rotation % 2 === 0 ? 'steady' : 'progression', label: rotation % 2 === 0 ? '穩定節奏課' : '漸進節奏課' }
+        : { type: 'easy', focus: 'aerobic', label: '穩定慢跑' };
+    const entrySessions = [
+      { type: 'easy', focus: 'recovery', label: '恢復跑' },
+      entryQuality,
+      { type: 'easy', focus: canUseInterval ? 'strides' : 'progression', label: canUseInterval ? '輕鬆跑 + 加速跑' : '漸進慢跑' },
+      { type: 'easy', focus: 'prelong', label: '週末前喚醒' }
+    ];
+    return entrySessions.slice(0, Math.max(1, numTrain - 1));
+  }
+
+  if (numTrain <= 2) {
+    return [{ type: 'easy', focus: 'aerobic', label: '單週維持跑' }];
+  }
 
   if (numTrain === 3) {
-    if (mainWorkout === 'easy') return ['easy', 'easy'];
-    return rotation === 0 ? ['easy', mainWorkout] : [mainWorkout, 'easy'];
+    if (qualityType === 'easy') {
+      return [
+        { type: 'easy', focus: 'recovery', label: '恢復跑' },
+        { type: 'easy', focus: rotation % 2 === 0 ? 'prelong' : 'aerobic', label: rotation % 2 === 0 ? '長跑前喚醒' : '穩定有氧' }
+      ];
+    }
+    return rotation % 2 === 0
+      ? [
+          { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' },
+          { type: 'easy', focus: 'prelong', label: '長跑前喚醒' }
+        ]
+      : [
+          { type: 'easy', focus: 'recovery', label: '恢復跑' },
+          { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' }
+        ];
   }
 
   if (numTrain === 4) {
-    if (mainWorkout === 'easy') return ['easy', 'easy', 'easy'];
-    return rotation === 0 ? [mainWorkout, 'easy', 'easy'] : ['easy', mainWorkout, 'easy'];
+    if (qualityType === 'easy') {
+      return [
+        { type: 'easy', focus: 'recovery', label: '恢復跑' },
+        { type: 'easy', focus: 'aerobic', label: '穩定有氧' },
+        { type: 'easy', focus: 'prelong', label: '長跑前喚醒' }
+      ];
+    }
+    return [
+      { type: 'easy', focus: 'recovery', label: '恢復跑' },
+      { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' },
+      { type: 'easy', focus: rotation % 2 === 0 ? 'prelong' : 'aerobic', label: rotation % 2 === 0 ? '長跑前喚醒' : '穩定有氧' }
+    ];
   }
 
-  if (mainWorkout === 'easy') return ['easy', 'easy', 'easy', 'easy'];
-  return rotation === 0 ? ['easy', mainWorkout, 'easy', 'easy'] : [mainWorkout, 'easy', 'easy', 'easy'];
+  const sessions = [
+    { type: 'easy', focus: 'recovery', label: '恢復跑' },
+    qualityType === 'easy'
+      ? { type: 'easy', focus: 'aerobic', label: '穩定有氧' }
+      : { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' },
+    { type: 'easy', focus: 'aerobic', label: '穩定有氧' },
+    { type: 'easy', focus: canUseInterval && phaseBucket !== 'base' ? 'strides' : easyFocusCycle[rotation], label: canUseInterval && phaseBucket !== 'base' ? '輕鬆跑 + 加速跑' : '補充有氧' }
+  ];
+  return sessions.slice(0, Math.max(0, numTrain - 1));
 }
 
-function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, isTaper) {
+function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, isTaper, focus = '', label = '') {
   const tempo = secToPace(profile.tempoPaceSec);
   const interval = secToPace(profile.intervalPaceSec);
   const easy = secToPace(profile.easyPaceSec);
   const fastEasy = profile.easyPaceSec > 15 ? secToPace(profile.easyPaceSec - 15) : easy;
+  const goal = profile.goal || 'half';
   const phaseBucket = ['base', 'light'].includes(phaseName) ? 'base' : ['peak', 'taper'].includes(phaseName) ? phaseName : 'build';
   const goalBias = { '5k10k': 0, half: 1, full: 2, rehab: 3 }[profile.goal] || 0;
   const rotation = (weekNum + goalBias) % 4;
@@ -1308,16 +1716,16 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
   if (type === 'easy') {
     const variants = [
       {
-        task: `輕鬆跑 ${km} km`,
+        task: `${label || '輕鬆跑'} ${km} km`,
         pace: `配速 ${easy}/km`,
         steps: [
-          { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '步行 + 動態伸展，喚醒髖部與小腿。' },
-          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `全程維持輕鬆跑，配速 ${easy}/km，以可對話為原則。` },
+          { icon: '🚶', title: '熱身', dose: '5–8 分', detail: focus === 'recovery' ? '先把雙腿走開，不急著進入跑步節奏。' : '步行 + 動態伸展，喚醒髖部與小腿。' },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: focus === 'recovery' ? `今天是恢復跑，只要順順完成 ${km} km，配速 ${easy}/km 不追快。` : `全程維持輕鬆跑，配速 ${easy}/km，以可對話為原則。` },
           { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢跑降速 + 靜態伸展，尤其小腿、臀肌與股四頭。' }
         ]
       },
       {
-        task: `輕鬆跑 ${km} km + 加速跑`,
+        task: `${label || '輕鬆跑'} ${km} km + 加速跑`,
         pace: `配速 ${easy}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '8–10 分', detail: '慢走、開髖、腿後勾與高抬腿，先把步幅打開。' },
@@ -1326,28 +1734,49 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `輕鬆漸進跑 ${km} km`,
+        task: `${label || '輕鬆漸進跑'} ${km} km`,
         pace: `配速 ${easy} 起，最後收至 ${fastEasy}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '8 分', detail: '先以慢走與動態伸展啟動，再進入很輕鬆的慢跑。' },
-          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前段維持 ${easy}/km，最後 15 分鐘自然收快到 ${fastEasy}/km，不硬頂。` },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: focus === 'prelong' ? `今天像長跑前喚醒：先輕鬆跑，最後 10–15 分鐘自然收快到 ${fastEasy}/km，不硬頂。` : `前段維持 ${easy}/km，最後 15 分鐘自然收快到 ${fastEasy}/km，不硬頂。` },
           { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢跑降速後補水，結束前做 2–3 個下肢伸展動作。' }
         ]
       },
       {
-        task: `有氧穩定跑 ${km} km`,
+        task: `${label || '有氧穩定跑'} ${km} km`,
         pace: `配速 ${easy}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '6–8 分', detail: '先走再跑，把呼吸和步幅順起來。' },
-          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `整段維持穩定有氧，不追速度，讓今天像在「存體能」。` },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: focus === 'aerobic' ? `今天是穩定有氧日，整段維持穩定節奏，不追速度，像在「存體能」。` : `整段維持穩定有氧，不追速度，讓今天像在「存體能」。` },
           { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢走、補水、簡單伸展，留一點餘裕給明後天。' }
         ]
       }
     ];
+    const focusMap = {
+      recovery: variants[0],
+      strides: allowSummerStrides ? variants[1] : variants[3],
+      progression: variants[2],
+      prelong: variants[2],
+      rebuild: variants[0],
+      marathon: variants[3],
+      fueling: variants[3],
+      aerobic: variants[3]
+    };
     const variantPool = allowSummerStrides ? variants : [variants[0], variants[2], variants[3]];
     const variant = isDeload || isTaper
       ? variants[0]
-      : variantPool[phaseBucket === 'base' ? rotation % Math.min(2, variantPool.length) : rotation % variantPool.length];
+      : focusMap[focus] || variantPool[phaseBucket === 'base' ? rotation % Math.min(2, variantPool.length) : rotation % variantPool.length];
+    if (focus === 'rebuild') {
+      variant.task = `${label || '跑走重建'} ${km} km`;
+      variant.pace = `配速 ${easy}/km 或跑走交替`;
+      variant.steps[1].detail = `今天重點是重新建立規律，不求整段都跑，必要時可用跑 4–6 分 / 走 1 分完成 ${km} km。`;
+    } else if (focus === 'marathon') {
+      variant.task = `${label || '馬拉松穩定跑'} ${km} km`;
+      variant.steps[1].detail = `今天像全馬教練安排的補充有氧：穩定完成 ${km} km，讓週量和耐力慢慢墊起來。`;
+    } else if (focus === 'fueling') {
+      variant.task = `${label || '補給演練跑'} ${km} km`;
+      variant.steps[1].detail = `今天不是拚速度，而是邊跑邊練喝水、補給和穩定節奏，先把全馬需要的節奏建立起來。`;
+    }
     return variant;
   }
 
@@ -1355,7 +1784,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
     const blockKm = Math.max(1, Math.round((km / 2.5) * 10) / 10);
     const variants = [
       {
-        task: `節奏跑 ${km} km`,
+        task: `${label || '節奏跑'} ${km} km`,
         pace: `配速 ${tempo}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '10 分', detail: `慢跑（${easy}/km）+ 動態伸展 + 2 趟短加速。` },
@@ -1364,7 +1793,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `節奏分段跑 ${km} km`,
+        task: `${label || '節奏分段跑'} ${km} km`,
         pace: `配速 ${tempo}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '12 分', detail: `慢跑 + 動態伸展，最後做 2 趟 80m 加速，準備進入閾值區。` },
@@ -1373,7 +1802,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `漸進節奏跑 ${km} km`,
+        task: `${label || '漸進節奏跑'} ${km} km`,
         pace: `由 ${easy}/km 收至 ${tempo}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '10 分', detail: '慢跑啟動 + 下肢動態伸展，讓步頻先順起來。' },
@@ -1382,7 +1811,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `穩定節奏巡航 ${km} km`,
+        task: `${label || '穩定節奏巡航'} ${km} km`,
         pace: `配速 ${tempo}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '10–12 分', detail: '慢跑啟動，加上 2 趟輕快加速，把步頻先喚醒。' },
@@ -1391,7 +1820,18 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       }
     ];
-    const variant = isDeload ? variants[0] : variants[phaseBucket === 'peak' ? 1 : rotation % variants.length];
+    const focusMap = {
+      steady: variants[0],
+      cruise: variants[1],
+      progression: variants[2],
+      marathon: variants[3]
+    };
+    const variant = isDeload ? variants[0] : focusMap[focus] || variants[phaseBucket === 'peak' ? 1 : rotation % variants.length];
+    if (focus === 'marathon') {
+      variant.task = `${label || '馬拉松穩定主課'} ${km} km`;
+      variant.pace = `配速 ${tempo}/km 附近`;
+      variant.steps[1].detail = `今天不是衝閾值，而是練全馬需要的穩定輸出與呼吸節奏，整體感受要穩而不爆。`;
+    }
     return variant;
   }
 
@@ -1401,7 +1841,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
     const sets1k = Math.max(3, Math.min(5, Math.round(km)));
     const variants = [
       {
-        task: `間歇跑 ${sets400}×400m`,
+        task: `${label || '間歇跑'} ${sets400}×400m`,
         pace: `配速 ${interval}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '15 分', detail: '慢跑 + 動態伸展 + 3 趟 100m 加速，準備進入較快節奏。' },
@@ -1410,7 +1850,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `間歇跑 ${sets800}×800m`,
+        task: `${label || '間歇跑'} ${sets800}×800m`,
         pace: `配速 ${interval}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '15–18 分', detail: `慢跑、活動度、2 趟短加速，讓身體先進入可提速狀態。` },
@@ -1419,7 +1859,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `巡航間歇 ${sets1k}×1 km`,
+        task: `${label || '巡航間歇'} ${sets1k}×1 km`,
         pace: `配速 ${tempo}–${interval}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '15 分', detail: '慢跑、動態伸展、3 趟加速跑，避免一開始就頂強度。' },
@@ -1428,7 +1868,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `節奏交替跑 ${Math.max(4, Math.round(km * 10) / 10)} km`,
+        task: `${label || '節奏交替跑'} ${Math.max(4, Math.round(km * 10) / 10)} km`,
         pace: `快段 ${tempo}/km，慢段 ${easy}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '15 分', detail: '先把身體開好，再進入交替變速，避免第一組就太硬。' },
@@ -1437,10 +1877,62 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       }
     ];
-    return variants[phaseBucket === 'peak' ? 1 : rotation % variants.length];
+    const focusMap = {
+      economy: variants[0],
+      specific: variants[1],
+      cruise: variants[2]
+    };
+    return focusMap[focus] || variants[phaseBucket === 'peak' ? 1 : rotation % variants.length];
   }
 
-  const longVariants = [
+  const longVariants = goal === 'full' ? [
+    {
+      task: `長跑 ${km} km（穩定累積）`,
+      pace: `配速 ${easy}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–10 分', detail: '先順順起跑，把今天當成全馬基礎耐力課。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `今天的任務是穩定把距離吃下來，不追速度，重點是全程節奏、補給和動作穩定。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '補水、補給、步行回收，把疲勞留在可恢復範圍。' }
+      ]
+    },
+    {
+      task: `長跑 ${km} km（補給節奏）`,
+      pace: `配速 ${easy}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '8 分', detail: '起跑前先把今天預計補給時間想好。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `今天要把喝水、補給與穩定跑感一起練進去，像正式全馬長跑那樣執行。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '回收後記一下今天補給和後段疲勞感，方便下週微調。' }
+      ]
+    },
+    {
+      task: `長跑 ${km} km（尾段穩住）`,
+      pace: `前段 ${easy}/km，後段守住姿勢`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '前段不要搶快，今天重點是後段也能維持動作。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前段保守，後段專注在步頻、姿勢和補給節奏，不刻意拉速度。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '慢走回收後補充水分與碳水，讓長跑真正被吸收。' }
+      ]
+    }
+  ] : goal === 'rehab' ? [
+    {
+      task: `長一點的輕鬆跑 ${km} km`,
+      pace: `配速 ${easy}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '先確認身體狀況，再慢慢進入今天較長一點的課。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `今天不是拼長跑，只是把可恢復的距離再拉長一點，過程有不適就降速或改跑走。` },
+        { icon: '🧘', title: '收操', dose: '8–10 分', detail: '跑後記一下疼痛、疲勞與恢復感，作為下週調整依據。' }
+      ]
+    },
+    {
+      task: `穩定長一點跑 ${km} km`,
+      pace: `配速 ${easy}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '今天目的是穩定完成，不是突破距離。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `全程保持保守節奏，讓身體學會在無痛範圍內穩定移動更久。` },
+        { icon: '🧘', title: '收操', dose: '8–10 分', detail: '步行、補水、伸展，觀察隔天是否恢復正常。' }
+      ]
+    }
+  ] : [
     {
       task: `長跑 ${km} km`,
       pace: `配速 ${easy}–${fastEasy}/km`,
@@ -1478,7 +1970,8 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       }
     ];
-  const longVariant = isDeload || isTaper ? longVariants[2] : longVariants[phaseBucket === 'peak' ? 1 : rotation % longVariants.length];
+  const taperIndex = goal === 'rehab' ? longVariants.length - 1 : Math.min(2, longVariants.length - 1);
+  const longVariant = isDeload || isTaper ? longVariants[taperIndex] : longVariants[phaseBucket === 'peak' ? Math.min(1, longVariants.length - 1) : rotation % longVariants.length];
   return longVariant;
 }
 
@@ -1632,9 +2125,9 @@ function buildRestDayCard(dow, dateStr, profile, today, weekNum = 1) {
   };
 }
 
-function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInjury, today, weekNum = 1, phaseName = 'build') {
-  const card = { dow, dateStr, type, km, isToday: dateStr === today, status: 'upcoming', isDeload, weekNum, phaseName };
-  const content = buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, isTaper);
+function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInjury, today, weekNum = 1, phaseName = 'build', focus = '', label = '') {
+  const card = { dow, dateStr, type, km, isToday: dateStr === today, status: 'upcoming', isDeload, weekNum, phaseName, focus, label };
+  const content = buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, isTaper, focus, label);
   card.task = content.task;
   card.pace = content.pace;
   card.steps = content.steps;
@@ -1655,7 +2148,11 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
   const level = profile.fitnessLevel || 'intermediate';
   const isEarlyBeginner = level === 'beginner' && weekNum <= 4;
   let otherTypes = buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, hasInjury, isEarlyBeginner, weekStart);
-  if (hasInjury) otherTypes = otherTypes.map(type => (type === 'tempo' ? 'easy' : type));
+  if (hasInjury) {
+    otherTypes = otherTypes.map(session => session.type === 'tempo' || session.type === 'interval'
+      ? { ...session, type: 'easy', focus: 'recovery', label: '恢復跑' }
+      : session);
+  }
 
   let otherIdx = 0;
   const today = todayStr();
@@ -1670,10 +2167,10 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
     if (profile.dayState[dow] === 2) {
       days.push(buildDayCard(dow, dateStr, 'long', longKm, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName));
     } else if (profile.dayState[dow] === 1) {
-      const type = otherTypes[otherIdx] || 'easy';
+      const session = otherTypes[otherIdx] || { type: 'easy', focus: 'aerobic', label: '穩定有氧' };
       otherIdx += 1;
-      const km = calcWorkoutKm(type, targetKm, profile.goal, longKm);
-      days.push(buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName));
+      const km = calcWorkoutKm(session.type, targetKm, profile.goal, longKm, session.focus);
+      days.push(buildDayCard(dow, dateStr, session.type, km, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName, session.focus, session.label));
     } else {
       days.push(buildRestDayCard(dow, dateStr, profile, today, weekNum));
     }
@@ -1772,6 +2269,7 @@ function generateAndShowPlan() {
 let currentWeek = 1;
 
 function renderPlanView() {
+  renderHeroPanel();
   const el = document.getElementById('view-plan');
   const profile = appData.profile;
   const plan = appData.plan || [];
@@ -1786,11 +2284,6 @@ function renderPlanView() {
   <button class="tab active" onclick="switchPlanTab('week')">本週課表</button>
   <button class="tab" onclick="switchPlanTab('checkin')">週評估</button>
   <button class="tab" onclick="switchPlanTab('log')">訓練紀錄</button>
-  <div class="guide-actions">
-    <button class="guide-chip" onclick="openGuideLibrary('warmup')">熱身圖解</button>
-    <button class="guide-chip" onclick="openGuideLibrary('cooldown')">收操伸展</button>
-    <button class="guide-chip" onclick="openGuideLibrary('strength')">肌力動作</button>
-  </div>
   <div class="spacer"></div>
   <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="editSetup()">⚙️ 修改設定</button>
 </div>
@@ -1925,6 +2418,11 @@ function renderWeekSection(plan) {
   <span style="font-size:13px;color:var(--c-text-muted);margin-left:auto">目標 ${week.targetKm} km</span>
   <div class="phase-explainer">${phaseRuleText}</div>
 </div>
+<div class="guide-actions">
+  <button class="guide-chip" onclick="openGuideLibrary('warmup')">熱身圖解</button>
+  <button class="guide-chip" onclick="openGuideLibrary('cooldown')">收操伸展</button>
+  <button class="guide-chip" onclick="openGuideLibrary('strength')">肌力動作</button>
+</div>
 <div class="week-calendar">${week.days.map(day => renderDayCard(day)).join('')}</div>`;
 }
 
@@ -1979,28 +2477,34 @@ function renderSupportCards(blocks) {
 function openGuideLibrary(kind) {
   const guide = GUIDE_LIBRARY[kind];
   if (!guide) return;
-  const body = `
-    ${guide.cover ? `
-      <div class="guide-hero">
-        <img class="guide-hero-image" src="${guide.cover.src}" alt="${guide.cover.alt || guide.title}">
-        <div class="guide-hero-copy">
-          <div class="guide-hero-title">${guide.title}</div>
-          <div class="guide-hero-text">${guide.intro || ''}</div>
-        </div>
-      </div>
-    ` : `
-      <div class="guide-hero-copy" style="padding:0 0 14px;border-top:none">
+  const hero = guide.cover ? `
+    <div class="guide-hero">
+      <img class="guide-hero-image" src="${guideAssetUrl(guide.cover.src)}" alt="${guide.cover.alt || guide.title}">
+      <div class="guide-hero-copy">
         <div class="guide-hero-title">${guide.title}</div>
         <div class="guide-hero-text">${guide.intro || ''}</div>
       </div>
-    `}
+    </div>` : `
+    <div class="guide-hero-copy" style="padding:0 0 14px;border-top:none">
+      <div class="guide-hero-title">${guide.title}</div>
+      <div class="guide-hero-text">${guide.intro || ''}</div>
+    </div>`;
+  const body = `
+    ${hero}
     <div class="guide-asset-stack">
       ${(guide.assets || []).map(asset => `
         <div class="guide-asset-card">
           <div class="guide-asset-title">${asset.title}</div>
-          ${(asset.items || []).length ? `<ul class="guide-action-list">${asset.items.map(item => `<li>${item}</li>`).join('')}</ul>` : ''}
-          <img class="guide-asset-image" src="${asset.src}" alt="${asset.alt || asset.title}">
-          ${asset.caption ? `<div class="guide-asset-caption">${asset.caption}</div>` : ''}
+          <div class="guide-asset-layout">
+            <div class="guide-asset-visual">
+              <img class="guide-asset-image" src="${guideAssetUrl(asset.src)}" alt="${asset.alt || asset.title}">
+              ${asset.caption ? `<div class="guide-asset-caption">${asset.caption}</div>` : ''}
+            </div>
+            <div class="guide-asset-copy">
+              ${(asset.items || []).length ? `<ol class="guide-action-list">${asset.items.map((item, index) => `<li><span class="guide-action-index">${index + 1}</span><span class="guide-action-text">${item}</span></li>`).join('')}</ol>` : ''}
+              <div class="guide-asset-note">看不懂文字時，直接對照左側海報的編號與動作即可；一張圖只做一套，不用再拆很多小卡片。</div>
+            </div>
+          </div>
         </div>
       `).join('')}
     </div>`;
@@ -2211,11 +2715,13 @@ function shouldShowAdaptationPrompt(scenario) {
 }
 
 function markDone(dateStr, type, plannedKm) {
+  const prescribedPaceSec = getPrescribedPaceSec(dateStr, type);
+  const suggestedMins = estimateDurationMinsFromPace(prescribedPaceSec, plannedKm);
   showModal(
     '✓ 記錄完成',
     `<div>
       <div class="form-group"><label class="form-label">實際距離 (km)</label><input class="form-input" id="m-km" type="number" step="0.1" value="${plannedKm}"></div>
-      <div class="form-group"><label class="form-label">完成時間 (分鐘)</label><input class="form-input" id="m-time" type="number" placeholder="例：45"></div>
+      <div class="form-group"><label class="form-label">完成時間 (分鐘)</label><input class="form-input" id="m-time" type="number" value="${suggestedMins || ''}" placeholder="例：45">${suggestedMins ? `<div class="field-help">已依課表配速 ${secToPace(prescribedPaceSec)}/km 自動估算約 ${suggestedMins} 分，可自行微調。</div>` : '<div class="field-help">若有課表配速，這裡會自動換算建議分鐘數。</div>'}</div>
       <div class="form-group"><label class="form-label">體感強度 RPE (1–10)</label><input class="form-input" id="m-rpe" type="number" min="1" max="10" placeholder="6"><div class="field-help">RPE = 你主觀覺得有多累。3–4 很輕鬆、5–6 穩定可持續、7–8 吃力但可控制、9–10 幾乎全力。</div></div>
       <div class="form-group"><label class="form-label">備註（選填）</label><input class="form-input" id="m-notes" type="text" placeholder="感覺..."></div>
     </div>`,
@@ -2228,7 +2734,6 @@ function markDone(dateStr, type, plannedKm) {
           const mins = parseInt(document.getElementById('m-time').value, 10) || 0;
           const rpe = parseInt(document.getElementById('m-rpe').value, 10) || 0;
           const notes = document.getElementById('m-notes').value;
-          const prescribedPaceSec = getPrescribedPaceSec(dateStr, type);
           saveLogEntry({ date: dateStr, type, plannedKm, actualKm: km, actualTimeMins: mins, rpe, notes, prescribedPaceSec });
           markDayStatus(dateStr, 'done');
           autoPaceCalibration();
@@ -2241,6 +2746,19 @@ function markDone(dateStr, type, plannedKm) {
       { label: '取消', action: closeModal }
     ]
   );
+  const kmInput = document.getElementById('m-km');
+  const timeInput = document.getElementById('m-time');
+  if (!kmInput || !timeInput || !prescribedPaceSec) return;
+  timeInput.dataset.autofilled = suggestedMins > 0 ? '1' : '0';
+  timeInput.addEventListener('input', () => {
+    timeInput.dataset.autofilled = '0';
+  });
+  kmInput.addEventListener('input', () => {
+    if (timeInput.dataset.autofilled !== '1') return;
+    const nextKm = parseFloat(kmInput.value) || 0;
+    const nextMins = estimateDurationMinsFromPace(prescribedPaceSec, nextKm);
+    timeInput.value = nextMins > 0 ? String(nextMins) : '';
+  });
 }
 
 function markMissed(dateStr) {
@@ -2377,6 +2895,11 @@ function getPrescribedPaceSec(dateStr, type) {
     }
   }
   return 0;
+}
+
+function estimateDurationMinsFromPace(paceSec, km) {
+  if (!paceSec || paceSec <= 0 || !km || km <= 0) return 0;
+  return Math.max(1, Math.round((paceSec * km) / 60));
 }
 
 // Returns { avgPaceGap (sec/km, negative = faster than prescribed), avgRpe, count }
