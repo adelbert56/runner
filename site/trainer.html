@@ -4,175 +4,413 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>訓練計畫生成器 — 跑者廣場</title>
+  <link rel="stylesheet" href="./styles.css?v=20260529-message-list1">
   <style>
     /* === Reset & Variables === */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --c-bg: #0f172a;
-      --c-surface: #1e293b;
-      --c-surface2: #334155;
-      --c-border: #475569;
-      --c-text: #e2e8f0;
-      --c-text-muted: #94a3b8;
-      --c-primary: #3b82f6;
-      --c-primary-hover: #2563eb;
-      --c-green: #22c55e;
-      --c-orange: #f97316;
-      --c-red: #ef4444;
-      --c-blue: #3b82f6;
-      --c-gray: #64748b;
+      --c-bg: #f6f4ee;
+      --c-surface: #fffdf8;
+      --c-surface2: #fbf8f0;
+      --c-border: #e2ded4;
+      --c-text: #1f2a24;
+      --c-text-muted: #65736b;
+      --c-primary: #24724f;
+      --c-primary-hover: #155338;
+      --c-green: #24724f;
+      --c-orange: #e8753d;
+      --c-red: #b8523b;
+      --c-blue: #dbeef3;
+      --c-gray: #8c948f;
       --radius: 12px;
       --radius-sm: 8px;
+      --c-shadow: 0 18px 48px rgba(31, 42, 36, 0.08);
+      --c-shadow-soft: 0 10px 28px rgba(31, 42, 36, 0.07);
+      --c-yellow: #f5c84c;
     }
-    body { background: var(--c-bg); color: var(--c-text); font-family: system-ui, sans-serif; min-height: 100vh; }
+    body { background: var(--c-bg); color: var(--c-text); font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; min-height: 100vh; line-height: 1.6; }
 
     /* === Layout === */
     .view { display: none; }
     .view.active { display: block; }
-    .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 24px 20px 28px; }
 
-    /* === Nav === */
-    .site-nav { background: var(--c-surface); border-bottom: 1px solid var(--c-border); padding: 12px 16px; display: flex; gap: 16px; align-items: center; }
-    .site-nav a { color: var(--c-text-muted); text-decoration: none; font-size: 14px; }
-    .site-nav a:hover, .site-nav a.active { color: var(--c-text); }
-    .site-nav .brand { font-weight: 700; color: var(--c-text); margin-right: auto; }
+    .trainer-page { padding-bottom: 56px; }
+    .trainer-hero {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 20px 12px;
+    }
+    .trainer-hero-shell {
+      padding: 28px clamp(20px, 3vw, 34px);
+      border: var(--card-border, 1px solid rgba(31, 42, 36, 0.11));
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at top right, rgba(245, 200, 76, 0.22), transparent 24%),
+        linear-gradient(135deg, rgba(231, 242, 235, 0.92), rgba(255, 253, 248, 0.98));
+      box-shadow: var(--c-shadow-soft);
+    }
+    .trainer-hero-title {
+      margin: 8px 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.06;
+      color: var(--c-text);
+    }
+    .trainer-hero-copy {
+      max-width: 760px;
+      margin: 0;
+      color: var(--c-text-muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      font-weight: 700;
+    }
+    .trainer-hero-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .trainer-point {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.88);
+      border: 1px solid rgba(31, 42, 36, 0.1);
+      color: var(--c-text);
+      font-size: 0.88rem;
+      font-weight: 850;
+      box-shadow: 0 8px 18px rgba(31, 42, 36, 0.06);
+    }
 
     /* === Cards === */
-    .card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
-    .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; box-shadow: var(--c-shadow); }
+    .card-title { font-size: 20px; font-weight: 700; margin-bottom: 18px; line-height: 1.4; }
 
     /* === Buttons === */
-    .btn { padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: opacity 0.15s; }
+    .btn { padding: 11px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 14px; font-weight: 600; line-height: 1.35; transition: opacity 0.15s; }
     .btn:hover { opacity: 0.85; }
-    .btn-primary { background: var(--c-primary); color: white; }
-    .btn-secondary { background: var(--c-surface2); color: var(--c-text); border: 1px solid var(--c-border); }
+    .btn-primary { background: var(--c-primary); color: white; box-shadow: 0 10px 20px rgba(36, 114, 79, 0.18); }
+    .btn-secondary { background: #f3efe5; color: var(--c-text); border: 1px solid var(--c-border); }
     .btn-danger { background: var(--c-red); color: white; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* === Form Elements === */
-    .form-group { margin-bottom: 20px; }
-    .form-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--c-text-muted); }
-    .form-input { width: 100%; padding: 10px 14px; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); color: var(--c-text); font-size: 15px; }
+    .form-group { margin-bottom: 24px; }
+    .form-label { display: block; font-size: 15px; font-weight: 600; margin-bottom: 10px; color: var(--c-text-muted); line-height: 1.5; }
+    .form-input { width: 100%; padding: 12px 14px; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); color: var(--c-text); font-size: 15px; line-height: 1.5; }
     .form-input:focus { outline: none; border-color: var(--c-primary); }
+    .field-help { margin-top: 8px; font-size: 13px; color: var(--c-text-muted); line-height: 1.6; }
+    .inline-help { display: inline-block; margin-left: 6px; font-size: 12px; color: var(--c-primary-hover); font-weight: 700; }
+    .setup-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .setup-actions .btn { flex: 1 1 220px; }
+    details.card summary { cursor: pointer; font-size: 18px; font-weight: 700; list-style: none; }
+    details.card summary::-webkit-details-marker { display: none; }
+    details.card[open] summary { margin-bottom: 16px; }
 
     /* === Goal Cards === */
-    .goal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    @media (max-width: 500px) { .goal-grid { grid-template-columns: 1fr; } }
-    .goal-card { background: var(--c-surface2); border: 2px solid var(--c-border); border-radius: var(--radius-sm); padding: 14px; cursor: pointer; text-align: center; transition: border-color 0.15s; }
+    .goal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    @media (max-width: 720px) { .goal-grid { grid-template-columns: 1fr; } }
+    .goal-card { background: var(--c-surface2); border: 2px solid var(--c-border); border-radius: var(--radius-sm); padding: 18px 16px; cursor: pointer; text-align: center; transition: border-color 0.15s; }
     .goal-card:hover { border-color: var(--c-primary); }
-    .goal-card.selected { border-color: var(--c-primary); background: #1d3a6e; }
-    .goal-card .goal-icon { font-size: 28px; margin-bottom: 6px; }
-    .goal-card .goal-name { font-weight: 700; font-size: 15px; }
-    .goal-card .goal-desc { font-size: 12px; color: var(--c-text-muted); margin-top: 4px; }
+    .goal-card.selected { border-color: var(--c-primary); background: #edf5ef; box-shadow: inset 0 0 0 1px rgba(36, 114, 79, 0.08); }
+    .goal-card .goal-icon { font-size: 30px; margin-bottom: 8px; }
+    .goal-card .goal-name { font-weight: 700; font-size: 16px; line-height: 1.4; }
+    .goal-card .goal-desc { font-size: 13px; color: var(--c-text-muted); margin-top: 6px; line-height: 1.5; }
+    .mode-brief {
+      margin-top: 14px;
+      padding: 16px 18px;
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(237, 245, 239, 0.92), rgba(255, 253, 248, 0.98));
+    }
+    .mode-brief-kicker { font-size: 12px; font-weight: 900; color: var(--c-primary-hover); letter-spacing: 0.04em; text-transform: uppercase; }
+    .mode-brief-title { margin-top: 6px; font-size: 18px; font-weight: 800; line-height: 1.4; }
+    .mode-brief-copy { margin-top: 6px; font-size: 14px; color: var(--c-text-muted); line-height: 1.7; }
+    .mode-brief-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .mode-brief-item { padding: 12px; border-radius: 10px; background: rgba(255, 253, 248, 0.94); border: 1px solid rgba(31, 42, 36, 0.08); }
+    .mode-brief-item b { display: block; margin-bottom: 4px; font-size: 12px; color: var(--c-text); }
+    .mode-brief-item span { font-size: 13px; color: var(--c-text-muted); line-height: 1.6; }
+    .mode-summary {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .mode-summary-card {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      background: var(--c-surface2);
+    }
+    .mode-summary-card b { display: block; margin-bottom: 4px; font-size: 12px; color: var(--c-text); }
+    .mode-summary-card span { font-size: 13px; color: var(--c-text-muted); line-height: 1.6; }
 
     /* === Day Picker === */
-    .day-picker { display: flex; gap: 8px; flex-wrap: wrap; }
-    .day-btn { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-    .day-btn.training { border-color: var(--c-primary); background: #1d3a6e; color: var(--c-text); }
-    .day-btn.long-run { border-color: #1d4ed8; background: #1e3a8a; color: white; }
-    .day-legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: var(--c-text-muted); }
+    .day-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+    .day-btn { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .day-btn.training { border-color: var(--c-primary); background: #edf5ef; color: var(--c-primary-hover); }
+    .day-btn.long-run { border-color: #295d6a; background: var(--c-blue); color: #295d6a; }
+    .day-legend { display: flex; gap: 18px; margin-top: 12px; font-size: 13px; color: var(--c-text-muted); flex-wrap: wrap; }
     .day-legend span::before { content: '●'; margin-right: 4px; }
     .day-legend .l-train::before { color: var(--c-primary); }
     .day-legend .l-long::before { color: #60a5fa; }
 
     /* === Injury Pills === */
-    .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
-    .pill { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; }
-    .pill.selected { border-color: var(--c-orange); background: #431407; color: var(--c-orange); }
+    .pill-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 14px; cursor: pointer; transition: all 0.15s; }
+    .pill.selected { border-color: var(--c-orange); background: #fff0e7; color: #9b4f2b; }
 
     /* === Live Calc === */
-    .live-calc { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 16px; }
-    .live-calc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    @media (max-width: 500px) { .live-calc-grid { grid-template-columns: repeat(2, 1fr); } }
-    .calc-item { text-align: center; }
-    .calc-label { font-size: 11px; color: var(--c-text-muted); margin-bottom: 4px; }
-    .calc-value { font-size: 18px; font-weight: 700; color: var(--c-primary); }
+    .live-calc { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 18px; }
+    .live-calc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    @media (max-width: 720px) { .live-calc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 480px) { .live-calc-grid { grid-template-columns: 1fr; } }
+    .calc-item { text-align: center; padding: 10px 8px; background: rgba(255, 253, 248, 0.92); border-radius: 10px; border: 1px solid rgba(31, 42, 36, 0.08); }
+    .calc-label { font-size: 12px; color: var(--c-text-muted); margin-bottom: 6px; line-height: 1.4; }
+    .calc-value { font-size: 20px; font-weight: 700; color: var(--c-primary); line-height: 1.3; }
     .calc-value.warn { color: var(--c-orange); }
     .calc-value.good { color: var(--c-green); }
 
     /* === Progress Card === */
     .progress-bar-wrap { background: var(--c-surface2); border-radius: 8px; height: 10px; margin: 10px 0; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: var(--c-primary); border-radius: 8px; transition: width 0.3s; }
-    .progress-stats { display: flex; gap: 16px; font-size: 13px; color: var(--c-text-muted); flex-wrap: wrap; }
+    .progress-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px 16px; font-size: 14px; color: var(--c-text-muted); }
     .progress-stats strong { color: var(--c-text); }
 
     /* === Phase Tabs === */
-    .phase-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
-    .phase-tab { padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 13px; white-space: nowrap; cursor: pointer; }
-    .phase-tab.current { border-color: var(--c-primary); background: #1d3a6e; color: var(--c-text); }
+    .phase-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px; }
+    .phase-tab { padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 13px; white-space: nowrap; cursor: pointer; line-height: 1.35; }
+    .phase-tab.current { border-color: var(--c-primary); background: #edf5ef; color: var(--c-primary-hover); }
     .phase-tab.done { opacity: 0.6; }
 
     /* === Week Calendar === */
-    .week-calendar { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-    .day-card { background: var(--c-surface); border: 2px solid var(--c-border); border-radius: var(--radius-sm); padding: 14px; transition: border-color 0.15s; }
+    .week-calendar { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .day-card { background: var(--c-surface); border: 2px solid var(--c-border); border-radius: var(--radius-sm); padding: 18px; transition: border-color 0.15s; }
     .day-card.today { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
     .day-card.done-card { background: #14532d22; border-color: var(--c-green); }
     .day-card.missed-card { background: #7f1d1d22; border-color: var(--c-red); }
     .day-card.deload-card { border-color: var(--c-orange); border-style: dashed; }
-    .day-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .day-card-date { font-size: 12px; color: var(--c-text-muted); }
+    .day-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+    .day-card-date { font-size: 13px; color: var(--c-text-muted); line-height: 1.4; }
     .day-card-today-badge { font-size: 11px; background: var(--c-primary); color: white; padding: 2px 8px; border-radius: 10px; }
-    .workout-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; margin-bottom: 8px; }
+    .workout-badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; margin-bottom: 10px; }
     .badge-easy { background: #14532d; color: #86efac; }
-    .badge-tempo { background: #431407; color: #fdba74; }
-    .badge-interval { background: #450a0a; color: #fca5a5; }
-    .badge-long { background: #1e3a8a; color: #93c5fd; }
+    .badge-tempo { background: #fff0e7; color: #9b4f2b; }
+    .badge-interval { background: #ffe0d5; color: #8a3521; }
+    .badge-long { background: var(--c-blue); color: #295d6a; }
     .badge-rest { background: var(--c-surface2); color: var(--c-text-muted); }
-    .day-card-task { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-    .day-card-pace { font-size: 12px; color: var(--c-text-muted); margin-bottom: 10px; }
-    .workout-steps { font-size: 12px; color: var(--c-text-muted); line-height: 1.6; }
-    .workout-steps .step { display: flex; gap: 6px; }
-    .step-icon { font-size: 10px; margin-top: 3px; flex-shrink: 0; }
-    .day-card-actions { display: flex; gap: 6px; margin-top: 10px; }
-    .day-card-actions .btn { font-size: 12px; padding: 6px 12px; flex: 1; }
-    .strength-box { background: var(--c-surface2); border-radius: 6px; padding: 8px; margin-top: 8px; font-size: 11px; color: var(--c-text-muted); }
-    .strength-box strong { color: var(--c-text); display: block; margin-bottom: 4px; }
+    .day-card-task { font-size: 15px; font-weight: 700; margin-bottom: 6px; line-height: 1.5; }
+    .day-card-pace { font-size: 13px; color: var(--c-text-muted); margin-bottom: 12px; line-height: 1.5; }
+    .workout-steps { display: grid; gap: 10px; font-size: 13px; color: var(--c-text-muted); line-height: 1.8; }
+    .step-card {
+      padding: 12px;
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      border-radius: 10px;
+      background: rgba(251, 248, 240, 0.92);
+    }
+    .step-copy { min-width: 0; }
+    .step-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .step-title { color: var(--c-text); font-size: 13px; font-weight: 900; }
+    .step-dose {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e7f2eb;
+      color: var(--c-primary-hover);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .step-detail { font-size: 13px; color: var(--c-text-muted); line-height: 1.65; }
+    .day-card-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .day-card-actions .btn { font-size: 13px; padding: 8px 12px; flex: 1 1 120px; }
+    .support-grid { display: grid; gap: 10px; margin-top: 12px; }
+    .support-card {
+      padding: 12px;
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(241, 234, 220, 0.72), rgba(255, 253, 248, 0.96));
+    }
+    .support-title { color: var(--c-text); font-size: 13px; font-weight: 900; }
+    .support-meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 2px; }
+    .support-drill-list {
+      font-size: 12px;
+      color: var(--c-text);
+      line-height: 1.7;
+      margin: 8px 0 6px;
+      font-weight: 700;
+    }
+    .support-type,
+    .support-dose {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .support-type { background: #fff0e7; color: #9b4f2b; }
+    .support-dose { background: #e7f2eb; color: var(--c-primary-hover); }
+    .support-detail { font-size: 13px; color: var(--c-text-muted); line-height: 1.65; }
 
     /* === Check-in === */
     .checkin-questions { list-style: none; }
-    .checkin-questions li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--c-border); font-size: 14px; }
+    .checkin-questions li { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--c-border); font-size: 15px; line-height: 1.6; }
     .checkin-questions li:last-child { border-bottom: none; }
     .checkin-questions input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
 
     /* === Log === */
-    .log-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    @media (max-width: 500px) { .log-form-grid { grid-template-columns: 1fr; } }
-    .log-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-    .stat-card { background: var(--c-surface2); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+    .log-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 720px) { .log-form-grid { grid-template-columns: 1fr; } }
+    .log-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: var(--c-surface2); border-radius: var(--radius-sm); padding: 18px 14px; text-align: center; }
     .stat-value { font-size: 24px; font-weight: 700; color: var(--c-primary); }
-    .stat-label { font-size: 12px; color: var(--c-text-muted); margin-top: 4px; }
-    .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .log-table th { text-align: left; padding: 8px; border-bottom: 2px solid var(--c-border); color: var(--c-text-muted); font-size: 12px; }
-    .log-table td { padding: 8px; border-bottom: 1px solid var(--c-border); }
+    .stat-label { font-size: 13px; color: var(--c-text-muted); margin-top: 6px; }
+    .log-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .log-table th { text-align: left; padding: 10px 8px; border-bottom: 2px solid var(--c-border); color: var(--c-text-muted); font-size: 12px; letter-spacing: 0.02em; }
+    .log-table td { padding: 12px 8px; border-bottom: 1px solid var(--c-border); line-height: 1.5; }
 
     /* === Export Bar === */
-    .export-bar { background: var(--c-surface); border-top: 1px solid var(--c-border); padding: 12px 16px; display: flex; gap: 10px; position: sticky; bottom: 0; }
+    .export-bar { background: var(--c-surface); border-top: 1px solid var(--c-border); padding: 14px 16px; display: flex; gap: 10px; position: sticky; bottom: 0; flex-wrap: wrap; }
 
     /* === Modal === */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; max-width: 400px; width: 90%; }
+    .modal { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; max-width: 520px; width: min(92vw, 520px); }
+    .modal.guide-modal { max-width: 980px; width: min(94vw, 980px); max-height: 88vh; display: flex; flex-direction: column; }
     .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
     .modal-body { font-size: 14px; color: var(--c-text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .modal.guide-modal .modal-body { overflow: auto; padding-right: 6px; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
     /* === Toolbar === */
-    .plan-toolbar { background: var(--c-surface); border-bottom: 1px solid var(--c-border); padding: 10px 16px; display: flex; gap: 10px; align-items: center; position: sticky; top: 0; z-index: 10; }
-    .plan-toolbar .tab { padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid transparent; color: var(--c-text-muted); font-size: 13px; cursor: pointer; background: transparent; }
+    .plan-toolbar { background: var(--c-surface); border-bottom: 1px solid var(--c-border); padding: 12px 16px; display: flex; gap: 10px; align-items: center; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
+    .plan-toolbar .tab { padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid transparent; color: var(--c-text-muted); font-size: 14px; cursor: pointer; background: transparent; }
     .plan-toolbar .tab.active { border-color: var(--c-border); background: var(--c-surface2); color: var(--c-text); }
     .plan-toolbar .spacer { flex: 1; }
+    .guide-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .guide-chip { padding: 8px 12px; border-radius: 999px; border: 1px solid var(--c-border); background: #f7f3ea; color: var(--c-text); font-size: 13px; font-weight: 700; cursor: pointer; }
+    .guide-chip:hover { border-color: var(--c-primary); color: var(--c-primary-hover); }
+    .guide-hero {
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+      box-shadow: 0 20px 42px rgba(20, 56, 114, 0.1);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .guide-hero-image {
+      display: block;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      background: #f3f7fd;
+    }
+    .guide-hero-copy {
+      padding: 16px 18px 18px;
+      border-top: 1px solid rgba(31, 42, 36, 0.08);
+    }
+    .guide-hero-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--c-text);
+      margin-bottom: 6px;
+    }
+    .guide-hero-text {
+      font-size: 14px;
+      color: var(--c-text-muted);
+      line-height: 1.7;
+    }
+    .guide-asset-stack { display: grid; gap: 18px; }
+    .guide-asset-card {
+      border: 1px solid rgba(31, 42, 36, 0.08);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff, #fbfcfe);
+      padding: 14px;
+      box-shadow: 0 12px 30px rgba(20, 56, 114, 0.08);
+    }
+    .guide-asset-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--c-text);
+      margin-bottom: 10px;
+    }
+    .guide-action-list {
+      margin: 0 0 12px;
+      padding-left: 18px;
+      color: var(--c-text);
+      font-size: 14px;
+      line-height: 1.75;
+      font-weight: 700;
+    }
+    .guide-action-list li + li { margin-top: 4px; }
+    .guide-asset-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      background: #f6f8fb;
+      border: 1px solid rgba(31, 42, 36, 0.08);
+    }
+    .guide-asset-caption {
+      font-size: 13px;
+      color: var(--c-text-muted);
+      line-height: 1.65;
+      margin-top: 10px;
+    }
 
     /* === Week Nav === */
-    .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .week-nav-label { font-weight: 700; font-size: 15px; }
-    .week-nav .btn { padding: 6px 12px; font-size: 13px; }
+    .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .week-nav-label { font-weight: 700; font-size: 16px; line-height: 1.5; }
+    .week-nav .btn { padding: 8px 12px; font-size: 13px; }
+    .phase-explainer {
+      width: 100%;
+      margin-top: 6px;
+      color: var(--c-text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.6;
+    }
 
     /* === Responsive === */
-    @media (max-width: 600px) { .week-calendar { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) {
+      .progress-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .log-stats { grid-template-columns: 1fr; }
+      .mode-brief-grid,
+      .mode-summary { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .container { padding: 18px 14px 22px; }
+      .card { padding: 20px 16px; }
+      .trainer-hero { padding-top: 24px; }
+      .trainer-hero-shell { padding: 22px 16px; }
+      .week-calendar { grid-template-columns: 1fr; }
+      .progress-stats { grid-template-columns: 1fr; }
+      .export-bar .btn { flex: 1 1 100%; }
+      .plan-toolbar .spacer { display: none; }
+      .plan-toolbar .btn,
+      .plan-toolbar .tab { flex: 1 1 auto; text-align: center; }
+      .guide-actions { width: 100%; }
+      .guide-chip { flex: 1 1 calc(33.33% - 6px); text-align: center; }
+      .guide-hero-copy { padding: 14px 14px 16px; }
+      .guide-asset-card { padding: 12px; }
+    }
 
     /* === Print === */
     @media print {
-      .site-nav, .plan-toolbar, .export-bar, .day-card-actions, .week-nav .btn, #view-log, #view-checkin { display: none !important; }
+      .site-header, .plan-toolbar, .export-bar, .day-card-actions, .week-nav .btn, #view-log, #view-checkin { display: none !important; }
       body { background: white; color: black; }
       .card { border: 1px solid #ccc; box-shadow: none; }
       .week-calendar { display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -181,17 +419,50 @@
 </head>
 <body>
 
-<!-- Site Nav -->
-<nav class="site-nav">
-  <span class="brand">🏃 跑者廣場</span>
-  <a href="index.html">首頁</a>
-  <a href="trainer.html" class="active">訓練計畫</a>
-</nav>
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="跑者廣場首頁">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 64 64" focusable="false">
+        <rect width="64" height="64" rx="14"></rect>
+        <path class="brand-route" d="M12 45c7-8 15-9 23-3 7 5 13 5 18-1"></path>
+        <circle class="brand-head" cx="27" cy="17" r="5"></circle>
+        <path class="brand-runner" d="M29 24l-7 8 10 4 7-8"></path>
+        <path class="brand-runner" d="M31 36l-8 12"></path>
+        <path class="brand-runner" d="M33 37l12 10"></path>
+        <path class="brand-route" d="M22 32l-8-5"></path>
+      </svg>
+    </span>
+    <span>跑者廣場</span>
+  </a>
+  <nav class="main-nav" aria-label="主要導覽">
+    <a href="index.html">首頁</a>
+    <a href="index.html#races">賽事</a>
+    <a href="index.html#training">練跑</a>
+    <a href="trainer.html" class="active">🗓 訓練計畫</a>
+    <a href="index.html#gear">跑鞋</a>
+    <a href="index.html#news">新聞</a>
+  </nav>
+</header>
 
-<!-- Views -->
-<div id="view-setup" class="view active"></div>
-<div id="view-plan" class="view"></div>
-<div id="view-log" class="view"></div>
+<main class="trainer-page" id="top">
+  <section class="trainer-hero" aria-labelledby="trainer-hero-title">
+    <div class="trainer-hero-shell">
+      <p class="eyebrow">跑者廣場訓練工具</p>
+      <h1 class="trainer-hero-title" id="trainer-hero-title">按你的週跑量與可訓練日，生成更像真人教練的課表</h1>
+      <p class="trainer-hero-copy">這裡不只看目標距離，還會一起考慮每週訓練天數、長跑上限、最近成績與目前跑量。半馬課表已改成更保守的進程，長跑也會和一般輕鬆跑明確區分。</p>
+      <div class="trainer-hero-points">
+        <span class="trainer-point">半馬課表已收斂週量上限</span>
+        <span class="trainer-point">休息日整合肌力 / 核心</span>
+        <span class="trainer-point">熱身・主課・收操分段顯示</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Views -->
+  <div id="view-setup" class="view active"></div>
+  <div id="view-plan" class="view"></div>
+  <div id="view-log" class="view"></div>
+</main>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal">
@@ -207,26 +478,2410 @@
 // STORAGE
 // ============================================================
 const STORAGE_KEY = 'runner-trainer-v1';
+const PLAN_SCHEMA_VERSION = 6;
 
 function loadData() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { profile: null, plan: [], log: [], checkins: [] };
-  } catch { return { profile: null, plan: [], log: [], checkins: [] }; }
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {} };
+  } catch { return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {} }; }
 }
 
 function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-let appData = loadData();
+function weekHasMalformedVolume(week) {
+  if (!week || !Array.isArray(week.days)) return true;
+  const runDays = week.days.filter(day => ['easy', 'tempo', 'interval', 'long'].includes(day.type));
+  if (!runDays.length) return false;
+  const longDay = runDays.find(day => day.type === 'long');
+  const longKm = longDay?.km || 0;
+  return runDays.some(day => {
+    if (day.type !== 'long' && longKm > 0 && (day.km || 0) >= longKm) return true;
+    if (day.type === 'easy' && (day.km || 0) >= Math.max((week.targetKm || 0) * 0.75, 18)) return true;
+    if ((day.km || 0) >= (week.targetKm || 0) * 0.9) return true;
+    return false;
+  });
+}
 
-// placeholder init — will be replaced in Task 12
+function shouldRebuildSavedPlan(data) {
+  if (!data?.profile || !Array.isArray(data.plan) || data.plan.length === 0) return false;
+  if ((data.profile.planVersion || 0) < PLAN_SCHEMA_VERSION) return true;
+  return data.plan.some(weekHasMalformedVolume);
+}
+
+function rebuildStoredPlan(data) {
+  if (!data?.profile) return data;
+  const preservedProfile = { ...data.profile };
+  preservedProfile.planVersion = PLAN_SCHEMA_VERSION;
+  const rebuilt = buildPlan(preservedProfile);
+  return {
+    ...data,
+    profile: preservedProfile,
+    plan: rebuilt,
+    log: data.log || [],
+    checkins: data.checkins || [],
+    assessments: data.assessments || [],
+    adaptationPrompts: data.adaptationPrompts || {}
+  };
+}
+
+let appData = loadData();
+let setupReturnTab = 'week';
+
+// ============================================================
+// VIEW SWITCHING
+// ============================================================
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
 }
 
-document.getElementById('view-setup').innerHTML = '<div class="container"><div class="card" style="margin-top:24px"><div class="card-title">⏳ 載入中...</div></div></div>';
+function renderGoalBrief(goal) {
+  const meta = GOAL_META[goal] || GOAL_META.half;
+  return `
+    <div class="mode-brief">
+      <div class="mode-brief-kicker">Mode Brief</div>
+      <div class="mode-brief-title">${meta.icon} ${meta.label}</div>
+      <div class="mode-brief-copy">${meta.handbook}</div>
+      <div class="mode-brief-grid">
+        <div class="mode-brief-item"><b>適合誰</b><span>${meta.suitable}</span></div>
+        <div class="mode-brief-item"><b>生成重點</b><span>${meta.focus}</span></div>
+        <div class="mode-brief-item"><b>手機手冊用途</b><span>${meta.exportUse}</span></div>
+      </div>
+    </div>`;
+}
+
+function renderExerciseFigure(kind) {
+  const art = {
+    squat: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="60" cy="18" r="8" fill="#f09a57"/><path d="M60 28 L48 44 L56 54 L69 40 Z" fill="#2f7d5a"/><path d="M56 54 L36 60" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M57 54 L78 60" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M52 50 L46 74" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M68 49 L76 74" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M28 60 H92" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    lunge: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="68" cy="16" r="8" fill="#f09a57"/><path d="M67 25 L58 44 L72 54 L82 36 Z" fill="#2f7d5a"/><path d="M58 43 L41 56" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M72 53 L91 56" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M54 52 L44 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M76 53 L88 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M32 76 H96" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    bridge: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="88" cy="54" r="7" fill="#f09a57"/><path d="M80 53 L63 42 L34 52" stroke="#2f7d5a" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M34 52 L24 68" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M64 42 L56 68" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M14 68 H104" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    clam: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="86" cy="54" r="7" fill="#f09a57"/><path d="M78 54 L58 48 L34 52" stroke="#2f7d5a" stroke-width="10" stroke-linecap="round"/><path d="M33 53 L22 67" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M55 50 L38 37" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M14 68 H102" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    single_balance: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="60" cy="16" r="8" fill="#f09a57"/><path d="M60 25 L52 46 L60 58 L68 46 Z" fill="#2f7d5a"/><path d="M52 44 L38 52" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M68 44 L83 38" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M60 58 L60 77" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M60 58 L78 67" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M44 78 H76" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    plank: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="92" cy="40" r="7" fill="#f09a57"/><path d="M84 40 L56 44 L28 48" stroke="#2f7d5a" stroke-width="10" stroke-linecap="round"/><path d="M58 44 L52 65" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M34 48 L24 68" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M16 68 H102" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    hip_flexor: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="68" cy="16" r="8" fill="#f09a57"/><path d="M68 26 L58 45 L72 55 L82 37 Z" fill="#2f7d5a"/><path d="M58 44 L42 56" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M72 54 L92 55" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M54 53 L45 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M82 54 L82 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M32 76 H98" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    glute_stretch: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="82" cy="26" r="7" fill="#f09a57"/><path d="M74 30 L56 42 L44 60" stroke="#2f7d5a" stroke-width="10" stroke-linecap="round"/><path d="M44 60 L27 72" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M58 42 L82 58" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M18 74 H102" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    calf_foot: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <path d="M26 66 C38 50 54 48 66 54 C78 60 87 58 96 52" fill="none" stroke="#2f7d5a" stroke-width="10" stroke-linecap="round"/><path d="M24 70 H98" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="46" r="6" fill="#f09a57"/><path d="M48 48 L60 60" stroke="#3e5360" stroke-width="7" stroke-linecap="round"/>
+      </svg>`,
+    walk: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="60" cy="16" r="8" fill="#f09a57"/><path d="M60 26 L54 45 L64 56 L74 40 Z" fill="#2f7d5a"/><path d="M54 44 L41 52" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M64 44 L79 38" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M58 56 L47 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M66 56 L82 72" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M38 78 H88" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    mobility: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="60" cy="16" r="8" fill="#f09a57"/><path d="M60 26 L52 46 L60 58 L68 46 Z" fill="#2f7d5a"/><path d="M52 42 L34 32" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M68 42 L86 32" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M60 58 L47 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M60 58 L73 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><circle cx="26" cy="28" r="4" fill="#a7c9b6"/><circle cx="94" cy="28" r="4" fill="#a7c9b6"/>
+      </svg>`,
+    foam_roll: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="84" cy="42" r="7" fill="#f09a57"/><path d="M76 42 L54 48 L36 58" stroke="#2f7d5a" stroke-width="10" stroke-linecap="round"/><path d="M36 58 L22 68" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><rect x="52" y="56" width="26" height="10" rx="5" fill="#efb16d"/><path d="M16 70 H102" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    run_easy: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="66" cy="16" r="8" fill="#f09a57"/><path d="M66 26 L57 44 L67 54 L79 39 Z" fill="#2f7d5a"/><path d="M57 43 L42 51" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M67 43 L83 37" stroke="#2f7d5a" stroke-width="7" stroke-linecap="round"/><path d="M61 55 L49 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M69 55 L86 71" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M38 78 H92" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    run_tempo: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="64" cy="15" r="8" fill="#f09a57"/><path d="M64 25 L54 43 L64 53 L78 35 Z" fill="#d96f39"/><path d="M54 42 L37 48" stroke="#d96f39" stroke-width="7" stroke-linecap="round"/><path d="M65 42 L82 33" stroke="#d96f39" stroke-width="7" stroke-linecap="round"/><path d="M59 54 L46 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M68 54 L88 66" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M34 78 H94" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    run_interval: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="63" cy="15" r="8" fill="#f09a57"/><path d="M63 25 L53 41 L65 50 L80 33 Z" fill="#c95533"/><path d="M54 40 L38 43" stroke="#c95533" stroke-width="7" stroke-linecap="round"/><path d="M66 40 L86 30" stroke="#c95533" stroke-width="7" stroke-linecap="round"/><path d="M59 51 L44 76" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M69 51 L90 60" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M34 78 H96" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/><path d="M92 24 l6 0 l-5 5" fill="none" stroke="#c95533" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`,
+    stretch: `
+      <svg viewBox="0 0 120 92" width="100%" height="100%" aria-hidden="true">
+        <circle cx="72" cy="18" r="7" fill="#f09a57"/><path d="M71 26 L56 42 L43 58" stroke="#2f7d5a" stroke-width="10" stroke-linecap="round"/><path d="M43 58 L27 73" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M55 42 L82 50" stroke="#3e5360" stroke-width="8" stroke-linecap="round"/><path d="M18 74 H100" stroke="#d7c6a3" stroke-width="6" stroke-linecap="round"/>
+      </svg>`
+  };
+  return art[kind] || art.mobility;
+}
+
+const GUIDE_LIBRARY = {
+  warmup: {
+    title: '熱身圖解',
+    intro: '跑前先把關節打開、腿部喚醒，再進入主課，比直接開跑穩很多。',
+    cover: {
+      src: 'assets/trainer-guides/warmup-cover.png',
+      alt: '跑前動態暖身封面圖'
+    },
+    assets: [
+      {
+        title: '跑前動態暖身',
+        src: 'assets/trainer-guides/warmup-dynamic.png',
+        alt: '跑前動態暖身海報',
+        caption: '建議在輕鬆跑、節奏跑、長跑前都先做一輪。',
+        items: [
+          '腳踝繞圈 30 秒 / 邊',
+          '小腿動態伸展 10 次 / 邊',
+          '髖關節繞圈 10 次 / 邊',
+          '弓箭步轉體 8 次 / 邊',
+          '原地高抬腿 30 秒',
+          '原地小跳 20 秒（無痛再做）'
+        ]
+      }
+    ]
+  },
+  cooldown: {
+    title: '收操伸展',
+    intro: '跑完先回收呼吸，再把最容易緊的部位放鬆掉，隔天恢復差很多。',
+    cover: {
+      src: 'assets/trainer-guides/cooldown-cover.png',
+      alt: '跑後收操伸展封面圖'
+    },
+    assets: [
+      {
+        title: '跑後收操伸展',
+        src: 'assets/trainer-guides/cooldown-static.png',
+        alt: '跑後收操伸展海報',
+        caption: '長跑日與節奏課後優先使用，降低臀腿與足底緊繃。',
+        items: [
+          '小腿伸展 45 秒 / 邊',
+          '臀肌伸展 45 秒 / 邊',
+          '髂脛束周邊放鬆 1-2 分鐘',
+          '足底按摩 1-2 分鐘'
+        ]
+      }
+    ]
+  },
+  strength: {
+    title: '肌力動作',
+    intro: '休息日或恢復日做一張即可。A 偏臀腿穩定，B 偏核心與足踝，兩套輪流用比較像真人教練安排。',
+    cover: {
+      src: 'assets/trainer-guides/strength-cover.png',
+      alt: '跑者肌力訓練封面圖'
+    },
+    assets: [
+      {
+        title: '跑者肌力訓練 A',
+        src: 'assets/trainer-guides/muscle-a.png',
+        alt: '跑者肌力訓練A海報',
+        caption: '臀腿穩定主軸：臀橋、分腿蹲、側棒式、小腿提踵。',
+        items: [
+          '臀橋 3×12',
+          '分腿蹲 3×8 / 邊',
+          '羅馬尼亞硬舉 3×8',
+          '側棒式 3×30 秒 / 邊',
+          '小腿提踵 3×15',
+          '單腳站平衡 3×30 秒 / 邊'
+        ]
+      },
+      {
+        title: '跑者肌力訓練 B',
+        src: 'assets/trainer-guides/muscle-b.png',
+        alt: '跑者肌力訓練B海報',
+        caption: '核心與足踝主軸：死蟲、Bird Dog、蚌殼式、短足訓練。',
+        items: [
+          '死蟲 3×10 / 邊',
+          'Bird Dog 3×10 / 邊',
+          '蚌殼式 3×15 / 邊',
+          '彈力帶側走 3×10 步 / 邊',
+          '脛前肌抬腳 3×15',
+          '足底短足訓練 3×10'
+        ]
+      }
+    ]
+  }
+};
+
+// ============================================================
+// SETUP VIEW
+// ============================================================
+function renderSetupView() {
+  const el = document.getElementById('view-setup');
+  const hasExistingPlan = Boolean(appData.profile && appData.plan && appData.plan.length);
+  const goalCards = ['5k10k', 'half', 'full', 'rehab'].map(goal => {
+    const meta = GOAL_META[goal];
+    return `<div class="goal-card" data-goal="${goal}">
+      <div class="goal-icon">${meta.icon}</div>
+      <div class="goal-name">${meta.label}</div>
+      <div class="goal-desc">${meta.cardDesc} · ${meta.minWeeksText}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `
+<div class="container" style="max-width:820px">
+  <div class="card" style="margin-top:24px">
+    <div class="card-title">📋 訓練手冊設定</div>
+    <p style="font-size:15px;line-height:1.7;color:var(--c-text-muted);margin-bottom:24px">這個功能不是只吐出課表，而是依你的目標、可訓練日、目前跑量與恢復條件，生成一份可放進手機的個人訓練手冊。所有資料只存在您的裝置上。</p>
+    ${hasExistingPlan ? `<div style="background:#f3efe5;border-radius:10px;padding:12px 14px;font-size:14px;color:var(--c-text-muted);margin-bottom:20px">你目前已經有一份訓練計畫。改完設定後按「更新訓練手冊」，若只是想回去看原計畫，可直接按「返回目前計畫」。</div>` : ''}
+
+    <!-- 1. Goal -->
+    <div class="form-group">
+      <div class="form-label">訓練模式</div>
+      <div class="goal-grid" id="goal-grid">
+        ${goalCards}
+      </div>
+      <div id="goal-brief">${renderGoalBrief(formState.goal || 'half')}</div>
+    </div>
+
+    <!-- 2. Target Date -->
+    <div class="form-group">
+      <label class="form-label" for="f-date">目標比賽日期</label>
+      <input class="form-input" type="date" id="f-date">
+      <div id="date-warn" style="font-size:13px;line-height:1.6;color:var(--c-orange);margin-top:8px;display:none"></div>
+    </div>
+
+    <!-- 3. Target Time -->
+    <div class="form-group">
+      <label class="form-label" for="f-target-time">目標完賽時間 (H:MM:SS)</label>
+      <input class="form-input" type="text" id="f-target-time" placeholder="例：2:05:00">
+    </div>
+
+    <!-- 4. Training Days -->
+    <div class="form-group">
+      <div class="form-label">訓練日（點一次=訓練日 🔵，再點=長跑日 💙，再點=取消）</div>
+      <div class="day-picker" id="day-picker">
+        <button class="day-btn" data-dow="0">日</button>
+        <button class="day-btn" data-dow="1">一</button>
+        <button class="day-btn" data-dow="2">二</button>
+        <button class="day-btn" data-dow="3">三</button>
+        <button class="day-btn" data-dow="4">四</button>
+        <button class="day-btn" data-dow="5">五</button>
+        <button class="day-btn" data-dow="6">六</button>
+      </div>
+      <div class="day-legend">
+        <span class="l-train">普通訓練日</span>
+        <span class="l-long">長跑日</span>
+      </div>
+      <div id="day-warn" style="font-size:13px;line-height:1.6;color:var(--c-orange);margin-top:8px;display:none"></div>
+    </div>
+
+    <!-- 5. Long Run Max Time -->
+    <div class="form-group">
+      <label class="form-label" for="f-long-max">長跑日最長可跑時間</label>
+      <select class="form-input" id="f-long-max">
+        <option value="60">60 分鐘</option>
+        <option value="90" selected>90 分鐘</option>
+        <option value="120">120 分鐘</option>
+        <option value="150">150+ 分鐘</option>
+      </select>
+    </div>
+
+    <!-- 6. Current Weekly Km -->
+    <div class="form-group">
+      <label class="form-label" for="f-weekly-km">目前每週跑量 (km)，填 0 表示剛開始</label>
+      <input class="form-input" type="number" id="f-weekly-km" min="0" max="200" placeholder="例：25">
+    </div>
+
+    <!-- 7. Easy Pace -->
+    <div class="form-group">
+      <label class="form-label" for="f-easy-pace">輕鬆跑配速 (分:秒/km)</label>
+      <input class="form-input" type="text" id="f-easy-pace" placeholder="例：6:30">
+    </div>
+
+    <!-- 8. Recent Result -->
+    <div class="form-group">
+      <label class="form-label" for="f-recent">最近比賽成績（選填，用於校正配速）</label>
+      <input class="form-input" type="text" id="f-recent" placeholder="例：10K 54:30">
+      <div class="field-help">如果你有近期 5K、10K、半馬成績，這裡可以先快速校正一次配速。更完整的校正建議用後面的「檢測紀錄」。</div>
+    </div>
+
+    <!-- 9. Injuries -->
+    <div class="form-group">
+      <div class="form-label">身體狀況</div>
+      <div class="pill-group" id="injury-pills">
+        <div class="pill selected" data-injury="none">無傷</div>
+        <div class="pill" data-injury="ankle">腳踝</div>
+        <div class="pill" data-injury="knee">膝蓋</div>
+        <div class="pill" data-injury="plantar">足底筋膜炎</div>
+        <div class="pill" data-injury="other">其他</div>
+      </div>
+    </div>
+
+    <!-- Live Calc -->
+    <div class="form-group">
+      <div class="form-label">即時評估</div>
+      <div class="live-calc">
+        <div class="live-calc-grid" id="live-calc-grid">
+          <div class="calc-item"><div class="calc-label">訓練週數</div><div class="calc-value" id="calc-weeks">—</div></div>
+          <div class="calc-item"><div class="calc-label">目標配速</div><div class="calc-value" id="calc-race-pace">—</div></div>
+          <div class="calc-item"><div class="calc-label">節奏跑配速</div><div class="calc-value" id="calc-tempo">—</div></div>
+          <div class="calc-item"><div class="calc-label">間歇配速</div><div class="calc-value" id="calc-interval">—</div></div>
+          <div class="calc-item"><div class="calc-label">訓練天數/週</div><div class="calc-value" id="calc-days">—</div></div>
+          <div class="calc-item"><div class="calc-label">難度評估</div><div class="calc-value" id="calc-difficulty">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-generate" style="width:100%;padding:14px;font-size:16px" disabled>🚀 生成訓練計畫</button>
+    ${hasExistingPlan ? `<div class="setup-actions"><button class="btn btn-secondary" type="button" onclick="returnToPlan()">↩ 返回目前計畫</button></div>` : ''}
+  </div>
+</div>`;
+
+  initGoalPicker();
+  initDayPicker();
+  initInjuryPills();
+  initLiveCalc();
+  document.getElementById('btn-generate').addEventListener('click', generateAndShowPlan);
+  document.getElementById('btn-generate').textContent = hasExistingPlan ? '🔄 更新訓練手冊' : '🚀 生成訓練手冊';
+
+  // Pre-fill if returning user
+  if (appData.profile) prefillSetupForm(appData.profile);
+}
+
+// ============================================================
+// FORM STATE
+// ============================================================
+let formState = {
+  goal: null,
+  dayState: [0, 0, 0, 0, 0, 0, 0],
+  injuries: ['none']
+};
+
+const GOAL_DIST = { '5k10k': 10, half: 21.0975, full: 42.195, rehab: 10 };
+const MIN_WEEKS = { '5k10k': 8, half: 12, full: 16, rehab: 8 };
+const GOAL_NAME = { '5k10k': '入門 5K/10K', half: '半馬 21K', full: '全馬 42K', rehab: '傷後重建' };
+const GOAL_META = {
+  '5k10k': {
+    icon: '🏃',
+    label: '入門 5K / 10K',
+    cardDesc: '建立規律、先把跑步變成習慣',
+    minWeeksText: '建議至少 8 週',
+    handbook: '這個模式不是追爆量，而是幫你把每週可完成的跑步節奏、恢復節奏和基礎速度放進手機手冊。',
+    suitable: '剛開始跑步、週跑量偏低、想先穩定完賽 5K 或 10K。',
+    focus: '課表會優先保留輕鬆跑、跑走銜接與簡單節奏刺激。',
+    exportUse: '匯出後適合當每日照表操課的小手冊。'
+  },
+  half: {
+    icon: '🏅',
+    label: '半馬 21K',
+    cardDesc: '長跑、節奏跑、恢復三者平衡',
+    minWeeksText: '建議至少 12 週',
+    handbook: '半馬模式的重點是把長跑、一般輕鬆跑、節奏 / 間歇、恢復安排拆開，不讓單一課表把壓力吃滿。',
+    suitable: '已有一些週跑量，準備 21K 完賽或穩定推進半馬成績的跑者。',
+    focus: '課表會優先管控長跑比例、品質課出現時機、以及賽前 2 週左右的收量。',
+    exportUse: '匯出後會更像一份單週半馬備賽手冊，而不是只有距離列表。'
+  },
+  full: {
+    icon: '🏆',
+    label: '全馬 42K',
+    cardDesc: '週量與長跑耐力優先，配速其次',
+    minWeeksText: '建議至少 16 週',
+    handbook: '全馬模式的目的不是只把距離乘二，而是讓週跑量、長跑恢復與補給節奏有足夠空間被安排。',
+    suitable: '已具備穩定訓練基礎，想把課表當成全馬基礎期或穩定完賽準備。',
+    focus: '課表會保守看待 3 天訓練、長跑占比與恢復壓力，不會把所有風險堆到週末。',
+    exportUse: '匯出後適合放在手機，當每週執行與自我檢查的全馬手冊。'
+  },
+  rehab: {
+    icon: '🩺',
+    label: '傷後重建',
+    cardDesc: '先回到可持續，再談速度與距離',
+    minWeeksText: '建議至少 8 週',
+    handbook: '傷後重建模式的核心不是追里程，而是建立無痛、可恢復、可追蹤的訓練節奏。',
+    suitable: '剛恢復訓練、近期有不適、想先回到穩定跑步能力的跑者。',
+    focus: '課表會壓低快課出現率，把肌力 / 核心、恢復與自我檢查往前排。',
+    exportUse: '匯出後更適合當每日復健式訓練手冊，而不是比賽導向菜單。'
+  }
+};
+const GOAL_RULES = {
+  '5k10k': { weeklyGrowth: 0.08, taperWeeks: 2, maxWeeklyKm: 40, longRunShare: 0.3, longRunCapKm: 14, qualityAfterWeeks: 2 },
+  half: { weeklyGrowth: 0.07, taperWeeks: 2, maxWeeklyKm: 38, longRunShare: 0.3, longRunCapKm: 18, qualityAfterWeeks: 3 },
+  full: { weeklyGrowth: 0.08, taperWeeks: 3, maxWeeklyKm: 70, longRunShare: 0.35, longRunCapKm: 32, qualityAfterWeeks: 3 },
+  rehab: { weeklyGrowth: 0.05, taperWeeks: 1, maxWeeklyKm: 28, longRunShare: 0.25, longRunCapKm: 12, qualityAfterWeeks: 99 }
+};
+const DOW_NAMES = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+const CHECKIN_QUESTIONS = [
+  '本週所有訓練都完成了',
+  '身體無異常疲勞或疼痛',
+  '睡眠品質良好',
+  '長跑結束後隔天恢復正常',
+  '節奏跑 / 間歇跑配速達標'
+];
+
+// ============================================================
+// PACE UTILITIES
+// ============================================================
+function timeToSec(str) {
+  if (!str) return 0;
+  const parts = str.trim().split(':').map(Number);
+  if (parts.some(Number.isNaN)) return 0;
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return 0;
+}
+
+function secToPace(sec) {
+  if (!sec || sec <= 0) return '—';
+  const rounded = Math.round(sec);
+  const m = Math.floor(rounded / 60);
+  const s = rounded % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function secToTime(sec) {
+  if (!sec || sec <= 0) return '0:00:00';
+  const rounded = Math.round(sec);
+  const h = Math.floor(rounded / 3600);
+  const m = Math.floor((rounded % 3600) / 60);
+  const s = rounded % 60;
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function fitnessLevel(profile) {
+  const gap = profile.easyPaceSec - profile.racePaceSec;
+  if (profile.weeklyKm <= 10 || gap > 120) return 'beginner';
+  if (gap > 60) return 'intermediate';
+  return 'advanced';
+}
+
+function adjustPaceByRecentResult(profile) {
+  if (!profile.recentResult) return;
+  const match = profile.recentResult.match(/([\d.]+)\s*[kK]\s*(\d+):(\d+)(?::(\d+))?/);
+  if (!match) return;
+  const dist = parseFloat(match[1]);
+  const sec = match[4]
+    ? parseInt(match[2], 10) * 3600 + parseInt(match[3], 10) * 60 + parseInt(match[4], 10)
+    : parseInt(match[2], 10) * 60 + parseInt(match[3], 10);
+  if (!dist || !sec) return;
+  const recentPaceSec = sec / dist;
+  const derivedEasyPaceSec = recentPaceSec * 1.25;
+  if (derivedEasyPaceSec > profile.easyPaceSec) {
+    profile.easyPaceSec = derivedEasyPaceSec;
+  }
+  const goalDist = GOAL_DIST[profile.goal] || 10;
+  const ratio = goalDist / dist;
+  const impliedRacePaceSec = recentPaceSec * Math.pow(ratio, 0.07);
+  if (impliedRacePaceSec < profile.racePaceSec) {
+    profile.racePaceSec = impliedRacePaceSec;
+    profile.tempoPaceSec = profile.racePaceSec + 12;
+    profile.intervalPaceSec = Math.max(profile.racePaceSec - 10, 180);
+  }
+}
+
+// ============================================================
+// SETUP INTERACTIONS
+// ============================================================
+function initGoalPicker() {
+  document.querySelectorAll('.goal-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      formState.goal = card.dataset.goal;
+      const brief = document.getElementById('goal-brief');
+      if (brief) brief.innerHTML = renderGoalBrief(formState.goal);
+      updateGenButton();
+      updateLiveCalc();
+    });
+  });
+}
+
+function syncDayButtons() {
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    const dow = parseInt(btn.dataset.dow, 10);
+    btn.classList.toggle('training', formState.dayState[dow] === 1);
+    btn.classList.toggle('long-run', formState.dayState[dow] === 2);
+  });
+}
+
+function validateDays() {
+  const warn = document.getElementById('day-warn');
+  if (!warn) return;
+  const trainDays = formState.dayState.filter(s => s >= 1).length;
+  const longDays = formState.dayState.filter(s => s === 2).length;
+  if (trainDays > 0 && longDays === 0) {
+    warn.textContent = '請點兩下指定一天為長跑日（深藍）';
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+function initDayPicker() {
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dow = parseInt(btn.dataset.dow, 10);
+      const cur = formState.dayState[dow];
+      if (cur === 0) {
+        formState.dayState[dow] = 1;
+      } else if (cur === 1) {
+        formState.dayState = formState.dayState.map((s, i) => (i === dow ? 2 : (s === 2 ? 1 : s)));
+      } else {
+        formState.dayState[dow] = 0;
+      }
+      syncDayButtons();
+      validateDays();
+      updateLiveCalc();
+      updateGenButton();
+    });
+  });
+}
+
+function initInjuryPills() {
+  document.querySelectorAll('.pill[data-injury]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const injury = pill.dataset.injury;
+      if (injury === 'none') {
+        formState.injuries = ['none'];
+        document.querySelectorAll('.pill[data-injury]').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        return;
+      }
+      formState.injuries = formState.injuries.filter(i => i !== 'none');
+      document.querySelector('.pill[data-injury="none"]')?.classList.remove('selected');
+      if (formState.injuries.includes(injury)) {
+        formState.injuries = formState.injuries.filter(i => i !== injury);
+        pill.classList.remove('selected');
+      } else {
+        formState.injuries.push(injury);
+        pill.classList.add('selected');
+      }
+      if (formState.injuries.length === 0) {
+        formState.injuries = ['none'];
+        document.querySelector('.pill[data-injury="none"]')?.classList.add('selected');
+      }
+    });
+  });
+}
+
+function updateLiveCalc() {
+  const dateVal = document.getElementById('f-date')?.value;
+  const timeVal = document.getElementById('f-target-time')?.value;
+  const easyVal = document.getElementById('f-easy-pace')?.value;
+  const goal = formState.goal;
+  const weeksEl = document.getElementById('calc-weeks');
+  const warnEl = document.getElementById('date-warn');
+  if (!weeksEl || !warnEl) return;
+
+  if (!dateVal) {
+    weeksEl.textContent = '—';
+    weeksEl.className = 'calc-value';
+    warnEl.style.display = 'none';
+  } else {
+    const diffWeeks = Math.floor((new Date(dateVal) - new Date()) / (1000 * 86400 * 7));
+    if (diffWeeks < 0) {
+      weeksEl.textContent = '已過期';
+      weeksEl.className = 'calc-value warn';
+      warnEl.textContent = '日期已過，請重新選擇。';
+      warnEl.style.display = 'block';
+    } else {
+      weeksEl.textContent = `${diffWeeks} 週`;
+      const minWeeks = goal ? MIN_WEEKS[goal] : 8;
+      weeksEl.className = `calc-value${diffWeeks < minWeeks ? ' warn' : ' good'}`;
+      if (diffWeeks > 0 && diffWeeks < minWeeks) {
+        warnEl.textContent = `⚠️ 建議至少 ${minWeeks} 週，目前只有 ${diffWeeks} 週，計畫會壓縮。`;
+        warnEl.style.display = 'block';
+      } else if (diffWeeks > 24) {
+        warnEl.textContent = `ℹ️ 距離比賽還有 ${diffWeeks} 週，計畫會維持適當強度。`;
+        warnEl.style.display = 'block';
+      } else {
+        warnEl.style.display = 'none';
+      }
+    }
+  }
+
+  const dist = goal ? GOAL_DIST[goal] : 10;
+  const timeSec = timeToSec(timeVal);
+  let racePaceSec = 0;
+  if (timeSec > 0 && dist > 0) {
+    racePaceSec = timeSec / dist;
+    document.getElementById('calc-race-pace').textContent = `${secToPace(racePaceSec)}/km`;
+    document.getElementById('calc-race-pace').className = 'calc-value good';
+    document.getElementById('calc-tempo').textContent = `${secToPace(racePaceSec + 12)}/km`;
+    document.getElementById('calc-tempo').className = 'calc-value good';
+    document.getElementById('calc-interval').textContent = `${secToPace(Math.max(racePaceSec - 10, 180))}/km`;
+    document.getElementById('calc-interval').className = 'calc-value good';
+  } else {
+    ['calc-race-pace', 'calc-tempo', 'calc-interval'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+      document.getElementById(id).className = 'calc-value';
+    });
+  }
+
+  const trainCount = formState.dayState.filter(s => s >= 1).length;
+  const daysEl = document.getElementById('calc-days');
+  daysEl.textContent = trainCount > 0 ? `${trainCount} 天/週` : '—';
+  daysEl.className = `calc-value${trainCount > 0 ? ' good' : ''}`;
+
+  const diffEl = document.getElementById('calc-difficulty');
+  const easyPaceSec = timeToSec(easyVal);
+  if (racePaceSec > 0 && easyPaceSec > 0) {
+    const gap = easyPaceSec - racePaceSec;
+    if (gap < 30) {
+      diffEl.textContent = '挑戰';
+      diffEl.className = 'calc-value warn';
+    } else if (gap < 90) {
+      diffEl.textContent = '適中';
+      diffEl.className = 'calc-value good';
+    } else {
+      diffEl.textContent = '保守';
+      diffEl.className = 'calc-value good';
+    }
+  } else {
+    diffEl.textContent = '—';
+    diffEl.className = 'calc-value';
+  }
+}
+
+function initLiveCalc() {
+  ['f-date', 'f-target-time', 'f-easy-pace', 'f-weekly-km'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => {
+      updateLiveCalc();
+      updateGenButton();
+    });
+  });
+}
+
+function updateGenButton() {
+  const dateVal = document.getElementById('f-date')?.value;
+  const kmVal = document.getElementById('f-weekly-km')?.value;
+  const easyVal = document.getElementById('f-easy-pace')?.value;
+  const timeVal = document.getElementById('f-target-time')?.value;
+  const hasLong = formState.dayState.some(s => s === 2);
+  const hasTrain = formState.dayState.some(s => s >= 1);
+  const btn = document.getElementById('btn-generate');
+  if (btn) {
+    btn.disabled = !(formState.goal && dateVal && kmVal !== '' && easyVal && timeVal && hasTrain && hasLong);
+  }
+}
+
+function prefillSetupForm(profile) {
+  formState = {
+    goal: profile.goal || null,
+    dayState: Array.isArray(profile.dayState) && profile.dayState.length === 7 ? [...profile.dayState] : [0, 0, 0, 0, 0, 0, 0],
+    injuries: Array.isArray(profile.injuries) && profile.injuries.length ? [...profile.injuries] : ['none']
+  };
+  if (profile.goal) {
+    document.querySelector(`.goal-card[data-goal="${profile.goal}"]`)?.classList.add('selected');
+    const brief = document.getElementById('goal-brief');
+    if (brief) brief.innerHTML = renderGoalBrief(profile.goal);
+  }
+  if (profile.targetDate) document.getElementById('f-date').value = profile.targetDate;
+  if (profile.targetTime) document.getElementById('f-target-time').value = profile.targetTime;
+  if (profile.maxLongRunMins) document.getElementById('f-long-max').value = String(profile.maxLongRunMins);
+  if (profile.weeklyKm !== undefined) document.getElementById('f-weekly-km').value = profile.weeklyKm;
+  if (profile.easyPace) document.getElementById('f-easy-pace').value = profile.easyPace;
+  if (profile.recentResult) document.getElementById('f-recent').value = profile.recentResult;
+  syncDayButtons();
+  validateDays();
+  document.querySelectorAll('.pill[data-injury]').forEach(p => {
+    p.classList.toggle('selected', formState.injuries.includes(p.dataset.injury));
+  });
+  updateLiveCalc();
+  updateGenButton();
+}
+
+// ============================================================
+// PLAN GENERATION
+// ============================================================
+function calcWeeks(targetDate) {
+  return Math.max(Math.floor((new Date(targetDate) - new Date()) / (1000 * 86400 * 7)), 1);
+}
+
+function buildPhases(goal, totalWeeks) {
+  const configs = {
+    '5k10k': [
+      { name: 'base', label: '基礎建量', ratio: 0.4 },
+      { name: 'build', label: '強化提升', ratio: 0.4 },
+      { name: 'taper', label: '賽前減量', ratio: 0.2 }
+    ],
+    half: [
+      { name: 'base', label: '基礎建量', ratio: 0.3 },
+      { name: 'build', label: '強化提升', ratio: 0.35 },
+      { name: 'peak', label: '高峰週期', ratio: 0.2 },
+      { name: 'taper', label: '賽前減量', ratio: 0.15 }
+    ],
+    full: [
+      { name: 'base', label: '基礎建量', ratio: 0.25 },
+      { name: 'build1', label: '強化①', ratio: 0.25 },
+      { name: 'build2', label: '強化②', ratio: 0.25 },
+      { name: 'peak', label: '高峰週期', ratio: 0.15 },
+      { name: 'taper', label: '賽前減量', ratio: 0.1 }
+    ],
+    rehab: [
+      { name: 'light', label: '輕量恢復', ratio: 0.25 },
+      { name: 'progress', label: '漸進強化', ratio: 0.35 },
+      { name: 'solid', label: '鞏固基礎', ratio: 0.25 },
+      { name: 'maintain', label: '維持訓練', ratio: 0.15 }
+    ]
+  };
+  const template = configs[goal] || configs.half;
+  let remaining = totalWeeks;
+  return template.map((phase, index) => {
+    const weeks = index === template.length - 1 ? remaining : Math.max(1, Math.round(totalWeeks * phase.ratio));
+    remaining -= weeks;
+    return { ...phase, weeks };
+  });
+}
+
+function calcLongRunKm(targetKm, numTrain, maxMins, easyPaceSec, isTaper, goal) {
+  const rule = GOAL_RULES[goal] || GOAL_RULES.half;
+  const share = numTrain <= 2 ? Math.min(rule.longRunShare + 0.08, 0.45) : rule.longRunShare;
+  let km = targetKm * share;
+  if (easyPaceSec > 0) {
+    km = Math.min(km, (maxMins * 60) / easyPaceSec);
+  }
+  km = Math.min(km, rule.longRunCapKm);
+  if (isTaper) km *= 0.7;
+  return Math.round(km * 10) / 10;
+}
+
+function calcWorkoutKm(type, targetKm, goal, longKm) {
+  const sharesByGoal = {
+    '5k10k': { interval: 0.13, tempo: 0.17, easy: 0.2 },
+    half: { interval: 0.12, tempo: 0.16, easy: 0.2 },
+    full: { interval: 0.1, tempo: 0.15, easy: 0.18 },
+    rehab: { interval: 0, tempo: 0.12, easy: 0.16 }
+  };
+  const goalShares = sharesByGoal[goal] || sharesByGoal.half;
+  const share = goalShares[type] ?? 0.16;
+  const baseKm = targetKm * share;
+  const capped = longKm ? Math.min(baseKm, Math.max(longKm - 2, longKm * 0.78)) : baseKm;
+  return Math.max(Math.round(capped * 10) / 10, type === 'interval' ? 4 : 5);
+}
+
+function canUseIntervalBySeason(weekStart) {
+  const month = weekStart.getMonth() + 1;
+  return month >= 9;
+}
+
+function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, hasInjury, isEarlyBeginner, weekStart) {
+  const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
+  const qualityReady = weekNum >= rule.qualityAfterWeeks && !isDeload && !hasInjury && !isEarlyBeginner;
+  const canUseTempo = qualityReady && profile.goal !== 'rehab';
+  const canUseInterval = canUseTempo && canUseIntervalBySeason(weekStart);
+  const phaseBucket = ['base', 'light'].includes(phaseName) ? 'base' : ['peak', 'taper'].includes(phaseName) ? phaseName : 'build';
+  const rotation = weekNum % 3;
+  const mainWorkout = !canUseTempo || phaseBucket === 'base'
+    ? 'easy'
+    : canUseInterval && (phaseBucket === 'peak' || rotation === 1)
+      ? 'interval'
+      : 'tempo';
+
+  if (numTrain <= 2) return ['easy'];
+
+  if (numTrain === 3) {
+    if (mainWorkout === 'easy') return ['easy', 'easy'];
+    return rotation === 0 ? ['easy', mainWorkout] : [mainWorkout, 'easy'];
+  }
+
+  if (numTrain === 4) {
+    if (mainWorkout === 'easy') return ['easy', 'easy', 'easy'];
+    return rotation === 0 ? [mainWorkout, 'easy', 'easy'] : ['easy', mainWorkout, 'easy'];
+  }
+
+  if (mainWorkout === 'easy') return ['easy', 'easy', 'easy', 'easy'];
+  return rotation === 0 ? ['easy', mainWorkout, 'easy', 'easy'] : [mainWorkout, 'easy', 'easy', 'easy'];
+}
+
+function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, isTaper) {
+  const tempo = secToPace(profile.tempoPaceSec);
+  const interval = secToPace(profile.intervalPaceSec);
+  const easy = secToPace(profile.easyPaceSec);
+  const fastEasy = profile.easyPaceSec > 15 ? secToPace(profile.easyPaceSec - 15) : easy;
+  const phaseBucket = ['base', 'light'].includes(phaseName) ? 'base' : ['peak', 'taper'].includes(phaseName) ? phaseName : 'build';
+  const goalBias = { '5k10k': 0, half: 1, full: 2, rehab: 3 }[profile.goal] || 0;
+  const rotation = (weekNum + goalBias) % 4;
+  const generatedAt = profile.generatedAt ? new Date(profile.generatedAt) : new Date();
+  const weekAnchor = new Date(generatedAt);
+  weekAnchor.setDate(generatedAt.getDate() + (weekNum - 1) * 7);
+  const allowSummerStrides = canUseIntervalBySeason(weekAnchor);
+
+  if (type === 'easy') {
+    const variants = [
+      {
+        task: `輕鬆跑 ${km} km`,
+        pace: `配速 ${easy}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '步行 + 動態伸展，喚醒髖部與小腿。' },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `全程維持輕鬆跑，配速 ${easy}/km，以可對話為原則。` },
+          { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢跑降速 + 靜態伸展，尤其小腿、臀肌與股四頭。' }
+        ]
+      },
+      {
+        task: `輕鬆跑 ${km} km + 加速跑`,
+        pace: `配速 ${easy}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '8–10 分', detail: '慢走、開髖、腿後勾與高抬腿，先把步幅打開。' },
+          { icon: '🏃', title: '主課', dose: `${Math.max(3, Math.round((km - 0.8) * 10) / 10)} km + 4×100m`, detail: `先完成輕鬆跑，再做 4 趟 100m 放鬆加速，提升步頻但不衝刺。` },
+          { icon: '🧘', title: '收操', dose: '5–8 分', detail: '走跑交替降心率，最後做小腿、臀肌與髂脛束伸展。' }
+        ]
+      },
+      {
+        task: `輕鬆漸進跑 ${km} km`,
+        pace: `配速 ${easy} 起，最後收至 ${fastEasy}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '8 分', detail: '先以慢走與動態伸展啟動，再進入很輕鬆的慢跑。' },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前段維持 ${easy}/km，最後 15 分鐘自然收快到 ${fastEasy}/km，不硬頂。` },
+          { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢跑降速後補水，結束前做 2–3 個下肢伸展動作。' }
+        ]
+      },
+      {
+        task: `有氧穩定跑 ${km} km`,
+        pace: `配速 ${easy}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '6–8 分', detail: '先走再跑，把呼吸和步幅順起來。' },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `整段維持穩定有氧，不追速度，讓今天像在「存體能」。` },
+          { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢走、補水、簡單伸展，留一點餘裕給明後天。' }
+        ]
+      }
+    ];
+    const variantPool = allowSummerStrides ? variants : [variants[0], variants[2], variants[3]];
+    const variant = isDeload || isTaper
+      ? variants[0]
+      : variantPool[phaseBucket === 'base' ? rotation % Math.min(2, variantPool.length) : rotation % variantPool.length];
+    return variant;
+  }
+
+  if (type === 'tempo') {
+    const blockKm = Math.max(1, Math.round((km / 2.5) * 10) / 10);
+    const variants = [
+      {
+        task: `節奏跑 ${km} km`,
+        pace: `配速 ${tempo}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '10 分', detail: `慢跑（${easy}/km）+ 動態伸展 + 2 趟短加速。` },
+          { icon: '🔥', title: '主課', dose: `${km} km`, detail: `連續節奏跑，配速 ${tempo}/km，維持穩定但可控制的吃力感。` },
+          { icon: '🧘', title: '收操', dose: '5–10 分', detail: '慢跑降速，收掉心率，再做靜態伸展。' }
+        ]
+      },
+      {
+        task: `節奏分段跑 ${km} km`,
+        pace: `配速 ${tempo}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '12 分', detail: `慢跑 + 動態伸展，最後做 2 趟 80m 加速，準備進入閾值區。` },
+          { icon: '🔥', title: '主課', dose: `2×${blockKm} km`, detail: `兩段節奏跑，配速 ${tempo}/km，中間慢跑 3 分鐘恢復，練穩定輸出。` },
+          { icon: '🧘', title: '收操', dose: '8–10 分', detail: '慢跑降速，把呼吸和步頻整理回輕鬆區。' }
+        ]
+      },
+      {
+        task: `漸進節奏跑 ${km} km`,
+        pace: `由 ${easy}/km 收至 ${tempo}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '10 分', detail: '慢跑啟動 + 下肢動態伸展，讓步頻先順起來。' },
+          { icon: '🔥', title: '主課', dose: `${km} km`, detail: `前半先在輕鬆偏穩定節奏，後半逐步收快到 ${tempo}/km，練配速控制。` },
+          { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢跑降速，再做髖部與小腿伸展。' }
+        ]
+      },
+      {
+        task: `穩定節奏巡航 ${km} km`,
+        pace: `配速 ${tempo}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '10–12 分', detail: '慢跑啟動，加上 2 趟輕快加速，把步頻先喚醒。' },
+          { icon: '🔥', title: '主課', dose: `${Math.max(2, Math.round(km * 0.7 * 10) / 10)} km`, detail: `今天像真人教練帶的穩定主課：節奏要平、呼吸要穩，不用硬衝。` },
+          { icon: '🧘', title: '收操', dose: '6–8 分', detail: '慢跑降速，再做小腿、臀部和腿後側伸展。' }
+        ]
+      }
+    ];
+    const variant = isDeload ? variants[0] : variants[phaseBucket === 'peak' ? 1 : rotation % variants.length];
+    return variant;
+  }
+
+  if (type === 'interval') {
+    const sets400 = Math.max(4, Math.min(8, Math.round(km / 0.4)));
+    const sets800 = Math.max(3, Math.min(6, Math.round(km / 0.8)));
+    const sets1k = Math.max(3, Math.min(5, Math.round(km)));
+    const variants = [
+      {
+        task: `間歇跑 ${sets400}×400m`,
+        pace: `配速 ${interval}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '15 分', detail: '慢跑 + 動態伸展 + 3 趟 100m 加速，準備進入較快節奏。' },
+          { icon: '⚡', title: '主課', dose: `${sets400}×400m`, detail: `目標配速 ${interval}/km，每趟之間慢跑 90 秒恢復，重點是節奏一致。` },
+          { icon: '🧘', title: '收操', dose: '10 分', detail: '慢跑降速，整理步頻與呼吸，再做伸展。' }
+        ]
+      },
+      {
+        task: `間歇跑 ${sets800}×800m`,
+        pace: `配速 ${interval}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '15–18 分', detail: `慢跑、活動度、2 趟短加速，讓身體先進入可提速狀態。` },
+          { icon: '⚡', title: '主課', dose: `${sets800}×800m`, detail: `每趟維持 ${interval}/km，趟間慢跑 2 分鐘恢復，練半馬所需的穩定速度。` },
+          { icon: '🧘', title: '收操', dose: '10 分', detail: '慢跑回收後補水，最後做臀腿伸展。' }
+        ]
+      },
+      {
+        task: `巡航間歇 ${sets1k}×1 km`,
+        pace: `配速 ${tempo}–${interval}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '15 分', detail: '慢跑、動態伸展、3 趟加速跑，避免一開始就頂強度。' },
+          { icon: '⚡', title: '主課', dose: `${sets1k}×1 km`, detail: `每組控制在節奏到間歇之間，配速 ${tempo}–${interval}/km，組間慢跑 2 分鐘。` },
+          { icon: '🧘', title: '收操', dose: '10 分', detail: '慢跑降速，把心率拉回來再收操。' }
+        ]
+      },
+      {
+        task: `節奏交替跑 ${Math.max(4, Math.round(km * 10) / 10)} km`,
+        pace: `快段 ${tempo}/km，慢段 ${easy}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '15 分', detail: '先把身體開好，再進入交替變速，避免第一組就太硬。' },
+          { icon: '⚡', title: '主課', dose: '3–4 組', detail: `每組快跑 3 分 + 慢跑 2 分，讓速度刺激更像夏季可執行版本。` },
+          { icon: '🧘', title: '收操', dose: '10 分', detail: '慢跑回收，最後用步行把呼吸帶回來。' }
+        ]
+      }
+    ];
+    return variants[phaseBucket === 'peak' ? 1 : rotation % variants.length];
+  }
+
+  const longVariants = [
+    {
+      task: `長跑 ${km} km`,
+      pace: `配速 ${easy}–${fastEasy}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–10 分', detail: '步行 + 動態伸展，進入穩定長距離前先放鬆關節。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `本週最長距離課，維持 ${easy}–${fastEasy}/km，重點是穩定與耐力。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '步行、補水、靜態伸展，讓下肢完整回收。' }
+      ]
+    },
+    {
+      task: `長跑 ${km} km（尾段收快）`,
+      pace: `前段 ${easy}/km，最後 2–3 km 收至 ${fastEasy}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '8 分', detail: '慢走與動態伸展後，用非常輕鬆的步伐起跑。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前段穩穩跑，最後 2–3 km 略收快，練長距離後段仍能維持姿勢。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '步行回收、補給、下肢伸展，避免累積性緊繃。' }
+      ]
+    },
+      {
+        task: `穩定長跑 ${km} km`,
+        pace: `配速 ${easy}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '先把關節與步幅打開，避免一開始就跨太大。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `全程守在輕鬆配速 ${easy}/km，重點是均速與補給節奏，不追求速度。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '慢走、補水、伸展，把疲勞控制在下一課前可恢復的範圍。' }
+        ]
+      },
+      {
+        task: `長跑 ${km} km（補給演練）`,
+        pace: `配速 ${easy}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '先順順起跑，不用一開始就卡在目標節奏。' },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: '今天重點不只是距離，也包含喝水、補給、配速穩定和姿勢維持。' },
+          { icon: '🧘', title: '收操', dose: '10 分', detail: '走跑回收後記一下今天補給和疲勞感，方便下次微調。' }
+        ]
+      }
+    ];
+  const longVariant = isDeload || isTaper ? longVariants[2] : longVariants[phaseBucket === 'peak' ? 1 : rotation % longVariants.length];
+  return longVariant;
+}
+
+function buildSupportBlocks(kind, hasInjury, profile, weekNum = 1, daySeed = 0) {
+  const rotation = (weekNum + daySeed) % 3;
+  if (kind === 'strength') {
+    const strengthVariants = hasInjury ? [
+      {
+        icon: '🏋️',
+        title: '肌力 / 核心',
+        type: '休息日訓練',
+        dose: '20–25 分',
+        detail: rotation === 0 ? '今天先做保守版，穩定和對稱比做多更重要。' : rotation === 1 ? '今天先做關節友善版，把臀腿啟動與核心撐住。' : '今天先做恢復版，不追求刺激，只把控制找回來。',
+        drills: rotation === 0
+          ? [
+              { icon: '🌉', visual: 'bridge', name: '橋式', dose: '3×15' },
+              { icon: '🦪', visual: 'clam', name: '蚌殼式', dose: '3×15' },
+              { icon: '🧍', visual: 'single_balance', name: '單腳站立', dose: '3×30 秒' }
+            ]
+          : rotation === 1
+            ? [
+                { icon: '🌉', visual: 'bridge', name: '臀橋', dose: '3×12' },
+                { icon: '🪵', visual: 'plank', name: '棒式', dose: '3×30 秒' },
+                { icon: '🦶', visual: 'single_balance', name: '提踵', dose: '2×15' }
+              ]
+            : [
+                { icon: '🪑', visual: 'squat', name: '椅子坐站', dose: '2×12' },
+                { icon: '🦪', visual: 'clam', name: '蚌殼式', dose: '2×12 / 邊' },
+                { icon: '🧍', visual: 'single_balance', name: '單腳平衡', dose: '2×30 秒 / 邊' }
+              ]
+      },
+      {
+        icon: '🧘',
+        title: '活動度 / 收操',
+        type: '恢復',
+        dose: '10–15 分',
+        detail: rotation === 2 ? '今天把足底、小腿、臀部依序放掉，恢復會比較完整。' : '把容易緊的地方先放掉，避免下一個跑課又把疲勞帶進去。',
+        drills: rotation === 2
+          ? [
+              { icon: '🦶', visual: 'calf_foot', name: '足底放鬆', dose: '60 秒×2' },
+              { icon: '🦵', visual: 'hip_flexor', name: '小腿伸展', dose: '40 秒×2' },
+              { icon: '🍑', visual: 'glute_stretch', name: '臀肌伸展', dose: '40 秒×2' }
+            ]
+          : [
+              { icon: '🦵', visual: 'hip_flexor', name: '髖屈肌', dose: '40 秒×2' },
+              { icon: '🍑', visual: 'glute_stretch', name: '臀肌伸展', dose: '40 秒×2' },
+              { icon: '🦶', visual: 'calf_foot', name: '足底放鬆', dose: '60 秒' }
+            ]
+      }
+    ] : [
+      {
+        icon: '🏋️',
+        title: '肌力 / 核心',
+        type: '休息日訓練',
+        dose: '20–30 分',
+        detail: rotation === 0 ? '今天偏臀腿穩定，重點是把支撐做紮實。' : rotation === 1 ? '今天偏核心與單腳控制，避免跑到後段姿勢散掉。' : '今天偏足踝與臀中肌，讓落地更穩定。',
+        drills: rotation === 0
+          ? [
+              { icon: '🌉', visual: 'bridge', name: '臀橋', dose: '3×12' },
+              { icon: '↗️', visual: 'lunge', name: '分腿蹲', dose: '3×8 / 邊' },
+              { icon: '🧍', visual: 'single_balance', name: '單腳站立', dose: '3×30 秒 / 邊' }
+            ]
+          : rotation === 1 ? [
+              { icon: '🪵', visual: 'plank', name: '棒式', dose: '3×45 秒' },
+              { icon: '🦪', visual: 'clam', name: '蚌殼式', dose: '3×15 / 邊' },
+              { icon: '🧍', visual: 'single_balance', name: '單腳硬舉', dose: '2×8 / 邊' }
+            ]
+          : [
+              { icon: '🦶', visual: 'single_balance', name: '提踵', dose: '3×15' },
+              { icon: '🪑', visual: 'squat', name: '椅子坐站', dose: '2×12' },
+              { icon: '↔️', visual: 'clam', name: '側向開腿', dose: '2×12 / 邊' }
+            ]
+      },
+      {
+        icon: '🧘',
+        title: '活動度 / 收操',
+        type: '恢復',
+        dose: '10–15 分',
+        detail: rotation === 2 ? '今天偏下肢回收，把足底和小腿的緊繃放掉。' : '這段不是可有可無，是幫你把下次訓練的恢復先做好。',
+        drills: rotation === 2
+          ? [
+              { icon: '🦶', visual: 'calf_foot', name: '足底放鬆', dose: '60 秒×2' },
+              { icon: '🦵', visual: 'hip_flexor', name: '小腿伸展', dose: '40 秒×2' },
+              { icon: '🍑', visual: 'glute_stretch', name: '臀部伸展', dose: '40 秒×2' }
+            ]
+          : [
+              { icon: '🦵', visual: 'hip_flexor', name: '腿後側', dose: '40 秒×2' },
+              { icon: '🍑', visual: 'glute_stretch', name: '臀部伸展', dose: '40 秒×2' },
+              { icon: '🦶', visual: 'calf_foot', name: '小腿 / 足底', dose: '60 秒' }
+            ]
+      }
+    ];
+    return strengthVariants;
+  }
+
+  return rotation === 0 ? [
+    {
+      icon: '🫧',
+      title: '恢復日',
+      type: '主動恢復',
+      dose: '10–20 分',
+      detail: '今天只做恢復，不再額外堆跑量，讓身體把前幾天的訓練吸收掉。',
+      drills: [
+        { icon: '🚶', visual: 'walk', name: '輕鬆步行', dose: '10 分' },
+        { icon: '🌀', visual: 'mobility', name: '關節活動', dose: '5 分' },
+        { icon: '🫧', visual: 'foam_roll', name: '滾筒放鬆', dose: '5 分' }
+      ]
+    }
+  ] : rotation === 1 ? [
+    {
+      icon: '🫧',
+      title: '恢復日',
+      type: '主動恢復',
+      dose: '10–15 分',
+      detail: '今天以走路和伸展為主，不補跑，只做恢復。',
+      drills: [
+        { icon: '🚶', visual: 'walk', name: '輕鬆步行', dose: '8–10 分' },
+        { icon: '🦵', visual: 'hip_flexor', name: '髖屈肌伸展', dose: '40 秒×2' },
+        { icon: '🍑', visual: 'glute_stretch', name: '臀肌伸展', dose: '40 秒×2' }
+      ]
+    }
+  ] : [
+    {
+      icon: '🫧',
+      title: '恢復日',
+      type: '主動恢復',
+      dose: '12–18 分',
+      detail: '今天偏足底與小腿回收，把下肢緊繃先降下來。',
+      drills: [
+        { icon: '🦶', visual: 'calf_foot', name: '足底放鬆', dose: '60 秒×2' },
+        { icon: '🦵', visual: 'hip_flexor', name: '小腿伸展', dose: '40 秒×2' },
+        { icon: '🌀', visual: 'mobility', name: '關節活動', dose: '5 分' }
+      ]
+    }
+  ];
+}
+
+function buildRestDayCard(dow, dateStr, profile, today, weekNum = 1) {
+  const prevState = profile.dayState[(dow + 6) % 7];
+  const nextState = profile.dayState[(dow + 1) % 7];
+  const betweenRuns = prevState >= 1 && nextState >= 1;
+  const hasInjury = !profile.injuries.includes('none');
+  return {
+    dow,
+    dateStr,
+    type: 'rest',
+    isToday: dateStr === today,
+    status: 'upcoming',
+    task: betweenRuns ? '肌力 / 核心 + 恢復' : '主動恢復 / 完全休息',
+    supportBlocks: buildSupportBlocks(betweenRuns ? 'strength' : 'recovery', hasInjury, profile, weekNum, dow)
+  };
+}
+
+function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInjury, today, weekNum = 1, phaseName = 'build') {
+  const card = { dow, dateStr, type, km, isToday: dateStr === today, status: 'upcoming', isDeload, weekNum, phaseName };
+  const content = buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, isTaper);
+  card.task = content.task;
+  card.pace = content.pace;
+  card.steps = content.steps;
+
+  if (isDeload && type !== 'rest') {
+    card.task = `${card.task} · 減量週`;
+  } else if (isTaper && type !== 'rest') {
+    card.task = `${card.task} · 賽前減量`;
+  }
+  return card;
+}
+
+function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeload, isTaper, hasInjury, weekNum, startDate, phaseName) {
+  const days = [];
+  const weekStart = new Date(startDate);
+  weekStart.setDate(startDate.getDate() + (weekNum - 1) * 7 - startDate.getDay());
+  const numTrain = trainDows.length;
+  const level = profile.fitnessLevel || 'intermediate';
+  const isEarlyBeginner = level === 'beginner' && weekNum <= 4;
+  let otherTypes = buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, hasInjury, isEarlyBeginner, weekStart);
+  if (hasInjury) otherTypes = otherTypes.map(type => (type === 'tempo' ? 'easy' : type));
+
+  let otherIdx = 0;
+  const today = todayStr();
+  const longKm = profile.dayState.includes(2)
+    ? calcLongRunKm(targetKm, numTrain, profile.maxLongRunMins, profile.easyPaceSec, isTaper, profile.goal)
+    : 0;
+
+  for (let dow = 0; dow < 7; dow++) {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + dow);
+    const dateStr = date.toISOString().split('T')[0];
+    if (profile.dayState[dow] === 2) {
+      days.push(buildDayCard(dow, dateStr, 'long', longKm, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName));
+    } else if (profile.dayState[dow] === 1) {
+      const type = otherTypes[otherIdx] || 'easy';
+      otherIdx += 1;
+      const km = calcWorkoutKm(type, targetKm, profile.goal, longKm);
+      days.push(buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName));
+    } else {
+      days.push(buildRestDayCard(dow, dateStr, profile, today, weekNum));
+    }
+  }
+
+  return days;
+}
+
+function buildPlan(profile) {
+  const totalWeeks = calcWeeks(profile.targetDate);
+  const phases = buildPhases(profile.goal, totalWeeks);
+  const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
+  const plan = [];
+  const hasInjury = !profile.injuries.includes('none');
+  const startDate = new Date();
+  const longDow = profile.dayState.indexOf(2);
+  const trainDows = profile.dayState.map((s, i) => (s >= 1 ? i : -1)).filter(i => i >= 0).sort((a, b) => a - b);
+  const otherDows = trainDows.filter(d => d !== longDow);
+  let baseKm = Math.min(Math.max(profile.weeklyKm * 1.03, 10), rule.maxWeeklyKm);
+
+  phases.forEach(phase => {
+    for (let wi = 0; wi < phase.weeks; wi++) {
+      const weekNum = plan.length + 1;
+      const weeksToRace = totalWeeks - weekNum + 1;
+      const isTaper = weeksToRace <= rule.taperWeeks;
+      const isDeload = weekNum % 4 === 0 && !isTaper && weekNum < totalWeeks;
+
+      let targetKm = baseKm;
+      if (isDeload) targetKm = baseKm * 0.8;
+      else if (isTaper) {
+        if (weeksToRace === 1) targetKm = Math.max(baseKm * 0.2, 8);
+        else if (weeksToRace === 2) targetKm = baseKm * 0.5;
+        else targetKm = baseKm * 0.7;
+      }
+      targetKm = Math.min(targetKm, rule.maxWeeklyKm);
+
+      plan.push({
+        weekNum,
+        phase: phase.name,
+        phaseLabel: phase.label,
+        isDeload,
+        isTaper,
+        targetKm: Math.round(targetKm * 10) / 10,
+        days: buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeload, isTaper, hasInjury, weekNum, startDate, phase.name)
+      });
+
+      if (!isDeload && !isTaper) {
+        baseKm = Math.min(baseKm * (1 + rule.weeklyGrowth), rule.maxWeeklyKm);
+      }
+    }
+  });
+
+  return plan;
+}
+
+function generateAndShowPlan() {
+  if (appData.plan && appData.plan.length > 0) {
+    if (!confirm('重新生成會取代目前計畫，訓練紀錄將保留。確定繼續？')) return;
+  }
+  const profile = {
+    goal: formState.goal,
+    targetDate: document.getElementById('f-date').value,
+    targetTime: document.getElementById('f-target-time').value,
+    dayState: [...formState.dayState],
+    maxLongRunMins: parseInt(document.getElementById('f-long-max').value, 10),
+    weeklyKm: parseFloat(document.getElementById('f-weekly-km').value) || 0,
+    easyPace: document.getElementById('f-easy-pace').value,
+    recentResult: document.getElementById('f-recent').value,
+    injuries: [...formState.injuries],
+    generatedAt: new Date().toISOString()
+  };
+  const dist = GOAL_DIST[profile.goal];
+  const timeSec = timeToSec(profile.targetTime);
+  profile.racePaceSec = timeSec / dist;
+  profile.tempoPaceSec = profile.racePaceSec + 12;
+  profile.intervalPaceSec = Math.max(profile.racePaceSec - 10, 180);
+  profile.easyPaceSec = timeToSec(profile.easyPace);
+  profile.fitnessLevel = fitnessLevel(profile);
+  profile.planVersion = PLAN_SCHEMA_VERSION;
+  adjustPaceByRecentResult(profile);
+
+  appData.profile = profile;
+  appData.plan = buildPlan(profile);
+  appData.log = appData.log || [];
+  appData.checkins = appData.checkins || [];
+  appData.assessments = appData.assessments || [];
+  appData.adaptationPrompts = {};
+  saveData(appData);
+  renderPlanView();
+  showView('plan');
+}
+
+// ============================================================
+// PLAN VIEW
+// ============================================================
+let currentWeek = 1;
+
+function renderPlanView() {
+  const el = document.getElementById('view-plan');
+  const profile = appData.profile;
+  const plan = appData.plan || [];
+  if (!profile || !plan.length) {
+    showView('setup');
+    return;
+  }
+  const daysSinceGen = Math.floor((new Date() - new Date(profile.generatedAt)) / 86400000);
+  currentWeek = Math.min(Math.max(1, Math.floor(daysSinceGen / 7) + 1), plan.length);
+  el.innerHTML = `
+<div class="plan-toolbar">
+  <button class="tab active" onclick="switchPlanTab('week')">本週課表</button>
+  <button class="tab" onclick="switchPlanTab('checkin')">週評估</button>
+  <button class="tab" onclick="switchPlanTab('log')">訓練紀錄</button>
+  <div class="guide-actions">
+    <button class="guide-chip" onclick="openGuideLibrary('warmup')">熱身圖解</button>
+    <button class="guide-chip" onclick="openGuideLibrary('cooldown')">收操伸展</button>
+    <button class="guide-chip" onclick="openGuideLibrary('strength')">肌力動作</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="editSetup()">⚙️ 修改設定</button>
+</div>
+<div id="plan-tab-week" class="container">
+  ${renderProgressCard(profile, plan)}
+  ${renderPhaseTabs(plan)}
+  ${renderWeekSection(plan)}
+</div>
+<div id="plan-tab-checkin" class="container" style="display:none">
+  ${renderCheckinSection()}
+</div>
+<div id="plan-tab-log" class="container" style="display:none">
+  ${renderLogSection()}
+</div>
+<div class="export-bar">
+  <button class="btn btn-secondary" onclick="exportPDF()">📄 存 PDF</button>
+  <button class="btn btn-secondary" onclick="exportHTML()">📱 下載手機訓練手冊</button>
+</div>`;
+}
+
+function switchPlanTab(tab) {
+  const tabs = ['week', 'checkin', 'log'];
+  tabs.forEach((name, index) => {
+    const section = document.getElementById(`plan-tab-${name}`);
+    if (section) section.style.display = name === tab ? 'block' : 'none';
+    const btn = document.querySelectorAll('.plan-toolbar .tab')[index];
+    if (btn) btn.classList.toggle('active', name === tab);
+  });
+}
+
+function editSetup() {
+  const tabs = ['week', 'checkin', 'log'];
+  const activeIndex = [...document.querySelectorAll('.plan-toolbar .tab')].findIndex(btn => btn.classList.contains('active'));
+  setupReturnTab = tabs[Math.max(0, activeIndex)] || 'week';
+  renderSetupView();
+  showView('setup');
+}
+
+function returnToPlan() {
+  renderPlanView();
+  showView('plan');
+  switchPlanTab(setupReturnTab || 'week');
+}
+
+function renderProgressCard(profile, plan) {
+  const totalWeeks = plan.length;
+  const pct = Math.round((currentWeek / totalWeeks) * 100);
+  const log = appData.log || [];
+  const meta = GOAL_META[profile.goal] || GOAL_META.half;
+  const assessmentHint = getAssessmentCycleHint(plan);
+  const totalKm = log.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const doneCount = log.length;
+  const currWeekPlan = plan[currentWeek - 1];
+  const currWeekDone = log.filter(entry => {
+    const weekNum = Math.floor((new Date(entry.date) - new Date(profile.generatedAt)) / 86400000 / 7) + 1;
+    return weekNum === currentWeek;
+  }).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const plannedSessions = plan.slice(0, currentWeek).reduce((sum, week) => sum + week.days.filter(day => day.type !== 'rest').length, 0);
+  const adherence = plannedSessions > 0 ? Math.round((doneCount / plannedSessions) * 100) : 0;
+  const pausedBanner = profile.paused
+    ? `<div style="background:#7f1d1d;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:12px;color:#fca5a5">
+        ⏸ 計畫已暫停（${profile.pausedAt}）
+        <button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;margin-left:10px" onclick="resumePlan()">繼續計畫</button>
+      </div>`
+    : '';
+  return `
+<div class="card">
+  ${pausedBanner}
+  ${assessmentHint ? `<div style="background:#edf5ef;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:12px;color:var(--c-primary-hover)">🧪 ${assessmentHint}</div>` : ''}
+  <div style="font-size:18px;font-weight:700;margin-bottom:4px">${GOAL_NAME[profile.goal]} 訓練計畫</div>
+  <div style="font-size:13px;color:var(--c-text-muted);margin-bottom:12px">
+    目標日 ${profile.targetDate} · 目標配速 ${secToPace(profile.racePaceSec)}/km
+  </div>
+  <div class="mode-summary">
+    <div class="mode-summary-card"><b>這個模式在做什麼</b><span>${meta.handbook}</span></div>
+    <div class="mode-summary-card"><b>本模式優先順序</b><span>${meta.focus}</span></div>
+    <div class="mode-summary-card"><b>手機手冊怎麼用</b><span>${meta.exportUse}</span></div>
+  </div>
+  <div style="height:12px"></div>
+  <div style="font-size:14px;margin-bottom:6px">第 <strong>${currentWeek}</strong> 週 / 共 ${totalWeeks} 週</div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${Math.min(100, pct)}%"></div></div>
+  <div class="progress-stats">
+    <span>完成 <strong>${doneCount}</strong> 次</span>
+    <span>本週 <strong>${currWeekDone.toFixed(1)}/${currWeekPlan?.targetKm || '?'} km</strong></span>
+    <span>累積 <strong>${totalKm.toFixed(1)} km</strong></span>
+    ${adherence > 0 ? `<span>遵從率 <strong>${adherence}%</strong></span>` : ''}
+  </div>
+</div>`;
+}
+
+function renderPhaseTabs(plan) {
+  const phases = [];
+  let lastPhase = null;
+  plan.forEach(week => {
+    if (!lastPhase || lastPhase.name !== week.phase) {
+      lastPhase = { name: week.phase, label: week.phaseLabel, start: week.weekNum, end: week.weekNum };
+      phases.push(lastPhase);
+    } else {
+      lastPhase.end = week.weekNum;
+    }
+  });
+  const currentPhase = plan[currentWeek - 1]?.phase;
+  const emojiMap = { base: '🏗️', build: '🔥', build1: '🔥', build2: '💪', peak: '🎯', taper: '⬇️', light: '🌱', progress: '📈', solid: '💪', maintain: '✓' };
+  return `<div class="phase-tabs">${phases.map(phase => {
+    const isCurrent = phase.name === currentPhase;
+    const isDone = phase.end < currentWeek;
+    return `<div class="phase-tab ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}" onclick="jumpToPhaseWeek(${phase.start})">
+      ${emojiMap[phase.name] || '📍'} ${phase.label} W${phase.start}${phase.end > phase.start ? '–' + phase.end : ''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function jumpToPhaseWeek(weekNum) {
+  currentWeek = weekNum;
+  document.getElementById('plan-tab-week').innerHTML = `
+    ${renderProgressCard(appData.profile, appData.plan)}
+    ${renderPhaseTabs(appData.plan)}
+    ${renderWeekSection(appData.plan)}`;
+}
+
+function renderWeekSection(plan) {
+  const week = plan[currentWeek - 1];
+  if (!week) return '<p>找不到訓練週資料</p>';
+  const deloadBadge = week.isDeload ? '<span style="font-size:12px;color:var(--c-orange);margin-left:8px">減量週</span>' : '';
+  const taperBadge = week.isTaper ? '<span style="font-size:12px;color:var(--c-blue);margin-left:8px">減量期</span>' : '';
+  const phaseRuleText = getPhaseRuleText(week, appData.profile, plan.length);
+  return `
+<div class="week-nav">
+  <button class="btn btn-secondary" onclick="navWeek(-1)" ${currentWeek <= 1 ? 'disabled' : ''}>◀</button>
+  <span class="week-nav-label">第 ${currentWeek} 週 — ${week.phaseLabel} ${deloadBadge}${taperBadge}</span>
+  <button class="btn btn-secondary" onclick="navWeek(1)" ${currentWeek >= plan.length ? 'disabled' : ''}>▶</button>
+  <span style="font-size:13px;color:var(--c-text-muted);margin-left:auto">目標 ${week.targetKm} km</span>
+  <div class="phase-explainer">${phaseRuleText}</div>
+</div>
+<div class="week-calendar">${week.days.map(day => renderDayCard(day)).join('')}</div>`;
+}
+
+function navWeek(delta) {
+  currentWeek = Math.max(1, Math.min(appData.plan.length, currentWeek + delta));
+  jumpToPhaseWeek(currentWeek);
+}
+
+function renderStepCards(steps) {
+  return `<div class="workout-steps">${(steps || []).map(step => `
+    <div class="step-card">
+      <div class="step-copy">
+        <div class="step-head">
+          <span class="step-title">${step.title || ''}</span>
+          ${step.dose ? `<span class="step-dose">${step.dose}</span>` : ''}
+        </div>
+        <div class="step-detail">${step.detail || step.text || ''}</div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function resolveStepVisual(step) {
+  const title = step?.title || '';
+  const detail = step?.detail || '';
+  if (title.includes('熱身')) return detail.includes('加速') ? 'mobility' : 'walk';
+  if (title.includes('收操')) return 'stretch';
+  if (title.includes('主課')) {
+    if (detail.includes('間歇') || detail.includes('快跑') || detail.includes('400m') || detail.includes('800m')) return 'run_interval';
+    if (detail.includes('節奏') || detail.includes('漸進')) return 'run_tempo';
+    return 'run_easy';
+  }
+  return 'mobility';
+}
+
+function renderSupportCards(blocks) {
+  return `<div class="support-grid">${(blocks || []).map(block => `
+    <div class="support-card">
+      <div>
+        <div class="support-title">${block.title}</div>
+        <div class="support-meta">
+          <span class="support-type">${block.type}</span>
+          ${block.dose ? `<span class="support-dose">${block.dose}</span>` : ''}
+        </div>
+        ${(block.drills || []).length ? `<div class="support-drill-list">${block.drills.map(drill => `${drill.name}${drill.dose ? ` ${drill.dose}` : ''}`).join('・')}</div>` : ''}
+        <div class="support-detail">${block.detail}</div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function openGuideLibrary(kind) {
+  const guide = GUIDE_LIBRARY[kind];
+  if (!guide) return;
+  const body = `
+    ${guide.cover ? `
+      <div class="guide-hero">
+        <img class="guide-hero-image" src="${guide.cover.src}" alt="${guide.cover.alt || guide.title}">
+        <div class="guide-hero-copy">
+          <div class="guide-hero-title">${guide.title}</div>
+          <div class="guide-hero-text">${guide.intro || ''}</div>
+        </div>
+      </div>
+    ` : `
+      <div class="guide-hero-copy" style="padding:0 0 14px;border-top:none">
+        <div class="guide-hero-title">${guide.title}</div>
+        <div class="guide-hero-text">${guide.intro || ''}</div>
+      </div>
+    `}
+    <div class="guide-asset-stack">
+      ${(guide.assets || []).map(asset => `
+        <div class="guide-asset-card">
+          <div class="guide-asset-title">${asset.title}</div>
+          ${(asset.items || []).length ? `<ul class="guide-action-list">${asset.items.map(item => `<li>${item}</li>`).join('')}</ul>` : ''}
+          <img class="guide-asset-image" src="${asset.src}" alt="${asset.alt || asset.title}">
+          ${asset.caption ? `<div class="guide-asset-caption">${asset.caption}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>`;
+  showModal(guide.title, body, [{ label: '關閉', primary: true, action: closeModal }], { className: 'guide-modal' });
+}
+
+function getPhaseRuleText(week, profile, totalWeeks) {
+  const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
+  const weekStart = week.days?.[0]?.dateStr ? new Date(`${week.days[0].dateStr}T00:00:00`) : null;
+  const isSummerHeatBlock = weekStart ? (weekStart.getMonth() + 1) < 9 : false;
+  const phaseGuides = {
+    base: '先用輕鬆跑與長跑把有氧底盤墊起來，品質課只會少量出現。',
+    build: '開始加入節奏跑與間歇跑，把速度耐力拉上來，但長跑仍是主軸。',
+    peak: '保留關鍵強度，讓長跑尾段與品質課更接近比賽需求，但不再大幅堆量。',
+    taper: '進入賽前回收，保留節奏感、明顯收量，讓雙腿在比賽前恢復。',
+    light: '先以恢復與重新建立規律為主，強度維持保守。',
+    progress: '在可恢復的前提下逐步加回跑量與節奏刺激。',
+    solid: '把已恢復的跑量與動作品質穩定下來，避免再次拉傷。',
+    maintain: '已進入維持期，以穩定出席和不過度疲勞為優先。'
+  };
+  if (week.isTaper) {
+    return `賽前減量期：${rule.taperWeeks} 週內自動收量，讓比賽前體能回收。`;
+  }
+  if (week.isDeload) {
+    return '本週是恢復週，總量下修，硬課減少，避免連續堆疲勞。';
+  }
+  if (isSummerHeatBlock && ['half', 'full'].includes(profile.goal)) {
+    return `週期判別：依目標與總週數 ${totalWeeks} 週切分，目前第 ${week.weekNum} 週屬於「${week.phaseLabel}」。夏季炎熱期先以主課節奏跑、輕鬆跑與長跑為主，間歇跑會等 9 月後再加入。距離目標日還有 ${totalWeeks - week.weekNum + 1} 週。`;
+  }
+  return `週期判別：依目標與總週數 ${totalWeeks} 週切分，目前第 ${week.weekNum} 週屬於「${week.phaseLabel}」。${phaseGuides[week.phase] || ''} 距離目標日還有 ${totalWeeks - week.weekNum + 1} 週。`;
+}
+
+function renderDayCard(day) {
+  if (day.type === 'rest') {
+    return `<div class="day-card ${day.status === 'missed' ? 'missed-card' : ''}">
+      <div class="day-card-header">
+        <span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>
+        ${day.isToday ? '<span class="day-card-today-badge">今天</span>' : ''}
+      </div>
+      <span class="workout-badge badge-rest">休息</span>
+      <div class="day-card-task">${day.task || '主動恢復 / 完全休息'}</div>
+      ${renderSupportCards(day.supportBlocks)}
+    </div>`;
+  }
+  const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long' }[day.type] || 'badge-rest';
+  const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[day.type] || '訓練';
+  const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : '';
+  const actionsHTML = day.status === 'done'
+    ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>'
+    : day.status === 'missed'
+      ? '<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>'
+      : `<div class="day-card-actions">
+          <button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">✓ 完成</button>
+          <button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button>
+        </div>`;
+  return `<div class="day-card ${day.isToday ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}">
+    <div class="day-card-header">
+      <span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>
+      ${day.isToday ? '<span class="day-card-today-badge">今天</span>' : ''}
+    </div>
+    <span class="workout-badge ${badgeClass}">${typeName}</span>
+    <div class="day-card-task">${day.task || typeName}</div>
+    <div class="day-card-pace">${day.pace || ''}</div>
+    ${renderStepCards(day.steps)}
+    ${actionsHTML}
+  </div>`;
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function showModal(title, bodyHTML, actions, options = {}) {
+  const modalEl = document.querySelector('#modal .modal');
+  if (modalEl) modalEl.className = `modal ${options.className || ''}`.trim();
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  const actionsEl = document.getElementById('modal-actions');
+  actionsEl.innerHTML = '';
+  actions.forEach(action => {
+    const btn = document.createElement('button');
+    btn.className = `btn ${action.primary ? 'btn-primary' : 'btn-secondary'}`;
+    btn.textContent = action.label;
+    btn.onclick = action.action;
+    actionsEl.appendChild(btn);
+  });
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  const modalEl = document.querySelector('#modal .modal');
+  if (modalEl) modalEl.className = 'modal';
+  document.getElementById('modal').classList.remove('open');
+}
+
+document.getElementById('modal')?.addEventListener('click', event => {
+  if (event.target === document.getElementById('modal')) closeModal();
+});
+
+// ============================================================
+// WORKOUT ACTIONS
+// ============================================================
+function markDayStatus(dateStr, status) {
+  appData.plan.forEach(week => week.days.forEach(day => {
+    if (day.dateStr === dateStr) day.status = status;
+  }));
+  saveData(appData);
+}
+
+function saveLogEntry(entry) {
+  appData.log = appData.log || [];
+  appData.log = appData.log.filter(item => !(item.date === entry.date && item.type === entry.type));
+  appData.log.push(entry);
+  saveData(appData);
+}
+
+const ASSESSMENT_TYPE_LABEL = {
+  test_20min: '20 分鐘測驗',
+  race_5k: '5K 測驗',
+  race_10k: '10K 測驗',
+  race_half: '半馬測驗',
+  custom_race: '近期比賽'
+};
+
+function formatAssessmentType(type) {
+  return ASSESSMENT_TYPE_LABEL[type] || type;
+}
+
+function saveAssessmentEntry(entry) {
+  appData.assessments = appData.assessments || [];
+  appData.assessments = appData.assessments.filter(item => !(item.date === entry.date && item.type === entry.type));
+  appData.assessments.push(entry);
+  appData.assessments.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  saveData(appData);
+}
+
+function estimatePacesFromAssessment(assessment) {
+  const goalDist = GOAL_DIST[appData.profile?.goal] || 10;
+  let racePaceSec = 0;
+  if (assessment.type === 'test_20min') {
+    if (!assessment.distanceKm) return null;
+    const thresholdPaceSec = (20 * 60) / assessment.distanceKm;
+    racePaceSec = thresholdPaceSec + 12;
+  } else {
+    const resultSec = timeToSec(assessment.result);
+    const distMap = { race_5k: 5, race_10k: 10, race_half: 21.0975 };
+    const baseDist = distMap[assessment.type] || assessment.distanceKm;
+    if (!resultSec || !baseDist) return null;
+    const recentPaceSec = resultSec / baseDist;
+    racePaceSec = recentPaceSec * Math.pow(goalDist / baseDist, 0.07);
+  }
+  if (!racePaceSec || !Number.isFinite(racePaceSec)) return null;
+  return {
+    racePaceSec,
+    tempoPaceSec: racePaceSec + 12,
+    intervalPaceSec: Math.max(racePaceSec - 10, 180),
+    easyPaceSec: Math.max(racePaceSec + 75, racePaceSec * 1.12),
+    targetTime: secToTime(Math.round(racePaceSec * goalDist))
+  };
+}
+
+function applyAssessmentToPlan(index = 0) {
+  const assessment = (appData.assessments || [])[index];
+  if (!assessment || !appData.profile) return;
+  const nextPaces = estimatePacesFromAssessment(assessment);
+  if (!nextPaces) {
+    showModal('無法套用檢測', '這筆檢測資料不足，請確認時間或距離格式。', [{ label: '確認', action: closeModal }]);
+    return;
+  }
+  Object.assign(appData.profile, nextPaces, {
+    easyPace: secToPace(nextPaces.easyPaceSec),
+    lastAssessmentAt: assessment.date,
+    lastAssessmentType: assessment.type
+  });
+  rebuildWeeksFrom(currentWeek + 1, appData.plan.length - currentWeek);
+  saveData(appData);
+  closeModal();
+  renderPlanView();
+  switchPlanTab('log');
+  showView('plan');
+}
+
+function getAssessmentCycleHint(plan) {
+  const nextWeek = plan[currentWeek];
+  const phaseShift = nextWeek && nextWeek.phase !== plan[currentWeek - 1]?.phase;
+  if (currentWeek > 1 && (currentWeek % 4 === 0 || phaseShift)) {
+    return '本週建議新增一筆檢測紀錄，像是 20 分鐘測驗、5K 或 10K，讓系統重算後續配速。';
+  }
+  return '';
+}
+
+function hasTwoConsecutiveLowCheckins() {
+  const sorted = [...(appData.checkins || [])].sort((a, b) => a.weekNum - b.weekNum);
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i - 1].weekNum + 1 === sorted[i].weekNum && sorted[i - 1].score <= 2 && sorted[i].score <= 2) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function shouldShowAdaptationPrompt(scenario) {
+  appData.adaptationPrompts = appData.adaptationPrompts || {};
+  const key = `${currentWeek}:${scenario}`;
+  if (appData.adaptationPrompts[key]) return false;
+  appData.adaptationPrompts[key] = todayStr();
+  saveData(appData);
+  return true;
+}
+
+function markDone(dateStr, type, plannedKm) {
+  showModal(
+    '✓ 記錄完成',
+    `<div>
+      <div class="form-group"><label class="form-label">實際距離 (km)</label><input class="form-input" id="m-km" type="number" step="0.1" value="${plannedKm}"></div>
+      <div class="form-group"><label class="form-label">完成時間 (分鐘)</label><input class="form-input" id="m-time" type="number" placeholder="例：45"></div>
+      <div class="form-group"><label class="form-label">體感強度 RPE (1–10)</label><input class="form-input" id="m-rpe" type="number" min="1" max="10" placeholder="6"><div class="field-help">RPE = 你主觀覺得有多累。3–4 很輕鬆、5–6 穩定可持續、7–8 吃力但可控制、9–10 幾乎全力。</div></div>
+      <div class="form-group"><label class="form-label">備註（選填）</label><input class="form-input" id="m-notes" type="text" placeholder="感覺..."></div>
+    </div>`,
+    [
+      {
+        label: '儲存',
+        primary: true,
+        action: () => {
+          const km = parseFloat(document.getElementById('m-km').value) || plannedKm;
+          const mins = parseInt(document.getElementById('m-time').value, 10) || 0;
+          const rpe = parseInt(document.getElementById('m-rpe').value, 10) || 0;
+          const notes = document.getElementById('m-notes').value;
+          const prescribedPaceSec = getPrescribedPaceSec(dateStr, type);
+          saveLogEntry({ date: dateStr, type, plannedKm, actualKm: km, actualTimeMins: mins, rpe, notes, prescribedPaceSec });
+          markDayStatus(dateStr, 'done');
+          autoPaceCalibration();
+          closeModal();
+          renderPlanView();
+          assessProgress();
+          showView('plan');
+        }
+      },
+      { label: '取消', action: closeModal }
+    ]
+  );
+}
+
+function markMissed(dateStr) {
+  markDayStatus(dateStr, 'missed');
+  const plan = appData.plan || [];
+  const today = todayStr();
+  const weekIdx = plan.findIndex(week => week.days.some(day => day.dateStr === dateStr));
+  if (weekIdx < 0) {
+    renderPlanView();
+    showView('plan');
+    return;
+  }
+  const reschedCandidates = plan[weekIdx].days.filter(day => day.type === 'rest' && day.dateStr > today && day.dateStr > dateStr);
+  if (reschedCandidates.length === 0) {
+    renderPlanView();
+    showView('plan');
+    return;
+  }
+  const reschedDay = reschedCandidates[0];
+  showModal(
+    '要補跑嗎？',
+    `把 ${DOW_NAMES[reschedDay.dow]}（${reschedDay.dateStr}）改為補跑日？<br><br>補跑內容 = 原計畫縮短 20%`,
+    [
+      {
+        label: '確認補跑',
+        primary: true,
+        action: () => {
+          const origDay = plan[weekIdx].days.find(day => day.dateStr === dateStr);
+          const makeupKm = Math.round(((origDay?.km || 5) * 0.8) * 10) / 10;
+          reschedDay.type = origDay?.type || 'easy';
+          reschedDay.km = makeupKm;
+          reschedDay.task = `補跑 ${makeupKm} km（原計畫縮短 20%）`;
+          reschedDay.pace = origDay?.pace || '';
+          reschedDay.steps = origDay?.steps || [];
+          reschedDay.supportBlocks = null;
+          reschedDay.weekNum = origDay?.weekNum || weekIdx + 1;
+          reschedDay.phaseName = origDay?.phaseName || plan[weekIdx].phase;
+          saveData(appData);
+          closeModal();
+          renderPlanView();
+          showView('plan');
+        }
+      },
+      {
+        label: '不補跑',
+        action: () => {
+          closeModal();
+          renderPlanView();
+          showView('plan');
+        }
+      }
+    ]
+  );
+}
+
+// ============================================================
+// WEEKLY CHECK-IN
+// ============================================================
+function renderCheckinSection() {
+  const existing = (appData.checkins || []).find(checkin => checkin.weekNum === currentWeek);
+  if (existing) {
+    return `<div class="card"><div class="card-title">✅ 第 ${currentWeek} 週評估完成</div>
+      <p style="font-size:14px;color:var(--c-text-muted)">結果：${existing.result}　勾選 ${existing.score}/5</p>
+      ${existing.fatigue ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">本週整體疲勞：${existing.fatigue}/5</p>` : ''}
+      ${existing.note ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">週記：${existing.note}</p>` : ''}
+      <p style="font-size:13px;margin-top:8px">${existing.adjustment}</p>
+    </div>`;
+  }
+  const qHTML = CHECKIN_QUESTIONS.map((question, index) => `<li><input type="checkbox" id="cq-${index}"><label for="cq-${index}">${question}</label></li>`).join('');
+  return `<div class="card">
+    <div class="card-title">📋 第 ${currentWeek} 週評估</div>
+    <p style="font-size:14px;color:var(--c-text-muted);margin-bottom:16px">這裡是主要檢查入口。一般情況下，不需要每天手動填一大堆資料；每週做一次這份檢查，再搭配課表卡上的完成/跳過，就夠系統判斷要不要調整。</p>
+    <ul class="checkin-questions">${qHTML}</ul>
+    <div class="log-form-grid" style="margin-top:18px">
+      <div class="form-group"><label class="form-label">本週整體疲勞 (1–5)</label><input class="form-input" id="cw-fatigue" type="number" min="1" max="5" placeholder="3"><div class="field-help">1 很輕鬆，3 正常可恢復，5 非常疲勞。</div></div>
+      <div class="form-group"><label class="form-label">本週一句話備註</label><input class="form-input" id="cw-note" type="text" placeholder="例：長跑後腿有點重，但隔天恢復"></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="submitCheckin()">提交評估</button>
+  </div>`;
+}
+
+function adjustNextWeek(factor, removeInterval) {
+  const nextWeekPlan = appData.plan[currentWeek];
+  if (!nextWeekPlan) return;
+  nextWeekPlan.targetKm = Math.round(nextWeekPlan.targetKm * factor * 10) / 10;
+  nextWeekPlan.days = nextWeekPlan.days.map(day => {
+    if (removeInterval && day.type === 'interval') {
+      return buildDayCard(day.dow, day.dateStr, 'easy', Math.round((day.km || 0) * factor * 10) / 10, appData.profile, false, false, !appData.profile.injuries.includes('none'), todayStr(), day.weekNum || currentWeek + 1, day.phaseName || nextWeekPlan.phase);
+    }
+    if (day.type !== 'rest') day.km = Math.round((day.km || 0) * factor * 10) / 10;
+    return day;
+  });
+  saveData(appData);
+}
+
+function submitCheckin() {
+  const score = CHECKIN_QUESTIONS.filter((_, index) => document.getElementById(`cq-${index}`)?.checked).length;
+  const fatigue = parseInt(document.getElementById('cw-fatigue')?.value, 10) || 0;
+  const note = document.getElementById('cw-note')?.value?.trim() || '';
+  let result;
+  let adjustment;
+  if (score === 5) {
+    result = '升級';
+    adjustment = '下週跑量 +10%，繼續保持！';
+    adjustNextWeek(1.1, false);
+  } else if (score >= 3) {
+    result = '維持';
+    adjustment = '下週維持現有計畫。';
+  } else if (score >= 1) {
+    result = '減量';
+    adjustment = '下週跑量 -15%，移除間歇跑。';
+    adjustNextWeek(0.85, true);
+  } else {
+    result = '停止建議';
+    adjustment = '⚠️ 建議休息一週後重新評估，若有疼痛請就醫。';
+  }
+  appData.checkins = appData.checkins || [];
+  appData.checkins.push({ weekNum: currentWeek, score, result, adjustment, date: todayStr(), fatigue, note });
+  saveData(appData);
+  assessProgress();
+  document.getElementById('plan-tab-checkin').innerHTML = renderCheckinSection();
+}
+
+// ============================================================
+// LIVE PACE CALIBRATION
+// ============================================================
+
+function getPrescribedPaceSec(dateStr, type) {
+  for (const week of appData.plan) {
+    const day = week.days.find(d => d.dateStr === dateStr && d.type === type);
+    if (day && day.pace) {
+      const m = day.pace.match(/(\d+):(\d+)/);
+      if (m) return parseInt(m[1]) * 60 + parseInt(m[2]);
+    }
+  }
+  return 0;
+}
+
+// Returns { avgPaceGap (sec/km, negative = faster than prescribed), avgRpe, count }
+function analyzePerformanceTrend(type, lookback = 3) {
+  const log = (appData.log || []).filter(e =>
+    e.type === type && e.actualKm > 0 && e.actualTimeMins > 0 && e.prescribedPaceSec > 0
+  ).slice(-lookback);
+  if (log.length < 2) return null;
+  let paceGapSum = 0, rpeSum = 0;
+  log.forEach(e => {
+    paceGapSum += (e.actualTimeMins * 60) / e.actualKm - e.prescribedPaceSec;
+    rpeSum += (e.rpe || 6);
+  });
+  return { avgPaceGap: paceGapSum / log.length, avgRpe: rpeSum / log.length, count: log.length };
+}
+
+function autoPaceCalibration() {
+  const profile = appData.profile;
+  if (!profile) return;
+  const reasons = [];
+
+  const tempoTrend = analyzePerformanceTrend('tempo');
+  if (tempoTrend) {
+    if (tempoTrend.avgPaceGap < -15 && tempoTrend.avgRpe < 7.5) {
+      profile.tempoPaceSec = Math.max(profile.tempoPaceSec - 8, profile.racePaceSec + 5);
+      reasons.push(`節奏跑配速提升 → ${secToPace(profile.tempoPaceSec)}/km`);
+    } else if (tempoTrend.avgRpe > 8.5) {
+      profile.tempoPaceSec += 10;
+      reasons.push(`節奏跑配速放鬆 → ${secToPace(profile.tempoPaceSec)}/km`);
+    }
+  }
+
+  const intervalTrend = analyzePerformanceTrend('interval');
+  if (intervalTrend) {
+    if (intervalTrend.avgPaceGap < -10 && intervalTrend.avgRpe < 7) {
+      profile.intervalPaceSec = Math.max(profile.intervalPaceSec - 5, 150);
+      reasons.push(`間歇配速提升 → ${secToPace(profile.intervalPaceSec)}/km`);
+    } else if (intervalTrend.avgRpe > 9) {
+      profile.intervalPaceSec += 8;
+      reasons.push(`間歇配速放鬆 → ${secToPace(profile.intervalPaceSec)}/km`);
+    }
+  }
+
+  const easyTrend = analyzePerformanceTrend('easy');
+  if (easyTrend && easyTrend.avgRpe > 7 && easyTrend.count >= 2) {
+    profile.easyPaceSec += 15;
+    reasons.push(`輕鬆跑配速放鬆 → ${secToPace(profile.easyPaceSec)}/km`);
+  }
+
+  const longTrend = analyzePerformanceTrend('long');
+  if (longTrend && longTrend.avgRpe > 7.5 && longTrend.count >= 2) {
+    profile.easyPaceSec += 10;
+    reasons.push(`長跑配速放鬆 → ${secToPace(profile.easyPaceSec)}/km`);
+  }
+
+  if (reasons.length > 0) {
+    rebuildWeeksFrom(currentWeek + 1, Math.min(3, (appData.plan.length - currentWeek)));
+    saveData(appData);
+    showCalibrationToast(reasons);
+  }
+}
+
+function showCalibrationToast(reasons) {
+  document.getElementById('calibration-toast')?.remove();
+  const toast = document.createElement('div');
+  toast.id = 'calibration-toast';
+  toast.style.cssText = [
+    'position:fixed', 'bottom:72px', 'left:50%', 'transform:translateX(-50%)',
+    'background:var(--c-surface)', 'border:1.5px solid var(--c-primary)',
+    'border-radius:10px', 'padding:12px 18px', 'font-size:13px',
+    'z-index:300', 'max-width:360px', 'width:90%',
+    'box-shadow:0 8px 24px rgba(0,0,0,0.15)', 'transition:opacity .4s'
+  ].join(';');
+  toast.innerHTML = `<div style="font-weight:700;margin-bottom:6px;color:var(--c-primary)">📊 配速已根據近期表現自動調整</div>
+    <ul style="margin:0;padding-left:16px;color:var(--c-text-muted);line-height:1.8">
+      ${reasons.map(r => `<li>${r}</li>`).join('')}
+    </ul>`;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; }, 4500);
+  setTimeout(() => toast.remove(), 5000);
+}
+
+// ============================================================
+// ADAPTIVE PLAN MANAGEMENT
+// ============================================================
+function assessProgress() {
+  const plan = appData.plan || [];
+  const log = appData.log || [];
+  const profile = appData.profile;
+  if (!plan.length || currentWeek < 2) return;
+  const plannedKm = plan.slice(0, currentWeek - 1).reduce((sum, week) => sum + week.targetKm, 0);
+  const genDate = new Date(profile.generatedAt);
+  const actualKm = log.filter(entry => {
+    const weekNum = Math.floor((new Date(entry.date) - genDate) / 86400000 / 7) + 1;
+    return weekNum < currentWeek;
+  }).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const progressRate = plannedKm > 0 ? actualKm / plannedKm : 1;
+  const plannedSessions = plan.slice(0, currentWeek - 1).reduce((sum, week) => sum + week.days.filter(day => day.type !== 'rest').length, 0);
+  const doneSessions = plan.slice(0, currentWeek - 1).flatMap(week => week.days).filter(day => day.status === 'done').length;
+  const adherenceRate = plannedSessions > 0 ? doneSessions / plannedSessions : 1;
+  const recentLog = log.filter(entry => {
+    const weekNum = Math.floor((new Date(entry.date) - genDate) / 86400000 / 7) + 1;
+    return weekNum >= currentWeek - 2 && weekNum < currentWeek;
+  });
+  const avgRpe = recentLog.length > 0 ? recentLog.reduce((sum, entry) => sum + (entry.rpe || 6), 0) / recentLog.length : 6;
+  const weeksLeft = plan.length - currentWeek + 1;
+  const lowScoreStreak = hasTwoConsecutiveLowCheckins();
+  if (progressRate > 1.15 && avgRpe < 6 && shouldShowAdaptationPrompt('ahead')) {
+    showAdaptationDialog('ahead', { progressRate, avgRpe, weeksLeft });
+  } else if ((progressRate < 0.6 || lowScoreStreak) && shouldShowAdaptationPrompt('behind_critical')) {
+    showAdaptationDialog('behind_critical', { progressRate, adherenceRate, weeksLeft, lowScoreStreak });
+  } else if (progressRate >= 0.6 && progressRate < 0.8 && weeksLeft > 4 && shouldShowAdaptationPrompt('behind_moderate')) {
+    showAdaptationDialog('behind_moderate', { progressRate, weeksLeft });
+  }
+}
+
+function showAdaptationDialog(scenario, data) {
+  if (scenario === 'ahead') {
+    showModal(
+      '🚀 你超前計畫了！',
+      `進度率 ${Math.round(data.progressRate * 100)}%，平均 RPE ${data.avgRpe.toFixed(1)}/10。<br><br>你跑得比計畫還好，要提升強度嗎？<br>若確認，系統會把目標配速再快 5 秒，並在允許的週期把主課提升。`,
+      [
+        { label: '提升強度', primary: true, action: () => { upgradeIntensity(); closeModal(); renderPlanView(); showView('plan'); } },
+        { label: '維持現況', action: closeModal }
+      ]
+    );
+  } else if (scenario === 'behind_moderate') {
+    showModal(
+      '📉 進度略為落後',
+      `進度率 ${Math.round(data.progressRate * 100)}%，剩餘 ${data.weeksLeft} 週。<br><br>本週落後，繼續原計畫 / 降低目標 / 延後比賽日期？`,
+      [
+        { label: '繼續原計畫', action: closeModal },
+        { label: '降低目標', primary: true, action: () => { adjustTargetPace(15); closeModal(); showView('plan'); } },
+        { label: '延後比賽日期', action: () => { closeModal(); promptReschedule(); } }
+      ]
+    );
+  } else if (scenario === 'behind_critical') {
+    showModal(
+      '⚠️ 計畫嚴重落後',
+      `${data.lowScoreStreak ? '連續 2 週評估分數偏低。' : `進度率 ${Math.round(data.progressRate * 100)}%。`}<br><br>建議：重設計畫 / 降級目標 / 暫停。`,
+      [
+        { label: '重設計畫', primary: true, action: () => { closeModal(); resetPlanFromNow(); } },
+        { label: '降級目標', action: () => { closeModal(); promptGoalDowngrade(); } },
+        { label: '暫停計畫', action: () => { closeModal(); pausePlan(); } }
+      ]
+    );
+  }
+}
+
+function upgradeIntensity() {
+  const nextWeek = appData.plan[currentWeek];
+  if (!nextWeek) return;
+  appData.profile.racePaceSec = Math.max(appData.profile.racePaceSec - 5, 150);
+  appData.profile.tempoPaceSec = appData.profile.racePaceSec + 12;
+  appData.profile.intervalPaceSec = Math.max(appData.profile.racePaceSec - 10, 180);
+  rebuildWeeksFrom(currentWeek + 1, 4);
+  saveData(appData);
+}
+
+function adjustTargetPace(deltaSecPerKm) {
+  appData.profile.racePaceSec += deltaSecPerKm;
+  appData.profile.tempoPaceSec = appData.profile.racePaceSec + 12;
+  appData.profile.intervalPaceSec = Math.max(appData.profile.racePaceSec - 10, 180);
+  const dist = GOAL_DIST[appData.profile.goal];
+  appData.profile.targetTime = secToTime(Math.round(appData.profile.racePaceSec * dist));
+  rebuildWeeksFrom(currentWeek + 1, appData.plan.length - currentWeek);
+  saveData(appData);
+  renderPlanView();
+  showView('plan');
+}
+
+function promptReschedule() {
+  showModal(
+    '📅 延後比賽日期',
+    `<div class="form-group"><label class="form-label">新的比賽日期</label><input class="form-input" type="date" id="new-race-date" value="${appData.profile.targetDate}"></div>`,
+    [
+      {
+        label: '確認',
+        primary: true,
+        action: () => {
+          const newDate = document.getElementById('new-race-date').value;
+          if (!newDate) return;
+          appData.profile.targetDate = newDate;
+          const extraWeeks = calcWeeks(newDate) - appData.plan.length;
+          if (extraWeeks > 0) extendPlan(extraWeeks);
+          saveData(appData);
+          closeModal();
+          renderPlanView();
+          showView('plan');
+        }
+      },
+      { label: '取消', action: closeModal }
+    ]
+  );
+}
+
+function promptGoalDowngrade() {
+  const goalOrder = ['5k10k', 'half', 'full'];
+  const curIdx = goalOrder.indexOf(appData.profile.goal);
+  const downgradeGoal = curIdx > 0 ? goalOrder[curIdx - 1] : null;
+  if (!downgradeGoal) {
+    showModal('無法再降級', '已是最低目標（5K/10K）。建議暫停計畫休息。', [{ label: '確認', action: closeModal }]);
+    return;
+  }
+  showModal(
+    '降級目標',
+    `把目標從 ${GOAL_NAME[appData.profile.goal]} 改為 ${GOAL_NAME[downgradeGoal]}？<br><br>訓練紀錄保留，計畫後半段重新生成。`,
+    [
+      {
+        label: `改為 ${GOAL_NAME[downgradeGoal]}`,
+        primary: true,
+        action: () => {
+          appData.profile.goal = downgradeGoal;
+          const timeSec = timeToSec(appData.profile.targetTime);
+          const dist = GOAL_DIST[downgradeGoal];
+          appData.profile.racePaceSec = timeSec / dist;
+          appData.profile.tempoPaceSec = appData.profile.racePaceSec + 12;
+          appData.profile.intervalPaceSec = Math.max(appData.profile.racePaceSec - 10, 180);
+          rebuildWeeksFrom(currentWeek + 1, appData.plan.length - currentWeek);
+          saveData(appData);
+          closeModal();
+          renderPlanView();
+          showView('plan');
+        }
+      },
+      { label: '取消', action: closeModal }
+    ]
+  );
+}
+
+function resetPlanFromNow() {
+  const newPlan = buildPlan({ ...appData.profile, generatedAt: new Date().toISOString() });
+  appData.plan = [
+    ...appData.plan.slice(0, currentWeek - 1),
+    ...newPlan.slice(0, Math.max(0, newPlan.length - (currentWeek - 1)))
+  ];
+  saveData(appData);
+  renderPlanView();
+  showView('plan');
+}
+
+function pausePlan() {
+  appData.profile.paused = true;
+  appData.profile.pausedAt = todayStr();
+  saveData(appData);
+  showModal(
+    '計畫已暫停',
+    '訓練計畫已暫停。重新開始時，點「繼續計畫」即可恢復，訓練紀錄會保留。',
+    [{ label: '確認', action: () => { closeModal(); renderPlanView(); showView('plan'); } }]
+  );
+}
+
+function resumePlan() {
+  const pausedAt = new Date(appData.profile.pausedAt || new Date());
+  const daysPaused = Math.floor((new Date() - pausedAt) / 86400000);
+  const weeksPaused = Math.round(daysPaused / 7);
+  appData.plan.forEach(week => {
+    week.days.forEach(day => {
+      if (day.dateStr && new Date(day.dateStr) >= pausedAt && day.status === 'upcoming') {
+        const shifted = new Date(day.dateStr);
+        shifted.setDate(shifted.getDate() + weeksPaused * 7);
+        day.dateStr = shifted.toISOString().split('T')[0];
+      }
+    });
+  });
+  appData.profile.paused = false;
+  const newTargetDate = new Date(appData.profile.targetDate);
+  newTargetDate.setDate(newTargetDate.getDate() + weeksPaused * 7);
+  appData.profile.targetDate = newTargetDate.toISOString().split('T')[0];
+  saveData(appData);
+  renderPlanView();
+  showView('plan');
+}
+
+function extendPlan(extraWeeks) {
+  const profile = appData.profile;
+  const lastWeek = appData.plan[appData.plan.length - 1];
+  const lastKm = lastWeek?.targetKm || 30;
+  const hasInjury = !profile.injuries.includes('none');
+  const longDow = profile.dayState.indexOf(2);
+  const trainDows = profile.dayState.map((s, i) => (s >= 1 ? i : -1)).filter(i => i >= 0).sort((a, b) => a - b);
+  const otherDows = trainDows.filter(d => d !== longDow);
+  const startDate = new Date(profile.generatedAt);
+  for (let i = 0; i < extraWeeks; i++) {
+    const weekNum = appData.plan.length + 1;
+    const days = buildWeekDays(profile, trainDows, longDow, otherDows, lastKm, false, false, hasInjury, weekNum, startDate, 'maintain');
+    appData.plan.push({ weekNum, phase: 'maintain', phaseLabel: '延長期', isDeload: false, isTaper: false, targetKm: lastKm, days });
+  }
+}
+
+function rebuildWeeksFrom(startWeekNum, count) {
+  const profile = appData.profile;
+  const hasInjury = !profile.injuries.includes('none');
+  const longDow = profile.dayState.indexOf(2);
+  const trainDows = profile.dayState.map((s, i) => (s >= 1 ? i : -1)).filter(i => i >= 0).sort((a, b) => a - b);
+  const otherDows = trainDows.filter(d => d !== longDow);
+  const startDate = new Date(profile.generatedAt);
+  for (let wi = 0; wi < count; wi++) {
+    const weekIdx = startWeekNum - 1 + wi;
+    if (weekIdx >= appData.plan.length) break;
+    const week = appData.plan[weekIdx];
+    const preserved = week.days.filter(day => day.status === 'done' || day.status === 'missed');
+    const newDays = buildWeekDays(profile, trainDows, longDow, otherDows, week.targetKm, week.isDeload, week.isTaper, hasInjury, week.weekNum, startDate, week.phase);
+    newDays.forEach(day => {
+      const old = preserved.find(item => item.dateStr === day.dateStr);
+      if (old) day.status = old.status;
+    });
+    week.days = newDays;
+  }
+}
+
+// ============================================================
+// LOG VIEW
+// ============================================================
+function renderLogSection() {
+  const log = appData.log || [];
+  const assessments = appData.assessments || [];
+  const totalKm = log.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const plan = appData.plan || [];
+  const plannedSessions = plan.reduce((sum, week) => sum + week.days.filter(day => day.type !== 'rest').length, 0);
+  const adherence = plannedSessions > 0 ? Math.round((log.length / plannedSessions) * 100) : 0;
+  const rows = [...log].reverse().map(entry => {
+    const paceStr = entry.actualKm > 0 && entry.actualTimeMins > 0 ? `${secToPace((entry.actualTimeMins * 60) / entry.actualKm)}/km` : '—';
+    const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[entry.type] || entry.type;
+    return `<tr>
+      <td>${entry.date}</td>
+      <td>${typeName}</td>
+      <td>${entry.actualKm} km</td>
+      <td>${entry.actualTimeMins ? `${entry.actualTimeMins} 分` : '—'}</td>
+      <td>${paceStr}</td>
+      <td>${entry.rpe || '—'}</td>
+    </tr>`;
+  }).join('');
+  const assessmentRows = assessments.map((entry, index) => {
+    const summary = entry.type === 'test_20min'
+      ? `${entry.distanceKm || '—'} km / 20 分`
+      : `${entry.result || '—'}${entry.distanceKm ? ` · ${entry.distanceKm} km` : ''}`;
+    return `<tr>
+      <td>${entry.date}</td>
+      <td>${formatAssessmentType(entry.type)}</td>
+      <td>${summary}</td>
+      <td>${entry.rpe || '—'}</td>
+      <td><button class="btn btn-secondary" style="padding:6px 10px;font-size:12px" onclick="applyAssessmentToPlan(${index})">套用配速</button></td>
+    </tr>`;
+  }).join('');
+  return `
+<div class="log-stats">
+  <div class="stat-card"><div class="stat-value">${totalKm.toFixed(1)}</div><div class="stat-label">累積公里</div></div>
+  <div class="stat-card"><div class="stat-value">${log.length}</div><div class="stat-label">完成次數</div></div>
+  <div class="stat-card"><div class="stat-value">${adherence}%</div><div class="stat-label">遵從率</div></div>
+</div>
+<div class="card">
+  <div class="card-title">使用建議</div>
+  <p style="font-size:14px;color:var(--c-text-muted);line-height:1.7">正常使用時，優先做兩件事就好：1. 每天在課表卡上按完成/跳過。2. 每週到「週評估」做一次檢查。下面的手動新增記錄，是拿來補登遺漏資料，不是要你每天都填。</p>
+</div>
+<div class="card">
+  <div class="card-title">檢測紀錄 / 配速校正</div>
+  <p style="font-size:14px;color:var(--c-text-muted);margin-bottom:16px">建議每 4 週、進入新週期前，或狀態明顯改變時新增一筆檢測。套用後只會重建未來週課表，已完成紀錄保留。</p>
+  <div class="log-form-grid">
+    <div class="form-group"><label class="form-label">日期</label><input class="form-input" type="date" id="assessment-date" value="${todayStr()}"></div>
+    <div class="form-group"><label class="form-label">檢測類型</label><select class="form-input" id="assessment-type"><option value="test_20min">20 分鐘測驗</option><option value="race_5k">5K 測驗</option><option value="race_10k">10K 測驗</option><option value="race_half">半馬測驗</option><option value="custom_race">近期比賽</option></select></div>
+    <div class="form-group"><label class="form-label">成績時間 (H:MM:SS / M:SS)</label><input class="form-input" type="text" id="assessment-result" placeholder="20 分測驗可留空"></div>
+    <div class="form-group"><label class="form-label">距離 (km)</label><input class="form-input" type="number" id="assessment-distance" step="0.1" placeholder="20 分測驗或自訂比賽才需要"></div>
+    <div class="form-group"><label class="form-label">RPE (1–10)<span class="inline-help">主觀疲勞</span></label><input class="form-input" type="number" id="assessment-rpe" min="1" max="10" placeholder="7"><div class="field-help">如果這次測驗已經接近全力，通常會落在 8–10；若只是穩定測驗，通常在 6–7。</div></div>
+    <div class="form-group"><label class="form-label">備註</label><input class="form-input" type="text" id="assessment-notes" placeholder="選填"></div>
+  </div>
+  <button class="btn btn-primary" onclick="addAssessmentRecord()">新增檢測並更新建議</button>
+</div>
+<details class="card">
+  <summary>手動補登每日記錄</summary>
+  <p style="font-size:14px;color:var(--c-text-muted);margin-bottom:16px">只有在你忘記用課表卡打卡，或想補記舊資料時再開這裡。平常不需要每天手動填。</p>
+  <div class="log-form-grid">
+    <div class="form-group"><label class="form-label">日期</label><input class="form-input" type="date" id="log-date" value="${todayStr()}"></div>
+    <div class="form-group"><label class="form-label">類型</label><select class="form-input" id="log-type"><option value="easy">輕鬆跑</option><option value="tempo">節奏跑</option><option value="interval">間歇跑</option><option value="long">長跑</option></select></div>
+    <div class="form-group"><label class="form-label">距離 (km)</label><input class="form-input" type="number" id="log-km" step="0.1" placeholder="5.0"></div>
+    <div class="form-group"><label class="form-label">時間 (分鐘)</label><input class="form-input" type="number" id="log-time" placeholder="30"></div>
+    <div class="form-group"><label class="form-label">RPE (1–10)<span class="inline-help">主觀疲勞</span></label><input class="form-input" type="number" id="log-rpe" min="1" max="10" placeholder="6"><div class="field-help">不確定就抓大概即可：4 輕鬆、6 穩定、8 很吃力。</div></div>
+    <div class="form-group"><label class="form-label">備註</label><input class="form-input" type="text" id="log-notes" placeholder="選填"></div>
+  </div>
+  <button class="btn btn-primary" onclick="addManualLog()">新增記錄</button>
+</details>
+<div class="card">
+  <div class="card-title">檢測歷史</div>
+  ${assessments.length === 0 ? '<p style="color:var(--c-text-muted);font-size:14px">尚無檢測紀錄</p>' : `<table class="log-table"><thead><tr><th>日期</th><th>類型</th><th>結果</th><th>RPE</th><th>操作</th></tr></thead><tbody>${assessmentRows}</tbody></table>`}
+</div>
+<div class="card">
+  <div class="card-title">訓練記錄</div>
+  ${log.length === 0 ? '<p style="color:var(--c-text-muted);font-size:14px">尚無記錄</p>' : `<table class="log-table"><thead><tr><th>日期</th><th>類型</th><th>距離</th><th>時間</th><th>配速</th><th>RPE</th></tr></thead><tbody>${rows}</tbody></table>`}
+</div>`;
+}
+
+function addManualLog() {
+  const entry = {
+    date: document.getElementById('log-date').value,
+    type: document.getElementById('log-type').value,
+    actualKm: parseFloat(document.getElementById('log-km').value) || 0,
+    actualTimeMins: parseInt(document.getElementById('log-time').value, 10) || 0,
+    rpe: parseInt(document.getElementById('log-rpe').value, 10) || 0,
+    notes: document.getElementById('log-notes').value
+  };
+  if (!entry.date || !entry.actualKm) return;
+  saveLogEntry(entry);
+  assessProgress();
+  document.getElementById('plan-tab-log').innerHTML = renderLogSection();
+}
+
+function addAssessmentRecord() {
+  const entry = {
+    date: document.getElementById('assessment-date').value,
+    type: document.getElementById('assessment-type').value,
+    result: document.getElementById('assessment-result').value.trim(),
+    distanceKm: parseFloat(document.getElementById('assessment-distance').value) || 0,
+    rpe: parseInt(document.getElementById('assessment-rpe').value, 10) || 0,
+    notes: document.getElementById('assessment-notes').value.trim()
+  };
+  const needsDistance = ['test_20min', 'custom_race'].includes(entry.type);
+  if (!entry.date) return;
+  if (needsDistance && !entry.distanceKm) return;
+  if (!needsDistance && !entry.result) return;
+  saveAssessmentEntry(entry);
+  document.getElementById('plan-tab-log').innerHTML = renderLogSection();
+  showModal(
+    '套用這筆檢測？',
+    `已新增「${formatAssessmentType(entry.type)}」檢測。要用這筆資料重算配速並更新後續課表嗎？`,
+    [
+      { label: '先套用', primary: true, action: () => applyAssessmentToPlan(0) },
+      { label: '先保留', action: closeModal }
+    ]
+  );
+}
+
+// ============================================================
+// EXPORTS
+// ============================================================
+function exportPDF() {
+  switchPlanTab('week');
+  setTimeout(() => window.print(), 100);
+}
+
+function generateOfflineHTML(week, profile, weekNum) {
+  const badgeMap = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', rest: 'badge-rest' };
+  const typeMap = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', rest: '休息' };
+  const meta = GOAL_META[profile.goal] || GOAL_META.half;
+  const weekGuide = getPhaseRuleText(week, profile, appData.plan?.length || weekNum);
+  const cards = week.days.map(day => {
+    if (day.type === 'rest') {
+      const supportHTML = (day.supportBlocks || []).map(block => `
+        <div class="strength-box">
+          <strong>${block.title}</strong>
+          ${block.detail}
+        </div>
+      `).join('');
+      return `<div class="day-card">
+        <div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${(day.dateStr || '').slice(5)}</span></div>
+        <span class="workout-badge badge-rest">休息</span>
+        <div class="day-card-task" style="font-size:12px;color:var(--c-text-muted)">${day.task || '主動恢復 / 完全休息'}</div>
+        ${supportHTML}
+      </div>`;
+    }
+    const stepsHTML = (day.steps || []).map(step => `<div class="step"><span><strong>${step.title || ''}</strong>${step.detail ? `：${step.detail}` : (step.text || '')}${step.dose ? ` (${step.dose})` : ''}</span></div>`).join('');
+    return `<div class="day-card ${day.isDeload ? 'deload-card' : ''}">
+      <div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${(day.dateStr || '').slice(5)}</span></div>
+      <span class="workout-badge ${badgeMap[day.type] || 'badge-rest'}">${typeMap[day.type] || day.type}</span>
+      <div class="day-card-task">${day.task || ''}</div>
+      <div class="day-card-pace">${day.pace || ''}</div>
+      <div class="workout-steps">${stepsHTML}</div>
+      <button class="check-btn" data-date="${day.dateStr}">標記完成</button>
+    </div>`;
+  }).join('');
+  return `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${meta.label}手機訓練手冊 第${weekNum}週</title>
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}:root{--bg:#f6f4ee;--surface:#fffdf8;--surface2:#fbf8f0;--border:#e2ded4;--text:#1f2a24;--muted:#65736b;--primary:#24724f;--primary-hover:#155338;--green:#24724f;--orange:#e8753d;--blue:#dbeef3;--radius:14px;--shadow:0 18px 40px rgba(31,42,36,.08)}body{background:var(--bg);color:var(--text);font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;padding:16px;line-height:1.65}.shell{max-width:760px;margin:0 auto}.hero{padding:22px 18px;border:1px solid rgba(31,42,36,.08);border-radius:18px;background:linear-gradient(135deg,rgba(231,242,235,.94),rgba(255,253,248,.98));box-shadow:var(--shadow);margin-bottom:16px}.kicker{font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--primary-hover)}.header{font-size:28px;font-weight:900;line-height:1.18;margin-top:6px}.sub{font-size:14px;color:var(--muted);margin-top:10px}.meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}.meta-card{padding:12px;border-radius:12px;background:rgba(255,253,248,.94);border:1px solid rgba(31,42,36,.08)}.meta-card b{display:block;font-size:12px;margin-bottom:4px}.meta-card span{font-size:13px;color:var(--muted);line-height:1.55}.section{margin-bottom:16px}.section-title{font-size:18px;font-weight:900;margin-bottom:10px}.lead-card{padding:14px 16px;border:1px solid rgba(31,42,36,.08);border-radius:14px;background:var(--surface)}.week-calendar{display:grid;grid-template-columns:1fr;gap:12px}.day-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 10px 24px rgba(31,42,36,.05)}.day-card.deload-card{border-color:var(--orange);border-style:dashed}.day-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}.day-card-date{font-size:12px;color:var(--muted)}.workout-badge{display:inline-block;font-size:11px;font-weight:900;padding:4px 10px;border-radius:999px;margin-bottom:10px}.badge-easy{background:#14532d;color:#d9ffe4}.badge-tempo{background:#fff0e7;color:#9b4f2b}.badge-interval{background:#ffe0d5;color:#8a3521}.badge-long{background:var(--blue);color:#295d6a}.badge-rest{background:var(--surface2);color:var(--muted)}.day-card-task{font-size:16px;font-weight:800;margin-bottom:4px;line-height:1.45}.day-card-pace{font-size:13px;color:var(--muted);margin-bottom:12px}.workout-steps{font-size:13px;color:var(--muted);line-height:1.7;display:grid;gap:8px}.step{display:flex;gap:8px}.step-icon{font-size:13px;line-height:1.4;flex-shrink:0}.strength-box{background:var(--surface2);border-radius:10px;padding:10px;margin-top:8px;font-size:12px;color:var(--muted);border:1px solid rgba(31,42,36,.06)}.strength-box strong{color:var(--text);display:block;margin-bottom:4px}.check-btn{width:100%;margin-top:12px;padding:10px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:14px;font-weight:800;cursor:pointer}.check-btn.checked{background:var(--green)}@media (max-width:640px){body{padding:12px}.header{font-size:24px}.meta-grid{grid-template-columns:1fr}}</style>
+</head><body><div class="shell"><div class="hero"><div class="kicker">Mobile Training Handbook</div><div class="header">${meta.icon} ${meta.label}｜第 ${weekNum} 週</div><div class="sub">目標日 ${profile.targetDate} · ${week.phaseLabel} · 目標 ${week.targetKm} km · 目標配速 ${secToPace(profile.racePaceSec)}/km</div><div class="meta-grid"><div class="meta-card"><b>這個模式在做什麼</b><span>${meta.handbook}</span></div><div class="meta-card"><b>這週重點</b><span>${weekGuide}</span></div><div class="meta-card"><b>怎麼用這份手冊</b><span>先看今天那張卡，照著熱身、主課、收操完成；若身體不適，優先保留恢復與下修跑量。</span></div></div></div><div class="section"><div class="section-title">本週卡片</div><div class="lead-card">這份 HTML 是單週手機版訓練手冊。你不需要另外解讀課表邏輯，直接照卡片做，完成後可在本機標記。</div></div><div class="section"><div class="week-calendar">${cards}</div></div></div><script>const SK='trainer-offline-${weekNum}';function load(){const d=JSON.parse(localStorage.getItem(SK)||'{}');document.querySelectorAll('[data-date]').forEach(b=>{if(d[b.dataset.date]){b.textContent='✓ 已完成';b.classList.add('checked')}})}document.querySelectorAll('[data-date]').forEach(b=>{b.addEventListener('click',()=>{const d=JSON.parse(localStorage.getItem(SK)||'{}');d[b.dataset.date]=true;localStorage.setItem(SK,JSON.stringify(d));b.textContent='✓ 已完成';b.classList.add('checked')})});load();<\/script></body></html>`;
+}
+
+function exportHTML() {
+  const week = appData.plan[currentWeek - 1];
+  if (!week) return;
+  const finalHtml = generateOfflineHTML(week, appData.profile, currentWeek);
+  const blob = new Blob([finalHtml], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${appData.profile?.goal || 'trainer'}-handbook-week-${currentWeek}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  appData = loadData();
+  if (shouldRebuildSavedPlan(appData)) {
+    appData = rebuildStoredPlan(appData);
+    saveData(appData);
+  }
+  if (appData.profile && appData.plan && appData.plan.length > 0) {
+    renderPlanView();
+    showView('plan');
+  } else {
+    renderSetupView();
+    showView('setup');
+  }
+}
+
+init();
 </script>
 </body>
 </html>
