@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訓練計畫生成器 — 跑者廣場</title>
+  <style>
+    /* === Reset & Variables === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --c-bg: #0f172a;
+      --c-surface: #1e293b;
+      --c-surface2: #334155;
+      --c-border: #475569;
+      --c-text: #e2e8f0;
+      --c-text-muted: #94a3b8;
+      --c-primary: #3b82f6;
+      --c-primary-hover: #2563eb;
+      --c-green: #22c55e;
+      --c-orange: #f97316;
+      --c-red: #ef4444;
+      --c-blue: #3b82f6;
+      --c-gray: #64748b;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    body { background: var(--c-bg); color: var(--c-text); font-family: system-ui, sans-serif; min-height: 100vh; }
+
+    /* === Layout === */
+    .view { display: none; }
+    .view.active { display: block; }
+    .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+    /* === Nav === */
+    .site-nav { background: var(--c-surface); border-bottom: 1px solid var(--c-border); padding: 12px 16px; display: flex; gap: 16px; align-items: center; }
+    .site-nav a { color: var(--c-text-muted); text-decoration: none; font-size: 14px; }
+    .site-nav a:hover, .site-nav a.active { color: var(--c-text); }
+    .site-nav .brand { font-weight: 700; color: var(--c-text); margin-right: auto; }
+
+    /* === Cards === */
+    .card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+    /* === Buttons === */
+    .btn { padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-secondary { background: var(--c-surface2); color: var(--c-text); border: 1px solid var(--c-border); }
+    .btn-danger { background: var(--c-red); color: white; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* === Form Elements === */
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--c-text-muted); }
+    .form-input { width: 100%; padding: 10px 14px; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); color: var(--c-text); font-size: 15px; }
+    .form-input:focus { outline: none; border-color: var(--c-primary); }
+
+    /* === Goal Cards === */
+    .goal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (max-width: 500px) { .goal-grid { grid-template-columns: 1fr; } }
+    .goal-card { background: var(--c-surface2); border: 2px solid var(--c-border); border-radius: var(--radius-sm); padding: 14px; cursor: pointer; text-align: center; transition: border-color 0.15s; }
+    .goal-card:hover { border-color: var(--c-primary); }
+    .goal-card.selected { border-color: var(--c-primary); background: #1d3a6e; }
+    .goal-card .goal-icon { font-size: 28px; margin-bottom: 6px; }
+    .goal-card .goal-name { font-weight: 700; font-size: 15px; }
+    .goal-card .goal-desc { font-size: 12px; color: var(--c-text-muted); margin-top: 4px; }
+
+    /* === Day Picker === */
+    .day-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+    .day-btn { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .day-btn.training { border-color: var(--c-primary); background: #1d3a6e; color: var(--c-text); }
+    .day-btn.long-run { border-color: #1d4ed8; background: #1e3a8a; color: white; }
+    .day-legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: var(--c-text-muted); }
+    .day-legend span::before { content: '●'; margin-right: 4px; }
+    .day-legend .l-train::before { color: var(--c-primary); }
+    .day-legend .l-long::before { color: #60a5fa; }
+
+    /* === Injury Pills === */
+    .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .pill.selected { border-color: var(--c-orange); background: #431407; color: var(--c-orange); }
+
+    /* === Live Calc === */
+    .live-calc { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 16px; }
+    .live-calc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 500px) { .live-calc-grid { grid-template-columns: repeat(2, 1fr); } }
+    .calc-item { text-align: center; }
+    .calc-label { font-size: 11px; color: var(--c-text-muted); margin-bottom: 4px; }
+    .calc-value { font-size: 18px; font-weight: 700; color: var(--c-primary); }
+    .calc-value.warn { color: var(--c-orange); }
+    .calc-value.good { color: var(--c-green); }
+
+    /* === Progress Card === */
+    .progress-bar-wrap { background: var(--c-surface2); border-radius: 8px; height: 10px; margin: 10px 0; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--c-primary); border-radius: 8px; transition: width 0.3s; }
+    .progress-stats { display: flex; gap: 16px; font-size: 13px; color: var(--c-text-muted); flex-wrap: wrap; }
+    .progress-stats strong { color: var(--c-text); }
+
+    /* === Phase Tabs === */
+    .phase-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
+    .phase-tab { padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--c-border); background: var(--c-surface2); color: var(--c-text-muted); font-size: 13px; white-space: nowrap; cursor: pointer; }
+    .phase-tab.current { border-color: var(--c-primary); background: #1d3a6e; color: var(--c-text); }
+    .phase-tab.done { opacity: 0.6; }
+
+    /* === Week Calendar === */
+    .week-calendar { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+    .day-card { background: var(--c-surface); border: 2px solid var(--c-border); border-radius: var(--radius-sm); padding: 14px; transition: border-color 0.15s; }
+    .day-card.today { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+    .day-card.done-card { background: #14532d22; border-color: var(--c-green); }
+    .day-card.missed-card { background: #7f1d1d22; border-color: var(--c-red); }
+    .day-card.deload-card { border-color: var(--c-orange); border-style: dashed; }
+    .day-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .day-card-date { font-size: 12px; color: var(--c-text-muted); }
+    .day-card-today-badge { font-size: 11px; background: var(--c-primary); color: white; padding: 2px 8px; border-radius: 10px; }
+    .workout-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; margin-bottom: 8px; }
+    .badge-easy { background: #14532d; color: #86efac; }
+    .badge-tempo { background: #431407; color: #fdba74; }
+    .badge-interval { background: #450a0a; color: #fca5a5; }
+    .badge-long { background: #1e3a8a; color: #93c5fd; }
+    .badge-rest { background: var(--c-surface2); color: var(--c-text-muted); }
+    .day-card-task { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .day-card-pace { font-size: 12px; color: var(--c-text-muted); margin-bottom: 10px; }
+    .workout-steps { font-size: 12px; color: var(--c-text-muted); line-height: 1.6; }
+    .workout-steps .step { display: flex; gap: 6px; }
+    .step-icon { font-size: 10px; margin-top: 3px; flex-shrink: 0; }
+    .day-card-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .day-card-actions .btn { font-size: 12px; padding: 6px 12px; flex: 1; }
+    .strength-box { background: var(--c-surface2); border-radius: 6px; padding: 8px; margin-top: 8px; font-size: 11px; color: var(--c-text-muted); }
+    .strength-box strong { color: var(--c-text); display: block; margin-bottom: 4px; }
+
+    /* === Check-in === */
+    .checkin-questions { list-style: none; }
+    .checkin-questions li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--c-border); font-size: 14px; }
+    .checkin-questions li:last-child { border-bottom: none; }
+    .checkin-questions input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+    /* === Log === */
+    .log-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (max-width: 500px) { .log-form-grid { grid-template-columns: 1fr; } }
+    .log-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: var(--c-surface2); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--c-primary); }
+    .stat-label { font-size: 12px; color: var(--c-text-muted); margin-top: 4px; }
+    .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .log-table th { text-align: left; padding: 8px; border-bottom: 2px solid var(--c-border); color: var(--c-text-muted); font-size: 12px; }
+    .log-table td { padding: 8px; border-bottom: 1px solid var(--c-border); }
+
+    /* === Export Bar === */
+    .export-bar { background: var(--c-surface); border-top: 1px solid var(--c-border); padding: 12px 16px; display: flex; gap: 10px; position: sticky; bottom: 0; }
+
+    /* === Modal === */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; max-width: 400px; width: 90%; }
+    .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+    .modal-body { font-size: 14px; color: var(--c-text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* === Toolbar === */
+    .plan-toolbar { background: var(--c-surface); border-bottom: 1px solid var(--c-border); padding: 10px 16px; display: flex; gap: 10px; align-items: center; position: sticky; top: 0; z-index: 10; }
+    .plan-toolbar .tab { padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid transparent; color: var(--c-text-muted); font-size: 13px; cursor: pointer; background: transparent; }
+    .plan-toolbar .tab.active { border-color: var(--c-border); background: var(--c-surface2); color: var(--c-text); }
+    .plan-toolbar .spacer { flex: 1; }
+
+    /* === Week Nav === */
+    .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .week-nav-label { font-weight: 700; font-size: 15px; }
+    .week-nav .btn { padding: 6px 12px; font-size: 13px; }
+
+    /* === Responsive === */
+    @media (max-width: 600px) { .week-calendar { grid-template-columns: 1fr; } }
+
+    /* === Print === */
+    @media print {
+      .site-nav, .plan-toolbar, .export-bar, .day-card-actions, .week-nav .btn, #view-log, #view-checkin { display: none !important; }
+      body { background: white; color: black; }
+      .card { border: 1px solid #ccc; box-shadow: none; }
+      .week-calendar { display: grid; grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Site Nav -->
+<nav class="site-nav">
+  <span class="brand">🏃 跑者廣場</span>
+  <a href="index.html">首頁</a>
+  <a href="trainer.html" class="active">訓練計畫</a>
+</nav>
+
+<!-- Views -->
+<div id="view-setup" class="view active"></div>
+<div id="view-plan" class="view"></div>
+<div id="view-log" class="view"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STORAGE
+// ============================================================
+const STORAGE_KEY = 'runner-trainer-v1';
+
+function loadData() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { profile: null, plan: [], log: [], checkins: [] };
+  } catch { return { profile: null, plan: [], log: [], checkins: [] }; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let appData = loadData();
+
+// placeholder init — will be replaced in Task 12
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+}
+
+document.getElementById('view-setup').innerHTML = '<div class="container"><div class="card" style="margin-top:24px"><div class="card-title">⏳ 載入中...</div></div></div>';
+</script>
+</body>
+</html>
