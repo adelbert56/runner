@@ -12,6 +12,19 @@ function keyFor(row) {
   return `${String(row.race_name || "").trim()}||${String(row.race_date || "").trim()}`;
 }
 
+function normalizedName(value) {
+  return String(value || "")
+    .trim()
+    .replace(/台/g, "臺")
+    .replace(/^(?:20\d{2}|1\d{2})\s*/, "")
+    .replace(/[\s\-–—_/()（）【】\[\]．.、，,:：'\"「」『』]+/g, "")
+    .toLowerCase();
+}
+
+function normalizedKeyFor(row) {
+  return `${normalizedName(row.race_name)}||${String(row.race_date || "").trim()}`;
+}
+
 async function loadJson(path, fallback) {
   try {
     return JSON.parse(await readFile(path, "utf-8"));
@@ -27,6 +40,7 @@ function normalizeOverrides(rows) {
   const overrides = new Map();
   for (const row of rows) {
     const key = keyFor(row);
+    const normalizedKey = normalizedKeyFor(row);
     if (key === "||") {
       continue;
     }
@@ -36,6 +50,9 @@ function normalizeOverrides(rows) {
       })
     );
     overrides.set(key, fields);
+    if (normalizedKey !== "||") {
+      overrides.set(normalizedKey, fields);
+    }
   }
   return overrides;
 }
@@ -44,7 +61,7 @@ function applyOverrides(races, overrides) {
   let updatedFields = 0;
   let updatedRaces = 0;
   const next = races.map((race) => {
-    const fields = overrides.get(keyFor(race));
+    const fields = overrides.get(keyFor(race)) || overrides.get(normalizedKeyFor(race));
     if (!fields) {
       return race;
     }

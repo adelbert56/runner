@@ -558,6 +558,15 @@ function trackingPlanForRace(race, missing, todayText = TODAY) {
         reason: `已知開報日 ${formatDate(opensAt)}，開報前 14 天再開始追蹤。`,
       };
     }
+    if (daysToOpen > 0) {
+      return {
+        status: "wait_until_open_window",
+        status_label: "等待開報當天",
+        next_check_date: formatDate(opensAt),
+        cadence: "on_open_date",
+        reason: `已知開報日 ${formatDate(opensAt)}，尚有 ${daysToOpen} 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。`,
+      };
+    }
     if (daysToOpen >= -30) {
       return {
         status: "due_now",

@@ -15,7 +15,7 @@ from pathlib import Path
 # Local imports
 sys.path.insert(0, str(Path(__file__).parent))
 from config import SOURCES, RACE_DB_JSON, RACE_MANUAL_OVERRIDES_JSON
-from scrapers import sports_note_scraper, sportsnet_scraper, twttra_scraper
+from scrapers import sports_note_scraper, sportsnet_scraper, taipeimarathon_scraper, twttra_scraper
 from processors.race_normalizer import normalize_all
 from processors.manual_overrides import apply_overrides, load_overrides
 from processors.dedup import load_existing, merge, save
@@ -32,7 +32,13 @@ SCRAPER_MAP = {
     "sports_note": sports_note_scraper,
     "sportsnet":   sportsnet_scraper,
     "twttra":      twttra_scraper,
+    "taipeimarathon": taipeimarathon_scraper,
 }
+
+
+def _safe_console_text(text: str) -> str:
+    encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+    return text.encode(encoding, errors="replace").decode(encoding, errors="replace")
 
 
 def main(dry_run: bool = False, sources: list[str] | None = None) -> None:
@@ -69,7 +75,7 @@ def main(dry_run: bool = False, sources: list[str] | None = None) -> None:
     if dry_run:
         logger.info("[DRY RUN] Skipping file writes.")
         for r in normalized:
-            print(f"  {r['race_date']} | {r['race_county']} | {r['race_name']}")
+            print(_safe_console_text(f"  {r['race_date']} | {r['race_county']} | {r['race_name']}"))
         return
 
     # ── Merge with existing DB ────────────────────────────────────────────────

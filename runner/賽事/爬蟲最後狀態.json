@@ -1,12 +1,10 @@
 {
-  "scrape_date": "2026-06-23 10:57",
-  "added": 1,
-  "updated": 0,
-  "total": 42,
+  "scrape_date": "2026-06-23 20:06",
+  "added": 0,
+  "updated": 13,
+  "total": 52,
   "sources": [
-    "運動筆記",
-    "中華民國路跑協會",
-    "台灣越野跑協會"
+    "跑者廣場全國賽會"
   ],
   "errors": [],
   "has_errors": false

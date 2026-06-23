@@ -62,6 +62,11 @@ def _url_tokens(value: str) -> set[str]:
     if host == "irunner.biji.co" and path:
         tokens.add(f"irunner:{path.split('/', 1)[0].lower()}")
 
+    if host.endswith("ctrun.com.tw"):
+        event_main_id = query.get("EventMain_ID", "").strip()
+        if event_main_id:
+            tokens.add(f"ctrun-event:{event_main_id}")
+
     if host.endswith("lohasnet.tw"):
         signup_match = re.search(r"/signup/(\d+)", parsed.path, flags=re.IGNORECASE)
         if signup_match:
@@ -77,6 +82,19 @@ def _identity_tokens(race: dict) -> set[str]:
     tokens: set[str] = set()
     for field in ("official_event_url", "detail_url", "registration_link", "source_registration_link"):
         tokens.update(_url_tokens(race.get(field, "")))
+    return tokens
+
+
+def _distance_tokens(race: dict) -> set[str]:
+    tokens: set[str] = set()
+    for value in race.get("distances", []) or []:
+        text = _compact_text(value).lower()
+        if not text:
+            continue
+        tokens.add(text)
+        number_match = re.search(r"(\d+(?:\.\d+)?)", text)
+        if number_match:
+            tokens.add(number_match.group(1))
     return tokens
 
 
@@ -158,11 +176,34 @@ def _prefer_text(current: object, incoming: object, *, prefer_incoming: bool = F
     return incoming if len(incoming_text) > len(current_text) else current
 
 
+def _field_quality_score(field: str, value: object) -> int:
+    text = _compact_text(value)
+    if not text:
+        return 0
+    if field == "fees":
+        score = text.count("元") * 5 + text.count("$") * 4 + text.count("K") + text.count("km")
+        if re.search(r"202\d", text):
+            score -= 4
+        return score + min(len(text), 80) // 20
+    if field == "quota":
+        score = text.count("人") * 6 + text.count("K") + text.count("km")
+        if "未標示" in text:
+            score -= 2
+        return score + min(len(text), 80) // 20
+    if field == "start_times":
+        score = len(re.findall(r"([01]?\d|2[0-3])[:：][0-5]\d", text)) * 8
+        score += text.count("起跑") * 2 + text.count("鳴槍") * 2
+        return score + min(len(text), 120) // 30
+    return 0
+
+
 def _prefer_field_value(field: str, current: object, incoming: object) -> object:
     if field in {"registration_link", "official_event_url", "detail_url", "source_registration_link"}:
         return incoming if _url_score(field, str(incoming)) > _url_score(field, str(current)) else current
     if field == "registration_status":
         return incoming if _status_rank(str(incoming)) > _status_rank(str(current)) else current
+    if field in {"fees", "quota", "start_times"}:
+        return incoming if _field_quality_score(field, incoming) > _field_quality_score(field, current) else current
     if field in {"social_links", "distances"}:
         return _merge_unique_list(current, incoming)
     if field == "source_platform":
@@ -189,6 +230,17 @@ def _same_event(left: dict, right: dict) -> bool:
         return False
     if left_name == right_name:
         return True
+
+    if left_name in right_name or right_name in left_name:
+        left_distances = _distance_tokens(left)
+        right_distances = _distance_tokens(right)
+        if not left_distances or not right_distances:
+            return True
+        if left_distances == right_distances:
+            return True
+        overlap = len(left_distances & right_distances)
+        if overlap >= min(len(left_distances), len(right_distances)):
+            return True
 
     similarity = SequenceMatcher(a=left_name, b=right_name).ratio()
     return similarity >= 0.8

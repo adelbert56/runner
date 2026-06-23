@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from .common import (
     collect_between,
     compact_lines,
@@ -10,7 +12,15 @@ from .common import (
     first_quota_text,
     generic_extract,
     merge_details,
+    normalize_date,
 )
+
+
+def _countdown_deadline(html: str) -> str:
+    match = re.search(r"countdown\('(\d{4}-\d{2}-\d{2})\s+\d{2}:\d{2}:\d{2}'", html)
+    if not match:
+        return ""
+    return normalize_date(match.group(1))
 
 
 def extract(html: str, race: dict, url: str) -> dict:
@@ -29,6 +39,7 @@ def extract(html: str, race: dict, url: str) -> dict:
         "co_organizer": find_label_value(lines, ("承辦單位", "承辦")),
         "fees": fees,
         "quota": first_quota_text(quota_block),
+        "registration_deadline": _countdown_deadline(html),
     }
 
     return merge_details(platform_details, details)

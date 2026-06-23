@@ -212,7 +212,13 @@ def collect_between(lines: list[str], start_labels: tuple[str, ...], stop_labels
 
 
 def extract_money_values(text: str) -> list[str]:
-    return list(dict.fromkeys(re.findall(r"(?:NT\$|NTD|\$)?\s?\d{2,5}(?:,\d{3})?\s?元?", text)))
+    explicit = re.findall(r"(?:NT\$|NTD|\$)\s*\d{2,5}(?:,\d{3})?|\d{2,5}(?:,\d{3})?\s*元", text, flags=re.IGNORECASE)
+    if explicit:
+        return list(dict.fromkeys(compact_text(value) for value in explicit if compact_text(value)))
+    if "費用" not in text and "報名費" not in text:
+        return []
+    fallback = re.findall(r"\b\d{2,5}(?:,\d{3})?\b", text)
+    return list(dict.fromkeys(value for value in fallback if len(value.replace(",", "")) >= 3))
 
 
 def extract_quota_values(text: str) -> list[str]:
@@ -489,6 +495,8 @@ def generic_extract(html: str, race: dict, source_url: str = "") -> dict:
     text = " ".join(lines)
     opens_at, deadline = extract_registration_dates(text, race.get("race_date", ""))
     cancel_notice = cancellation_notice(lines)
+    fee_block = " ".join(collect_between(lines, ("報名費用", "費用"), ("晶片押金", "開放名額", "限制名額", "名額", "活動資訊", "競賽獎勵", "報名資訊")))
+    quota_block = " ".join(collect_between(lines, ("開放名額", "限制名額", "名額"), ("報名資格", "活動資訊", "報名費用", "費用", "活動路線")))
     return {
         "registration_link": extract_registration_link(html, race.get("official_event_url", "") or race.get("registration_link", "") or race.get("detail_url", "")),
         "registration_opens_at": opens_at,
@@ -497,8 +505,8 @@ def generic_extract(html: str, race: dict, source_url: str = "") -> dict:
         "start_location": find_label_value(lines, ("活動地點", "會場地點", "集合地點", "起跑地點", "地點")),
         "organizer": find_label_value(lines, ("主辦單位", "主辦")),
         "co_organizer": find_label_value(lines, ("承辦單位", "承辦", "協辦單位", "協辦")),
-        "fees": first_fee_text(text),
-        "quota": first_quota_text(text),
+        "fees": first_fee_text(fee_block),
+        "quota": first_quota_text(quota_block),
         "start_times": extract_start_times(lines),
         "registration_status": status_from_text(text),
         "cancellation_notice": cancel_notice,

@@ -12,6 +12,7 @@ const paths = {
 
 const typePriority = {
   new: 10,
+  updated: 15,
   opening: 20,
   ending: 30,
   closing: 40,
@@ -22,6 +23,7 @@ const typePriority = {
 
 const typeMeta = {
   new: { label: "新增賽事", tone: "primary" },
+  updated: { label: "狀態更新", tone: "blue" },
   opening: { label: "報名開始", tone: "blue" },
   ending: { label: "快截止", tone: "warning" },
   closing: { label: "即將截止", tone: "warning" },
@@ -52,6 +54,10 @@ function shortDate(value) {
   const text = String(value || "").slice(0, 10);
   const [, month, day] = text.match(/^\d{4}-(\d{2})-(\d{2})$/) || [];
   return month && day ? `${month}/${day}` : "";
+}
+
+function dayText(value) {
+  return String(value || "").slice(0, 10);
 }
 
 function isCancelledRace(race) {
@@ -90,6 +96,36 @@ function formatRaceTitle(race) {
 
 function raceKey(race) {
   return `${race.race_name || ""}|${race.race_date || ""}|${race.race_county || ""}`;
+}
+
+function hasRegistrationSite(race) {
+  return Boolean(race.registration_link || race.official_event_url);
+}
+
+function hasRegistrationDates(race) {
+  return Boolean(race.registration_opens_at || race.registration_deadline);
+}
+
+function isFreshVerification(race) {
+  return dayText(race.verified_at) === today;
+}
+
+function isNewDiscovery(race) {
+  return dayText(race.first_seen_at || race.scraped_at) === today;
+}
+
+function verificationDetail(race) {
+  const verified = shortDate(race.verified_at) || shortDate(today) || "今日";
+  if (hasRegistrationSite(race) && hasRegistrationDates(race)) {
+    return `${verified} 補齊報名網站與時間`;
+  }
+  if (hasRegistrationSite(race)) {
+    return `${verified} 補齊報名網站`;
+  }
+  if (hasRegistrationDates(race)) {
+    return `${verified} 補齊報名時間`;
+  }
+  return `${verified} 更新賽事資訊`;
 }
 
 function normalizeTypes(types) {
@@ -154,6 +190,16 @@ latestBatch
     const seen = String(race.first_seen_at || race.scraped_at || "").slice(0, 10).replaceAll("-", "/") || "最新批次";
     addRaceAnnouncement(race, status === "已截止" ? "closed" : "new", `${seen} 收到`);
   });
+
+upcoming
+  .filter((race) => isFreshVerification(race) && !isNewDiscovery(race) && (hasRegistrationSite(race) || hasRegistrationDates(race)))
+  .sort((a, b) => {
+    const siteDelta = Number(hasRegistrationSite(b)) - Number(hasRegistrationSite(a));
+    if (siteDelta !== 0) return siteDelta;
+    return dateValue(b.verified_at || b.scraped_at) - dateValue(a.verified_at || a.scraped_at);
+  })
+  .slice(0, 6)
+  .forEach((race) => addRaceAnnouncement(race, "updated", verificationDetail(race)));
 
 upcoming
   .filter((race) => {

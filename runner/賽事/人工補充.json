@@ -449,10 +449,10 @@
     "verification_note": "使用者提供官方報名頁。"
   },
   {
-    "race_name": "仁愛長庚合作聯盟醫院2026永慶盃路跑",
+    "race_name": "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
     "race_date": "2026-09-20",
     "registration_link": "https://www.ctrun.com.tw/Activity/?EventMain_ID=239&Article_ID=6745",
-    "official_event_url": "https://www.ctrun.com.tw/Activity/?EventMain_ID=239&Article_ID=6745",
+    "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=239",
     "registration_opens_at": "2026-06-15",
     "registration_deadline": "2026-08-04",
     "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正，並依使用者提供之運動筆記報名頁截圖補回報名起訖日期。",
@@ -478,12 +478,35 @@
     "verification_note": "使用者提供 CTRun 官方活動頁。"
   },
   {
+    "race_name": "2026 梨山水蜜桃路跑",
+    "race_date": "2026-08-23",
+    "registration_status": "報名中",
+    "registration_opens_at": "2026-05-01",
+    "registration_deadline": "2026-06-30",
+    "registration_note": "人工補登：依 Focusline 官方活動 API 補登報名起訖。",
+    "verified_at": "2026-06-23",
+    "verification_note": "Focusline 官方 /api/act/260823KM。"
+  },
+  {
+    "race_name": "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站",
+    "race_date": "2026-09-19",
+    "registration_status": "報名中",
+    "registration_opens_at": "2026-06-23",
+    "registration_deadline": "2026-06-26",
+    "quota": "3,318人",
+    "registration_note": "人工補登：依 Focusline 官方活動 API 補登報名起訖與名額。",
+    "verified_at": "2026-06-23",
+    "verification_note": "Focusline 官方 /api/act/260919KN。"
+  },
+  {
     "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
     "race_date": "2026-10-25",
     "official_event_url": "https://lohasnet.tw/YuanLinLionsClub2026/",
-    "registration_note": "人工補登：依使用者提供之 Lohas 官方活動頁連結校正。",
+    "registration_opens_at": "__CLEAR__",
+    "registration_deadline": "2026-09-30",
+    "registration_note": "人工補登：依 Lohas 官方報名頁倒數截止日補登。",
     "verified_at": "2026-06-23",
-    "verification_note": "使用者提供 Lohas 官方活動頁。"
+    "verification_note": "Lohas 官方 signup 頁倒數計時。"
   },
   {
     "race_name": "2026第二屆食安盃馬拉松",

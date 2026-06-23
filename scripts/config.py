@@ -56,6 +56,11 @@ SOURCES = {
         "url": "https://www.twttra.com/",
         "enabled": True,
     },
+    "taipeimarathon": {
+        "name": "跑者廣場全國賽會",
+        "url": "http://www.taipeimarathon.org.tw/contest.aspx",
+        "enabled": True,
+    },
 }
 
 # ─── HTTP settings ────────────────────────────────────────────────────────────

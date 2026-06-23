@@ -1204,12 +1204,24 @@ function legacyRaceKey(race) {
   return race.race_id || `${race.race_name}|${race.race_date}`;
 }
 
+function announcementRaceKey(race) {
+  return `${race.race_name || ""}|${race.race_date || ""}|${race.race_county || ""}`;
+}
+
 function getRaceKey(race) {
   return `r:${shortHash(legacyRaceKey(race))}`;
 }
 
 function raceDomId(race) {
   return `race-${getRaceKey(race).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function matchesAnnouncementRaceKey(race, targetRace) {
+  return [
+    getRaceKey(race),
+    legacyRaceKey(race),
+    announcementRaceKey(race),
+  ].includes(targetRace);
 }
 
 function migrateRaceFavorites() {
@@ -3784,7 +3796,7 @@ function bindEvents() {
         render();
         requestAnimationFrame(() => {
           const targetRace = announcementRace.dataset.announcementRace;
-          const race = state.races.find((item) => getRaceKey(item) === targetRace || legacyRaceKey(item) === targetRace);
+          const race = state.races.find((item) => matchesAnnouncementRaceKey(item, targetRace));
           const card = race ? document.getElementById(raceDomId(race)) : null;
           card?.scrollIntoView({ behavior: "smooth", block: "center" });
           card?.querySelector("details")?.setAttribute("open", "");

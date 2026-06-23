@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-06-23T11:00:45.517Z",
+  "generated_at": "2026-06-23T11:36:22.360Z",
   "basis_date": "2026-06-23",
   "races": {
-    "total": 42,
+    "total": 41,
     "follow_up_count": 10,
-    "complete_count": 32,
+    "complete_count": 31,
     "complete_rate": "76%",
-    "launch_blocking_gap_count": 4,
-    "launch_ready_count": 38,
-    "launch_ready_rate": "90%",
-    "official_direct_count": 38,
+    "launch_blocking_gap_count": 5,
+    "launch_ready_count": 36,
+    "launch_ready_rate": "88%",
+    "official_direct_count": 37,
     "official_direct_rate": "90%",
-    "verified_count": 42,
+    "verified_count": 41,
     "verified_rate": "100%",
     "opened_gap_count": 0,
     "date_anomaly_count": 1,
-    "due_now_count": 4,
+    "due_now_count": 5,
     "monthly_tracking_count": 3,
     "state_counts": {
       "歷史": 2,
       "停辦": 2,
       "已截止": 9,
-      "報名中": 24,
-      "尚未開報": 3,
-      "待確認": 2
+      "報名中": 23,
+      "待確認": 3,
+      "尚未開報": 2
     }
   },
   "content": {
@@ -190,11 +190,11 @@
         "missing": 5,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 2,
         "sample_races": [
           "2026 KOF拳皇公益主題路跑",
-          "TOYOTA RUN 台中 視障專場",
-          "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
+          "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
+          "2026台灣米倉田中馬拉松"
         ],
         "complete_rate": "50%",
         "official_direct_rate": "60%",
@@ -204,9 +204,9 @@
       },
       {
         "platform": "iRunner",
-        "total": 9,
-        "official_direct": 9,
-        "verified": 9,
+        "total": 8,
+        "official_direct": 8,
+        "verified": 8,
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
