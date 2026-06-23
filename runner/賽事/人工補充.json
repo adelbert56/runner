@@ -502,11 +502,11 @@
     "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
     "race_date": "2026-10-25",
     "official_event_url": "https://lohasnet.tw/YuanLinLionsClub2026/",
-    "registration_opens_at": "__CLEAR__",
+    "registration_opens_at": "2026-06-15",
     "registration_deadline": "2026-09-30",
-    "registration_note": "人工補登：依 Lohas 官方報名頁倒數截止日補登。",
+    "registration_note": "人工補登：依 Lohas signup 頁「自 2026年06月15日 11:00 起 至 2026年09月30日 23:59 止」。",
     "verified_at": "2026-06-23",
-    "verification_note": "Lohas 官方 signup 頁倒數計時。"
+    "verification_note": "截圖確認：Lohasnet 報名頁顯示報名期間。"
   },
   {
     "race_name": "2026第二屆食安盃馬拉松",
@@ -519,5 +519,41 @@
     "registration_note": "人工補登：依使用者提供之 iRunner 官方報名頁連結校正。",
     "verified_at": "2026-06-23",
     "verification_note": "使用者提供 iRunner 官方報名頁。"
+  },
+  {
+    "race_name": "115 年運動i臺灣2.0計畫-北屯區路跑樂活嘉年華",
+    "race_date": "2026-06-28",
+    "registration_opens_at": "__CLEAR__",
+    "registration_deadline": "__CLEAR__",
+    "registration_note": "人工核實：bao-ming.com/eb/content/6965 bot 驗證頁，無法取得報名日期；賽事已截止。",
+    "verified_at": "2026-06-23",
+    "verification_note": "bao-ming 頁被 bot 驗證擋住，空白非爬蟲漏抓。"
+  },
+  {
+    "race_name": "24小時不斷電公益路跑接力賽～為視多障孩子而跑",
+    "race_date": "2026-10-31",
+    "registration_opens_at": "2026-03-12",
+    "registration_deadline": "2026-09-10",
+    "registration_note": "人工補登：報名頁顯示「報名時間：2026年03月12日 12:00 起 - 2026年09月10日 23:59 止」；biji 顯示截止 09/30 有誤。",
+    "verified_at": "2026-06-23",
+    "verification_note": "截圖確認：報名頁倒數計時頁面，79天剩餘（今日2026-06-23）與截止09-10吻合。"
+  },
+  {
+    "race_name": "2026 愛在幼安公益路跑",
+    "race_date": "2026-11-07",
+    "registration_opens_at": "__CLEAR__",
+    "registration_deadline": "2026-09-30",
+    "registration_note": "人工補登：截止日依跑者廣場 registration_status「~ 9月30日」推斷；開報日期 Focusline SPA 無法在無 JS 執行下取得。",
+    "verified_at": "2026-06-23",
+    "verification_note": "registration_status 文字來源：~ 9月30日。Focusline 261107KZ/3566 頁 SPA shell，無嵌入資料。"
+  },
+  {
+    "race_name": "國立臺灣體育運動大學第34屆駱駝盃路跑賽",
+    "race_date": "2026-11-21",
+    "registration_opens_at": "2026-05-08",
+    "registration_deadline": "2026-10-23",
+    "registration_note": "人工補登：bao-ming 頁顯示「報名起訖：2026-05-08 16:30:00 ▶ 2026-10-23 18:00:00」。",
+    "verified_at": "2026-06-23",
+    "verification_note": "截圖確認：bao-ming.com/eb/content/7016 賽事頁報名起訖欄位。"
   }
 ]
