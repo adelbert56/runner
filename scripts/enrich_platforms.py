@@ -242,7 +242,30 @@ def has_redundant_start_time_rows(value: object) -> bool:
     return False
 
 
+_SKIP_STATUSES = {"已截止", "停辦", "停賽"}
+_PAST_RACE_GRACE_DAYS = 7
+
+
+def _is_stale_past_race(race: dict) -> bool:
+    """Return True for races whose date has passed beyond the grace window and are closed."""
+    race_date = str(race.get("race_date", "")).strip()
+    if not race_date:
+        return False
+    try:
+        from datetime import date, timedelta
+        rd = date.fromisoformat(race_date)
+        if rd >= date.today() - timedelta(days=_PAST_RACE_GRACE_DAYS):
+            return False
+    except ValueError:
+        return False
+    status = str(race.get("registration_status", "")).strip()
+    return status in _SKIP_STATUSES or rd < date.today()
+
+
 def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False) -> tuple[dict, list[str], list[str]]:
+    if _is_stale_past_race(race):
+        return race, [], []
+
     updated = dict(race)
     changed: list[str] = []
     errors: list[str] = []

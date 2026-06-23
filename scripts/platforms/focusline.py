@@ -11,6 +11,9 @@ import requests
 from config import REQUEST_HEADERS, REQUEST_RETRIES, REQUEST_RETRY_BACKOFF_SECONDS, REQUEST_TIMEOUT
 from http_client import request_text
 
+_session = requests.Session()
+_session.headers.update(REQUEST_HEADERS)
+
 from .common import compact_lines, find_label_value, generic_extract, merge_details, normalize_date
 
 
@@ -54,8 +57,7 @@ def _load_api_details(url: str) -> dict:
     if not event_code:
         return {}
     api_url = f"https://www.focusline.com.tw/api/act/{event_code}"
-    session = requests.Session()
-    session.headers.update(REQUEST_HEADERS)
+    session = _session
     try:
         text = request_text(
             session,
