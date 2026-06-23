@@ -89,7 +89,7 @@ function formatRaceTitle(race) {
 }
 
 function raceKey(race) {
-  return race.race_id || `${race.race_name || ""}|${race.race_date || ""}`;
+  return `${race.race_name || ""}|${race.race_date || ""}|${race.race_county || ""}`;
 }
 
 function normalizeTypes(types) {

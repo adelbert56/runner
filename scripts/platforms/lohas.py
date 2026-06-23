@@ -15,7 +15,7 @@ from .common import (
 
 def extract(html: str, race: dict, url: str) -> dict:
     lines = compact_lines(html)
-    details = generic_extract(html, race)
+    details = generic_extract(html, race, url)
 
     fee_block = " ".join(collect_between(lines, ("報名費用", "費用"), ("晶片押金", "報名資訊", "開放名額", "活動資訊")))
     quota_block = " ".join(collect_between(lines, ("開放名額", "限制名額", "名額"), ("報名資格", "活動資訊", "報名費用")))

@@ -7,6 +7,7 @@ const CONTENT_FAVORITES_KEY = `runner-plaza:${DEVICE_ID}:content-favorites`;
 const CONTENT_SETTINGS_KEY = `runner-plaza:${DEVICE_ID}:content-settings`;
 const PLAN_KEY = `runner-plaza:${DEVICE_ID}:training-plan`;
 const PLAN_PROGRESS_KEY = `runner-plaza:${DEVICE_ID}:training-progress`;
+const PLAN_FEEDBACK_KEY = `runner-plaza:${DEVICE_ID}:training-feedback`;
 const DATA_VERSION = "20260529-message-list1";
 const TODAY = getTodayString();
 
@@ -33,6 +34,7 @@ const state = {
   trainingRaceKey: "",
   planWeek: 1,
   completedPlanWeeks: new Set(),
+  planFeedback: [],
 };
 
 const els = {
@@ -86,6 +88,15 @@ const els = {
   planPriority: document.querySelector("#plan-priority"),
   planIntensity: document.querySelector("#plan-intensity"),
   planOutput: document.querySelector("#plan-output"),
+  planFeedbackWeek: document.querySelector("#plan-feedback-week"),
+  planFeedbackKm: document.querySelector("#plan-feedback-km"),
+  planFeedbackLongRun: document.querySelector("#plan-feedback-long-run"),
+  planFeedbackPain: document.querySelector("#plan-feedback-pain"),
+  planFeedbackSleep: document.querySelector("#plan-feedback-sleep"),
+  planFeedbackCompletion: document.querySelector("#plan-feedback-completion"),
+  planFeedbackSave: document.querySelector("#plan-feedback-save"),
+  planFeedbackClear: document.querySelector("#plan-feedback-clear"),
+  planFeedbackStatus: document.querySelector("#plan-feedback-status"),
   panelLinks: document.querySelectorAll("[data-panel-link]"),
   panels: document.querySelectorAll("[data-panel]"),
   backTop: document.querySelector("#back-top"),
@@ -617,25 +628,142 @@ function savePlanProgress(signature) {
   }));
 }
 
-function weekAdjustmentFor(plan, completedWeeks) {
+function normalizePlanFeedbackEntry(entry) {
+  const week = clampNumber(Number(entry?.week) || 0, 0, 20);
+  if (!week) {
+    return null;
+  }
+  return {
+    week,
+    actualKm: Math.max(0, Number(entry?.actualKm) || 0),
+    longRunKm: Math.max(0, Number(entry?.longRunKm) || 0),
+    pain: clampNumber(Number(entry?.pain) || 0, 0, 10),
+    sleepHours: clampNumber(Number(entry?.sleepHours) || 0, 0, 12),
+    completion: ["full", "partial", "missed"].includes(entry?.completion) ? entry.completion : "partial",
+    updatedAt: entry?.updatedAt || new Date().toISOString(),
+  };
+}
+
+function loadPlanFeedback(signature) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PLAN_FEEDBACK_KEY) || "{}");
+    if (stored.signature !== signature) {
+      state.planFeedback = [];
+      return state.planFeedback;
+    }
+    state.planFeedback = (stored.entries || [])
+      .map(normalizePlanFeedbackEntry)
+      .filter(Boolean)
+      .sort((a, b) => a.week - b.week);
+  } catch {
+    state.planFeedback = [];
+  }
+  return state.planFeedback;
+}
+
+function savePlanFeedback(signature) {
+  localStorage.setItem(PLAN_FEEDBACK_KEY, JSON.stringify({
+    signature,
+    entries: state.planFeedback,
+    updatedAt: new Date().toISOString(),
+  }));
+}
+
+function feedbackEntryForWeek(entries, week) {
+  return entries.find((entry) => entry.week === week) || null;
+}
+
+function feedbackAdjustmentFor(plan, feedback) {
+  if (!feedback) {
+    return null;
+  }
+  const previousWeek = plan.weeklyBlocks[feedback.week - 1];
+  const plannedKm = previousWeek?.weeklyKm || 0;
+  const plannedLongRun = previousWeek?.longRunKm || 0;
+  const kmRatio = plannedKm > 0 ? feedback.actualKm / plannedKm : 1;
+  const longRunRatio = plannedLongRun > 0 ? feedback.longRunKm / plannedLongRun : 1;
+  let factor = 1;
+  let longRunFactor = 1;
+  let qualityMode = "keep";
+  let status = "依回饋維持";
+  let note = "前一週回饋穩定，這週照原結構推進。";
+
+  if (feedback.pain >= 7 || (feedback.completion === "missed" && kmRatio < 0.4)) {
+    factor = 0.55;
+    longRunFactor = 0.5;
+    qualityMode = "remove";
+    status = "停跑觀察";
+    note = "前一週疼痛或失敗訊號過高，這週移除品質課，長跑與總量大幅下修。";
+  } else if (feedback.pain >= 5 || feedback.sleepHours < 6 || kmRatio < 0.65 || feedback.completion === "missed") {
+    factor = 0.78;
+    longRunFactor = 0.72;
+    qualityMode = "remove";
+    status = "恢復降載";
+    note = "前一週恢復不足或完成度偏低，這週改恢復導向，先把疲勞與疼痛壓下來。";
+  } else if (feedback.pain >= 3 || feedback.sleepHours < 6.8 || kmRatio < 0.85 || longRunRatio < 0.8 || feedback.completion === "partial") {
+    factor = 0.9;
+    longRunFactor = 0.85;
+    qualityMode = "reduced";
+    status = "保守維持";
+    note = "前一週只有部分完成，這週保留課表骨架，但重點課與長跑都會收一點。";
+  } else if (feedback.pain <= 2 && feedback.sleepHours >= 7.2 && kmRatio >= 0.95 && longRunRatio >= 0.9 && feedback.completion === "full") {
+    factor = plan.intensity === "push" && plan.priority === "pb" ? 1.04 : 1.02;
+    longRunFactor = 1.02;
+    qualityMode = "keep";
+    status = "小幅推進";
+    note = "前一週吸收狀況不錯，這週只小幅推進，不會同時暴增總量和刺激。";
+  }
+
+  return {
+    source: "feedback",
+    previousWeek: feedback.week,
+    status,
+    note,
+    factor,
+    longRunFactor,
+    qualityMode,
+    actualKm: feedback.actualKm,
+    plannedKm,
+    actualLongRunKm: feedback.longRunKm,
+    plannedLongRun,
+    pain: feedback.pain,
+    sleepHours: feedback.sleepHours,
+    completion: feedback.completion,
+  };
+}
+
+function weekAdjustmentFor(plan, completedWeeks, feedbackEntries) {
   if (plan.selectedWeek <= 1) {
     return {
+      source: "initial",
       status: "首週建立節奏",
       note: "先把出門頻率與輕鬆跑完成度跑穩，不急著追配速。",
       factor: 1,
+      longRunFactor: 1,
+      qualityMode: "keep",
     };
+  }
+  const feedback = feedbackAdjustmentFor(plan, feedbackEntryForWeek(feedbackEntries, plan.selectedWeek - 1));
+  if (feedback) {
+    return feedback;
   }
   if (completedWeeks.has(plan.selectedWeek - 1)) {
     return {
+      source: "completion",
       status: "上週已完成",
       note: "本週可以照原計畫推進；若疲勞偏高，重點課保留但總量降 10%。",
       factor: 1,
+      longRunFactor: 1,
+      qualityMode: "keep",
     };
   }
   return {
+    source: "completion",
     status: "上週未完成",
     note: "本週自動降載約 10%，先補回規律與恢復，不把漏掉的課硬塞回來。",
     factor: 0.9,
+    longRunFactor: 0.88,
+    qualityMode: "reduced",
   };
 }
 
@@ -643,12 +771,100 @@ function adjustedTrainingWeek(week, adjustment) {
   if (!week || adjustment.factor === 1) {
     return week;
   }
+  const direction = adjustment.factor < 1 || (adjustment.longRunFactor || adjustment.factor) < 1 ? "恢復調整" : "推進調整";
   return {
     ...week,
     weeklyKm: Math.max(1, Math.round(week.weeklyKm * adjustment.factor)),
-    longRunKm: Math.max(1, Math.round(week.longRunKm * adjustment.factor)),
-    focus: `${week.focus}，降載調整`,
+    longRunKm: Math.max(1, Math.round(week.longRunKm * (adjustment.longRunFactor || adjustment.factor))),
+    focus: `${week.focus}，${direction}`,
   };
+}
+
+function updatePlanFeedbackForm(plan, feedbackEntries, adjustment) {
+  if (!els.planFeedbackWeek) {
+    return;
+  }
+  const suggestedWeek = clampNumber(plan.selectedWeek <= 1 ? 1 : plan.selectedWeek - 1, 1, plan.weekCount);
+  const currentWeek = document.activeElement === els.planFeedbackWeek
+    ? clampNumber(Number(els.planFeedbackWeek.value) || suggestedWeek, 1, plan.weekCount)
+    : suggestedWeek;
+  const activeFeedback = feedbackEntryForWeek(feedbackEntries, currentWeek);
+
+  els.planFeedbackWeek.max = String(plan.weekCount);
+  els.planFeedbackWeek.value = String(currentWeek);
+  els.planFeedbackKm.value = activeFeedback ? String(activeFeedback.actualKm) : "";
+  els.planFeedbackLongRun.value = activeFeedback ? String(activeFeedback.longRunKm) : "";
+  els.planFeedbackPain.value = activeFeedback ? String(activeFeedback.pain) : "0";
+  els.planFeedbackSleep.value = activeFeedback ? String(activeFeedback.sleepHours) : "";
+  els.planFeedbackCompletion.value = activeFeedback?.completion || "full";
+
+  if (!els.planFeedbackStatus) {
+    return;
+  }
+  if (adjustment?.source === "feedback") {
+    const completionText = {
+      full: "大致完成",
+      partial: "完成一部分",
+      missed: "明顯沒完成",
+    }[adjustment.completion] || "有回饋";
+    els.planFeedbackStatus.textContent = `已套用第 ${adjustment.previousWeek} 週回饋：${adjustment.status}。完成度 ${completionText}，疼痛 ${adjustment.pain}/10，睡眠 ${adjustment.sleepHours} 小時；這週會依此自動調整。`;
+    return;
+  }
+  if (activeFeedback) {
+    els.planFeedbackStatus.textContent = `已儲存第 ${activeFeedback.week} 週回饋，但目前檢視的不是它的下一週。切到第 ${activeFeedback.week + 1} 週，就會看到自動調整結果。`;
+    return;
+  }
+  els.planFeedbackStatus.textContent = "尚未儲存每週回饋；目前只會用課表完成標記做基本調整。";
+}
+
+function readPlanFeedbackForm(plan) {
+  const week = clampNumber(Number(els.planFeedbackWeek?.value) || (plan.selectedWeek > 1 ? plan.selectedWeek - 1 : 1), 1, plan.weekCount);
+  return normalizePlanFeedbackEntry({
+    week,
+    actualKm: Number(els.planFeedbackKm?.value) || 0,
+    longRunKm: Number(els.planFeedbackLongRun?.value) || 0,
+    pain: Number(els.planFeedbackPain?.value) || 0,
+    sleepHours: Number(els.planFeedbackSleep?.value) || 0,
+    completion: els.planFeedbackCompletion?.value || "partial",
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+function savePlanFeedbackFromForm() {
+  const plan = buildPlanSnapshot();
+  const signature = planProgressSignature(plan);
+  loadPlanFeedback(signature);
+  const entry = readPlanFeedbackForm(plan);
+  if (!entry || entry.actualKm <= 0 || entry.longRunKm < 0 || entry.sleepHours <= 0) {
+    if (els.planFeedbackStatus) {
+      els.planFeedbackStatus.textContent = "請先填完整：週次、實際跑量、最長跑與平均睡眠。";
+    }
+    return;
+  }
+  state.planFeedback = state.planFeedback.filter((item) => item.week !== entry.week);
+  state.planFeedback.push(entry);
+  state.planFeedback.sort((a, b) => a.week - b.week);
+  savePlanFeedback(signature);
+
+  if (entry.completion === "full") {
+    state.completedPlanWeeks.add(entry.week);
+  } else if (entry.completion === "missed") {
+    state.completedPlanWeeks.delete(entry.week);
+  }
+  savePlanProgress(signature);
+  state.planWeek = Math.min(plan.weekCount, entry.week + 1);
+  savePlanSettings();
+  renderPlan();
+}
+
+function clearPlanFeedbackFromForm() {
+  const plan = buildPlanSnapshot();
+  const signature = planProgressSignature(plan);
+  loadPlanFeedback(signature);
+  const week = clampNumber(Number(els.planFeedbackWeek?.value) || (plan.selectedWeek > 1 ? plan.selectedWeek - 1 : 1), 1, plan.weekCount);
+  state.planFeedback = state.planFeedback.filter((item) => item.week !== week);
+  savePlanFeedback(signature);
+  renderPlan();
 }
 
 function normalizeControlValue(control, value) {
@@ -1070,18 +1286,24 @@ function isSourceLink(url) {
 }
 
 function getRegistrationLink(race) {
-  const link = race.registration_link || "";
-  return link && !isSourceLink(link) ? link : "";
+  for (const value of [race.registration_link, race.official_event_url]) {
+    const link = value || "";
+    if (link && !isSourceLink(link)) {
+      return link;
+    }
+  }
+  return "";
+}
+
+function hasLiveRegistrationEvidence(race) {
+  if (getRegistrationLink(race)) {
+    return true;
+  }
+  return dateDiffDays(race.registration_opens_at) !== null || dateDiffDays(race.registration_deadline) !== null;
 }
 
 function isCancelledRace(race) {
-  const text = [
-    race.race_name,
-    race.registration_status,
-    race.registration_note,
-    race.verification_note,
-  ].filter(Boolean).join(" ");
-  return /停辦|停賽|取消|被迫取消|cancel/i.test(text);
+  return Boolean(race.cancellation_notice || race.cancellation_notice_url);
 }
 
 function getRegistrationTarget(race) {
@@ -2214,6 +2436,10 @@ function paceRange(baseSeconds, slowerFrom, slowerTo) {
   return `${formatPace(baseSeconds + slowerFrom)} - ${formatPace(baseSeconds + slowerTo)}`;
 }
 
+function paceRangeFrom(fromSeconds, toSeconds) {
+  return `${formatPace(fromSeconds)} - ${formatPace(toSeconds)}`;
+}
+
 function weeksUntilRace(dateText) {
   if (!dateText) {
     return null;
@@ -2254,19 +2480,30 @@ function clampNumber(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority, experience, intensity, injury) {
+function goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority, experience, intensity, injury, readiness, weekCount) {
   const distance = goalProfile.distanceKm;
   const levelBoost = level === "advanced" ? 1.25 : level === "beginner" ? 0.85 : 1;
-  const priorityBoost = priority === "pb" ? 1.12 : priority === "habit" ? 0.88 : 1;
+  const priorityBoost = priority === "pb" ? 1.1 : priority === "habit" ? 0.86 : 1;
   const experienceBoost = experience === "seasoned" ? 1.08 : experience === "rookie" ? 0.88 : 1;
-  const intensityBoost = intensity === "push" ? 1.08 : intensity === "safe" ? 0.94 : 1;
-  const injuryBoost = injury === "recovering" ? 0.82 : injury === "tight" ? 0.92 : 1;
+  const intensityBoost = intensity === "push" ? 1.05 : intensity === "safe" ? 0.93 : 1;
+  const injuryBoost = injury === "recovering" ? 0.8 : injury === "tight" ? 0.9 : 1;
+  const readinessBoost = readiness === "confident" ? 1.03 : readiness === "busy" ? 0.94 : readiness === "tired" ? 0.88 : 1;
   const baseKm = clampNumber(weeklyKm, 6, 80);
-  const rawPeak = Math.max(baseKm * 1.18, distance * 1.4 * levelBoost * priorityBoost * experienceBoost * intensityBoost * injuryBoost);
+  const growthCap = weekCount <= 4 ? 1.08 : weekCount <= 8 ? 1.22 : weekCount <= 12 ? 1.34 : 1.42;
+  const raceDemand = distance * (distance >= 42 ? 1.08 : distance >= 21 ? 0.98 : distance >= 10 ? 0.84 : 0.7);
+  const rawPeak = Math.max(
+    baseKm * growthCap,
+    raceDemand * levelBoost * priorityBoost * experienceBoost * intensityBoost * injuryBoost * readinessBoost,
+  );
   const maxPeak = distance >= 42 ? 58 : distance >= 21 ? 42 : distance >= 10 ? 30 : 22;
   const peakKm = Math.round(clampNumber(rawPeak, baseKm, maxPeak));
   const longRunCap = distance >= 42 ? 30 : distance >= 21 ? 20 : distance >= 10 ? 13 : 8;
-  const peakLongRun = Math.round(clampNumber(Math.max(longRunKm + 2, distance * 0.78), longRunKm, longRunCap));
+  const longRunGrowth = weekCount <= 4 ? 1.1 : weekCount <= 8 ? 1.22 : 1.32;
+  const peakLongRun = Math.round(clampNumber(
+    Math.max(longRunKm * longRunGrowth, distance * (distance >= 42 ? 0.6 : distance >= 21 ? 0.76 : 0.72)),
+    longRunKm,
+    longRunCap,
+  ));
 
   return {
     baseKm: Math.round(baseKm),
@@ -2311,9 +2548,73 @@ function buildWeeklyBlocks(weekCount, targets, goalProfile) {
       phase,
       weeklyKm,
       longRunKm,
-      focus: phase === "打底" ? "穩定頻率" : phase === "加量" ? "提高總量" : phase === "專項" ? "接近比賽需求" : "保留體力",
+      focus: phase === "打底"
+        ? "穩定頻率與有氧"
+        : phase === "加量"
+          ? "提高總量與中長跑"
+          : phase === "專項"
+            ? "專項配速與長跑尾段"
+            : "保留速度與恢復",
     };
   });
+}
+
+function buildPaceProfile(goalProfile, targetRacePace, weeklyKm, longRunKm, level, experience, readiness, injury, priority, intensity) {
+  const lowVolumePenalty = goalProfile.distanceKm >= 42
+    ? weeklyKm < 30 ? 22 : weeklyKm < 40 ? 12 : 0
+    : goalProfile.distanceKm >= 21
+      ? weeklyKm < 18 ? 18 : weeklyKm < 28 ? 10 : 0
+      : weeklyKm < 12 ? 10 : 0;
+  const longRunPenalty = goalProfile.distanceKm >= 21 && longRunKm < goalProfile.distanceKm * 0.35
+    ? 8
+    : longRunKm < 6
+      ? 5
+      : 0;
+  const readinessPenalty = readiness === "tired" ? 15 : readiness === "busy" ? 8 : readiness === "confident" ? -4 : 0;
+  const injuryPenalty = injury === "recovering" ? 18 : injury === "tight" ? 8 : 0;
+  const levelPenalty = level === "beginner" ? 8 : level === "advanced" ? -4 : 0;
+  const experiencePenalty = experience === "rookie" ? 8 : experience === "seasoned" ? -3 : 0;
+  const priorityPenalty = priority === "pb" && intensity === "push" ? -4 : priority === "habit" ? 10 : 0;
+  const conservativeOffset = clampNumber(
+    lowVolumePenalty + longRunPenalty + readinessPenalty + injuryPenalty + levelPenalty + experiencePenalty + priorityPenalty,
+    -8,
+    40,
+  );
+  const trainingRacePace = targetRacePace + conservativeOffset;
+  const cautious = injury !== "none" || readiness === "tired" || intensity === "safe";
+  const recoveryFrom = trainingRacePace + (cautious ? 85 : 75);
+  const recoveryTo = trainingRacePace + (cautious ? 115 : 100);
+  const easyFrom = trainingRacePace + (cautious ? 65 : 55);
+  const easyTo = trainingRacePace + (cautious ? 95 : 82);
+  const steadyFrom = trainingRacePace + 25;
+  const steadyTo = trainingRacePace + (cautious ? 42 : 35);
+  const tempoFrom = trainingRacePace + (goalProfile.distanceKm >= 21 ? 2 : 0);
+  const tempoTo = trainingRacePace + (cautious ? 16 : 10);
+  const intervalFrom = trainingRacePace - (cautious ? 12 : 20);
+  const intervalTo = trainingRacePace + (cautious ? 4 : 0);
+  const longFrom = trainingRacePace + (cautious ? 50 : 42);
+  const longTo = trainingRacePace + (cautious ? 82 : 68);
+  const marathonFrom = trainingRacePace + 12;
+  const marathonTo = trainingRacePace + 26;
+  const source = conservativeOffset >= 18
+    ? "訓練配速已依目前跑量、長跑距離與恢復狀態自動放保守。"
+    : conservativeOffset >= 8
+      ? "訓練配速以目標配速為基礎，並做小幅保守校正。"
+      : "訓練配速與目標能力接近，可直接做專項安排。";
+
+  return {
+    targetRacePace,
+    trainingRacePace,
+    conservativeOffset,
+    recoveryRange: paceRangeFrom(recoveryFrom, recoveryTo),
+    easyRange: paceRangeFrom(easyFrom, easyTo),
+    steadyRange: paceRangeFrom(steadyFrom, steadyTo),
+    tempoRange: paceRangeFrom(tempoFrom, tempoTo),
+    intervalRange: paceRangeFrom(intervalFrom, intervalTo),
+    longRange: paceRangeFrom(longFrom, longTo),
+    marathonRange: paceRangeFrom(marathonFrom, marathonTo),
+    source,
+  };
 }
 
 function buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longRunKm, priority, experience, injury, intensity) {
@@ -2323,6 +2624,9 @@ function buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longR
   }
   if (goalProfile.distanceKm >= 42 && dayCount <= 3) {
     notes.push("全馬只跑 3 天風險偏高，長跑壓力會集中，建議至少加入 1 天短恢復跑。");
+  }
+  if (goalProfile.distanceKm >= 21 && dayCount <= 3 && weeklyKm >= 18) {
+    notes.push("半馬以上若已經有一定跑量，建議加入一堂中長跑，避免所有耐力都壓在週末長跑。");
   }
   if (goalProfile.distanceKm >= 21 && weeklyKm < 18) {
     notes.push("目前週跑量偏低，半馬以上目標先求穩定累積，不建議每週都做間歇。");
@@ -2379,50 +2683,66 @@ function isHalfMarathonGoal(goalProfile) {
   return goalProfile?.distanceKm >= 20.5 && goalProfile?.distanceKm < 22;
 }
 
-function buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience, goalProfile) {
+function buildTrainingSchedule(dayCount, level, priority, currentWeek, paceProfile, longRunDay, intensity, injury, experience, readiness, goalProfile, adjustment = null) {
   const isCautious = intensity === "safe" || injury === "recovering";
   const isHalf = isHalfMarathonGoal(goalProfile);
   const longRunLabel = weekdayLabels[longRunDay] || "週日";
   const useRunWalk = shouldUseRunWalk(level, experience, priority, injury);
   const runWalk = runWalkStageForWeek(currentWeek.week, currentWeek.weekCount || 12, injury);
-  const quality = useRunWalk
-    ? `${runWalk.title}：${runWalk.work}`
-    : isHalf && currentWeek.phase === "打底"
-      ? `坡跑 6 組 × 60 秒，上坡穩定出力、下坡走回恢復；前後各慢跑 10 分鐘`
-      : isHalf && currentWeek.phase === "專項"
-        ? `半馬目標配速 3 × 8 分鐘，組間慢跑 3 分鐘，控制在 ${tempoRange}`
-    : injury === "recovering"
-      ? `有氧穩定跑 20-30 分鐘，${easyRange}`
-      : level === "advanced" && priority === "pb" && intensity === "push"
-        ? `間歇 4-6 組，${intervalRange}`
-        : priority === "habit"
-          ? `漸進跑 20 分鐘，最後 5 分鐘接近 ${tempoRange}`
-          : `節奏跑 ${isCautious ? "12-18" : "15-25"} 分鐘，${tempoRange}`;
+  const { recoveryRange, easyRange, steadyRange, tempoRange, intervalRange, longRange, marathonRange } = paceProfile;
+  const qualityMode = adjustment?.qualityMode || "keep";
   const recovery = "伸展、活動度或完整休息";
   const support = isHalf
     ? `${supportWorkoutFor(priority, injury)} 可用騎車、游泳或快走替代一堂恢復跑，降低衝擊。`
     : supportWorkoutFor(priority, injury);
   const easyKm = Math.max(3, Math.round((currentWeek.weeklyKm - currentWeek.longRunKm) / Math.max(2, dayCount - 1)));
+  const mediumKm = clampNumber(Math.round(currentWeek.longRunKm * 0.7), 5, Math.max(6, currentWeek.longRunKm - 2));
+  const shortTempoMinutes = isCautious || readiness === "busy" ? "12-18" : "20-30";
+  const longProgression = goalProfile.distanceKm >= 21 && currentWeek.phase === "專項" && injury === "none" && readiness !== "tired"
+    ? `${currentWeek.longRunKm}km，前段 ${longRange}，最後 20-30 分鐘逐步收到 ${steadyRange}`
+    : `${currentWeek.longRunKm}km，${longRange}`;
+  const baseQuality = useRunWalk
+    ? `${runWalk.title}：${runWalk.work}`
+    : injury === "recovering"
+      ? `有氧穩定跑 20-30 分鐘，${easyRange}`
+      : isHalf && currentWeek.phase === "打底"
+        ? `坡跑 6-8 組 × 60 秒，上坡穩定出力；前後各慢跑 10 分鐘，恢復段維持 ${recoveryRange}`
+        : isHalf && currentWeek.phase === "專項"
+          ? `半馬專項 3 × 10 分鐘，控制在 ${tempoRange}；組間慢跑 3 分鐘`
+          : goalProfile.distanceKm >= 42 && currentWeek.phase === "專項"
+            ? `全馬配速段 2 × 15 分鐘，控制在 ${marathonRange}；組間慢跑 5 分鐘`
+            : level === "advanced" && priority === "pb" && intensity === "push" && readiness !== "busy"
+              ? `Cruise intervals 4-5 × 1km，控制在 ${intervalRange}；每趟慢跑 90 秒恢復`
+              : priority === "habit"
+                ? `漸進跑 20 分鐘，最後 5-8 分鐘收進 ${steadyRange}`
+                : `節奏跑 ${shortTempoMinutes}，控制在 ${tempoRange}`;
+  const quality = useRunWalk
+    ? baseQuality
+    : qualityMode === "remove"
+      ? `改恢復跑 25-40 分鐘，控制在 ${easyRange}；若腿部仍不舒服就改休息`
+      : qualityMode === "reduced"
+        ? `縮短版重點課：15-20 分鐘穩定跑，控制在 ${steadyRange}，全程保留餘裕`
+        : baseQuality;
 
   if (dayCount <= 3) {
     return [
       { day: "第 1 跑", type: useRunWalk ? "跑走" : "輕鬆", work: useRunWalk ? quality : `${easyKm}km，${easyRange}` },
       { day: "第 2 跑", type: useRunWalk ? "輕鬆" : "重點", work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
-      { day: longRunLabel, type: "長跑", work: useRunWalk ? `跑走長課 ${Math.max(30, currentWeek.longRunKm * 7)} 分鐘，跑段全程可聊天` : `${currentWeek.longRunKm}km，${longRange}` },
+      { day: longRunLabel, type: "長跑", work: useRunWalk ? `跑走長課 ${Math.max(30, currentWeek.longRunKm * 7)} 分鐘，跑段全程可聊天` : longProgression },
       { day: "支援日", type: "徒手", work: support },
     ];
   }
 
   const schedule = [
-    { day: "週二", type: useRunWalk ? "跑走" : "輕鬆", work: useRunWalk ? quality : `${easyKm}km，${easyRange}` },
-    { day: "週四", type: useRunWalk ? "輕鬆" : "重點", work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
-    { day: "週五", type: "恢復", work: dayCount >= 4 ? `短恢復跑 25-35 分鐘，${easyRange}` : recovery },
-    { day: longRunLabel, type: "長跑", work: `${currentWeek.longRunKm}km，${longRange}` },
+    { day: "週二", type: useRunWalk ? "跑走" : "恢復", work: useRunWalk ? quality : `恢復跑 ${Math.max(4, easyKm - 1)}km，${recoveryRange}` },
+    { day: "週四", type: useRunWalk ? "輕鬆" : (qualityMode === "remove" ? "恢復" : "重點"), work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
+    { day: "週五", type: goalProfile.distanceKm >= 21 ? "中長跑" : "恢復", work: dayCount >= 4 ? (goalProfile.distanceKm >= 21 ? `${mediumKm}-${mediumKm + 2}km 穩定跑，控制在 ${qualityMode === "remove" ? easyRange : steadyRange}` : `短恢復跑 25-35 分鐘，${easyRange}`) : recovery },
+    { day: longRunLabel, type: "長跑", work: longProgression },
     { day: "支援日", type: "徒手", work: support },
   ];
 
   if (dayCount >= 5) {
-    schedule.splice(1, 0, { day: "週三", type: "補量", work: `${Math.max(3, easyKm - 1)}km 輕鬆跑或跑走，${easyRange}` });
+    schedule.splice(1, 0, { day: "週三", type: "補量", work: `${Math.max(4, easyKm)}km 輕鬆跑或跑走，${easyRange}` });
   }
 
   return schedule;
@@ -2490,18 +2810,26 @@ function buildPlan(profileInput) {
     ? finishSeconds / goalProfile.distanceKm
     : inputPace || goalProfile.defaultPace;
   const targetFinish = finishSeconds || racePace * goalProfile.distanceKm;
-  const easyRange = paceRange(racePace, 55, 90);
-  const longRange = paceRange(racePace, 40, 75);
-  const tempoRange = paceRange(racePace, 5, 20);
-  const intervalRange = paceRange(racePace, -30, -10);
-  const targets = goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority, safeExperience, safeIntensity, safeInjury);
+  const paceProfile = buildPaceProfile(
+    goalProfile,
+    racePace,
+    weeklyKm,
+    longRunKm,
+    level,
+    safeExperience,
+    safeReadiness,
+    safeInjury,
+    priority,
+    safeIntensity,
+  );
+  const targets = goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority, safeExperience, safeIntensity, safeInjury, safeReadiness, weekCount);
   const weeklyBlocks = buildWeeklyBlocks(weekCount, targets, goalProfile);
   const selectedWeek = clampNumber(Number(selectedWeekInput) || 1, 1, weekCount);
   const currentWeek = weeklyBlocks[selectedWeek - 1];
   const usesRunWalk = shouldUseRunWalk(level, safeExperience, priority, safeInjury);
   const runWalkStage = runWalkStageForWeek(selectedWeek, weekCount, safeInjury);
   const usesHalfStrategy = isHalfMarathonGoal(goalProfile);
-  const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, easyRange, tempoRange, intervalRange, longRange, safeLongRunDay, safeIntensity, safeInjury, safeExperience, goalProfile);
+  const schedule = buildTrainingSchedule(dayCount, level, priority, currentWeek, paceProfile, safeLongRunDay, safeIntensity, safeInjury, safeExperience, safeReadiness, goalProfile);
   const riskNotes = buildRiskNotes(goalProfile, level, dayCount, weekCount, weeklyKm, longRunKm, priority, safeExperience, safeInjury, safeIntensity);
   const progression = buildProgression(weekCount, raceWindow);
 
@@ -2516,11 +2844,16 @@ function buildPlan(profileInput) {
     progression,
     weekCount,
     racePace,
+    trainingRacePace: paceProfile.trainingRacePace,
     targetFinish,
-    easyRange,
-    longRange,
-    tempoRange,
-    intervalRange,
+    recoveryRange: paceProfile.recoveryRange,
+    easyRange: paceProfile.easyRange,
+    steadyRange: paceProfile.steadyRange,
+    longRange: paceProfile.longRange,
+    tempoRange: paceProfile.tempoRange,
+    intervalRange: paceProfile.intervalRange,
+    marathonRange: paceProfile.marathonRange,
+    paceProfile,
     raceWindow,
     raceDateInput,
     dayCount,
@@ -2568,6 +2901,9 @@ function buildCoachInsights(plan) {
   } else {
     strengths.push("長跑比例尚可，課表壓力不會全部集中在單日。");
   }
+  if (plan.goalProfile.distanceKm >= 21 && plan.dayCount >= 4) {
+    strengths.push("課表已保留中長跑位置，耐力不會只靠單次長跑硬撐。");
+  }
 
   if (plan.injury === "recovering") {
     risks.push("剛恢復訓練時先取消間歇，連續兩週無痛再恢復節奏跑。");
@@ -2604,13 +2940,20 @@ function buildCoachInsights(plan) {
     strengths.push("半馬課表已把長跑、慢跑比例、坡跑與賽前減量拆開，不只看單次配速。");
     nextActions.push("半馬長跑不要每週硬衝；賽前 2-3 週到高峰後就開始保留體力。");
   }
+  if (plan.paceProfile.conservativeOffset >= 12) {
+    risks.push("目前訓練配速已刻意放保守，代表目標能力和現在可吸收的刺激還有落差。");
+    nextActions.push("先把恢復跑與中長跑完成度拉穩，再逐步把節奏跑收進目標配速附近。");
+    score -= 6;
+  } else {
+    strengths.push("訓練配速和目標能力差距不大，適合加入更明確的專項課。");
+  }
   if (plan.raceWindow && plan.raceWindow.days <= 21) {
     risks.push("距離目標賽事很近，現在重點是維持手感與恢復，不適合大幅增加跑量。");
     score -= 6;
   }
 
   nextActions.push(`本週先完成第 ${plan.selectedWeek} 週課表，重點是 ${plan.currentWeek.focus}。`);
-  nextActions.push(`長跑控制在 ${plan.longRange}，跑完隔天若疲勞超過 24 小時，下週跑量降 10%。`);
+  nextActions.push(`長跑控制在 ${plan.longRange}，跑完隔天若疲勞超過 24 小時，下週先降 10-15% 跑量。`);
 
   const finalScore = clampNumber(Math.round(score), 35, 96);
   const status = finalScore >= 82 ? "穩定推進" : finalScore >= 65 ? "保守調整" : "先降載";
@@ -2654,15 +2997,14 @@ function buildPlanCalendar(plan) {
       els.planLevel?.value,
       plan.priority,
       week,
-      plan.easyRange,
-      plan.tempoRange,
-      plan.intervalRange,
-      plan.longRange,
+      plan.paceProfile,
       plan.longRunDay,
       plan.intensity,
       plan.injury,
       plan.experience,
+      plan.readiness,
       plan.goalProfile,
+      null,
     );
     schedule.forEach((item, itemIndex) => {
       const date = new Date(weekStart.getTime() + itemIndex * 86400000);
@@ -2699,15 +3041,14 @@ function buildGarminGuide(plan) {
       els.planLevel?.value,
       plan.priority,
       week,
-      plan.easyRange,
-      plan.tempoRange,
-      plan.intervalRange,
-      plan.longRange,
+      plan.paceProfile,
       plan.longRunDay,
       plan.intensity,
       plan.injury,
       plan.experience,
+      plan.readiness,
       plan.goalProfile,
+      null,
     );
     rows.push(`第 ${week.week} 週｜${week.phase}｜${week.weeklyKm} km｜長跑 ${week.longRunKm} km`);
     schedule.forEach((item) => rows.push(`- ${item.day} ${item.type}：${item.work}`));
@@ -2755,11 +3096,16 @@ function renderPlan() {
     progression,
     weekCount,
     racePace,
+    trainingRacePace,
     targetFinish,
+    recoveryRange,
     easyRange,
+    steadyRange,
     longRange,
     tempoRange,
     intervalRange,
+    marathonRange,
+    paceProfile,
     raceWindow,
     dayCount,
     longRunDay,
@@ -2778,12 +3124,13 @@ function renderPlan() {
   state.planWeek = selectedWeek;
   const progressSignature = planProgressSignature(plan);
   const completedWeeks = loadPlanProgress(progressSignature);
+  const feedbackEntries = loadPlanFeedback(progressSignature);
   const selectedWeekDone = completedWeeks.has(selectedWeek);
   const completedCount = completedWeeks.size;
   const completionPercent = Math.round((completedCount / Math.max(weekCount, 1)) * 100);
-  const adjustment = weekAdjustmentFor(plan, completedWeeks);
+  const adjustment = weekAdjustmentFor(plan, completedWeeks, feedbackEntries);
   const displayWeek = adjustedTrainingWeek(currentWeek, adjustment);
-  const displaySchedule = buildTrainingSchedule(dayCount, els.planLevel?.value, priority, displayWeek, easyRange, tempoRange, intervalRange, longRange, longRunDay, intensity, injury, experience, goalProfile);
+  const displaySchedule = buildTrainingSchedule(dayCount, els.planLevel?.value, priority, displayWeek, paceProfile, longRunDay, intensity, injury, experience, readiness, goalProfile, adjustment);
 
   const priorityLabel = {
     finish: "穩定完賽",
@@ -2807,7 +3154,8 @@ function renderPlan() {
       </div>
       <dl>
         <div><dt>完賽</dt><dd>${escapeHtml(formatDuration(targetFinish))}</dd></div>
-        <div><dt>比賽配速</dt><dd>${escapeHtml(formatPace(racePace))}</dd></div>
+        <div><dt>目標配速</dt><dd>${escapeHtml(formatPace(racePace))}</dd></div>
+        <div><dt>訓練基準</dt><dd>${escapeHtml(formatPace(trainingRacePace))}</dd></div>
         <div><dt>目標</dt><dd>${escapeHtml(priorityLabel)}</dd></div>
       </dl>
     </div>
@@ -2827,14 +3175,17 @@ function renderPlan() {
       <div><span>強度</span><strong>${escapeHtml(intensityLabel)}</strong></div>
     </div>
     <div class="pace-zones">
+      <div><span>恢復跑</span><strong>${escapeHtml(recoveryRange)}</strong></div>
       <div><span>輕鬆跑</span><strong>${escapeHtml(easyRange)}</strong></div>
+      <div><span>穩定跑</span><strong>${escapeHtml(steadyRange)}</strong></div>
       <div><span>節奏跑</span><strong>${escapeHtml(tempoRange)}</strong></div>
       <div><span>間歇</span><strong>${escapeHtml(intervalRange)}</strong></div>
       <div><span>長跑</span><strong>${escapeHtml(longRange)}</strong></div>
+      ${goalProfile.distanceKm >= 21 ? `<div><span>目標配速段</span><strong>${escapeHtml(marathonRange)}</strong></div>` : ""}
     </div>
     <div class="plan-note">
       <strong>${escapeHtml(goalProfile.focus)}</strong>
-      <p>${escapeHtml(progression)} 依照 ${escapeHtml(experienceLabel)}、${escapeHtml(injuryLabel)}、${escapeHtml(intensityLabel)} 調整跑量與強度。${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
+      <p>${escapeHtml(progression)} 依照 ${escapeHtml(experienceLabel)}、${escapeHtml(injuryLabel)}、${escapeHtml(intensityLabel)} 調整跑量與強度。${escapeHtml(paceProfile.source)}${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
     </div>
     ${usesRunWalk ? `
       <div class="plan-method-card">
@@ -2876,6 +3227,16 @@ function renderPlan() {
       <button class="${selectedWeekDone ? "active" : ""}" type="button" data-toggle-week-complete>
         ${selectedWeekDone ? "取消本週完成" : "標記本週完成"}
       </button>
+    </div>
+    <div class="plan-adjustment-panel">
+      <strong>這週自動調整</strong>
+      <p>${escapeHtml(adjustment.note)}</p>
+      <div class="plan-adjustment-metrics">
+        <div><span>調整來源</span><strong>${escapeHtml(adjustment.source === "feedback" ? `第 ${adjustment.previousWeek} 週回饋` : adjustment.source === "completion" ? "完成標記" : "初始週" )}</strong></div>
+        <div><span>總量倍率</span><strong>${escapeHtml(`${Math.round((adjustment.factor || 1) * 100)}%`)}</strong></div>
+        <div><span>長跑倍率</span><strong>${escapeHtml(`${Math.round((adjustment.longRunFactor || adjustment.factor || 1) * 100)}%`)}</strong></div>
+        <div><span>品質課</span><strong>${escapeHtml(adjustment.qualityMode === "remove" ? "取消改恢復" : adjustment.qualityMode === "reduced" ? "保留但縮短" : "照常保留")}</strong></div>
+      </div>
     </div>
     <div class="plan-week-title">
       <span>第 ${escapeHtml(selectedWeek)} 週執行課表</span>
@@ -2966,6 +3327,7 @@ function renderPlan() {
       }
     });
   });
+  updatePlanFeedbackForm(plan, feedbackEntries, adjustment);
 }
 
 function setActiveButtons(buttons, dataKey, value) {
@@ -3555,6 +3917,11 @@ function bindEvents() {
       });
     });
   }
+  els.planFeedbackSave?.addEventListener("click", savePlanFeedbackFromForm);
+  els.planFeedbackClear?.addEventListener("click", clearPlanFeedbackFromForm);
+  els.planFeedbackWeek?.addEventListener("change", () => {
+    renderPlan();
+  });
 }
 
 async function loadRaces() {

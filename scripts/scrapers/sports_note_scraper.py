@@ -3,6 +3,8 @@
 import re
 import time
 import logging
+import json
+import subprocess
 from dataclasses import dataclass, field
 from urllib.parse import quote, urljoin, urlparse
 
@@ -23,6 +25,7 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://running.biji.co"
 SOURCE_NAME = SOURCES["sports_note"]["name"]
 SOURCE_URL = SOURCES["sports_note"]["url"]
+RENDER_BIJI_SCRIPT = Path(__file__).resolve().parents[1] / "render-biji-page.mjs"
 
 
 @dataclass
@@ -145,6 +148,39 @@ def _extract_registration_dates(text: str, race_date: str) -> tuple[str, str]:
     return opens_at, deadline
 
 
+def _extract_rendered_biji_details(url: str, race_date: str = "") -> dict:
+    """Use a real browser to read dynamic SportsNote pages when plain HTTP is incomplete."""
+    if not url or not RENDER_BIJI_SCRIPT.exists():
+        return {}
+    try:
+        completed = subprocess.run(
+            [
+                "node",
+                str(RENDER_BIJI_SCRIPT),
+                "--url",
+                url,
+                "--race-date",
+                race_date or "",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=60,
+        )
+    except (subprocess.SubprocessError, OSError) as error:
+        logger.debug("Rendered SportsNote extraction failed %s: %s", url, error)
+        return {}
+
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        logger.debug("Rendered SportsNote extraction returned invalid JSON for %s", url)
+        return {}
+
+    return payload if isinstance(payload, dict) else {}
+
+
 def _normalize_county(raw: str) -> str:
     """Normalize county names to traditional Chinese."""
     mapping = {
@@ -188,7 +224,26 @@ def _extract_source_registration_link(item_soup, cid: str) -> str:
 
 def _is_running_biji_url(url: str) -> bool:
     host = urlparse(url).netloc.lower()
-    return host.endswith("running.biji.co") or host.endswith("biji.co")
+    return host in {"running.biji.co", "www.running.biji.co"}
+
+
+def _is_generic_registration_link(url: str) -> bool:
+    parsed = urlparse(url)
+    host = parsed.netloc.lower()
+    path = parsed.path.rstrip("/").lower()
+    if not host:
+        return True
+    if host.endswith("google.com") and "/calendar/event" in path:
+        return True
+    if host == "irunner.biji.co":
+        return path in {"", "/irunner", "/list"}
+    if host == "signup.lohasnet.tw":
+        return path in {"", "/", "/member", "/event/score"}
+    if host == "lohasnet.tw":
+        return path in {"", "/", "/#/inquiry"}
+    if host == "www.focusline.com.tw":
+        return path in {"", "/"}
+    return False
 
 
 def _is_ignored_external_url(url: str) -> bool:
@@ -314,6 +369,7 @@ def _extract_official_registration_link(
         return "", f"{fetch_error or '賽事詳情頁讀取失敗'}，待人工補報名連結"
 
     candidates: list[str] = []
+    preferred: list[str] = []
 
     for a in soup.select("a[href]"):
         href = a.get("href", "").strip()
@@ -322,12 +378,20 @@ def _extract_official_registration_link(
         absolute = urljoin(detail_url, href)
         if _is_running_biji_url(absolute):
             continue
+        if _is_generic_registration_link(absolute):
+            continue
         if _is_ignored_external_url(absolute):
             continue
         text = a.get_text(" ", strip=True)
         if _looks_like_registration_link(text, absolute):
-            candidates.append(absolute)
+            if absolute not in candidates:
+                candidates.append(absolute)
+            lower_url = absolute.lower()
+            if any(token in lower_url for token in ("signup", "register", "step1", "personal", "entry")) and absolute not in preferred:
+                preferred.append(absolute)
 
+    if preferred:
+        return preferred[0], ""
     if candidates:
         return candidates[0], ""
 
@@ -352,6 +416,46 @@ def _extract_official_event_url(detail_url: str, soup: BeautifulSoup | None) -> 
             candidates.append(absolute)
 
     return candidates[0] if candidates else ""
+
+
+def _merge_rendered_fallback(
+    *,
+    detail_url: str,
+    source_reg_link: str,
+    race_date: str,
+    official_reg_link: str,
+    opens_at: str,
+    deadline: str,
+) -> tuple[str, str, str]:
+    """Fallback to browser-rendered SportsNote pages for dynamic content."""
+    rendered_sources = [detail_url]
+    if source_reg_link and source_reg_link not in rendered_sources:
+        rendered_sources.append(source_reg_link)
+
+    next_reg_link = official_reg_link
+    next_opens_at = opens_at
+    next_deadline = deadline
+
+    for rendered_url in rendered_sources:
+        payload = _extract_rendered_biji_details(rendered_url, race_date)
+        if not payload:
+            continue
+        if payload.get("auth_required"):
+            logger.debug("Rendered SportsNote page requires auth: %s -> %s", rendered_url, payload.get("final_url"))
+            continue
+        rendered_link = str(payload.get("registration_link", "")).strip()
+        if rendered_link and not next_reg_link and not _is_running_biji_url(rendered_link) and not _is_generic_registration_link(rendered_link):
+            next_reg_link = rendered_link
+        rendered_opens_at = str(payload.get("registration_opens_at", "")).strip()
+        rendered_deadline = str(payload.get("registration_deadline", "")).strip()
+        if rendered_opens_at and not next_opens_at:
+            next_opens_at = rendered_opens_at
+        if rendered_deadline and not next_deadline:
+            next_deadline = rendered_deadline
+        if next_reg_link and next_opens_at and next_deadline:
+            break
+
+    return next_reg_link, next_opens_at, next_deadline
 
 
 def scrape() -> list[dict]:
@@ -433,6 +537,15 @@ def scrape() -> list[dict]:
         official_event_url = _extract_official_event_url(detail_url, detail_soup)
         detail_text = detail_soup.get_text(" ", strip=True) if detail_soup else ""
         opens_at, deadline = _extract_registration_dates(detail_text, race_date)
+        if not official_reg_link or not opens_at or not deadline:
+            official_reg_link, opens_at, deadline = _merge_rendered_fallback(
+                detail_url=detail_url,
+                source_reg_link=source_reg_link,
+                race_date=race_date,
+                official_reg_link=official_reg_link,
+                opens_at=opens_at,
+                deadline=deadline,
+            )
         if facebook_links and (not opens_at or not deadline):
             facebook_text = _fetch_facebook_text(facebook_links, session)
             fb_opens_at, fb_deadline = _extract_registration_dates(facebook_text, race_date)

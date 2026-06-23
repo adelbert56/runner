@@ -109,9 +109,44 @@ function isSourceLink(url) {
   }
 }
 
+function isGenericRegistrationLink(url) {
+  if (!hasText(url)) {
+    return true;
+  }
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.replace(/\/+$/, "").toLowerCase();
+    if (host === "irunner.biji.co") {
+      return path === "" || path === "/irunner" || path === "/list";
+    }
+    if (host === "signup.lohasnet.tw") {
+      return path === "" || path === "/" || path === "/member" || path === "/event/score";
+    }
+    if (host === "lohasnet.tw") {
+      return path === "" || path === "/";
+    }
+    if (host === "www.focusline.com.tw") {
+      return path === "" || path === "/";
+    }
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+function getOfficialLinkCandidate(race) {
+  for (const value of [race.registration_link, race.official_event_url]) {
+    const link = value || "";
+    if (hasText(link) && !isSourceLink(link) && !isGenericRegistrationLink(link)) {
+      return link;
+    }
+  }
+  return "";
+}
+
 function getOfficialRegistrationLink(race) {
-  const link = race.registration_link || "";
-  return hasText(link) && !isSourceLink(link) ? link : "";
+  return getOfficialLinkCandidate(race);
 }
 
 function isOfficialDirect(race) {
@@ -130,6 +165,29 @@ function isCancelledRace(race) {
     race.verification_note,
   ].filter(hasText).join(" ");
   return /停辦|停賽|取消|被迫取消|cancel/i.test(text);
+}
+
+function effectiveRegistrationStatus(race, todayText = TODAY) {
+  if (isCancelledRace(race)) {
+    return race.registration_status || "停辦";
+  }
+  const today = parseDate(todayText);
+  const raceDate = parseDate(race.race_date);
+  const opensAt = parseDate(race.registration_opens_at);
+  const deadline = parseDate(race.registration_deadline);
+  if (raceDate && daysBetween(today, raceDate) < 0) {
+    return race.registration_status || "賽事已過";
+  }
+  if (deadline && daysBetween(today, deadline) < 0) {
+    return "已截止";
+  }
+  if (opensAt && daysBetween(today, opensAt) > 0) {
+    return "尚未開報";
+  }
+  if (opensAt && deadline && daysBetween(opensAt, today) >= 0 && daysBetween(today, deadline) >= 0) {
+    return "報名中";
+  }
+  return race.registration_status || "待確認";
 }
 
 function registrationDateAnomalies(race) {
@@ -570,7 +628,7 @@ function buildQueueItem(race) {
     race_county: race.race_county || "",
     registration_opens_at: race.registration_opens_at || "",
     registration_deadline: race.registration_deadline || "",
-    registration_status: race.registration_status || "",
+    registration_status: effectiveRegistrationStatus(race),
     source_platform: race.source_platform || race.source || "",
     is_official_direct: isOfficialDirect(race),
     priority_score: priorityScore(missing),

@@ -420,5 +420,81 @@
     "quota": "依報名項目上限。",
     "verified_at": "2026-05-15",
     "verification_note": "EventGo 活動頁整理伊貝特報名資訊，顯示地點、報名起訖、費用與限額說明。"
+  },
+  {
+    "race_name": "第一屆樂敗國際精品路跑",
+    "race_date": "2026-10-11",
+    "registration_link": "https://irunner.biji.co/2026Lovebuy",
+    "official_event_url": "https://irunner.biji.co/2026Lovebuy",
+    "registration_note": "人工補登：依使用者提供之 iRunner 官方報名頁連結校正。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供官方報名頁。"
+  },
+  {
+    "race_name": "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場",
+    "race_date": "2026-10-25",
+    "registration_link": "https://irunner.biji.co/2026SpongeBob-TXG",
+    "official_event_url": "https://irunner.biji.co/2026SpongeBob-TXG",
+    "registration_note": "人工補登：依使用者提供之 iRunner 官方報名頁連結校正。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供官方報名頁。"
+  },
+  {
+    "race_name": "2026母子鱷魚40週年-突破前行馬拉松",
+    "race_date": "2026-12-13",
+    "registration_link": "https://lohasnet.tw/BNM40thMarathon2026/",
+    "official_event_url": "https://lohasnet.tw/BNM40thMarathon2026/",
+    "registration_note": "人工補登：依使用者提供之 Lohas 官方活動頁連結校正。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供官方報名頁。"
+  },
+  {
+    "race_name": "仁愛長庚合作聯盟醫院2026永慶盃路跑",
+    "race_date": "2026-09-20",
+    "registration_link": "https://www.ctrun.com.tw/Activity/?EventMain_ID=239&Article_ID=6745",
+    "official_event_url": "https://www.ctrun.com.tw/Activity/?EventMain_ID=239&Article_ID=6745",
+    "registration_opens_at": "2026-06-15",
+    "registration_deadline": "2026-08-04",
+    "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正，並依使用者提供之運動筆記報名頁截圖補回報名起訖日期。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供 CTRun 官方活動頁與運動筆記報名頁截圖。"
+  },
+  {
+    "race_name": "2026公勝盃",
+    "race_date": "2026-10-04",
+    "registration_link": "https://www.ctrun.com.tw/Activity?EventMain_ID=339",
+    "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=339",
+    "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供 CTRun 官方活動頁。"
+  },
+  {
+    "race_name": "2026國聚慵懶跑者聚樂部",
+    "race_date": "2026-11-15",
+    "registration_link": "https://www.ctrun.com.tw/Activity/?EventMain_ID=308",
+    "official_event_url": "https://www.ctrun.com.tw/Activity/?EventMain_ID=308",
+    "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供 CTRun 官方活動頁。"
+  },
+  {
+    "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
+    "race_date": "2026-10-25",
+    "official_event_url": "https://lohasnet.tw/YuanLinLionsClub2026/",
+    "registration_note": "人工補登：依使用者提供之 Lohas 官方活動頁連結校正。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供 Lohas 官方活動頁。"
+  },
+  {
+    "race_name": "2026第二屆食安盃馬拉松",
+    "race_date": "2026-12-19",
+    "registration_link": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
+    "official_event_url": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
+    "registration_status": "報名中",
+    "registration_opens_at": "2026-06-11",
+    "registration_deadline": "2026-09-19",
+    "registration_note": "人工補登：依使用者提供之 iRunner 官方報名頁連結校正。",
+    "verified_at": "2026-06-23",
+    "verification_note": "使用者提供 iRunner 官方報名頁。"
   }
 ]

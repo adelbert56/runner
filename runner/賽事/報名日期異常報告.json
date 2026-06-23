@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "race_id": "b861d413-e83b-476d-a325-47c41b83f3ff",
+    "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
+    "race_date": "2026-10-25",
+    "race_county": "彰化縣",
+    "registration_opens_at": "",
+    "registration_deadline": "2026-10-25",
+    "registration_link": "https://signup.lohasnet.tw/signup/4261",
+    "official_event_url": "https://lohasnet.tw/YuanLinLionsClub2026/",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13075&subtitle=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E+2026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
+    "anomalies": [
+      {
+        "key": "deadline_equals_race_date",
+        "label": "截止日等於賽事日",
+        "hint": "常見原因是把賽事日期誤存成報名截止日；請回官方頁確認報名期間。"
+      }
+    ]
+  }
+]

@@ -3614,6 +3614,63 @@ h3 {
   color: var(--muted);
 }
 
+.plan-adjustment-panel,
+.plan-feedback-card {
+  margin: 14px 0 16px;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.plan-adjustment-panel {
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(16, 185, 129, 0.06)),
+    #f8fbff;
+}
+
+.plan-adjustment-panel strong,
+.plan-feedback-card h3 {
+  color: var(--ink);
+}
+
+.plan-adjustment-panel p,
+.plan-feedback-status {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.plan-adjustment-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.plan-adjustment-metrics div {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(191, 219, 254, 0.9);
+}
+
+.plan-adjustment-metrics span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.plan-adjustment-metrics strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 1rem;
+}
+
+.plan-feedback-card {
+  border: 1px solid rgba(21, 83, 56, 0.14);
+  background: rgba(255, 255, 255, 0.9);
+}
+
 .coach-panel {
   display: grid;
   gap: 14px;

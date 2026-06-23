@@ -67,14 +67,35 @@ function isCancelledRace(race) {
 }
 
 function isOfficialDirect(race) {
-  if (!hasText(race.registration_link)) {
-    return false;
+  for (const candidate of [race.registration_link, race.official_event_url]) {
+    if (!hasText(candidate)) {
+      continue;
+    }
+    try {
+      const url = new URL(candidate);
+      const host = url.hostname.toLowerCase();
+      const path = url.pathname.replace(/\/+$/, "").toLowerCase();
+      if (host.endsWith("running.biji.co")) {
+        continue;
+      }
+      if (host === "irunner.biji.co") {
+        return path !== "" && path !== "/irunner" && path !== "/list";
+      }
+      if (host === "signup.lohasnet.tw") {
+        return path !== "" && path !== "/" && path !== "/member" && path !== "/event/score";
+      }
+      if (host === "lohasnet.tw") {
+        return path !== "" && path !== "/";
+      }
+      if (host === "www.focusline.com.tw") {
+        return path !== "" && path !== "/";
+      }
+      return true;
+    } catch {
+      continue;
+    }
   }
-  try {
-    return !new URL(race.registration_link).hostname.toLowerCase().endsWith("running.biji.co");
-  } catch {
-    return false;
-  }
+  return false;
 }
 
 function hostFromUrl(url) {

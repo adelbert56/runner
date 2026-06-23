@@ -30,12 +30,69 @@ def absolute_url(url: str, base_url: str) -> str:
     return url if url.startswith(("http://", "https://")) else urljoin(base_url, url)
 
 
+def is_running_biji_url(url: str) -> bool:
+    host = host_of(url)
+    return host == "running.biji.co" or host == "www.running.biji.co"
+
+
+def is_generic_registration_link(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return True
+    host = parsed.netloc.lower()
+    path = parsed.path.rstrip("/").lower()
+    if not host:
+        return True
+    if host.endswith("google.com") and "/calendar/event" in path:
+        return True
+    if host == "irunner.biji.co":
+        return path in {"", "/irunner", "/list"}
+    if host == "signup.lohasnet.tw":
+        return path in {"", "/", "/member", "/event/score"}
+    if host == "lohasnet.tw":
+        return path in {"", "/", "/#/inquiry"}
+    if host == "www.focusline.com.tw":
+        return path in {"", "/"}
+    return False
+
+
 def compact_text(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip(" ：:　\t\r\n")
 
 
 def soup_from_html(html: str) -> BeautifulSoup:
     return BeautifulSoup(html, "html.parser")
+
+
+def extract_registration_link(html: str, base_url: str) -> str:
+    soup = soup_from_html(html)
+    keywords = ("報名", "我要報名", "立即報名", "線上報名", "signup", "register", "registration")
+    preferred_tokens = ("signup", "register", "reg", "personal", "step1", "entry")
+    candidates: list[str] = []
+    preferred: list[str] = []
+
+    for anchor in soup.select("a[href]"):
+        href = anchor.get("href", "").strip()
+        if not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
+            continue
+        absolute = absolute_url(href, base_url)
+        if is_running_biji_url(absolute):
+            continue
+        if is_generic_registration_link(absolute):
+            continue
+        text = compact_text(anchor.get_text(" ", strip=True)).lower()
+        target = f"{text} {absolute.lower()}"
+        if not any(keyword in target for keyword in keywords):
+            continue
+        if absolute not in candidates:
+            candidates.append(absolute)
+        if any(token in absolute.lower() for token in preferred_tokens) and absolute not in preferred:
+            preferred.append(absolute)
+
+    if preferred:
+        return preferred[0]
+    return candidates[0] if candidates else ""
 
 
 def compact_lines(html: str) -> list[str]:
@@ -382,8 +439,6 @@ def extract_start_times(lines: list[str]) -> str:
 
 def status_from_text(text: str) -> str:
     snippet = compact_text(text[:4000])
-    if any(keyword in snippet for keyword in ("停辦", "停賽", "取消辦理", "取消停辦")):
-        return "停辦"
     if "額滿" in snippet:
         return "已截止"
     if any(keyword in snippet for keyword in ("報名中", "開放報名", "立即報名", "我要報名")):
@@ -393,11 +448,49 @@ def status_from_text(text: str) -> str:
     return ""
 
 
-def generic_extract(html: str, race: dict) -> dict:
+def cancellation_notice(lines: list[str]) -> str:
+    explicit_phrases = ("停辦", "停賽", "取消辦理", "取消停辦", "活動取消", "賽事取消", "取消賽事", "取消活動")
+    conditional_markers = ("如遇", "若遇", "有權決定是否取消", "得取消", "宣布停止上課", "延期", "擇期", "改用其他替代路線")
+    generic_reject_markers = (
+        "違反下列規定者",
+        "取消活動成績",
+        "停辦資訊",
+        "停辦賽事",
+        "因不可抗力因素停辦",
+        "若為主辦單位之因素停辦",
+        "延期或停辦",
+        "活動延期或停辦",
+        "停辦（或延辦）",
+        "停辦(或延辦)",
+        "暫停賽",
+        "停賽指示",
+        "為什麼賽事延期或停辦",
+        "拿不到錢",
+        "安心退費",
+        "退費",
+    )
+    for line in lines:
+        snippet = compact_text(line)
+        if not snippet:
+            continue
+        if any(marker in snippet for marker in conditional_markers):
+            continue
+        if any(marker in snippet for marker in generic_reject_markers):
+            continue
+        if re.match(r"^(停辦公告|停賽公告|活動停辦|賽事停辦|活動取消|賽事取消|\(?停辦\)?|\(?停賽\)?)", snippet):
+            return snippet
+        if any(keyword in snippet for keyword in explicit_phrases) and len(snippet) <= 80:
+            return snippet
+    return ""
+
+
+def generic_extract(html: str, race: dict, source_url: str = "") -> dict:
     lines = compact_lines(html)
     text = " ".join(lines)
     opens_at, deadline = extract_registration_dates(text, race.get("race_date", ""))
+    cancel_notice = cancellation_notice(lines)
     return {
+        "registration_link": extract_registration_link(html, race.get("official_event_url", "") or race.get("registration_link", "") or race.get("detail_url", "")),
         "registration_opens_at": opens_at,
         "registration_deadline": deadline,
         "venue": find_label_value(lines, ("活動地點", "會場地點", "集合地點", "起跑地點", "地點")),
@@ -408,6 +501,8 @@ def generic_extract(html: str, race: dict) -> dict:
         "quota": first_quota_text(text),
         "start_times": extract_start_times(lines),
         "registration_status": status_from_text(text),
+        "cancellation_notice": cancel_notice,
+        "cancellation_notice_url": source_url if cancel_notice and source_url else "",
     }
 
 

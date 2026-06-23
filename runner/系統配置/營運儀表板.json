@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-06-22T01:45:10.755Z",
-  "basis_date": "2026-06-22",
+  "generated_at": "2026-06-23T08:30:38.866Z",
+  "basis_date": "2026-06-23",
   "races": {
-    "total": 45,
-    "follow_up_count": 23,
-    "complete_count": 22,
-    "complete_rate": "49%",
-    "launch_blocking_gap_count": 13,
-    "launch_ready_count": 32,
-    "launch_ready_rate": "71%",
-    "official_direct_count": 25,
-    "official_direct_rate": "56%",
-    "verified_count": 45,
+    "total": 41,
+    "follow_up_count": 13,
+    "complete_count": 28,
+    "complete_rate": "68%",
+    "launch_blocking_gap_count": 6,
+    "launch_ready_count": 35,
+    "launch_ready_rate": "85%",
+    "official_direct_count": 32,
+    "official_direct_rate": "78%",
+    "verified_count": 41,
     "verified_rate": "100%",
-    "opened_gap_count": 9,
+    "opened_gap_count": 0,
     "date_anomaly_count": 0,
-    "due_now_count": 13,
-    "monthly_tracking_count": 6,
+    "due_now_count": 6,
+    "monthly_tracking_count": 5,
     "state_counts": {
       "歷史": 2,
       "停辦": 2,
-      "已截止": 10,
-      "報名中": 18,
-      "報名時間未定": 10,
-      "尚未開報": 3
+      "已截止": 9,
+      "報名中": 17,
+      "待確認": 9,
+      "尚未開報": 2
     }
   },
   "content": {
@@ -178,69 +178,69 @@
     ]
   },
   "platform_stability": {
-    "stable_count": 5,
-    "watch_count": 2,
-    "weak_count": 1,
+    "stable_count": 7,
+    "watch_count": 1,
+    "weak_count": 0,
     "items": [
       {
         "platform": "運動筆記",
-        "total": 19,
-        "official_direct": 1,
-        "verified": 19,
-        "missing": 17,
-        "opened_gap": 5,
+        "total": 14,
+        "official_direct": 5,
+        "verified": 14,
+        "missing": 9,
+        "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 8,
+        "due_now": 3,
         "sample_races": [
           "2026 KOF拳皇公益主題路跑",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
           "仁愛長庚合作聯盟醫院2026永慶盃路跑"
         ],
-        "complete_rate": "11%",
-        "official_direct_rate": "5%",
+        "complete_rate": "36%",
+        "official_direct_rate": "36%",
         "verified_rate": "100%",
-        "score": 45,
-        "status": "需補強"
+        "score": 61,
+        "status": "可用需觀察"
       },
       {
         "platform": "iRunner",
-        "total": 6,
-        "official_direct": 6,
-        "verified": 6,
+        "total": 8,
+        "official_direct": 8,
+        "verified": 8,
+        "missing": 2,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 3,
+        "sample_races": [
+          "第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
+          "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
+          "2026東城盃合歡山越野馬拉松"
+        ],
+        "complete_rate": "75%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 91,
+        "status": "穩定"
+      },
+      {
+        "platform": "Lohas",
+        "total": 5,
+        "official_direct": 5,
+        "verified": 5,
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
-          "第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
-          "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
-          "2026東城盃合歡山越野馬拉松"
+          "2026中興新村半程馬拉松-披興戴月的想你",
+          "2026年FUN電多巴胺路跑嘉年華",
+          "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
         ],
         "complete_rate": "100%",
         "official_direct_rate": "100%",
         "verified_rate": "100%",
         "score": 100,
         "status": "穩定"
-      },
-      {
-        "platform": "Lohas",
-        "total": 6,
-        "official_direct": 5,
-        "verified": 6,
-        "missing": 3,
-        "opened_gap": 3,
-        "date_anomaly": 0,
-        "due_now": 3,
-        "sample_races": [
-          "2026中興新村半程馬拉松-披興戴月的想你",
-          "2026年FUN電多巴胺路跑嘉年華",
-          "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
-        ],
-        "complete_rate": "50%",
-        "official_direct_rate": "83%",
-        "verified_rate": "100%",
-        "score": 78,
-        "status": "可用需觀察"
       },
       {
         "platform": "CTRun",
@@ -268,9 +268,9 @@
         "official_direct": 4,
         "verified": 4,
         "missing": 1,
-        "opened_gap": 1,
+        "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 0,
         "sample_races": [
           "2026 BOBDOG RUN(台中場)",
           "2026 松鶴越野",
@@ -290,7 +290,7 @@
         "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 0,
         "sample_races": [
           "2026全台PAPAGO歡樂跑--西湖場",
           "夏日馬拉松 - 苗栗鯉魚潭"
@@ -306,7 +306,7 @@
         "total": 2,
         "official_direct": 2,
         "verified": 2,
-        "missing": 1,
+        "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
@@ -314,16 +314,16 @@
           "2026第九屆幸福龍井活力健康路跑健走",
           "2026浪漫台三線新店老街路跑賽"
         ],
-        "complete_rate": "50%",
+        "complete_rate": "100%",
         "official_direct_rate": "100%",
         "verified_rate": "100%",
-        "score": 83,
+        "score": 100,
         "status": "穩定"
       },
       {
         "platform": "Focusline",
         "total": 2,
-        "official_direct": 1,
+        "official_direct": 2,
         "verified": 2,
         "missing": 1,
         "opened_gap": 0,
@@ -334,10 +334,10 @@
           "2027南投縣仁愛鄉原住民三鐵挑戰賽"
         ],
         "complete_rate": "50%",
-        "official_direct_rate": "50%",
+        "official_direct_rate": "100%",
         "verified_rate": "100%",
-        "score": 70,
-        "status": "可用需觀察"
+        "score": 83,
+        "status": "穩定"
       }
     ]
   }

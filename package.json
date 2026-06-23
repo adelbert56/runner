@@ -17,8 +17,8 @@
     "data:weather": "node scripts/update-race-weather.mjs",
     "data:quality": "node scripts/validate-race-data.mjs",
     "data:quality:strict": "node scripts/validate-race-data.mjs --strict",
-    "data:refresh": "npm run data:apply && npm run data:sync && npm run data:quality",
-    "data:refresh:online": "npm run data:apply && npm run data:enrich:official && npm run data:sync && npm run data:quality",
+    "data:refresh": "npm run data:apply && npm run data:sync && npm run data:quality && npm run announcements:build",
+    "data:refresh:online": "npm run data:apply && npm run data:enrich:official && npm run data:sync && npm run data:quality && npm run announcements:build",
     "content:candidates": "node scripts/collect-content-candidates.mjs",
     "content:publish": "node scripts/publish-content.mjs",
     "content:quality": "node scripts/validate-content-data.mjs",
@@ -31,5 +31,8 @@
   },
   "dependencies": {
     "exceljs": "^4.4.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.61.0"
   }
 }

@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
+    "race_name": "2026公勝盃",
+    "race_date": "2026-10-04",
+    "race_county": "臺中市",
+    "distances": [
+      "10km",
+      "3.5km"
+    ],
+    "start_times": "10公里 起跑 07:00",
+    "registration_link": "https://www.ctrun.com.tw/Activity?EventMain_ID=339",
+    "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=339",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13042&subtitle=2026%E5%85%AC%E5%8B%9D%E7%9B%83",
+    "issues": [
+      {
+        "key": "multi_distance_one_group_time",
+        "severity": "medium",
+        "label": "多距離只抓到一個組別時間",
+        "hint": "組別數少於距離數，可能漏掉活動時序表或競賽資訊表。"
+      }
+    ]
+  },
+  {
+    "race_id": "34b4433b-8832-42e6-a063-1df6c91e8b30",
+    "race_name": "第一屆樂敗國際精品路跑",
+    "race_date": "2026-10-11",
+    "race_county": "臺中市",
+    "distances": [
+      "10km",
+      "6km",
+      "3km"
+    ],
+    "start_times": "健康組（6公里） 起跑 07:45、3公里 起跑 09:30",
+    "registration_link": "https://irunner.biji.co/2026Lovebuy",
+    "official_event_url": "https://irunner.biji.co/2026Lovebuy",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13082&subtitle=%E7%AC%AC%E4%B8%80%E5%B1%86%E6%A8%82%E6%95%97%E5%9C%8B%E9%9A%9B%E7%B2%BE%E5%93%81%E8%B7%AF%E8%B7%91",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：10K、6K、3K；起跑列：健康組（6公里）、3公里"
+      }
+    ]
+  }
+]

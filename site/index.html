@@ -633,6 +633,62 @@
           </form>
 
           <div class="plan-output" id="plan-output" aria-live="polite"></div>
+          <div class="plan-feedback-card" aria-labelledby="plan-feedback-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">第二階段</p>
+                <h3 id="plan-feedback-title">每週回饋直接改寫下週課表</h3>
+                <p class="section-lead">填前一週的完成狀況、跑量、長跑、疼痛與睡眠，系統會自動決定下週是維持、降載還是小幅推進。</p>
+              </div>
+            </div>
+            <div class="plan-field-group compact">
+              <label>
+                <span>回饋哪一週</span>
+                <input id="plan-feedback-week" type="number" min="1" max="20" placeholder="例如 3">
+              </label>
+              <label>
+                <span>本週實際跑量</span>
+                <input id="plan-feedback-km" type="number" min="0" step="0.1" placeholder="例如 26">
+              </label>
+              <label>
+                <span>本週最長跑</span>
+                <input id="plan-feedback-long-run" type="number" min="0" step="0.1" placeholder="例如 12">
+              </label>
+              <label>
+                <span>疼痛程度</span>
+                <select id="plan-feedback-pain">
+                  <option value="0">0 幾乎無感</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10 無法訓練</option>
+                </select>
+              </label>
+              <label>
+                <span>平均睡眠</span>
+                <input id="plan-feedback-sleep" type="number" min="0" max="12" step="0.5" placeholder="例如 6.5">
+              </label>
+              <label>
+                <span>課表完成度</span>
+                <select id="plan-feedback-completion">
+                  <option value="full">大致完成</option>
+                  <option value="partial">完成一部分</option>
+                  <option value="missed">明顯沒完成</option>
+                </select>
+              </label>
+            </div>
+            <div class="plan-submit-row">
+              <button class="button primary" type="button" id="plan-feedback-save">儲存本週回饋</button>
+              <button class="button secondary" type="button" id="plan-feedback-clear">清除這週回饋</button>
+            </div>
+            <div class="plan-feedback-status" id="plan-feedback-status">尚未儲存每週回饋；目前只會用課表完成標記做基本調整。</div>
+          </div>
         </div>
       </section>
 

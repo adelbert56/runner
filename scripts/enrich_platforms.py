@@ -28,7 +28,7 @@ from config import (
 )
 from http_client import request_text
 from platforms import baoming, ctrun, eventgo, focusline, irunner, joinnow, lohas
-from platforms.common import generic_extract, has_text, host_of
+from platforms.common import generic_extract, has_text, host_of, is_generic_registration_link
 
 logger = logging.getLogger("enrich_platforms")
 
@@ -38,8 +38,11 @@ REPORT_MD = ROOT_DIR / "runner" / "賽事" / "平台爬蟲覆蓋報告.md"
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 ENRICH_FIELDS = (
+    "registration_link",
     "registration_opens_at",
     "registration_deadline",
+    "cancellation_notice",
+    "cancellation_notice_url",
     "venue",
     "start_location",
     "organizer",
@@ -51,13 +54,41 @@ ENRICH_FIELDS = (
     "registration_note",
 )
 SAFE_AUTO_FIELDS = {
+    "registration_link",
     "registration_opens_at",
     "registration_deadline",
+    "cancellation_notice",
+    "cancellation_notice_url",
+    "venue",
+    "start_location",
+    "organizer",
+    "co_organizer",
+    "fees",
+    "quota",
     "start_times",
+    "registration_status",
     "registration_note",
 }
 
 PlatformParser = Callable[[str, dict, str], dict]
+EXPLICIT_CANCELLATION_PATTERN = re.compile(r"停辦|停賽|取消辦理|取消停辦|活動取消|賽事取消|取消賽事|取消活動")
+
+
+def inferred_status_from_dates(race: dict) -> str:
+    opens_at = str(race.get("registration_opens_at", "")).strip()
+    deadline = str(race.get("registration_deadline", "")).strip()
+    if opens_at and opens_at > TODAY:
+        return "尚未開報"
+    if deadline:
+        return "已截止" if deadline < TODAY else "報名中"
+    if opens_at and opens_at <= TODAY:
+        return "報名中"
+    return ""
+
+
+def has_explicit_cancellation_notice(race: dict) -> bool:
+    notice = str(race.get("cancellation_notice", "")).strip()
+    return bool(notice and EXPLICIT_CANCELLATION_PATTERN.search(notice))
 
 
 def biji_extract(html: str, race: dict, url: str) -> dict:
@@ -91,8 +122,11 @@ def is_source_url(url: str) -> bool:
 
 
 def has_official_registration_link(race: dict) -> bool:
-    url = str(race.get("registration_link", "")).strip()
-    return has_text(url) and not is_source_url(url)
+    for field in ("registration_link", "official_event_url"):
+        url = str(race.get(field, "")).strip()
+        if has_text(url) and not is_source_url(url) and not is_generic_registration_link(url):
+            return True
+    return False
 
 
 def race_key(race: dict) -> str:
@@ -101,7 +135,7 @@ def race_key(race: dict) -> str:
 
 def candidate_urls(race: dict) -> list[str]:
     urls = []
-    for field in ("official_event_url", "registration_link", "detail_url"):
+    for field in ("official_event_url", "registration_link", "source_registration_link", "detail_url"):
         url = str(race.get(field, "")).strip()
         if url and url not in urls:
             urls.append(url)
@@ -132,6 +166,23 @@ def fetch_html(session: requests.Session, url: str) -> str:
 def should_replace(field: str, current: object, incoming: object, *, preferred: bool = False) -> bool:
     if not has_text(incoming):
         return False
+    if field == "registration_link":
+        current_text = str(current).strip()
+        incoming_text = str(incoming).strip()
+        if is_generic_registration_link(incoming_text):
+            return False
+        if not has_text(current_text):
+            return True
+        if is_generic_registration_link(current_text):
+            return True
+        return is_source_url(current_text) and not is_source_url(incoming_text)
+    if field == "registration_status":
+        incoming_text = str(incoming).strip()
+        current_text = str(current).strip()
+        unknown_statuses = {"", "未知", "待確認", "報名時間未定"}
+        if current_text in unknown_statuses:
+            return True
+        return incoming_text != current_text
     if field == "start_times":
         current_quality = start_time_quality(current)
         incoming_quality = start_time_quality(incoming)
@@ -196,6 +247,8 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
     changed: list[str] = []
     errors: list[str] = []
     seen_platforms: list[str] = []
+    found_registration_dates = False
+    found_cancellation_evidence = False
 
     for url in candidate_urls(race):
         platform, parser = platform_for_url(url)
@@ -211,6 +264,11 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
         except Exception as error:
             errors.append(f"{platform}: parse failed ({error})")
             continue
+
+        if has_text(details.get("registration_opens_at")) or has_text(details.get("registration_deadline")):
+            found_registration_dates = True
+        if has_text(details.get("cancellation_notice")) or has_text(details.get("cancellation_notice_url")):
+            found_cancellation_evidence = True
 
         for field in ENRICH_FIELDS:
             if field not in SAFE_AUTO_FIELDS:
@@ -233,9 +291,58 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
             changed.append("source_platform")
 
     official_direct = has_official_registration_link(updated)
+    current_link = str(updated.get("registration_link", "")).strip()
+    if current_link and is_generic_registration_link(current_link):
+        updated["registration_link"] = ""
+        changed.append("registration_link")
     if updated.get("is_official_direct") != official_direct:
         updated["is_official_direct"] = official_direct
         changed.append("is_official_direct")
+
+    if not found_cancellation_evidence:
+        for field in ("cancellation_notice", "cancellation_notice_url"):
+            if has_text(updated.get(field)):
+                updated[field] = ""
+                changed.append(field)
+
+    if has_text(updated.get("cancellation_notice")) and not has_explicit_cancellation_notice(updated):
+        updated["cancellation_notice"] = ""
+        changed.append("cancellation_notice")
+        if has_text(updated.get("cancellation_notice_url")):
+            updated["cancellation_notice_url"] = ""
+            changed.append("cancellation_notice_url")
+
+    cancellation_notice = str(updated.get("cancellation_notice", "")).strip()
+    cancellation_notice_url = str(updated.get("cancellation_notice_url", "")).strip()
+    has_cancellation_evidence = has_explicit_cancellation_notice(updated) and has_text(cancellation_notice_url)
+
+    status_text = str(updated.get("registration_status", "")).strip()
+    if has_cancellation_evidence and status_text != "停辦":
+        updated["registration_status"] = "停辦"
+        changed.append("registration_status")
+        status_text = "停辦"
+
+    if status_text == "停辦" and not has_cancellation_evidence:
+        has_live_evidence = official_direct or found_registration_dates
+        source_platform_text = str(updated.get("source_platform", "")).strip()
+        source_only_biji = source_platform_text == "運動筆記"
+        inferred_status = inferred_status_from_dates(updated)
+        replacement_status = inferred_status or ("待確認" if has_live_evidence or source_only_biji else "")
+        if replacement_status and replacement_status != status_text:
+            updated["registration_status"] = replacement_status
+            changed.append("registration_status")
+            status_text = replacement_status
+    if status_text == "停辦" and has_cancellation_evidence and not found_registration_dates:
+        for field in ("registration_opens_at", "registration_deadline"):
+            if has_text(updated.get(field)):
+                updated[field] = ""
+                changed.append(field)
+
+    if not has_cancellation_evidence:
+        inferred_status = inferred_status_from_dates(updated)
+        if inferred_status and inferred_status != status_text:
+            updated["registration_status"] = inferred_status
+            changed.append("registration_status")
 
     if changed:
         updated["verified_at"] = TODAY

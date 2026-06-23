@@ -6,5 +6,4 @@ from .common import generic_extract
 
 
 def extract(html: str, race: dict, url: str) -> dict:
-    return generic_extract(html, race)
-
+    return generic_extract(html, race, url)

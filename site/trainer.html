@@ -706,18 +706,104 @@
 // ============================================================
 // STORAGE
 // ============================================================
-const STORAGE_KEY = 'runner-trainer-v1';
+const LEGACY_STORAGE_KEY = 'runner-trainer-v1';
+const DEVICE_KEY = 'runner-trainer:device-id';
+const STORAGE_KEY = `runner-trainer:${getDeviceId()}:v1`;
 const PLAN_SCHEMA_VERSION = 7;
 const GUIDE_ASSET_VERSION = 3;
 
+function createEmptyData() {
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {} };
+}
+
+function getDeviceId() {
+  try {
+    const existing = localStorage.getItem(DEVICE_KEY);
+    if (existing) return existing;
+    const nextId = globalThis.crypto?.randomUUID?.() || `device-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    localStorage.setItem(DEVICE_KEY, nextId);
+    return nextId;
+  } catch {
+    return 'shared-device';
+  }
+}
+
+function normalizeDayStatuses(dayStatuses) {
+  if (!dayStatuses || typeof dayStatuses !== 'object') return {};
+  return Object.fromEntries(
+    Object.entries(dayStatuses).filter(([, status]) => status === 'done' || status === 'missed')
+  );
+}
+
+function collectLegacyDayStatuses(data) {
+  const dayStatuses = {};
+  (data?.plan || []).forEach(week => (week.days || []).forEach(day => {
+    if (day?.dateStr && (day.status === 'done' || day.status === 'missed')) {
+      dayStatuses[day.dateStr] = day.status;
+    }
+  }));
+  (data?.log || []).forEach(entry => {
+    if (entry?.date) {
+      dayStatuses[entry.date] = 'done';
+    }
+  });
+  return dayStatuses;
+}
+
+function applyStoredDayStatuses(data) {
+  const dayStatuses = normalizeDayStatuses(data?.dayStatuses);
+  (data?.plan || []).forEach(week => (week.days || []).forEach(day => {
+    if (!day?.dateStr) return;
+    const savedStatus = dayStatuses[day.dateStr];
+    if (savedStatus) {
+      day.status = savedStatus;
+    }
+  }));
+  data.dayStatuses = dayStatuses;
+  return data;
+}
+
+function normalizeData(data) {
+  const base = createEmptyData();
+  const normalized = {
+    ...base,
+    ...(data || {}),
+    profile: data?.profile || null,
+    plan: Array.isArray(data?.plan) ? data.plan : [],
+    log: Array.isArray(data?.log) ? data.log : [],
+    checkins: Array.isArray(data?.checkins) ? data.checkins : [],
+    assessments: Array.isArray(data?.assessments) ? data.assessments : [],
+    adaptationPrompts: data?.adaptationPrompts && typeof data.adaptationPrompts === 'object' ? data.adaptationPrompts : {},
+    dayStatuses: normalizeDayStatuses(data?.dayStatuses)
+  };
+  normalized.dayStatuses = {
+    ...collectLegacyDayStatuses(normalized),
+    ...normalized.dayStatuses
+  };
+  return applyStoredDayStatuses(normalized);
+}
+
 function loadData() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {} };
-  } catch { return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {} }; }
+    const currentRaw = localStorage.getItem(STORAGE_KEY);
+    if (currentRaw) {
+      return normalizeData(JSON.parse(currentRaw));
+    }
+    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacyRaw) {
+      const migrated = normalizeData(JSON.parse(legacyRaw));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
+    return createEmptyData();
+  } catch {
+    return createEmptyData();
+  }
 }
 
 function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const normalized = normalizeData(data);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
 }
 
 function weekHasMalformedVolume(week) {
@@ -744,7 +830,10 @@ function rebuildStoredPlan(data) {
   if (!data?.profile) return data;
   const preservedProfile = { ...data.profile };
   preservedProfile.planVersion = PLAN_SCHEMA_VERSION;
-  const rebuilt = buildPlan(preservedProfile);
+  const rebuilt = applyStoredDayStatuses({
+    ...data,
+    plan: buildPlan(preservedProfile)
+  }).plan;
   return {
     ...data,
     profile: preservedProfile,
@@ -2607,6 +2696,8 @@ document.getElementById('modal')?.addEventListener('click', event => {
 // WORKOUT ACTIONS
 // ============================================================
 function markDayStatus(dateStr, status) {
+  appData.dayStatuses = normalizeDayStatuses(appData.dayStatuses);
+  appData.dayStatuses[dateStr] = status;
   appData.plan.forEach(week => week.days.forEach(day => {
     if (day.dateStr === dateStr) day.status = status;
   }));
@@ -2617,6 +2708,10 @@ function saveLogEntry(entry) {
   appData.log = appData.log || [];
   appData.log = appData.log.filter(item => !(item.date === entry.date && item.type === entry.type));
   appData.log.push(entry);
+  appData.dayStatuses = normalizeDayStatuses(appData.dayStatuses);
+  if (entry?.date) {
+    appData.dayStatuses[entry.date] = 'done';
+  }
   saveData(appData);
 }
 

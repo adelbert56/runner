@@ -7,7 +7,7 @@ from .common import compact_lines, find_label_value, generic_extract, merge_deta
 
 def extract(html: str, race: dict, url: str) -> dict:
     lines = compact_lines(html)
-    details = generic_extract(html, race)
+    details = generic_extract(html, race, url)
     platform_details = {
         "venue": find_label_value(lines, ("活動地點", "地址", "地點")),
         "start_location": find_label_value(lines, ("活動地點", "地址", "地點")),
@@ -15,4 +15,3 @@ def extract(html: str, race: dict, url: str) -> dict:
         "co_organizer": find_label_value(lines, ("協辦單位", "協辦", "承辦單位", "承辦")),
     }
     return merge_details(platform_details, details)
-
