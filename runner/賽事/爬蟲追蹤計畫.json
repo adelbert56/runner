@@ -10,7 +10,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-08",
+      "next_check_date": "2027-06-07",
       "cadence": "future",
       "reason": "距離賽事 530 天，先排到賽前約 180 天再追。"
     },
@@ -194,6 +194,32 @@
     }
   },
   {
+    "race_id": "342d3e0b-c2cf-42fc-8e23-835b391ea9c4",
+    "race_name": "TOYOTA RUN 台中 視障專場",
+    "race_date": "2026-09-19",
+    "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": true,
+    "priority_score": 1,
+    "tracking": {
+      "status": "monitor_weekly",
+      "status_label": "每週追蹤",
+      "next_check_date": "2026-06-23",
+      "cadence": "biweekly",
+      "reason": "開報日已過，仍缺：名額。"
+    },
+    "missing": [
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+      "official_event_url": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13091&subtitle=TOYOTA+RUN+%E5%8F%B0%E4%B8%AD+%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13091",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=TOYOTA%20RUN%20%E5%8F%B0%E4%B8%AD%20%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4"
+    }
+  },
+  {
     "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
     "race_name": "2026公勝盃",
     "race_date": "2026-10-04",
@@ -220,32 +246,6 @@
     }
   },
   {
-    "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
-    "race_name": "2026第二屆食安盃馬拉松",
-    "race_date": "2026-12-19",
-    "race_county": "臺中市",
-    "source_platform": "運動筆記",
-    "is_official_direct": true,
-    "priority_score": 1,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間。"
-    },
-    "missing": [
-      "start_times"
-    ],
-    "current_links": {
-      "registration_link": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
-      "official_event_url": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE"
-    }
-  },
-  {
     "race_id": "e75da261-120b-44da-b8c6-f6fec63d1f2e",
     "race_name": "2027南投縣仁愛鄉原住民三鐵挑戰賽",
     "race_date": "2027-01-10",
@@ -256,9 +256,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-08-03",
+      "next_check_date": "2026-08-02",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
     },
     "missing": [
       "quota"

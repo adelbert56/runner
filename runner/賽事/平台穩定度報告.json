@@ -1,60 +1,40 @@
 {
-  "generated_at": "2026-06-23T08:30:38.866Z",
+  "generated_at": "2026-06-23T11:00:45.517Z",
   "basis_date": "2026-06-23",
   "items": [
     {
       "platform": "運動筆記",
-      "total": 14,
-      "official_direct": 5,
-      "verified": 14,
-      "missing": 9,
+      "total": 10,
+      "official_direct": 6,
+      "verified": 10,
+      "missing": 5,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 3,
+      "due_now": 1,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
-        "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松",
-        "仁愛長庚合作聯盟醫院2026永慶盃路跑"
+        "TOYOTA RUN 台中 視障專場",
+        "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
       ],
-      "complete_rate": "36%",
-      "official_direct_rate": "36%",
+      "complete_rate": "50%",
+      "official_direct_rate": "60%",
       "verified_rate": "100%",
-      "score": 61,
+      "score": 73,
       "status": "可用需觀察"
     },
     {
       "platform": "iRunner",
-      "total": 8,
-      "official_direct": 8,
-      "verified": 8,
-      "missing": 2,
+      "total": 9,
+      "official_direct": 9,
+      "verified": 9,
+      "missing": 0,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 3,
+      "due_now": 1,
       "sample_races": [
         "第13屆專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
         "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
         "2026東城盃合歡山越野馬拉松"
-      ],
-      "complete_rate": "75%",
-      "official_direct_rate": "100%",
-      "verified_rate": "100%",
-      "score": 91,
-      "status": "穩定"
-    },
-    {
-      "platform": "Lohas",
-      "total": 5,
-      "official_direct": 5,
-      "verified": 5,
-      "missing": 0,
-      "opened_gap": 0,
-      "date_anomaly": 0,
-      "due_now": 0,
-      "sample_races": [
-        "2026中興新村半程馬拉松-披興戴月的想你",
-        "2026年FUN電多巴胺路跑嘉年華",
-        "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
       ],
       "complete_rate": "100%",
       "official_direct_rate": "100%",
@@ -64,22 +44,42 @@
     },
     {
       "platform": "CTRun",
-      "total": 4,
-      "official_direct": 4,
-      "verified": 4,
-      "missing": 0,
+      "total": 7,
+      "official_direct": 7,
+      "verified": 7,
+      "missing": 2,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 0,
+      "due_now": 2,
       "sample_races": [
         "2026 VISOGE 夜跑派對 台中場",
-        "2026 山城星光馬拉松",
-        "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽"
+        "仁愛長庚合作聯盟醫院2026永慶盃路跑",
+        "2026 山城星光馬拉松"
       ],
-      "complete_rate": "100%",
+      "complete_rate": "71%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 100,
+      "score": 90,
+      "status": "穩定"
+    },
+    {
+      "platform": "Lohas",
+      "total": 6,
+      "official_direct": 6,
+      "verified": 6,
+      "missing": 1,
+      "opened_gap": 0,
+      "date_anomaly": 1,
+      "due_now": 0,
+      "sample_races": [
+        "2026中興新村半程馬拉松-披興戴月的想你",
+        "2026年FUN電多巴胺路跑嘉年華",
+        "2026臺中國際馬拉松-酷城市．酷運動 水岸花都"
+      ],
+      "complete_rate": "83%",
+      "official_direct_rate": "100%",
+      "verified_rate": "100%",
+      "score": 92,
       "status": "穩定"
     },
     {

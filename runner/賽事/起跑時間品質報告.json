@@ -1,5 +1,26 @@
 [
   {
+    "race_id": "342d3e0b-c2cf-42fc-8e23-835b391ea9c4",
+    "race_name": "TOYOTA RUN 台中 視障專場",
+    "race_date": "2026-09-19",
+    "race_county": "臺中市",
+    "distances": [
+      "5km"
+    ],
+    "start_times": "5K 起跑 08:00、5K 起跑 08:10",
+    "registration_link": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+    "official_event_url": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13091&subtitle=TOYOTA+RUN+%E5%8F%B0%E4%B8%AD+%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4",
+    "issues": [
+      {
+        "key": "same_group_multiple_times",
+        "severity": "high",
+        "label": "同一組別出現多個起跑時間",
+        "hint": "可疑組別：5K"
+      }
+    ]
+  },
+  {
     "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
     "race_name": "2026公勝盃",
     "race_date": "2026-10-04",
@@ -41,6 +62,56 @@
         "severity": "low",
         "label": "起跑組別少於距離數",
         "hint": "距離：10K、6K、3K；起跑列：健康組（6公里）、3公里"
+      }
+    ]
+  },
+  {
+    "race_id": "d0a54a7f-24da-4bce-9eb3-775bcbf9462b",
+    "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑－順風啟程 • 澤福同行 • 謝平安",
+    "race_date": "2026-12-19",
+    "race_county": "彰化縣",
+    "distances": [
+      "42.195km",
+      "21km",
+      "10km",
+      "3.5km",
+      "5.5km",
+      "2.5km"
+    ],
+    "start_times": "全馬組（42.195K） 起跑 06:30、半馬組（21K） 起跑 06:40、10K 起跑 06:50、健走組（3.5K） 起跑 07:00",
+    "registration_link": "https://signup.lohasnet.tw/signup/4246",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91%EF%BC%8D%E9%A0%86%E9%A2%A8%E5%95%9F%E7%A8%8B+%E2%80%A2+%E6%BE%A4%E7%A6%8F%E5%90%8C%E8%A1%8C+%E2%80%A2+%E8%AC%9D%E5%B9%B3%E5%AE%89",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：全馬（42.195K）、半馬（21K）、10K、3.5K、5.5K、2.5K；起跑列：全馬組（42.195K）、半馬組（21K）、10K、健走組（3.5K）"
+      }
+    ]
+  },
+  {
+    "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
+    "race_name": "2026第二屆食安盃馬拉松",
+    "race_date": "2026-12-19",
+    "race_county": "臺中市",
+    "distances": [
+      "42km",
+      "21km",
+      "10km",
+      "5km"
+    ],
+    "start_times": "10K 起跑 06:40、5K 起跑 06:50",
+    "registration_link": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
+    "official_event_url": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：全馬（42K）、半馬（21K）、10K、5K；起跑列：10K、5K"
       }
     ]
   }

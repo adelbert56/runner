@@ -216,7 +216,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12919&subtitle=2026%E5%85%A8%E5%8F%B0PAPAGO%E6%AD%A1%E6%A8%82%E8%B7%91--%E8%A5%BF%E6%B9%96%E5%A0%B4",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.088924+00:00",
+    "scraped_at": "2026-06-23T10:58:50.402955+00:00",
     "registration_opens_at": "2026-04-16",
     "registration_deadline": "2026-05-30",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12919",
@@ -234,7 +234,8 @@
     "source_platform": "EventGo、Focusline、運動筆記",
     "is_official_direct": true,
     "start_times": "全馬 起跑 05:00、半馬 起跑 05:00",
-    "first_seen_at": "2026-05-16"
+    "first_seen_at": "2026-05-16",
+    "co_organizer": null
   },
   {
     "race_id": "8447eb28-405b-4d47-ad6c-2209d48b0ae6",
@@ -250,7 +251,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12810&subtitle=%E7%AC%AC13%E5%B1%86%E5%B0%88%E9%91%84%E4%B8%8D%E5%87%A1-SIMHOPE+x+%E5%A4%A7%E8%85%B3%E4%B8%AB%E5%85%A8%E5%9C%8B%E9%A6%AC%E6%8B%89%E6%9D%BE%E6%8E%A5%E5%8A%9B%E8%B3%BD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.088956+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403019+00:00",
     "registration_opens_at": "2026-03-12",
     "registration_deadline": "2026-05-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12810",
@@ -288,7 +289,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12974&subtitle=%E5%A4%8F%E6%97%A5%E9%A6%AC%E6%8B%89%E6%9D%BE+-+%E8%8B%97%E6%A0%97%E9%AF%89%E9%AD%9A%E6%BD%AD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.088988+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403050+00:00",
     "registration_opens_at": "2026-01-28",
     "registration_deadline": "2026-05-17",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12974",
@@ -306,7 +307,8 @@
     "source_platform": "EventGo、運動筆記",
     "is_official_direct": true,
     "start_times": "半馬組（21K） 起跑 05:00、全馬組（42K） 起跑 05:00",
-    "first_seen_at": "2026-05-16"
+    "first_seen_at": "2026-05-16",
+    "co_organizer": null
   },
   {
     "race_id": "f666760d-e82e-4d02-8542-4b537d1295c0",
@@ -322,7 +324,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12989&subtitle=2026+KOF%E6%8B%B3%E7%9A%87%E5%85%AC%E7%9B%8A%E4%B8%BB%E9%A1%8C%E8%B7%AF%E8%B7%91",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089028+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403074+00:00",
     "registration_opens_at": "2026-04-03",
     "registration_deadline": "2026-05-22",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12989",
@@ -341,7 +343,9 @@
     "organizer": "坤翔國際有限公司",
     "fees": "2026、2026、850、2026、07、12、2026、04",
     "cancellation_notice": "(停賽)2026 KOF拳皇公益主題路跑 - 筆記報名 - 我要報名",
-    "cancellation_notice_url": "https://irunner.biji.co/2026KOF/signup"
+    "cancellation_notice_url": "https://irunner.biji.co/2026KOF/signup",
+    "co_organizer": null,
+    "quota": null
   },
   {
     "race_id": "fd352db7-c2bd-4f58-829f-b2f73c5e7583",
@@ -358,7 +362,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12963&subtitle=2026+VISOGE+%E5%A4%9C%E8%B7%91%E6%B4%BE%E5%B0%8D+%E5%8F%B0%E4%B8%AD%E5%A0%B4",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089054+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403110+00:00",
     "registration_opens_at": "2026-03-23",
     "registration_deadline": "2026-04-23",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12963",
@@ -395,7 +399,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12978&subtitle=2026+Run+For+Dad+%E7%88%B8%E8%B6%A3%E8%BF%B7%E4%BD%A0%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%81%8B%E5%8B%95i%E8%87%BA%E7%81%A32.0",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089072+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403133+00:00",
     "registration_opens_at": "2026-05-10",
     "registration_deadline": "2026-06-30",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12978",
@@ -459,7 +463,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-26",
-    "scraped_at": "2026-06-18T12:48:54.089098+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403161+00:00",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
   },
@@ -479,7 +483,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12979&subtitle=2026%E6%9D%B1%E5%9F%8E%E7%9B%83%E5%90%88%E6%AD%A1%E5%B1%B1%E8%B6%8A%E9%87%8E%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089128+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403195+00:00",
     "registration_opens_at": "2026-04-01",
     "registration_deadline": "2026-06-15",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12979",
@@ -524,7 +528,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12904&subtitle=2026%E6%B5%AA%E6%BC%AB%E5%8F%B0%E4%B8%89%E7%B7%9A%E6%96%B0%E5%BA%97%E8%80%81%E8%A1%97%E8%B7%AF%E8%B7%91%E8%B3%BD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089162+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403239+00:00",
     "registration_opens_at": "2026-04-30",
     "registration_deadline": "2026-07-24",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12904",
@@ -550,7 +554,43 @@
     },
     "first_seen_at": "2026-05-16",
     "cancellation_notice": "",
-    "cancellation_notice_url": ""
+    "cancellation_notice_url": "",
+    "co_organizer": null
+  },
+  {
+    "race_id": "342d3e0b-c2cf-42fc-8e23-835b391ea9c4",
+    "race_name": "TOYOTA RUN 台中 視障專場",
+    "race_date": "2026-09-19",
+    "race_county": "臺中市",
+    "distances": [
+      "5km"
+    ],
+    "difficulty": "初級",
+    "registration_status": "報名中",
+    "registration_link": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+    "official_event_url": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+    "registration_note": "",
+    "registration_opens_at": "2026-05-05",
+    "registration_deadline": "2026-09-06",
+    "venue": "臺中市 潭雅神綠園道和平場站（臺中市神岡區和平路）",
+    "start_location": "臺中市 潭雅神綠園道和平場站（臺中市神岡區和平路）",
+    "organizer": "和泰汽車股份有限公司",
+    "co_organizer": "禾圓行銷有限公司",
+    "fees": "126、2026、09、19、2026、05、05、00",
+    "quota": "",
+    "start_times": "5K 起跑 08:00、5K 起跑 08:10",
+    "verified_at": "2026-06-23",
+    "verification_note": "平台爬蟲自動查證：運動筆記",
+    "source_platform": "運動筆記",
+    "is_official_direct": true,
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13091",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=TOYOTA%20RUN%20%E5%8F%B0%E4%B8%AD%20%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13091&subtitle=TOYOTA+RUN+%E5%8F%B0%E4%B8%AD+%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4",
+    "source": "運動筆記",
+    "source_url": "https://running.biji.co/index.php?q=competition",
+    "first_seen_at": "2026-06-23",
+    "scraped_at": "2026-06-23T10:58:50.403256+00:00"
   },
   {
     "race_id": "0cbfb0b7-c08d-44f8-a648-6ea360f29597",
@@ -569,7 +609,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12889&subtitle=2026+%E7%AC%AC%E4%BA%94%E5%B1%86%E6%B3%B0%E5%AE%89%E7%83%8F%E5%98%8E%E5%BD%A5%E5%8E%9F%E9%84%89%E7%A7%98%E5%A2%83%E6%A3%AE%E6%9E%97%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089184+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403276+00:00",
     "registration_opens_at": "2026-04-03",
     "registration_deadline": "2026-07-03",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12889",
@@ -592,7 +632,8 @@
       "超半馬組（24K）": "06:00",
       "健康組（10K）": "06:10"
     },
-    "first_seen_at": "2026-05-16"
+    "first_seen_at": "2026-05-16",
+    "co_organizer": null
   },
   {
     "race_id": "9435cbf4-7877-40a1-a6ec-34e4bf08a34f",
@@ -609,7 +650,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13041&subtitle=%E4%BB%81%E6%84%9B%E9%95%B7%E5%BA%9A%E5%90%88%E4%BD%9C%E8%81%AF%E7%9B%9F%E9%86%AB%E9%99%A22026%E6%B0%B8%E6%85%B6%E7%9B%83%E8%B7%AF%E8%B7%91",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089203+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403291+00:00",
     "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正，並依使用者提供之運動筆記報名頁截圖補回報名起訖日期。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13041",
     "social_links": [],
@@ -628,7 +669,9 @@
     "cancellation_notice": "",
     "cancellation_notice_url": "",
     "co_organizer": "執行，並承接活動行銷、活動企劃、活動影音及視覺設計、晶片計時、運動用品研發設計與生產、器架租賃搭建等營業項目。",
-    "registration_opens_at": "2026-06-15"
+    "registration_opens_at": "2026-06-15",
+    "quota": null,
+    "start_times": null
   },
   {
     "race_id": "269e9045-3335-4a6b-b2c7-aef66050c677",
@@ -647,7 +690,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12954&subtitle=2026+%E5%B1%B1%E5%9F%8E%E6%98%9F%E5%85%89%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089225+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403309+00:00",
     "registration_opens_at": "2026-03-16",
     "registration_deadline": "2026-07-26",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12954",
@@ -692,7 +735,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13026&subtitle=2026+Puli+Power+%E5%9F%94%E9%87%8C%E5%B1%B1%E5%9F%8E%E6%B4%BE%E5%B0%8D%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089246+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403327+00:00",
     "registration_opens_at": "2026-05-01",
     "registration_deadline": "2026-06-30",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13026",
@@ -736,7 +779,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13042&subtitle=2026%E5%85%AC%E5%8B%9D%E7%9B%83",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089264+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403343+00:00",
     "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13042",
     "social_links": [],
@@ -754,7 +797,8 @@
     "registration_deadline": "2026-08-14",
     "registration_opens_at": "2026-06-22",
     "co_organizer": "全統運動用品股份有限公司",
-    "start_times": "10公里 起跑 07:00"
+    "start_times": "10公里 起跑 07:00",
+    "quota": null
   },
   {
     "race_id": "34b4433b-8832-42e6-a063-1df6c91e8b30",
@@ -791,7 +835,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-09",
-    "scraped_at": "2026-06-18T12:48:54.089282+00:00"
+    "scraped_at": "2026-06-23T10:58:50.403360+00:00"
   },
   {
     "race_id": "3a39e33f-f3ce-44c1-860f-5e4142df7dcd",
@@ -809,7 +853,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12981&subtitle=2026+%E5%8D%97%E5%BA%84%E5%B1%B1%E6%B0%B4%E6%82%A0%E9%81%8A%E8%A1%8C+%E2%80%94+%E5%B1%B1%E6%B0%B4%E8%B7%AF%E8%B7%91%E8%B3%BD+%C3%97+%E6%85%A2%E5%9F%8E%E7%88%AC%E5%9D%A1%28%E8%A7%80%E8%B3%9E%29%E8%B3%BD",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089300+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403376+00:00",
     "registration_opens_at": "2026-04-01",
     "registration_deadline": "2026-08-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12981",
@@ -846,7 +890,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13050&subtitle=2026%E5%B9%B4FUN%E9%9B%BB%E5%A4%9A%E5%B7%B4%E8%83%BA%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089314+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403389+00:00",
     "registration_note": "",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050",
     "social_links": [],
@@ -910,7 +954,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-19",
-    "scraped_at": "2026-06-18T12:48:54.089334+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403411+00:00",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
   },
@@ -931,7 +975,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12926&subtitle=2026+%E5%8D%97%E6%8A%95%E9%A6%AC11th+%E8%8D%89%E9%9E%8B%E5%A2%A9%E9%A6%AC%E6%8B%89%E6%9D%BE+%E5%89%8D%E9%80%B2%E9%B3%A5%E5%98%B4%E6%BD%AD%E3%80%81%E5%A5%94%E5%90%91%E4%B9%9D%E4%B9%9D%E5%B3%B0",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089354+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403429+00:00",
     "registration_opens_at": "2026-04-27",
     "registration_deadline": "2026-07-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12926",
@@ -987,7 +1031,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-28",
-    "scraped_at": "2026-06-18T12:48:54.089368+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403442+00:00",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
   },
@@ -1024,7 +1068,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-04",
-    "scraped_at": "2026-06-18T12:48:54.089382+00:00"
+    "scraped_at": "2026-06-23T10:58:50.403471+00:00"
   },
   {
     "race_id": "0e285ab6-7707-4faf-88db-c50e4628f9ab",
@@ -1043,7 +1087,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13028&subtitle=2026+%E6%B8%85%E6%B0%B4%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%98%89%E5%B9%B4%E8%8F%AF",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089402+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403490+00:00",
     "registration_opens_at": "2026-05-04",
     "registration_deadline": "2026-09-20",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13028",
@@ -1082,7 +1126,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12897&subtitle=2026%E6%97%A5%E6%9C%88%E6%BD%AD%E7%92%B0%E6%B9%96%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089419+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403508+00:00",
     "registration_opens_at": "2026-01-23",
     "registration_deadline": "2026-05-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12897",
@@ -1122,7 +1166,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089439+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403528+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12929",
     "social_links": [],
@@ -1156,12 +1200,12 @@
       "3km"
     ],
     "difficulty": "初級",
-    "registration_status": "待確認",
+    "registration_status": "尚未開報",
     "registration_link": "",
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12900&subtitle=2026+%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089458+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403545+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12900",
     "social_links": [],
@@ -1178,7 +1222,9 @@
     "organizer": "公告為主。",
     "fees": "2026、2026、069、51、2026、11、15、99",
     "quota": "51人",
-    "registration_deadline": ""
+    "registration_deadline": "",
+    "registration_opens_at": null,
+    "co_organizer": null
   },
   {
     "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
@@ -1195,7 +1241,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13045&subtitle=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089475+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403559+00:00",
     "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13045",
     "social_links": [],
@@ -1252,7 +1298,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-16",
-    "scraped_at": "2026-06-18T12:48:54.089494+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403577+00:00",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
   },
@@ -1273,7 +1319,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12814&subtitle=2026+%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089514+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403595+00:00",
     "registration_note": "人工查證：iRunner 報名頁與運動筆記賽事頁。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12814",
     "social_links": [],
@@ -1338,7 +1384,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-09",
-    "scraped_at": "2026-06-18T12:48:54.089534+00:00"
+    "scraped_at": "2026-06-23T10:58:50.403614+00:00"
   },
   {
     "race_id": "205c284e-77bf-4224-8cda-79cd7bd819a9",
@@ -1377,48 +1423,49 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-16",
-    "scraped_at": "2026-06-18T12:48:54.089554+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403631+00:00",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
   },
   {
-    "race_id": "ea131e34-b3e9-4bc4-b626-c5345c26cb59",
-    "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑",
+    "race_id": "d0a54a7f-24da-4bce-9eb3-775bcbf9462b",
+    "race_name": "2026歲次丙午年順澤宮第四屆冠軍路跑－順風啟程 • 澤福同行 • 謝平安",
     "race_date": "2026-12-19",
     "race_county": "彰化縣",
     "distances": [
+      "42.195km",
       "21km",
       "10km",
+      "3.5km",
       "5.5km",
       "2.5km"
     ],
     "difficulty": "中級",
     "registration_status": "報名中",
     "registration_link": "https://signup.lohasnet.tw/signup/4246",
-    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
-    "source": "運動筆記",
-    "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089575+00:00",
-    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
-    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13031",
-    "social_links": [],
-    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
-    "is_official_direct": true,
     "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
-    "source_platform": "運動筆記、Lohas",
-    "verified_at": "2026-06-23",
-    "verification_note": "平台爬蟲自動查證：運動筆記、Lohas",
-    "first_seen_at": "2026-05-16",
+    "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
     "registration_opens_at": "2026-06-18",
     "registration_deadline": "2026-10-04",
     "venue": "彰化縣 埔鹽順澤宮(彰化縣鹽埔鄉中正路55號)",
     "start_location": "彰化縣 埔鹽順澤宮(彰化縣鹽埔鄉中正路55號)",
     "organizer": "埔鹽順澤宮管理委員會",
+    "co_organizer": "",
     "fees": "2026、2026、295、25、12、19、55、06",
     "quota": "25人、1000人",
     "start_times": "全馬組（42.195K） 起跑 06:30、半馬組（21K） 起跑 06:40、10K 起跑 06:50、健走組（3.5K） 起跑 07:00",
-    "cancellation_notice": "",
-    "cancellation_notice_url": ""
+    "verified_at": "2026-06-23",
+    "verification_note": "平台爬蟲自動查證：運動筆記、Lohas",
+    "source_platform": "運動筆記、Lohas",
+    "is_official_direct": true,
+    "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13031",
+    "social_links": [],
+    "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91%EF%BC%8D%E9%A0%86%E9%A2%A8%E5%95%9F%E7%A8%8B%20%E2%80%A2%20%E6%BE%A4%E7%A6%8F%E5%90%8C%E8%A1%8C%20%E2%80%A2%20%E8%AC%9D%E5%B9%B3%E5%AE%89",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91%EF%BC%8D%E9%A0%86%E9%A2%A8%E5%95%9F%E7%A8%8B+%E2%80%A2+%E6%BE%A4%E7%A6%8F%E5%90%8C%E8%A1%8C+%E2%80%A2+%E8%AC%9D%E5%B9%B3%E5%AE%89",
+    "source": "運動筆記",
+    "source_url": "https://running.biji.co/index.php?q=competition",
+    "first_seen_at": "2026-05-16",
+    "scraped_at": "2026-06-23T10:58:50.403650+00:00"
   },
   {
     "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
@@ -1437,14 +1484,14 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089595+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403669+00:00",
     "registration_note": "人工補登：依使用者提供之 iRunner 官方報名頁連結校正。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "is_official_direct": false,
+    "is_official_direct": true,
     "official_event_url": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
-    "source_platform": "運動筆記",
+    "source_platform": "iRunner、運動筆記",
     "verified_at": "2026-06-23",
     "verification_note": "使用者提供 iRunner 官方報名頁。",
     "first_seen_at": "2026-05-16",
@@ -1454,7 +1501,9 @@
     "fees": "2026、2026、061、21、12、19、42、10",
     "quota": "21人",
     "registration_deadline": "2026-09-19",
-    "registration_opens_at": "2026-06-11"
+    "registration_opens_at": "2026-06-11",
+    "co_organizer": "(陸續增加中)",
+    "start_times": "10K 起跑 06:40、5K 起跑 06:50"
   },
   {
     "race_id": "0929827f-0b09-441f-bb20-f42815b1bcb4",
@@ -1481,7 +1530,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13033&subtitle=2027+%E7%AC%AC%E4%B9%9D%E5%B1%86%E9%BE%8D%E8%99%8E%E9%B3%B3%E8%B6%8A%E9%87%8E",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089617+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403690+00:00",
     "official_event_url": "https://bao-ming.com/eb/content/7004#reg",
     "venue": "加里山越野賽",
     "start_location": "苗栗縣三義鄉龍騰村（Gari Mountain）",
@@ -1531,7 +1580,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-28",
-    "scraped_at": "2026-06-18T12:48:54.089632+00:00"
+    "scraped_at": "2026-06-23T10:58:50.403703+00:00"
   },
   {
     "race_id": "7609d890-e7fe-426b-b5e7-ea9419d2ff54",
@@ -1556,7 +1605,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12976&subtitle=2027%E7%AC%AC%E4%B9%9D%E5%B1%86%E8%87%BA%E4%B8%AD%E8%B3%87%E8%A8%8A%E7%9B%83%E5%85%AC%E7%9B%8A%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-06-18T12:48:54.089652+00:00",
+    "scraped_at": "2026-06-23T10:58:50.403723+00:00",
     "is_official_direct": false,
     "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12976&subtitle=2027%E7%AC%AC%E4%B9%9D%E5%B1%86%E8%87%BA%E4%B8%AD%E8%B3%87%E8%A8%8A%E7%9B%83%E5%85%AC%E7%9B%8A%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source_platform": "運動筆記",
@@ -1567,7 +1616,9 @@
     "start_location": "臺中市 烏日國中(臺中市烏日區新興路457號)",
     "organizer": "台中市電腦商業同業公會/台灣大腳丫長跑協會",
     "fees": "2027、2027、893、52、01、17、457、42",
-    "quota": "52人"
+    "quota": "52人",
+    "co_organizer": null,
+    "start_times": null
   },
   {
     "race_id": "794c18cb-3e95-46d5-a10b-814e78f0ca6d",
@@ -1602,6 +1653,6 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-26",
-    "scraped_at": "2026-06-18T12:48:54.089666+00:00"
+    "scraped_at": "2026-06-23T10:58:50.403735+00:00"
   }
 ]
