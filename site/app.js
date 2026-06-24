@@ -1722,6 +1722,8 @@ function renderRaceCard(race) {
   const deadline = formatShortDate(race.registration_deadline) || "待確認";
   const datesNeedCheck = hasSuspiciousRegistrationDates(race);
   const scheduleOpenText = datesNeedCheck ? "待查證" : opensAt;
+  const deadlineDaysNum = dateDiffDays(race.registration_deadline);
+  const closingSoon = !isCancelledRace(race) && !datesNeedCheck && deadlineDaysNum !== null && deadlineDaysNum >= 0 && deadlineDaysNum <= 7;
   const favorite = isFavorite(race);
   const registered = isRegisteredRace(race);
   const decision = raceDecisionText(race, registrationTarget);
@@ -1736,6 +1738,7 @@ function renderRaceCard(race) {
   const weather = weatherSummaryForRace(race);
   const organizer = race.organizer || race.host || race.organizer_name || "";
   const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
+  const disappeared = Boolean(race.disappeared_at);
   const factItems = [
     venue ? { label: "地點", value: venue, action: mapLink ? { href: mapLink, label: "導航" } : null } : null,
     startTimes ? { label: "開跑", value: startTimes } : null,
@@ -1782,9 +1785,10 @@ function renderRaceCard(race) {
         <p class="race-distance">${escapeHtml(distances)}</p>
         <div class="race-schedule" aria-label="報名時間">
           <span class="${datesNeedCheck ? "schedule-warning" : ""}"><strong>開報</strong>${escapeHtml(scheduleOpenText)}</span>
-          <span><strong>截止</strong>${escapeHtml(deadline)}</span>
+          <span${closingSoon ? ' class="schedule-urgent"' : ""}><strong>截止</strong>${escapeHtml(deadline)}${closingSoon ? `<em class="deadline-count">${deadlineDaysNum === 0 ? "今天！" : `${deadlineDaysNum}天`}</em>` : ""}</span>
         </div>
         ${datesNeedCheck ? `<p class="race-data-warning">報名起訖日期邏輯待查證</p>` : ""}
+        ${disappeared ? `<p class="race-data-warning race-disappeared-warning">⚠ 此賽事近期從資料來源消失，請自行確認是否仍舉辦</p>` : ""}
         <div class="race-insight">${escapeHtml(decision)}</div>
         ${
           factItems.length || trustItems.length

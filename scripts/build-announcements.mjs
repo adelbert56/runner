@@ -12,6 +12,7 @@ const paths = {
 
 const typePriority = {
   new: 10,
+  disappeared: 12,
   updated: 15,
   opening: 20,
   ending: 30,
@@ -23,6 +24,7 @@ const typePriority = {
 
 const typeMeta = {
   new: { label: "新增賽事", tone: "primary" },
+  disappeared: { label: "賽事消失", tone: "warning" },
   updated: { label: "狀態更新", tone: "blue" },
   opening: { label: "報名開始", tone: "blue" },
   ending: { label: "快截止", tone: "warning" },
@@ -220,6 +222,14 @@ upcoming
   .forEach((race) => {
     const days = daysUntil(race.registration_deadline);
     addRaceAnnouncement(race, days <= 7 ? "ending" : "closing", `${shortDate(race.registration_deadline)} 截止｜剩 ${days} 天`);
+  });
+
+races
+  .filter((race) => race.disappeared_at && String(race.race_date || "") >= today)
+  .sort((a, b) => String(a.race_date).localeCompare(String(b.race_date)))
+  .slice(0, 3)
+  .forEach((race) => {
+    addRaceAnnouncement(race, "disappeared", `${shortDate(race.disappeared_at)} 起資料來源消失，請自行確認`);
   });
 
 const raceAnnouncements = [...raceItems.values()]

@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { todayInTaipei } from "./lib/time.mjs";
 
@@ -59,6 +59,12 @@ function isOfficialDirect(race) {
   });
 }
 
+const today = todayInTaipei();
+
+function raceKey(race) {
+  return `${String(race.race_name || "").trim()}||${String(race.race_date || "").slice(0, 10)}`;
+}
+
 let races;
 try {
   races = JSON.parse(await readFile(source, "utf-8"));
@@ -69,6 +75,13 @@ try {
   process.exit(0);
 }
 
+let previousRaces = [];
+try {
+  previousRaces = JSON.parse(await readFile(target, "utf-8"));
+} catch {
+  // first run or target doesn't exist yet
+}
+
 const normalized = races.map((race) => ({
   ...race,
   first_seen_at: firstSeenDate(race),
@@ -76,6 +89,23 @@ const normalized = races.map((race) => ({
 }));
 
 await writeFile(source, `${JSON.stringify(normalized, null, 2)}\n`, "utf-8");
+
+// Disappearance detection: only run when new data looks plausible (guards against total scraper failure)
+const newKeySet = new Set(normalized.map(raceKey));
+const disappeared = normalized.length >= 3
+  ? previousRaces
+      .filter((r) => {
+        if (newKeySet.has(raceKey(r))) return false;
+        return String(r.race_date || "").slice(0, 10) >= today;
+      })
+      .map((r) => r.disappeared_at ? r : { ...r, disappeared_at: today })
+  : [];
+
+if (disappeared.length) {
+  console.log(`Carrying ${disappeared.length} disappeared upcoming race(s):`, disappeared.map(raceKey));
+}
+
+const output = [...normalized, ...disappeared];
 await mkdir(dirname(target), { recursive: true });
-await copyFile(source, target);
-console.log(`Synced ${source} -> ${target}`);
+await writeFile(target, `${JSON.stringify(output, null, 2)}\n`, "utf-8");
+console.log(`Synced ${normalized.length} races -> ${target}${disappeared.length ? ` (+${disappeared.length} disappeared)` : ""}`);

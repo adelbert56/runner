@@ -318,8 +318,8 @@ for (const [name, workflow] of [
   ["runner quips", quipsWorkflow],
   ["message cloud", messageCloudWorkflow],
 ]) {
-  assertCheck(workflow.includes("pages: write") && workflow.includes("id-token: write"), `${name} workflow can deploy Pages after scheduled updates`);
-  assertCheck(workflow.includes("actions/upload-pages-artifact@v3") && workflow.includes("actions/deploy-pages@v4"), `${name} workflow deploys Pages directly`);
+  assertCheck(workflow.includes("actions: write"), `${name} workflow can trigger Pages deploy`);
+  assertCheck(workflow.includes("pages.yml"), `${name} workflow delegates Pages deploy to pages.yml`);
 }
 
 assertCheck(
@@ -344,9 +344,7 @@ assertCheck(
     "Build announcement and automation data",
     "Validate generated files",
     "Commit weather updates",
-    "Setup Pages",
-    "Upload site",
-    "Deploy",
+    "Trigger Pages deploy",
   ]),
   "weather workflow syncs, validates, commits, and deploys in order"
 );
@@ -358,9 +356,7 @@ assertCheck(
     "Build automation health data",
     "Validate scripts",
     "Commit content candidates",
-    "Setup Pages",
-    "Upload site",
-    "Deploy",
+    "Trigger Pages deploy",
   ]),
   "content workflow validates, commits, and deploys in order"
 );
@@ -370,9 +366,7 @@ assertCheck(
     "Build announcement and automation data",
     "Validate scripts",
     "Commit runner quips",
-    "Setup Pages",
-    "Upload site",
-    "Deploy",
+    "Trigger Pages deploy",
   ]),
   "runner quips workflow validates, commits, and deploys in order"
 );
@@ -381,9 +375,7 @@ assertCheck(
     "Build message cloud",
     "Validate scripts",
     "Commit message cloud",
-    "Setup Pages",
-    "Upload site",
-    "Deploy",
+    "Trigger Pages deploy",
   ]),
   "message cloud workflow validates, commits, and deploys in order"
 );
