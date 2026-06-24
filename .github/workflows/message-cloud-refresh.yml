@@ -9,14 +9,13 @@ on:
     - cron: "7 10 * * *"
 
 permissions:
+  actions: write
   contents: write
   issues: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: message-cloud-refresh-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -24,9 +23,6 @@ env:
 
 jobs:
   refresh:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,17 +44,13 @@ jobs:
         run: npm run check
 
       - name: Commit message cloud
+        id: commit
         run: |
           bash .github/scripts/commit-generated.sh "chore(site): refresh message cloud" "site/data/message-cloud.json"
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.did_push == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh workflow run --repo "$REPOSITORY" pages.yml --ref main
