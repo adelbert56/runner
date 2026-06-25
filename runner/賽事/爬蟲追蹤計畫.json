@@ -1,5 +1,36 @@
 [
   {
+    "race_id": "794c18cb-3e95-46d5-a10b-814e78f0ca6d",
+    "race_name": "2027臺中城市半程馬拉松",
+    "race_date": "2027-12-05",
+    "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "priority_score": 14,
+    "tracking": {
+      "status": "wait_future",
+      "status_label": "未來再查",
+      "next_check_date": "2027-06-07",
+      "cadence": "future",
+      "reason": "距離賽事 528 天，先排到賽前約 180 天再追。"
+    },
+    "missing": [
+      "official_registration_link",
+      "registration_opens_at",
+      "registration_deadline",
+      "start_times",
+      "fees",
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13065&subtitle=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13065&subtitle=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13065",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE"
+    }
+  },
+  {
     "race_id": "7609d890-e7fe-426b-b5e7-ea9419d2ff54",
     "race_name": "2027 第九屆臺中資訊盃公益馬拉松",
     "race_date": "2027-01-17",
@@ -12,7 +43,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 208 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 206 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -30,36 +61,6 @@
     }
   },
   {
-    "race_id": "794c18cb-3e95-46d5-a10b-814e78f0ca6d",
-    "race_name": "2027臺中城市半程馬拉松",
-    "race_date": "2027-12-05",
-    "race_county": "臺中市",
-    "source_platform": "運動筆記",
-    "is_official_direct": false,
-    "priority_score": 13,
-    "tracking": {
-      "status": "wait_future",
-      "status_label": "未來再查",
-      "next_check_date": "2027-06-08",
-      "cadence": "future",
-      "reason": "距離賽事 530 天，先排到賽前約 180 天再追。"
-    },
-    "missing": [
-      "official_registration_link",
-      "registration_opens_at",
-      "registration_deadline",
-      "start_times",
-      "quota"
-    ],
-    "current_links": {
-      "registration_link": "",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13065&subtitle=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13065&subtitle=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13065",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E8%87%BA%E4%B8%AD%E5%9F%8E%E5%B8%82%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE"
-    }
-  },
-  {
     "race_id": "4deefa08-b316-4d29-8842-a5e9848f396c",
     "race_name": "2026 臺中舒跑杯",
     "race_date": "2026-11-15",
@@ -72,7 +73,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 145 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 143 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -88,94 +89,6 @@
     }
   },
   {
-    "race_id": "27fe6e4f-ede0-4213-bbf9-07d189103571",
-    "race_name": "24小時不斷電公益路跑接力賽～為視多障孩子而跑",
-    "race_date": "2026-10-31",
-    "race_county": "臺中市",
-    "source_platform": "Focusline",
-    "is_official_direct": true,
-    "priority_score": 9,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-07-01",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 130 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      "registration_opens_at",
-      "registration_deadline",
-      "start_times",
-      "fees",
-      "quota"
-    ],
-    "current_links": {
-      "registration_link": "https://www.focusline.com.tw/261001JF",
-      "official_event_url": "https://www.focusline.com.tw/261001JF",
-      "detail_url": "https://www.focusline.com.tw/261001JF",
-      "source_registration_link": "",
-      "facebook_search_url": ""
-    }
-  },
-  {
-    "race_id": "50cfc282-37ef-4aee-be62-9ce2a6a2865d",
-    "race_name": "2026 愛在幼安公益路跑",
-    "race_date": "2026-11-07",
-    "race_county": "苗栗縣",
-    "source_platform": "Focusline",
-    "is_official_direct": true,
-    "priority_score": 8,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-07-01",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 137 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      "registration_opens_at",
-      "registration_deadline",
-      "start_times",
-      "quota"
-    ],
-    "current_links": {
-      "registration_link": "https://www.focusline.com.tw/261107KZ/3566",
-      "official_event_url": "https://www.focusline.com.tw/261107KZ/3566",
-      "detail_url": "https://www.focusline.com.tw/261107KZ/3566",
-      "source_registration_link": "",
-      "facebook_search_url": ""
-    }
-  },
-  {
-    "race_id": "cd9fe61c-eab0-4c56-a097-c19c26ecb157",
-    "race_name": "國立臺灣體育運動大學第34屆駱駝盃路跑賽",
-    "race_date": "2026-11-21",
-    "race_county": "臺中市",
-    "source_platform": "bao-ming",
-    "is_official_direct": true,
-    "priority_score": 8,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-07-01",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 151 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      "registration_opens_at",
-      "registration_deadline",
-      "start_times",
-      "quota"
-    ],
-    "current_links": {
-      "registration_link": "https://bao-ming.com/eb/content/7016#32884",
-      "official_event_url": "https://bao-ming.com/eb/content/7016#32884",
-      "detail_url": "https://bao-ming.com/eb/content/7016#32884",
-      "source_registration_link": "",
-      "facebook_search_url": ""
-    }
-  },
-  {
     "race_id": "c6135a41-bbc9-426c-8bf6-2248c5fa219c",
     "race_name": "2026 通霄濱海追風馬拉松",
     "race_date": "2026-12-13",
@@ -186,9 +99,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待開報當天",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-06-29",
       "cadence": "on_open_date",
-      "reason": "已知開報日 2026-06-30，尚有 7 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+      "reason": "已知開報日 2026-06-29，尚有 5 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
     },
     "missing": [
       "official_registration_link",
@@ -197,7 +110,7 @@
       "quota"
     ],
     "current_links": {
-      "registration_link": "https://lohasnet.tw/#/event",
+      "registration_link": "",
       "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13079&subtitle=2026+%E9%80%9A%E9%9C%84%E6%BF%B1%E6%B5%B7%E8%BF%BD%E9%A2%A8%E9%A6%AC%E6%8B%89%E6%9D%BE",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13079&subtitle=2026+%E9%80%9A%E9%9C%84%E6%BF%B1%E6%B5%B7%E8%BF%BD%E9%A2%A8%E9%A6%AC%E6%8B%89%E6%9D%BE",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13079",
@@ -211,18 +124,17 @@
     "race_county": "臺中市",
     "source_platform": "bao-ming",
     "is_official_direct": true,
-    "priority_score": 7,
+    "priority_score": 6,
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 5 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：開報時間、報名截止時間、各距離開跑時間。"
+      "reason": "距離賽事 3 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：開報時間、報名截止時間。"
     },
     "missing": [
       "registration_opens_at",
-      "registration_deadline",
-      "start_times"
+      "registration_deadline"
     ],
     "current_links": {
       "registration_link": "https://bao-ming.com/eb/content/6965#32705",
@@ -233,46 +145,47 @@
     }
   },
   {
-    "race_id": "b861d413-e83b-476d-a325-47c41b83f3ff",
-    "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
-    "race_date": "2026-10-25",
-    "race_county": "彰化縣",
-    "source_platform": "Lohas、運動筆記",
+    "race_id": "50cfc282-37ef-4aee-be62-9ce2a6a2865d",
+    "race_name": "2026 愛在幼安公益路跑",
+    "race_date": "2026-11-07",
+    "race_county": "苗栗縣",
+    "source_platform": "Focusline",
     "is_official_direct": true,
-    "priority_score": 4,
+    "priority_score": 5,
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
       "next_check_date": "2026-07-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 124 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 135 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "registration_opens_at",
-      "fees"
+      "start_times",
+      "quota"
     ],
     "current_links": {
-      "registration_link": "https://signup.lohasnet.tw/signup/4261",
-      "official_event_url": "https://lohasnet.tw/YuanLinLionsClub2026/",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13075&subtitle=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E+2026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13075",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E%202026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
+      "registration_link": "https://www.focusline.com.tw/261107KZ/3566",
+      "official_event_url": "https://www.focusline.com.tw/261107KZ/3566",
+      "detail_url": "https://www.focusline.com.tw/261107KZ/3566",
+      "source_registration_link": "",
+      "facebook_search_url": ""
     }
   },
   {
-    "race_id": "9435cbf4-7877-40a1-a6ec-34e4bf08a34f",
-    "race_name": "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
-    "race_date": "2026-09-20",
+    "race_id": "27fe6e4f-ede0-4213-bbf9-07d189103571",
+    "race_name": "24小時不斷電公益路跑接力賽～為視多障孩子而跑",
+    "race_date": "2026-10-31",
     "race_county": "臺中市",
-    "source_platform": "CTRun、運動筆記",
+    "source_platform": "Focusline",
     "is_official_direct": true,
     "priority_score": 3,
     "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、費用、名額。"
+      "status": "monitor_weekly",
+      "status_label": "每週追蹤",
+      "next_check_date": "2026-06-25",
+      "cadence": "biweekly",
+      "reason": "開報日已過，仍缺：各距離開跑時間、費用、名額。"
     },
     "missing": [
       "start_times",
@@ -280,36 +193,9 @@
       "quota"
     ],
     "current_links": {
-      "registration_link": "https://www.ctrun.com.tw/Activity/?EventMain_ID=239&Article_ID=6745",
-      "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=239",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13041&subtitle=%E4%BB%81%E6%84%9B%E9%95%B7%E5%BA%9A%E5%90%88%E4%BD%9C%E8%81%AF%E7%9B%9F%E9%86%AB%E9%99%A22026%E6%B0%B8%E6%85%B6%E7%9B%83%E8%B7%AF%E8%B7%91",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13041",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=%E4%BB%81%E6%84%9B%E9%95%B7%E5%BA%9A%E5%90%88%E4%BD%9C%E8%81%AF%E7%9B%9F%E9%86%AB%E9%99%A22026%E6%B0%B8%E6%85%B6%E7%9B%83%E8%B7%AF%E8%B7%91"
-    }
-  },
-  {
-    "race_id": "8726bcf1-a9ca-4ab8-89e1-d7e3fcadc2d8",
-    "race_name": "臺灣環島跑者圓夢計畫III(火車站環島體驗賽)",
-    "race_date": "2026-09-12",
-    "race_county": "苗栗縣",
-    "source_platform": "JoinNow",
-    "is_official_direct": true,
-    "priority_score": 2,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、費用。"
-    },
-    "missing": [
-      "start_times",
-      "fees"
-    ],
-    "current_links": {
-      "registration_link": "https://www.joinnow.com.tw/2026runningfordreams.php",
-      "official_event_url": "https://www.joinnow.com.tw/2026runningfordreams.php",
-      "detail_url": "https://www.joinnow.com.tw/2026runningfordreams.php",
+      "registration_link": "https://www.focusline.com.tw/261001JF",
+      "official_event_url": "https://www.focusline.com.tw/261001JF",
+      "detail_url": "https://www.focusline.com.tw/261001JF",
       "source_registration_link": "",
       "facebook_search_url": ""
     }
@@ -325,7 +211,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、費用。"
     },
@@ -342,33 +228,6 @@
     }
   },
   {
-    "race_id": "f30d8140-5a13-4173-93ce-924be1f5be34",
-    "race_name": "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華",
-    "race_date": "2026-10-17",
-    "race_county": "臺中市",
-    "source_platform": "bao-ming",
-    "is_official_direct": true,
-    "priority_score": 2,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、名額。"
-    },
-    "missing": [
-      "start_times",
-      "quota"
-    ],
-    "current_links": {
-      "registration_link": "https://bao-ming.com/eb/content/7066#33056",
-      "official_event_url": "https://bao-ming.com/eb/content/7066#33056",
-      "detail_url": "https://bao-ming.com/eb/content/7066#33056",
-      "source_registration_link": "",
-      "facebook_search_url": ""
-    }
-  },
-  {
     "race_id": "db09aa75-1035-41f1-acea-59fc25f50818",
     "race_name": "2026 第二屆核泰皮拉提斯馬拉松",
     "race_date": "2026-12-05",
@@ -379,7 +238,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、費用。"
     },
@@ -396,33 +255,6 @@
     }
   },
   {
-    "race_id": "e75da261-120b-44da-b8c6-f6fec63d1f2e",
-    "race_name": "2027南投縣仁愛鄉原住民三鐵挑戰賽",
-    "race_date": "2027-01-10",
-    "race_county": "南投縣",
-    "source_platform": "Focusline、運動筆記",
-    "is_official_direct": true,
-    "priority_score": 2,
-    "tracking": {
-      "status": "wait_until_open_window",
-      "status_label": "等待接近開報",
-      "next_check_date": "2026-08-03",
-      "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
-    },
-    "missing": [
-      "fees",
-      "quota"
-    ],
-    "current_links": {
-      "registration_link": "https://www.focusline.com.tw/270110KW?promo=taipeimarathon",
-      "official_event_url": "https://www.focusline.com.tw/270110KW?promo=taipeimarathon",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13069&subtitle=2027%E5%8D%97%E6%8A%95%E7%B8%A3%E4%BB%81%E6%84%9B%E9%84%89%E5%8E%9F%E4%BD%8F%E6%B0%91%E4%B8%89%E9%90%B5%E6%8C%91%E6%88%B0%E8%B3%BD",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13069",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E5%8D%97%E6%8A%95%E7%B8%A3%E4%BB%81%E6%84%9B%E9%84%89%E5%8E%9F%E4%BD%8F%E6%B0%91%E4%B8%89%E9%90%B5%E6%8C%91%E6%88%B0%E8%B3%BD"
-    }
-  },
-  {
     "race_id": "9b9b1889-4d8c-4dc4-89d4-f792520bda1e",
     "race_name": "2026 梨山水蜜桃路跑",
     "race_date": "2026-08-23",
@@ -433,7 +265,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：各距離開跑時間。"
     },
@@ -449,6 +281,58 @@
     }
   },
   {
+    "race_id": "8726bcf1-a9ca-4ab8-89e1-d7e3fcadc2d8",
+    "race_name": "臺灣環島跑者圓夢計畫III(火車站環島體驗賽)",
+    "race_date": "2026-09-12",
+    "race_county": "苗栗縣",
+    "source_platform": "JoinNow",
+    "is_official_direct": true,
+    "priority_score": 1,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-06-25",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間。"
+    },
+    "missing": [
+      "start_times"
+    ],
+    "current_links": {
+      "registration_link": "https://www.joinnow.com.tw/2026runningfordreams.php",
+      "official_event_url": "https://www.joinnow.com.tw/2026runningfordreams.php",
+      "detail_url": "https://www.joinnow.com.tw/2026runningfordreams.php",
+      "source_registration_link": "",
+      "facebook_search_url": ""
+    }
+  },
+  {
+    "race_id": "349b31c3-5908-4e96-9987-4d5ec0befd3f",
+    "race_name": "TOYOTA RUN 台中 視障專場",
+    "race_date": "2026-09-19",
+    "race_county": "臺中市",
+    "source_platform": "運動筆記",
+    "is_official_direct": true,
+    "priority_score": 1,
+    "tracking": {
+      "status": "monitor_weekly",
+      "status_label": "每週追蹤",
+      "next_check_date": "2026-06-25",
+      "cadence": "biweekly",
+      "reason": "開報日已過，仍缺：名額。"
+    },
+    "missing": [
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+      "official_event_url": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13091&subtitle=TOYOTA+RUN+%E5%8F%B0%E4%B8%AD+%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13091",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=TOYOTA%20RUN%20%E5%8F%B0%E4%B8%AD%20%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4"
+    }
+  },
+  {
     "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
     "race_name": "2026 公勝盃公益路跑",
     "race_date": "2026-10-04",
@@ -459,7 +343,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：名額。"
     },
@@ -467,77 +351,51 @@
       "quota"
     ],
     "current_links": {
-      "registration_link": "https://www.ctrun.com.tw/Activity?EventMain_ID=339",
-      "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=339",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13042&subtitle=2026%E5%85%AC%E5%8B%9D%E7%9B%83",
+      "registration_link": "https://www.ctrun.com.tw/Activity?EventMain_ID=339&Register=true&ActionStr=Create&Team=false",
+      "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=339&Register=true&ActionStr=Create&Team=false",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13042&subtitle=2026%E5%85%AC%E5%8B%9D%E7%9B%83%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13042",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%85%AC%E5%8B%9D%E7%9B%83"
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%85%AC%E5%8B%9D%E7%9B%83%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
     }
   },
   {
-    "race_id": "bcd64f2b-7c8d-476d-af0e-3cca85349b60",
-    "race_name": "2026 聯大八甲馬拉松",
-    "race_date": "2026-10-31",
-    "race_county": "苗栗縣",
+    "race_id": "f30d8140-5a13-4173-93ce-924be1f5be34",
+    "race_name": "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華",
+    "race_date": "2026-10-17",
+    "race_county": "臺中市",
     "source_platform": "bao-ming",
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間。"
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：名額。"
     },
     "missing": [
-      "start_times"
+      "quota"
     ],
     "current_links": {
-      "registration_link": "https://bao-ming.com/eb/content/7087#33080",
-      "official_event_url": "https://bao-ming.com/eb/content/7087#33080",
-      "detail_url": "https://bao-ming.com/eb/content/7087#33080",
+      "registration_link": "https://bao-ming.com/eb/content/7066#33056",
+      "official_event_url": "https://bao-ming.com/eb/content/7066#33056",
+      "detail_url": "https://bao-ming.com/eb/content/7066#33056",
       "source_registration_link": "",
       "facebook_search_url": ""
     }
   },
   {
-    "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
-    "race_name": "2026 台灣米倉田中馬拉松",
-    "race_date": "2026-11-08",
-    "race_county": "彰化縣",
-    "source_platform": "運動筆記、iRunner",
-    "is_official_direct": true,
-    "priority_score": 1,
-    "tracking": {
-      "status": "closed_gap",
-      "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-06-23",
-      "cadence": "manual",
-      "reason": "報名已截止但仍缺：費用。保留供歷史資料補齊。"
-    },
-    "missing": [
-      "fees"
-    ],
-    "current_links": {
-      "registration_link": "https://irunner.biji.co/Tianzhong2026/signup",
-      "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12929",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE"
-    }
-  },
-  {
-    "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
-    "race_name": "2026 國聚慵懶跑者聚樂部",
-    "race_date": "2026-11-15",
+    "race_id": "027109af-8571-4410-9a36-918ecc9d4a3f",
+    "race_name": "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場",
+    "race_date": "2026-10-25",
     "race_county": "臺中市",
-    "source_platform": "CTRun、運動筆記",
+    "source_platform": "iRunner、運動筆記",
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：費用。"
     },
@@ -545,11 +403,63 @@
       "fees"
     ],
     "current_links": {
-      "registration_link": "https://www.ctrun.com.tw/Activity/?EventMain_ID=308",
-      "official_event_url": "https://www.ctrun.com.tw/Activity/?EventMain_ID=308",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13045&subtitle=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13045",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8"
+      "registration_link": "https://irunner.biji.co/2026SpongeBob-TXG",
+      "official_event_url": "https://irunner.biji.co/2026SpongeBob-TXG",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13066",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4"
+    }
+  },
+  {
+    "race_id": "cd9fe61c-eab0-4c56-a097-c19c26ecb157",
+    "race_name": "國立臺灣體育運動大學第34屆駱駝盃路跑賽",
+    "race_date": "2026-11-21",
+    "race_county": "臺中市",
+    "source_platform": "bao-ming",
+    "is_official_direct": true,
+    "priority_score": 1,
+    "tracking": {
+      "status": "monitor_weekly",
+      "status_label": "每週追蹤",
+      "next_check_date": "2026-06-25",
+      "cadence": "biweekly",
+      "reason": "開報日已過，仍缺：名額。"
+    },
+    "missing": [
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "https://bao-ming.com/eb/content/7016#32884",
+      "official_event_url": "https://bao-ming.com/eb/content/7016#32884",
+      "detail_url": "https://bao-ming.com/eb/content/7016#32884",
+      "source_registration_link": "",
+      "facebook_search_url": ""
+    }
+  },
+  {
+    "race_id": "e75da261-120b-44da-b8c6-f6fec63d1f2e",
+    "race_name": "2027南投縣仁愛鄉原住民三鐵挑戰賽",
+    "race_date": "2027-01-10",
+    "race_county": "南投縣",
+    "source_platform": "Focusline、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 1,
+    "tracking": {
+      "status": "wait_until_open_window",
+      "status_label": "等待接近開報",
+      "next_check_date": "2026-08-02",
+      "cadence": "weekly_near_open",
+      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
+    },
+    "missing": [
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "https://www.focusline.com.tw/270110KW?promo=taipeimarathon",
+      "official_event_url": "https://www.focusline.com.tw/270110KW?promo=taipeimarathon",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13069&subtitle=2027%E5%8D%97%E6%8A%95%E7%B8%A3%E4%BB%81%E6%84%9B%E9%84%89%E5%8E%9F%E4%BD%8F%E6%B0%91%E4%B8%89%E9%90%B5%E6%8C%91%E6%88%B0%E8%B3%BD",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13069",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E5%8D%97%E6%8A%95%E7%B8%A3%E4%BB%81%E6%84%9B%E9%84%89%E5%8E%9F%E4%BD%8F%E6%B0%91%E4%B8%89%E9%90%B5%E6%8C%91%E6%88%B0%E8%B3%BD"
     }
   },
   {
@@ -563,9 +473,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-06-23",
+      "next_check_date": "2026-06-25",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 12 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "reason": "距離賽事 10 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
     },
     "missing": [],
     "current_links": {
