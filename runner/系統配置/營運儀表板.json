@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-25T11:16:35.096Z",
-  "basis_date": "2026-06-25",
+  "generated_at": "2026-06-26T01:35:06.442Z",
+  "basis_date": "2026-06-26",
   "races": {
     "total": 53,
     "follow_up_count": 17,
@@ -27,52 +27,52 @@
     }
   },
   "content": {
-    "shoe_cards": 23,
+    "shoe_cards": 24,
     "news_cards": 40,
-    "newest_shoe_date": "2026-06-22",
-    "newest_news_date": "2026-06-24",
-    "published_count": 63,
+    "newest_shoe_date": "2026-06-25",
+    "newest_news_date": "2026-06-26",
+    "published_count": 64,
     "candidate_count": 83,
     "editorial_count": 3,
     "candidate_by_category": {
-      "訓練": 11,
-      "跑鞋新品": 61,
-      "入門知識": 3,
-      "跑步新聞": 6,
-      "恢復": 2
+      "入門知識": 4,
+      "跑鞋新品": 64,
+      "跑步新聞": 7,
+      "訓練": 7,
+      "恢復": 1
     },
     "source_stable_count": 10,
     "source_watch_count": 0,
     "source_weak_count": 0,
     "source_health": [
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "運動筆記",
         "url": "https://running.biji.co/",
         "source_type": "跑步新聞 / 跑鞋專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 10,
+        "candidate_count": 12,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "動一動",
         "url": "https://www.don1don.com/",
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 20,
+        "candidate_count": 18,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "Bounce",
         "url": "https://bouncin.net/",
         "source_type": "跑鞋新品",
@@ -85,20 +85,20 @@
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "Runner's World",
         "url": "https://www.runnersworld.com/",
         "source_type": "英文跑鞋評測 / 訓練知識",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 104,
+        "candidate_count": 100,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "Women's Health Taiwan",
         "url": "https://www.womenshealthmag.com/tw/fitness/",
         "source_type": "跑鞋選購 / 健康訓練",
@@ -111,7 +111,7 @@
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "HK01 跑步",
         "url": "https://www.hk01.com/channel/跑步",
         "source_type": "跑步裝備 / 跑步知識",
@@ -124,20 +124,20 @@
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "KENLU",
         "url": "https://kenlu.net/",
         "source_type": "跑鞋評測 / 裝備情報",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 133,
+        "candidate_count": 130,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "KENLU 越野",
         "url": "https://kenlu.net/tag/trail-run/",
         "source_type": "越野跑鞋 / 越野訓練",
@@ -150,7 +150,7 @@
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "運動科學網",
         "url": "https://www.sportscience.com.tw/",
         "source_type": "訓練知識 / 運動科學",
@@ -163,7 +163,7 @@
         "error": ""
       },
       {
-        "checked_at": "2026-06-24",
+        "checked_at": "2026-06-26",
         "source": "IR SPORTS",
         "url": "https://irsports.com.tw/",
         "source_type": "路跑活動 / 訓練資訊",
