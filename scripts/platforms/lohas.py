@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from urllib.parse import urljoin
 
 import requests
@@ -126,6 +127,19 @@ def _grouped_start_time_text(labels: list[str], values: list[str]) -> str:
     return "、".join(rows)
 
 
+def _status_from_dates(opens_at: str, deadline: str, signup_url: str) -> str:
+    today = datetime.now().strftime("%Y-%m-%d")
+    if opens_at and opens_at > today:
+        return "未開始"
+    if deadline and deadline < today:
+        return "已截止"
+    if signup_url and deadline and deadline >= today:
+        return "報名中"
+    if signup_url and opens_at and opens_at <= today:
+        return "報名中"
+    return ""
+
+
 def _registration_period(html: str) -> tuple[str, str]:
     """Extract opens_at and deadline from Lohas period text.
 
@@ -146,6 +160,7 @@ def extract(html: str, race: dict, url: str) -> dict:
     lines = compact_lines(html)
     details = generic_extract(html, race, url)
     labels = _extract_group_labels(lines)
+    signup_url = _signup_link(html, url)
 
     fee_block = " ".join(collect_between(lines, ("報名費用", "費用"), ("晶片押金", "報名資訊", "開放名額", "活動資訊")))
     quota_block = " ".join(collect_between(lines, ("開放名額", "限制名額", "名額"), ("報名資格", "活動資訊", "報名費用")))
@@ -156,7 +171,8 @@ def extract(html: str, race: dict, url: str) -> dict:
     fees = "；".join(value for value in (grouped_fees or first_fee_text(fee_block), f"晶片押金 {first_fee_text(deposit_block)}" if first_fee_text(deposit_block) else "") if value)
 
     opens_at, period_deadline = _registration_period(html)
-    deadline = period_deadline or _load_signup_deadline(_signup_link(html, url)) or _countdown_deadline(html)
+    deadline = period_deadline or _load_signup_deadline(signup_url) or _countdown_deadline(html)
+    status = _status_from_dates(opens_at, deadline, signup_url)
 
     platform_details = {
         "venue": find_label_value(lines, ("活動地點", "會場地點", "起跑地點")),
@@ -167,7 +183,8 @@ def extract(html: str, race: dict, url: str) -> dict:
         "quota": grouped_quota or first_quota_text(quota_block),
         "registration_opens_at": opens_at,
         "registration_deadline": deadline,
-        "registration_link": _signup_link(html, url),
+        "registration_link": signup_url,
+        "registration_status": status,
         "start_times": grouped_start_times,
     }
 
