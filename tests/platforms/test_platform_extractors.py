@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from platforms import focusline, lohas
+from platforms.common import extract_start_times
 
 
 def test_focusline_extract_uses_api_payload(monkeypatch):
@@ -44,3 +45,19 @@ def test_lohas_extract_reads_signup_countdown_deadline():
     details = lohas.extract(html, {}, "https://signup.lohasnet.tw/signup/4261")
 
     assert details["registration_deadline"] == "2026-09-30"
+
+
+def test_extract_start_times_handles_grouped_schedule_rows():
+    lines = [
+        "07：30",
+        "路跑組(10公里 )",
+        "健康組(6公里)",
+        "選手起跑",
+        "07：45",
+        "趣味組(3公里)",
+        "選手起跑",
+        "09：30",
+        "頒獎",
+    ]
+
+    assert extract_start_times(lines) == "10K 起跑 07:30、6K 起跑 07:30、3K 起跑 07:45"

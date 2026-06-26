@@ -371,6 +371,33 @@ def _start_time_rows_from_schedule(lines: list[str]) -> list[str]:
     return rows
 
 
+def _start_time_rows_from_grouped_schedule(lines: list[str]) -> list[str]:
+    rows: list[str] = []
+    time_only = re.compile(r"^\s*([01]?\d|2[0-3])[:：][0-5]\d(?:\s*[~～-]\s*(?:[01]?\d|2[0-3])[:：][0-5]\d)?\s*$")
+    start_keywords = ("起跑", "鳴槍", "出發")
+
+    for index, line in enumerate(lines):
+        if not time_only.match(line):
+            continue
+        time = _time_text(line)
+        if not time:
+            continue
+
+        groups: list[str] = []
+        found_start_line = False
+        for candidate in lines[index + 1:index + 6]:
+            if time_only.match(candidate):
+                break
+            if any(keyword in candidate for keyword in start_keywords):
+                found_start_line = True
+                break
+            groups.extend(_distance_groups(candidate))
+
+        if found_start_line and groups:
+            rows.extend(_format_start_time(group, time) for group in dict.fromkeys(groups))
+    return rows
+
+
 def _start_time_rows_from_inline(lines: list[str]) -> list[str]:
     """Handle lines where group name, time, and start keyword appear together (e.g. biji.co '組名 AM HH:MM 起跑')."""
     rows: list[str] = []
@@ -402,6 +429,10 @@ def extract_start_times(lines: list[str]) -> str:
     schedule_rows = _start_time_rows_from_schedule(lines)
     if schedule_rows:
         return "、".join(dict.fromkeys(schedule_rows[:8]))
+
+    grouped_schedule_rows = _start_time_rows_from_grouped_schedule(lines)
+    if grouped_schedule_rows:
+        return "、".join(dict.fromkeys(grouped_schedule_rows[:8]))
 
     inline_rows = _start_time_rows_from_inline(lines)
     if inline_rows:

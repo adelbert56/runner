@@ -165,29 +165,6 @@
     ]
   },
   {
-    "race_id": "34b4433b-8832-42e6-a063-1df6c91e8b30",
-    "race_name": "第一屆樂敗國際精品路跑",
-    "race_date": "2026-10-11",
-    "race_county": "臺中市",
-    "distances": [
-      "10km",
-      "6km",
-      "3km"
-    ],
-    "start_times": "健康組（6公里） 起跑 07:45、3公里 起跑 09:30",
-    "registration_link": "https://irunner.biji.co/2026Lovebuy",
-    "official_event_url": "https://irunner.biji.co/2026Lovebuy",
-    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13082&subtitle=%E7%AC%AC%E4%B8%80%E5%B1%86%E6%A8%82%E6%95%97%E5%9C%8B%E9%9A%9B%E7%B2%BE%E5%93%81%E8%B7%AF%E8%B7%91",
-    "issues": [
-      {
-        "key": "group_count_less_than_distance_count",
-        "severity": "low",
-        "label": "起跑組別少於距離數",
-        "hint": "距離：10K、6K、3K；起跑列：健康組（6公里）、3公里"
-      }
-    ]
-  },
-  {
     "race_id": "f30d8140-5a13-4173-93ce-924be1f5be34",
     "race_name": "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華",
     "race_date": "2026-10-17",
@@ -284,32 +261,6 @@
         "severity": "low",
         "label": "起跑組別少於距離數",
         "hint": "距離：全馬（42K）、半馬（21K）、10K、5K、全馬（42.195K）；起跑列：全馬組（42K）、半馬、挑戰組（10K）、健走組（5K）"
-      }
-    ]
-  },
-  {
-    "race_id": "205c284e-77bf-4224-8cda-79cd7bd819a9",
-    "race_name": "2026 母子鱷魚40週年-突破前行馬拉松",
-    "race_date": "2026-12-13",
-    "race_county": "臺中市",
-    "distances": [
-      "42km",
-      "21km",
-      "13km",
-      "5km",
-      "10km",
-      "42.195km"
-    ],
-    "start_times": "全馬組（42K） 起跑 06:00、半馬 起跑 06:10、半馬組（21K） 起跑 06:10、挑戰組（13K） 起跑 06:20、5K 起跑 06:30",
-    "registration_link": "https://lohasnet.tw/BNM40thMarathon2026/",
-    "official_event_url": "https://lohasnet.tw/BNM40thMarathon2026/",
-    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12997&subtitle=2026%E6%AF%8D%E5%AD%90%E9%B1%B7%E9%AD%9A40%E9%80%B1%E5%B9%B4-%E7%AA%81%E7%A0%B4%E5%89%8D%E8%A1%8C%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "issues": [
-      {
-        "key": "group_count_less_than_distance_count",
-        "severity": "low",
-        "label": "起跑組別少於距離數",
-        "hint": "距離：全馬（42K）、半馬（21K）、13K、5K、10K、全馬（42.195K）；起跑列：全馬組（42K）、半馬、半馬組（21K）、挑戰組（13K）、5K"
       }
     ]
   },
