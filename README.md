@@ -133,6 +133,18 @@ http://localhost:4173/site/
 
 不要直接用檔案方式開 `site/index.html`，因為瀏覽器安全限制可能造成 `site/data/*.json` 載入失敗。
 
+### 本機報名管理
+
+本機站台啟動後，可另外開啟：
+
+```text
+http://localhost:4173/local/registration/registration.html
+```
+
+- 這一頁只會透過本機 API 讀寫 `runner/報名管理/報名管理資料.json`
+- 該檔案已加入 `.gitignore`，避免把姓名、電話、衣服尺寸、繳費狀態等個資誤推到公開站台
+- 初始範本可參考 `runner/報名管理/報名管理資料.範例.json`
+
 ## 常用指令
 
 | 指令 | 用途 |

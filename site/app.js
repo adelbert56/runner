@@ -11,6 +11,29 @@ const PLAN_FEEDBACK_KEY = `runner-plaza:${DEVICE_ID}:training-feedback`;
 const DATA_VERSION = "20260529-message-list1";
 const TODAY = getTodayString();
 
+const LOCAL_REGISTRATION_HREF = "/local/registration/registration.html";
+
+function isLocalHost() {
+  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+}
+
+function addLocalRegistrationLink() {
+  if (!isLocalHost()) {
+    return;
+  }
+  const nav = document.querySelector(".main-nav");
+  if (!nav || nav.querySelector(`[href="${LOCAL_REGISTRATION_HREF}"]`)) {
+    return;
+  }
+  const link = document.createElement("a");
+  link.href = LOCAL_REGISTRATION_HREF;
+  link.textContent = "報名管理";
+  link.setAttribute("data-local-only", "registration");
+  nav.append(link);
+}
+
+addLocalRegistrationLink();
+
 const state = {
   races: [],
   county: "all",

@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>跑者廣場 | 本機報名管理</title>
+    <meta
+      name="description"
+      content="只在本機保存的賽事報名管理頁，記錄參加人員、衣服尺寸、報名與繳費狀態。"
+    >
+    <link rel="icon" type="image/svg+xml" href="/site/assets/favicon.svg?v=20260626-registration1">
+    <link rel="shortcut icon" href="/site/favicon.ico?v=20260626-registration1">
+    <link rel="icon" type="image/png" sizes="32x32" href="/site/assets/favicon-32.png?v=20260626-registration1">
+    <link rel="apple-touch-icon" sizes="180x180" href="/site/assets/apple-touch-icon.png?v=20260626-registration1">
+    <link rel="stylesheet" href="/site/styles.css?v=20260626-registration1">
+    <link rel="stylesheet" href="./registration.css?v=20260626-registration1">
+  </head>
+  <body class="registration-page">
+    <header class="site-header">
+      <a class="brand" href="/site/index.html#top" aria-label="跑者廣場首頁">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" focusable="false">
+            <rect width="64" height="64" rx="14"></rect>
+            <path class="brand-route" d="M12 45c7-8 15-9 23-3 7 5 13 5 18-1"></path>
+            <circle class="brand-head" cx="27" cy="17" r="5"></circle>
+            <path class="brand-runner" d="M29 24l-7 8 10 4 7-8"></path>
+            <path class="brand-runner" d="M31 36l-8 12"></path>
+            <path class="brand-runner" d="M33 37l12 10"></path>
+            <path class="brand-route" d="M22 32l-8-5"></path>
+          </svg>
+        </span>
+        <span>跑者廣場</span>
+      </a>
+      <nav class="main-nav" aria-label="主要導覽">
+        <a href="/site/index.html#races">賽事</a>
+        <a href="/site/index.html#announcements">公告</a>
+        <a href="/site/trainer.html">訓練計畫</a>
+        <a href="/local/registration/registration.html" aria-current="page">報名管理</a>
+      </nav>
+    </header>
+
+    <main class="registration-app">
+      <section class="registration-hero">
+        <div>
+          <p class="eyebrow">Local Only</p>
+          <h1>本機報名管理</h1>
+          <p>
+            這一頁只會把個資與報名狀態寫到你本機的
+            <code>runner/報名管理/報名管理資料.json</code>，
+            不會進到公開站台資料流。
+          </p>
+        </div>
+        <div class="registration-hero-actions">
+          <button type="button" class="primary-action" id="export-data">匯出備份 JSON</button>
+          <label class="secondary-action file-action">
+            匯入備份 JSON
+            <input id="import-data" type="file" accept="application/json">
+          </label>
+        </div>
+      </section>
+
+      <section class="registration-summary" aria-label="報名摘要">
+        <article class="summary-card">
+          <span>規劃賽事</span>
+          <strong id="summary-races">0</strong>
+          <small>資料來源：站內賽事清單</small>
+        </article>
+        <article class="summary-card">
+          <span>報名人員</span>
+          <strong id="summary-people">0</strong>
+          <small>本機私有名單</small>
+        </article>
+        <article class="summary-card">
+          <span>報名紀錄</span>
+          <strong id="summary-entries">0</strong>
+          <small>每人每賽事一筆</small>
+        </article>
+        <article class="summary-card">
+          <span>未完成</span>
+          <strong id="summary-pending">0</strong>
+          <small>未報名或未繳費</small>
+        </article>
+      </section>
+
+      <section class="registration-layout">
+        <aside class="panel race-picker-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Race Feed</p>
+              <h2>從賽事資料帶入</h2>
+            </div>
+            <input id="race-search" type="search" placeholder="搜尋賽事名稱、地點、距離">
+          </div>
+          <div class="race-select-box">
+            <label>
+              <span>選擇賽事</span>
+              <select id="race-select">
+                <option value="">賽事整理中...</option>
+              </select>
+            </label>
+            <button class="primary-action" type="button" id="use-selected-race">帶入賽事</button>
+            <button class="secondary-action" type="button" id="export-selected-race-payment-html">匯出繳費確認 HTML</button>
+            <button class="ghost-action" type="button" id="export-selected-race-payments">匯出繳費確認 CSV</button>
+          </div>
+          <div id="race-picker" class="race-picker-summary" aria-live="polite">
+            <div class="empty-state">請先選擇賽事</div>
+          </div>
+        </aside>
+
+        <section class="panel registration-main">
+          <div class="panel-grid">
+            <section class="panel-block">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">People</p>
+                  <h2>人員主檔</h2>
+                </div>
+              </div>
+              <form id="person-form" class="data-form">
+                <input type="hidden" id="person-id">
+                <div class="field-grid three">
+                  <label>
+                    <span>姓名 <b aria-hidden="true">*</b></span>
+                    <input id="person-name" required>
+                  </label>
+                  <label>
+                    <span>性別 <b aria-hidden="true">*</b></span>
+                    <select id="person-gender" required>
+                      <option value="">請選擇</option>
+                      <option>男</option>
+                      <option>女</option>
+                      <option>其他</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>衣服尺寸 <b aria-hidden="true">*</b></span>
+                    <select id="person-shirt-size" required>
+                      <option value="">請選擇</option>
+                      <option>XS</option>
+                      <option>S</option>
+                      <option>M</option>
+                      <option>L</option>
+                      <option>XL</option>
+                      <option>2XL</option>
+                      <option>3XL</option>
+                      <option>童裝</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="field-grid three">
+                  <label>
+                    <span>手機 <b aria-hidden="true">*</b></span>
+                    <input id="person-phone" required inputmode="tel">
+                  </label>
+                  <label>
+                    <span>身分證號碼 <b aria-hidden="true">*</b></span>
+                    <input id="person-national-id" required autocomplete="off">
+                  </label>
+                  <label>
+                    <span>出生年月日 <b aria-hidden="true">*</b></span>
+                    <input id="person-birthday" type="date" required>
+                  </label>
+                </div>
+                <div class="field-grid three">
+                  <label>
+                    <span>緊急聯絡人 <b aria-hidden="true">*</b></span>
+                    <input id="person-emergency-name" required>
+                  </label>
+                  <label>
+                    <span>關係 <b aria-hidden="true">*</b></span>
+                    <input id="person-emergency-relationship" required>
+                  </label>
+                  <label>
+                    <span>緊急聯絡人手機 <b aria-hidden="true">*</b></span>
+                    <input id="person-emergency-phone" required inputmode="tel">
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button class="primary-action" type="submit">儲存人員</button>
+                  <button class="ghost-action" type="button" id="person-reset">清空</button>
+                </div>
+              </form>
+              <div id="people-list" class="list-shell">
+                <div class="empty-state">尚未建立人員</div>
+              </div>
+            </section>
+
+            <section class="panel-block">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Entries</p>
+                  <h2>報名紀錄</h2>
+                </div>
+                <span class="panel-tip">一人一賽事一筆</span>
+              </div>
+              <form id="entry-form" class="data-form">
+                <input type="hidden" id="entry-id">
+                <div class="field-grid two">
+                  <label>
+                    <span>賽事</span>
+                    <input id="entry-race-name" required placeholder="可從左側帶入或手動輸入">
+                  </label>
+                  <label>
+                    <span>參加人員</span>
+                    <select id="entry-person-id" required>
+                      <option value="">請先選擇人員</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="field-grid four">
+                  <label>
+                    <span>日期</span>
+                    <input id="entry-race-date" type="date">
+                  </label>
+                  <label>
+                    <span>距離 / 組別</span>
+                    <input id="entry-distance" placeholder="10K / 半馬">
+                  </label>
+                  <label>
+                    <span>縣市</span>
+                    <input id="entry-county">
+                  </label>
+                  <label>
+                    <span>地點</span>
+                    <input id="entry-location">
+                  </label>
+                </div>
+                <div class="field-grid three">
+                  <label>
+                    <span>報名網站</span>
+                    <input id="entry-registration-url" type="url" placeholder="https://">
+                  </label>
+                  <label>
+                    <span>報名開始日</span>
+                    <input id="entry-registration-opens-at" type="date">
+                  </label>
+                  <label>
+                    <span>報名截止日</span>
+                    <input id="entry-registration-deadline" type="date">
+                  </label>
+                </div>
+                <div class="field-grid four">
+                  <label>
+                    <span>衣服尺寸</span>
+                    <select id="entry-shirt-size">
+                      <option value="">未設定</option>
+                      <option>XS</option>
+                      <option>S</option>
+                      <option>M</option>
+                      <option>L</option>
+                      <option>XL</option>
+                      <option>2XL</option>
+                      <option>3XL</option>
+                      <option>童裝</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>目前狀態</span>
+                    <select id="entry-status">
+                      <option>待報名</option>
+                      <option>尚未開報</option>
+                      <option>可報名</option>
+                      <option>已報名未繳費</option>
+                      <option>已完成</option>
+                      <option>已截止</option>
+                      <option>取消</option>
+                    </select>
+                  </label>
+                  <label class="checkbox-field">
+                    <span>是否報名</span>
+                    <input id="entry-is-registered" type="checkbox">
+                  </label>
+                  <label class="checkbox-field">
+                    <span>是否繳費</span>
+                    <input id="entry-is-paid" type="checkbox">
+                  </label>
+                </div>
+                <div class="field-grid four">
+                  <label>
+                    <span>報名日期</span>
+                    <input id="entry-registration-date" type="date">
+                  </label>
+                  <label>
+                    <span>繳費金額</span>
+                    <input id="entry-paid-amount" type="number" min="0" step="1">
+                  </label>
+                  <label>
+                    <span>繳費日期</span>
+                    <input id="entry-payment-date" type="date">
+                  </label>
+                  <label>
+                    <span>付款方式</span>
+                    <select id="entry-payment-method">
+                      <option value="">未設定</option>
+                      <option>信用卡</option>
+                      <option>ATM轉帳</option>
+                      <option>超商</option>
+                      <option>現金</option>
+                      <option>其他</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="field-grid three">
+                  <label>
+                    <span>訂單編號</span>
+                    <input id="entry-order-code">
+                  </label>
+                  <label>
+                    <span>匯款後五碼</span>
+                    <input id="entry-transfer-last-five" maxlength="5">
+                  </label>
+                  <label>
+                    <span>備註</span>
+                    <input id="entry-notes">
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button class="primary-action" type="submit">儲存報名紀錄</button>
+                  <button class="ghost-action" type="button" id="entry-reset">清空</button>
+                </div>
+              </form>
+              <div id="entry-status-message" class="status-message" aria-live="polite"></div>
+              <div id="entries-list" class="list-shell">
+                <div class="empty-state">尚未建立報名紀錄</div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./registration.js?v=20260626-registration1"></script>
+  </body>
+</html>
