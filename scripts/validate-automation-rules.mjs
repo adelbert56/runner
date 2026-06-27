@@ -126,10 +126,11 @@ assertCheck(
     .filter((workflow) => [
       ".github/workflows/weather-refresh.yml",
       ".github/workflows/content-candidates.yml",
+      ".github/workflows/message-cloud-refresh.yml",
       ".github/workflows/runner-quips-refresh.yml",
     ].includes(workflow.path))
     .every((workflow) => workflow.recovery_events?.includes("workflow_dispatch")),
-  "schedule audit accepts orchestrator recovery dispatches for scheduled content/weather workflows"
+  "schedule audit accepts orchestrator recovery dispatches for scheduled content, weather, and message cloud workflows"
 );
 assertCheck(httpClientScript.includes("522") && httpClientScript.includes("Retry-After"), "HTTP scraper retry policy handles Cloudflare/transient failures");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
@@ -247,6 +248,15 @@ assertCheck(
   "message cloud workflow refreshes the GitHub issue source twice daily"
 );
 assertCheck(
+  messageCloudWorkflow.includes("Check recent message cloud refresh guard")
+    && messageCloudWorkflow.includes("lookback_hours=8")
+    && messageCloudWorkflow.includes("--json databaseId,createdAt,status,conclusion")
+    && messageCloudWorkflow.includes('.conclusion == "success"')
+    && messageCloudWorkflow.includes('.status == "in_progress"')
+    && messageCloudWorkflow.includes('.status == "queued"'),
+  "message cloud schedule slots skip when a recent refresh already exists or is running"
+);
+assertCheck(
   automationOrchestratorWorkflow.includes('cron: "*/30 * * * *"')
     && automationOrchestratorWorkflow.includes("workflow_run:")
     && automationOrchestratorWorkflow.includes("node scripts/automation-orchestrator.mjs"),
@@ -321,6 +331,8 @@ for (const [name, workflow] of [
 ]) {
   assertCheck(workflow.includes("actions: write"), `${name} workflow can trigger Pages deploy`);
   assertCheck(workflow.includes("pages.yml"), `${name} workflow delegates Pages deploy to pages.yml`);
+  assertCheck(workflow.includes("Wait for Pages deploy"), `${name} workflow waits for the matching Pages deploy`);
+  assertCheck(workflow.includes('gh run watch --repo "$REPOSITORY" "$pages_run_id" --exit-status'), `${name} workflow blocks on Pages deploy completion`);
 }
 
 assertCheck(
@@ -346,6 +358,7 @@ assertCheck(
     "Validate generated files",
     "Commit weather updates",
     "Trigger Pages deploy",
+    "Wait for Pages deploy",
   ]),
   "weather workflow syncs, validates, commits, and deploys in order"
 );
@@ -358,6 +371,7 @@ assertCheck(
     "Validate scripts",
     "Commit content candidates",
     "Trigger Pages deploy",
+    "Wait for Pages deploy",
   ]),
   "content workflow validates, commits, and deploys in order"
 );
@@ -368,15 +382,18 @@ assertCheck(
     "Validate scripts",
     "Commit runner quips",
     "Trigger Pages deploy",
+    "Wait for Pages deploy",
   ]),
   "runner quips workflow validates, commits, and deploys in order"
 );
 assertCheck(
   includesInOrder(messageCloudWorkflow, [
+    "Check recent message cloud refresh guard",
     "Build message cloud",
     "Validate scripts",
     "Commit message cloud",
     "Trigger Pages deploy",
+    "Wait for Pages deploy",
   ]),
   "message cloud workflow validates, commits, and deploys in order"
 );
