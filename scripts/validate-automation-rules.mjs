@@ -24,6 +24,40 @@ function includesInOrder(content, labels) {
   return true;
 }
 
+function extractLookbackHours(workflow) {
+  const match = workflow.match(/lookback_hours=(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+function extractOrchestratorTask(source, workflowFile) {
+  const tasksBlockMatch = source.match(/const TASKS = \[(?<body>[\s\S]*?)\n\];/);
+  if (!tasksBlockMatch?.groups?.body) {
+    return null;
+  }
+
+  const taskBlocks = tasksBlockMatch.groups.body
+    .split(/\n  },\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+  const block = taskBlocks.find((candidate) => candidate.includes(`workflow: "${workflowFile}"`));
+  if (!block) {
+    return null;
+  }
+
+  const name = block.match(/name: "([^"]+)"/)?.[1] || null;
+  const slots = [];
+  const slotRegex = /{ days: \[([^\]]+)\], due: "([^"]+)", deadline: "([^"]+)" }/g;
+  let slotMatch;
+  while ((slotMatch = slotRegex.exec(block)) !== null) {
+    slots.push({
+      days: slotMatch[1].split(",").map((value) => Number(value.trim())),
+      due: slotMatch[2],
+      deadline: slotMatch[3],
+    });
+  }
+  return { name, slots };
+}
+
 function workflowCommitsGeneratedFiles(workflow, files) {
   return workflow.includes("bash .github/scripts/commit-generated.sh")
     && commitGeneratedScript.includes("git add --")
@@ -56,11 +90,13 @@ const [
   quipsWorkflow,
   messageCloudWorkflow,
   automationOrchestratorWorkflow,
+  automationOrchestratorScript,
   pagesWorkflow,
   ciWorkflow,
   scheduleAuditConfigRaw,
   httpClientScript,
   commitGeneratedScript,
+  waitForPagesDispatchScript,
 ] = await Promise.all([
   text("package.json"),
   text("site/index.html"),
@@ -87,17 +123,64 @@ const [
   text(".github/workflows/runner-quips-refresh.yml"),
   text(".github/workflows/message-cloud-refresh.yml"),
   text(".github/workflows/automation-orchestrator.yml"),
+  text("scripts/automation-orchestrator.mjs"),
   text(".github/workflows/pages.yml"),
   text(".github/workflows/ci.yml"),
   text(".github/schedule-audit.json"),
   text("scripts/http_client.py"),
   text(".github/scripts/commit-generated.sh"),
+  text(".github/scripts/wait-for-pages-dispatch.sh"),
 ]);
 
 const packageJson = JSON.parse(packageJsonRaw);
 const scheduleAuditConfig = JSON.parse(scheduleAuditConfigRaw);
 const appVersion = appJs.match(/const DATA_VERSION = "([^"]+)"/)?.[1] || "";
 const scriptVersion = indexHtml.match(/app\.js\?v=([^"]+)"/)?.[1] || "";
+const scheduledWorkflowExpectations = [
+  {
+    label: "weather",
+    workflowFile: "weather-refresh.yml",
+    workflowName: "Refresh race weather",
+    workflowSource: weatherWorkflow,
+    lookbackHours: 6,
+    slots: [{ days: [0, 1, 2, 3, 4, 5, 6], due: "07:23", deadline: "15:30" }],
+  },
+  {
+    label: "race data",
+    workflowFile: "data-refresh.yml",
+    workflowName: "Refresh race data",
+    workflowSource: dataWorkflow,
+    lookbackHours: 18,
+    slots: [{ days: [2, 4], due: "18:17", deadline: "23:59" }],
+  },
+  {
+    label: "content",
+    workflowFile: "content-candidates.yml",
+    workflowName: "Collect content candidates",
+    workflowSource: contentWorkflow,
+    lookbackHours: 8,
+    slots: [{ days: [1, 3, 5], due: "09:17", deadline: "18:00" }],
+  },
+  {
+    label: "runner quips",
+    workflowFile: "runner-quips-refresh.yml",
+    workflowName: "Refresh runner quips",
+    workflowSource: quipsWorkflow,
+    lookbackHours: 8,
+    slots: [{ days: [1], due: "10:23", deadline: "18:00" }],
+  },
+  {
+    label: "message cloud",
+    workflowFile: "message-cloud-refresh.yml",
+    workflowName: "Refresh message cloud",
+    workflowSource: messageCloudWorkflow,
+    lookbackHours: 8,
+    slots: [
+      { days: [0, 1, 2, 3, 4, 5, 6], due: "12:07", deadline: "17:59" },
+      { days: [0, 1, 2, 3, 4, 5, 6], due: "18:07", deadline: "23:59" },
+    ],
+  },
+];
 
 assertCheck(
   packageJson.scripts.check.includes("scripts/validate-automation-rules.mjs"),
@@ -111,6 +194,9 @@ assertCheck(appJs.includes("message-cloud.json?v=${DATA_VERSION}"), "message clo
 assertCheck(appJs.includes("automation-health.json?v=${DATA_VERSION}"), "automation health fetch uses DATA_VERSION cache busting");
 assertCheck(packageJson.scripts["message-cloud:build"] === "node scripts/build-message-cloud.mjs", "message cloud has a GitHub issue build script");
 assertCheck(scheduleAuditConfig.pages_url === "https://adelbert56.github.io/runner/", "schedule audit checks the public GitHub Pages URL");
+assertCheck(waitForPagesDispatchScript.includes('workflow_file="${PAGES_WORKFLOW_FILE:-pages.yml}"'), "shared Pages wait script defaults to pages.yml");
+assertCheck(waitForPagesDispatchScript.includes('workflow_event="${PAGES_WORKFLOW_EVENT:-workflow_dispatch}"'), "shared Pages wait script waits for workflow_dispatch runs");
+assertCheck(waitForPagesDispatchScript.includes('gh run watch --repo "$REPOSITORY" "$pages_run_id" --exit-status'), "shared Pages wait script blocks on deploy completion");
 const raceScheduleAudit = scheduleAuditConfig.expected_workflows.find((workflow) => workflow.path === ".github/workflows/data-refresh.yml");
 assertCheck(
   raceScheduleAudit?.max_age_minutes_by_local_weekday?.["3"] <= 430
@@ -132,6 +218,19 @@ assertCheck(
     .every((workflow) => workflow.recovery_events?.includes("workflow_dispatch")),
   "schedule audit accepts orchestrator recovery dispatches for scheduled content, weather, and message cloud workflows"
 );
+for (const expected of scheduledWorkflowExpectations) {
+  const lookbackHours = extractLookbackHours(expected.workflowSource);
+  const auditEntry = scheduleAuditConfig.expected_workflows.find((workflow) => workflow.path === `.github/workflows/${expected.workflowFile}`);
+  const orchestratorTask = extractOrchestratorTask(automationOrchestratorScript, expected.workflowFile);
+
+  assertCheck(lookbackHours === expected.lookbackHours, `${expected.label} workflow keeps the expected lookback guard (${expected.lookbackHours}h)`);
+  assertCheck(Boolean(auditEntry), `${expected.label} workflow is registered in schedule audit config`);
+  assertCheck(auditEntry?.name === expected.workflowName, `${expected.label} audit entry matches the workflow display name`);
+  assertCheck(auditEntry?.recovery_events?.includes("workflow_dispatch"), `${expected.label} audit entry accepts workflow_dispatch recovery`);
+  assertCheck(Boolean(orchestratorTask), `${expected.label} workflow is covered by automation orchestrator`);
+  assertCheck(orchestratorTask?.name === expected.workflowName, `${expected.label} orchestrator task matches the workflow display name`);
+  assertCheck(JSON.stringify(orchestratorTask?.slots || []) === JSON.stringify(expected.slots), `${expected.label} orchestrator slots match the validated schedule windows`);
+}
 assertCheck(httpClientScript.includes("522") && httpClientScript.includes("Retry-After"), "HTTP scraper retry policy handles Cloudflare/transient failures");
 assertCheck((appJs.match(/cache: "no-cache"/g) || []).length >= 2, "race/content fetches opt out of stale cache");
 assertCheck(!appJs.includes("function buildAnnouncementItems"), "front end does not build announcements from race data");
@@ -324,6 +423,7 @@ for (const [name, workflow] of [
 }
 
 for (const [name, workflow] of [
+  ["race data", dataWorkflow],
   ["weather", weatherWorkflow],
   ["content", contentWorkflow],
   ["runner quips", quipsWorkflow],
@@ -332,7 +432,7 @@ for (const [name, workflow] of [
   assertCheck(workflow.includes("actions: write"), `${name} workflow can trigger Pages deploy`);
   assertCheck(workflow.includes("pages.yml"), `${name} workflow delegates Pages deploy to pages.yml`);
   assertCheck(workflow.includes("Wait for Pages deploy"), `${name} workflow waits for the matching Pages deploy`);
-  assertCheck(workflow.includes('gh run watch --repo "$REPOSITORY" "$pages_run_id" --exit-status'), `${name} workflow blocks on Pages deploy completion`);
+  assertCheck(workflow.includes("bash .github/scripts/wait-for-pages-dispatch.sh"), `${name} workflow uses the shared Pages wait script`);
 }
 
 assertCheck(

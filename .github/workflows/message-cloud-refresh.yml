@@ -90,31 +90,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-        run: |
-          expected_sha="$(git rev-parse HEAD)"
-          pages_run_id=""
-
-          for _ in $(seq 1 60); do
-            pages_run_id="$(
-              gh run list --repo "$REPOSITORY" --workflow pages.yml --branch main --limit 10 \
-                --json databaseId,headSha,event \
-              | jq -r --arg sha "$expected_sha" '
-                  [.[] | select(.event == "workflow_dispatch" and .headSha == $sha)][0].databaseId // empty
-                '
-            )"
-
-            if [ -n "$pages_run_id" ]; then
-              break
-            fi
-
-            sleep 10
-          done
-
-          if [ -z "$pages_run_id" ]; then
-            echo "Timed out waiting for Pages workflow dispatch for commit $expected_sha."
-            exit 1
-          fi
-
-          pages_run_url="$(gh run view --repo "$REPOSITORY" "$pages_run_id" --json url --jq '.url')"
-          echo "Waiting for Pages workflow: $pages_run_url"
-          gh run watch --repo "$REPOSITORY" "$pages_run_id" --exit-status
+        run: bash .github/scripts/wait-for-pages-dispatch.sh
