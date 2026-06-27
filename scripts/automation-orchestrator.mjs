@@ -27,6 +27,14 @@ const TASKS = [
     workflow: "runner-quips-refresh.yml",
     slots: [{ days: [1], due: "10:23", deadline: "18:00" }],
   },
+  {
+    name: "Refresh message cloud",
+    workflow: "message-cloud-refresh.yml",
+    slots: [
+      { days: [0, 1, 2, 3, 4, 5, 6], due: "12:07", deadline: "17:59" },
+      { days: [0, 1, 2, 3, 4, 5, 6], due: "18:07", deadline: "23:59" },
+    ],
+  },
 ];
 
 function parseHm(value) {

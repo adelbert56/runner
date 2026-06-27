@@ -256,8 +256,9 @@ assertCheck(
   automationOrchestratorWorkflow.includes("actions: write")
     && automationOrchestratorWorkflow.includes("Refresh runner quips")
     && automationOrchestratorWorkflow.includes("Collect content candidates")
-    && automationOrchestratorWorkflow.includes("Refresh race data"),
-  "automation orchestrator can dispatch missed runner quips, content, and race data workflows"
+    && automationOrchestratorWorkflow.includes("Refresh race data")
+    && automationOrchestratorWorkflow.includes("Refresh message cloud"),
+  "automation orchestrator can dispatch missed runner quips, content, race data, and message cloud workflows"
 );
 assertCheck(
   messageCloudWorkflow.includes("issues: read") && messageCloudWorkflow.includes("npm run message-cloud:build"),
