@@ -65,6 +65,29 @@
     ]
   },
   {
+    "race_id": "cd7b49ea-7a4c-469c-b863-c74e94cdeb8a",
+    "race_name": "東豐快通車路跑嘉年華",
+    "race_date": "2026-11-07",
+    "race_county": "臺中市",
+    "distances": [
+      "21km",
+      "10km",
+      "5km"
+    ],
+    "start_times": "視障組(21K/10K/5K) 起跑 07:00",
+    "registration_link": "https://lohasnet.tw/DongfengRun2026/",
+    "official_event_url": "https://lohasnet.tw/DongfengRun2026/",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13100&subtitle=%E6%9D%B1%E8%B1%90%E5%BF%AB%E9%80%9A%E8%BB%8A%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
+    "issues": [
+      {
+        "key": "multi_distance_one_group_time",
+        "severity": "medium",
+        "label": "多距離只抓到一個組別時間",
+        "hint": "組別數少於距離數，可能漏掉活動時序表或競賽資訊表。"
+      }
+    ]
+  },
+  {
     "race_id": "a5278744-091a-4aae-9a59-eedde05a39fe",
     "race_name": "115 年運動i臺灣2.0計畫-北屯區路跑樂活嘉年華",
     "race_date": "2026-06-28",
@@ -202,7 +225,7 @@
       "5km",
       "4km"
     ],
-    "start_times": "全馬組（42K） 起跑 06:00、超半馬組（23K） 起跑 06:10、挑戰組（12K） 起跑 06:20、健康組（4K） 起跑 06:30",
+    "start_times": "全馬組(42.195K) 起跑 06:00、超半馬組(23K) 起跑 06:10、挑戰組(12K) 起跑 06:20、健康組(4K) 起跑 06:30",
     "registration_link": "https://signup.lohasnet.tw/signup/4228",
     "official_event_url": "https://lohasnet.tw/QingshuiCarnaval2026/",
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13028&subtitle=2026+%E6%B8%85%E6%B0%B4%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%98%89%E5%B9%B4%E8%8F%AF",
@@ -211,7 +234,7 @@
         "key": "group_count_less_than_distance_count",
         "severity": "low",
         "label": "起跑組別少於距離數",
-        "hint": "距離：全馬（42.195K）、超半馬（23K）、12K、5K、4K；起跑列：全馬組（42K）、超半馬組（23K）、挑戰組（12K）、健康組（4K）"
+        "hint": "距離：全馬（42.195K）、超半馬（23K）、12K、5K、4K；起跑列：全馬組(42.195K)、超半馬組(23K)、挑戰組(12K)、健康組(4K)"
       }
     ]
   },
@@ -240,6 +263,29 @@
     ]
   },
   {
+    "race_id": "4deefa08-b316-4d29-8842-a5e9848f396c",
+    "race_name": "2026 臺中舒跑杯",
+    "race_date": "2026-11-15",
+    "race_county": "臺中市",
+    "distances": [
+      "9km",
+      "5km",
+      "3km"
+    ],
+    "start_times": "挑戰組（5K） 起跑 06:10、3K 起跑 06:50",
+    "registration_link": "",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12900&subtitle=2026+%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12900&subtitle=2026+%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：9K、5K、3K；起跑列：挑戰組（5K）、3K"
+      }
+    ]
+  },
+  {
     "race_id": "96c6f753-a758-4842-b880-d532b8f2380d",
     "race_name": "2026 鹿港馬拉松",
     "race_date": "2026-11-15",
@@ -261,6 +307,32 @@
         "severity": "low",
         "label": "起跑組別少於距離數",
         "hint": "距離：全馬（42K）、半馬（21K）、10K、5K、全馬（42.195K）；起跑列：全馬組（42K）、半馬、挑戰組（10K）、健走組（5K）"
+      }
+    ]
+  },
+  {
+    "race_id": "e42b89e6-f0ff-4d07-ab24-1ad30598e6d3",
+    "race_name": "2026 歲次丙午年順澤宮第四屆冠軍路跑－順風啟程 • 澤福同行 • 謝平安",
+    "race_date": "2026-12-19",
+    "race_county": "彰化縣",
+    "distances": [
+      "42.195km",
+      "21km",
+      "10km",
+      "3.5km",
+      "5.5km",
+      "2.5km"
+    ],
+    "start_times": "全馬組（42.195K） 起跑 06:30、半馬組（21K） 起跑 06:40、10K 起跑 06:50、健走組（3.5K） 起跑 07:00",
+    "registration_link": "https://signup.lohasnet.tw/signup/4246",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91%EF%BC%8D%E9%A0%86%E9%A2%A8%E5%95%9F%E7%A8%8B+%E2%80%A2+%E6%BE%A4%E7%A6%8F%E5%90%8C%E8%A1%8C+%E2%80%A2+%E8%AC%9D%E5%B9%B3%E5%AE%89",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：全馬（42.195K）、半馬（21K）、10K、3.5K、5.5K、2.5K；起跑列：全馬組（42.195K）、半馬組（21K）、10K、健走組（3.5K）"
       }
     ]
   },

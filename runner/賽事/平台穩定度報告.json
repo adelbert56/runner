@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-25T11:16:35.096Z",
-  "basis_date": "2026-06-25",
+  "generated_at": "2026-06-30T10:56:13.901Z",
+  "basis_date": "2026-06-30",
   "items": [
     {
       "platform": "運動筆記",
@@ -8,9 +8,9 @@
       "official_direct": 6,
       "verified": 10,
       "missing": 5,
-      "opened_gap": 0,
+      "opened_gap": 1,
       "date_anomaly": 0,
-      "due_now": 0,
+      "due_now": 1,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
         "TOYOTA RUN 台中 視障專場",
@@ -43,6 +43,26 @@
       "status": "穩定"
     },
     {
+      "platform": "Lohas",
+      "total": 8,
+      "official_direct": 7,
+      "verified": 8,
+      "missing": 1,
+      "opened_gap": 0,
+      "date_anomaly": 0,
+      "due_now": 0,
+      "sample_races": [
+        "2026中興新村半程馬拉松-披興戴月的想你",
+        "2026年FUN電多巴胺路跑嘉年華",
+        "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
+      ],
+      "complete_rate": "88%",
+      "official_direct_rate": "88%",
+      "verified_rate": "100%",
+      "score": 93,
+      "status": "穩定"
+    },
+    {
       "platform": "bao-ming",
       "total": 8,
       "official_direct": 8,
@@ -50,7 +70,7 @@
       "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 1,
       "sample_races": [
         "2026 BOBDOG RUN(台中場)",
         "2026 松鶴越野",
@@ -60,26 +80,6 @@
       "official_direct_rate": "100%",
       "verified_rate": "100%",
       "score": 87,
-      "status": "穩定"
-    },
-    {
-      "platform": "Lohas",
-      "total": 7,
-      "official_direct": 7,
-      "verified": 7,
-      "missing": 0,
-      "opened_gap": 0,
-      "date_anomaly": 0,
-      "due_now": 0,
-      "sample_races": [
-        "2026中興新村半程馬拉松-披興戴月的想你",
-        "2026年FUN電多巴胺路跑嘉年華",
-        "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
-      ],
-      "complete_rate": "100%",
-      "official_direct_rate": "100%",
-      "verified_rate": "100%",
-      "score": 100,
       "status": "穩定"
     },
     {
@@ -110,7 +110,7 @@
       "missing": 6,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 1,
       "sample_races": [
         "夏日馬拉松 - 南投埔里場",
         "2026 梨山水蜜桃路跑",
@@ -150,7 +150,7 @@
       "missing": 0,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 0,
+      "due_now": 1,
       "sample_races": [
         "2026 全台PAPAGO歡樂跑--苗栗場",
         "夏日馬拉松 - 苗栗鯉魚潭"
@@ -160,6 +160,24 @@
       "verified_rate": "100%",
       "score": 100,
       "status": "穩定"
+    },
+    {
+      "platform": "跑者廣場全國賽會",
+      "total": 1,
+      "official_direct": 0,
+      "verified": 0,
+      "missing": 1,
+      "opened_gap": 0,
+      "date_anomaly": 0,
+      "due_now": 0,
+      "sample_races": [
+        "2027 第九屆臺中資訊盃公益馬拉松"
+      ],
+      "complete_rate": "0%",
+      "official_direct_rate": "0%",
+      "verified_rate": "0%",
+      "score": 15,
+      "status": "需補強"
     }
   ]
 }

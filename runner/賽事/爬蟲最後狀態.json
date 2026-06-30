@@ -1,14 +1,32 @@
 {
-  "scrape_date": "2026-06-25 11:12",
-  "added": 1,
-  "updated": 5,
-  "total": 53,
+  "scrape_date": "2026-06-30 10:50",
+  "added": 3,
+  "updated": 3,
+  "total": 55,
   "sources": [
     "運動筆記",
     "中華民國路跑協會",
     "台灣越野跑協會",
     "跑者廣場全國賽會"
   ],
-  "errors": [],
-  "has_errors": false
+  "errors": [
+    "115 年運動i臺灣2.0計畫-北屯區路跑樂活嘉年華||2026-06-28: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6965#32705",
+    "2026 HOT DOG Trail 台中系列活動-熱血接力賽||2026-08-30: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6974#32748",
+    "2026 HOT DOG Trail 台中系列活動-熱血接力賽||2026-08-30: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6974#reg",
+    "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華||2026-10-17: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7066#33056",
+    "2026 聯大八甲馬拉松||2026-10-31: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7087#33080",
+    "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7016#32884",
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004#reg"
+  ],
+  "has_errors": true,
+  "enrichment_errors": [
+    "115 年運動i臺灣2.0計畫-北屯區路跑樂活嘉年華||2026-06-28: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6965#32705",
+    "2026 HOT DOG Trail 台中系列活動-熱血接力賽||2026-08-30: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6974#32748",
+    "2026 HOT DOG Trail 台中系列活動-熱血接力賽||2026-08-30: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6974#reg",
+    "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華||2026-10-17: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7066#33056",
+    "2026 聯大八甲馬拉松||2026-10-31: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7087#33080",
+    "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7016#32884",
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004#reg"
+  ],
+  "has_enrichment_errors": true
 }
