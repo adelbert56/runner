@@ -12,9 +12,9 @@ const sourceHealthJsonPath = resolve(outputDir, "內容來源健康度報告.jso
 const sourceHealthReportPath = resolve(outputDir, "內容來源健康度報告.md");
 const ARCHIVE_RETENTION_DAYS = 183;
 const PREFERRED_WINDOW_DAYS = 92;
-const ENRICH_LIMIT = 120;
+const ENRICH_LIMIT = 180;
 const CANDIDATES_ALL_LIMIT = 400;
-const CANDIDATE_OUTPUT_LIMIT = 80;
+const CANDIDATE_OUTPUT_LIMIT = 140;
 
 const sources = [
   {
@@ -23,6 +23,9 @@ const sources = [
     entryUrls: [
       "https://running.biji.co/",
       "https://running.biji.co/index.php?q=news",
+    ],
+    allowUrlPatterns: [
+      /running\.biji\.co\/index\.php\?q=news&act=info&id=\d+/i,
     ],
     type: "跑步新聞 / 跑鞋專題",
     priority: 5,
@@ -66,6 +69,33 @@ const sources = [
     priority: 3,
   },
   {
+    name: "Tom's Guide Running",
+    url: "https://www.tomsguide.com/",
+    entryUrls: [
+      "https://www.tomsguide.com/wellness/running",
+      "https://www.tomsguide.com/best-picks/best-running-shoes",
+      "https://www.tomsguide.com/best-picks/best-mens-running-shoes",
+      "https://www.tomsguide.com/best-picks/best-womens-running-shoes",
+    ],
+    allowUrlPatterns: [
+      /tomsguide\.com\/(?:wellness\/running|best-picks)\/[a-z0-9-]+/i,
+    ],
+    type: "英文跑鞋評測 / 鞋款整理",
+    priority: 3,
+  },
+  {
+    name: "T3 Running",
+    url: "https://www.t3.com/",
+    entryUrls: [
+      "https://www.t3.com/active/running",
+    ],
+    allowUrlPatterns: [
+      /t3\.com\/active\/running\/[a-z0-9-]+/i,
+    ],
+    type: "英文跑鞋新品 / 發表資訊",
+    priority: 2,
+  },
+  {
     name: "Women's Health Taiwan",
     url: "https://www.womenshealthmag.com/tw/fitness/",
     entryUrls: [
@@ -88,19 +118,31 @@ const sources = [
       "https://kenlu.net/",
       "https://kenlu.net/category/review/",
       "https://kenlu.net/category/news/release/",
+      "https://kenlu.net/tag/running/",
+      "https://kenlu.net/tag/trail-running/",
       "https://kenlu.net/tag/trail-hiking-shoes/",
+      "https://kenlu.net/tag/saucony/",
+      "https://kenlu.net/tag/asics/",
+    ],
+    allowUrlPatterns: [
+      /kenlu\.net\/\d{4}\/\d{2}\//i,
     ],
     type: "跑鞋評測 / 裝備情報",
-    priority: 3,
+    priority: 5,
   },
   {
     name: "KENLU 越野",
     url: "https://kenlu.net/tag/trail-run/",
     entryUrls: [
+      "https://kenlu.net/tag/trail-run/",
+      "https://kenlu.net/tag/trail-running/",
       "https://kenlu.net/tag/trail-hiking-shoes/",
     ],
+    allowUrlPatterns: [
+      /kenlu\.net\/\d{4}\/\d{2}\//i,
+    ],
     type: "越野跑鞋 / 越野訓練",
-    priority: 3,
+    priority: 5,
   },
   {
     name: "運動科學網",
@@ -117,7 +159,7 @@ const sources = [
 ];
 
 const sourceByName = new Map(sources.map((source) => [source.name, source]));
-const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i];
+const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i, /Tom's Guide/i, /tomsguide\.com/i, /\bT3\b/i, /t3\.com/i];
 
 const keywords = [
   "跑鞋",
@@ -227,12 +269,21 @@ const blockedKeywords = [
   "sale",
   "deal",
   "discount",
+  "訓練營",
+  "跑旅",
+  "行事曆",
+  "懶人包",
+  "報名攻略",
 ];
 
 const SHOE_TITLE_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|實著|中底|大底|鞋面|足弓|回彈|穩定型|shoe awards|shoe preview|best running shoes/i;
 const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Saucony|SALOMON|On Running|On Cloud|Altra|adidas|Diadora|Mount To Coast|Tracksmith|R\.A\.D|Cloudmonster|Cloudsurfer|Cloudboom|Vomero|Pegasus|Structure Plus|Glycerin|Ghost|Glycerin Flex|Kayano|Nimbus|Cumulus|Superblast|Sonicblast|Mach|Mach X|Rebel|FuelCell Rebel|Triumph|Endorphin|Wave Rider|Adios Pro|Metaspeed|Deviate|Velocity Nitro|Fast-R|Neo Vista|Phantasm|Cascadia|Ride 19|Paramount Max|Escalante|Azura|Ellipse|Experience Flow|Hyperboost|Atomo Star|\bUFO\b|\bC1\b/i;
 const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
 const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
+const SHOE_REVIEW_SIGNAL = /鞋評|評測|實測|首試|開箱|review|tested|testers?|verdict|on feet|performance review/i;
+const SHOE_LAUNCH_SIGNAL = /新鞋上市|上市|登場|首發|推出|發表|正式開賣|release|launch|debut|unveiled|available now/i;
+const SHOE_FOCUS_SIGNAL = /Novablast|Clifton|Wave Rider|Deviate|Pegasus|Ghost|Kayano|Nimbus|Cumulus|Mach|Metaspeed|Cascadia|Phantasm|Rebel|FuelCell Rebel|Cloudmonster|Cloudsurfer|Elite|Nitro|Adios Pro|\bv\d+\b|\b\d{1,2}\b/i;
+const LOW_VALUE_CONTENT_SIGNAL = /IKEA|肉丸|便利商店|7-Eleven|Lawson|MondaySleepingClub|聯名系列|慵懶風格|旗艦店|開幕|快閃店|跑站|好水跑站|高爾夫球|長明賞|得獎典禮|奧斯卡|華航馬拉松 PB 訓練營|PB 訓練營/i;
 
 function compact(text) {
   return String(text || "")
@@ -364,6 +415,9 @@ function extractHref(tag) {
 
 function isAllowedSourceUrl(url, source) {
   if (!url) return false;
+  if (source.name === "運動筆記" && !/running\.biji\.co\/index\.php\?q=news&act=info&id=\d+/i.test(url)) {
+    return false;
+  }
   const patterns = Array.isArray(source.allowUrlPatterns) ? source.allowUrlPatterns : null;
   if (!patterns || !patterns.length) {
     return true;
@@ -372,6 +426,9 @@ function isAllowedSourceUrl(url, source) {
 }
 
 function scoreTitle(title, source) {
+  if (NON_RUNNING_SHOE_SIGNAL.test(title) || ACCESSORY_SIGNAL.test(title)) {
+    return 0;
+  }
   if (blockedKeywords.some((keyword) => title.toLowerCase().includes(keyword.toLowerCase()))) {
     return 0;
   }
@@ -382,7 +439,23 @@ function scoreTitle(title, source) {
   const keywordScore = keywords.reduce((sum, keyword) => (
     title.toLowerCase().includes(keyword.toLowerCase()) ? sum + 1 : sum
   ), 0);
-  return keywordScore + (source.effectivePriority ?? source.priority);
+  let bonus = 0;
+  if (looksLikeRunningShoeTitle(title)) {
+    bonus += 4;
+  }
+  if (SHOE_REVIEW_SIGNAL.test(title)) {
+    bonus += 4;
+  }
+  if (SHOE_LAUNCH_SIGNAL.test(title)) {
+    bonus += 3;
+  }
+  if (SHOE_BRAND_MODEL_SIGNAL.test(title) && SHOE_FOCUS_SIGNAL.test(title)) {
+    bonus += 2;
+  }
+  if (LOW_VALUE_CONTENT_SIGNAL.test(title) && !looksLikeRunningShoeTitle(title)) {
+    bonus -= 6;
+  }
+  return Math.max(0, keywordScore + bonus + (source.effectivePriority ?? source.priority));
 }
 
 function looksLikeRunningShoeTitle(title) {
@@ -401,6 +474,9 @@ function shouldRejectRunningShoeCandidate(title) {
   const normalized = String(title || "");
   if (!normalized) return true;
   if (NON_RUNNING_SHOE_SIGNAL.test(normalized) || ACCESSORY_SIGNAL.test(normalized)) {
+    return true;
+  }
+  if (LOW_VALUE_CONTENT_SIGNAL.test(normalized) && !looksLikeRunningShoeTitle(normalized)) {
     return true;
   }
   if (/prime day|sale|deal|discount|優惠|特價|best .*?(?:gear|watch|sock|bra)|watch|garmin|shokz|playlist|sports bra|balance board/i.test(normalized)) {
@@ -594,6 +670,9 @@ function classifyFetchFailure(error) {
   const causeMessage = compactErrorText(error?.cause?.message || "");
   const combined = `${message} ${causeCode} ${causeMessage}`.toLowerCase();
 
+  if (/eacces|access denied|permission denied/.test(combined)) {
+    return { kind: "sandbox_network", detail: causeCode || causeMessage || message || "Network access is blocked in this environment" };
+  }
   if (error?.name === "TimeoutError" || /timed out|timeout|aborted/.test(combined)) {
     return { kind: "timeout", detail: causeCode || causeMessage || message || "Request timed out" };
   }
@@ -769,6 +848,7 @@ function candidatePreference(item) {
   const source = sourceByName.get(item.source) || {};
   return {
     languageRank: sourceLanguageRank(source),
+    shoeRank: shoeCandidateRank(item),
     priority: Number(source.effectivePriority ?? source.priority ?? 0),
     score: Number(item.score || 0),
     articleDate: parseTaipeiDate(item.article_date || item.checked_at || "")?.getTime() || 0,
@@ -784,6 +864,7 @@ function compareCandidates(a, b) {
   const right = candidatePreference(b);
   return (
     left.languageRank - right.languageRank
+    || right.shoeRank - left.shoeRank
     || right.priority - left.priority
     || right.score - left.score
     || right.articleDate - left.articleDate
@@ -792,6 +873,32 @@ function compareCandidates(a, b) {
     || left.sourceName.localeCompare(right.sourceName)
     || left.title.localeCompare(right.title)
   );
+}
+
+function shoeCandidateRank(item) {
+  const text = `${item.title || ""} ${item.description || ""} ${item.category || ""}`;
+  const isShoe = item.category === "跑鞋新品" || looksLikeRunningShoeTitle(text);
+  if (!isShoe) {
+    return 0;
+  }
+  const isReview = SHOE_REVIEW_SIGNAL.test(text);
+  const isLaunch = SHOE_LAUNCH_SIGNAL.test(text);
+  const hasBrandModel = SHOE_BRAND_MODEL_SIGNAL.test(text);
+  const hasFocus = SHOE_FOCUS_SIGNAL.test(text);
+  const isGuide = /推薦|盤點|best|top picks|guide|preview|awards/i.test(text);
+  if (hasBrandModel && hasFocus && isReview && !isGuide) {
+    return 5;
+  }
+  if (hasBrandModel && hasFocus && isLaunch && !isGuide) {
+    return 4;
+  }
+  if (hasBrandModel && !isGuide) {
+    return 3;
+  }
+  if (isReview || isLaunch) {
+    return 2;
+  }
+  return 1;
 }
 
 function mergeCandidateRecords(previous, current) {
@@ -897,9 +1004,19 @@ function sourceStatus({ ok, candidateCount, consecutiveFailures }) {
   return "穩定";
 }
 
+function sourceStatusLabel(run, consecutiveFailures) {
+  if (!run.ok && run.errorKind === "sandbox_network") {
+    return "本機受限";
+  }
+  return sourceStatus({ ok: run.ok, candidateCount: run.candidateCount, consecutiveFailures });
+}
+
 function effectivePriority(source, priorHealth) {
   const status = priorHealth?.status || "新來源";
   const consecutiveFailures = Number(priorHealth?.consecutive_failures || 0);
+  if (status === "本機受限") {
+    return source.priority;
+  }
   if (status === "穩定") {
     return source.priority + 1;
   }
@@ -910,8 +1027,9 @@ function effectivePriority(source, priorHealth) {
 }
 
 async function enrichTitles(items) {
+  const prioritized = dedupe(items, CANDIDATES_ALL_LIMIT);
   const enriched = [];
-  for (const item of items.slice(0, ENRICH_LIMIT)) {
+  for (const item of prioritized.slice(0, ENRICH_LIMIT)) {
     enriched.push(await fetchArticleMetadata(item));
   }
   return enriched;
@@ -1017,6 +1135,13 @@ function buildReport(items, errors, options = {}) {
     });
   }
 
+  if (options.environmentRestrictedSourceCount) {
+    lines.push(
+      "",
+      `註記：本輪有 ${options.environmentRestrictedSourceCount} 個來源因目前執行環境封鎖外網而無法連線，這不會再被視為來源站台故障。`,
+    );
+  }
+
   return `${lines.join("\n")}\n`;
 }
 
@@ -1117,13 +1242,17 @@ async function main() {
 
   const sourceHealth = sourceRuns.map((run) => {
     const previous = previousHealth.get(run.source.name);
-    const consecutiveFailures = run.ok ? 0 : Number(previous?.consecutive_failures || 0) + 1;
+    const consecutiveFailures = run.ok
+      ? 0
+      : (run.errorKind === "sandbox_network"
+        ? Number(previous?.consecutive_failures || 0)
+        : Number(previous?.consecutive_failures || 0) + 1);
     return {
       checked_at: today,
       source: run.source.name,
       url: run.source.url,
       source_type: run.source.type,
-      status: sourceStatus({ ok: run.ok, candidateCount: run.candidateCount, consecutiveFailures }),
+      status: sourceStatusLabel(run, consecutiveFailures),
       ok: run.ok,
       candidate_count: run.candidateCount,
       consecutive_failures: consecutiveFailures,
@@ -1135,6 +1264,7 @@ async function main() {
     };
   });
   const successfulSourceCount = sourceRuns.filter((run) => run.ok).length;
+  const environmentRestrictedSourceCount = sourceRuns.filter((run) => run.errorKind === "sandbox_network").length;
   await writeFile(jsonPath, `${JSON.stringify(candidates, null, 2)}\n`, "utf8");
   await writeFile(
     archivePath,
@@ -1145,6 +1275,7 @@ async function main() {
     successfulSourceCount,
     totalSourceCount: runtimeSources.length,
     usedFallback,
+    environmentRestrictedSourceCount,
   }), "utf8");
   await writeFile(sourceHealthJsonPath, `${JSON.stringify(sourceHealth, null, 2)}\n`, "utf8");
   await writeFile(sourceHealthReportPath, buildSourceHealthReport(sourceHealth, {
@@ -1159,8 +1290,12 @@ async function main() {
     console.log(`Source errors: ${errors.length}`);
   }
   if (successfulSourceCount === 0) {
-    console.error("All content sources failed. Preserved the previous candidate inventory, but this run should be treated as stale.");
-    process.exitCode = 1;
+    if (environmentRestrictedSourceCount === sourceRuns.length && sourceRuns.length > 0) {
+      console.warn("All content sources were blocked by the current environment network policy. Preserved the previous candidate inventory without penalizing source health.");
+    } else {
+      console.error("All content sources failed. Preserved the previous candidate inventory, but this run should be treated as stale.");
+      process.exitCode = 1;
+    }
   }
 }
 

@@ -25,6 +25,39 @@ function Invoke-Step {
     }
 }
 
+function Invoke-OptionalStep {
+    # Best-effort step: failure (e.g. offline, unreachable origin) must never
+    # block the dev server from starting.
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Label,
+        [Parameter(Mandatory = $true)]
+        [string[]]$Command
+    )
+
+    try {
+        Invoke-Step -Label $Label -Command $Command
+    } catch {
+        Write-Warning "$Label skipped: $($_.Exception.Message)"
+    }
+}
+
+function Test-PublicDataDirty {
+    $paths = @(
+        "site/data/announcements.json",
+        "site/data/automation-health.json",
+        "site/data/content.json",
+        "site/data/message-cloud.json",
+        "site/data/races.json",
+        "site/data/runner-quips.json"
+    )
+    $status = & git status --porcelain -- $paths 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        return $false
+    }
+    return -not [string]::IsNullOrWhiteSpace(($status -join "`n"))
+}
+
 function Test-CleanGitTree {
     $status = & git status --short 2>$null
     if ($LASTEXITCODE -ne 0) {
@@ -43,21 +76,26 @@ function Get-GitBranchName {
 
 if (Get-Command git -ErrorAction SilentlyContinue) {
     $branchName = Get-GitBranchName
-    if ($branchName -eq "main" -and Test-CleanGitTree) {
-        Invoke-Step -Label "git-sync" -Command @("git", "pull", "--ff-only", "origin", "main")
+    if ($branchName -eq "main" -and (Test-CleanGitTree)) {
+        Invoke-OptionalStep -Label "git-sync" -Command @("git", "pull", "--ff-only", "origin", "main")
     } elseif ($branchName -ne "main") {
         Write-Warning "Current branch is '$branchName'. Skipping full git pull, but public site data will still sync from origin/main."
     } else {
         Write-Warning "Working tree is not clean; skipping full git pull, but public site data will still sync from origin/main."
     }
-    Invoke-Step -Label "site-sync" -Command @("npm", "run", "site:sync:remote")
+
+    if (Test-PublicDataDirty) {
+        Write-Warning "Local site/data/*.json has uncommitted changes; skipping site-sync to avoid overwriting them."
+    } else {
+        Invoke-OptionalStep -Label "site-sync" -Command @("npm", "run", "site:sync:remote")
+    }
 } else {
     Write-Warning "git is not available; skipping public site data sync."
 }
 
 Write-Host "Starting Runner Plaza dev server on $url ..."
 
-Start-Process -FilePath "npm" -ArgumentList "run", "dev" -NoNewWindow
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm", "run", "dev" -NoNewWindow
 
 # Wait for the server to come up, then open the browser.
 $ready = $false

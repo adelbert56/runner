@@ -36,15 +36,18 @@ const SUMMARY_RULES = [
   "來源描述太籠統時使用決策型摘要，避免硬塞無資訊量文字。",
 ];
 
-const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i];
+const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i, /Tom's Guide/i, /tomsguide\.com/i, /\bT3\b/i, /t3\.com/i];
 const SHOE_ONLY_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|實著|中底|大底|鞋面|回彈|穩定型|shoe awards|shoe preview|best running shoes/i;
 const RUNNING_CONTEXT_SIGNAL = /跑步|跑鞋|路跑|慢跑|馬拉松|半馬|訓練|daily trainer|marathon|running|runner|tempo|recovery|trail/i;
 const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Saucony|SALOMON|On Running|On Cloud|Altra|adidas|Diadora|Mount To Coast|Tracksmith|R\.A\.D|Cloudmonster|Cloudsurfer|Cloudboom|Vomero|Pegasus|Structure Plus|Glycerin|Ghost|Glycerin Flex|Kayano|Nimbus|Cumulus|Superblast|Sonicblast|Mach|Mach X|Rebel|FuelCell Rebel|Triumph|Endorphin|Wave Rider|Adios Pro|Metaspeed|Deviate|Velocity Nitro|Fast-R|Neo Vista|Phantasm|Cascadia|Ride 19|Paramount Max|Escalante|Azura|Ellipse|Experience Flow|Hyperboost|Atomo Star|\bUFO\b|\bC1\b/i;
 const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
 const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
-const SHOE_EXCLUSION_SIGNAL = /prime day|sale|deal|discount|優惠|特價|training plan|return-to-running|mindset|Parkinson|sports bras?|Shokz|Garmin|gear on amazon|running gear|balance board|playlist|watch|襪|socks?|hyrox|綜合訓練鞋|旗艦店|開幕|store opening|flagship/i;
+const SHOE_EXCLUSION_SIGNAL = /prime day|sale|deal|discount|優惠|特價|training plan|return-to-running|mindset|Parkinson|sports bras?|Shokz|Garmin|gear on amazon|running gear|balance board|playlist|watch|襪|socks?|hyrox|綜合訓練鞋|旗艦店|開幕|store opening|flagship|IKEA|肉丸|便利商店|7-Eleven|Lawson|MondaySleepingClub|聯名系列|慵懶風格|快閃店|跑站|好水跑站|高爾夫球|PB 訓練營|訓練營/i;
 const SHOE_GUIDE_SIGNAL = /best|top|guide|awards|preview|for men|for women|for beginners|flat feet|most cushioned|our top picks/i;
 const SHOE_MODEL_FOCUS_SIGNAL = /review|上市|登場|推出|發表|實測|首試|開箱|評測|同級對比|\bv\d+\b|\b\d{1,2}\b|elite|nitro|pegasus|glycerin|ghost|kayano|nimbus|cumulus|mach|rebel|metaspeed|deviate|wave rider|triumph|paramount|escalante|azura|ellipse|cascadia|cloudmonster|cloudsurfer|vomero/i;
+const SHOE_REVIEW_SIGNAL = /review|實測|首試|開箱|評測|tested|vs\.?|outperforms|verdict/i;
+const SHOE_LAUNCH_SIGNAL = /上市|登場|推出|發表|正式開賣|首發|release|launch|debut|unveiled|available/i;
+const SHOE_LISTICLE_SIGNAL = /these \d+|the \d+ best|best .*running shoes|running shoes for|our favorite new running shoes|shoe awards|shoe preview|top picks/i;
 
 function normalizeUrl(url) {
   try {
@@ -151,6 +154,7 @@ function publishedPreference(item) {
     originRank: sourceOriginRank(item.source_origin),
     typeRank: item.type === "shoe" ? 0 : 1,
     shoeSpecificityRank: item.type === "shoe" ? shoeSpecificityRank(item) : 0,
+    shoePriorityRank: item.type === "shoe" ? shoePriorityRank(item) : 0,
     score: Number(item.score || 0),
     dateValue: parseTaipeiDate(item.date || item.published_at || "")?.getTime() || 0,
     title: String(item.title || ""),
@@ -165,6 +169,7 @@ function comparePublishedItems(a, b) {
     left.languageRank - right.languageRank
     || right.originRank - left.originRank
     || left.typeRank - right.typeRank
+    || right.shoePriorityRank - left.shoePriorityRank
     || right.shoeSpecificityRank - left.shoeSpecificityRank
     || right.score - left.score
     || right.dateValue - left.dateValue
@@ -187,13 +192,46 @@ function shoeSpecificityRank(item) {
   return 0;
 }
 
+function shoePriorityRank(item) {
+  const text = `${item.title || ""} ${item.summary || ""}`;
+  const hasBrandModelSignal = SHOE_BRAND_MODEL_SIGNAL.test(text);
+  const isGuide = SHOE_GUIDE_SIGNAL.test(text) || SHOE_LISTICLE_SIGNAL.test(text);
+  const isReview = SHOE_REVIEW_SIGNAL.test(text);
+  const isLaunch = SHOE_LAUNCH_SIGNAL.test(text);
+  const isFresh = withinDays(item.date || item.published_at, 10);
+  if (isFresh && hasBrandModelSignal && (isReview || isLaunch) && !isGuide) {
+    return 5;
+  }
+  if (hasBrandModelSignal && isReview) {
+    return 4;
+  }
+  if (hasBrandModelSignal && isLaunch) {
+    return 3;
+  }
+  if (hasBrandModelSignal && !isGuide) {
+    return 2;
+  }
+  if (isGuide) {
+    return 1;
+  }
+  return 0;
+}
+
+function isPriorityShoeItem(item) {
+  if (item.type !== "shoe") {
+    return false;
+  }
+  return shoePriorityRank(item) >= 3;
+}
+
 function inferShoeCategory(title) {
   if (/碳板|競速|PHANTASM|FAST-R|ELITE|比賽/i.test(title)) return "競速";
   if (/越野|Trail|UTMB|CASCADIA|ULTRAFLY/i.test(title)) return "越野";
   if (/防水|GTX|GORE/i.test(title)) return "防水";
+  if (/NOVABLAST|REBEL|PEGASUS|GHOST|TRIUMPH|1080|VOMERO|CUMULUS|RIDE 19/i.test(title)) return "日常訓練";
   if (/緩震|厚底|NIMBUS|NEO VISTA|CUMULUS|CLOUDMONSTER/i.test(title)) return "長距離緩震";
   if (/速度|節奏|TEMPO|MACH|DEVIATE/i.test(title)) return "速度訓練";
-  if (/GHOST|PEGASUS|日常|慢跑/i.test(title)) return "日常訓練";
+  if (/日常|慢跑/i.test(title)) return "日常訓練";
   return "跑鞋新品";
 }
 
@@ -202,8 +240,8 @@ function inferNewsCategory(title, description = "") {
   if (/賽事|報名|城市路跑|開放報名|完賽/i.test(title)) return "賽事資訊";
   if (/新手|入門|初跑|跑姿|肌力|心率|乳酸閾值|跑步經濟性|跑者知識/i.test(text)) return "入門知識";
   if (/恢復|傷|睡眠|疲勞|伸展|保養|防曬|肌膚|休息/i.test(text)) return "恢復保養";
+  if (/跑鞋|鞋款|裝備|Nike|ASICS|Brooks|HOKA|PUMA|New Balance|Mizuno|On Cloud|Saucony|SALOMON|FuelCell Rebel|Wave Rider|Novablast|Clifton|Deviate|Pegasus|Ghost|Kayano|Nimbus|Metaspeed/i.test(text)) return "跑鞋裝備";
   if (/補給|飲食|碳水|蛋白|能量膠|水分|電解質/i.test(text)) return "補給";
-  if (/跑鞋|鞋款|裝備|Nike|ASICS|Brooks|HOKA|PUMA|New Balance|Mizuno|On Cloud/i.test(text)) return "跑鞋裝備";
   if (/訓練|間歇|節奏|長跑|配速|課表|週跑量|跑量|肌力|坡跑/i.test(text)) return "訓練";
   if (/賽事|報名|馬拉松|半馬|城市路跑|開放報名|完賽/i.test(text)) return "賽事資訊";
   return "跑步新聞";
@@ -300,6 +338,9 @@ function summarize(item, type) {
 }
 
 function summarizeShoeTitle(title) {
+  if (/NOVABLAST 6/i.test(title)) {
+    return "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。";
+  }
   if (/GHOST 18/i.test(title)) {
     return "Ghost 18 偏日常穩定與舒適里程，適合新手、恢復跑、通勤慢跑與想找一雙主力訓練鞋的跑者。";
   }
@@ -450,6 +491,25 @@ function pick(items, type, limit = LIMITS[type]) {
 }
 
 function fillWithInventory(primary, inventory, type) {
+  if (type === "shoe") {
+    const preferred = sortItems(primary.filter((entry) => entry.type === "shoe" && entry.score >= MIN_SCORE.shoe && isPriorityShoeItem(entry)));
+    const remaining = sortItems(inventory.filter((entry) => entry.type === "shoe" && entry.score >= MIN_SCORE.shoe && !isPriorityShoeItem(entry)));
+    const seen = new Set();
+    const picked = [];
+
+    for (const item of [...preferred, ...remaining]) {
+      const key = normalizeUrl(item.url);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      picked.push(item);
+      if (picked.length >= LIMITS.shoe) {
+        break;
+      }
+    }
+
+    return picked;
+  }
+
   const picked = pick(primary, type);
   const seen = new Set(picked.map((item) => normalizeUrl(item.url)).filter(Boolean));
   let englishCount = picked.filter((item) => type === "news" && isEnglishNewsItem(item)).length;
@@ -612,13 +672,7 @@ async function main() {
   ].sort((a, b) => {
     const typeDiff = a.type.localeCompare(b.type);
     if (typeDiff !== 0) return typeDiff;
-    const languageDiff = contentLanguageRank(a) - contentLanguageRank(b);
-    if (languageDiff !== 0) return languageDiff;
-    const originDiff = sourceOriginRank(b.source_origin) - sourceOriginRank(a.source_origin);
-    if (originDiff !== 0) return originDiff;
-    const dateDiff = String(b.date).localeCompare(String(a.date));
-    if (dateDiff !== 0) return dateDiff;
-    return b.score - a.score;
+    return comparePublishedItems(a, b);
   });
 
   await mkdir(resolve(root, "site/data"), { recursive: true });

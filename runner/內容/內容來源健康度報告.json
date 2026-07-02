@@ -4,140 +4,111 @@
     "source": "運動筆記",
     "url": "https://running.biji.co/",
     "source_type": "跑步新聞 / 跑鞋專題",
-    "status": "需補強",
-    "ok": false,
-    "candidate_count": 0,
-    "consecutive_failures": 3,
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 10,
+    "consecutive_failures": 0,
     "base_priority": 5,
-    "effective_priority": 5,
-    "error_kind": "network",
-    "error": "https://running.biji.co/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://running.biji.co/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://running.biji.co/index.php?q=news",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "effective_priority": 6,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
     "source": "動一動",
     "url": "https://www.don1don.com/",
     "source_type": "跑鞋新品 / 跑步專題",
-    "status": "需補強",
-    "ok": false,
-    "candidate_count": 0,
-    "consecutive_failures": 3,
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 10,
+    "consecutive_failures": 0,
     "base_priority": 5,
-    "effective_priority": 5,
-    "error_kind": "network",
-    "error": "https://www.don1don.com/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://www.don1don.com/",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "effective_priority": 6,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
     "source": "Bounce",
     "url": "https://bouncin.net/",
     "source_type": "跑鞋新品",
-    "status": "需補強",
-    "ok": false,
-    "candidate_count": 0,
-    "consecutive_failures": 3,
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 5,
+    "consecutive_failures": 0,
     "base_priority": 4,
-    "effective_priority": 4,
-    "error_kind": "network",
-    "error": "https://bouncin.net/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://bouncin.net/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://bouncin.net/category/trend",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "effective_priority": 5,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
     "source": "Runner's World",
     "url": "https://www.runnersworld.com/",
     "source_type": "英文跑鞋評測 / 訓練知識",
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 120,
+    "consecutive_failures": 0,
+    "base_priority": 3,
+    "effective_priority": 4,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
+  },
+  {
+    "checked_at": "2026-07-02",
+    "source": "Tom's Guide Running",
+    "url": "https://www.tomsguide.com/",
+    "source_type": "英文跑鞋評測 / 鞋款整理",
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 101,
+    "consecutive_failures": 0,
+    "base_priority": 3,
+    "effective_priority": 4,
+    "error_kind": "",
+    "error": "",
+    "error_details": [
+      {
+        "url": "https://www.tomsguide.com/wellness/running",
+        "kind": "http",
+        "detail": "404 Not Found"
+      }
+    ]
+  },
+  {
+    "checked_at": "2026-07-02",
+    "source": "T3 Running",
+    "url": "https://www.t3.com/",
+    "source_type": "英文跑鞋新品 / 發表資訊",
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 3,
-    "base_priority": 3,
-    "effective_priority": 3,
-    "error_kind": "network",
-    "error": "https://www.runnersworld.com/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://www.runnersworld.com/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://www.runnersworld.com/rss/gear.xml",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://www.runnersworld.com/rss/training.xml",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://www.runnersworld.com/gear/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://www.runnersworld.com/training/",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "consecutive_failures": 4,
+    "base_priority": 2,
+    "effective_priority": 1,
+    "error_kind": "unknown",
+    "error": "No crawlable entry URLs for T3 Running",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
     "source": "Women's Health Taiwan",
     "url": "https://www.womenshealthmag.com/tw/fitness/",
     "source_type": "跑鞋選購 / 健康訓練",
-    "status": "需補強",
-    "ok": false,
-    "candidate_count": 0,
-    "consecutive_failures": 3,
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 36,
+    "consecutive_failures": 0,
     "base_priority": 3,
-    "effective_priority": 3,
-    "error_kind": "network",
-    "error": "https://www.womenshealthmag.com/tw/fitness/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://www.womenshealthmag.com/tw/fitness/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://www.womenshealthmag.com/tw/fashion/equipment/",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "effective_priority": 4,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
@@ -147,101 +118,57 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 3,
+    "consecutive_failures": 7,
     "base_priority": 3,
-    "effective_priority": 3,
-    "error_kind": "network",
-    "error": "https://www.hk01.com/channel/%E8%B7%91%E6%AD%A5: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://www.hk01.com/channel/%E8%B7%91%E6%AD%A5",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "effective_priority": 2,
+    "error_kind": "unknown",
+    "error": "No crawlable entry URLs for HK01 跑步",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
     "source": "KENLU",
     "url": "https://kenlu.net/",
     "source_type": "跑鞋評測 / 裝備情報",
-    "status": "需補強",
-    "ok": false,
-    "candidate_count": 0,
-    "consecutive_failures": 3,
-    "base_priority": 3,
-    "effective_priority": 3,
-    "error_kind": "network",
-    "error": "https://kenlu.net/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://kenlu.net/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://kenlu.net/category/review/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://kenlu.net/category/news/release/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://kenlu.net/tag/trail-hiking-shoes/",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 59,
+    "consecutive_failures": 0,
+    "base_priority": 5,
+    "effective_priority": 6,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
     "source": "KENLU 越野",
     "url": "https://kenlu.net/tag/trail-run/",
     "source_type": "越野跑鞋 / 越野訓練",
-    "status": "需補強",
-    "ok": false,
-    "candidate_count": 0,
-    "consecutive_failures": 3,
-    "base_priority": 3,
-    "effective_priority": 3,
-    "error_kind": "network",
-    "error": "https://kenlu.net/tag/trail-run/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://kenlu.net/tag/trail-run/",
-        "kind": "network",
-        "detail": "EACCES"
-      },
-      {
-        "url": "https://kenlu.net/tag/trail-hiking-shoes/",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 23,
+    "consecutive_failures": 0,
+    "base_priority": 5,
+    "effective_priority": 6,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
     "source": "運動科學網",
     "url": "https://www.sportscience.com.tw/",
     "source_type": "訓練知識 / 運動科學",
-    "status": "需補強",
-    "ok": false,
-    "candidate_count": 0,
-    "consecutive_failures": 3,
+    "status": "穩定",
+    "ok": true,
+    "candidate_count": 6,
+    "consecutive_failures": 0,
     "base_priority": 3,
-    "effective_priority": 3,
-    "error_kind": "network",
-    "error": "https://www.sportscience.com.tw/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://www.sportscience.com.tw/",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "effective_priority": 4,
+    "error_kind": "",
+    "error": "",
+    "error_details": []
   },
   {
     "checked_at": "2026-07-02",
@@ -251,17 +178,11 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 3,
+    "consecutive_failures": 7,
     "base_priority": 2,
-    "effective_priority": 2,
-    "error_kind": "network",
-    "error": "https://irsports.com.tw/: network:EACCES",
-    "error_details": [
-      {
-        "url": "https://irsports.com.tw/",
-        "kind": "network",
-        "detail": "EACCES"
-      }
-    ]
+    "effective_priority": 1,
+    "error_kind": "unknown",
+    "error": "No crawlable entry URLs for IR SPORTS",
+    "error_details": []
   }
 ]
