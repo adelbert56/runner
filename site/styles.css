@@ -2958,6 +2958,49 @@ h3 {
   margin-bottom: 20px;
 }
 
+#training .section-heading,
+#training .training-system {
+  max-width: min(1760px, calc(100vw - 56px));
+}
+
+.training-system > .plan-builder {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.training-system > .plan-feedback-card {
+  grid-column: 1;
+}
+
+.training-system > .plan-output {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+@media (min-width: 1480px) {
+  .training-system {
+    grid-template-columns: minmax(360px, 420px) minmax(0, 1fr) minmax(280px, 340px);
+    gap: 18px;
+  }
+
+  .training-system > .plan-builder {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .training-system > .plan-output {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .training-system > .plan-feedback-card {
+    grid-column: 3;
+    grid-row: 1;
+    position: sticky;
+    top: 92px;
+  }
+}
+
 .academy-section {
   background: linear-gradient(180deg, #f6fbf7 0%, #fffdf8 100%);
 }
@@ -3410,15 +3453,23 @@ h3 {
 }
 
 .plan-hero {
-  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(420px, 0.95fr);
   align-items: stretch;
   margin-bottom: 14px;
-  padding: 18px;
-  border-radius: 8px;
+  padding: 22px;
+  border-radius: 16px;
   background:
-    linear-gradient(135deg, #0d2418, #173e2b);
+    linear-gradient(135deg, #0c2318, #123725 58%, #19442d 100%);
   color: white;
-  box-shadow: 0 14px 30px rgba(15, 37, 25, 0.18);
+  box-shadow: 0 18px 40px rgba(15, 37, 25, 0.18);
+}
+
+.plan-hero > div:first-child {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding-right: 12px;
 }
 
 .plan-hero span {
@@ -3430,30 +3481,36 @@ h3 {
 
 .plan-hero strong {
   display: block;
-  margin-top: 5px;
-  font-size: clamp(1.45rem, 3vw, 2rem);
-  line-height: 1.12;
+  margin-top: 2px;
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
 }
 
 .plan-hero p {
-  margin: 8px 0 0;
-  color: rgba(255, 255, 255, 0.72);
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.96rem;
 }
 
 .plan-hero dl {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   margin: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
 }
 
 .plan-hero dl div {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.1);
+  display: grid;
+  align-content: start;
+  min-height: 88px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .plan-hero dt,
@@ -3462,13 +3519,14 @@ h3 {
 }
 
 .plan-hero dt {
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.78rem;
   font-weight: 900;
 }
 
 .plan-hero dd {
-  margin-top: 4px;
+  margin-top: 8px;
+  font-size: 1.05rem;
   font-weight: 950;
 }
 
@@ -3480,6 +3538,10 @@ h3 {
 .training-summary {
   grid-template-columns: repeat(6, 1fr);
   margin-bottom: 12px;
+}
+
+.training-summary-hero {
+  margin-bottom: 16px;
 }
 
 .profile-summary {
@@ -3517,6 +3579,94 @@ h3 {
   margin-top: 4px;
   color: var(--green-dark);
   font-size: 0.98rem;
+}
+
+.training-accordion {
+  margin: 0 0 14px;
+  border: 1px solid rgba(21, 83, 56, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 34px rgba(31, 42, 36, 0.06);
+  overflow: hidden;
+}
+
+.training-accordion[open] {
+  border-color: rgba(21, 83, 56, 0.18);
+}
+
+.training-accordion summary {
+  display: block;
+  list-style: none;
+  cursor: pointer;
+}
+
+.training-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.training-accordion-summary {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 16px 54px 16px 18px;
+  background:
+    linear-gradient(135deg, rgba(21, 83, 56, 0.04), rgba(245, 200, 76, 0.08)),
+    #fffdf8;
+}
+
+.training-accordion-summary::after {
+  content: "+";
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(21, 83, 56, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--green-dark);
+  font-size: 1rem;
+  font-weight: 950;
+  transform: translateY(-50%);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.training-accordion[open] .training-accordion-summary::after {
+  content: "−";
+  background: rgba(21, 83, 56, 0.08);
+}
+
+.training-accordion-summary span {
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.training-accordion-summary strong {
+  color: var(--ink);
+  font-size: 1.08rem;
+  line-height: 1.4;
+}
+
+.training-accordion-summary p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.training-accordion-body {
+  padding: 16px 18px 18px;
+  border-top: 1px solid rgba(21, 83, 56, 0.08);
+}
+
+.training-accordion-primary .training-accordion-summary {
+  background:
+    linear-gradient(135deg, rgba(13, 36, 24, 0.06), rgba(245, 200, 76, 0.1)),
+    #fffdf8;
 }
 
 .plan-note {
@@ -3691,8 +3841,99 @@ h3 {
 }
 
 .plan-feedback-card {
+  display: grid;
+  gap: 14px;
   border: 1px solid rgba(21, 83, 56, 0.14);
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(252, 248, 239, 0.92)),
+    rgba(255, 255, 255, 0.9);
+  box-shadow: 0 16px 34px rgba(31, 42, 36, 0.08);
+}
+
+.plan-feedback-card .section-heading {
+  display: block;
+  margin: 0;
+}
+
+.plan-feedback-card .eyebrow {
+  margin-bottom: 10px;
+}
+
+.plan-feedback-card h3 {
+  margin-bottom: 0;
+  font-size: 1.8rem;
+  line-height: 1.18;
+}
+
+.plan-feedback-card .section-lead {
+  max-width: none;
+  margin-top: 10px;
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.plan-feedback-card label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.plan-feedback-card label span {
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.plan-feedback-card select,
+.plan-feedback-card input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid rgba(21, 83, 56, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  font-size: 0.98rem;
+  font-weight: 850;
+  box-shadow: inset 0 1px 0 rgba(31, 42, 36, 0.03);
+}
+
+.plan-feedback-card select:focus,
+.plan-feedback-card input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(36, 114, 79, 0.12);
+}
+
+.plan-feedback-card .plan-field-group {
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.plan-feedback-card .plan-submit-row {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding-top: 0;
+}
+
+.plan-feedback-card .button {
+  width: 100%;
+}
+
+.plan-feedback-card .button.primary,
+.plan-feedback-card .button.secondary {
+  min-height: 50px;
+  border-radius: 12px;
+}
+
+.plan-feedback-status {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(21, 83, 56, 0.05);
 }
 
 .coach-panel {
@@ -4316,6 +4557,13 @@ h3 {
   .shoe-spotlight,
   .training-system {
     grid-template-columns: 1fr;
+  }
+
+  .training-system > .plan-builder,
+  .training-system > .plan-output,
+  .training-system > .plan-feedback-card {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .race-console {
@@ -5354,6 +5602,7 @@ h3 {
   }
 
   .plan-hero {
+    grid-template-columns: 1fr;
     gap: 12px;
     padding: 16px;
   }
@@ -5381,12 +5630,32 @@ h3 {
     gap: 8px;
   }
 
+  .training-accordion-summary {
+    padding: 14px 48px 14px 14px;
+  }
+
+  .training-accordion-body {
+    padding: 14px;
+  }
+
   .plan-progress-panel {
     grid-template-columns: 1fr;
     gap: 10px;
   }
 
   .coach-panel {
+    padding: 12px;
+  }
+
+  .plan-feedback-card h3 {
+    font-size: 1.45rem;
+  }
+
+  .plan-feedback-card .section-lead {
+    font-size: 0.9rem;
+  }
+
+  .plan-feedback-card .plan-field-group {
     padding: 12px;
   }
 

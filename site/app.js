@@ -3198,7 +3198,7 @@ function renderPlan() {
         <div><dt>目標</dt><dd>${escapeHtml(priorityLabel)}</dd></div>
       </dl>
     </div>
-    <div class="training-summary">
+    <div class="training-summary training-summary-hero">
       <div><span>目前週跑量</span><strong>${escapeHtml(targets.baseKm)} km</strong></div>
       <div><span>高峰週跑量</span><strong>${escapeHtml(targets.peakKm)} km</strong></div>
       <div><span>目前長跑</span><strong>${escapeHtml(targets.baseLongRun)} km</strong></div>
@@ -3206,138 +3206,179 @@ function renderPlan() {
       <div><span>每週頻率</span><strong>${escapeHtml(dayCount)} 天</strong></div>
       <div><span>長跑日</span><strong>${escapeHtml(longRunDayLabel)}</strong></div>
     </div>
-    <div class="profile-summary">
-      <div><span>選手</span><strong>${escapeHtml(athleteName)}</strong></div>
-      <div><span>跑齡</span><strong>${escapeHtml(experienceLabel)}</strong></div>
-      <div><span>傷痛</span><strong>${escapeHtml(injuryLabel)}</strong></div>
-      <div><span>狀態</span><strong>${escapeHtml(readinessLabel)}</strong></div>
-      <div><span>強度</span><strong>${escapeHtml(intensityLabel)}</strong></div>
-    </div>
-    <div class="pace-zones">
-      <div><span>恢復跑</span><strong>${escapeHtml(recoveryRange)}</strong></div>
-      <div><span>輕鬆跑</span><strong>${escapeHtml(easyRange)}</strong></div>
-      <div><span>穩定跑</span><strong>${escapeHtml(steadyRange)}</strong></div>
-      <div><span>節奏跑</span><strong>${escapeHtml(tempoRange)}</strong></div>
-      <div><span>間歇</span><strong>${escapeHtml(intervalRange)}</strong></div>
-      <div><span>長跑</span><strong>${escapeHtml(longRange)}</strong></div>
-      ${goalProfile.distanceKm >= 21 ? `<div><span>目標配速段</span><strong>${escapeHtml(marathonRange)}</strong></div>` : ""}
-    </div>
-    <div class="plan-note">
-      <strong>${escapeHtml(goalProfile.focus)}</strong>
-      <p>${escapeHtml(progression)} 依照 ${escapeHtml(experienceLabel)}、${escapeHtml(injuryLabel)}、${escapeHtml(intensityLabel)} 調整跑量與強度。${escapeHtml(paceProfile.source)}${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
-    </div>
-    ${usesRunWalk ? `
-      <div class="plan-method-card">
-        <span>新手跑走進階</span>
-        <strong>${escapeHtml(runWalkStage.title)}</strong>
-        <p>${escapeHtml(runWalkStage.work)}。完成這一階段覺得穩、隔天恢復正常，再進入下一階段。</p>
-      </div>
-    ` : usesHalfStrategy ? `
-      <div class="plan-method-card half-plan-card">
-        <span>${escapeHtml(halfMarathonStrategy.title)}</span>
-        <strong>${escapeHtml(halfMarathonStrategy.summary)}</strong>
-        <ul>
-          ${halfMarathonStrategy.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
-        </ul>
-      </div>
-    ` : `
-      <div class="plan-method-card">
-        <span>訓練結構</span>
-        <strong>一週一堂重點課，其餘保留輕鬆跑</strong>
-        <p>避免每趟都跑快；強度課、長跑與恢復日分開，讓身體吸收訓練。</p>
-      </div>
-    `}
-    <div class="plan-export-actions" aria-label="課表匯出">
-      <button class="export-button" type="button" data-export-plan="calendar">匯出行事曆</button>
-      <button class="export-button" type="button" data-export-plan="garmin">Garmin 建課摘要</button>
-    </div>
-    <div class="risk-panel">
-      <strong>調整提醒</strong>
-      <ul>
-        ${riskNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
-      </ul>
-    </div>
-    <div class="plan-progress-panel">
-      <div>
-        <span>完成進度</span>
-        <strong>${escapeHtml(completedCount)} / ${escapeHtml(weekCount)} 週</strong>
-        <p>${escapeHtml(completionPercent)}% · ${escapeHtml(adjustment.status)}。${escapeHtml(adjustment.note)}</p>
-      </div>
-      <button class="${selectedWeekDone ? "active" : ""}" type="button" data-toggle-week-complete>
-        ${selectedWeekDone ? "取消本週完成" : "標記本週完成"}
-      </button>
-    </div>
-    <div class="plan-adjustment-panel">
-      <strong>這週自動調整</strong>
-      <p>${escapeHtml(adjustment.note)}</p>
-      <div class="plan-adjustment-metrics">
-        <div><span>調整來源</span><strong>${escapeHtml(adjustment.source === "feedback" ? `第 ${adjustment.previousWeek} 週回饋` : adjustment.source === "completion" ? "完成標記" : "初始週" )}</strong></div>
-        <div><span>總量倍率</span><strong>${escapeHtml(`${Math.round((adjustment.factor || 1) * 100)}%`)}</strong></div>
-        <div><span>長跑倍率</span><strong>${escapeHtml(`${Math.round((adjustment.longRunFactor || adjustment.factor || 1) * 100)}%`)}</strong></div>
-        <div><span>品質課</span><strong>${escapeHtml(adjustment.qualityMode === "remove" ? "取消改恢復" : adjustment.qualityMode === "reduced" ? "保留但縮短" : "照常保留")}</strong></div>
-      </div>
-    </div>
-    <div class="plan-week-title">
-      <span>第 ${escapeHtml(selectedWeek)} 週執行課表</span>
-      <strong>${escapeHtml(displayWeek.weeklyKm)} km / 長跑 ${escapeHtml(displayWeek.longRunKm)} km</strong>
-    </div>
-    <div class="plan-table" role="table" aria-label="每週課表">
-      ${displaySchedule.map((item) => `
-        <div class="plan-row" role="row">
-          <span>${escapeHtml(item.day)}</span>
-          <strong>${escapeHtml(item.type)}</strong>
-          <p>${escapeHtml(item.work)}</p>
+    <details class="training-accordion training-accordion-primary" open>
+      <summary>
+        <div class="training-accordion-summary">
+          <span>本週課表</span>
+          <strong>第 ${escapeHtml(selectedWeek)} 週 · ${escapeHtml(displayWeek.weeklyKm)} km / 長跑 ${escapeHtml(displayWeek.longRunKm)} km</strong>
+          <p>${escapeHtml(adjustment.status)} · ${escapeHtml(adjustment.note)}</p>
         </div>
-      `).join("")}
-    </div>
-    <div class="training-output-section">
-      <span class="form-section-title">切換週數</span>
-    </div>
-    <div class="phase-table" aria-label="週數切換">
-      ${weeklyBlocks.map((week) => `
-        <button class="${week.week === selectedWeek ? "active" : ""} ${completedWeeks.has(week.week) ? "completed" : ""}" type="button" data-plan-week="${escapeHtml(week.week)}">
-          <span>第 ${escapeHtml(week.week)} 週 · ${escapeHtml(week.phase)}</span>
-          <strong>${escapeHtml(week.weeklyKm)} km</strong>
-          <p>長跑 ${escapeHtml(week.longRunKm)} km · ${escapeHtml(week.focus)}</p>
-        </button>
-      `).join("")}
-    </div>
-    <div class="coach-panel">
-      <div class="coach-header">
-        <div>
-          <span>Personal Coach</span>
-          <strong>教練分析 · ${escapeHtml(coach.status)}</strong>
+      </summary>
+      <div class="training-accordion-body">
+        <div class="plan-note">
+          <strong>${escapeHtml(goalProfile.focus)}</strong>
+          <p>${escapeHtml(progression)} 依照 ${escapeHtml(experienceLabel)}、${escapeHtml(injuryLabel)}、${escapeHtml(intensityLabel)} 調整跑量與強度。${escapeHtml(paceProfile.source)}${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
+        </div>
+        <div class="plan-export-actions" aria-label="課表匯出">
+          <button class="export-button" type="button" data-export-plan="calendar">匯出行事曆</button>
+          <button class="export-button" type="button" data-export-plan="garmin">Garmin 建課摘要</button>
+        </div>
+        <div class="plan-progress-panel">
+          <div>
+            <span>完成進度</span>
+            <strong>${escapeHtml(completedCount)} / ${escapeHtml(weekCount)} 週</strong>
+            <p>${escapeHtml(completionPercent)}% · ${escapeHtml(adjustment.status)}。${escapeHtml(adjustment.note)}</p>
+          </div>
+          <button class="${selectedWeekDone ? "active" : ""}" type="button" data-toggle-week-complete>
+            ${selectedWeekDone ? "取消本週完成" : "標記本週完成"}
+          </button>
+        </div>
+        <div class="plan-week-title">
+          <span>第 ${escapeHtml(selectedWeek)} 週執行課表</span>
+          <strong>${escapeHtml(displayWeek.weeklyKm)} km / 長跑 ${escapeHtml(displayWeek.longRunKm)} km</strong>
+        </div>
+        <div class="plan-table" role="table" aria-label="每週課表">
+          ${displaySchedule.map((item) => `
+            <div class="plan-row" role="row">
+              <span>${escapeHtml(item.day)}</span>
+              <strong>${escapeHtml(item.type)}</strong>
+              <p>${escapeHtml(item.work)}</p>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </details>
+    <details class="training-accordion">
+      <summary>
+        <div class="training-accordion-summary">
+          <span>配速與策略</span>
+          <strong>${escapeHtml(goalProfile.title)} · ${escapeHtml(priorityLabel)}</strong>
+          <p>${escapeHtml(experienceLabel)} / ${escapeHtml(injuryLabel)} / ${escapeHtml(intensityLabel)}</p>
+        </div>
+      </summary>
+      <div class="training-accordion-body">
+        <div class="profile-summary">
+          <div><span>選手</span><strong>${escapeHtml(athleteName)}</strong></div>
+          <div><span>跑齡</span><strong>${escapeHtml(experienceLabel)}</strong></div>
+          <div><span>傷痛</span><strong>${escapeHtml(injuryLabel)}</strong></div>
+          <div><span>狀態</span><strong>${escapeHtml(readinessLabel)}</strong></div>
+          <div><span>強度</span><strong>${escapeHtml(intensityLabel)}</strong></div>
+        </div>
+        <div class="pace-zones">
+          <div><span>恢復跑</span><strong>${escapeHtml(recoveryRange)}</strong></div>
+          <div><span>輕鬆跑</span><strong>${escapeHtml(easyRange)}</strong></div>
+          <div><span>穩定跑</span><strong>${escapeHtml(steadyRange)}</strong></div>
+          <div><span>節奏跑</span><strong>${escapeHtml(tempoRange)}</strong></div>
+          <div><span>間歇</span><strong>${escapeHtml(intervalRange)}</strong></div>
+          <div><span>長跑</span><strong>${escapeHtml(longRange)}</strong></div>
+          ${goalProfile.distanceKm >= 21 ? `<div><span>目標配速段</span><strong>${escapeHtml(marathonRange)}</strong></div>` : ""}
+        </div>
+        ${usesRunWalk ? `
+          <div class="plan-method-card">
+            <span>新手跑走進階</span>
+            <strong>${escapeHtml(runWalkStage.title)}</strong>
+            <p>${escapeHtml(runWalkStage.work)}。完成這一階段覺得穩、隔天恢復正常，再進入下一階段。</p>
+          </div>
+        ` : usesHalfStrategy ? `
+          <div class="plan-method-card half-plan-card">
+            <span>${escapeHtml(halfMarathonStrategy.title)}</span>
+            <strong>${escapeHtml(halfMarathonStrategy.summary)}</strong>
+            <ul>
+              ${halfMarathonStrategy.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+            </ul>
+          </div>
+        ` : `
+          <div class="plan-method-card">
+            <span>訓練結構</span>
+            <strong>一週一堂重點課，其餘保留輕鬆跑</strong>
+            <p>避免每趟都跑快；強度課、長跑與恢復日分開，讓身體吸收訓練。</p>
+          </div>
+        `}
+        <div class="risk-panel">
+          <strong>調整提醒</strong>
+          <ul>
+            ${riskNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
+          </ul>
+        </div>
+        <div class="plan-adjustment-panel">
+          <strong>這週自動調整</strong>
+          <p>${escapeHtml(adjustment.note)}</p>
+          <div class="plan-adjustment-metrics">
+            <div><span>調整來源</span><strong>${escapeHtml(adjustment.source === "feedback" ? `第 ${adjustment.previousWeek} 週回饋` : adjustment.source === "completion" ? "完成標記" : "初始週" )}</strong></div>
+            <div><span>總量倍率</span><strong>${escapeHtml(`${Math.round((adjustment.factor || 1) * 100)}%`)}</strong></div>
+            <div><span>長跑倍率</span><strong>${escapeHtml(`${Math.round((adjustment.longRunFactor || adjustment.factor || 1) * 100)}%`)}</strong></div>
+            <div><span>品質課</span><strong>${escapeHtml(adjustment.qualityMode === "remove" ? "取消改恢復" : adjustment.qualityMode === "reduced" ? "保留但縮短" : "照常保留")}</strong></div>
+          </div>
+        </div>
+      </div>
+    </details>
+    <details class="training-accordion">
+      <summary>
+        <div class="training-accordion-summary">
+          <span>週數切換</span>
+          <strong>${escapeHtml(weekCount)} 週週期總覽</strong>
+          <p>切換不同週次，查看該週跑量、長跑與重點。</p>
+        </div>
+      </summary>
+      <div class="training-accordion-body">
+        <div class="phase-table" aria-label="週數切換">
+          ${weeklyBlocks.map((week) => `
+            <button class="${week.week === selectedWeek ? "active" : ""} ${completedWeeks.has(week.week) ? "completed" : ""}" type="button" data-plan-week="${escapeHtml(week.week)}">
+              <span>第 ${escapeHtml(week.week)} 週 · ${escapeHtml(week.phase)}</span>
+              <strong>${escapeHtml(week.weeklyKm)} km</strong>
+              <p>長跑 ${escapeHtml(week.longRunKm)} km · ${escapeHtml(week.focus)}</p>
+            </button>
+          `).join("")}
+        </div>
+      </div>
+    </details>
+    <details class="training-accordion">
+      <summary>
+        <div class="training-accordion-summary">
+          <span>教練分析</span>
+          <strong>${escapeHtml(coach.status)} · 評分 ${escapeHtml(coach.score)}</strong>
           <p>${escapeHtml(coach.mainAdvice)}</p>
         </div>
-        <div class="coach-score" aria-label="教練評分">${escapeHtml(coach.score)}</div>
-      </div>
-      <div class="coach-grid">
-        <section>
-          <h3>做得好的地方</h3>
-          <ul>${coach.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>先把資料填完整，系統會更準確判斷訓練狀態。</li>"}</ul>
-        </section>
-        <section>
-          <h3>需要留意</h3>
-          <ul>${coach.risks.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>目前沒有明顯高風險設定，照課表跑並觀察恢復即可。</li>"}</ul>
-        </section>
-        <section>
-          <h3>下一步</h3>
-          <ul>${coach.nextActions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-        </section>
-      </div>
-      <div class="coach-chat">
-        <div>
-          <strong>問教練</strong>
-          <p id="coach-response">${escapeHtml(coach.encouragement)}</p>
+      </summary>
+      <div class="training-accordion-body">
+        <div class="coach-panel">
+          <div class="coach-header">
+            <div>
+              <span>Personal Coach</span>
+              <strong>教練分析 · ${escapeHtml(coach.status)}</strong>
+              <p>${escapeHtml(coach.mainAdvice)}</p>
+            </div>
+            <div class="coach-score" aria-label="教練評分">${escapeHtml(coach.score)}</div>
+          </div>
+          <div class="coach-grid">
+            <section>
+              <h3>做得好的地方</h3>
+              <ul>${coach.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>先把資料填完整，系統會更準確判斷訓練狀態。</li>"}</ul>
+            </section>
+            <section>
+              <h3>需要留意</h3>
+              <ul>${coach.risks.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>目前沒有明顯高風險設定，照課表跑並觀察恢復即可。</li>"}</ul>
+            </section>
+            <section>
+              <h3>下一步</h3>
+              <ul>${coach.nextActions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+            </section>
+          </div>
+          <div class="coach-chat">
+            <div>
+              <strong>問教練</strong>
+              <p id="coach-response">${escapeHtml(coach.encouragement)}</p>
+            </div>
+            <div class="coach-questions" aria-label="教練問答">
+              <button type="button" data-coach-question="tired">今天很累</button>
+              <button type="button" data-coach-question="pain">有點痛</button>
+              <button type="button" data-coach-question="faster">想跑快</button>
+              <button type="button" data-coach-question="taper">賽前一週</button>
+            </div>
+          </div>
         </div>
-        <div class="coach-questions" aria-label="教練問答">
-          <button type="button" data-coach-question="tired">今天很累</button>
-          <button type="button" data-coach-question="pain">有點痛</button>
-          <button type="button" data-coach-question="faster">想跑快</button>
-          <button type="button" data-coach-question="taper">賽前一週</button>
-        </div>
       </div>
-    </div>
+    </details>
   `;
 
   els.planOutput.querySelectorAll("[data-plan-week]").forEach((button) => {
