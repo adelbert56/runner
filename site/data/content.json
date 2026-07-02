@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T01:22:59.079Z",
+  "generated_at": "2026-07-02T01:47:27.023Z",
   "items": [
     {
       "id": "news-www-don1don-com-archives-239814-e8-b7-91-e6-ad-a5-e4-b8-8d-e6-87-89-e8-a9-b2-e6-",
@@ -240,40 +240,6 @@
       ]
     },
     {
-      "id": "news-www-don1don-com-archives-233552-e6-97-a5-e5-b8-b8-e9-87-8c-e7-a8-8b-ef-bc-8c-e8-",
-      "type": "news",
-      "title": "BROOKS GHOST 18",
-      "date": "2026-05-16",
-      "source": "動一動",
-      "category": "恢復保養",
-      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://www.don1don.com/archives/233552/%E6%97%A5%E5%B8%B8%E9%87%8C%E7%A8%8B%EF%BC%8C%E8%BC%95%E9%AC%86%E9%81%94%E6%88%90%EF%BC%9Abrooks-ghost-18%E7%94%A8%E6%AD%A5%E5%B1%A5%E9%80%A3%E7%B5%90%E5%9F%8E%E5%B8%82%E9%A2%A8%E6%99%AF",
-      "score": 4,
-      "source_origin": "editorial",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-232283-nike-pegasus-42-ef-bc-9a-e8-bf-84-e4-bb-8a-e7-82",
-      "type": "news",
-      "title": "NIKE PEGASUS 42",
-      "date": "2026-05-16",
-      "source": "動一動",
-      "category": "跑鞋裝備",
-      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://www.don1don.com/archives/232283/nike-pegasus-42%EF%BC%9A%E8%BF%84%E4%BB%8A%E7%82%BA%E6%AD%A2%E6%9C%80%E5%87%BA%E8%89%B2%E7%9A%84%E5%B0%8F%E9%A3%9B%E9%A6%AC%E8%B7%91%E9%9E%8B",
-      "score": 4,
-      "source_origin": "editorial",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
       "id": "news-bouncin-net-p-news-new-stuff-6035-dead-serene-nike-st-charge-franklin-session-co",
       "type": "news",
       "title": "Nike 攜手業餘聯盟傳奇 Franklin Session 主理品牌 DEAD Serene 推出 S.T. Charge 聯名鞋款",
@@ -317,6 +283,23 @@
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
       "url": "https://bouncin.net/p/news/new-stuff/6033/nike-caitlin-1-signature-shoe-launch",
       "score": 7,
+      "source_origin": "archive",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Bounce"
+      ]
+    },
+    {
+      "id": "news-bouncin-net-p-news-new-stuff-6031-adidas-adizero-dropset-pro-hybrid-training-sho",
+      "type": "news",
+      "title": "Hyrox 裝備新選擇！adidas 推出全新綜合訓練鞋款 Adizero Dropset Pro",
+      "date": "2026-06-17",
+      "source": "Bounce",
+      "category": "跑鞋裝備",
+      "summary": "這篇適合作為課表調整參考。重點不是照抄強度，而是確認自己目前週跑量、恢復能力與目標賽事距離。",
+      "url": "https://bouncin.net/p/news/new-stuff/6031/adidas-adizero-dropset-pro-hybrid-training-shoe-launch",
+      "score": 9,
       "source_origin": "archive",
       "published_at": "2026-07-02",
       "publish_status": "published",
@@ -608,21 +591,10 @@
       "score": 6,
       "source_origin": "archive",
       "published_at": "2026-07-02",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-www-don1don-com-archives-237159-e7-82-ba-e8-b7-91-e6-ad-a5-e7-a3-a8-e5-88-a9-e5-",
-      "type": "news",
-      "title": "為跑步磨利刀刃 江典祐 ENDORPHIN ELITE 3 成就菁英表現",
-      "date": "2026-05-25",
-      "source": "動一動",
-      "category": "訓練",
-      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://www.don1don.com/archives/237159/%e7%82%ba%e8%b7%91%e6%ad%a5%e7%a3%a8%e5%88%a9%e5%88%80%e5%88%83-%e6%b1%9f%e5%85%b8%e7%a5%90-endorphin-elite-3-%e6%88%90%e5%b0%b1%e8%8f%81%e8%8b%b1%e8%a1%a8%e7%8f%be",
-      "score": 6,
-      "source_origin": "archive",
-      "published_at": "2026-07-02",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
     },
     {
       "id": "news-www-don1don-com-archives-233837-e8-b1-aa-e9-9b-a8-e9-96-8b-e8-b7-91-e4-b9-9f-e4-",
@@ -659,6 +631,40 @@
       ]
     },
     {
+      "id": "news-www-don1don-com-archives-233736-e6-88-91-e7-9a-84-e8-b7-91-e6-ad-a5-e5-be-9e-e5-",
+      "type": "news",
+      "title": "我的跑步從台灣開始 歐洲紀錄保持人 Alice Finot",
+      "date": "2026-05-22",
+      "source": "動一動",
+      "category": "訓練",
+      "summary": "菁英跑者移地訓練的價值在於紀律、恢復與長期目標管理。一般跑者可借鏡訓練節奏，不必照抄強度。",
+      "url": "https://www.don1don.com/archives/233736/%e6%88%91%e7%9a%84%e8%b7%91%e6%ad%a5%e5%be%9e%e5%8f%b0%e7%81%a3%e9%96%8b%e5%a7%8b-%e6%ad%90%e6%b4%b2%e7%b4%80%e9%8c%84%e4%bf%9d%e6%8c%81%e4%ba%ba-alice-finot",
+      "score": 6,
+      "source_origin": "archive",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
+      "id": "news-www-don1don-com-archives-233820-e8-80-90-e5-8a-9b-e7-9a-84-e6-99-82-e9-96-93-e8-",
+      "type": "news",
+      "title": "耐力的時間軸 馬拉松跑者何時迎來黃金期",
+      "date": "2026-05-22",
+      "source": "動一動",
+      "category": "訓練",
+      "summary": "馬拉松進步不只靠高強度，穩定低強度跑量才是地基。安排課表時，要先確保恢復能力跟得上。",
+      "url": "https://www.don1don.com/archives/233820/%e8%80%90%e5%8a%9b%e7%9a%84%e6%99%82%e9%96%93%e8%bb%b8-%e9%a6%ac%e6%8b%89%e6%9d%be%e8%b7%91%e8%80%85%e4%bd%95%e6%99%82%e8%bf%8e%e4%be%86%e9%bb%83%e9%87%91%e6%9c%9f",
+      "score": 6,
+      "source_origin": "archive",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
       "id": "news-www-womenshealthmag-com-tw-fitness-running-a71264464-glucose-monitor-runners-fue",
       "type": "news",
       "title": "跑步補給怎麼吃才對？實測「連續血糖監測器」揭秘：馬拉松、半馬跑者必懂",
@@ -685,6 +691,40 @@
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.runnersworld.com/gear/a20866339/best-brooks-running-shoes/",
       "score": 13,
+      "source_origin": "candidate",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a71677406-brooks-cascadia-19-review",
+      "type": "shoe",
+      "title": "Brooks Cascadia 19 Review: A Dependable Trail Workhorse for Big Miles",
+      "date": "2026-06-26",
+      "source": "Runner's World",
+      "category": "越野",
+      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
+      "url": "https://www.runnersworld.com/gear/a71677406/brooks-cascadia-19-review/",
+      "score": 12,
+      "source_origin": "candidate",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a71626774-asics-metaspeed-tokyo-review",
+      "type": "shoe",
+      "title": "Asics Metaspeed Sky Tokyo Helped Me Run a Sub-3 Marathon. The Metaspeed Edge Was the Obvious Choice for Conquering 13.1.",
+      "date": "2026-06-26",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a71626774/asics-metaspeed-tokyo-review/",
+      "score": 7,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
       "publish_status": "published",
@@ -880,6 +920,23 @@
       ]
     },
     {
+      "id": "shoe-www-don1don-com-archives-233552-e6-97-a5-e5-b8-b8-e9-87-8c-e7-a8-8b-ef-bc-8c-e8-",
+      "type": "shoe",
+      "title": "BROOKS GHOST 18",
+      "date": "2026-05-16",
+      "source": "動一動",
+      "category": "日常訓練",
+      "summary": "Ghost 18 偏日常穩定與舒適里程，適合新手、恢復跑、通勤慢跑與想找一雙主力訓練鞋的跑者。",
+      "url": "https://www.don1don.com/archives/233552/%E6%97%A5%E5%B8%B8%E9%87%8C%E7%A8%8B%EF%BC%8C%E8%BC%95%E9%AC%86%E9%81%94%E6%88%90%EF%BC%9Abrooks-ghost-18%E7%94%A8%E6%AD%A5%E5%B1%A5%E9%80%A3%E7%B5%90%E5%9F%8E%E5%B8%82%E9%A2%A8%E6%99%AF",
+      "score": 4,
+      "source_origin": "editorial",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
       "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a70752335-2026-running-shoes",
       "type": "shoe",
       "title": "HOKA MACH 7",
@@ -897,49 +954,32 @@
       ]
     },
     {
-      "id": "shoe-www-runnersworld-com-gear-a71617217-rad-ufo-running-shoe-review",
+      "id": "shoe-www-don1don-com-archives-232283-nike-pegasus-42-ef-bc-9a-e8-bf-84-e4-bb-8a-e7-82",
       "type": "shoe",
-      "title": "I’m Calling It Now: R.A.D UFO Is My Shoe of the Year",
-      "date": "2026-06-19",
+      "title": "NIKE PEGASUS 42",
+      "date": "2026-05-16",
+      "source": "動一動",
+      "category": "日常訓練",
+      "summary": "Pegasus 42 延續日常訓練鞋定位，適合輕鬆跑、一般配速課與想用一雙鞋處理多數里程的跑者。",
+      "url": "https://www.don1don.com/archives/232283/nike-pegasus-42%EF%BC%9A%E8%BF%84%E4%BB%8A%E7%82%BA%E6%AD%A2%E6%9C%80%E5%87%BA%E8%89%B2%E7%9A%84%E5%B0%8F%E9%A3%9B%E9%A6%AC%E8%B7%91%E9%9E%8B",
+      "score": 4,
+      "source_origin": "editorial",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a71481920-new-balance-680v9-review",
+      "type": "shoe",
+      "title": "Is an Under-$100 Shoe Too Good to Be True? The Pros and Cons of Running in the New Balance 680v9",
+      "date": "2026-06-17",
       "source": "Runner's World",
       "category": "跑鞋新品",
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a71617217/rad-ufo-running-shoe-review/",
-      "score": 4,
-      "source_origin": "archive",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
-      ]
-    },
-    {
-      "id": "shoe-bouncin-net-p-news-new-stuff-6031-adidas-adizero-dropset-pro-hybrid-training-sho",
-      "type": "shoe",
-      "title": "Hyrox 裝備新選擇！adidas 推出全新綜合訓練鞋款 Adizero Dropset Pro",
-      "date": "2026-06-17",
-      "source": "Bounce",
-      "category": "跑鞋新品",
-      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://bouncin.net/p/news/new-stuff/6031/adidas-adizero-dropset-pro-hybrid-training-shoe-launch",
-      "score": 9,
-      "source_origin": "archive",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a70974311-nike-pegasus-42-review",
-      "type": "shoe",
-      "title": "Nike Gave the Pegasus 42 a Big Overhaul to Make Your Daily Miles More Fun",
-      "date": "2026-06-17",
-      "source": "Runner's World",
-      "category": "日常訓練",
-      "summary": "Pegasus 42 延續日常訓練鞋定位，適合輕鬆跑、一般配速課與想用一雙鞋處理多數里程的跑者。",
-      "url": "https://www.runnersworld.com/gear/a70974311/nike-pegasus-42-review/",
-      "score": 5,
+      "url": "https://www.runnersworld.com/gear/a71481920/new-balance-680v9-review/",
+      "score": 7,
       "source_origin": "archive",
       "published_at": "2026-07-02",
       "publish_status": "published",
@@ -1033,6 +1073,23 @@
       ]
     },
     {
+      "id": "shoe-www-runnersworld-com-gear-a71460160-best-brooks-walking-shoes",
+      "type": "shoe",
+      "title": "The 7 Best Brooks Walking Shoes to Save Your Feet From Hard Ground",
+      "date": "2026-06-14",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a71460160/best-brooks-walking-shoes/",
+      "score": 10,
+      "source_origin": "archive",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
+    },
+    {
       "id": "shoe-www-runnersworld-com-gear-a26860886-long-distance-running-shoes",
       "type": "shoe",
       "title": "The 7 Best Long-Distance Running Shoes",
@@ -1092,6 +1149,23 @@
       "category": "跑鞋新品",
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.runnersworld.com/gear/a20865766/best-stability-running-shoes/",
+      "score": 9,
+      "source_origin": "archive",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a71282549-runners-world-shoe-awards-2026-training-shoe",
+      "type": "shoe",
+      "title": "Runner’s World Shoe Awards 2026 - Training Shoes",
+      "date": "2026-06-14",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a71282549/runners-world-shoe-awards-2026-training-shoes/",
       "score": 9,
       "source_origin": "archive",
       "published_at": "2026-07-02",
@@ -1161,23 +1235,6 @@
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.runnersworld.com/gear/a25578469/best-running-shoes-for-women/",
       "score": 7,
-      "source_origin": "archive",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a71282136-shoe-awards-2026",
-      "type": "shoe",
-      "title": "Runner’s World 2026 Shoe Awards",
-      "date": "2026-06-14",
-      "source": "Runner's World",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a71282136/shoe-awards-2026/",
-      "score": 5,
       "source_origin": "archive",
       "published_at": "2026-07-02",
       "publish_status": "published",
@@ -1288,40 +1345,6 @@
       ]
     },
     {
-      "id": "shoe-www-hk01-com-e8-b7-91-e6-ad-a5-60348268-e8-b7-91-e9-9e-8b-e6-8e-a8-e8-96-a62026-",
-      "type": "shoe",
-      "title": "跑鞋推薦2026｜ASICS跑鞋GEL-KAYANO 33革新中底 6月全球上市",
-      "date": "2026-05-22",
-      "source": "HK01 跑步",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.hk01.com/%E8%B7%91%E6%AD%A5/60348268/%E8%B7%91%E9%9E%8B%E6%8E%A8%E8%96%A62026-asics%E8%B7%91%E9%9E%8Bgel-kayano-33%E9%9D%A9%E6%96%B0%E4%B8%AD%E5%BA%95-6%E6%9C%88%E5%85%A8%E7%90%83%E4%B8%8A%E5%B8%82",
-      "score": 6,
-      "source_origin": "archive",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "HK01 跑步"
-      ]
-    },
-    {
-      "id": "shoe-www-hk01-com-e8-b7-91-e6-ad-a5-60348301-e8-b7-91-e9-9e-8b-e6-8e-a8-e8-96-a62026-",
-      "type": "shoe",
-      "title": "跑鞋推薦2026｜New Balance Grey Days 1080+Rebel向元祖灰致敬",
-      "date": "2026-05-22",
-      "source": "HK01 跑步",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.hk01.com/%E8%B7%91%E6%AD%A5/60348301/%E8%B7%91%E9%9E%8B%E6%8E%A8%E8%96%A62026-new-balance-grey-days-1080-rebel%E5%90%91%E5%85%83%E7%A5%96%E7%81%B0%E8%87%B4%E6%95%AC",
-      "score": 6,
-      "source_origin": "archive",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "HK01 跑步"
-      ]
-    },
-    {
       "id": "shoe-www-sportscience-com-tw-article-detail-e7-a0-b4-e4-ba-8c-e9-a6-ac-e6-8b-89-e6-9d",
       "type": "shoe",
       "title": "破二馬拉松, 碳板跑鞋, 跑步經濟性, Adidas Pro E - Sportscience 運動科學網",
@@ -1336,23 +1359,6 @@
       "publish_status": "published",
       "source_aliases": [
         "運動科學網"
-      ]
-    },
-    {
-      "id": "shoe-bouncin-net-p-news-new-stuff-5980-adidas-satisfy-adizero-adios-pro-4-release-inf",
-      "type": "shoe",
-      "title": "adidas 攜手巴黎高端運動服飾品牌 SATISFY 推出全新限量 ADIZERO ADIOS PRO 4 跑鞋",
-      "date": "2026-05-20",
-      "source": "Bounce",
-      "category": "跑鞋新品",
-      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://bouncin.net/p/news/new-stuff/5980/adidas-satisfy-adizero-adios-pro-4-release-info",
-      "score": 5,
-      "source_origin": "archive",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
       ]
     }
   ]

@@ -56,6 +56,8 @@ const sources = [
       "https://www.runnersworld.com/rss/training.xml",
       "https://www.runnersworld.com/gear/",
       "https://www.runnersworld.com/training/",
+      "https://www.runnersworld.com/gear/a69661889/2026-running-shoes-preview/",
+      "https://www.runnersworld.com/gear/a71282549/runners-world-shoe-awards-2026-training-shoes/",
     ],
     allowUrlPatterns: [
       /\/(gear|training|beginner|news|runners-stories)\/[ag]\d+/i,
@@ -227,8 +229,8 @@ const blockedKeywords = [
   "discount",
 ];
 
-const SHOE_TITLE_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|鞋款|實著|中底|大底|鞋面|足弓|回彈|穩定型/i;
-const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Saucony|SALOMON|On\b|Cloudmonster|Cloudsurfer|Vomero|Pegasus|Glycerin|Ghost|Kayano|Nimbus|Cumulus|Mach|Rebel|Triumph|Wave Rider|Adios Pro|Metaspeed|Deviate|Fast-R|Neo Vista|Phantasm/i;
+const SHOE_TITLE_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|實著|中底|大底|鞋面|足弓|回彈|穩定型|shoe awards|shoe preview|best running shoes/i;
+const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Saucony|SALOMON|On Running|On Cloud|Altra|adidas|Diadora|Mount To Coast|Tracksmith|R\.A\.D|Cloudmonster|Cloudsurfer|Cloudboom|Vomero|Pegasus|Structure Plus|Glycerin|Ghost|Glycerin Flex|Kayano|Nimbus|Cumulus|Superblast|Sonicblast|Mach|Mach X|Rebel|FuelCell Rebel|Triumph|Endorphin|Wave Rider|Adios Pro|Metaspeed|Deviate|Velocity Nitro|Fast-R|Neo Vista|Phantasm|Cascadia|Ride 19|Paramount Max|Escalante|Azura|Ellipse|Experience Flow|Hyperboost|Atomo Star|\bUFO\b|\bC1\b/i;
 const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
 const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
 
@@ -395,6 +397,21 @@ function looksLikeRunningShoeTitle(title) {
   return /跑步|路跑|慢跑|馬拉松|running|runner|marathon|trail/i.test(normalized) && SHOE_BRAND_MODEL_SIGNAL.test(normalized);
 }
 
+function shouldRejectRunningShoeCandidate(title) {
+  const normalized = String(title || "");
+  if (!normalized) return true;
+  if (NON_RUNNING_SHOE_SIGNAL.test(normalized) || ACCESSORY_SIGNAL.test(normalized)) {
+    return true;
+  }
+  if (/prime day|sale|deal|discount|優惠|特價|best .*?(?:gear|watch|sock|bra)|watch|garmin|shokz|playlist|sports bra|balance board/i.test(normalized)) {
+    return true;
+  }
+  if (/(?:running|marathon|trail).*(?:plan|program|guide)|return-to-running|couch-to-5k|beginner prep/i.test(normalized)) {
+    return true;
+  }
+  return false;
+}
+
 const SOCIAL_PLATFORM_TITLES = /^(instagram|facebook|youtube|line|twitter|x|tiktok|threads)$/i;
 
 function isGenericTitle(title, source) {
@@ -418,7 +435,7 @@ function looksBrokenTitle(title) {
 }
 
 function isRejectedTitle(title, source) {
-  if (NON_RUNNING_SHOE_SIGNAL.test(title) || ACCESSORY_SIGNAL.test(title)) {
+  if (shouldRejectRunningShoeCandidate(title)) {
     return true;
   }
   if (source.name !== "Runner's World") {
@@ -483,6 +500,18 @@ function choosePreferredTitle(html, source, fallbackTitle = "") {
 }
 
 function classify(title) {
+  if (shouldRejectRunningShoeCandidate(title)) {
+    if (/恢復|傷|睡眠|疲勞|recovery|recover|injur|rest|soreness/i.test(title)) {
+      return "恢復";
+    }
+    if (/補給|飲食|碳水|蛋白|能量膠|fuel|nutrition|hydration|gel|electrolyte/i.test(title)) {
+      return "補給";
+    }
+    if (/訓練|間歇|節奏|長跑|半馬|馬拉松|training|workout|speed|tempo|long run|interval|pace|mile/i.test(title)) {
+      return "訓練";
+    }
+    return "跑步新聞";
+  }
   if (looksLikeRunningShoeTitle(title)) {
     return "跑鞋新品";
   }
@@ -554,6 +583,46 @@ const DEFAULT_HEADERS = {
   "accept-language": "zh-TW,zh;q=0.9,en;q=0.8",
   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
 };
+
+function compactErrorText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function classifyFetchFailure(error) {
+  const message = compactErrorText(error?.message || "");
+  const causeCode = compactErrorText(error?.cause?.code || error?.code || "");
+  const causeMessage = compactErrorText(error?.cause?.message || "");
+  const combined = `${message} ${causeCode} ${causeMessage}`.toLowerCase();
+
+  if (error?.name === "TimeoutError" || /timed out|timeout|aborted/.test(combined)) {
+    return { kind: "timeout", detail: causeCode || causeMessage || message || "Request timed out" };
+  }
+  if (/enotfound|eai_again|getaddrinfo|dns/.test(combined)) {
+    return { kind: "dns", detail: causeCode || causeMessage || message || "DNS resolution failed" };
+  }
+  if (/self signed|certificate|tls|ssl|cert/.test(combined)) {
+    return { kind: "tls", detail: causeCode || causeMessage || message || "TLS handshake failed" };
+  }
+  if (/fetch failed|socket|network|connect|reset|refused|unreachable/.test(combined)) {
+    return { kind: "network", detail: causeCode || causeMessage || message || "Network request failed" };
+  }
+  return { kind: "unknown", detail: causeCode || causeMessage || message || "Unknown fetch failure" };
+}
+
+function buildHttpFailure(status, statusText = "") {
+  return {
+    kind: "http",
+    detail: `${status}${statusText ? ` ${statusText}` : ""}`.trim(),
+  };
+}
+
+function formatFailureSummary(failure) {
+  if (!failure) return "unknown";
+  if (failure.kind === "http") {
+    return `http:${failure.detail}`;
+  }
+  return `${failure.kind}:${failure.detail}`;
+}
 
 async function fetchArticleMetadata(item) {
   try {
@@ -776,7 +845,10 @@ async function fetchSource(source) {
       });
 
       if (!response.ok) {
-        entryErrors.push(`${entryUrl}: ${response.status} ${response.statusText}`);
+        entryErrors.push({
+          url: entryUrl,
+          ...buildHttpFailure(response.status, response.statusText),
+        });
         continue;
       }
 
@@ -784,15 +856,23 @@ async function fetchSource(source) {
       const entrySource = { ...source, url: entryUrl };
       results.push(...extractSourceLinks(body, entrySource));
     } catch (error) {
-      entryErrors.push(`${entryUrl}: ${error.message}`);
+      entryErrors.push({
+        url: entryUrl,
+        ...classifyFetchFailure(error),
+      });
     }
   }
 
   if (!results.length) {
-    throw new Error(entryErrors[0] || `No crawlable entry URLs for ${source.name}`);
+    const topError = entryErrors[0];
+    const summary = topError ? `${topError.url}: ${formatFailureSummary(topError)}` : `No crawlable entry URLs for ${source.name}`;
+    const detail = new Error(summary);
+    detail.sourceFailures = entryErrors.slice(0, 5);
+    detail.failureKind = topError?.kind || "unknown";
+    throw detail;
   }
 
-  return results;
+  return { results, entryErrors };
 }
 
 async function readJson(path, fallback) {
@@ -903,7 +983,15 @@ function applyRetention(items, retentionDays) {
   });
 }
 
-function buildReport(items, errors) {
+function newestCandidateDate(items) {
+  return items.reduce((latest, item) => {
+    const value = String(item.article_date || item.checked_at || "").slice(0, 10);
+    return !latest || value > latest ? value : latest;
+  }, "");
+}
+
+function buildReport(items, errors, options = {}) {
+  const latestDate = newestCandidateDate(items);
   const lines = [
     "# 跑鞋與跑步新聞候選內容",
     "",
@@ -913,6 +1001,9 @@ function buildReport(items, errors) {
     "這份清單由 GitHub Actions 定期整理，會交由自動上架規則挑選；來源、日期與跑者決策價值會在發布品質檢查中驗證。",
     "",
     `候選筆數：${items.length}`,
+    `最新候選日期：${latestDate || "未知"}`,
+    `本輪成功來源：${options.successfulSourceCount ?? 0} / ${options.totalSourceCount ?? 0}`,
+    options.usedFallback ? "狀態：本輪未抓到新來源，沿用上一版候選庫。" : "狀態：本輪候選來自最新抓取結果。",
     "",
     "| 分數 | 日期 | 分類 | 來源 | 標題 | 摘要 | 連結 |",
     "| ---: | --- | --- | --- | --- | --- | --- |",
@@ -920,16 +1011,16 @@ function buildReport(items, errors) {
   ];
 
   if (errors.length) {
-    lines.push("", "## 抓取失敗", "", "| 來源 | 錯誤 |", "| --- | --- |");
+    lines.push("", "## 抓取失敗", "", "| 來源 | 類型 | 錯誤 |", "| --- | --- | --- |");
     errors.forEach((error) => {
-      lines.push(`| ${error.source} | ${String(error.message).replace(/\|/g, "／")} |`);
+      lines.push(`| ${error.source} | ${String(error.kind || "unknown").replace(/\|/g, "／")} | ${String(error.message).replace(/\|/g, "／")} |`);
     });
   }
 
   return `${lines.join("\n")}\n`;
 }
 
-function buildSourceHealthReport(items) {
+function buildSourceHealthReport(items, options = {}) {
   const lines = [
     "# 內容來源健康度報告",
     "",
@@ -938,11 +1029,25 @@ function buildSourceHealthReport(items) {
     "",
     "這份報告追蹤跑鞋與跑步內容來源的抓取狀態。下一輪候選收集會依狀態調整有效權重：穩定來源加權，連續失敗來源降權。",
     "",
-    "| 來源 | 狀態 | 候選 | 連續失敗 | 基礎權重 | 有效權重 | 錯誤 |",
-    "| --- | --- | ---: | ---: | ---: | ---: | --- |",
-    ...items.map((item) => `| ${item.source} | ${item.status} | ${item.candidate_count} | ${item.consecutive_failures} | ${item.base_priority} | ${item.effective_priority} | ${String(item.error || "-").replaceAll("|", "｜")} |`),
+    `本輪成功來源：${options.successfulSourceCount ?? 0} / ${options.totalSourceCount ?? 0}`,
+    "",
+    "| 來源 | 狀態 | 候選 | 連續失敗 | 基礎權重 | 有效權重 | 錯誤類型 | 錯誤 |",
+    "| --- | --- | ---: | ---: | ---: | ---: | --- | --- |",
+    ...items.map((item) => `| ${item.source} | ${item.status} | ${item.candidate_count} | ${item.consecutive_failures} | ${item.base_priority} | ${item.effective_priority} | ${String(item.error_kind || "-").replaceAll("|", "｜")} | ${String(item.error || "-").replaceAll("|", "｜")} |`),
     "",
   ];
+  const itemsWithDetails = items.filter((item) => Array.isArray(item.error_details) && item.error_details.length);
+  if (itemsWithDetails.length) {
+    lines.push("## 來源細節", "");
+    itemsWithDetails.forEach((item) => {
+      lines.push(`### ${item.source}`, "");
+      lines.push("| URL | 類型 | 細節 |", "| --- | --- | --- |");
+      item.error_details.forEach((detail) => {
+        lines.push(`| ${String(detail.url || "-").replaceAll("|", "｜")} | ${String(detail.kind || "-").replaceAll("|", "｜")} | ${String(detail.detail || "-").replaceAll("|", "｜")} |`);
+      });
+      lines.push("");
+    });
+  }
   return `${lines.join("\n")}`;
 }
 
@@ -958,12 +1063,26 @@ async function main() {
 
   for (const source of runtimeSources) {
     try {
-      const sourceResults = await fetchSource(source);
-      results.push(...sourceResults);
-      sourceRuns.push({ source, ok: true, candidateCount: sourceResults.length, error: "" });
+      const sourceRun = await fetchSource(source);
+      results.push(...sourceRun.results);
+      sourceRuns.push({
+        source,
+        ok: true,
+        candidateCount: sourceRun.results.length,
+        error: "",
+        errorKind: "",
+        errorDetails: sourceRun.entryErrors.filter((item) => item.kind).slice(0, 5),
+      });
     } catch (error) {
-      errors.push({ source: source.name, message: error.message });
-      sourceRuns.push({ source, ok: false, candidateCount: 0, error: error.message });
+      errors.push({ source: source.name, kind: error.failureKind || "unknown", message: error.message });
+      sourceRuns.push({
+        source,
+        ok: false,
+        candidateCount: 0,
+        error: error.message,
+        errorKind: error.failureKind || "unknown",
+        errorDetails: Array.isArray(error.sourceFailures) ? error.sourceFailures : [],
+      });
     }
   }
 
@@ -971,11 +1090,13 @@ async function main() {
   const preferredCandidates = enrichedCandidates.filter(isPreferredWindowCandidate);
   let candidatesAll = dedupe(preferredCandidates, CANDIDATES_ALL_LIMIT);
   let candidates = candidatesAll.slice(0, CANDIDATE_OUTPUT_LIMIT);
+  let usedFallback = false;
   if (!candidates.length && errors.length) {
     try {
       candidates = JSON.parse(await readFile(jsonPath, "utf8"));
       candidatesAll = candidates;
-      errors.push({ source: "fallback", message: "本次來源抓取失敗，保留上一版候選內容，避免清空前台素材。" });
+      usedFallback = true;
+      errors.push({ source: "fallback", kind: "stale-cache", message: "本次來源抓取失敗，保留上一版候選內容，避免清空前台素材。" });
     } catch {
       // Keep empty candidates when there is no previous file.
     }
@@ -1008,20 +1129,28 @@ async function main() {
       consecutive_failures: consecutiveFailures,
       base_priority: run.source.priority,
       effective_priority: run.source.effectivePriority,
+      error_kind: run.errorKind || "",
       error: run.error,
+      error_details: run.errorDetails || [],
     };
   });
+  const successfulSourceCount = sourceRuns.filter((run) => run.ok).length;
   await writeFile(jsonPath, `${JSON.stringify(candidates, null, 2)}\n`, "utf8");
   await writeFile(
     archivePath,
     `${JSON.stringify({ generated_at: new Date().toISOString(), retention_days: ARCHIVE_RETENTION_DAYS, items: archivedItems }, null, 2)}\n`,
     "utf8",
   );
-  await writeFile(reportPath, buildReport(candidates, errors), "utf8");
+  await writeFile(reportPath, buildReport(candidates, errors, {
+    successfulSourceCount,
+    totalSourceCount: runtimeSources.length,
+    usedFallback,
+  }), "utf8");
   await writeFile(sourceHealthJsonPath, `${JSON.stringify(sourceHealth, null, 2)}\n`, "utf8");
-  await writeFile(sourceHealthReportPath, buildSourceHealthReport(sourceHealth), "utf8");
-
-  const successfulSourceCount = sourceRuns.filter((run) => run.ok).length;
+  await writeFile(sourceHealthReportPath, buildSourceHealthReport(sourceHealth, {
+    successfulSourceCount,
+    totalSourceCount: runtimeSources.length,
+  }), "utf8");
 
   console.log(`Content candidates: ${candidates.length}`);
   console.log(`Content archive items: ${archivedItems.length}`);

@@ -3,13 +3,13 @@ name: Collect content candidates
 on:
   workflow_dispatch:
   schedule:
-    # Primary: 09:17 Asia/Taipei every Monday, Wednesday, and Friday.
+    # Primary: 09:17 Asia/Taipei every day.
     # Avoid :00 because GitHub scheduled workflows are more likely to be delayed there.
-    - cron: "17 1 * * 1,3,5"
+    - cron: "17 1 * * *"
     # Backups: GitHub scheduled workflows can be delayed or skipped under load.
-    - cron: "37 2 * * 1,3,5"
-    - cron: "17 4 * * 1,3,5"
-    - cron: "47 5 * * 1,3,5"
+    - cron: "37 2 * * *"
+    - cron: "17 4 * * *"
+    - cron: "47 5 * * *"
 
 permissions:
   actions: write

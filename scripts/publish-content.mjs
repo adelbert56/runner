@@ -37,11 +37,14 @@ const SUMMARY_RULES = [
 ];
 
 const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i];
-const SHOE_ONLY_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|鞋款|實著|中底|大底|鞋面|回彈|穩定型/i;
+const SHOE_ONLY_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|實著|中底|大底|鞋面|回彈|穩定型|shoe awards|shoe preview|best running shoes/i;
 const RUNNING_CONTEXT_SIGNAL = /跑步|跑鞋|路跑|慢跑|馬拉松|半馬|訓練|daily trainer|marathon|running|runner|tempo|recovery|trail/i;
+const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Saucony|SALOMON|On Running|On Cloud|Altra|adidas|Diadora|Mount To Coast|Tracksmith|R\.A\.D|Cloudmonster|Cloudsurfer|Cloudboom|Vomero|Pegasus|Structure Plus|Glycerin|Ghost|Glycerin Flex|Kayano|Nimbus|Cumulus|Superblast|Sonicblast|Mach|Mach X|Rebel|FuelCell Rebel|Triumph|Endorphin|Wave Rider|Adios Pro|Metaspeed|Deviate|Velocity Nitro|Fast-R|Neo Vista|Phantasm|Cascadia|Ride 19|Paramount Max|Escalante|Azura|Ellipse|Experience Flow|Hyperboost|Atomo Star|\bUFO\b|\bC1\b/i;
 const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
 const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
-const SHOE_EXCLUSION_SIGNAL = /prime day|sale|deal|discount|優惠|特價|training plan|return-to-running|mindset|Parkinson|sports bras?|Shokz|Garmin|gear on amazon|running gear|balance board|playlist|watch|襪|socks?/i;
+const SHOE_EXCLUSION_SIGNAL = /prime day|sale|deal|discount|優惠|特價|training plan|return-to-running|mindset|Parkinson|sports bras?|Shokz|Garmin|gear on amazon|running gear|balance board|playlist|watch|襪|socks?|hyrox|綜合訓練鞋|旗艦店|開幕|store opening|flagship/i;
+const SHOE_GUIDE_SIGNAL = /best|top|guide|awards|preview|for men|for women|for beginners|flat feet|most cushioned|our top picks/i;
+const SHOE_MODEL_FOCUS_SIGNAL = /review|上市|登場|推出|發表|實測|首試|開箱|評測|同級對比|\bv\d+\b|\b\d{1,2}\b|elite|nitro|pegasus|glycerin|ghost|kayano|nimbus|cumulus|mach|rebel|metaspeed|deviate|wave rider|triumph|paramount|escalante|azura|ellipse|cascadia|cloudmonster|cloudsurfer|vomero/i;
 
 function normalizeUrl(url) {
   try {
@@ -105,10 +108,22 @@ function inferType(item) {
   const text = `${item.title || ""} ${item.description || ""}`;
   const hasShoeSignal = SHOE_ONLY_SIGNAL.test(text);
   const hasRunningContext = RUNNING_CONTEXT_SIGNAL.test(text);
+  const hasBrandModelSignal = SHOE_BRAND_MODEL_SIGNAL.test(text);
   const hasNonRunningSignal = NON_RUNNING_SHOE_SIGNAL.test(text) || ACCESSORY_SIGNAL.test(text);
   const hasShoeExclusionSignal = SHOE_EXCLUSION_SIGNAL.test(text);
   const eventOnlySignal = /賽事|報名|馬拉松|半馬|UTMB|開放報名|城市路跑/i.test(text) && !hasShoeSignal;
-  if (hasShoeSignal && hasRunningContext && !hasNonRunningSignal && !hasShoeExclusionSignal && !eventOnlySignal) return "shoe";
+  if (
+    !hasNonRunningSignal
+    && !hasShoeExclusionSignal
+    && !eventOnlySignal
+    && (
+      (hasShoeSignal && hasRunningContext)
+      || (hasRunningContext && hasBrandModelSignal)
+      || (/shoe awards|shoe preview|best running shoes/i.test(text) && hasBrandModelSignal)
+    )
+  ) {
+    return "shoe";
+  }
   return "news";
 }
 
@@ -135,6 +150,7 @@ function publishedPreference(item) {
     languageRank: sourceLanguageRank(item),
     originRank: sourceOriginRank(item.source_origin),
     typeRank: item.type === "shoe" ? 0 : 1,
+    shoeSpecificityRank: item.type === "shoe" ? shoeSpecificityRank(item) : 0,
     score: Number(item.score || 0),
     dateValue: parseTaipeiDate(item.date || item.published_at || "")?.getTime() || 0,
     title: String(item.title || ""),
@@ -149,11 +165,26 @@ function comparePublishedItems(a, b) {
     left.languageRank - right.languageRank
     || right.originRank - left.originRank
     || left.typeRank - right.typeRank
+    || right.shoeSpecificityRank - left.shoeSpecificityRank
     || right.score - left.score
     || right.dateValue - left.dateValue
     || left.source.localeCompare(right.source)
     || left.title.localeCompare(right.title)
   );
+}
+
+function shoeSpecificityRank(item) {
+  const text = `${item.title || ""} ${item.summary || ""}`;
+  const hasBrandModelSignal = SHOE_BRAND_MODEL_SIGNAL.test(text);
+  const isGuide = SHOE_GUIDE_SIGNAL.test(text);
+  const isFocusedModel = SHOE_MODEL_FOCUS_SIGNAL.test(text);
+  if (hasBrandModelSignal && isFocusedModel && !isGuide) {
+    return 2;
+  }
+  if (hasBrandModelSignal || isGuide) {
+    return 1;
+  }
+  return 0;
 }
 
 function inferShoeCategory(title) {
@@ -345,7 +376,10 @@ function toPublishedItem(item) {
 }
 
 function previousToPublishedItem(item) {
-  const type = item.type === "shoe" ? "shoe" : "news";
+  const type = inferType({
+    title: item.title || "",
+    description: item.summary || "",
+  });
   const normalizedDate = normalizeIsoDate(item.date || item.published_at);
   return {
     id: item.id || `${type}-${slugify(normalizeUrl(item.url) || item.title)}`,
@@ -497,6 +531,10 @@ function sourceOriginRank(origin) {
   return 1;
 }
 
+function isExcludedShoeContent(item) {
+  return item.type === "shoe" && SHOE_EXCLUSION_SIGNAL.test(`${item.title || ""} ${item.summary || ""} ${item.category || ""}`);
+}
+
 function mergePublishedRecords(previous, current) {
   if (!previous) {
     return { ...current };
@@ -544,10 +582,12 @@ async function main() {
   const normalized = raw
     .map((item) => mergeArchiveFields(item, archiveByUrl))
     .filter((item) => withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
-    .map(toPublishedItem);
+    .map(toPublishedItem)
+    .filter((item) => !isExcludedShoeContent(item));
   const previousInventory = (Array.isArray(previousContent.items) ? previousContent.items : [])
     .filter((item) => withinDays(item.date || item.published_at, PUBLISH_WINDOW_DAYS))
-    .map(previousToPublishedItem);
+    .map(previousToPublishedItem)
+    .filter((item) => !isExcludedShoeContent(item));
   const archiveInventory = archiveItems
     .filter((item) => withinRetention(item, ARCHIVE_RETENTION_DAYS) && withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map((item) => ({ ...item, source_origin: "archive" }))
@@ -555,14 +595,16 @@ async function main() {
     .map((item) => ({
       ...item,
       score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 1),
-    }));
+    }))
+    .filter((item) => !isExcludedShoeContent(item));
   const editorialInventory = editorial
     .filter((item) => withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map(toPublishedItem)
     .map((item) => ({
-    ...item,
-    score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 2),
-  }));
+      ...item,
+      score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 2),
+    }))
+    .filter((item) => !isExcludedShoeContent(item));
   const inventory = dedupePublishedRecords([...normalized, ...archiveInventory, ...previousInventory, ...editorialInventory]);
   const published = [
     ...fillWithInventory(inventory, inventory, "shoe"),
