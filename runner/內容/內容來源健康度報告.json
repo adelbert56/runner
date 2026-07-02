@@ -6,13 +6,19 @@
     "source_type": "跑步新聞 / 跑鞋專題",
     "status": "穩定",
     "ok": true,
-    "candidate_count": 10,
+    "candidate_count": 5,
     "consecutive_failures": 0,
     "base_priority": 5,
     "effective_priority": 6,
     "error_kind": "",
     "error": "",
-    "error_details": []
+    "error_details": [
+      {
+        "url": "https://running.biji.co/",
+        "kind": "http",
+        "detail": "403 Forbidden"
+      }
+    ]
   },
   {
     "checked_at": "2026-07-02",
@@ -21,7 +27,7 @@
     "source_type": "跑鞋新品 / 跑步專題",
     "status": "穩定",
     "ok": true,
-    "candidate_count": 10,
+    "candidate_count": 11,
     "consecutive_failures": 0,
     "base_priority": 5,
     "effective_priority": 6,
@@ -51,7 +57,7 @@
     "source_type": "英文跑鞋評測 / 訓練知識",
     "status": "穩定",
     "ok": true,
-    "candidate_count": 120,
+    "candidate_count": 117,
     "consecutive_failures": 0,
     "base_priority": 3,
     "effective_priority": 4,
@@ -88,7 +94,7 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 4,
+    "consecutive_failures": 5,
     "base_priority": 2,
     "effective_priority": 1,
     "error_kind": "unknown",
@@ -118,7 +124,7 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 7,
+    "consecutive_failures": 8,
     "base_priority": 3,
     "effective_priority": 2,
     "error_kind": "unknown",
@@ -178,7 +184,7 @@
     "status": "需補強",
     "ok": false,
     "candidate_count": 0,
-    "consecutive_failures": 7,
+    "consecutive_failures": 8,
     "base_priority": 2,
     "effective_priority": 1,
     "error_kind": "unknown",

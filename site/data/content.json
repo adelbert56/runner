@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T05:42:07.204Z",
+  "generated_at": "2026-07-02T06:41:41.276Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-05-hoka-mach-7-review-by-grace-ho",
@@ -10,6 +10,40 @@
       "category": "恢復保養",
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
       "url": "https://kenlu.net/2026/05/hoka-mach-7-review-by-grace-ho/",
+      "score": 29,
+      "source_origin": "candidate",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
+      "id": "news-kenlu-net-2026-05-hoka-speedgoat-7-review-by-yangzz421",
+      "type": "news",
+      "title": "網友 劉名洋 鞋評 / HOKA Speedgoat 7",
+      "date": "2026-07-02",
+      "source": "KENLU",
+      "category": "恢復保養",
+      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
+      "url": "https://kenlu.net/2026/05/hoka-speedgoat-7-review-by-yangzz421/",
+      "score": 29,
+      "source_origin": "candidate",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
+      "id": "news-kenlu-net-2026-07-puma-deviate-nitro-4-review-yangzz421",
+      "type": "news",
+      "title": "網友 劉名洋 鞋評 / PUMA Deviate NITRO™ 4",
+      "date": "2026-07-02",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
+      "url": "https://kenlu.net/2026/07/puma-deviate-nitro-4-review-yangzz421/",
       "score": 29,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
@@ -53,32 +87,15 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-05-hoka-speedgoat-7-review-by-yangzz421",
+      "id": "news-kenlu-net-2026-04-puma-deviate-nitro-4-otc-crew-review",
       "type": "news",
-      "title": "網友 劉名洋 鞋評 / HOKA Speedgoat 7",
-      "date": "2026-07-02",
-      "source": "KENLU",
-      "category": "恢復保養",
-      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://kenlu.net/2026/05/hoka-speedgoat-7-review-by-yangzz421/",
-      "score": 29,
-      "source_origin": "candidate",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-07-puma-deviate-nitro-4-review-yangzz421",
-      "type": "news",
-      "title": "網友 劉名洋 鞋評 / PUMA Deviate NITRO™ 4",
+      "title": "OffTrack Crew：「PUMA Deviate NITRO 4 是一雙催自己快一點的跑鞋」",
       "date": "2026-07-02",
       "source": "KENLU",
       "category": "跑鞋裝備",
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://kenlu.net/2026/07/puma-deviate-nitro-4-review-yangzz421/",
-      "score": 29,
+      "url": "https://kenlu.net/2026/04/puma-deviate-nitro-4-otc-crew-review/",
+      "score": 21,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
       "publish_status": "published",
@@ -138,23 +155,6 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-04-puma-deviate-nitro-4-otc-crew-review",
-      "type": "news",
-      "title": "OffTrack Crew：「PUMA Deviate NITRO 4 是一雙催自己快一點的跑鞋」",
-      "date": "2026-07-02",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://kenlu.net/2026/04/puma-deviate-nitro-4-otc-crew-review/",
-      "score": 21,
-      "source_origin": "candidate",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
       "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a71104782-saucony-omni-23-st",
       "type": "news",
       "title": "Saucony OMNI 23 ST 編輯評測：入門跑者適合穿嗎？規格、完整介紹一次看懂",
@@ -172,14 +172,14 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-06-nike-lebron-xxiii-ep-im5124-401-release-info",
+      "id": "news-kenlu-net-2026-05-xlim-x-hoka-mafate-speed-2-grey-foam-release-info",
       "type": "news",
-      "title": "上市速報 / 靈感來自 LBJ 喜歡的動畫《蓋酷家庭》 Nike LeBron XXIII ‘Stewie’ EP 臺灣販售資訊整理",
+      "title": "上市速報 / XLIM x HOKA Mafate Speed 2 ‘Grey Foam’ 臺灣販售資訊整理",
       "date": "2026-07-02",
       "source": "KENLU",
       "category": "跑鞋裝備",
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://kenlu.net/2026/06/nike-lebron-xxiii-ep-im5124-401-release-info/",
+      "url": "https://kenlu.net/2026/05/xlim-x-hoka-mafate-speed-2-grey-foam-release-info/",
       "score": 19,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
@@ -189,14 +189,14 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-05-xlim-x-hoka-mafate-speed-2-grey-foam-release-info",
+      "id": "news-kenlu-net-2026-06-nike-lebron-xxiii-ep-im5124-401-release-info",
       "type": "news",
-      "title": "上市速報 / XLIM x HOKA Mafate Speed 2 ‘Grey Foam’ 臺灣販售資訊整理",
+      "title": "上市速報 / 靈感來自 LBJ 喜歡的動畫《蓋酷家庭》 Nike LeBron XXIII ‘Stewie’ EP 臺灣販售資訊整理",
       "date": "2026-07-02",
       "source": "KENLU",
       "category": "跑鞋裝備",
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://kenlu.net/2026/05/xlim-x-hoka-mafate-speed-2-grey-foam-release-info/",
+      "url": "https://kenlu.net/2026/06/nike-lebron-xxiii-ep-im5124-401-release-info/",
       "score": 19,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
@@ -444,23 +444,6 @@
       ]
     },
     {
-      "id": "news-www-don1don-com-archives-239883-2026-e8-a5-bf-e9-83-a8-e8-80-90-e5-8a-9b-e8-b3-b",
-      "type": "news",
-      "title": "2026西部耐力賽越野鞋盤點 HOKA、NIKE 原型鞋聚焦",
-      "date": "2026-07-02",
-      "source": "動一動",
-      "category": "跑鞋裝備",
-      "summary": "富士山周邊賽事從公路馬到長距離越野都有，重點不是只看距離，而是爬升、補給、旅跑成本與自身山徑經驗是否匹配。",
-      "url": "https://www.don1don.com/archives/239883/2026%e8%a5%bf%e9%83%a8%e8%80%90%e5%8a%9b%e8%b3%bd%e8%b6%8a%e9%87%8e%e9%9e%8b%e7%9b%a4%e9%bb%9e-hoka%e3%80%81nike-%e5%8e%9f%e5%9e%8b%e9%9e%8b%e8%81%9a%e7%84%a6",
-      "score": 13,
-      "source_origin": "candidate",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
       "id": "news-kenlu-net-2023-03-brooks-catamount-2-unboxing",
       "type": "news",
       "title": "勘履訪客 / 美洲豹現身！BROOKS CATAMOUNT 2 帶領你征服各種地形",
@@ -475,6 +458,23 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-www-don1don-com-archives-239883-2026-e8-a5-bf-e9-83-a8-e8-80-90-e5-8a-9b-e8-b3-b",
+      "type": "news",
+      "title": "2026西部耐力賽越野鞋盤點 HOKA、NIKE 原型鞋聚焦",
+      "date": "2026-07-02",
+      "source": "動一動",
+      "category": "跑鞋裝備",
+      "summary": "富士山周邊賽事從公路馬到長距離越野都有，重點不是只看距離，而是爬升、補給、旅跑成本與自身山徑經驗是否匹配。",
+      "url": "https://www.don1don.com/archives/239883/2026%e8%a5%bf%e9%83%a8%e8%80%90%e5%8a%9b%e8%b3%bd%e8%b6%8a%e9%87%8e%e9%9e%8b%e7%9b%a4%e9%bb%9e-hoka%e3%80%81nike-%e5%8e%9f%e5%9e%8b%e9%9e%8b%e8%81%9a%e7%84%a6",
+      "score": 13,
+      "source_origin": "candidate",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
       ]
     },
     {
@@ -529,14 +529,14 @@
       ]
     },
     {
-      "id": "news-bouncin-net-p-trend-sole-watch-5942-lin-shu-wei-puma-mb01-golden-child-kings-pla",
+      "id": "news-bouncin-net-p-trend-sole-watch-5944-donovan-mitchell-adidas-don-issue-8-spida-ma",
       "type": "news",
-      "title": "換鞋就爆發！林書緯上腳 PUMA MB.01 \"Golden Child\" 助國王季後挑戰賽續命成功",
+      "title": "Donovan Mitchell 個人第 8 代簽名球鞋 adidas D.O.N. Issue 8 \"Spida-Man\" 首度曝光",
       "date": "2026-05-06",
       "source": "Bounce",
-      "category": "跑鞋裝備",
+      "category": "跑步新聞",
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://bouncin.net/p/trend/sole-watch/5942/lin-shu-wei-puma-mb01-golden-child-kings-play-in-win",
+      "url": "https://bouncin.net/p/trend/sole-watch/5944/donovan-mitchell-adidas-don-issue-8-spida-man-debut",
       "score": 10,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
@@ -546,14 +546,14 @@
       ]
     },
     {
-      "id": "news-bouncin-net-p-trend-sole-watch-5944-donovan-mitchell-adidas-don-issue-8-spida-ma",
+      "id": "news-bouncin-net-p-trend-sole-watch-5942-lin-shu-wei-puma-mb01-golden-child-kings-pla",
       "type": "news",
-      "title": "Donovan Mitchell 個人第 8 代簽名球鞋 adidas D.O.N. Issue 8 \"Spida-Man\" 首度曝光",
+      "title": "換鞋就爆發！林書緯上腳 PUMA MB.01 \"Golden Child\" 助國王季後挑戰賽續命成功",
       "date": "2026-05-06",
       "source": "Bounce",
-      "category": "跑步新聞",
+      "category": "跑鞋裝備",
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://bouncin.net/p/trend/sole-watch/5944/donovan-mitchell-adidas-don-issue-8-spida-man-debut",
+      "url": "https://bouncin.net/p/trend/sole-watch/5942/lin-shu-wei-puma-mb01-golden-child-kings-play-in-win",
       "score": 10,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
@@ -752,13 +752,13 @@
     {
       "id": "shoe-running-biji-co-index-php",
       "type": "shoe",
-      "title": "【品牌動態】HOKA Clifton PRO登場！全新超臨界中底 挑戰高階日常訓練鞋市場",
-      "date": "2026-06-26",
+      "title": "【品牌動態】ASICS Novablast 6 登場！旗艦泡棉下放 從舒適訓練鞋進化成全能主力",
+      "date": "2026-07-01",
       "source": "運動筆記",
       "category": "日常訓練",
-      "summary": "這雙鞋目前以「日常訓練」定位收錄。適合輕鬆跑、恢復跑與日常累積里程，是多數跑者第一雙主力鞋的優先選項。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114267&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91HOKA%20Clifton%20PRO%E7%99%BB%E5%A0%B4%EF%BC%81%E5%85%A8%E6%96%B0%E8%B6%85%E8%87%A8%E7%95%8C%E4%B8%AD%E5%BA%95%20%E6%8C%91%E6%88%B0%E9%AB%98%E9%9A%8E%E6%97%A5%E5%B8%B8%E8%A8%93%E7%B7%B4%E9%9E%8B%E5%B8%82%E5%A0%B4",
-      "score": 29,
+      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114278&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91ASICS%20Novablast%206%20%E7%99%BB%E5%A0%B4%EF%BC%81%E6%97%97%E8%89%A6%E6%B3%A1%E6%A3%89%E4%B8%8B%E6%94%BE%20%E5%BE%9E%E8%88%92%E9%81%A9%E8%A8%93%E7%B7%B4%E9%9E%8B%E9%80%B2%E5%8C%96%E6%88%90%E5%85%A8%E8%83%BD%E4%B8%BB%E5%8A%9B&label=all",
+      "score": 28,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
       "publish_status": "published",
@@ -934,23 +934,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "shoe-bouncin-net-p-news-new-stuff-6064-asics-novablast-6",
-      "type": "shoe",
-      "title": "ASICS 彈力跑鞋 NOVABLAST 6 全面進化 強化回彈腳感與舒適度",
-      "date": "2026-07-02",
-      "source": "Bounce",
-      "category": "日常訓練",
-      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
-      "url": "https://bouncin.net/p/news/new-stuff/6064/asics-novablast-6",
-      "score": 20,
-      "source_origin": "candidate",
-      "published_at": "2026-07-02",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
       ]
     },
     {
@@ -1303,6 +1286,23 @@
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.runnersworld.com/gear/a20866339/best-brooks-running-shoes/",
       "score": 25,
+      "source_origin": "candidate",
+      "published_at": "2026-07-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a22140215-best-asics-running-shoes",
+      "type": "shoe",
+      "title": "The 10 Best Asics Running Shoes for Racing and Distance Running",
+      "date": "2026-07-02",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a22140215/best-asics-running-shoes/",
+      "score": 23,
       "source_origin": "candidate",
       "published_at": "2026-07-02",
       "publish_status": "published",
