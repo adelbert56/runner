@@ -69,6 +69,9 @@ function itemIssues(item, index, seenUrls) {
   if (item.type === "shoe" && !/跑鞋|鞋|競速|越野|防水|緩震|速度|日常|訓練|里程|節奏|碳板/i.test(`${item.title} ${item.category} ${summary}`)) {
     issues.push({ severity: "medium", label, issue: "跑鞋卡缺少明確鞋款或用途訊號" });
   }
+  if (item.type === "shoe" && /prime day|sale|deal|discount|training plan|return-to-running|sports bras?|Shokz|Garmin|running gear|balance board|playlist|watch|襪|socks?/i.test(`${item.title} ${summary}`)) {
+    issues.push({ severity: "high", label, issue: "跑鞋卡混入特價文、訓練計畫或配件內容" });
+  }
 
   return issues;
 }

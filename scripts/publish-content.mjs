@@ -13,7 +13,7 @@ const ARCHIVE_RETENTION_DAYS = 183;
 const PUBLISH_WINDOW_DAYS = 92;
 
 const LIMITS = {
-  shoe: 30,
+  shoe: 40,
   news: 40,
 };
 
@@ -37,6 +37,11 @@ const SUMMARY_RULES = [
 ];
 
 const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i];
+const SHOE_ONLY_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|鞋款|實著|中底|大底|鞋面|回彈|穩定型/i;
+const RUNNING_CONTEXT_SIGNAL = /跑步|跑鞋|路跑|慢跑|馬拉松|半馬|訓練|daily trainer|marathon|running|runner|tempo|recovery|trail/i;
+const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
+const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
+const SHOE_EXCLUSION_SIGNAL = /prime day|sale|deal|discount|優惠|特價|training plan|return-to-running|mindset|Parkinson|sports bras?|Shokz|Garmin|gear on amazon|running gear|balance board|playlist|watch|襪|socks?/i;
 
 function normalizeUrl(url) {
   try {
@@ -98,9 +103,12 @@ function withinRetention(item, retentionDays) {
 
 function inferType(item) {
   const text = `${item.title || ""} ${item.description || ""}`;
-  const hasShoeSignal = /跑鞋|鞋款|鞋底|中底|鞋面|鞋碼|碳板|GTX|GORE|BROOKS GHOST|PEGASUS|GEL-|NIMBUS|KAYANO|MACH|DEVIATE|FAST-R|PHANTASM|NEO VISTA|CLOUDMONSTER/i.test(text);
+  const hasShoeSignal = SHOE_ONLY_SIGNAL.test(text);
+  const hasRunningContext = RUNNING_CONTEXT_SIGNAL.test(text);
+  const hasNonRunningSignal = NON_RUNNING_SHOE_SIGNAL.test(text) || ACCESSORY_SIGNAL.test(text);
+  const hasShoeExclusionSignal = SHOE_EXCLUSION_SIGNAL.test(text);
   const eventOnlySignal = /賽事|報名|馬拉松|半馬|UTMB|開放報名|城市路跑/i.test(text) && !hasShoeSignal;
-  if (item.category === "跑鞋新品" && hasShoeSignal && !eventOnlySignal) return "shoe";
+  if (hasShoeSignal && hasRunningContext && !hasNonRunningSignal && !hasShoeExclusionSignal && !eventOnlySignal) return "shoe";
   return "news";
 }
 
@@ -126,8 +134,8 @@ function publishedPreference(item) {
   return {
     languageRank: sourceLanguageRank(item),
     originRank: sourceOriginRank(item.source_origin),
-    score: Number(item.score || 0),
     typeRank: item.type === "shoe" ? 0 : 1,
+    score: Number(item.score || 0),
     dateValue: parseTaipeiDate(item.date || item.published_at || "")?.getTime() || 0,
     title: String(item.title || ""),
     source: String(item.source || ""),
@@ -140,8 +148,8 @@ function comparePublishedItems(a, b) {
   return (
     left.languageRank - right.languageRank
     || right.originRank - left.originRank
-    || right.score - left.score
     || left.typeRank - right.typeRank
+    || right.score - left.score
     || right.dateValue - left.dateValue
     || left.source.localeCompare(right.source)
     || left.title.localeCompare(right.title)

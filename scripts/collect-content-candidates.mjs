@@ -200,7 +200,37 @@ const blockedKeywords = [
   "艾蜜莉",
   "BTS",
   "林書豪",
+  "Air Force 1",
+  "Basketball",
+  "basketball",
+  "NBA",
+  "WNBA",
+  "足球",
+  "網球",
+  "棒球",
+  "耳機",
+  "手錶",
+  "Garmin",
+  "墨鏡",
+  "太陽眼鏡",
+  "襪",
+  "襪子",
+  "穿搭",
+  "音樂",
+  "歌單",
+  "Prime Day",
+  "特價",
+  "折扣",
+  "優惠",
+  "sale",
+  "deal",
+  "discount",
 ];
+
+const SHOE_TITLE_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|鞋款|實著|中底|大底|鞋面|足弓|回彈|穩定型/i;
+const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Saucony|SALOMON|On\b|Cloudmonster|Cloudsurfer|Vomero|Pegasus|Glycerin|Ghost|Kayano|Nimbus|Cumulus|Mach|Rebel|Triumph|Wave Rider|Adios Pro|Metaspeed|Deviate|Fast-R|Neo Vista|Phantasm/i;
+const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
+const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
 
 function compact(text) {
   return String(text || "")
@@ -353,6 +383,18 @@ function scoreTitle(title, source) {
   return keywordScore + (source.effectivePriority ?? source.priority);
 }
 
+function looksLikeRunningShoeTitle(title) {
+  const normalized = String(title || "");
+  if (!normalized) return false;
+  if (NON_RUNNING_SHOE_SIGNAL.test(normalized) || ACCESSORY_SIGNAL.test(normalized)) {
+    return false;
+  }
+  if (SHOE_TITLE_SIGNAL.test(normalized)) {
+    return true;
+  }
+  return /跑步|路跑|慢跑|馬拉松|running|runner|marathon|trail/i.test(normalized) && SHOE_BRAND_MODEL_SIGNAL.test(normalized);
+}
+
 const SOCIAL_PLATFORM_TITLES = /^(instagram|facebook|youtube|line|twitter|x|tiktok|threads)$/i;
 
 function isGenericTitle(title, source) {
@@ -376,10 +418,13 @@ function looksBrokenTitle(title) {
 }
 
 function isRejectedTitle(title, source) {
+  if (NON_RUNNING_SHOE_SIGNAL.test(title) || ACCESSORY_SIGNAL.test(title)) {
+    return true;
+  }
   if (source.name !== "Runner's World") {
     return false;
   }
-  return /(?:gift|gifts|headphones?|earbuds?|earphones?|sunglasses?|glasses|hats?|caps?|treadmill|hydration packs?|hydration pack|heart rate monitors?|heart rate monitor)/i.test(title);
+  return /(?:gift|gifts|headphones?|earbuds?|earphones?|sunglasses?|glasses|hats?|caps?|treadmill|hydration packs?|hydration pack|heart rate monitors?|heart rate monitor|watch|watches|socks?|playlist|sale|deal|discount)/i.test(title);
 }
 
 function normalizeTitleCandidate(title, source) {
@@ -438,11 +483,11 @@ function choosePreferredTitle(html, source, fallbackTitle = "") {
 }
 
 function classify(title) {
+  if (looksLikeRunningShoeTitle(title)) {
+    return "跑鞋新品";
+  }
   if (/為什麼|怎麼|如何|真的|是否|原理|解析|入門|新手|課表|訓練|跑姿|重量訓練|肌力|恢復|補給|乳酸|心率|傷痛|疼痛|比較省力|效率/i.test(title)) {
     return "入門知識";
-  }
-  if (/跑鞋|慢跑鞋|碳板|ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Cloud|鞋評|開箱|上市速報|評測|裝備|鞋款|實著|新品|running|runner|runners|marathon|trail|shoe|shoes|trainer|training|recovery|workout|gear|review/i.test(title)) {
-    return "跑鞋新品";
   }
   if (/新手|入門|初跑|跑姿|肌力|心率|乳酸閾值|how to|beginner|return to running/i.test(title)) {
     return "入門知識";
@@ -976,11 +1021,17 @@ async function main() {
   await writeFile(sourceHealthJsonPath, `${JSON.stringify(sourceHealth, null, 2)}\n`, "utf8");
   await writeFile(sourceHealthReportPath, buildSourceHealthReport(sourceHealth), "utf8");
 
+  const successfulSourceCount = sourceRuns.filter((run) => run.ok).length;
+
   console.log(`Content candidates: ${candidates.length}`);
   console.log(`Content archive items: ${archivedItems.length}`);
   console.log(`Content source issues: ${sourceHealth.filter((item) => item.status !== "穩定").length}`);
   if (errors.length) {
     console.log(`Source errors: ${errors.length}`);
+  }
+  if (successfulSourceCount === 0) {
+    console.error("All content sources failed. Preserved the previous candidate inventory, but this run should be treated as stale.");
+    process.exitCode = 1;
   }
 }
 
