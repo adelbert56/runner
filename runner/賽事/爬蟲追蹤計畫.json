@@ -10,9 +10,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-07-01",
+      "next_check_date": "2026-07-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 208 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 206 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -42,9 +42,9 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2026-09-28",
+      "next_check_date": "2026-09-29",
       "cadence": "future",
-      "reason": "距離賽事 271 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 269 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       "official_registration_link",
@@ -73,9 +73,9 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-07",
+      "next_check_date": "2027-06-08",
       "cadence": "future",
-      "reason": "距離賽事 523 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 521 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       "official_registration_link",
@@ -104,9 +104,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-07-01",
+      "next_check_date": "2026-07-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 201 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 199 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -134,9 +134,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-07-01",
+      "next_check_date": "2026-07-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 138 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 136 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -156,13 +156,13 @@
     "race_name": "2026 通霄濱海追風馬拉松",
     "race_date": "2026-12-13",
     "race_county": "苗栗縣",
-    "source_platform": "運動筆記、Lohas",
+    "source_platform": "運動筆記",
     "is_official_direct": false,
     "priority_score": 8,
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、各距離開跑時間、費用、名額。"
     },
@@ -191,7 +191,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：開報時間、報名截止時間。除非要補歷史資料，優先度較低。"
     },
@@ -218,9 +218,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-07-01",
+      "next_check_date": "2026-07-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 130 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 128 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "registration_opens_at",
@@ -246,7 +246,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：各距離開跑時間、費用、名額。"
     },
@@ -274,7 +274,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：各距離開跑時間、費用。保留供歷史資料補齊。"
     },
@@ -299,11 +299,11 @@
     "is_official_direct": true,
     "priority_score": 2,
     "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-30",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、費用。"
+      "status": "monitor_weekly",
+      "status_label": "每週追蹤",
+      "next_check_date": "2026-07-02",
+      "cadence": "biweekly",
+      "reason": "開報日已過，仍缺：各距離開跑時間、費用。"
     },
     "missing": [
       "start_times",
@@ -326,11 +326,11 @@
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
-      "status": "monitor_weekly",
-      "status_label": "每週追蹤",
-      "next_check_date": "2026-06-30",
-      "cadence": "biweekly",
-      "reason": "開報日已過，仍缺：各距離開跑時間。"
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-07-02",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：各距離開跑時間。保留供歷史資料補齊。"
     },
     "missing": [
       "start_times"
@@ -352,11 +352,11 @@
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-06-30",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間。"
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-07-02",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：各距離開跑時間。保留供歷史資料補齊。"
     },
     "missing": [
       "start_times"
@@ -380,7 +380,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -406,7 +406,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：名額。"
     },
@@ -432,7 +432,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：名額。"
     },
@@ -458,7 +458,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：費用。"
     },
@@ -484,7 +484,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -510,9 +510,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-08-02",
+      "next_check_date": "2026-08-03",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
     },
     "missing": [
       "quota"
@@ -536,9 +536,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 5 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "reason": "距離賽事 3 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
     },
     "missing": [],
     "current_links": {
@@ -560,9 +560,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-06-30",
+      "next_check_date": "2026-07-02",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 11 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "reason": "距離賽事 9 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
     },
     "missing": [],
     "current_links": {

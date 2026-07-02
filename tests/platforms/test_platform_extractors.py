@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
-from platforms import focusline, lohas
+from platforms import baoming, focusline, lohas
 from platforms.common import extract_start_times
 
 
@@ -99,3 +99,58 @@ def test_extract_start_times_handles_grouped_schedule_rows():
     ]
 
     assert extract_start_times(lines) == "10K 起跑 07:30、6K 起跑 07:30、3K 起跑 07:45"
+
+
+def test_baoming_extract_prefers_structured_sections():
+    html = """
+    <html>
+      <body>
+        <div class="page-info">
+          <div class="row">
+            <h3>主辦單位：</h3>
+            <div class="text-break">國立臺灣體育運動大學、財團法人蔡長啓體育基金會</div>
+          </div>
+        </div>
+        <ul>
+          <li class="list-group-item d-flex flex-wrap">
+            <h6 class="text-dark mt-3">報名起訖：</h6>
+            <h6 class="text-dark mt-3">2026-05-08<span> 16:30:00</span> <i></i> 2026-10-23<span> 18:00:00</span></h6>
+          </li>
+          <li class="list-group-item">
+            <h6 class="text-dark mt-3">報名限額：依報名項目上限</h6>
+          </li>
+        </ul>
+        <div class="card css-header1">
+          <div class="py-2 px-3">競賽地點</div>
+          <div class="card-body"><div class="py-3">國立臺灣體育運動大學田徑場(臺中市北區力行路271號)。</div></div>
+        </div>
+        <div class="card css-header1">
+          <div class="py-2 px-3">承辦單位</div>
+          <div class="card-body"><div class="py-3">國立臺灣體育運動大學 運動賽會中心</div></div>
+        </div>
+        <div class="card css-header1">
+          <div class="py-2 px-3">報名辦法</div>
+          <div class="card-body">
+            <div class="py-3">
+              21KM接力組，報名費用為每隊新臺幣2,400元整。
+              21KM個人半馬組，報名費用為每人新臺幣600元整。
+            </div>
+          </div>
+        </div>
+        <a href="//www.facebook.com/EBBaoming/">伊貝特報名網</a>
+        <a href="#reg">馬上報名 Sign Up</a>
+      </body>
+    </html>
+    """.strip()
+
+    details = baoming.extract(html, {"race_date": "2026-11-21"}, "https://bao-ming.com/eb/content/7016#32884")
+
+    assert details["registration_link"] == "https://bao-ming.com/eb/content/7016#reg"
+    assert details["registration_opens_at"] == "2026-05-08"
+    assert details["registration_deadline"] == "2026-10-23"
+    assert details["venue"] == "國立臺灣體育運動大學田徑場(臺中市北區力行路271號)。"
+    assert details["start_location"] == "國立臺灣體育運動大學田徑場(臺中市北區力行路271號)。"
+    assert details["organizer"] == "國立臺灣體育運動大學、財團法人蔡長啓體育基金會"
+    assert details["co_organizer"] == "國立臺灣體育運動大學 運動賽會中心"
+    assert details["quota"] == "依報名項目上限"
+    assert details["fees"] == "21KM接力組 2400元、21KM個人半馬組 600元"

@@ -15,6 +15,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Callable
+from urllib.parse import urlsplit, urlunsplit
 
 import requests
 
@@ -142,6 +143,13 @@ def candidate_urls(race: dict) -> list[str]:
     return urls
 
 
+def fetch_target_url(url: str) -> str:
+    split = urlsplit(url)
+    if not split.scheme or not split.netloc:
+        return url
+    return urlunsplit((split.scheme, split.netloc, split.path, split.query, ""))
+
+
 def load_races(path: Path) -> list[dict]:
     if not path.exists():
         return []
@@ -242,6 +250,14 @@ def has_redundant_start_time_rows(value: object) -> bool:
     return False
 
 
+def registration_window_is_valid(opens_at: object, deadline: object) -> bool:
+    opens_text = str(opens_at or "").strip()
+    deadline_text = str(deadline or "").strip()
+    if not opens_text or not deadline_text:
+        return True
+    return opens_text <= deadline_text
+
+
 _SKIP_STATUSES = {"已截止", "停辦", "停賽"}
 _PAST_RACE_GRACE_DAYS = 7
 
@@ -270,6 +286,7 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
     changed: list[str] = []
     errors: list[str] = []
     seen_platforms: list[str] = []
+    seen_fetch_targets: set[str] = set()
     found_registration_dates = False
     found_cancellation_evidence = False
 
@@ -277,10 +294,14 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
         platform, parser = platform_for_url(url)
         if not platform or parser is None:
             continue
+        fetch_url = fetch_target_url(url)
+        if fetch_url in seen_fetch_targets:
+            continue
+        seen_fetch_targets.add(fetch_url)
         seen_platforms.append(platform)
         try:
-            html = fetch_html(session, url)
-            details = parser(html, updated, url)
+            html = fetch_html(session, fetch_url)
+            details = parser(html, updated, fetch_url)
         except requests.RequestException as error:
             errors.append(f"{platform}: {error}")
             continue
@@ -293,10 +314,28 @@ def enrich_race(race: dict, session: requests.Session, *, dry_run: bool = False)
         if has_text(details.get("cancellation_notice")) or has_text(details.get("cancellation_notice_url")):
             found_cancellation_evidence = True
 
+        incoming_registration_window_valid = registration_window_is_valid(
+            details.get("registration_opens_at"),
+            details.get("registration_deadline"),
+        )
+        current_registration_window_valid = registration_window_is_valid(
+            updated.get("registration_opens_at"),
+            updated.get("registration_deadline"),
+        )
+
         for field in ENRICH_FIELDS:
             if field not in SAFE_AUTO_FIELDS:
                 continue
             preferred = field == "start_times" and url == str(race.get("official_event_url", "")).strip()
+            if (
+                field in {"registration_opens_at", "registration_deadline"}
+                and incoming_registration_window_valid
+                and not current_registration_window_valid
+                and has_text(details.get(field))
+            ):
+                updated[field] = details[field]
+                changed.append(field)
+                continue
             if should_replace(field, updated.get(field), details.get(field), preferred=preferred):
                 updated[field] = details[field]
                 changed.append(field)
@@ -409,9 +448,6 @@ def write_report(stats: dict) -> None:
 
 def update_scrape_status_with_enrichment_errors(stats: dict) -> None:
     """Surface platform enrichment failures to the workflow error reporter."""
-    if not stats["errors"]:
-        return
-
     status = {}
     if SCRAPE_STATUS_JSON.exists():
         try:
@@ -424,12 +460,19 @@ def update_scrape_status_with_enrichment_errors(stats: dict) -> None:
     if not isinstance(existing_errors, list):
         existing_errors = []
 
+    existing_non_enrichment_errors = [
+        error for error in existing_errors
+        if error not in set(status.get("enrichment_errors") or [])
+    ]
+
+    has_any_errors = bool(existing_non_enrichment_errors or enrichment_errors)
+
     status.update(
         {
             "enrichment_errors": enrichment_errors,
-            "has_enrichment_errors": True,
-            "has_errors": True,
-            "errors": list(dict.fromkeys([*existing_errors, *enrichment_errors])),
+            "has_enrichment_errors": bool(enrichment_errors),
+            "has_errors": has_any_errors,
+            "errors": list(dict.fromkeys([*existing_non_enrichment_errors, *enrichment_errors])),
         }
     )
     SCRAPE_STATUS_JSON.parent.mkdir(parents=True, exist_ok=True)
