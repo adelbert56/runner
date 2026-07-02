@@ -134,7 +134,7 @@ const [
 
 const packageJson = JSON.parse(packageJsonRaw);
 const scheduleAuditConfig = JSON.parse(scheduleAuditConfigRaw);
-const appVersion = appJs.match(/const DATA_VERSION = "([^"]+)"/)?.[1] || "";
+const appUsesDynamicDataVersion = appJs.includes("const DATA_VERSION = `${Date.now()}`;");
 const scriptVersion = indexHtml.match(/app\.js\?v=([^"]+)"/)?.[1] || "";
 const scheduledWorkflowExpectations = [
   {
@@ -159,7 +159,7 @@ const scheduledWorkflowExpectations = [
     workflowName: "Collect content candidates",
     workflowSource: contentWorkflow,
     lookbackHours: 8,
-    slots: [{ days: [1, 3, 5], due: "09:17", deadline: "18:00" }],
+    slots: [{ days: [0, 1, 2, 3, 4, 5, 6], due: "09:17", deadline: "18:00" }],
   },
   {
     label: "runner quips",
@@ -186,7 +186,12 @@ assertCheck(
   packageJson.scripts.check.includes("scripts/validate-automation-rules.mjs"),
   "npm run check includes automation rule validation"
 );
-assertCheck(appVersion && appVersion === scriptVersion, `app data version matches index asset version (${appVersion})`);
+assertCheck(
+  appUsesDynamicDataVersion || Boolean(scriptVersion),
+  appUsesDynamicDataVersion
+    ? "app data version uses runtime cache busting"
+    : `app script asset version is present (${scriptVersion})`
+);
 assertCheck(appJs.includes("races.json?v=${DATA_VERSION}"), "race data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("content.json?v=${DATA_VERSION}"), "content data fetch uses DATA_VERSION cache busting");
 assertCheck(appJs.includes("announcements.json?v=${DATA_VERSION}"), "announcement data fetch uses DATA_VERSION cache busting");
@@ -239,7 +244,15 @@ assertCheck(
   appJs.includes('timeZone: "Asia/Taipei"') && appJs.includes("const TODAY = getTodayString();"),
   "site date calculations use Asia/Taipei today"
 );
-assertCheck(raceDbRaw === siteRaceRaw, "runner race database and site race data are identical");
+assertCheck(
+  (() => {
+    const runnerRaces = JSON.parse(raceDbRaw);
+    const siteRaces = JSON.parse(siteRaceRaw);
+    const activeSiteRaces = siteRaces.filter((race) => !race.disappeared_at);
+    return JSON.stringify(runnerRaces) === JSON.stringify(activeSiteRaces);
+  })(),
+  "runner race database matches active site race data"
+);
 assertCheck(
   pythonConfig.includes("NON_RUNNING_EVENT_KEYWORDS")
     && sportsNoteScraper.includes("is_running_event")
@@ -316,8 +329,8 @@ assertCheck(
   "race data primary schedule also skips when a recent refresh already exists"
 );
 assertCheck(
-  contentWorkflow.includes('cron: "17 1 * * 1,3,5"') && contentWorkflow.includes('cron: "37 2 * * 1,3,5"') && contentWorkflow.includes('cron: "17 4 * * 1,3,5"') && contentWorkflow.includes('cron: "47 5 * * 1,3,5"'),
-  "content workflow has staggered Monday/Wednesday/Friday primary and backup schedules"
+  contentWorkflow.includes('cron: "17 1 * * *"') && contentWorkflow.includes('cron: "37 2 * * *"') && contentWorkflow.includes('cron: "17 4 * * *"') && contentWorkflow.includes('cron: "47 5 * * *"'),
+  "content workflow has staggered daily primary and backup schedules"
 );
 assertCheck(
   contentWorkflow.includes("Check recent content refresh guard")

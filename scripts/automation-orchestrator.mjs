@@ -20,7 +20,7 @@ const TASKS = [
   {
     name: "Collect content candidates",
     workflow: "content-candidates.yml",
-    slots: [{ days: [1, 3, 5], due: "09:17", deadline: "18:00" }],
+    slots: [{ days: [0, 1, 2, 3, 4, 5, 6], due: "09:17", deadline: "18:00" }],
   },
   {
     name: "Refresh runner quips",
