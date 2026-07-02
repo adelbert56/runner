@@ -84,7 +84,7 @@
     }
   },
   {
-    "race_id": "aaa2417f-4436-4c66-82f4-442d00d78167",
+    "race_id": "5e787194-8ba9-4bcf-8607-12eb5f2d247f",
     "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
     "race_date": "2027-03-28",
     "race_county": "臺中市",
@@ -97,7 +97,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2026-09-29",
+      "next_check_date": "2026-09-28",
       "cadence": "future",
       "reason": "距離賽事 269 天，先排到賽前約 180 天再追。"
     },
@@ -175,7 +175,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-08",
+      "next_check_date": "2027-06-07",
       "cadence": "future",
       "reason": "距離賽事 521 天，先排到賽前約 180 天再追。"
     },
@@ -424,6 +424,72 @@
     },
     "suggested_override": {
       "race_name": "2026 通霄濱海追風馬拉松",
+      "race_date": "2026-12-13",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "c6e7b727-0bf3-4c8b-81c2-d22b472b7b31",
+    "race_name": "2026 通霄粉紅超跑馬拉松",
+    "race_date": "2026-12-13",
+    "race_county": "苗栗縣",
+    "registration_opens_at": "2026-07-13",
+    "registration_deadline": "2026-10-13",
+    "registration_status": "尚未開報",
+    "source_platform": "Lohas",
+    "is_official_direct": false,
+    "priority_score": 8,
+    "tracking": {
+      "status": "wait_until_open_window",
+      "status_label": "等待開報當天",
+      "next_check_date": "2026-07-12",
+      "cadence": "on_open_date",
+      "reason": "已知開報日 2026-07-12，尚有 11 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://lohasnet.tw/#/event",
+      "detail_url": "https://lohasnet.tw/#/event",
+      "source_registration_link": "",
+      "facebook_search_url": ""
+    },
+    "suggested_override": {
+      "race_name": "2026 通霄粉紅超跑馬拉松",
       "race_date": "2026-12-13",
       "registration_link": "",
       "official_event_url": "",
@@ -1069,9 +1135,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-08-03",
+      "next_check_date": "2026-08-02",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
     },
     "missing": [
       {

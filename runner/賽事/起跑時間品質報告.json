@@ -240,31 +240,6 @@
     ]
   },
   {
-    "race_id": "96c6f753-a758-4842-b880-d532b8f2380d",
-    "race_name": "2026 鹿港馬拉松",
-    "race_date": "2026-11-15",
-    "race_county": "彰化縣",
-    "distances": [
-      "42km",
-      "21km",
-      "10km",
-      "5km",
-      "42.195km"
-    ],
-    "start_times": "全馬組（42K） 起跑 06:15、半馬 起跑 06:15、挑戰組（10K） 起跑 06:30、健走組（5K） 起跑 06:45",
-    "registration_link": "https://signup.lohasnet.tw/signup/4220",
-    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "issues": [
-      {
-        "key": "group_count_less_than_distance_count",
-        "severity": "low",
-        "label": "起跑組別少於距離數",
-        "hint": "距離：全馬（42K）、半馬（21K）、10K、5K、全馬（42.195K）；起跑列：全馬組（42K）、半馬、挑戰組（10K）、健走組（5K）"
-      }
-    ]
-  },
-  {
     "race_id": "4deefa08-b316-4d29-8842-a5e9848f396c",
     "race_name": "2026 臺中舒跑杯",
     "race_date": "2026-11-15",
@@ -288,10 +263,10 @@
     ]
   },
   {
-    "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
-    "race_name": "2026 第二屆食安盃馬拉松",
-    "race_date": "2026-12-19",
-    "race_county": "臺中市",
+    "race_id": "96c6f753-a758-4842-b880-d532b8f2380d",
+    "race_name": "2026 鹿港馬拉松",
+    "race_date": "2026-11-15",
+    "race_county": "彰化縣",
     "distances": [
       "42km",
       "21km",
@@ -299,16 +274,16 @@
       "5km",
       "42.195km"
     ],
-    "start_times": "10K 起跑 06:40、5K 起跑 06:50",
-    "registration_link": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
-    "official_event_url": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
-    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "start_times": "全馬組（42K） 起跑 06:15、半馬 起跑 06:15、挑戰組（10K） 起跑 06:30、健走組（5K） 起跑 06:45",
+    "registration_link": "https://signup.lohasnet.tw/signup/4220",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12934&subtitle=2026%E9%B9%BF%E6%B8%AF%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "issues": [
       {
         "key": "group_count_less_than_distance_count",
         "severity": "low",
         "label": "起跑組別少於距離數",
-        "hint": "距離：全馬（42K）、半馬（21K）、10K、5K、全馬（42.195K）；起跑列：10K、5K"
+        "hint": "距離：全馬（42K）、半馬（21K）、10K、5K、全馬（42.195K）；起跑列：全馬組（42K）、半馬、挑戰組（10K）、健走組（5K）"
       }
     ]
   },
@@ -335,6 +310,31 @@
         "severity": "low",
         "label": "起跑組別少於距離數",
         "hint": "距離：全馬（42.195K）、半馬（21K）、10K、3.5K、5.5K、2.5K；起跑列：全馬組（42.195K）、半馬組（21K）、10K、健走組（3.5K）"
+      }
+    ]
+  },
+  {
+    "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
+    "race_name": "2026 第二屆食安盃馬拉松",
+    "race_date": "2026-12-19",
+    "race_county": "臺中市",
+    "distances": [
+      "42km",
+      "21km",
+      "10km",
+      "5km",
+      "42.195km"
+    ],
+    "start_times": "10K 起跑 06:40、5K 起跑 06:50",
+    "registration_link": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
+    "official_event_url": "https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：全馬（42K）、半馬（21K）、10K、5K、全馬（42.195K）；起跑列：10K、5K"
       }
     ]
   }

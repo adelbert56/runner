@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-30T10:56:13.901Z",
-  "basis_date": "2026-06-30",
+  "generated_at": "2026-07-02T11:19:27.705Z",
+  "basis_date": "2026-07-02",
   "items": [
     {
       "platform": "運動筆記",
@@ -44,10 +44,10 @@
     },
     {
       "platform": "Lohas",
-      "total": 8,
+      "total": 9,
       "official_direct": 7,
-      "verified": 8,
-      "missing": 1,
+      "verified": 9,
+      "missing": 2,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 0,
@@ -56,10 +56,10 @@
         "2026年FUN電多巴胺路跑嘉年華",
         "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
       ],
-      "complete_rate": "88%",
-      "official_direct_rate": "88%",
+      "complete_rate": "78%",
+      "official_direct_rate": "78%",
       "verified_rate": "100%",
-      "score": 93,
+      "score": 87,
       "status": "穩定"
     },
     {
@@ -110,7 +110,7 @@
       "missing": 6,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "夏日馬拉松 - 南投埔里場",
         "2026 梨山水蜜桃路跑",
@@ -130,7 +130,7 @@
       "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026第九屆幸福龍井活力健康路跑健走",
         "2026 浪漫台三線新店老街路跑賽",
