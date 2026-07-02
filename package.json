@@ -27,6 +27,7 @@
     "content:quality": "node scripts/validate-content-data.mjs",
     "content:quality:strict": "node scripts/validate-content-data.mjs --strict",
     "content:refresh": "npm run content:candidates && npm run content:publish && npm run content:quality",
+    "content:refresh:publish-live": "npm run content:refresh && npm run site:publish",
     "quips:refresh": "node scripts/refresh-runner-quips.mjs",
     "ops:dashboard": "node scripts/build-operational-dashboard.mjs",
     "payment:build": "node scripts/build-payment-sheet.mjs",
