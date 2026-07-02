@@ -112,6 +112,50 @@ assertCheck(
   "registration person profile includes required identity and emergency-contact fields"
 );
 assertCheck(
+  registrationHtml.includes('id="people-search"') &&
+    registrationHtml.includes('id="people-pagination"') &&
+    registrationHtml.includes('id="workspace-view-tabs"') &&
+    registrationHtml.includes('id="workspace-overview"') &&
+    registrationHtml.includes('id="workspace-people"') &&
+    registrationHtml.includes('id="workspace-entries"') &&
+    registrationHtml.includes('id="overview-selected-race"') &&
+    registrationHtml.includes('id="entries-scope-tabs"') &&
+    registrationHtml.includes('id="entries-history-summary"') &&
+    registrationHtml.includes('id="entries-pagination"') &&
+    registrationHtml.includes('id="entries-search"') &&
+    registrationHtml.includes('id="entries-filter-year"') &&
+    registrationHtml.includes('id="entries-filter-person"') &&
+    registrationHtml.includes('id="entries-filter-progress"') &&
+    registrationHtml.includes('id="entries-filter-status"') &&
+    registrationJs.includes("personSearchText") &&
+    registrationJs.includes("entrySearchText") &&
+    registrationJs.includes("entryYear") &&
+    registrationJs.includes("historySummary") &&
+    registrationJs.includes("entryTimeBucket") &&
+    registrationJs.includes("paginateItems") &&
+    registrationJs.includes("renderPagination") &&
+    registrationJs.includes("renderEntriesList") &&
+    registrationJs.includes("setWorkspaceView") &&
+    registrationJs.includes("renderOverview"),
+  "registration manager includes workspace views, overview summary, people search, entry filters, history tabs, history summary, and pagination"
+);
+assertCheck(
+  registrationHtml.includes('id="entry-person-batch"') &&
+    registrationHtml.includes("多人快速建立") &&
+    registrationJs.includes("renderEntryPersonBatch") &&
+    registrationJs.includes("selectedEntryPersonIds"),
+  "registration manager supports batch person selection for new entries"
+);
+assertCheck(
+  registrationJs.includes("maskedPhone") &&
+    registrationJs.includes("目前 ${escapeHtml(stats.active)} 場") &&
+    registrationJs.includes("歷史 ${escapeHtml(stats.history)} 場") &&
+    registrationJs.includes("查看目前賽事") &&
+    registrationJs.includes("查看歷史紀錄") &&
+    registrationJs.includes("focusRenderedCard"),
+  "registration manager masks phones, splits current and history counts, provides person shortcuts, and returns focus after save"
+);
+assertCheck(
     registrationHtml.includes('id="export-selected-race-payments"') &&
     registrationJs.includes("downloadSelectedRacePaymentCsv") &&
     registrationJs.includes("paymentExportRows") &&

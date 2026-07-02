@@ -8,12 +8,12 @@
       name="description"
       content="只在本機保存的賽事報名管理頁，記錄參加人員、衣服尺寸、報名與繳費狀態。"
     >
-    <link rel="icon" type="image/svg+xml" href="/site/assets/favicon.svg?v=20260626-registration1">
-    <link rel="shortcut icon" href="/site/favicon.ico?v=20260626-registration1">
-    <link rel="icon" type="image/png" sizes="32x32" href="/site/assets/favicon-32.png?v=20260626-registration1">
-    <link rel="apple-touch-icon" sizes="180x180" href="/site/assets/apple-touch-icon.png?v=20260626-registration1">
-    <link rel="stylesheet" href="/site/styles.css?v=20260626-registration1">
-    <link rel="stylesheet" href="./registration.css?v=20260626-registration1">
+    <link rel="icon" type="image/svg+xml" href="/site/assets/favicon.svg?v=20260630-registration-notify1">
+    <link rel="shortcut icon" href="/site/favicon.ico?v=20260630-registration-notify1">
+    <link rel="icon" type="image/png" sizes="32x32" href="/site/assets/favicon-32.png?v=20260630-registration-notify1">
+    <link rel="apple-touch-icon" sizes="180x180" href="/site/assets/apple-touch-icon.png?v=20260630-registration-notify1">
+    <link rel="stylesheet" href="/site/styles.css?v=20260701-registration-notify8">
+    <link rel="stylesheet" href="./registration.css?v=20260701-registration-notify8">
   </head>
   <body class="registration-page">
     <header class="site-header">
@@ -41,16 +41,23 @@
 
     <main class="registration-app">
       <section class="registration-hero">
-        <div>
-          <p class="eyebrow">Local Only</p>
+        <div class="registration-hero-copy">
+          <p class="eyebrow">本機工具</p>
           <h1>本機報名管理</h1>
-          <p>
+          <p class="registration-hero-description">
             這一頁只會把個資與報名狀態寫到你本機的
             <code>runner/報名管理/報名管理資料.json</code>，
             不會進到公開站台資料流。
           </p>
+          <div class="registration-hero-meta" aria-label="本機報名頁特性">
+            <span class="hero-pill">只存本機</span>
+            <span class="hero-pill">不進公開站</span>
+            <span class="hero-pill">支援匯入匯出備份</span>
+          </div>
         </div>
         <div class="registration-hero-actions">
+          <p class="hero-actions-label">資料維護</p>
+          <p class="hero-actions-note">本機保存、可隨時備份，不會同步到公開頁面。</p>
           <button type="button" class="primary-action" id="export-data">匯出備份 JSON</button>
           <label class="secondary-action file-action">
             匯入備份 JSON
@@ -59,141 +66,244 @@
         </div>
       </section>
 
-      <section class="registration-summary" aria-label="報名摘要">
-        <article class="summary-card">
-          <span>規劃賽事</span>
-          <strong id="summary-races">0</strong>
-          <small>資料來源：站內賽事清單</small>
-        </article>
-        <article class="summary-card">
-          <span>報名人員</span>
-          <strong id="summary-people">0</strong>
-          <small>本機私有名單</small>
-        </article>
-        <article class="summary-card">
-          <span>報名紀錄</span>
-          <strong id="summary-entries">0</strong>
-          <small>每人每賽事一筆</small>
-        </article>
-        <article class="summary-card">
-          <span>未完成</span>
-          <strong id="summary-pending">0</strong>
-          <small>未報名或未繳費</small>
-        </article>
-      </section>
-
       <section class="registration-layout">
-        <aside class="panel race-picker-panel">
-          <div class="panel-heading">
+        <aside class="panel race-picker-panel workspace-sidebar">
+          <div class="panel-heading compact-heading sidebar-header">
             <div>
-              <p class="eyebrow">Race Feed</p>
-              <h2>從賽事資料帶入</h2>
+              <p class="eyebrow">賽事來源</p>
+              <h2>帶入賽事</h2>
+              <p class="sidebar-intro">先選賽事，再決定要帶入、輸出或開啟外部報名站。</p>
             </div>
+          </div>
+          <section class="sidebar-group">
+            <div class="sidebar-group-title">搜尋</div>
             <input id="race-search" type="search" placeholder="搜尋賽事名稱、地點、距離">
-          </div>
-          <div class="race-select-box">
-            <label>
-              <span>選擇賽事</span>
-              <select id="race-select">
-                <option value="">賽事整理中...</option>
-              </select>
-            </label>
-            <button class="primary-action" type="button" id="use-selected-race">帶入賽事</button>
-            <button class="secondary-action" type="button" id="export-selected-race-payment-html">匯出繳費確認 HTML</button>
-            <button class="ghost-action" type="button" id="export-selected-race-payments">匯出繳費確認 CSV</button>
-          </div>
-          <div id="race-picker" class="race-picker-summary" aria-live="polite">
-            <div class="empty-state">請先選擇賽事</div>
-          </div>
+          </section>
+          <section class="sidebar-group">
+            <div class="sidebar-group-title">選擇與帶入</div>
+            <div class="race-select-box">
+              <label>
+                <span>選擇賽事</span>
+                <select id="race-select">
+                  <option value="">賽事整理中...</option>
+                </select>
+              </label>
+              <button class="primary-action" type="button" id="use-selected-race">帶入賽事</button>
+            </div>
+          </section>
+          <section class="sidebar-group">
+            <div class="sidebar-group-title">輸出工具</div>
+            <div class="sidebar-actions-grid">
+              <button class="secondary-action" type="button" id="export-selected-race-payment-html">開啟繳費確認分頁</button>
+              <button class="ghost-action" type="button" id="export-selected-race-payments">匯出繳費確認 CSV</button>
+            </div>
+          </section>
+          <section class="sidebar-group sidebar-group-preview">
+            <div class="sidebar-group-title">目前賽事</div>
+            <div id="race-picker" class="race-picker-summary" aria-live="polite">
+              <div class="empty-state">請先選擇賽事</div>
+            </div>
+          </section>
         </aside>
 
-        <section class="panel registration-main">
-          <div class="panel-grid">
-            <section class="panel-block">
-              <div class="panel-heading">
-                <div>
-                  <p class="eyebrow">People</p>
-                  <h2>人員主檔</h2>
+        <section class="registration-main">
+          <section class="registration-dashboard-shell">
+            <section class="registration-command-grid">
+              <section class="registration-summary" aria-label="報名摘要">
+                <article class="summary-card">
+                  <span>規劃賽事</span>
+                  <strong id="summary-races">0</strong>
+                  <small>資料來源：站內賽事清單</small>
+                </article>
+                <article class="summary-card">
+                  <span>報名人員</span>
+                  <strong id="summary-people">0</strong>
+                  <small>本機私有名單</small>
+                </article>
+                <article class="summary-card">
+                  <span>報名紀錄</span>
+                  <strong id="summary-entries">0</strong>
+                  <small>每人每賽事一筆</small>
+                </article>
+                <article class="summary-card">
+                  <span>未完成</span>
+                  <strong id="summary-pending">0</strong>
+                  <small>未報名或未繳費</small>
+                </article>
+              </section>
+
+              <section class="panel workspace-switcher">
+                <div class="workspace-switcher-copy">
+                  <p class="eyebrow">控制台</p>
+                  <h2>報名控制台</h2>
+                  <p>把總覽、人員、報名、通知收成同一個工作入口，維持清楚的處理節奏。</p>
                 </div>
-              </div>
-              <form id="person-form" class="data-form">
-                <input type="hidden" id="person-id">
-                <div class="field-grid three">
-                  <label>
-                    <span>姓名 <b aria-hidden="true">*</b></span>
-                    <input id="person-name" required>
-                  </label>
-                  <label>
-                    <span>性別 <b aria-hidden="true">*</b></span>
-                    <select id="person-gender" required>
-                      <option value="">請選擇</option>
-                      <option>男</option>
-                      <option>女</option>
-                      <option>其他</option>
-                    </select>
-                  </label>
-                  <label>
-                    <span>衣服尺寸 <b aria-hidden="true">*</b></span>
-                    <select id="person-shirt-size" required>
-                      <option value="">請選擇</option>
-                      <option>XS</option>
-                      <option>S</option>
-                      <option>M</option>
-                      <option>L</option>
-                      <option>XL</option>
-                      <option>2XL</option>
-                      <option>3XL</option>
-                      <option>童裝</option>
-                    </select>
-                  </label>
+                <div class="workspace-tabs" id="workspace-view-tabs" aria-label="報名工作區">
+                  <button type="button" class="workspace-tab active" data-workspace-view="overview">總覽</button>
+                  <button type="button" class="workspace-tab" data-workspace-view="people">人員</button>
+                  <button type="button" class="workspace-tab" data-workspace-view="entries">報名</button>
+                  <button type="button" class="workspace-tab" data-workspace-view="notify">通知</button>
                 </div>
-                <div class="field-grid three">
-                  <label>
-                    <span>手機 <b aria-hidden="true">*</b></span>
-                    <input id="person-phone" required inputmode="tel">
-                  </label>
-                  <label>
-                    <span>身分證號碼 <b aria-hidden="true">*</b></span>
-                    <input id="person-national-id" required autocomplete="off">
-                  </label>
-                  <label>
-                    <span>出生年月日 <b aria-hidden="true">*</b></span>
-                    <input id="person-birthday" type="date" required>
-                  </label>
-                </div>
-                <div class="field-grid three">
-                  <label>
-                    <span>緊急聯絡人 <b aria-hidden="true">*</b></span>
-                    <input id="person-emergency-name" required>
-                  </label>
-                  <label>
-                    <span>關係 <b aria-hidden="true">*</b></span>
-                    <input id="person-emergency-relationship" required>
-                  </label>
-                  <label>
-                    <span>緊急聯絡人手機 <b aria-hidden="true">*</b></span>
-                    <input id="person-emergency-phone" required inputmode="tel">
-                  </label>
-                </div>
-                <div class="form-actions">
-                  <button class="primary-action" type="submit">儲存人員</button>
-                  <button class="ghost-action" type="button" id="person-reset">清空</button>
-                </div>
-              </form>
-              <div id="people-list" class="list-shell">
-                <div class="empty-state">尚未建立人員</div>
+              </section>
+            </section>
+          </section>
+
+          <section class="workspace-views">
+            <section class="workspace-view workspace-view-active" id="workspace-overview" data-workspace-panel="overview">
+              <div class="overview-grid">
+                <article class="panel panel-block spotlight-panel">
+                  <div class="panel-heading compact-heading">
+                    <div>
+                      <p class="eyebrow">目前賽事</p>
+                      <h2>目前鎖定賽事</h2>
+                    </div>
+                    <button class="ghost-action" type="button" data-open-view="entries">直接去報名</button>
+                  </div>
+                  <div id="overview-selected-race" class="overview-selected-race">
+                    <div class="empty-state">請先從左側選一場賽事。</div>
+                  </div>
+                </article>
+
+                <article class="panel panel-block overview-side-panel">
+                  <div class="panel-heading compact-heading">
+                    <div>
+                      <p class="eyebrow">進度摘要</p>
+                      <h2>操作節奏</h2>
+                    </div>
+                  </div>
+                  <div id="overview-insights" class="overview-insights"></div>
+                </article>
+
+                <article class="panel panel-block overview-wide-panel">
+                  <div class="panel-heading compact-heading">
+                    <div>
+                      <p class="eyebrow">目前清單</p>
+                      <h2>目前賽事縮覽</h2>
+                    </div>
+                    <button class="ghost-action" type="button" data-open-view="entries">查看全部報名</button>
+                  </div>
+                  <div id="overview-active-groups" class="overview-list">
+                    <div class="empty-state">尚未建立目前賽事報名。</div>
+                  </div>
+                </article>
+
+                <article class="panel panel-block overview-wide-panel">
+                  <div class="panel-heading compact-heading">
+                    <div>
+                      <p class="eyebrow">人員摘要</p>
+                      <h2>人員重點</h2>
+                    </div>
+                    <button class="ghost-action" type="button" data-open-view="people">管理人員</button>
+                  </div>
+                  <div id="overview-people-focus" class="overview-list">
+                    <div class="empty-state">尚未建立人員主檔。</div>
+                  </div>
+                </article>
               </div>
             </section>
 
-            <section class="panel-block">
-              <div class="panel-heading">
-                <div>
-                  <p class="eyebrow">Entries</p>
-                  <h2>報名紀錄</h2>
-                </div>
-                <span class="panel-tip">一人一賽事一筆</span>
+            <section class="workspace-view" id="workspace-people" data-workspace-panel="people" hidden>
+              <div class="split-layout">
+                <section class="panel panel-block sticky-panel">
+                  <div class="panel-heading compact-heading">
+                    <div>
+                      <p class="eyebrow">人員主檔</p>
+                      <h2>人員主檔</h2>
+                    </div>
+                  </div>
+                  <form id="person-form" class="data-form">
+                    <input type="hidden" id="person-id">
+                    <div class="field-grid three">
+                      <label>
+                        <span>姓名 <b aria-hidden="true">*</b></span>
+                        <input id="person-name" required>
+                      </label>
+                      <label>
+                        <span>性別 <b aria-hidden="true">*</b></span>
+                        <select id="person-gender" required>
+                          <option value="">請選擇</option>
+                          <option>男</option>
+                          <option>女</option>
+                          <option>其他</option>
+                        </select>
+                      </label>
+                      <label>
+                        <span>衣服尺寸 <b aria-hidden="true">*</b></span>
+                        <select id="person-shirt-size" required>
+                          <option value="">請選擇</option>
+                          <option>XS</option>
+                          <option>S</option>
+                          <option>M</option>
+                          <option>L</option>
+                          <option>XL</option>
+                          <option>2XL</option>
+                          <option>3XL</option>
+                          <option>童裝</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="field-grid three">
+                      <label>
+                        <span>手機 <b aria-hidden="true">*</b></span>
+                        <input id="person-phone" required inputmode="tel">
+                      </label>
+                      <label>
+                        <span>身分證號碼 <b aria-hidden="true">*</b></span>
+                        <input id="person-national-id" required autocomplete="off">
+                      </label>
+                      <label>
+                        <span>出生年月日 <b aria-hidden="true">*</b></span>
+                        <input id="person-birthday" type="date" required>
+                      </label>
+                    </div>
+                    <div class="field-grid three">
+                      <label>
+                        <span>緊急聯絡人 <b aria-hidden="true">*</b></span>
+                        <input id="person-emergency-name" required>
+                      </label>
+                      <label>
+                        <span>關係 <b aria-hidden="true">*</b></span>
+                        <input id="person-emergency-relationship" required>
+                      </label>
+                      <label>
+                        <span>緊急聯絡人手機 <b aria-hidden="true">*</b></span>
+                        <input id="person-emergency-phone" required inputmode="tel">
+                      </label>
+                    </div>
+                    <div class="form-actions">
+                      <button class="primary-action" type="submit">儲存人員</button>
+                      <button class="ghost-action" type="button" id="person-reset">清空</button>
+                    </div>
+                  </form>
+                </section>
+
+                <section class="panel panel-block people-list-panel">
+                  <div class="panel-heading people-list-heading">
+                    <div>
+                      <p class="eyebrow">人員清單</p>
+                      <h2>人員清單</h2>
+                    </div>
+                    <input id="people-search" type="search" placeholder="搜尋姓名、手機末三碼、身分證末四碼">
+                  </div>
+                  <div id="people-list" class="list-shell">
+                    <div class="empty-state">尚未建立人員</div>
+                  </div>
+                  <div id="people-pagination" class="list-pagination"></div>
+                </section>
               </div>
-              <form id="entry-form" class="data-form">
+            </section>
+
+            <section class="workspace-view" id="workspace-entries" data-workspace-panel="entries" hidden>
+              <div class="split-layout entries-layout">
+                <section class="panel panel-block sticky-panel">
+                  <div class="panel-heading compact-heading">
+                    <div>
+                      <p class="eyebrow">報名表單</p>
+                      <h2>建立 / 編輯報名</h2>
+                    </div>
+                    <span class="panel-tip">一人一賽事一筆</span>
+                  </div>
+                  <form id="entry-form" class="data-form">
                 <input type="hidden" id="entry-id">
                 <div class="field-grid two">
                   <label>
@@ -207,6 +317,15 @@
                     </select>
                   </label>
                 </div>
+                <div class="batch-picker">
+                  <div class="batch-picker-head">
+                    <span>多人快速建立</span>
+                    <small>建立新報名時可同時勾多人；編輯既有紀錄時維持單筆。</small>
+                  </div>
+                  <div id="entry-person-batch" class="batch-picker-list">
+                    <div class="empty-state">請先建立人員</div>
+                  </div>
+                </div>
                 <div class="field-grid four">
                   <label>
                     <span>日期</span>
@@ -214,7 +333,9 @@
                   </label>
                   <label>
                     <span>距離 / 組別</span>
-                    <input id="entry-distance" placeholder="10K / 半馬">
+                    <select id="entry-distance">
+                      <option value="">請先帶入賽事</option>
+                    </select>
                   </label>
                   <label>
                     <span>縣市</span>
@@ -258,11 +379,14 @@
                     <span>目前狀態</span>
                     <select id="entry-status">
                       <option>待報名</option>
+                      <option>待確認</option>
                       <option>尚未開報</option>
                       <option>可報名</option>
                       <option>已報名未繳費</option>
                       <option>已完成</option>
                       <option>已截止</option>
+                      <option>停辦</option>
+                      <option>停賽</option>
                       <option>取消</option>
                     </select>
                   </label>
@@ -319,16 +443,169 @@
                   <button class="ghost-action" type="button" id="entry-reset">清空</button>
                 </div>
               </form>
-              <div id="entry-status-message" class="status-message" aria-live="polite"></div>
-              <div id="entries-list" class="list-shell">
-                <div class="empty-state">尚未建立報名紀錄</div>
+                  <div id="entry-status-message" class="status-message" aria-live="polite"></div>
+                </section>
+
+                <section class="panel panel-block">
+                  <div class="panel-heading compact-heading">
+                    <div>
+                      <p class="eyebrow">報名紀錄</p>
+                      <h2>報名紀錄</h2>
+                    </div>
+                  </div>
+                  <div class="list-tabs" id="entries-scope-tabs" aria-label="報名紀錄範圍">
+                    <button type="button" class="tab-button active" data-entry-scope="active">目前賽事</button>
+                    <button type="button" class="tab-button" data-entry-scope="history">歷史紀錄</button>
+                    <button type="button" class="tab-button" data-entry-scope="all">全部</button>
+                  </div>
+                  <div id="entries-history-summary" class="history-summary"></div>
+                  <div class="list-toolbar entries-toolbar">
+                    <input id="entries-search" type="search" placeholder="搜尋賽事、人員、距離、地點">
+                    <select id="entries-filter-year">
+                      <option value="all">全部年份</option>
+                    </select>
+                    <select id="entries-filter-person">
+                      <option value="">全部人員</option>
+                    </select>
+                    <select id="entries-filter-progress">
+                      <option value="all">全部進度</option>
+                      <option value="pending">只看未完成</option>
+                      <option value="complete">只看已完成</option>
+                    </select>
+                    <select id="entries-filter-status">
+                      <option value="">全部狀態</option>
+                      <option value="待報名">待報名</option>
+                      <option value="待確認">待確認</option>
+                      <option value="尚未開報">尚未開報</option>
+                      <option value="可報名">可報名</option>
+                      <option value="已報名未繳費">已報名未繳費</option>
+                      <option value="已完成">已完成</option>
+                      <option value="已截止">已截止</option>
+                      <option value="停辦">停辦</option>
+                      <option value="停賽">停賽</option>
+                      <option value="取消">取消</option>
+                    </select>
+                    <button class="ghost-action" type="button" id="entries-filter-reset">清空篩選</button>
+                  </div>
+                  <div id="entries-list" class="list-shell">
+                    <div class="empty-state">尚未建立報名紀錄</div>
+                  </div>
+                  <div id="entries-pagination" class="list-pagination"></div>
+                </section>
               </div>
             </section>
-          </div>
+
+            <section class="workspace-view" id="workspace-notify" data-workspace-panel="notify" hidden>
+              <div class="notify-layout">
+                <section class="panel panel-block sticky-panel notify-filter-panel">
+                  <div class="notify-control-hero">
+                    <div>
+                      <p class="eyebrow">通知台</p>
+                      <h2>多人多賽事篩選</h2>
+                      <p class="notify-control-note">先圈定範圍，再用人員清單逐一展開或直接開分頁通知。</p>
+                    </div>
+                    <span class="panel-tip">單一工作台</span>
+                  </div>
+                  <div class="notify-summary-strip" id="notify-summary-strip">
+                    <article class="notify-summary-card">
+                      <span>符合人員</span>
+                      <strong id="notify-summary-people">0</strong>
+                    </article>
+                    <article class="notify-summary-card">
+                      <span>符合賽事</span>
+                      <strong id="notify-summary-races">0</strong>
+                    </article>
+                    <article class="notify-summary-card">
+                      <span>待通知</span>
+                      <strong id="notify-summary-pending">0</strong>
+                    </article>
+                    <article class="notify-summary-card">
+                      <span>待收金額</span>
+                      <strong id="notify-summary-unpaid">0</strong>
+                    </article>
+                  </div>
+                  <div class="notify-filter-stack">
+                    <label>
+                      <span>範圍</span>
+                      <select id="notify-scope">
+                        <option value="active">目前賽事</option>
+                        <option value="all">全部</option>
+                        <option value="history">歷史紀錄</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>關鍵字</span>
+                      <input id="notify-search" type="search" placeholder="姓名、賽事、距離、備註、尺寸">
+                    </label>
+                    <label>
+                      <span>進度</span>
+                      <select id="notify-progress">
+                        <option value="all">全部</option>
+                        <option value="pending">只看未完成</option>
+                        <option value="unpaid">只看未繳費</option>
+                        <option value="registered">只看已報名</option>
+                        <option value="unregistered">只看未報名</option>
+                        <option value="complete">只看已完成</option>
+                      </select>
+                    </label>
+                  </div>
+                  <details class="notify-picker-panel" open>
+                    <summary class="notify-picker-head">
+                      <strong>賽事</strong>
+                      <div class="notify-chip-actions">
+                        <button class="mini-action" type="button" id="notify-races-all">全選</button>
+                        <button class="mini-action" type="button" id="notify-races-clear">清空</button>
+                      </div>
+                    </summary>
+                    <div id="notify-race-list" class="notify-chip-list">
+                      <div class="empty-state">尚無賽事資料</div>
+                    </div>
+                  </details>
+                  <details class="notify-picker-panel" open>
+                    <summary class="notify-picker-head">
+                      <strong>人員</strong>
+                      <div class="notify-chip-actions">
+                        <button class="mini-action" type="button" id="notify-people-all">全選</button>
+                        <button class="mini-action" type="button" id="notify-people-clear">清空</button>
+                      </div>
+                    </summary>
+                    <div id="notify-people-list" class="notify-chip-list">
+                      <div class="empty-state">尚未建立人員</div>
+                    </div>
+                  </details>
+                  <div class="form-actions notify-actions">
+                    <button class="primary-action" type="button" id="notify-open-preview">開啟通知分頁</button>
+                    <button class="secondary-action" type="button" id="notify-copy-batch">複製通知文字</button>
+                    <button class="ghost-action" type="button" id="notify-reset">清空篩選</button>
+                  </div>
+                  <div id="notify-status-message" class="status-message" aria-live="polite"></div>
+                </section>
+
+                <section class="panel panel-block notify-results-panel">
+                  <div class="panel-heading compact-heading notify-results-head">
+                    <div>
+                      <p class="eyebrow">結果清單</p>
+                      <h2>人員通知卡</h2>
+                      <p class="notify-results-note">以人員為主軸的可收合工作列，避免左篩選右卡片的拼貼堆疊。</p>
+                    </div>
+                    <div class="notify-results-actions">
+                      <button class="mini-action" type="button" id="notify-density-comfortable">一般</button>
+                      <button class="mini-action" type="button" id="notify-density-compact">緊湊</button>
+                      <button class="mini-action" type="button" id="notify-expand-all">全部展開</button>
+                      <button class="mini-action" type="button" id="notify-collapse-all">全部收合</button>
+                    </div>
+                  </div>
+                  <div id="notify-results" class="notify-results-shell">
+                    <div class="empty-state">尚未建立報名紀錄</div>
+                  </div>
+                </section>
+              </div>
+            </section>
+          </section>
         </section>
       </section>
     </main>
 
-    <script type="module" src="./registration.js?v=20260626-registration1"></script>
+    <script type="module" src="./registration.js?v=20260701-registration-notify8"></script>
   </body>
 </html>
