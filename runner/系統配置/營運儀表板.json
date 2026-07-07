@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-07-07T04:37:51.539Z",
+  "generated_at": "2026-07-07T11:46:04.060Z",
   "basis_date": "2026-07-07",
   "races": {
-    "total": 56,
+    "total": 57,
     "follow_up_count": 20,
-    "complete_count": 36,
-    "complete_rate": "64%",
+    "complete_count": 37,
+    "complete_rate": "65%",
     "launch_blocking_gap_count": 6,
-    "launch_ready_count": 50,
+    "launch_ready_count": 51,
     "launch_ready_rate": "89%",
-    "official_direct_count": 49,
+    "official_direct_count": 50,
     "official_direct_rate": "88%",
-    "verified_count": 55,
+    "verified_count": 56,
     "verified_rate": "98%",
     "opened_gap_count": 1,
     "date_anomaly_count": 0,
-    "due_now_count": 6,
-    "monthly_tracking_count": 4,
+    "due_now_count": 5,
+    "monthly_tracking_count": 3,
     "state_counts": {
       "歷史": 3,
       "停辦": 2,
       "已截止": 15,
       "報名中": 29,
-      "尚未開報": 3,
+      "尚未開報": 4,
       "待確認": 2,
       "未知": 1,
       "報名時間未定": 1
@@ -248,10 +248,10 @@
     "items": [
       {
         "platform": "運動筆記",
-        "total": 10,
+        "total": 11,
         "official_direct": 6,
-        "verified": 10,
-        "missing": 5,
+        "verified": 11,
+        "missing": 6,
         "opened_gap": 1,
         "date_anomaly": 0,
         "due_now": 1,
@@ -260,10 +260,10 @@
           "TOYOTA RUN 台中 視障專場",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
         ],
-        "complete_rate": "50%",
-        "official_direct_rate": "60%",
+        "complete_rate": "45%",
+        "official_direct_rate": "55%",
         "verified_rate": "100%",
-        "score": 73,
+        "score": 70,
         "status": "可用需觀察"
       },
       {
@@ -274,7 +274,7 @@
         "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 2,
+        "due_now": 1,
         "sample_races": [
           "2026 專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
           "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
@@ -289,9 +289,9 @@
       {
         "platform": "Lohas",
         "total": 9,
-        "official_direct": 7,
+        "official_direct": 8,
         "verified": 9,
-        "missing": 2,
+        "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
@@ -300,10 +300,10 @@
           "2026年FUN電多巴胺路跑嘉年華",
           "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
         ],
-        "complete_rate": "78%",
-        "official_direct_rate": "78%",
+        "complete_rate": "89%",
+        "official_direct_rate": "89%",
         "verified_rate": "100%",
-        "score": 87,
+        "score": 93,
         "status": "穩定"
       },
       {
@@ -314,7 +314,7 @@
         "missing": 3,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 0,
         "sample_races": [
           "2026 BOBDOG RUN(台中場)",
           "2026 松鶴越野",
@@ -334,7 +334,7 @@
         "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 2,
         "sample_races": [
           "2026 VISOGE 夜跑派對 台中場",
           "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",

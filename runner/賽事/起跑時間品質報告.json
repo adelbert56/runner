@@ -240,6 +240,29 @@
     ]
   },
   {
+    "race_id": "16bea2b0-6494-4e27-84f5-3b62782d983d",
+    "race_name": "2026 臺中舒跑杯",
+    "race_date": "2026-11-08",
+    "race_county": "臺中市",
+    "distances": [
+      "9km",
+      "5km",
+      "3km"
+    ],
+    "start_times": "挑戰組（5K） 起跑 06:10、3K 起跑 06:50",
+    "registration_link": "",
+    "official_event_url": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12900",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12900&subtitle=2026+%E8%87%BA%E4%B8%AD%E8%88%92%E8%B7%91%E6%9D%AF",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：9K、5K、3K；起跑列：挑戰組（5K）、3K"
+      }
+    ]
+  },
+  {
     "race_id": "4deefa08-b316-4d29-8842-a5e9848f396c",
     "race_name": "2026 臺中舒跑杯",
     "race_date": "2026-11-15",
@@ -284,6 +307,31 @@
         "severity": "low",
         "label": "起跑組別少於距離數",
         "hint": "距離：全馬（42K）、半馬（21K）、10K、5K、全馬（42.195K）；起跑列：全馬組（42K）、半馬、挑戰組（10K）、健走組（5K）"
+      }
+    ]
+  },
+  {
+    "race_id": "95fa59e9-c81f-43d0-b93a-de35085fbb52",
+    "race_name": "2026 通霄粉紅超跑馬拉松",
+    "race_date": "2026-12-13",
+    "race_county": "苗栗縣",
+    "distances": [
+      "42.195km",
+      "23km",
+      "12km",
+      "4.5km",
+      "42km"
+    ],
+    "start_times": "疾疾如風組(42.195K) 起跑 06:30、乘風破浪組(23K) 起跑 06:40、一帆風順組(12K) 起跑 06:50、走馬看花組(4.5K) 起跑 07:00",
+    "registration_link": "https://lohasnet.tw/Tongxiao2026/",
+    "official_event_url": "https://lohasnet.tw/Tongxiao2026/",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13079&subtitle=2026%E9%80%9A%E9%9C%84%E7%B2%89%E7%B4%85%E8%B6%85%E8%B7%91%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：全馬（42.195K）、超半馬（23K）、12K、4.5K、全馬（42K）；起跑列：疾疾如風組(42.195K)、乘風破浪組(23K)、一帆風順組(12K)、走馬看花組(4.5K)"
       }
     ]
   },
