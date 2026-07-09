@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-07-07T11:46:04.060Z",
-  "basis_date": "2026-07-07",
+  "generated_at": "2026-07-09T11:14:12.762Z",
+  "basis_date": "2026-07-09",
   "items": [
     {
       "platform": "運動筆記",
       "total": 11,
-      "official_direct": 6,
+      "official_direct": 7,
       "verified": 11,
-      "missing": 6,
-      "opened_gap": 1,
+      "missing": 5,
+      "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
         "TOYOTA RUN 台中 視障專場",
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
       ],
-      "complete_rate": "45%",
-      "official_direct_rate": "55%",
+      "complete_rate": "55%",
+      "official_direct_rate": "64%",
       "verified_rate": "100%",
-      "score": 70,
+      "score": 75,
       "status": "可用需觀察"
     },
     {
@@ -30,7 +30,7 @@
       "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
         "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
