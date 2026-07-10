@@ -54,7 +54,7 @@ RUNNING_TYPE_KEYS = {
 
 def hydrate_tokenstore_from_env() -> None:
     """Restore a GitHub Secret token into the runner-local token directory."""
-    encoded = os.environ.get("GARMIN_TOKENSTORE_B64", "").strip()
+    encoded = "".join(os.environ.get("GARMIN_TOKENSTORE_B64", "").split())
     if not encoded:
         return
     try:
