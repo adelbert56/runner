@@ -3046,8 +3046,12 @@ function renderCoachReviewPanel() {
   const scheduleDays = scheduledMenu.map((item) => DOW_NAMES[item.scheduledDow] || item.day).join('、');
   const menu = scheduledMenu.map((item) => `<tr><td style="white-space:nowrap"><b>${reviewEscape(DOW_NAMES[item.scheduledDow] || item.day)}</b></td><td>${reviewEscape(item.plan)}</td></tr>`).join('');
   const notes = (coachReviewData.history || []).slice().reverse().map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
+  const garminOnlyNotice = coachReviewData.sourceMode === 'garmin-only'
+    ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 資料模式</b><br>雲端已同步實跑資料，但沒有人工週報。正式課表維持你的目標與可跑日；累積紀錄後才校正未來週，不會虛構一份教練菜單。</div>`
+    : '';
   return `<div class="card"><div class="card-title">🏃 教練建議 <span style="font-weight:normal;font-size:0.7em;opacity:0.7">資料截至 ${reviewEscape(coachReviewData.updatedAt)} · <button class="btn btn-secondary" style="font-size:12px;padding:3px 8px" onclick="lockCoachReview()">鎖定</button></span></div>
     <p style="font-size:13px;color:var(--c-text-muted);margin:0 0 12px">更新規則：${reviewEscape(coachScheduleLabel())}</p>
+    ${garminOnlyNotice}
     <div style="margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#edf5ef;color:var(--c-primary-hover);font-size:14px"><b>目前採用訓練設定：</b>${reviewEscape(currentTrainingGoalLabel())}<br><span style="font-size:12px;color:var(--c-text-muted)">此設定會優先於週報快照中的舊目標，修改訓練設定後會立即同步顯示。</span>${coachGoalGapNote()}</div>
     <p style="margin:0 0 12px"><b>本週判定：</b>${reviewEscape(week.verdict)}<br><span style="color:var(--c-text-muted)">${reviewEscape(week.notes)}</span></p>
     <div style="padding:12px;border-left:3px solid var(--c-primary);background:var(--c-surface-alt);border-radius:8px"><b>下週參考菜單：${reviewEscape(nextWeek.label)}</b>（${reviewEscape(nextWeek.targetKm)} km）<p style="margin:5px 0 0;font-size:12px;color:var(--c-text-muted)">已依目前訓練日重排：${reviewEscape(scheduleDays)}${appData.profile?.dayState?.includes(2) ? '（長跑固定於指定長跑日）' : ''}</p><table class="log-table" style="margin-top:8px"><tbody>${menu}</tbody></table><p style="margin:10px 0 0">🗣️ ${reviewEscape(nextWeek.coachNote)}</p>${nextWeek.weatherPlan ? `<p style="margin:6px 0 0;font-size:13px;color:var(--c-text-muted)">🌦️ 天氣備案：${reviewEscape(nextWeek.weatherPlan)}</p>` : ''}</div>
