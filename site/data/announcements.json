@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10",
+  "generated_at": "2026-07-11",
   "retention": {
     "closed_notice_days": 14,
     "daily_quips": 2
@@ -64,7 +64,7 @@
         "ending"
       ],
       "details": [
-        "07/15 截止｜剩 5 天"
+        "07/15 截止｜剩 4 天"
       ],
       "race_date": "2026-12-06",
       "first_seen_at": "2026-05-16"
@@ -77,13 +77,13 @@
         "closing"
       ],
       "details": [
-        "07/24 截止｜剩 14 天"
+        "07/24 截止｜剩 13 天"
       ],
       "race_date": "2026-09-06",
       "first_seen_at": "2026-05-16"
     },
     {
-      "id": "quip-2026-07-10-0",
+      "id": "quip-2026-07-11-0",
       "title": "配速可以慢，按下報名的手速不要太慢。",
       "types": [
         "talk"
@@ -93,7 +93,7 @@
       ]
     },
     {
-      "id": "quip-2026-07-10-1",
+      "id": "quip-2026-07-11-1",
       "title": "跑步最難的不是上坡，是出門前那五分鐘。",
       "types": [
         "talk"
