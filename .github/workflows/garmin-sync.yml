@@ -1,7 +1,7 @@
 name: Sync Garmin training data
 
-"on":
-  workflow_dispatch:
+on:
+  workflow_dispatch: {}
   schedule:
     # 21:37 Asia/Taipei. Avoid :00 because GitHub cron can be delayed then.
     - cron: "37 13 * * *"
