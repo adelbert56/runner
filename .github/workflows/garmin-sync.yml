@@ -1,0 +1,109 @@
+name: Sync Garmin training data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 21:37 Asia/Taipei. Avoid :00 because GitHub cron can be delayed then.
+    - cron: "37 13 * * *"
+    # Backup slot: a second incremental pull is harmless when the primary succeeded.
+    - cron: "7 15 * * *"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: garmin-training-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GARMIN_TOKENSTORE_B64: ${{ secrets.GARMIN_TOKENSTORE_B64 }}
+      TRAINING_REVIEW_KEY: ${{ secrets.TRAINING_REVIEW_KEY }}
+    steps:
+      - name: Check recent sync guard
+        id: sync-guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "$EVENT_NAME" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          runs_json="$(gh run list --repo "$REPOSITORY" --workflow garmin-sync.yml --branch main --limit 30 --json databaseId,createdAt,status,conclusion)"
+          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= 72000) | select((.conclusion == "success") or (.status == "in_progress") or (.status == "queued"))] | length')"
+          if [ "$prior_count" -gt 0 ]; then
+            echo "A Garmin sync already succeeded or is active within 20 hours; skipping this backup slot."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check required secrets
+        if: steps.sync-guard.outputs.should_run == 'true'
+        run: |
+          if [ -z "$GARMIN_TOKENSTORE_B64" ] || [ -z "$TRAINING_REVIEW_KEY" ]; then
+            echo "GARMIN_TOKENSTORE_B64 and TRAINING_REVIEW_KEY must be configured as repository secrets." >&2
+            exit 1
+          fi
+
+      - name: Checkout
+        if: steps.sync-guard.outputs.should_run == 'true'
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        if: steps.sync-guard.outputs.should_run == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Setup Python
+        if: steps.sync-guard.outputs.should_run == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Setup uv
+        if: steps.sync-guard.outputs.should_run == 'true'
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install Python dependencies
+        if: steps.sync-guard.outputs.should_run == 'true'
+        run: uv sync --frozen
+
+      - name: Fetch Garmin running activities
+        if: steps.sync-guard.outputs.should_run == 'true'
+        run: uv run python scripts/garmin/fetch_garmin.py --days 90 --non-interactive
+
+      - name: Build encrypted training review
+        if: steps.sync-guard.outputs.should_run == 'true'
+        run: node scripts/build-training-review.mjs
+
+      - name: Commit encrypted training update
+        if: steps.sync-guard.outputs.should_run == 'true'
+        id: commit
+        run: bash .github/scripts/commit-generated.sh "chore(training): sync Garmin review" "site/data/training-review.enc.json"
+
+      - name: Trigger Pages deploy
+        if: steps.sync-guard.outputs.should_run == 'true' && steps.commit.outputs.did_push == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh workflow run --repo "$REPOSITORY" pages.yml --ref main
+
+      - name: Wait for Pages deploy
+        if: steps.sync-guard.outputs.should_run == 'true' && steps.commit.outputs.did_push == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: bash .github/scripts/wait-for-pages-dispatch.sh

@@ -16,7 +16,9 @@ are incremental.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
+import os
 import sys
 from datetime import date, timedelta
 from getpass import getpass
@@ -34,7 +36,8 @@ from garminconnect import (
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_PATH = REPO_ROOT / "runner" / "訓練" / "訓練紀錄.json"
-TOKEN_DIR = "~/.garminconnect"
+TOKEN_DIR = os.environ.get("GARMIN_TOKENSTORE", "~/.garminconnect")
+TOKEN_FILE = "garmin_tokens.json"
 
 RUNNING_TYPE_KEYS = {
     "running",
@@ -49,7 +52,22 @@ RUNNING_TYPE_KEYS = {
 }
 
 
-def login() -> Garmin:
+def hydrate_tokenstore_from_env() -> None:
+    """Restore a GitHub Secret token into the runner-local token directory."""
+    encoded = os.environ.get("GARMIN_TOKENSTORE_B64", "").strip()
+    if not encoded:
+        return
+    try:
+        decoded = base64.b64decode(encoded, validate=True)
+        json.loads(decoded.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError("GARMIN_TOKENSTORE_B64 is not a valid base64 Garmin token file") from exc
+    token_path = Path(TOKEN_DIR).expanduser()
+    token_path.mkdir(parents=True, exist_ok=True)
+    (token_path / TOKEN_FILE).write_bytes(decoded)
+
+
+def login(interactive: bool = True) -> Garmin:
     if Path(TOKEN_DIR).expanduser().exists():
         try:
             client = Garmin()
@@ -60,6 +78,9 @@ def login() -> Garmin:
             GarminConnectConnectionError,
         ) as exc:
             print(f"既有 token 失效（{exc}），需重新登入", file=sys.stderr)
+
+    if not interactive:
+        raise RuntimeError("Garmin token is unavailable or expired; run the sync once interactively to sign in again.")
 
     print("尚無登入 token，請輸入 Garmin Connect 帳號（只需一次）")
     email = input("Email: ").strip()
@@ -122,9 +143,15 @@ def load_existing() -> dict[int, dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="抓取 Garmin 跑步紀錄")
     parser.add_argument("--days", type=int, default=90, help="回溯天數（預設 90）")
+    parser.add_argument("--non-interactive", action="store_true", help="排程模式：token 失效時直接失敗，不開啟帳密提示")
     args = parser.parse_args()
 
-    client = login()
+    try:
+        hydrate_tokenstore_from_env()
+        client = login(interactive=not args.non_interactive)
+    except RuntimeError as exc:
+        print(f"Garmin authentication unavailable: {exc}", file=sys.stderr)
+        return 3
 
     end = date.today()
     start = end - timedelta(days=args.days)

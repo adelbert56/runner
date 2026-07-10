@@ -72,6 +72,8 @@ async function buildPublishedReview(plaintext) {
   try {
     const activityFeed = JSON.parse(await readFile(ACTIVITY_SOURCE, "utf8"));
     const activities = Array.isArray(activityFeed.activities) ? activityFeed.activities : [];
+    review.analyticsUpdatedAt = activityFeed.updatedAt || null;
+    review.analyticsStatus = "synced";
     review.analyticsRuns = activities.map((activity) => ({
       date: activity.date,
       startTime: activity.startTime,
@@ -92,6 +94,8 @@ async function buildPublishedReview(plaintext) {
   } catch {
     // The encrypted weekly review remains publishable before Garmin data exists.
     review.analyticsRuns = [];
+    review.analyticsUpdatedAt = null;
+    review.analyticsStatus = "missing";
   }
   return JSON.stringify(review);
 }

@@ -62,6 +62,14 @@
       "recovery_events": ["workflow_dispatch"]
     },
     {
+      "name": "Sync Garmin training data",
+      "path": ".github/workflows/garmin-sync.yml",
+      "expected_event": "schedule",
+      "require_schedule": true,
+      "max_age_minutes": 1560,
+      "recovery_events": ["workflow_dispatch"]
+    },
+    {
       "name": "CI",
       "path": ".github/workflows/ci.yml",
       "expected_event": "push",

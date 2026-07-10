@@ -2887,7 +2887,7 @@ function renderPaceTrend(runs) {
 
 function renderTrainingAnalysis() {
   const runs = coachRunRecords();
-  if (!runs.length) return `<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">解鎖教練建議後，這裡會用 Garmin 練跑紀錄呈現週跑量、配速與心率趨勢。</p></div>`;
+  if (!runs.length) return `<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
   const trend = weeklyRunTrend(runs);
   const recent = runs.slice(-4);
   const averagePace = recent.filter((run) => run.paceSeconds).reduce((sum, run, _, list) => sum + run.paceSeconds / list.length, 0);
@@ -2898,7 +2898,7 @@ function renderTrainingAnalysis() {
   const averageLoad = recent.filter((run) => run.trainingLoad).reduce((sum, run, _, list) => sum + run.trainingLoad / list.length, 0);
   const latestVo2 = [...runs].reverse().find((run) => run.vo2max)?.vo2max;
   return `<div class="card"><div class="card-title">📈 訓練分析 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
-    <div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">近四週跑量</span><strong class="plan-metric-value">${lastFourKm.toFixed(1)} km</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均配速</span><strong class="plan-metric-value">${formatPaceSeconds(averagePace)}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均心率</span><strong class="plan-metric-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">資料截至</span><strong class="plan-metric-value">${reviewEscape(coachReviewData.updatedAt)}</strong></div></div>
+    <div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">近四週跑量</span><strong class="plan-metric-value">${lastFourKm.toFixed(1)} km</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均配速</span><strong class="plan-metric-value">${formatPaceSeconds(averagePace)}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均心率</span><strong class="plan-metric-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">Garmin 資料截至</span><strong class="plan-metric-value">${reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt)}</strong></div></div>
     <div style="margin-top:20px"><b style="font-size:15px">進階訓練指標</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 10px">只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p><div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">最近四趟平均步頻</span><strong class="plan-metric-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟累積爬升</span><strong class="plan-metric-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均負荷</span><strong class="plan-metric-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近 VO₂ Max</span><strong class="plan-metric-value">${latestVo2 || '—'}</strong></div></div></div>
     <div class="analysis-chart-grid"><section class="analysis-chart-card"><b>週跑量趨勢</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 0">每週總公里數，包含額外跑步。</p>${renderVolumeBars(trend)}</section><section class="analysis-chart-card"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
   </div>`;
@@ -3025,7 +3025,7 @@ function renderCoachDataSignals() {
 
 function renderGarminActualCard() {
   if (!coachReviewData?.week) {
-    return `<div class="card" id="plan-week-garmin-actual"><div class="card-title">⌚ 本週實績</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">Garmin 實績會在解鎖「教練建議」後顯示於此；正式課表不會被建議菜單自動覆寫。</p></div>`;
+    return `<div class="card" id="plan-week-garmin-actual"><div class="card-title">⌚ 本週實績</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">尚無可用 Garmin 實績。課表會先依目標日期、目前週跑量、最長跑、可訓練日與傷痛設定建立保守基準；收到至少 3 筆有效跑步後，才會用實跑配速、心率與完成度校正未來週。</p></div>`;
   }
   const week = coachReviewData.week;
   const runs = garminActivityRecords();
