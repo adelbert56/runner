@@ -25,3 +25,6 @@ runner/報名管理/報名管理資料.json
 ~$*.xlsx
 
 .superpowers/
+
+# Garmin 訓練紀錄為個人健康資料，只留本機不進 git
+runner/訓練/

@@ -2566,8 +2566,56 @@ function phaseForWeek(weekIndex, weekCount, goalProfile) {
   return "專項";
 }
 
-function buildWeeklyBlocks(weekCount, targets, goalProfile) {
+function qualityFocusForWeek(week, phase, goalProfile) {
+  const cycle = (week - 1) % 3;
+  if (phase === "打底") {
+    return [
+      { type: "節奏", label: "短節奏跑", focus: "建立穩定輸出，不追極限配速" },
+      { type: "技巧", label: "坡跑與跑姿", focus: "用短坡提升力量與跑姿效率" },
+      { type: "間歇", label: "短間歇", focus: "用短組數建立速度感，總量保持克制" },
+    ][cycle];
+  }
+  if (phase === "加量") {
+    return [
+      { type: "節奏", label: "乳酸閾值節奏", focus: "累積可持續的節奏跑時間" },
+      { type: "間歇", label: "巡航間歇", focus: "以可控組數提升有氧上限" },
+      { type: "技巧", label: "坡跑與加速跑", focus: "用低衝擊速度刺激銜接下一週" },
+    ][cycle];
+  }
+  if (phase === "專項") {
+    if (goalProfile.distanceKm >= 21) {
+      return [
+        { type: "專項", label: "目標配速段", focus: "把比賽配速放進可恢復的分段" },
+        { type: "節奏", label: "乳酸閾值節奏", focus: "維持專項耐力，不在每週都硬做間歇" },
+        { type: "間歇", label: "短間歇喚醒", focus: "以短刺激保留步頻與跑感" },
+      ][cycle];
+    }
+    return [
+      { type: "節奏", label: "節奏跑", focus: "拉長可持續的穩定輸出" },
+      { type: "間歇", label: "間歇跑", focus: "用可控組數提升速度耐力" },
+      { type: "專項", label: "目標配速段", focus: "練習目標距離所需的配速感" },
+    ][cycle];
+  }
+  return { type: "喚醒", label: "配速喚醒", focus: "減量期保留跑感，讓疲勞下降" };
+}
+
+function seasonalTrainingContext(dateInput) {
+  const month = parseDateAsUtc(dateInput || TODAY).getUTCMonth() + 1;
+  if (month >= 6 && month <= 9) {
+    return { label: "夏季高溫", paceNote: "炎熱時以體感與心率為主，品質課縮短 10-15%，安排在清晨或傍晚並補水。", qualityFactor: 0.88 };
+  }
+  if (month >= 10 && month <= 12) {
+    return { label: "秋冬適訓", paceNote: "氣溫較適合品質課，但仍以恢復與完成度決定是否推進。", qualityFactor: 1 };
+  }
+  if (month >= 3 && month <= 5) {
+    return { label: "春季多變", paceNote: "天候與濕度變化大，雨天改跑步機或把間歇換成節奏跑。", qualityFactor: 0.94 };
+  }
+  return { label: "冬季保暖", paceNote: "先充分熱身；低溫或下雨時，品質課以完成動作品質為優先。", qualityFactor: 0.96 };
+}
+
+function buildWeeklyBlocks(weekCount, targets, goalProfile, raceDateInput) {
   const safeWeekCount = clampNumber(weekCount, 1, 20);
+  const raceDate = parseDateAsUtc(raceDateInput || TODAY);
   return Array.from({ length: safeWeekCount }, (_, index) => {
     const week = index + 1;
     const phase = phaseForWeek(week, safeWeekCount, goalProfile);
@@ -2580,6 +2628,8 @@ function buildWeeklyBlocks(weekCount, targets, goalProfile) {
       3,
       Math.min(targets.peakLongRun, weeklyKm * 0.42),
     ));
+    const weekDate = new Date(raceDate.getTime() - (safeWeekCount - week) * 7 * 86400000);
+    const qualityFocus = qualityFocusForWeek(week, phase, goalProfile);
 
     return {
       week,
@@ -2587,13 +2637,15 @@ function buildWeeklyBlocks(weekCount, targets, goalProfile) {
       phase,
       weeklyKm,
       longRunKm,
+      qualityFocus,
+      season: seasonalTrainingContext(weekDate.toISOString().slice(0, 10)),
       focus: phase === "打底"
-        ? "穩定頻率與有氧"
+        ? `穩定頻率與有氧｜${qualityFocus.label}`
         : phase === "加量"
-          ? "提高總量與中長跑"
+          ? `提高總量與中長跑｜${qualityFocus.label}`
           : phase === "專項"
-            ? "專項配速與長跑尾段"
-            : "保留速度與恢復",
+            ? `專項配速與長跑尾段｜${qualityFocus.label}`
+            : `保留速度與恢復｜${qualityFocus.label}`,
     };
   });
 }
@@ -2730,31 +2782,43 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, paceProfi
   const runWalk = runWalkStageForWeek(currentWeek.week, currentWeek.weekCount || 12, injury);
   const { recoveryRange, easyRange, steadyRange, tempoRange, intervalRange, longRange, marathonRange } = paceProfile;
   const qualityMode = adjustment?.qualityMode || "keep";
+  const qualityFocus = currentWeek.qualityFocus || qualityFocusForWeek(currentWeek.week, currentWeek.phase, goalProfile);
+  const season = currentWeek.season || seasonalTrainingContext(TODAY);
   const recovery = "伸展、活動度或完整休息";
   const support = isHalf
     ? `${supportWorkoutFor(priority, injury)} 可用騎車、游泳或快走替代一堂恢復跑，降低衝擊。`
     : supportWorkoutFor(priority, injury);
   const easyKm = Math.max(3, Math.round((currentWeek.weeklyKm - currentWeek.longRunKm) / Math.max(2, dayCount - 1)));
   const mediumKm = clampNumber(Math.round(currentWeek.longRunKm * 0.7), 5, Math.max(6, currentWeek.longRunKm - 2));
-  const shortTempoMinutes = isCautious || readiness === "busy" ? "12-18" : "20-30";
+  const shortTempoMinutes = isCautious || readiness === "busy" ? "12-18" : season.qualityFactor < 1 ? "18-25" : "20-30";
+  const intervalSets = season.qualityFactor < 1 ? "4-5" : "5-6";
+  const hillSets = season.qualityFactor < 1 ? "5-6" : "6-8";
+  const specificSets = season.qualityFactor < 1 ? "2" : "2-3";
   const longProgression = goalProfile.distanceKm >= 21 && currentWeek.phase === "專項" && injury === "none" && readiness !== "tired"
     ? `${currentWeek.longRunKm}km，前段 ${longRange}，最後 20-30 分鐘逐步收到 ${steadyRange}`
     : `${currentWeek.longRunKm}km，${longRange}`;
+  const qualityByFocus = qualityFocus.type === "技巧"
+    ? `坡跑 ${hillSets} 組 × 45-60 秒，上坡穩定出力；前後各慢跑 10 分鐘，恢復段維持 ${recoveryRange}`
+    : qualityFocus.type === "間歇"
+      ? `間歇 ${intervalSets} 組 × 3 分鐘，控制在 ${intervalRange}；每組慢跑 2 分鐘恢復`
+      : qualityFocus.type === "專項"
+        ? goalProfile.distanceKm >= 21
+          ? `目標配速 ${specificSets} 組 × 10 分鐘，控制在 ${marathonRange}；組間慢跑 3 分鐘`
+          : `目標配速 3 組 × 6-8 分鐘，控制在 ${tempoRange}；組間慢跑 2 分鐘`
+        : qualityFocus.type === "喚醒"
+          ? `配速喚醒 6 組 × 1 分鐘，控制在 ${tempoRange}；每組慢跑 90 秒，不累積疲勞`
+          : `節奏跑 ${shortTempoMinutes} 分鐘，控制在 ${tempoRange}`;
   const baseQuality = useRunWalk
     ? `${runWalk.title}：${runWalk.work}`
     : injury === "recovering"
       ? `有氧穩定跑 20-30 分鐘，${easyRange}`
-      : isHalf && currentWeek.phase === "打底"
-        ? `坡跑 6-8 組 × 60 秒，上坡穩定出力；前後各慢跑 10 分鐘，恢復段維持 ${recoveryRange}`
-        : isHalf && currentWeek.phase === "專項"
-          ? `半馬專項 3 × 10 分鐘，控制在 ${tempoRange}；組間慢跑 3 分鐘`
-          : goalProfile.distanceKm >= 42 && currentWeek.phase === "專項"
+      : goalProfile.distanceKm >= 42 && currentWeek.phase === "專項" && qualityFocus.type === "專項"
             ? `全馬配速段 2 × 15 分鐘，控制在 ${marathonRange}；組間慢跑 5 分鐘`
-            : level === "advanced" && priority === "pb" && intensity === "push" && readiness !== "busy"
+            : level === "advanced" && priority === "pb" && intensity === "push" && readiness !== "busy" && qualityFocus.type === "間歇"
               ? `Cruise intervals 4-5 × 1km，控制在 ${intervalRange}；每趟慢跑 90 秒恢復`
               : priority === "habit"
                 ? `漸進跑 20 分鐘，最後 5-8 分鐘收進 ${steadyRange}`
-                : `節奏跑 ${shortTempoMinutes}，控制在 ${tempoRange}`;
+                : qualityByFocus;
   const quality = useRunWalk
     ? baseQuality
     : qualityMode === "remove"
@@ -2766,7 +2830,7 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, paceProfi
   if (dayCount <= 3) {
     return [
       { day: "第 1 跑", type: useRunWalk ? "跑走" : "輕鬆", work: useRunWalk ? quality : `${easyKm}km，${easyRange}` },
-      { day: "第 2 跑", type: useRunWalk ? "輕鬆" : "重點", work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
+      { day: "第 2 跑", type: useRunWalk ? "輕鬆" : qualityFocus.label, work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
       { day: longRunLabel, type: "長跑", work: useRunWalk ? `跑走長課 ${Math.max(30, currentWeek.longRunKm * 7)} 分鐘，跑段全程可聊天` : longProgression },
       { day: "支援日", type: "徒手", work: support },
     ];
@@ -2774,7 +2838,7 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, paceProfi
 
   const schedule = [
     { day: "週二", type: useRunWalk ? "跑走" : "恢復", work: useRunWalk ? quality : `恢復跑 ${Math.max(4, easyKm - 1)}km，${recoveryRange}` },
-    { day: "週四", type: useRunWalk ? "輕鬆" : (qualityMode === "remove" ? "恢復" : "重點"), work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
+    { day: "週四", type: useRunWalk ? "輕鬆" : (qualityMode === "remove" ? "恢復" : qualityFocus.label), work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
     { day: "週五", type: goalProfile.distanceKm >= 21 ? "中長跑" : "恢復", work: dayCount >= 4 ? (goalProfile.distanceKm >= 21 ? `${mediumKm}-${mediumKm + 2}km 穩定跑，控制在 ${qualityMode === "remove" ? easyRange : steadyRange}` : `短恢復跑 25-35 分鐘，${easyRange}`) : recovery },
     { day: longRunLabel, type: "長跑", work: longProgression },
     { day: "支援日", type: "徒手", work: support },
@@ -2862,7 +2926,7 @@ function buildPlan(profileInput) {
     safeIntensity,
   );
   const targets = goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority, safeExperience, safeIntensity, safeInjury, safeReadiness, weekCount);
-  const weeklyBlocks = buildWeeklyBlocks(weekCount, targets, goalProfile);
+  const weeklyBlocks = buildWeeklyBlocks(weekCount, targets, goalProfile, raceDateInput);
   const selectedWeek = clampNumber(Number(selectedWeekInput) || 1, 1, weekCount);
   const currentWeek = weeklyBlocks[selectedWeek - 1];
   const usesRunWalk = shouldUseRunWalk(level, safeExperience, priority, safeInjury);
@@ -2910,7 +2974,7 @@ function buildPlan(profileInput) {
   };
 }
 
-function buildCoachInsights(plan) {
+function buildCoachInsights(plan, adjustment, displayWeek, displaySchedule) {
   const risks = [];
   const strengths = [];
   const nextActions = [];
@@ -2991,16 +3055,50 @@ function buildCoachInsights(plan) {
     score -= 6;
   }
 
-  nextActions.push(`本週先完成第 ${plan.selectedWeek} 週課表，重點是 ${plan.currentWeek.focus}。`);
+  const qualityWorkout = displaySchedule.find((item) => !["跑走", "輕鬆", "恢復", "中長跑", "長跑", "徒手", "補量"].includes(item.type));
+  if (adjustment.source === "feedback" && adjustment.qualityMode === "remove") {
+    risks.unshift(`第 ${adjustment.previousWeek} 週的完成度與恢復訊號不足；本週已取消品質課，總量調整為 ${Math.round(adjustment.factor * 100)}%。`);
+    nextActions.unshift("這週只完成恢復跑與保守長跑，不補做漏掉的品質課；疼痛持續或加劇就停止跑步並尋求專業評估。");
+    score -= 12;
+  } else if (adjustment.source === "feedback" && adjustment.qualityMode === "reduced") {
+    risks.unshift(`第 ${adjustment.previousWeek} 週只部分吸收訓練；本週品質課已縮短、長跑調整為 ${Math.round(adjustment.longRunFactor * 100)}%。`);
+    nextActions.unshift("先把恢復跑、縮短版品質課與長跑完成；下週是否推進，交給新的完成度與恢復紀錄決定。");
+    score -= 5;
+  } else if (adjustment.source === "feedback" && adjustment.factor > 1) {
+    strengths.unshift(`第 ${adjustment.previousWeek} 週回饋顯示吸收穩定，本週僅小幅推進到 ${Math.round(adjustment.factor * 100)}% 跑量。`);
+    nextActions.unshift("狀態好也只照既定課表完成，不額外加第二堂品質課或拉長長跑。");
+    score += 2;
+  }
+  if (displayWeek.season?.qualityFactor < 1) {
+    nextActions.push(`${displayWeek.season.label}：${displayWeek.season.paceNote}`);
+  }
+  nextActions.push(`本週先完成第 ${plan.selectedWeek} 週課表，重點是 ${displayWeek.focus}。${qualityWorkout ? `品質課為「${qualityWorkout.type}」。` : "本週以恢復為主。"}`);
   nextActions.push(`長跑控制在 ${plan.longRange}，跑完隔天若疲勞超過 24 小時，下週先降 10-15% 跑量。`);
 
   const finalScore = clampNumber(Math.round(score), 35, 96);
-  const status = finalScore >= 82 ? "穩定推進" : finalScore >= 65 ? "保守調整" : "先降載";
-  const mainAdvice = finalScore >= 82
-    ? "目前設定合理，可以照課表推進。重點是穩定完成，不要因為狀態好就臨時多加一堂快課。"
-    : finalScore >= 65
-      ? "這份課表可用，但需要保守執行。先讓身體吸收訓練，再逐步把配速和跑量拉上來。"
-      : "目前風險偏高，建議先把課表當恢復與打底，不要急著追目標配速。";
+  const status = adjustment.qualityMode === "remove"
+    ? "恢復降載"
+    : adjustment.qualityMode === "reduced"
+      ? "保守調整"
+      : adjustment.factor > 1
+        ? "小幅推進"
+        : finalScore >= 82 ? "穩定推進" : finalScore >= 65 ? "保守調整" : "先降載";
+  const mainAdvice = adjustment.qualityMode === "remove"
+    ? "本週的任務是恢復，不是補課。先讓疼痛與疲勞下降，再用下一週紀錄決定何時恢復品質課。"
+    : adjustment.qualityMode === "reduced"
+      ? "本週維持訓練節奏但不追配速；縮短品質課已是計畫的一部分，不需要額外補量。"
+      : adjustment.factor > 1
+        ? "這週可以依計畫小幅推進，但只增加一個變因：既不額外加快，也不額外拉長。"
+        : finalScore >= 82
+          ? "目前設定合理，可以照課表推進。重點是穩定完成，不要因為狀態好就臨時多加一堂快課。"
+          : finalScore >= 65
+            ? "這份課表可用，但需要保守執行。先讓身體吸收訓練，再逐步把配速和跑量拉上來。"
+            : "目前風險偏高，建議先把課表當恢復與打底，不要急著追目標配速。";
+  const tiredReply = adjustment.qualityMode === "remove"
+    ? "課表已進入恢復降載，今天不需要補任何課；以休息、步行或無痛活動度訓練為主。"
+    : adjustment.qualityMode === "reduced"
+      ? "課表已縮短品質課；今天仍覺得沉重就直接改恢復跑，並把這個狀態留給下週調整。"
+      : "今天很累就改 20-30 分鐘輕鬆跑或休息。疲勞是資料，不是失敗；連續兩天沉重就把本週重點課取消。";
 
   return {
     score: finalScore,
@@ -3011,7 +3109,7 @@ function buildCoachInsights(plan) {
     nextActions: nextActions.slice(0, 3),
     encouragement: `${plan.athleteName}，你現在最該追的是可持續的完成率。每週穩穩完成 80% 課表，會比偶爾爆量更接近目標。`,
     replies: {
-      tired: "今天很累就改 20-30 分鐘輕鬆跑或休息。疲勞是資料，不是失敗；連續兩天沉重就把本週重點課取消。",
+      tired: tiredReply,
       pain: "如果是尖銳痛、跛行或越跑越痛，今天不要跑。若只是輕微緊繃，改步行、伸展與睡眠，隔天再評估。",
       faster: "想跑快先不要每趟都加速。保留一堂節奏或間歇，其餘維持輕鬆跑，讓快課真的有品質。",
       taper: "賽前一週跑量降到平常 50-60%，保留短暫配速感，不做新的長跑、新鞋或新補給測試。",
@@ -3182,7 +3280,7 @@ function renderPlan() {
   const readinessLabel = readinessLabels[readiness] || readinessLabels.normal;
   const intensityLabel = intensityLabels[intensity] || intensityLabels.safe;
   const longRunDayLabel = weekdayLabels[longRunDay] || "週日";
-  const coach = buildCoachInsights(plan);
+  const coach = buildCoachInsights(plan, adjustment, displayWeek, displaySchedule);
 
   els.planOutput.innerHTML = `
     <div class="plan-hero">
@@ -3218,6 +3316,7 @@ function renderPlan() {
         <div class="plan-note">
           <strong>${escapeHtml(goalProfile.focus)}</strong>
           <p>${escapeHtml(progression)} 依照 ${escapeHtml(experienceLabel)}、${escapeHtml(injuryLabel)}、${escapeHtml(intensityLabel)} 調整跑量與強度。${escapeHtml(paceProfile.source)}${escapeHtml(levelProfile.note)}檢查點：${escapeHtml(goalProfile.benchmark)}。</p>
+          <p>本週品質主題：${escapeHtml(displayWeek.qualityFocus.label)}，${escapeHtml(displayWeek.qualityFocus.focus)}。${escapeHtml(displayWeek.season.paceNote)}</p>
         </div>
         <div class="plan-export-actions" aria-label="課表匯出">
           <button class="export-button" type="button" data-export-plan="calendar">匯出行事曆</button>
@@ -3290,8 +3389,8 @@ function renderPlan() {
         ` : `
           <div class="plan-method-card">
             <span>訓練結構</span>
-            <strong>一週一堂重點課，其餘保留輕鬆跑</strong>
-            <p>避免每趟都跑快；強度課、長跑與恢復日分開，讓身體吸收訓練。</p>
+            <strong>輕鬆、恢復、品質與長跑會隨週期輪替</strong>
+            <p>品質課會在節奏、間歇、坡跑與目標配速間輪替；完成度、疼痛、睡眠與季節條件會決定是否保留、縮短或換成恢復跑。</p>
           </div>
         `}
         <div class="risk-panel">

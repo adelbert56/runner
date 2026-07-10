@@ -77,14 +77,16 @@ function Test-PublicDataMatchesOriginMain {
             return $false
         }
 
-        $remoteBlob = & git show "origin/main:$path" 2>$null
+        # Compare blob hashes: string comparison of `git show` output loses
+        # the trailing newline (PowerShell splits output into lines), which
+        # made this check fail even when the files were identical.
+        $remoteHash = & git rev-parse "origin/main:$path" 2>$null
         if ($LASTEXITCODE -ne 0) {
             return $false
         }
 
-        $localContent = [System.IO.File]::ReadAllText($localPath)
-        $remoteContent = ($remoteBlob -join "`n")
-        if ($localContent -ne $remoteContent) {
+        $localHash = & git hash-object -- $localPath 2>$null
+        if ($LASTEXITCODE -ne 0 -or $localHash -ne $remoteHash) {
             return $false
         }
     }
