@@ -92,7 +92,7 @@ jobs:
       - name: Commit encrypted training update
         if: steps.sync-guard.outputs.should_run == 'true'
         id: commit
-        run: bash .github/scripts/commit-generated.sh "chore(training): sync Garmin review" "site/data/training-review.enc.json"
+        run: 'bash .github/scripts/commit-generated.sh "chore(training): sync Garmin review" "site/data/training-review.enc.json"'
 
       - name: Trigger Pages deploy
         if: steps.sync-guard.outputs.should_run == 'true' && steps.commit.outputs.did_push == 'true'
