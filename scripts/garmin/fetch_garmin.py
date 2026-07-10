@@ -54,14 +54,20 @@ RUNNING_TYPE_KEYS = {
 
 def hydrate_tokenstore_from_env() -> None:
     """Restore a GitHub Secret token into the runner-local token directory."""
-    encoded = "".join(os.environ.get("GARMIN_TOKENSTORE_B64", "").split())
-    if not encoded:
+    raw_secret = os.environ.get("GARMIN_TOKENSTORE_B64", "").strip()
+    if not raw_secret:
         return
     try:
-        decoded = base64.b64decode(encoded, validate=True)
+        decoded = base64.b64decode("".join(raw_secret.split()), validate=True)
         json.loads(decoded.decode("utf-8"))
-    except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise RuntimeError("GARMIN_TOKENSTORE_B64 is not a valid base64 Garmin token file") from exc
+    except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        # Allow a raw JSON token secret too. This keeps the cloud workflow
+        # resilient when GitHub Secrets is populated directly from the file.
+        try:
+            decoded = raw_secret.encode("utf-8")
+            json.loads(raw_secret)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError("GARMIN_TOKENSTORE_B64 is not a valid base64 or JSON Garmin token file") from exc
     token_path = Path(TOKEN_DIR).expanduser()
     token_path.mkdir(parents=True, exist_ok=True)
     (token_path / TOKEN_FILE).write_bytes(decoded)
