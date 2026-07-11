@@ -228,6 +228,29 @@
     .coach-signals { margin-top: 16px; }
     .coach-history { margin-top: 14px; }
     .coach-history summary { cursor: pointer; }
+    #back-to-top {
+      position: fixed; right: 22px; bottom: 22px; z-index: 900;
+      width: 50px; height: 50px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: linear-gradient(155deg, #2f8a5f, #1c5a3f 72%);
+      color: #fff; cursor: pointer;
+      box-shadow: 0 10px 24px rgba(20, 60, 42, 0.32), 0 2px 6px rgba(20, 60, 42, 0.18), inset 0 1px 0 rgba(255,255,255,0.25);
+      opacity: 0; pointer-events: none; transform: translateY(10px) scale(.85);
+      transition: opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+    }
+    #back-to-top svg { width: 20px; height: 20px; transition: transform .2s ease; }
+    #back-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+    #back-to-top:hover {
+      background: linear-gradient(155deg, #379a6a, #1f6547 72%);
+      box-shadow: 0 14px 28px rgba(20, 60, 42, 0.4), 0 2px 6px rgba(20, 60, 42, 0.2), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    #back-to-top:hover svg { transform: translateY(-2px); }
+    #back-to-top:active { transform: translateY(0) scale(.92); }
+    @media (prefers-color-scheme: dark) {
+      #back-to-top { border-color: rgba(255,255,255,0.12); }
+    }
+    @media print { #back-to-top { display: none !important; } }
     .hr-zone-list { display: flex; flex-direction: column; gap: 8px; }
     .hr-zone-row { display: grid; grid-template-columns: 110px 92px 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--c-surface2); }
     .hr-zone-row.is-key { background: #edf5ef; border: 2px solid var(--c-primary); }
@@ -922,6 +945,8 @@
   <div id="view-plan" class="view"></div>
   <div id="view-log" class="view"></div>
 </main>
+
+<button id="back-to-top" aria-label="回到頂端" onclick="scrollPageTop()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></button>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal">
@@ -3737,6 +3762,9 @@ function renderPhaseTabs(plan) {
 function jumpToPhaseWeek(weekNum) {
   currentWeek = weekNum;
   saveUiState({ week: weekNum });
+  // innerHTML 重繪會讓瀏覽器把捲動重置回頂，先記住再還原
+  const scroller = document.scrollingElement || document.documentElement;
+  const scrollBefore = scroller.scrollTop;
   document.getElementById('plan-tab-week').innerHTML = `
     ${renderRaceWeekCard(appData.profile)}
     ${renderProgressCard(appData.profile, appData.plan)}
@@ -3745,6 +3773,7 @@ function jumpToPhaseWeek(weekNum) {
   const autopilotHost = document.getElementById('plan-tab-autopilot');
   if (autopilotHost) autopilotHost.innerHTML = renderGarminAutopilotTab(appData.profile, appData.plan);
   renderHeroPanel();
+  scroller.scrollTop = scrollBefore;
 }
 
 function renderWeekSection(plan) {
@@ -4852,6 +4881,22 @@ function init() {
     showView('setup');
   }
   applyRacePrefill();
+  window.scrollPageTop = () => {
+    const el = document.scrollingElement || document.documentElement;
+    const start = el.scrollTop;
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { /* 老環境不支援 options */ }
+    // 部分環境 smooth scrollTo 無效：250ms 後沒動就直接跳頂
+    setTimeout(() => { if (el.scrollTop >= start && start > 0) el.scrollTop = 0; }, 250);
+  };
+  const backToTop = document.getElementById('back-to-top');
+  if (backToTop) {
+    const syncBackToTop = () => {
+      const y = window.scrollY || document.scrollingElement?.scrollTop || 0;
+      backToTop.classList.toggle('show', y > 400);
+    };
+    document.addEventListener('scroll', syncBackToTop, { passive: true, capture: true });
+    syncBackToTop();
+  }
   loadTrainerWeather().then(() => {
     if (trainerWeather && document.getElementById('plan-tab-week')) {
       jumpToPhaseWeek(currentWeek);
