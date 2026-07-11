@@ -228,6 +228,16 @@
     .coach-signals { margin-top: 16px; }
     .coach-history { margin-top: 14px; }
     .coach-history summary { cursor: pointer; }
+    .hr-zone-list { display: flex; flex-direction: column; gap: 8px; }
+    .hr-zone-row { display: grid; grid-template-columns: 110px 92px 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--c-surface2); }
+    .hr-zone-row.is-key { background: #edf5ef; border: 2px solid var(--c-primary); }
+    .hr-zone-name { font-size: 13px; font-weight: 800; }
+    .hr-zone-name .coach-key-badge { display: block; width: fit-content; margin: 4px 0 0; }
+    .hr-zone-bpm { font-size: 16px; font-weight: 900; color: var(--c-primary-hover); white-space: nowrap; }
+    .hr-zone-bpm small { font-size: 11px; font-weight: 700; color: var(--c-text-muted); }
+    .hr-zone-meta span { font-size: 11px; font-weight: 700; color: var(--c-text-muted); }
+    .hr-zone-meta p { margin: 2px 0 0; font-size: 12.5px; line-height: 1.5; }
+    @media (max-width: 520px) { .hr-zone-row { grid-template-columns: 88px 1fr; } .hr-zone-meta { grid-column: 1 / -1; } }
     .coach-history ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.8; }
     @media (max-width: 560px) { .coach-lock-btn { margin-left: 0; } }
     .hero-today-card .trainer-side-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -1837,6 +1847,34 @@ function hrZones(profile) {
     intervalLow: pct(0.9),
     intervalHigh: pct(0.95)
   };
+}
+
+function showHrZones() {
+  const profile = appData.profile || {};
+  const zones = hrZones(profile);
+  const ownMaxHr = Number(profile.maxHr);
+  const source = ownMaxHr >= 140 && ownMaxHr <= 220
+    ? '你的設定'
+    : (Number(coachReviewData?.zones?.maxHr) >= 140 ? 'Garmin 教練資料' : `預設 ${DEFAULT_MAX_HR}（建議到「⚙️ 修改設定」填實測值，區間才準）`);
+  const rows = [
+    ['恢復跑', `≤ ${zones.recoveryMax}`, '≤75%', '很輕鬆，可完整講句子；硬課隔天用', ''],
+    ['輕鬆跑 / 長跑', `≤ ${zones.easyMax}`, '≤80%', '可對話的輕鬆有氧，週跑量主體都在這區', 'is-key'],
+    ['穩定有氧', `${zones.steadyLow}–${zones.steadyHigh}`, '80–84%', '呼吸變深但可控，存體能不追速度', ''],
+    ['節奏跑', `${zones.tempoLow}–${zones.tempoHigh}`, '85–89%', '吃力但穩定，只能講短句', ''],
+    ['間歇', `${zones.intervalLow}–${zones.intervalHigh}`, '90–95%', '很硬，趟與趟之間要完整恢復', '']
+  ];
+  const body = `
+    <p style="margin:0 0 10px;font-size:13px;color:var(--c-text-muted)">最大心率 <b style="color:var(--c-text)">${zones.max} bpm</b>（來源：${source}）。跑步時看錶守區間，比守配速可靠——尤其夏天。</p>
+    <div class="hr-zone-list">
+      ${rows.map(([name, bpm, pctText, desc, cls]) => `
+        <div class="hr-zone-row ${cls}">
+          <div class="hr-zone-name">${name}${cls ? '<span class="coach-key-badge">主區</span>' : ''}</div>
+          <div class="hr-zone-bpm">${bpm} <small>bpm</small></div>
+          <div class="hr-zone-meta"><span>${pctText} HRmax</span><p>${desc}</p></div>
+        </div>`).join('')}
+    </div>
+    <p style="margin:12px 0 0;font-size:12px;color:var(--c-text-muted)">超過區間上限先降速或走 1 分鐘，回落再跑；課表卡上的 HR 上限就是照這張表開的。</p>`;
+  showModal('❤️ 心率區間表', body, [{ label: '關閉', primary: true, action: closeModal }]);
 }
 
 function isHotSeasonDate(date) {
@@ -3712,8 +3750,8 @@ function jumpToPhaseWeek(weekNum) {
 function renderWeekSection(plan) {
   const week = plan[currentWeek - 1];
   if (!week) return '<p>找不到訓練週資料</p>';
-  const deloadBadge = week.isDeload ? '<span style="font-size:12px;color:var(--c-orange);margin-left:8px">減量週</span>' : '';
-  const taperBadge = week.isTaper ? '<span style="font-size:12px;color:var(--c-blue);margin-left:8px">減量期</span>' : '';
+  const deloadBadge = week.isDeload ? '<span class="week-flag-badge is-deload">減量週</span>' : '';
+  const taperBadge = week.isTaper ? '<span class="week-flag-badge is-taper">賽前減量</span>' : '';
   const phaseRuleText = getPhaseRuleText(week, appData.profile, plan.length);
   const isCoachWeek = coachWeekMatches(week);
   const coachNextWeek = isCoachWeek ? coachReviewData.nextWeek : null;
@@ -3769,6 +3807,7 @@ function renderWeekSection(plan) {
     <button class="guide-chip" onclick="openGuideLibrary('warmup')">🤸 熱身流程</button>
     <button class="guide-chip" onclick="openGuideLibrary('cooldown')">🧘 收操恢復</button>
     <button class="guide-chip" onclick="openGuideLibrary('strength')">💪 肌力補強</button>
+    <button class="guide-chip" onclick="showHrZones()">❤️ 心率區間</button>
   </div>
 </div>
 <div class="week-calendar">${dayCards}</div>`;
