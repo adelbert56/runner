@@ -348,20 +348,7 @@
     "is_official_direct": true,
     "start_times": "半馬組（21K） 起跑 05:00、全馬組（42K） 起跑 05:00",
     "first_seen_at": "2026-05-16",
-    "co_organizer": null,
-    "weather_forecast": {
-      "forecast_for": "2026-07-11",
-      "updated_at": "2026-07-10T23:53:24.371Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，雷雨，24-26°C，降雨機率 100%，最大風速 41 km/h",
-      "weather_code": 96,
-      "temperature_min_c": 23.7,
-      "temperature_max_c": 25.8,
-      "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 41
-    }
+    "co_organizer": null
   },
   {
     "race_id": "f666760d-e82e-4d02-8542-4b537d1295c0",
@@ -401,16 +388,16 @@
     "quota": null,
     "weather_forecast": {
       "forecast_for": "2026-07-12",
-      "updated_at": "2026-07-10T23:53:24.530Z",
+      "updated_at": "2026-07-11T23:23:19.030Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，雷雨，24-32°C，降雨機率 94%，最大風速 24 km/h",
+      "summary": "臺中市縣市預報，雷雨，24-32°C，降雨機率 98%，最大風速 17 km/h",
       "weather_code": 95,
-      "temperature_min_c": 23.9,
-      "temperature_max_c": 32.3,
-      "precipitation_probability_max": 94,
-      "wind_speed_max_kmh": 24.3
+      "temperature_min_c": 24,
+      "temperature_max_c": 31.7,
+      "precipitation_probability_max": 98,
+      "wind_speed_max_kmh": 16.9
     }
   },
   {
@@ -452,16 +439,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-07-18",
-      "updated_at": "2026-07-10T23:53:24.688Z",
+      "updated_at": "2026-07-11T23:23:19.132Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，雷雨，26-30°C，降雨機率 100%，最大風速 5 km/h",
+      "summary": "臺中市縣市預報，雷雨，25-29°C，降雨機率 100%，最大風速 9 km/h",
       "weather_code": 95,
-      "temperature_min_c": 25.5,
-      "temperature_max_c": 29.5,
+      "temperature_min_c": 25.4,
+      "temperature_max_c": 29,
       "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 4.6
+      "wind_speed_max_kmh": 9.2
     }
   },
   {
