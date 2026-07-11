@@ -72,6 +72,150 @@ function buildWeeklyTrend(runs) {
   }));
 }
 
+function isoDateOffset(dateText, offsetDays) {
+  const date = new Date(`${dateText}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + offsetDays);
+  return date.toISOString().slice(0, 10);
+}
+
+function daysBetween(start, end) {
+  return Math.max(0, Math.round((new Date(`${end}T00:00:00Z`) - new Date(`${start}T00:00:00Z`)) / 86400000));
+}
+
+function sumKm(runs) {
+  return Math.round(runs.reduce((sum, run) => sum + (Number(run.km) || 0), 0) * 10) / 10;
+}
+
+function average(values) {
+  const usable = values.filter((value) => Number.isFinite(value) && value > 0);
+  return usable.length ? Math.round((usable.reduce((sum, value) => sum + value, 0) / usable.length) * 10) / 10 : null;
+}
+
+function median(values) {
+  const usable = values.filter((value) => Number.isFinite(value) && value > 0).sort((a, b) => a - b);
+  if (!usable.length) return null;
+  const middle = Math.floor(usable.length / 2);
+  return usable.length % 2 ? usable[middle] : Math.round((usable[middle - 1] + usable[middle]) / 2);
+}
+
+function paceSeconds(pace) {
+  const match = String(pace || '').match(/^(\d+):(\d{2})$/);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+}
+
+function longestKm(runs) {
+  return Math.round(Math.max(0, ...runs.map((run) => Number(run.km) || 0)) * 10) / 10;
+}
+
+function buildGarminAutopilot(analyticsRuns, updatedAt) {
+  const asOf = /^\d{4}-\d{2}-\d{2}$/.test(updatedAt || '')
+    ? updatedAt
+    : new Date().toISOString().slice(0, 10);
+  const recentStart = isoDateOffset(asOf, -13);
+  const previousStart = isoDateOffset(asOf, -27);
+  const previousEnd = isoDateOffset(asOf, -14);
+  const recent = analyticsRuns.filter((run) => run.date >= recentStart && run.date <= asOf);
+  const previous = analyticsRuns.filter((run) => run.date >= previousStart && run.date <= previousEnd);
+  const latestDate = analyticsRuns.map((run) => run.date).filter(Boolean).sort().at(-1) || null;
+  const recentKm = sumKm(recent);
+  const previousKm = sumKm(previous);
+  const latestRunDaysAgo = latestDate ? daysBetween(latestDate, asOf) : null;
+  const rampPct = previousKm > 0 ? Math.round(((recentKm - previousKm) / previousKm) * 100) : null;
+  const recentPace = median(recent.map((run) => paceSeconds(run.pace)));
+  const previousPace = median(previous.map((run) => paceSeconds(run.pace)));
+  const recentHr = average(recent.map((run) => Number(run.hr)));
+  const previousHr = average(previous.map((run) => Number(run.hr)));
+  const recentLoad = average(recent.map((run) => Number(run.trainingLoad)));
+  const previousLoad = average(previous.map((run) => Number(run.trainingLoad)));
+  const paceDeltaSeconds = recentPace && previousPace ? recentPace - previousPace : null;
+  const hrDelta = recentHr && previousHr ? Math.round(recentHr - previousHr) : null;
+  const fatigueSignal = paceDeltaSeconds !== null && hrDelta !== null && paceDeltaSeconds >= 8 && hrDelta >= 5;
+
+  let decision = 'maintain';
+  let volumeFactor = 1;
+  let qualityMode = 'keep';
+  let label = '維持節奏';
+  let headline = '近期訓練吸收平穩，照目前課表完成即可。';
+  const reasons = [];
+
+  if (!latestDate || latestRunDaysAgo >= 8) {
+    decision = 'rebuild';
+    volumeFactor = 0.75;
+    qualityMode = 'skip';
+    label = '重建週';
+    headline = '近期跑步中斷較久，先回到低壓力的重建菜單。';
+    reasons.push(latestDate ? `距離最近一次 Garmin 跑步已 ${latestRunDaysAgo} 天。` : '尚無可用 Garmin 跑步紀錄。');
+  } else if (recent.length < 3) {
+    decision = 'rebuild';
+    volumeFactor = 0.85;
+    qualityMode = 'skip';
+    label = '保守重建';
+    headline = '近 14 天有效跑步不足 3 次，先把頻率建立回來。';
+    reasons.push(`近 14 天僅 ${recent.length} 次 Garmin 跑步。`);
+  } else if (rampPct !== null && rampPct > 15) {
+    decision = 'deload';
+    volumeFactor = 0.85;
+    qualityMode = 'reduce';
+    label = '自動降量';
+    headline = '近期跑量拉升偏快，下週先收量，避免連續堆疲勞。';
+    reasons.push(`近 14 天跑量比前 14 天增加 ${rampPct}%。`);
+  } else if (fatigueSignal) {
+    decision = 'maintain';
+    volumeFactor = 0.9;
+    qualityMode = 'reduce';
+    label = '恢復優先';
+    headline = '近期配速變慢且平均心率上升，先下修品質課與總量。';
+    reasons.push(`同類跑步中位配速慢 ${paceDeltaSeconds} 秒 / km，平均心率高 ${hrDelta} bpm。`);
+  } else if (rampPct !== null && rampPct < -30) {
+    decision = 'maintain';
+    volumeFactor = 0.9;
+    qualityMode = 'reduce';
+    label = '保守銜接';
+    headline = '近期跑量明顯下降，下週先保守銜接，不直接跳回原本強度。';
+    reasons.push(`近 14 天跑量比前 14 天減少 ${Math.abs(rampPct)}%。`);
+  } else if (previousKm > 0 && recentKm >= previousKm * 0.9) {
+    decision = 'progress';
+    volumeFactor = 1.05;
+    qualityMode = 'keep';
+    label = '小幅推進';
+    headline = '近兩週完成度穩定，可小幅推進，但只增加一個變因。';
+    reasons.push(`近 14 天 ${recentKm} km，前 14 天 ${previousKm} km。`);
+  } else {
+    reasons.push(`近 14 天 ${recentKm} km，共 ${recent.length} 次跑步。`);
+  }
+
+  return {
+    version: 1,
+    asOf,
+    status: latestDate ? 'ready' : 'insufficient',
+    label,
+    decision,
+    volumeFactor,
+    qualityMode,
+    headline,
+    reasons,
+    metrics: {
+      recentKm,
+      previousKm,
+      recentRuns: recent.length,
+      latestRunDate: latestDate,
+      latestRunDaysAgo,
+      rampPct,
+      recentPace,
+      previousPace,
+      paceDeltaSeconds,
+      recentHr,
+      previousHr,
+      hrDelta,
+      recentLoad,
+      previousLoad,
+      recentLongKm: longestKm(recent),
+      previousLongKm: longestKm(previous),
+    },
+    guardrail: 'Garmin 不包含疼痛、生病與睡眠判讀；身體不適時請優先休息或下修。',
+  };
+}
+
 function buildGarminOnlyReview(analyticsRuns, updatedAt) {
   const trend = buildWeeklyTrend(analyticsRuns);
   const latest = trend.at(-1) || { week: updatedAt || "尚無資料", km: 0, runs: 0, longKm: 0, avgHr: null };
@@ -91,10 +235,10 @@ function buildGarminOnlyReview(analyticsRuns, updatedAt) {
       notes: "尚未建立人工教練週報；正式課表維持跑者設定，系統只依實跑資料校正未來週。",
     },
     nextWeek: {
-      label: "以正式課表為準",
-      targetKm: "依目前設定",
+      label: "Garmin 輔助菜單",
+      targetKm: "依近期實跑判讀",
       menu: [],
-      coachNote: "Garmin 已同步；累積足夠紀錄後，才會依完成度、配速與心率調整未來週。",
+      coachNote: "課表頁會依 Garmin 近期跑量與頻率生成下一段輔助菜單；正式課表維持原樣。",
     },
     trend,
   };
@@ -154,11 +298,13 @@ async function buildPublishedReview(plaintext) {
     review.analyticsUpdatedAt = activityFeed.updatedAt || null;
     review.analyticsStatus = "synced";
     review.analyticsRuns = analyticsRuns;
+    review.autopilot = buildGarminAutopilot(analyticsRuns, activityFeed.updatedAt);
   } catch {
     review = review || buildGarminOnlyReview([], null);
     review.analyticsRuns = [];
     review.analyticsUpdatedAt = null;
     review.analyticsStatus = "missing";
+    review.autopilot = buildGarminAutopilot([], null);
   }
   return JSON.stringify(review);
 }

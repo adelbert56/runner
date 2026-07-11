@@ -468,6 +468,25 @@
     .week-coach-meta { display:inline-flex; margin-left:6px; padding:2px 7px; border-radius:999px; background:#e1f1e6; color:var(--c-primary-hover); font-size:11px; font-weight:900; vertical-align:1px; white-space:nowrap; }
     .week-coach-note, .week-coach-weather { margin:5px 0 0; color:var(--c-text-muted); font-size:13px; font-weight:650; line-height:1.55; }
     .week-coach-weather { color:#53726a; }
+    .autopilot-card { margin-bottom:16px; border:1px solid rgba(36,114,79,.22); border-radius:16px; overflow:hidden; background:linear-gradient(135deg,#f0f9f2,#fffdf8 62%); box-shadow:0 12px 26px rgba(21,83,56,.07); }
+    .autopilot-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding:16px 16px 12px; }
+    .autopilot-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .autopilot-title { margin:4px 0 0; font-size:18px; font-weight:900; color:var(--c-text); }
+    .autopilot-status { flex:0 0 auto; padding:5px 9px; border-radius:999px; background:#dff1e5; color:#155338; font-size:12px; font-weight:900; }
+    .autopilot-copy { margin:0; padding:0 16px; color:var(--c-text-muted); font-size:13px; font-weight:650; line-height:1.65; }
+    .autopilot-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:14px 16px; }
+    .autopilot-metric { padding:9px 10px; border-radius:11px; background:rgba(255,255,255,.78); border:1px solid rgba(36,114,79,.1); }
+    .autopilot-metric span { display:block; color:var(--c-text-muted); font-size:11px; font-weight:700; }
+    .autopilot-metric b { display:block; margin-top:2px; color:var(--c-text); font-size:14px; }
+    .autopilot-menu { display:grid; gap:0; margin:0; padding:0 16px 12px; list-style:none; }
+    .autopilot-menu li { display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 0; border-top:1px solid rgba(31,42,36,.08); }
+    .autopilot-day { padding:5px 0; border-radius:9px; background:#e4f3e8; color:#155338; text-align:center; font-size:12px; font-weight:900; }
+    .autopilot-main { min-width:0; font-size:13px; font-weight:850; color:var(--c-text); }
+    .autopilot-main small { display:block; margin-top:2px; color:var(--c-text-muted); font-size:12px; font-weight:600; line-height:1.45; }
+    .autopilot-main .autopilot-intensity { color:#2d6a54; font-weight:800; }
+    .autopilot-km { color:var(--c-primary-hover); font-size:13px; font-weight:900; white-space:nowrap; }
+    .autopilot-footer { display:flex; gap:8px; align-items:flex-start; padding:10px 16px 14px; border-top:1px solid rgba(31,42,36,.08); color:var(--c-text-muted); font-size:12px; line-height:1.55; }
+    @media (max-width:560px) { .autopilot-metrics { grid-template-columns:1fr 1fr; } }
     .week-goal-alert { display:flex; align-items:flex-start; gap:9px; padding:11px 13px; border:1px solid transparent; border-radius:11px; font-size:12px; font-weight:650; line-height:1.6; }
     .week-goal-alert strong { color:var(--c-text); }
     .week-goal-alert.caution { border-color:#f0c9ab; background:#fff7f0; color:#8a4b20; }
@@ -1634,14 +1653,9 @@ function renderSetupView() {
 
     <!-- 10. Coach Sync Schedule -->
     <div class="form-group">
-      <div class="form-label">教練資料更新</div>
-      <p class="field-help" style="margin-top:0">排程會讀取 Garmin 實績並更新教練建議；正式課表不會自動被覆寫。</p>
-      <div class="log-form-grid">
-        <div><label class="form-label" for="f-coach-sync">檢查頻率</label><select class="form-input" id="f-coach-sync"><option value="manual">只手動更新</option><option value="daily">每天</option><option value="weekly">每週</option></select></div>
-        <div><label class="form-label" for="f-coach-time">檢查時間</label><input class="form-input" type="time" id="f-coach-time" value="21:30"></div>
-        <div><label class="form-label" for="f-coach-day">每週檢查日</label><select class="form-input" id="f-coach-day"><option value="0">週日</option><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option></select></div>
-      </div>
-      <div class="field-help">雲端排程設定完成後，儲存訓練手冊會同步更新這些規則；資料更新狀態會顯示在教練建議中。</div>
+      <div class="form-label">Garmin 自動同步</div>
+      <div class="coach-setting-card"><div class="coach-setting-value">每天約 21:37 自動更新</div><div class="coach-fineprint">同步後會依最近 Garmin 跑步產生輔助菜單；正式課表不會被暗中覆寫。資料是否新鮮會直接顯示在課表頁。</div></div>
+      <input type="hidden" id="f-coach-sync" value="daily"><input type="hidden" id="f-coach-time" value="21:37"><input type="hidden" id="f-coach-day" value="0">
     </div>
 
     <!-- Live Calc -->
@@ -2110,10 +2124,6 @@ function prefillSetupForm(profile) {
   if (profile.weightKg) document.getElementById('f-weight').value = profile.weightKg;
   if (profile.maxHr) document.getElementById('f-max-hr').value = profile.maxHr;
   if (profile.recentResult) document.getElementById('f-recent').value = profile.recentResult;
-  const coachSync = profile.coachSync || {};
-  if (coachSync.frequency) document.getElementById('f-coach-sync').value = coachSync.frequency;
-  if (coachSync.time) document.getElementById('f-coach-time').value = coachSync.time;
-  if (coachSync.day !== undefined) document.getElementById('f-coach-day').value = String(coachSync.day);
   syncDayButtons();
   validateDays();
   document.querySelectorAll('.pill[data-injury]').forEach(p => {
@@ -3013,6 +3023,7 @@ function renderPlanView() {
   el.innerHTML = `
 <div class="plan-toolbar">
   <button class="tab active" onclick="switchPlanTab('week')">本週課表</button>
+  <button class="tab" onclick="switchPlanTab('autopilot')">輔助菜單</button>
   <button class="tab" onclick="switchPlanTab('coach')">教練建議</button>
   <button class="tab" onclick="switchPlanTab('analysis')">訓練分析</button>
   <div class="spacer"></div>
@@ -3023,6 +3034,9 @@ function renderPlanView() {
   ${renderProgressCard(profile, plan)}
   ${renderPhaseTabs(plan)}
   ${renderWeekSection(plan)}
+</div>
+<div id="plan-tab-autopilot" class="container" style="display:none">
+  ${renderGarminAutopilotTab(profile, plan)}
 </div>
 <div id="plan-tab-coach" class="container" style="display:none">
   <div id="coach-review-content">${renderCoachReviewPanel()}</div>
@@ -3035,7 +3049,7 @@ function renderPlanView() {
 }
 
 function switchPlanTab(tab) {
-  const tabs = ['week', 'coach', 'analysis'];
+  const tabs = ['week', 'autopilot', 'coach', 'analysis'];
   tabs.forEach((name, index) => {
     const section = document.getElementById(`plan-tab-${name}`);
     if (section) section.style.display = name === tab ? 'block' : 'none';
@@ -3046,7 +3060,7 @@ function switchPlanTab(tab) {
 }
 
 function editSetup() {
-  const tabs = ['week', 'coach', 'analysis'];
+  const tabs = ['week', 'autopilot', 'coach', 'analysis'];
   const activeIndex = [...document.querySelectorAll('.plan-toolbar .tab')].findIndex(btn => btn.classList.contains('active'));
   setupReturnTab = tabs[Math.max(0, activeIndex)] || 'week';
   renderSetupView();
@@ -3127,6 +3141,76 @@ function renderRaceWeekCard(profile) {
 </div>`;
 }
 
+function garminAutopilotDays(plan) {
+  const today = todayStr();
+  const end = new Date(`${today}T00:00:00`);
+  end.setDate(end.getDate() + 6);
+  const endDate = localDateStr(end);
+  return (plan || []).flatMap((week) => week.days || [])
+    .filter((day) => day.dateStr >= today && day.dateStr <= endDate)
+    .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+}
+
+function renderGarminAutopilotCard(profile, plan) {
+  const autopilot = coachReviewData?.autopilot;
+  if (!autopilot) return '';
+  const rollingDays = garminAutopilotDays(plan);
+  const metrics = autopilot.metrics || {};
+  const decisionLabel = autopilot.label || '資料判讀中';
+  const volumeFactor = Number(autopilot.volumeFactor) || 1;
+  const plannedFactor = rollingDays.some((day) => day.isTaper) ? 1 : volumeFactor;
+  const factorText = plannedFactor === 1 ? '維持原量' : `${plannedFactor > 1 ? '+' : ''}${Math.round((plannedFactor - 1) * 100)}%`;
+  const workoutNames = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' };
+  const menu = rollingDays.map((day) => {
+    const isRest = day.type === 'rest';
+    const dropQuality = ['tempo', 'interval'].includes(day.type) && autopilot.qualityMode === 'skip';
+    const reducedQuality = ['tempo', 'interval'].includes(day.type) && autopilot.qualityMode === 'reduce';
+    const adjustedKm = isRest ? null : Math.max(1, Math.round((Number(day.km) || 0) * plannedFactor * 10) / 10);
+    const title = isRest
+      ? (day.task || '恢復 / 休息')
+      : dropQuality
+      ? '恢復跑（自動取代品質課）'
+      : `${workoutNames[day.type] || day.type}${reducedQuality ? '（保守版）' : ''}`;
+    const detail = isRest
+      ? (day.supportBlocks || []).map((block) => block.title).join('・') || '把恢復留給下一次跑課。'
+      : dropQuality
+      ? '保留跑步頻率，取消強度刺激。'
+      : day.task || day.pace || '依課表完成';
+    const intensity = isRest
+      ? '強度：恢復為主，不補跑。'
+      : dropQuality
+        ? '強度：Z2 輕鬆可對話；心率不超過輕鬆跑區間。'
+        : reducedQuality
+          ? `強度：原課表配速慢 10–15 秒 / km；${day.hrTarget || '心率守住原區間上緣以下。'}`
+          : `強度：${[day.pace, day.hrTarget].filter(Boolean).join(' · ') || '依呼吸與可對話感受完成。'}`;
+    return { day, adjustedKm, title, detail, intensity };
+  });
+  const staleDays = autopilot.asOf ? Math.max(0, Math.round((new Date(`${todayStr()}T00:00:00`) - new Date(`${autopilot.asOf}T00:00:00`)) / 86400000)) : null;
+  const freshness = staleDays === null ? '同步時間未知' : staleDays === 0 ? '今日已同步' : `${staleDays} 天前同步`;
+  const readiness = autopilot.status === 'ready';
+  return `
+<section class="autopilot-card" aria-label="Garmin 自動駕駛輔助課表">
+  <div class="autopilot-head">
+    <div><div class="autopilot-kicker">Garmin Autopilot · ${reviewEscape(freshness)}</div><h2 class="autopilot-title">⌚ 接下來 7 天輔助菜單</h2></div>
+    <span class="autopilot-status">${reviewEscape(decisionLabel)}</span>
+  </div>
+  <p class="autopilot-copy">${reviewEscape(autopilot.headline || 'Garmin 資料已同步；系統會依實跑狀況生成保守建議。')} ${rollingDays.some((day) => day.isTaper) ? '賽前減量週維持原課表，不再額外推進。' : ''}</p>
+  <div class="autopilot-metrics">
+    <div class="autopilot-metric"><span>近 14 天</span><b>${Number(metrics.recentKm || 0).toFixed(1)} km · ${metrics.recentRuns || 0} 次</b></div>
+    <div class="autopilot-metric"><span>配速 / 心率</span><b>${metrics.recentPace ? `${formatPaceSeconds(metrics.recentPace)}${metrics.paceDeltaSeconds !== null && metrics.paceDeltaSeconds !== undefined ? ` · ${metrics.paceDeltaSeconds > 0 ? '+' : ''}${metrics.paceDeltaSeconds}s` : ''}` : '資料不足'}${metrics.recentHr ? ` · HR ${Math.round(metrics.recentHr)}` : ''}</b></div>
+    <div class="autopilot-metric"><span>最近負荷 / 長跑</span><b>${metrics.recentLoad ? `${Math.round(metrics.recentLoad)} 負荷` : '負荷資料不足'} · ${Number(metrics.recentLongKm || 0).toFixed(1)} km</b></div>
+    <div class="autopilot-metric"><span>品質課 / 本次跑量</span><b>${autopilot.qualityMode === 'skip' ? '取消品質課' : autopilot.qualityMode === 'reduce' ? '品質課降階' : '保留品質課'} · ${factorText}</b></div>
+  </div>
+  ${readiness && menu.length ? `<ol class="autopilot-menu">${menu.map(({ day, adjustedKm, title, detail, intensity }) => `<li><span class="autopilot-day">${DOW_NAMES[day.dow] || ''}</span><span class="autopilot-main">${reviewEscape(title)}<small>${reviewEscape(detail)}</small><small class="autopilot-intensity">${reviewEscape(intensity)}</small></span><span class="autopilot-km">${adjustedKm === null ? '恢復' : `${adjustedKm.toFixed(1)} km`}</span></li>`).join('')}</ol>` : `<div class="autopilot-footer">ℹ️ <span>再累積至少 3 次 Garmin 跑步後，系統才會產生可採用的輔助菜單；目前不假裝知道你的恢復能力。</span></div>`}
+  <div class="autopilot-footer">🛟 <span>${reviewEscape(autopilot.guardrail || '身體不適時優先休息或下修；這張菜單不會覆寫正式課表。')} 正式課表保持原樣，這張可直接當作輔助參考。</span></div>
+</section>`;
+}
+
+function renderGarminAutopilotTab(profile, plan) {
+  const content = renderGarminAutopilotCard(profile, plan);
+  return content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`;
+}
+
 function renderProgressCard(profile, plan) {
   const totalWeeks = plan.length;
   const pct = Math.round((currentWeek / totalWeeks) * 100);
@@ -3184,10 +3268,8 @@ function reviewEscape(value) {
 }
 
 function coachScheduleLabel() {
-  const sync = appData.profile?.coachSync || {};
-  if (sync.frequency === 'daily') return `每天 ${sync.time || '21:30'} 檢查`;
-  if (sync.frequency === 'weekly') return `每週${DOW_NAMES[sync.day] || '日'} ${sync.time || '21:30'} 檢查`;
-  return '只在手動更新時檢查';
+  const asOf = coachReviewData?.autopilot?.asOf || coachReviewData?.analyticsUpdatedAt || coachReviewData?.updatedAt;
+  return asOf ? `Garmin 資料截至 ${asOf} · 每日約 21:37 同步` : 'Garmin 每日約 21:37 同步';
 }
 
 function currentTrainingGoalLabel() {
@@ -3462,7 +3544,7 @@ function renderCoachReviewPanel() {
   const scheduleDays = scheduledMenu.map((item) => DOW_NAMES[item.scheduledDow] || item.day).join('、');
   const notes = (coachReviewData.history || []).slice().reverse().map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
   const garminOnlyNotice = coachReviewData.sourceMode === 'garmin-only'
-    ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 資料模式</b><br>雲端已同步實跑資料，但沒有人工週報。正式課表維持你的目標與可跑日；累積紀錄後才校正未來週，不會虛構一份教練菜單。</div>`
+    ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 自動駕駛模式</b><br>雲端已同步實跑資料；課表頁會依近期跑量與頻率產生輔助菜單。正式課表維持原樣，不會被暗中覆寫。</div>`
     : '';
   const menuRows = scheduledMenu.map((item) => {
     const dayName = DOW_NAMES[item.scheduledDow] || item.day || '';
@@ -3620,6 +3702,8 @@ function jumpToPhaseWeek(weekNum) {
     ${renderProgressCard(appData.profile, appData.plan)}
     ${renderPhaseTabs(appData.plan)}
     ${renderWeekSection(appData.plan)}`;
+  const autopilotHost = document.getElementById('plan-tab-autopilot');
+  if (autopilotHost) autopilotHost.innerHTML = renderGarminAutopilotTab(appData.profile, appData.plan);
   renderHeroPanel();
 }
 
