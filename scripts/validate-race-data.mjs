@@ -334,7 +334,15 @@ function normalizeClock(value) {
 }
 
 function hasRaceStartKeyword(value) {
-  return /起跑|鳴槍|出發|全馬|半馬|超馬|超半馬|挑戰組|健康組|健跑組|健走組|親子組|休閒組|\d+(?:\.\d+)?\s?(?:K|KM|km|公里)/u.test(String(value || ""));
+  const text = String(value || "").trim();
+  if (/起跑|鳴槍|出發|全馬|半馬|超馬|超半馬|挑戰組|健康組|健跑組|健走組|親子組|休閒組|\d+(?:\.\d+)?\s?(?:K|KM|km|公里)/u.test(text)) {
+    return true;
+  }
+  // Organizers invent arbitrary group names (訓練組、競賽組、簡單組...) that
+  // never appear in the fixed keyword list above. Any short "<hanzi>組" label
+  // is accepted generically so it isn't silently dropped from group counting —
+  // same fragility class as the scraper's own group-name whitelist gap.
+  return /^[一-鿿]{1,6}組$/u.test(text);
 }
 
 function startTimeQualityIssues(race) {
@@ -762,8 +770,30 @@ function formatDateAnomalyReport(items) {
   return `${lines.join("\n")}\n`;
 }
 
+const SEVERITY_BADGE = { high: "🔴", medium: "🟡", low: "🟢" };
+
+function severityRank(item) {
+  const rank = { high: 3, medium: 2, low: 1 };
+  return Math.max(...item.issues.map((issue) => rank[issue.severity] || 0));
+}
+
 function formatStartTimeQualityReport(items) {
   const generatedAt = new Date().toISOString();
+  const severityCounts = { high: 0, medium: 0, low: 0 };
+  for (const item of items) {
+    const worst = ["high", "medium", "low"].find((level) => item.issues.some((issue) => issue.severity === level));
+    if (worst) severityCounts[worst] += 1;
+  }
+  const issueTypeCounts = new Map();
+  for (const item of items) {
+    for (const issue of item.issues) {
+      issueTypeCounts.set(issue.label, (issueTypeCounts.get(issue.label) || 0) + 1);
+    }
+  }
+  const issueTypeSummary = [...issueTypeCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, count]) => `- ${label}：${count} 場`);
+
   const lines = [
     "# 起跑時間品質報告",
     "",
@@ -772,24 +802,44 @@ function formatStartTimeQualityReport(items) {
     "",
     "這份報告列出 start_times 已有值但品質可疑的賽事，目標是讓爬蟲規則能自動發現「抓到非起跑時程」、「多距離只抓到單一時間」、「同組別多時間」等問題。",
     "",
-    `目前共 ${items.length} 場。`,
-    "",
-    "| 日期 | 賽事 | 距離 | 目前起跑時間 | 問題 | 建議 |",
-    "| --- | --- | --- | --- | --- | --- |",
   ];
 
-  for (const item of items) {
-    lines.push([
-      item.race_date || "-",
-      item.race_name,
-      item.distances.join(" / ") || "-",
-      item.start_times || "-",
-      item.issues.map((issue) => issue.label).join("、"),
-      item.issues.map((issue) => issue.hint).join("；"),
-    ].map((value) => String(value).replaceAll("|", "｜")).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  if (!items.length) {
+    lines.push("✅ 目前沒有可疑的起跑時間資料。");
+    lines.push("");
+    return `${lines.join("\n")}\n`;
   }
 
-  lines.push("");
+  lines.push(
+    `目前共 ${items.length} 場：🔴 高 ${severityCounts.high} 場・🟡 中 ${severityCounts.medium} 場・🟢 低 ${severityCounts.low} 場`,
+    "",
+    "**問題類型分布**（優先修影響場數最多的規則）：",
+    ...issueTypeSummary,
+    "",
+    "---",
+    "",
+  );
+
+  for (const item of items) {
+    const badge = SEVERITY_BADGE[["high", "medium", "low"].find((level) => item.issues.some((issue) => issue.severity === level))] || "⚪";
+    const link = item.official_event_url || item.registration_link || item.detail_url || "";
+    lines.push(`## ${badge} ${item.race_date || "日期未知"} · ${item.race_name}`);
+    lines.push("");
+    lines.push(`- **縣市**：${item.race_county || "-"}`);
+    lines.push(`- **距離**：${item.distances.join(" / ") || "-"}`);
+    lines.push(`- **目前起跑時間**：${item.start_times || "-"}`);
+    for (const issue of item.issues) {
+      lines.push(`- **問題**：${SEVERITY_BADGE[issue.severity] || "⚪"} ${issue.label}`);
+      lines.push(`  - 建議：${issue.hint}`);
+    }
+    if (link) {
+      lines.push(`- [官方／報名頁面](${link})`);
+    }
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+  }
+
   return `${lines.join("\n")}\n`;
 }
 

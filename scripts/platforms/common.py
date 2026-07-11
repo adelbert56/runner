@@ -278,11 +278,18 @@ def _distance_groups(value: str) -> list[str]:
     # disappears while its start time is still picked up elsewhere, shifting every later
     # group/time pairing by one — the root cause behind repeated "wrong distance next to
     # wrong time" bugs. Any "<1-6 hanzi>組（distance）" is accepted generically.
-    generic_composite_pattern = r"[一-鿿]{1,6}組\s*[（(]\s*\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)\s*[）)]"
+    # Some organizers prefix the group name with a short wave/category code
+    # (e.g. "EP全馬組"). Capture that prefix too instead of only matching from
+    # the CJK "組" label, otherwise the code silently drops off the label.
+    generic_composite_pattern = r"(?:[A-Za-z]{1,4})?[一-鿿]{1,6}組\s*[（(]\s*\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)\s*[）)]"
     group_pattern = rf"\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|全程馬拉松|半程馬拉松|半馬|全馬|{label_pattern}"
     groups: list[str] = []
     occupied: list[tuple[int, int]] = []
-    for pattern in (composite_pattern, generic_composite_pattern):
+    # generic_composite_pattern first: it's a superset of composite_pattern
+    # (same label length bound, plus an optional ASCII prefix like "EP"), so
+    # trying it first lets the fuller match claim the span before the
+    # narrower whitelist pattern can grab a redundant, prefix-stripped copy.
+    for pattern in (generic_composite_pattern, composite_pattern):
         for match in re.finditer(pattern, text):
             if any(start <= match.start() and match.end() <= end for start, end in occupied):
                 continue

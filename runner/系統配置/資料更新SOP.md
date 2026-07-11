@@ -45,6 +45,20 @@
 - 補完後執行 `npm run data:refresh`。
 - 若同一場賽事有多個名稱版本，人工補充要為同日期的短名、完整副標題、平台標題各建立一筆。例：`2026 臺中國際馬拉松` 與 `2026臺中國際馬拉松-酷城市．酷運動 水岸花都` 都要補，避免其中一個名稱在 GitHub Actions strict gate 繼續失敗。
 
+### 發現賽事資料有問題 → 怎麼直接改（聯動到 races.json）
+
+⚠️ 不要直接改 `賽事資料庫.json` 或 `site/data/races.json`——這兩個是爬蟲產出，下次排程重爬會被覆蓋掉。只有寫進人工補充才會在每次排程重跑時持續套用。
+
+**優先用 Excel（`runner/賽事/人工補充.xlsx`）**：JSON 陣列直接手改容易漏逗號/括號，改用 Excel 一列一場賽事、一欄一個要修正的欄位，跟 `收款明細.xlsx` 同一套做法。
+
+**步驟**：
+1. 打開 `runner/賽事/人工補充.xlsx`，找到那場賽事的列（用 `race_name` + `race_date` 定位；找不到就新增一列），只填要修正的欄位，其餘留空。
+   - `distances` 欄用 `/` 分隔多個距離，例：`42.195km / 21km / 10km`。
+   - 要清空某欄位填 `__CLEAR__`。
+2. 存檔後執行 `npm run data:apply`（只套用人工補充）或 `npm run data:refresh`（套用＋同步＋重產報告，排程也是跑這個）——**會優先讀 Excel**，自動轉換並同時寫入 `runner/賽事/賽事資料庫.json` 和 `site/data/races.json`，兩邊自動同步。
+3. 找不到 Excel 才會退回讀 `人工補充.json`（跟 Excel 同一層，也在 Obsidian vault 裡，格式較囉唆但可直接手改 JSON 陣列，適合批次貼上或程式化寫入）。
+4. `npm run data:overrides:init-xlsx` 會用 `人工補充.json` **重建並覆蓋** Excel（會蓋掉你在 Excel 上還沒寫回 JSON 的修改），平常別跑，只在需要重新產生 Excel 骨架時用。
+
 ## 查證欄位
 
 每筆賽事建議保留：
