@@ -8,6 +8,7 @@ on:
       - Collect content candidates
       - Refresh runner quips
       - Refresh message cloud
+      - Sync Garmin training data
       - Automation orchestrator
       - CI
       - Deploy static site

@@ -321,6 +321,10 @@ function getDeviceId() {
 }
 
 function setActivePanel(panelId, updateHash = true) {
+  if (panelId === "training") {
+    window.location.href = "trainer.html";
+    return;
+  }
   const nextPanel = [...els.panels].some((panel) => panel.dataset.panel === panelId)
     ? panelId
     : "races";
@@ -1679,21 +1683,13 @@ function goalFromRace(race) {
 }
 
 function useRaceForTraining(race) {
-  state.trainingRaceKey = getRaceKey(race);
-  state.planWeek = 1;
-  if (els.planGoal) {
-    els.planGoal.value = goalFromRace(race);
+  const goalMap = { marathon: "full", half: "half", "10k": "5k10k", "5k": "5k10k" };
+  const params = new URLSearchParams();
+  params.set("goal", goalMap[goalFromRace(race)] || "half");
+  if (race.race_date) {
+    params.set("date", race.race_date);
   }
-  if (els.planRaceDate) {
-    els.planRaceDate.value = race.race_date || "";
-  }
-  if (els.planPriority) {
-    els.planPriority.value = "finish";
-  }
-  savePlanSettings();
-  setActivePanel("training");
-  renderPlan();
-  document.getElementById("training")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.location.href = `trainer.html?${params.toString()}`;
 }
 
 function getVisibleRaces() {
