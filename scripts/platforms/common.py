@@ -273,22 +273,33 @@ def _distance_groups(value: str) -> list[str]:
     text = compact_text(value).replace("Ｋ", "K").replace("ｋ", "k")
     label_pattern = r"(?:全程馬拉松組|半程馬拉松組|友善樂跑組|挑戰組|休閒組|健走組|健跑組|健康組|親子組|超半馬組|全馬組|身視障組)"
     composite_pattern = rf"{label_pattern}\s*[（(]\s*\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)\s*[）)]"
-    group_pattern = rf"\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|半馬|全馬|{label_pattern}"
+    # Organizers invent arbitrary group names (競賽組、簡單組、疾疾如風組、玄天戰神組...) that
+    # never appear in `label_pattern`. Without this fallback, an unrecognized group silently
+    # disappears while its start time is still picked up elsewhere, shifting every later
+    # group/time pairing by one — the root cause behind repeated "wrong distance next to
+    # wrong time" bugs. Any "<1-6 hanzi>組（distance）" is accepted generically.
+    generic_composite_pattern = r"[一-鿿]{1,6}組\s*[（(]\s*\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)\s*[）)]"
+    group_pattern = rf"\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|全程馬拉松|半程馬拉松|半馬|全馬|{label_pattern}"
     groups: list[str] = []
     occupied: list[tuple[int, int]] = []
-    for match in re.finditer(composite_pattern, text):
-        group = compact_text(match.group(0))
-        group = re.sub(r"[（(]\s*", "（", group)
-        group = re.sub(r"\s*[）)]", "）", group)
-        group = re.sub(r"\s+（", "（", group)
-        groups.append(group)
-        occupied.append(match.span())
+    for pattern in (composite_pattern, generic_composite_pattern):
+        for match in re.finditer(pattern, text):
+            if any(start <= match.start() and match.end() <= end for start, end in occupied):
+                continue
+            group = compact_text(match.group(0))
+            group = re.sub(r"[（(]\s*", "（", group)
+            group = re.sub(r"\s*[）)]", "）", group)
+            group = re.sub(r"\s+（", "（", group)
+            groups.append(group)
+            occupied.append(match.span())
     for match in re.finditer(group_pattern, text):
         if any(start <= match.start() and match.end() <= end for start, end in occupied):
             continue
         group = compact_text(match.group(0)).replace(" ", "")
         if re.search(r"k|km", group, flags=re.IGNORECASE):
             group = _semantic_distance_label(group)
+        elif group in ("全程馬拉松", "半程馬拉松"):
+            group = "全馬" if group == "全程馬拉松" else "半馬"
         groups.append(group)
     return list(dict.fromkeys(groups))
 
@@ -398,6 +409,61 @@ def _start_time_rows_from_grouped_schedule(lines: list[str]) -> list[str]:
     return rows
 
 
+def _start_time_rows_from_labeled_blocks(lines: list[str]) -> list[str]:
+    """Handle accordion/table layouts where each group is its own block, but
+    the group label and its time can appear in either order depending on the
+    source site — group-then-time (biji.co: '競賽組（9K）'/'起跑'/'06:10') or
+    time-then-group ('06:30'/'全馬組'/'半程馬拉松'/'選手起跑').
+
+    The older forward/backward-only scanners assume one fixed order, so they
+    silently grab a *neighboring* block's label or time when the real source
+    uses the other order — shifting every pairing by one and dropping the
+    last block. This instead treats it as nearest-neighbor matching: each
+    group anchor pairs with whichever unused time-only line is closest to it
+    by line distance, regardless of direction.
+    """
+    time_only = re.compile(r"^\s*([01]?\d|2[0-3])[:：][0-5]\d(?:\s*[~～-]\s*(?:[01]?\d|2[0-3])[:：][0-5]\d)?\s*$")
+    anchors: list[tuple[int, str]] = []
+    time_lines: list[tuple[int, str]] = []
+    for index, line in enumerate(lines):
+        if time_only.match(line):
+            time = _time_text(line)
+            if time:
+                time_lines.append((index, time))
+            continue
+        groups = _distance_groups(line)
+        if len(groups) == 1 and len(line) <= 24:
+            anchors.append((index, groups[0]))
+    if len(anchors) < 2 or not time_lines:
+        return []
+
+    candidates = sorted(
+        (
+            (abs(anchor_index - time_index), anchor_position, time_position)
+            for anchor_position, (anchor_index, _group) in enumerate(anchors)
+            for time_position, (time_index, _time) in enumerate(time_lines)
+            if abs(anchor_index - time_index) <= 6
+        ),
+        key=lambda item: item[0],
+    )
+    assigned_time_for_anchor: dict[int, str] = {}
+    used_times: set[int] = set()
+    used_anchors: set[int] = set()
+    for _distance, anchor_position, time_position in candidates:
+        if anchor_position in used_anchors or time_position in used_times:
+            continue
+        assigned_time_for_anchor[anchor_position] = time_lines[time_position][1]
+        used_anchors.add(anchor_position)
+        used_times.add(time_position)
+
+    rows = [
+        _format_start_time(group, assigned_time_for_anchor[position])
+        for position, (_index, group) in enumerate(anchors)
+        if position in assigned_time_for_anchor
+    ]
+    return rows if len(rows) >= 2 else []
+
+
 def _start_time_rows_from_inline(lines: list[str]) -> list[str]:
     """Handle lines where group name, time, and start keyword appear together (e.g. biji.co '組名 AM HH:MM 起跑')."""
     rows: list[str] = []
@@ -426,9 +492,17 @@ def extract_start_times(lines: list[str]) -> str:
     if direct_has_group:
         return direct
 
+    # Try both the narrow-window scanner and the nearest-neighbor block
+    # matcher, then keep whichever found more rows. A narrow-window scanner
+    # can return a non-empty but silently *incomplete* result (e.g. it finds
+    # 2 of 3 groups because the 3rd's start-keyword sits just outside its
+    # look-ahead window) — taking the first non-empty result unconditionally
+    # would lock in that incomplete answer instead of the more complete one.
     schedule_rows = _start_time_rows_from_schedule(lines)
-    if schedule_rows:
-        return "、".join(dict.fromkeys(schedule_rows[:8]))
+    labeled_block_rows = _start_time_rows_from_labeled_blocks(lines)
+    if schedule_rows or labeled_block_rows:
+        best_rows = labeled_block_rows if len(labeled_block_rows) > len(schedule_rows) else schedule_rows
+        return "、".join(dict.fromkeys(best_rows[:8]))
 
     grouped_schedule_rows = _start_time_rows_from_grouped_schedule(lines)
     if grouped_schedule_rows:

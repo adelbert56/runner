@@ -1503,14 +1503,23 @@ function renderStartTimes(race) {
   if (!items.length) {
     return "";
   }
-  return `<ul class="start-time-list">${items
-    .map((item) => {
-      const parsed = typeof item === "string" ? parseStartTimeText(item) : item;
-      const distance = normalizeStartDistanceLabel(parsed.distance) || "賽事";
-      const time = parsed.time || "待確認";
-      return `<li><span class="start-distance">${escapeHtml(distance)}</span><span class="start-time">${escapeHtml(time)}</span></li>`;
-    })
-    .join("")}</ul>`;
+  const rows = items.map((item) => {
+    const parsed = typeof item === "string" ? parseStartTimeText(item) : item;
+    const distance = normalizeStartDistanceLabel(parsed.distance) || "賽事";
+    const time = parsed.time || "待確認";
+    return `<li><span class="start-distance">${escapeHtml(distance)}</span><span class="start-time">${escapeHtml(time)}</span></li>`;
+  });
+  // Some sources only publish start times for some distance categories.
+  // Rather than trying to numerically reconcile against race.distances
+  // (semantic labels like "半馬" carry no digit, and near-equal distances
+  // like 22.5K/23K are genuinely different course markings — both make
+  // false "missing" positives too common), just note it's partial when the
+  // published count is clearly short of the offered distance count.
+  const distanceCount = (race.distances || []).length;
+  const note = distanceCount > items.length
+    ? `<li class="start-time-note">其餘距離時間請見官網</li>`
+    : "";
+  return `<ul class="start-time-list">${rows.join("")}${note}</ul>`;
 }
 
 function factClassFor(label) {

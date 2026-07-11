@@ -164,6 +164,43 @@ def _merge_unique_list(primary: object, secondary: object) -> list[str]:
     return merged
 
 
+def _distance_km(value: str) -> float | None:
+    match = re.search(r"(\d+(?:\.\d+)?)", value)
+    if not match:
+        return None
+    try:
+        return float(match.group(1))
+    except ValueError:
+        return None
+
+
+def _merge_distances(primary: object, secondary: object) -> list[str]:
+    """Union distances but collapse near-duplicates (e.g. "42km" + "42.195km"
+    from two scrape passes of the same race). Without this, distances only
+    ever grows and drifts out of sync with start_times/fees, which get
+    whole-field-replaced rather than merged."""
+    merged = _merge_unique_list(primary, secondary)
+    kept: list[tuple[str, float]] = []
+    for text in merged:
+        km = _distance_km(text)
+        if km is None:
+            kept.append((text, float("nan")))
+            continue
+        collided_index = None
+        for index, (_, other_km) in enumerate(kept):
+            if other_km == other_km and abs(other_km - km) <= 0.3:  # not NaN and close
+                collided_index = index
+                break
+        if collided_index is None:
+            kept.append((text, km))
+            continue
+        # Prefer the more precise / decimal form (e.g. "42.195km" over "42km").
+        existing_text, existing_km = kept[collided_index]
+        if "." in text and "." not in existing_text:
+            kept[collided_index] = (text, km)
+    return [text for text, _ in kept]
+
+
 def _prefer_text(current: object, incoming: object, *, prefer_incoming: bool = False) -> object:
     current_text = _compact_text(current)
     incoming_text = _compact_text(incoming)
@@ -213,16 +250,43 @@ def _prefer_field_value(field: str, current: object, incoming: object) -> object
     return _prefer_text(current, incoming)
 
 
-def _same_event(left: dict, right: dict) -> bool:
-    left_date = _compact_text(left.get("race_date", ""))
-    right_date = _compact_text(right.get("race_date", ""))
-    left_county = _compact_text(left.get("race_county", ""))
-    right_county = _compact_text(right.get("race_county", ""))
-    if not left_date or left_date != right_date or not left_county or left_county != right_county:
-        return False
+def _is_unconfirmed_status(value: str) -> bool:
+    text = _compact_text(value)
+    return any(keyword in text for keyword in ("待確認", "未定", "未知", "TBD"))
 
+
+def _same_event(left: dict, right: dict) -> bool:
+    # Same source page (cid/signup id/...) means same event even if the
+    # organizer corrected the date between scrapes — check this before the
+    # date gate, otherwise a date correction spawns a permanent duplicate.
     if _identity_tokens(left) & _identity_tokens(right):
         return True
+
+    left_county = _compact_text(left.get("race_county", ""))
+    right_county = _compact_text(right.get("race_county", ""))
+    left_date = _compact_text(left.get("race_date", ""))
+    right_date = _compact_text(right.get("race_date", ""))
+
+    if left_date != right_date:
+        # Neither side has a reliable date (both are unconfirmed/placeholder
+        # scrapes with no shared identity token) — an exact name+county match
+        # with overlapping distances is still almost certainly the same
+        # event, just scraped before the real date was published anywhere.
+        exact_name_match = (
+            left_county
+            and left_county == right_county
+            and _normalize_name(left.get("race_name", "")) == _normalize_name(right.get("race_name", ""))
+        )
+        if not exact_name_match:
+            return False
+        if not (_is_unconfirmed_status(left.get("registration_status", "")) or _is_unconfirmed_status(right.get("registration_status", ""))):
+            return False
+        left_distances = _distance_tokens(left)
+        right_distances = _distance_tokens(right)
+        return bool(left_distances) and left_distances == right_distances
+
+    if not left_date or not left_county or left_county != right_county:
+        return False
 
     left_name = _normalize_name(left.get("race_name", ""))
     right_name = _normalize_name(right.get("race_name", ""))
@@ -261,7 +325,7 @@ def _merge_race_records(preferred: dict, other: dict) -> dict:
 
     prefer_extra_fields = _source_score(extra) > _source_score(base)
 
-    merged["distances"] = _merge_unique_list(base.get("distances"), extra.get("distances"))
+    merged["distances"] = _merge_distances(base.get("distances"), extra.get("distances"))
     merged["social_links"] = _merge_unique_list(base.get("social_links"), extra.get("social_links"))
     merged["source_platform"] = "、".join(_merge_unique_list(str(base.get("source_platform", "")).split("、"), str(extra.get("source_platform", "")).split("、")))
     merged["is_official_direct"] = bool(base.get("is_official_direct")) or bool(extra.get("is_official_direct"))
