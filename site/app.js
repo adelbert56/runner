@@ -1927,12 +1927,41 @@ function renderStats() {
   }
 }
 
+function taipeiDateKey(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function dailyRunnerQuips(pool, count = 2, now = new Date()) {
+  const items = [...new Set((Array.isArray(pool) ? pool : []).map((item) => String(item || "").trim()).filter(Boolean))];
+  if (!items.length) return [];
+  const dateKey = taipeiDateKey(now);
+  const dayIndex = Math.floor((Date.parse(`${dateKey}T00:00:00Z`) - Date.parse("2026-01-01T00:00:00Z")) / 86400000);
+  const start = ((dayIndex % items.length) + items.length) % items.length;
+  return Array.from({ length: Math.min(count, items.length) }, (_, index) => ({
+    id: `quip-${dateKey}-${index}`,
+    title: items[(start + index) % items.length],
+    types: ["talk"],
+    details: ["今日輪替"],
+  }));
+}
+
 function renderAnnouncementBoard(data = { items: [], type_meta: {} }) {
   if (!els.announcementBoard) {
     return;
   }
 
-  const items = Array.isArray(data.items) ? data.items : [];
+  const sourceItems = Array.isArray(data.items) ? data.items : [];
+  const dailyQuips = dailyRunnerQuips(data.quip_pool, data.retention?.daily_quips || 2);
+  const items = dailyQuips.length
+    ? [...sourceItems.filter((item) => !(item.types || []).includes("talk")), ...dailyQuips]
+    : sourceItems;
   const typeMeta = data.type_meta || {};
   els.announcementBoard.innerHTML = items
     .map((item) => {

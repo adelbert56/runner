@@ -253,6 +253,7 @@ const output = {
     closed_notice_days: 14,
     daily_quips: 2,
   },
+  quip_pool: (Array.isArray(quips.items) ? quips.items : []).filter(Boolean),
   type_meta: typeMeta,
   items: items.length ? items : [{ id: `notice-${today}`, title: "目前沒有新的賽事提醒，先把鞋帶綁好等下一輪資料更新。", types: ["notice"], details: [] }],
 };
