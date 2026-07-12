@@ -203,6 +203,9 @@
     .wx-chip.wx-rain { background: #e3ecfa; color: #1d4ed8; border-color: #bfd3f2; }
     .coach-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
     .coach-pill { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; background: var(--c-surface2); color: var(--c-text-muted); border: 1px solid var(--c-border); }
+    .coach-pill.status-running { background: #eaf1ff; color: #2453a8; border-color: rgba(36,83,168,.25); }
+    .coach-pill.status-delayed { background: #fff4e0; color: #8a5a10; border-color: rgba(138,90,16,.25); }
+    .coach-pill.status-failed { background: #fde8e8; color: #a3271f; border-color: rgba(163,39,31,.3); }
     .coach-lock-btn { font-size: 12px; padding: 4px 12px; margin-left: auto; }
     .coach-section-title { font-size: 14px; font-weight: 800; margin: 0 0 8px; }
     .coach-fineprint { font-size: 12px; color: var(--c-text-muted); line-height: 1.6; margin: 6px 0 0; }
@@ -3655,6 +3658,26 @@ function reviewEscape(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
 
+const COACH_REPORT_SCHEDULE = { day: 0, hour: 21, minute: 0 };
+
+function coachRunStatus() {
+  const now = new Date();
+  const scheduled = new Date(now);
+  scheduled.setHours(COACH_REPORT_SCHEDULE.hour, COACH_REPORT_SCHEDULE.minute, 0, 0);
+  const diff = (scheduled.getDay() - COACH_REPORT_SCHEDULE.day + 7) % 7;
+  scheduled.setDate(scheduled.getDate() - diff);
+  if (scheduled > now) scheduled.setDate(scheduled.getDate() - 7);
+  const updatedAt = coachReviewData?.updatedAt || coachReviewData?.autopilot?.asOf;
+  const scheduledDay = new Date(scheduled);
+  scheduledDay.setHours(0, 0, 0, 0);
+  const isFresh = updatedAt && new Date(`${updatedAt}T00:00:00`) >= scheduledDay;
+  if (isFresh) return { level: 'ok', text: '✅ 本次排程已完成' };
+  const minsSince = Math.round((now - scheduled) / 60000);
+  if (minsSince <= 20) return { level: 'running', text: `⏳ 產生中（通常 5–20 分鐘，已 ${Math.max(minsSince, 0)} 分）` };
+  if (minsSince <= 45) return { level: 'delayed', text: `⏳ 延遲中（已超過預計時間 ${minsSince} 分）` };
+  return { level: 'failed', text: `⚠️ 可能失敗，已超過 ${minsSince} 分鐘未更新`, actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
+}
+
 function coachScheduleLabel() {
   const sync = appData.profile?.coachSync || {};
   const label = sync.frequency === 'weekly'
@@ -4069,6 +4092,12 @@ function renderCoachReviewPanel() {
       <div class="card-title" style="margin:0">🏃 教練建議</div>
       <span class="coach-pill">資料截至 ${reviewEscape(coachReviewData.updatedAt)}</span>
       <span class="coach-pill">${reviewEscape(coachScheduleLabel())}</span>
+      ${(() => {
+        const status = coachRunStatus();
+        if (!status) return '';
+        const link = status.actionUrl ? ` <a class="coach-pill" href="${reviewEscape(status.actionUrl)}" target="_blank" rel="noopener">${reviewEscape(status.actionLabel)} ↗</a>` : '';
+        return `<span class="coach-pill status-${status.level}">${reviewEscape(status.text)}</span>${link}`;
+      })()}
       <button class="btn btn-secondary coach-lock-btn" onclick="lockCoachReview()">🔒 鎖定</button>
     </div>
     ${garminOnlyNotice}
@@ -4290,7 +4319,7 @@ function renderWeekSection(plan) {
   </section>` : '';
   const dayCards = week.days.map(day => {
     const entry = coachDays.find((item) => item.scheduledDow === day.dow);
-    return renderDayCard(entry ? { ...day, task: entry.plan, pace: '', steps: [], coachPlan: true } : day);
+    return renderDayCard(entry ? { ...day, task: entry.plan, pace: '', hrTarget: '', steps: [], coachPlan: true } : day);
   }).join('');
   return `
 <div class="card week-header-card">
@@ -4534,7 +4563,9 @@ function renderDayCard(day) {
     </div>`;
   }
   const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long' }[day.type] || 'badge-rest';
-  const typeName = day.type === 'easy' && day.focus === 'recovery'
+  const typeName = day.coachPlan
+    ? '教練課表'
+    : day.type === 'easy' && day.focus === 'recovery'
     ? '恢復跑'
     : { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[day.type] || '訓練';
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
@@ -4556,7 +4587,7 @@ function renderDayCard(day) {
       <span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>
       ${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}
     </div>
-    <span class="workout-badge ${badgeClass}">${typeName}</span>${day.coachPlan ? '<span class="workout-badge badge-long" style="margin-left:6px">📌 教練課表</span>' : ''}
+    <span class="workout-badge ${badgeClass}">${day.coachPlan ? '📌 ' : ''}${typeName}</span>
     <div class="day-card-task">${day.task || typeName}</div>
     <div class="day-card-pace">${[day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>
     ${day.injuryNote ? `<div style="font-size:12px;line-height:1.5;color:var(--c-red);margin:4px 0 8px">🦶 ${day.injuryNote}</div>` : ''}
