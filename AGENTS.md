@@ -28,6 +28,13 @@ Companion documents:
 8. Verify results against the real contract using `VERIFY.md`.
 9. Report the outcome, residual risk, and anything not verified.
 
+## Task Queue Continuity
+
+- Treat a new user question that is related to the active task as an inserted queue item, not as completion or cancellation of the active task.
+- Resolve the inserted item, then automatically resume the previously active task from its last unfinished acceptance criterion.
+- Do not report the overall task complete, switch to unrelated work, or wait for another prompt while an earlier accepted task still has implementation, verification, delivery, or explicitly requested follow-up work outstanding.
+- A new user message replaces the active task only when the user explicitly cancels, supersedes, or redirects it; otherwise state the resumed task and carry it through to verified completion.
+
 ## Planning And Prioritization
 
 - Use planning for work with dependencies, cross-file impact, unclear routing, or meaningful verification steps.
