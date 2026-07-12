@@ -1824,9 +1824,14 @@ function renderSetupView() {
 
     <!-- 10. Coach Sync Schedule -->
     <div class="form-group">
-      <div class="form-label">Garmin 自動同步</div>
-      <div class="coach-setting-card"><div class="coach-setting-value">每天約 21:37 自動更新</div><div class="coach-fineprint">同步後會依最近 Garmin 跑步產生輔助菜單；正式課表不會被暗中覆寫。資料是否新鮮會直接顯示在課表頁。</div></div>
-      <input type="hidden" id="f-coach-sync" value="daily"><input type="hidden" id="f-coach-time" value="21:37"><input type="hidden" id="f-coach-day" value="0">
+      <div class="form-label">教練資料更新</div>
+      <p class="field-help" style="margin-top:0">排程會讀取 Garmin 實績並更新教練建議；正式課表不會自動被覆寫。</p>
+      <div class="log-form-grid">
+        <div><label class="form-label" for="f-coach-sync">檢查頻率</label><select class="form-input" id="f-coach-sync"><option value="manual">只手動更新</option><option value="daily">每天</option><option value="weekly">每週</option></select></div>
+        <div><label class="form-label" for="f-coach-time">檢查時間</label><input class="form-input" type="time" id="f-coach-time" value="20:30"></div>
+        <div><label class="form-label" for="f-coach-day">每週檢查日</label><select class="form-input" id="f-coach-day"><option value="0" selected>週日</option><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option></select></div>
+      </div>
+      <div class="field-help">雲端排程設定完成後，儲存訓練手冊會同步更新這些規則；資料更新狀態會顯示在教練建議中。</div>
     </div>
 
     <div class="form-group">
@@ -2330,6 +2335,10 @@ function prefillSetupForm(profile) {
   if (profile.maxHr) document.getElementById('f-max-hr').value = profile.maxHr;
   document.getElementById('f-garmin-completion').value = String(garminCompletionPercent(profile));
   if (profile.recentResult) document.getElementById('f-recent').value = profile.recentResult;
+  const coachSync = profile.coachSync || {};
+  if (coachSync.frequency) document.getElementById('f-coach-sync').value = coachSync.frequency;
+  if (coachSync.time) document.getElementById('f-coach-time').value = coachSync.time;
+  if (coachSync.day !== undefined) document.getElementById('f-coach-day').value = String(coachSync.day);
   syncDayButtons();
   validateDays();
   document.querySelectorAll('.pill[data-injury]').forEach(p => {
@@ -3647,8 +3656,14 @@ function reviewEscape(value) {
 }
 
 function coachScheduleLabel() {
+  const sync = appData.profile?.coachSync || {};
+  const label = sync.frequency === 'weekly'
+    ? `每週${DOW_NAMES[sync.day] || '日'} ${sync.time || '20:30'} 檢查`
+    : sync.frequency === 'manual'
+    ? '只在手動更新時檢查'
+    : `每天 ${sync.time || '20:30'} 檢查`;
   const asOf = coachReviewData?.autopilot?.asOf || coachReviewData?.analyticsUpdatedAt || coachReviewData?.updatedAt;
-  return asOf ? `Garmin 資料截至 ${asOf} · 每日約 21:37 同步` : 'Garmin 每日約 21:37 同步';
+  return asOf ? `${label} · Garmin 資料截至 ${asOf}` : label;
 }
 
 function currentTrainingGoalLabel() {

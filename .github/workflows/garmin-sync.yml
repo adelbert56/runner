@@ -3,10 +3,10 @@ name: Sync Garmin training data
 on:
   workflow_dispatch: {}
   schedule:
-    # 21:37 Asia/Taipei. Avoid :00 because GitHub cron can be delayed then.
-    - cron: "37 13 * * *"
+    # 20:30 Asia/Taipei.
+    - cron: "30 12 * * *"
     # Backup slot: a second incremental pull is harmless when the primary succeeded.
-    - cron: "7 15 * * *"
+    - cron: "7 14 * * *"
 
 permissions:
   contents: write
