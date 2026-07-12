@@ -978,7 +978,7 @@ const SKIP_REASON_LABELS = {
 };
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {} };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {} };
 }
 
 function getDeviceId() {
@@ -1023,10 +1023,19 @@ function formatSkipReason(reason) {
   return reason.noMakeupReason ? `${label}｜不補跑：${reason.noMakeupReason}` : label;
 }
 
+function normalizeMakeupRecords(makeupRecords) {
+  if (!makeupRecords || typeof makeupRecords !== 'object') return {};
+  return Object.fromEntries(
+    Object.entries(makeupRecords)
+      .filter(([sourceDate, record]) => /^\d{4}-\d{2}-\d{2}$/.test(sourceDate) && /^\d{4}-\d{2}-\d{2}$/.test(record?.targetDate || ''))
+      .map(([sourceDate, record]) => [sourceDate, { targetDate: record.targetDate, source: record.source === 'garmin-auto' ? 'garmin-auto' : 'scheduled' }])
+  );
+}
+
 function collectLegacyDayStatuses(data) {
   const dayStatuses = {};
   (data?.plan || []).forEach(week => (week.days || []).forEach(day => {
-    if (day?.dateStr && (day.status === 'done' || day.status === 'missed')) {
+    if (day?.dateStr && day.type !== 'rest' && (day.status === 'done' || day.status === 'missed')) {
       dayStatuses[day.dateStr] = day.status;
     }
   }));
@@ -1042,12 +1051,38 @@ function applyStoredDayStatuses(data) {
   const dayStatuses = normalizeDayStatuses(data?.dayStatuses);
   (data?.plan || []).forEach(week => (week.days || []).forEach(day => {
     if (!day?.dateStr) return;
+    if (day.type === 'rest') {
+      // A prior plan may have used this date for a run. Do not let that stale
+      // completed/missed status block a newly generated recovery day.
+      delete dayStatuses[day.dateStr];
+      day.status = 'upcoming';
+      return;
+    }
     const savedStatus = dayStatuses[day.dateStr];
     if (savedStatus) {
       day.status = savedStatus;
     }
   }));
   data.dayStatuses = dayStatuses;
+  return data;
+}
+
+function applyStoredMakeupRecords(data) {
+  const makeupRecords = normalizeMakeupRecords(data?.makeupRecords);
+  const daysByDate = new Map((data?.plan || []).flatMap((week) => week.days || []).map((day) => [day.dateStr, day]));
+  Object.entries(makeupRecords).forEach(([sourceDate, record]) => {
+    const sourceDay = daysByDate.get(sourceDate);
+    const targetDay = daysByDate.get(record.targetDate);
+    if (!sourceDay || !targetDay || (targetDay.type !== 'rest' && !(targetDay.isMakeup && targetDay.makeupOf === sourceDate))) {
+      delete makeupRecords[sourceDate];
+      return;
+    }
+    if (targetDay.type === 'rest') applyMakeupAssignment(sourceDay, targetDay);
+    sourceDay.status = 'missed';
+    data.dayStatuses = normalizeDayStatuses(data.dayStatuses);
+    data.dayStatuses[sourceDate] = 'missed';
+  });
+  data.makeupRecords = makeupRecords;
   return data;
 }
 
@@ -1063,13 +1098,14 @@ function normalizeData(data) {
     assessments: Array.isArray(data?.assessments) ? data.assessments : [],
     adaptationPrompts: data?.adaptationPrompts && typeof data.adaptationPrompts === 'object' ? data.adaptationPrompts : {},
     dayStatuses: normalizeDayStatuses(data?.dayStatuses),
-    skipReasons: normalizeSkipReasons(data?.skipReasons)
+    skipReasons: normalizeSkipReasons(data?.skipReasons),
+    makeupRecords: normalizeMakeupRecords(data?.makeupRecords)
   };
   normalized.dayStatuses = {
     ...collectLegacyDayStatuses(normalized),
     ...normalized.dayStatuses
   };
-  return applyStoredDayStatuses(normalized);
+  return applyStoredMakeupRecords(applyStoredDayStatuses(normalized));
 }
 
 function loadData() {
@@ -1131,19 +1167,20 @@ function rebuildStoredPlan(data) {
   if (!data?.profile) return data;
   const preservedProfile = { ...data.profile };
   preservedProfile.planVersion = PLAN_SCHEMA_VERSION;
-  const rebuilt = applyStoredDayStatuses({
+  const rebuiltData = applyStoredMakeupRecords(applyStoredDayStatuses({
     ...data,
     plan: buildPlan(preservedProfile)
-  }).plan;
+  }));
   return {
     ...data,
     profile: preservedProfile,
-    plan: rebuilt,
+    plan: rebuiltData.plan,
     log: data.log || [],
     checkins: data.checkins || [],
     assessments: data.assessments || [],
     adaptationPrompts: data.adaptationPrompts || {},
-    skipReasons: normalizeSkipReasons(data.skipReasons)
+    skipReasons: normalizeSkipReasons(data.skipReasons),
+    makeupRecords: normalizeMakeupRecords(rebuiltData.makeupRecords)
   };
 }
 
@@ -3311,6 +3348,28 @@ function renderGarminAutopilotTab(profile, plan) {
   return content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`;
 }
 
+function makeupCompletionCredits(planDays, activityDates, today = todayStr()) {
+  const sortedDays = [...(planDays || [])].filter((day) => day?.dateStr).sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+  const credits = new Map();
+
+  // A deliberately scheduled makeup always takes priority over inferred credit.
+  sortedDays.filter((day) => day.isMakeup && day.makeupOf && day.dateStr <= today && activityDates.has(day.dateStr)).forEach((day) => {
+    credits.set(day.makeupOf, { makeupDate: day.dateStr, source: 'scheduled' });
+  });
+
+  // Garmin runs on a recovery day can close one recent missed session even when
+  // the runner could not schedule the makeup beforehand.
+  sortedDays.filter((day) => day.type === 'rest' && day.dateStr <= today && activityDates.has(day.dateStr)).forEach((restDay) => {
+    const missedDay = sortedDays.filter((day) => {
+      const daysApart = Math.round((new Date(`${restDay.dateStr}T00:00:00`) - new Date(`${day.dateStr}T00:00:00`)) / 86400000);
+      return day.type !== 'rest' && !day.isMakeup && day.status === 'missed' && !credits.has(day.dateStr) && daysApart >= 1 && daysApart <= 3;
+    }).pop();
+    if (missedDay) credits.set(missedDay.dateStr, { makeupDate: restDay.dateStr, source: 'garmin-auto' });
+  });
+
+  return credits;
+}
+
 function renderProgressCard(profile, plan) {
   const totalWeeks = plan.length;
   const pct = Math.round((currentWeek / totalWeeks) * 100);
@@ -3328,14 +3387,19 @@ function renderProgressCard(profile, plan) {
     const day = planDayByDate.get(entry.date);
     return day.type !== 'rest';
   });
+  const activityDates = new Set(allActivity.map((entry) => entry.date));
+  const makeupCredits = makeupCompletionCredits(planDays, activityDates, today);
   const completedDates = new Set(trackedLog.map((entry) => entry.date));
-  const elapsedSessions = planDays.filter((day) => day.type !== 'rest' && day.dateStr <= today).length;
-  const completedSessions = [...completedDates].filter((date) => planDayByDate.has(date)).length;
+  const elapsedDays = planDays.filter((day) => day.type !== 'rest' && !day.isMakeup && day.dateStr <= today);
+  const elapsedSessions = elapsedDays.length;
+  const completedSessions = elapsedDays.filter((day) => completedDates.has(day.dateStr) || makeupCredits.has(day.dateStr)).length;
   const totalKm = allActivity.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
   const weekDates = new Set((currWeekPlan?.days || []).map((day) => day.dateStr));
   const weekActivities = allActivity.filter((entry) => weekDates.has(entry.date));
   const currWeekDone = weekActivities.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
-  const extraKm = weekActivities.filter((entry) => planDayByDate.get(entry.date)?.type === 'rest').reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const creditedMakeupDates = new Set([...makeupCredits.values()].map((credit) => credit.makeupDate));
+  const creditedMakeupKm = weekActivities.filter((entry) => creditedMakeupDates.has(entry.date)).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const extraKm = weekActivities.filter((entry) => planDayByDate.get(entry.date)?.type === 'rest' && !creditedMakeupDates.has(entry.date)).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
   const adherence = elapsedSessions > 0 ? Math.round((completedSessions / elapsedSessions) * 100) : 0;
   const weekTargetKm = currWeekPlan?.targetKm || 0;
   const weekProgressPct = weekTargetKm > 0 ? Math.min(100, Math.round((currWeekDone / weekTargetKm) * 100)) : 0;
@@ -3352,7 +3416,7 @@ function renderProgressCard(profile, plan) {
   <div class="plan-overview-top"><div><div class="plan-overview-kicker">Plan progress</div><h2 class="plan-overview-title">${GOAL_NAME[profile.goal]} · 第 ${currentWeek} 週</h2></div><div class="plan-overview-meta">目標日 ${profile.targetDate} · ${secToPace(profile.racePaceSec)}/km</div></div>
   <div class="plan-progress-line"><span>計畫時間進度</span><strong>第 ${currentWeek} / ${totalWeeks} 週 · ${pct}%</strong></div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${Math.min(100, pct)}%"></div></div>
-  <div class="plan-progress-line"><span>本週跑量進度${extraKm ? `（含額外跑步 ${extraKm.toFixed(1)} km）` : ''}</span><strong>${currWeekDone.toFixed(1)} / ${weekTargetKm || '?'} km · ${weekProgressPct}%</strong></div>
+  <div class="plan-progress-line"><span>本週跑量進度${creditedMakeupKm ? `（含認列補跑 ${creditedMakeupKm.toFixed(1)} km）` : ''}${extraKm ? `${creditedMakeupKm ? '、' : '（含'}額外跑步 ${extraKm.toFixed(1)} km${creditedMakeupKm ? '' : '）'}` : ''}</span><strong>${currWeekDone.toFixed(1)} / ${weekTargetKm || '?'} km · ${weekProgressPct}%</strong></div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${weekProgressPct}%"></div></div>
   <div class="plan-metric-grid">
     <div class="plan-metric"><span class="plan-metric-label">本週剩餘</span><strong class="plan-metric-value">${weekTargetKm ? `${Math.max(0, weekTargetKm - currWeekDone).toFixed(1)} km` : '—'}</strong></div>
@@ -3758,6 +3822,40 @@ function syncGarminRunsToPlan(review) {
     }
   }));
 
+  const planDays = appData.plan.flatMap((week) => week.days || []);
+  const autoCredits = makeupCompletionCredits(planDays, new Set(runsByDate.keys()), todayStr());
+  autoCredits.forEach((credit, sourceDate) => {
+    if (credit.source !== 'garmin-auto') return;
+    const sourceDay = planDays.find((day) => day.dateStr === sourceDate);
+    const targetDay = planDays.find((day) => day.dateStr === credit.makeupDate);
+    const run = runsByDate.get(credit.makeupDate);
+    if (!sourceDay || !targetDay || !run || targetDay.type !== 'rest') return;
+    applyMakeupAssignment(sourceDay, targetDay);
+    appData.makeupRecords = normalizeMakeupRecords(appData.makeupRecords);
+    appData.makeupRecords[sourceDate] = { targetDate: credit.makeupDate, source: 'garmin-auto' };
+    const entry = {
+      date: targetDay.dateStr,
+      type: targetDay.type,
+      plannedKm: targetDay.km || 0,
+      actualKm: Number(run.km) || 0,
+      actualTimeMins: Math.round(paceToMinutes(run.pace) * (Number(run.km) || 0)),
+      rpe: 0,
+      notes: 'Garmin 自動認列補跑',
+      source: 'garmin'
+    };
+    const existingIndex = logByDate.get(targetDay.dateStr);
+    if (existingIndex === undefined) {
+      appData.log.push(entry);
+      logByDate.set(targetDay.dateStr, appData.log.length - 1);
+    } else if (appData.log[existingIndex].source === 'garmin') {
+      appData.log[existingIndex] = entry;
+    }
+    targetDay.status = 'done';
+    appData.dayStatuses = normalizeDayStatuses(appData.dayStatuses);
+    appData.dayStatuses[targetDay.dateStr] = 'done';
+    changed = true;
+  });
+
   if (changed) saveData(appData);
 }
 
@@ -4046,7 +4144,7 @@ function renderDayCard(day) {
     : day.status === 'done'
     ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>'
     : day.status === 'missed'
-      ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>${skipReason ? `<div class="skip-reason">原因：${reviewEscape(skipReason)}</div>` : ''}<div class="day-card-actions"><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}')">重新安排</button><button class="btn btn-secondary" onclick="undoMissed('${day.dateStr}')">撤銷跳過</button></div>`
+      ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div><div class="skip-reason">${skipReason ? `原因：${reviewEscape(skipReason)}` : '跳過原因：尚未記錄'}</div><div class="day-card-actions"><button class="btn btn-secondary" onclick="editSkipReason('${day.dateStr}')">補填原因</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}')">重新安排</button><button class="btn btn-secondary" onclick="undoMissed('${day.dateStr}')">撤銷跳過</button></div>`
       : `<div class="day-card-actions">
           <button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">✓ 完成</button>
           <button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button>
@@ -4103,9 +4201,6 @@ document.getElementById('modal')?.addEventListener('click', event => {
 function markDayStatus(dateStr, status) {
   appData.dayStatuses = normalizeDayStatuses(appData.dayStatuses);
   appData.dayStatuses[dateStr] = status;
-  if (status === 'done' && appData.skipReasons?.[dateStr]) {
-    delete appData.skipReasons[dateStr];
-  }
   appData.plan.forEach(week => week.days.forEach(day => {
     if (day.dateStr === dateStr) day.status = status;
   }));
@@ -4284,8 +4379,21 @@ function scheduleMakeupRun(sourceDate, targetDate) {
   const source = (appData.plan || []).flatMap(week => week.days || []).find(day => day.dateStr === sourceDate);
   const target = (appData.plan || []).flatMap(week => week.days || []).find(day => day.dateStr === targetDate);
   if (!source || !target || target.type !== 'rest') return;
+  applyMakeupAssignment(source, target);
+  appData.makeupRecords = normalizeMakeupRecords(appData.makeupRecords);
+  appData.makeupRecords[sourceDate] = { targetDate, source: 'scheduled' };
+  markDayStatus(sourceDate, 'missed');
+  saveData(appData);
+  closeModal();
+  renderPlanView();
+  showView('plan');
+}
+
+function applyMakeupAssignment(source, target) {
   const makeupKm = Math.round(((source.km || 5) * 0.8) * 10) / 10;
-  const originalRestDay = { ...target, steps: [...(target.steps || [])], supportBlocks: target.supportBlocks ? [...target.supportBlocks] : target.supportBlocks };
+  if (!target.makeupOriginal) {
+    target.makeupOriginal = { ...target, steps: [...(target.steps || [])], supportBlocks: target.supportBlocks ? [...target.supportBlocks] : target.supportBlocks };
+  }
   target.type = source.type || 'easy';
   target.km = makeupKm;
   target.task = `補跑 ${makeupKm} km（原計畫縮短 20%）`;
@@ -4294,13 +4402,7 @@ function scheduleMakeupRun(sourceDate, targetDate) {
   target.steps = source.steps || [];
   target.supportBlocks = null;
   target.isMakeup = true;
-  target.makeupOf = sourceDate;
-  target.makeupOriginal = originalRestDay;
-  markDayStatus(sourceDate, 'missed');
-  saveData(appData);
-  closeModal();
-  renderPlanView();
-  showView('plan');
+  target.makeupOf = source.dateStr;
 }
 
 function undoMissed(dateStr) {
@@ -4312,8 +4414,8 @@ function undoMissed(dateStr) {
   }));
   appData.dayStatuses = normalizeDayStatuses(appData.dayStatuses);
   delete appData.dayStatuses[dateStr];
-  appData.skipReasons = normalizeSkipReasons(appData.skipReasons);
-  delete appData.skipReasons[dateStr];
+  appData.makeupRecords = normalizeMakeupRecords(appData.makeupRecords);
+  delete appData.makeupRecords[dateStr];
   saveData(appData);
   renderPlanView();
   showView('plan');
@@ -4322,13 +4424,13 @@ function undoMissed(dateStr) {
 function markMissed(dateStr) {
   const candidates = futureMakeupCandidates(dateStr);
   const options = candidates.map(({ day, week }) => `<option value="${day.dateStr}">${DOW_NAMES[day.dow]} ${day.dateStr} · 第 ${week.weekNum} 週休息日</option>`).join('');
-  const skipReasonOptions = Object.entries(SKIP_REASON_LABELS).map(([code, label]) => `<option value="${code}">${label}</option>`).join('');
+  const skipReasonFields = renderSkipReasonFields(appData.skipReasons?.[dateStr]);
   const makeupControl = candidates.length
     ? `<div class="form-group"><label class="form-label" for="m-makeup-date">補跑日期</label><select class="form-input" id="m-makeup-date">${options}</select><div class="field-help">可選今天起尚未安排、沒有 Garmin 紀錄的休息日；補跑會取代該日的恢復內容。</div></div>`
     : `<div class="skip-reason">接下來的課表沒有可安全替換的休息日，因此這次不建議補跑。</div>`;
   showModal(
     '安排這次跳過',
-    `<div class="field-help" style="margin-bottom:14px">補跑內容會比原計畫縮短 20%，避免把訓練負荷硬塞回來。</div>${makeupControl}<div class="form-group"><label class="form-label" for="m-skip-reason-code">跳過原因</label><select class="form-input" id="m-skip-reason-code"><option value="" selected disabled>請選擇跳過原因</option>${skipReasonOptions}</select></div><div class="form-group"><label class="form-label" for="m-no-makeup-reason">不補跑原因（選填）</label><input class="form-input" id="m-no-makeup-reason" type="text" maxlength="240" placeholder="例如：明天也有行程、需要先休息恢復"></div>`,
+    `<div class="field-help" style="margin-bottom:14px">補跑內容會比原計畫縮短 20%，避免把訓練負荷硬塞回來。</div>${makeupControl}${skipReasonFields}`,
     [
       ...(candidates.length ? [{
         label: '確認補跑',
@@ -4347,6 +4449,46 @@ function markMissed(dateStr) {
           appData.skipReasons = normalizeSkipReasons(appData.skipReasons);
           appData.skipReasons[dateStr] = { code, noMakeupReason };
           finishMissedDecision(dateStr);
+        }
+      },
+      { label: '取消', action: closeModal }
+    ]
+  );
+}
+
+function renderSkipReasonFields(existingReason) {
+  const reason = typeof existingReason === 'string' ? { code: 'other', noMakeupReason: existingReason } : (existingReason || {});
+  const skipReasonOptions = Object.entries(SKIP_REASON_LABELS).map(([code, label]) => `<option value="${code}" ${reason.code === code ? 'selected' : ''}>${label}</option>`).join('');
+  return `<div class="form-group"><label class="form-label" for="m-skip-reason-code">跳過原因</label><select class="form-input" id="m-skip-reason-code"><option value="" ${reason.code ? '' : 'selected'} disabled>請選擇跳過原因</option>${skipReasonOptions}</select></div><div class="form-group"><label class="form-label" for="m-no-makeup-reason">不補跑原因（選填）</label><input class="form-input" id="m-no-makeup-reason" type="text" maxlength="240" value="${reviewEscape(reason.noMakeupReason || '')}" placeholder="例如：明天也有行程、需要先休息恢復"></div>`;
+}
+
+function saveSkipReason(dateStr) {
+  const code = document.getElementById('m-skip-reason-code')?.value;
+  if (!SKIP_REASON_LABELS[code]) {
+    document.getElementById('m-skip-reason-code')?.focus();
+    return;
+  }
+  const noMakeupReason = document.getElementById('m-no-makeup-reason')?.value?.trim() || '';
+  appData.skipReasons = normalizeSkipReasons(appData.skipReasons);
+  appData.skipReasons[dateStr] = { code, noMakeupReason };
+  saveData(appData);
+}
+
+function editSkipReason(dateStr) {
+  showModal(
+    '補填跳過原因',
+    `<div class="field-help" style="margin-bottom:14px">這筆原因會顯示在原課表日，讓後續調整知道這次跳過的背景。</div>${renderSkipReasonFields(appData.skipReasons?.[dateStr])}`,
+    [
+      {
+        label: '儲存原因',
+        primary: true,
+        action: () => {
+          const before = appData.skipReasons?.[dateStr];
+          saveSkipReason(dateStr);
+          if (appData.skipReasons?.[dateStr] === before) return;
+          closeModal();
+          renderPlanView();
+          showView('plan');
         }
       },
       { label: '取消', action: closeModal }
@@ -4530,15 +4672,21 @@ function assessProgress() {
   const log = appData.log || [];
   const profile = appData.profile;
   if (!plan.length || currentWeek < 2) return;
-  const plannedKm = plan.slice(0, currentWeek - 1).reduce((sum, week) => sum + week.targetKm, 0);
-  const genDate = new Date(profile.generatedAt);
-  const actualKm = log.filter(entry => {
-    const weekNum = Math.floor((new Date(entry.date) - genDate) / 86400000 / 7) + 1;
-    return weekNum < currentWeek;
-  }).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const completedWeeks = plan.slice(0, currentWeek - 1);
+  const completedPlanDays = completedWeeks.flatMap((week) => week.days || []);
+  const completedPlanDates = new Set(completedPlanDays.map((day) => day.dateStr));
+  const garminActivity = garminActivityRecords().map((run) => ({ date: run.date, actualKm: run.km, source: 'garmin' }));
+  const garminDates = new Set(garminActivity.map((entry) => entry.date));
+  const allActivity = [...log.filter((entry) => !garminDates.has(entry.date)), ...garminActivity]
+    .filter((entry) => completedPlanDates.has(entry.date));
+  const activityDates = new Set(allActivity.map((entry) => entry.date));
+  const makeupCredits = makeupCompletionCredits(completedPlanDays, activityDates, todayStr());
+  const plannedKm = completedWeeks.reduce((sum, week) => sum + week.targetKm, 0);
+  const actualKm = allActivity.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
   const progressRate = plannedKm > 0 ? actualKm / plannedKm : 1;
-  const plannedSessions = plan.slice(0, currentWeek - 1).reduce((sum, week) => sum + week.days.filter(day => day.type !== 'rest').length, 0);
-  const doneSessions = plan.slice(0, currentWeek - 1).flatMap(week => week.days).filter(day => day.status === 'done').length;
+  const elapsedDays = completedPlanDays.filter((day) => day.type !== 'rest' && !day.isMakeup);
+  const plannedSessions = elapsedDays.length;
+  const doneSessions = elapsedDays.filter((day) => day.status === 'done' || activityDates.has(day.dateStr) || makeupCredits.has(day.dateStr)).length;
   const adherenceRate = plannedSessions > 0 ? doneSessions / plannedSessions : 1;
   const recentLog = log.filter(entry => {
     const weekNum = Math.floor((new Date(entry.date) - genDate) / 86400000 / 7) + 1;
