@@ -216,15 +216,25 @@
     .coach-menu-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
     .coach-menu-title { font-size: 17px; }
     .coach-menu-km { font-size: 20px; font-weight: 900; color: var(--c-primary-hover); white-space: nowrap; }
-    .coach-menu-list { display: flex; flex-direction: column; }
-    .coach-menu-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--c-border); font-size: 14px; line-height: 1.7; }
-    .coach-menu-row:last-child { border-bottom: none; }
-    .coach-menu-day { flex: 0 0 46px; align-self: flex-start; text-align: center; font-size: 13px; font-weight: 800; padding: 5px 0; border-radius: 10px; background: var(--c-surface2); color: var(--c-text); }
+    .coach-menu-list { display: flex; flex-direction: column; gap: 10px; }
+    .coach-menu-row { display: flex; gap: 12px; padding: 12px; border-radius: 12px; background: var(--c-surface2); font-size: 14px; line-height: 1.65; }
+    .coach-menu-row.is-long { background: #edf5ef; border: 1px solid rgba(36,114,79,.25); }
+    .coach-menu-day { flex: 0 0 46px; align-self: flex-start; text-align: center; font-size: 13px; font-weight: 800; padding: 5px 0; border-radius: 10px; background: var(--c-surface); color: var(--c-text); }
     .coach-menu-row.is-long .coach-menu-day { background: var(--c-primary); color: #fff; }
     .coach-menu-body { min-width: 0; flex: 1; }
-    .coach-menu-purpose { font-size: 12.5px; color: var(--c-text-muted); margin-top: 3px; }
+    .coach-menu-head-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+    .coach-menu-purpose { font-size: 12.5px; color: var(--c-text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--c-border); }
+    .coach-menu-highlight { color: var(--c-primary-hover); font-weight: 800; }
     .coach-key-badge { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--c-primary); color: #fff; vertical-align: 1px; }
     .coach-note-callout { display: flex; gap: 8px; margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--c-surface2); font-size: 14px; font-weight: 600; line-height: 1.7; }
+    .coach-note-priority { margin: 0 0 14px; border-left: 4px solid var(--c-primary); background: #edf5ef; font-size: 15px; }
+    .coach-note-priority b { color: var(--c-primary-hover); }
+    .periodization-list { display: flex; flex-direction: column; gap: 8px; }
+    .periodization-row { padding: 10px 12px; border-radius: 10px; background: var(--c-surface); border-left: 3px solid var(--c-border); }
+    .periodization-row.is-current { border-left-color: var(--c-primary); background: #edf5ef; }
+    .periodization-phase { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .periodization-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--c-text-muted); margin-top: 3px; }
+    .periodization-focus { font-size: 12.5px; color: var(--c-text-muted); margin-top: 4px; line-height: 1.55; }
     .coach-signals { margin-top: 16px; }
     .coach-history { margin-top: 14px; }
     .coach-history summary { cursor: pointer; }
@@ -576,9 +586,22 @@
     .step-detail { font-size: 13px; color: var(--c-text-muted); line-height: 1.65; }
     .day-card-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
     .day-card-actions .btn { font-size: 13px; padding: 8px 12px; flex: 1 1 120px; }
-    .garmin-run-result { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:14px; padding:9px 10px; border-radius:10px; background:#eaf5ee; color:var(--c-primary-hover); font-size:12px; font-weight:850; }
-    .garmin-run-result b { color:var(--c-text); font-size:13px; }
-    .garmin-run-result.extra { background:#eef6f8; color:#295d6a; }
+    .garmin-run-result { display:grid; gap:8px; margin-top:14px; padding:11px 12px; border-radius:12px; background:#eaf5ee; color:var(--c-primary-hover); font-size:12px; font-weight:850; border:1px solid rgba(36,114,79,.1); }
+    .garmin-run-result.extra { background:#eef6f8; color:#295d6a; border-color:#cfe3e8; }
+    .garmin-run-label { display:flex; align-items:center; gap:6px; min-width:0; }
+    .garmin-run-label small { color:inherit; font-size:11px; font-weight:700; opacity:.78; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .garmin-run-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+    .garmin-run-stat { min-width:0; padding:6px 7px; border-radius:8px; background:rgba(255,255,255,.58); text-align:center; color:var(--c-text-muted); font-size:10px; font-weight:750; line-height:1.25; }
+    .garmin-run-stat b { display:block; margin-top:2px; color:var(--c-text); font-size:13px; font-weight:900; white-space:nowrap; }
+    .training-status-card { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; margin-bottom:16px; padding:13px 14px; border:1px solid rgba(36,114,79,.16); border-radius:14px; background:linear-gradient(135deg,#f0f8f2,#fffdf8); }
+    .training-status-card.is-attention { border-color:#edc48d; background:linear-gradient(135deg,#fff8ed,#fffdf8); }
+    .training-status-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+    .training-status-card.is-attention .training-status-kicker { color:#9a5d16; }
+    .training-status-title { margin-top:3px; color:var(--c-text); font-size:14px; font-weight:900; }
+    .training-status-copy { margin-top:3px; color:var(--c-text-muted); font-size:12px; font-weight:650; line-height:1.55; }
+    .training-status-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .training-status-actions .btn { padding:7px 10px; font-size:12px; white-space:nowrap; }
+    @media (max-width:620px) { .training-status-card { grid-template-columns:1fr; } .training-status-actions { justify-content:flex-start; } }
     .skip-reason { margin-top: 8px; padding: 8px 10px; border-radius: 9px; background: #fff7ed; color: #9a3412; font-size: 12px; line-height: 1.55; }
     .support-grid { display: grid; gap: 10px; margin-top: 12px; }
     .support-card {
@@ -957,6 +980,7 @@
     <div class="modal-actions" id="modal-actions"></div>
   </div>
 </div>
+<input type="file" id="training-data-import" accept="application/json,.json" hidden onchange="importTrainingData(event)">
 
 <script>
 // ============================================================
@@ -965,7 +989,7 @@
 const LEGACY_STORAGE_KEY = 'runner-trainer-v1';
 const DEVICE_KEY = 'runner-trainer:device-id';
 const STORAGE_KEY = `runner-trainer:${getDeviceId()}:v1`;
-const PLAN_SCHEMA_VERSION = 9;
+const PLAN_SCHEMA_VERSION = 10;
 const GUIDE_ASSET_VERSION = 3;
 const SKIP_REASON_LABELS = {
   work: '工作／行程',
@@ -978,7 +1002,7 @@ const SKIP_REASON_LABELS = {
 };
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {} };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, trainingEvents: [], lastBackupAt: null };
 }
 
 function getDeviceId() {
@@ -1030,6 +1054,35 @@ function normalizeMakeupRecords(makeupRecords) {
       .filter(([sourceDate, record]) => /^\d{4}-\d{2}-\d{2}$/.test(sourceDate) && /^\d{4}-\d{2}-\d{2}$/.test(record?.targetDate || ''))
       .map(([sourceDate, record]) => [sourceDate, { targetDate: record.targetDate, source: record.source === 'garmin-auto' ? 'garmin-auto' : 'scheduled' }])
   );
+}
+
+function normalizeTrainingEvents(trainingEvents) {
+  if (!Array.isArray(trainingEvents)) return [];
+  return trainingEvents
+    .filter((event) => event && typeof event.type === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(event.at || ''))
+    .slice(-500)
+    .map((event) => ({
+      id: String(event.id || `${event.type}-${event.at}`),
+      type: event.type,
+      at: event.at,
+      date: /^\d{4}-\d{2}-\d{2}$/.test(event.date || '') ? event.date : '',
+      sourceDate: /^\d{4}-\d{2}-\d{2}$/.test(event.sourceDate || '') ? event.sourceDate : '',
+      targetDate: /^\d{4}-\d{2}-\d{2}$/.test(event.targetDate || '') ? event.targetDate : '',
+      source: event.source === 'garmin' ? 'garmin' : 'runner',
+      detail: typeof event.detail === 'string' ? event.detail.slice(0, 240) : ''
+    }));
+}
+
+function recordTrainingEvent(type, payload = {}) {
+  appData.trainingEvents = normalizeTrainingEvents(appData.trainingEvents);
+  appData.trainingEvents.push({
+    id: globalThis.crypto?.randomUUID?.() || `${type}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    type,
+    at: new Date().toISOString(),
+    source: payload.source === 'garmin' ? 'garmin' : 'runner',
+    ...payload
+  });
+  appData.trainingEvents = appData.trainingEvents.slice(-500);
 }
 
 function collectLegacyDayStatuses(data) {
@@ -1099,7 +1152,8 @@ function normalizeData(data) {
     adaptationPrompts: data?.adaptationPrompts && typeof data.adaptationPrompts === 'object' ? data.adaptationPrompts : {},
     dayStatuses: normalizeDayStatuses(data?.dayStatuses),
     skipReasons: normalizeSkipReasons(data?.skipReasons),
-    makeupRecords: normalizeMakeupRecords(data?.makeupRecords)
+    makeupRecords: normalizeMakeupRecords(data?.makeupRecords),
+    trainingEvents: normalizeTrainingEvents(data?.trainingEvents)
   };
   normalized.dayStatuses = {
     ...collectLegacyDayStatuses(normalized),
@@ -1129,6 +1183,13 @@ function loadData() {
 function saveData(data) {
   const normalized = normalizeData(data);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  if (data && typeof data === 'object') {
+    Object.keys(data).forEach((key) => {
+      if (!(key in normalized)) delete data[key];
+    });
+    Object.assign(data, normalized);
+  }
+  return normalized;
 }
 
 function weekHasMalformedVolume(week) {
@@ -1180,7 +1241,8 @@ function rebuildStoredPlan(data) {
     assessments: data.assessments || [],
     adaptationPrompts: data.adaptationPrompts || {},
     skipReasons: normalizeSkipReasons(data.skipReasons),
-    makeupRecords: normalizeMakeupRecords(rebuiltData.makeupRecords)
+    makeupRecords: normalizeMakeupRecords(rebuiltData.makeupRecords),
+    trainingEvents: normalizeTrainingEvents(data.trainingEvents)
   };
 }
 
@@ -1767,6 +1829,12 @@ function renderSetupView() {
       <input type="hidden" id="f-coach-sync" value="daily"><input type="hidden" id="f-coach-time" value="21:37"><input type="hidden" id="f-coach-day" value="0">
     </div>
 
+    <div class="form-group">
+      <label class="form-label" for="f-garmin-completion">Garmin 自動完成門檻</label>
+      <select class="form-input" id="f-garmin-completion"><option value="50">50%｜恢復期較寬鬆</option><option value="60" selected>60%｜建議預設</option><option value="70">70%｜較嚴謹</option><option value="80">80%｜接近完整課表</option></select>
+      <div class="field-help">同步跑量達課表距離的比例（至少 1 km）才會自動完成或認列補跑；手動完成不受影響。</div>
+    </div>
+
     <!-- Live Calc -->
     <div class="form-group">
       <div class="form-label">即時評估</div>
@@ -2260,6 +2328,7 @@ function prefillSetupForm(profile) {
   if (profile.heightCm) document.getElementById('f-height').value = profile.heightCm;
   if (profile.weightKg) document.getElementById('f-weight').value = profile.weightKg;
   if (profile.maxHr) document.getElementById('f-max-hr').value = profile.maxHr;
+  document.getElementById('f-garmin-completion').value = String(garminCompletionPercent(profile));
   if (profile.recentResult) document.getElementById('f-recent').value = profile.recentResult;
   syncDayButtons();
   validateDays();
@@ -2273,8 +2342,21 @@ function prefillSetupForm(profile) {
 // ============================================================
 // PLAN GENERATION
 // ============================================================
-function calcWeeks(targetDate) {
-  return Math.max(Math.floor((new Date(targetDate) - new Date()) / (1000 * 86400 * 7)), 1);
+function mondayOfWeek(dateInput) {
+  const date = new Date(dateInput);
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+  return date;
+}
+
+function calcWeeks(targetDate, generatedAt = Date.now()) {
+  const raceDate = new Date(`${targetDate}T00:00:00`);
+  if (Number.isNaN(raceDate.getTime())) return 1;
+  // 課表以生成日所在週的週一開始；必須把賽事所在的整週也納入，
+  // 否則週日賽事會在「完整週數」計算中被漏掉一週。
+  const planStart = mondayOfWeek(generatedAt);
+  const raceWeekStart = mondayOfWeek(raceDate);
+  return Math.max(Math.round((raceWeekStart - planStart) / (1000 * 86400 * 7)) + 1, 1);
 }
 
 function buildPhases(goal, totalWeeks) {
@@ -2974,7 +3056,7 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
 }
 
 function buildPlan(profile) {
-  const totalWeeks = calcWeeks(profile.targetDate);
+  const totalWeeks = calcWeeks(profile.targetDate, profile.generatedAt);
   const phases = buildPhases(profile.goal, totalWeeks);
   const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
   const plan = [];
@@ -3110,6 +3192,7 @@ function generateAndShowPlan() {
     heightCm: parseFloat(document.getElementById('f-height')?.value) || 0,
     weightKg: parseFloat(document.getElementById('f-weight')?.value) || 0,
     maxHr: parseInt(document.getElementById('f-max-hr')?.value, 10) || 0,
+    garminCompletionPct: Number(document.getElementById('f-garmin-completion')?.value) || 60,
     recentResult: document.getElementById('f-recent').value,
     injuries: [...formState.injuries],
     coachSync: {
@@ -3162,8 +3245,10 @@ function renderPlanView() {
   <button class="tab active" onclick="switchPlanTab('week')">本週課表</button>
   <button class="tab" onclick="switchPlanTab('autopilot')">輔助菜單</button>
   <button class="tab" onclick="switchPlanTab('coach')">教練建議</button>
+  <button class="tab" onclick="switchPlanTab('periodization')">訓練週期</button>
   <button class="tab" onclick="switchPlanTab('analysis')">訓練分析</button>
   <div class="spacer"></div>
+  <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="openTrainingDataManager()">資料管理</button>
   <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="editSetup()">⚙️ 修改設定</button>
 </div>
 <div id="plan-tab-week" class="container">
@@ -3178,6 +3263,9 @@ function renderPlanView() {
 <div id="plan-tab-coach" class="container" style="display:none">
   <div id="coach-review-content">${renderCoachReviewPanel()}</div>
 </div>
+<div id="plan-tab-periodization" class="container" style="display:none">
+  <div id="periodization-content">${renderCoachPeriodizationTimeline() || '<div class="card"><div class="card-title">🗓️ 訓練週期總覽</div><p style="color:var(--c-text-muted);margin:0">解鎖加密週報後，這裡會顯示整個週期的階段規劃。</p></div>'}</div>
+</div>
 <div id="plan-tab-analysis" class="container" style="display:none">
   <div id="training-analysis-content">${renderTrainingAnalysis()}</div>
 </div>
@@ -3186,7 +3274,7 @@ function renderPlanView() {
 }
 
 function switchPlanTab(tab) {
-  const tabs = ['week', 'autopilot', 'coach', 'analysis'];
+  const tabs = ['week', 'autopilot', 'coach', 'periodization', 'analysis'];
   tabs.forEach((name, index) => {
     const section = document.getElementById(`plan-tab-${name}`);
     if (section) section.style.display = name === tab ? 'block' : 'none';
@@ -3345,29 +3433,174 @@ function renderGarminAutopilotCard(profile, plan) {
 
 function renderGarminAutopilotTab(profile, plan) {
   const content = renderGarminAutopilotCard(profile, plan);
-  return content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`;
+  return `${renderTrainingStatusCard(plan)}${content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`}`;
 }
 
-function makeupCompletionCredits(planDays, activityDates, today = todayStr()) {
+function garminCompletionPercent(profile = appData.profile) {
+  const configured = Number(profile?.garminCompletionPct);
+  return Number.isFinite(configured) && configured >= 40 && configured <= 90 ? Math.round(configured) : 60;
+}
+
+function garminCompletionRuleLabel(profile = appData.profile) {
+  return `Garmin 跑量達課表 ${garminCompletionPercent(profile)}%（至少 1 km）才自動認列完成`;
+}
+
+function activityForDate(activityIndex, dateStr) {
+  if (activityIndex instanceof Map) return activityIndex.get(dateStr) || null;
+  return activityIndex?.has?.(dateStr) ? { actualKm: Number.POSITIVE_INFINITY, source: 'legacy' } : null;
+}
+
+function activityCompletesDay(day, activity) {
+  if (!activity) return false;
+  if (activity.source !== 'garmin') return true;
+  const minimumKm = Math.max(1, (Number(day.km) || 0) * (garminCompletionPercent() / 100));
+  return (Number(activity.actualKm) || 0) >= minimumKm;
+}
+
+function makeupCompletionCredits(planDays, activityIndex, today = todayStr()) {
   const sortedDays = [...(planDays || [])].filter((day) => day?.dateStr).sort((a, b) => a.dateStr.localeCompare(b.dateStr));
   const credits = new Map();
 
   // A deliberately scheduled makeup always takes priority over inferred credit.
-  sortedDays.filter((day) => day.isMakeup && day.makeupOf && day.dateStr <= today && activityDates.has(day.dateStr)).forEach((day) => {
+  sortedDays.filter((day) => day.isMakeup && day.makeupOf && day.dateStr <= today && activityCompletesDay(day, activityForDate(activityIndex, day.dateStr))).forEach((day) => {
     credits.set(day.makeupOf, { makeupDate: day.dateStr, source: 'scheduled' });
   });
 
   // Garmin runs on a recovery day can close one recent missed session even when
   // the runner could not schedule the makeup beforehand.
-  sortedDays.filter((day) => day.type === 'rest' && day.dateStr <= today && activityDates.has(day.dateStr)).forEach((restDay) => {
+  sortedDays.filter((day) => day.type === 'rest' && day.dateStr <= today && activityForDate(activityIndex, day.dateStr)).forEach((restDay) => {
     const missedDay = sortedDays.filter((day) => {
       const daysApart = Math.round((new Date(`${restDay.dateStr}T00:00:00`) - new Date(`${day.dateStr}T00:00:00`)) / 86400000);
       return day.type !== 'rest' && !day.isMakeup && day.status === 'missed' && !credits.has(day.dateStr) && daysApart >= 1 && daysApart <= 3;
     }).pop();
-    if (missedDay) credits.set(missedDay.dateStr, { makeupDate: restDay.dateStr, source: 'garmin-auto' });
+    if (missedDay && activityCompletesDay(missedDay, activityForDate(activityIndex, restDay.dateStr))) {
+      credits.set(missedDay.dateStr, { makeupDate: restDay.dateStr, source: 'garmin-auto' });
+    }
   });
 
   return credits;
+}
+
+function trainingCompletionSummary(plan = appData.plan || [], today = todayStr()) {
+  const planDays = (plan || []).flatMap((week) => week.days || []);
+  const planDayByDate = new Map(planDays.map((day) => [day.dateStr, day]));
+  const garminActivity = garminActivityRecords().map((run) => ({
+    date: run.date,
+    actualKm: Number(run.km) || 0,
+    actualTimeMins: Math.round(paceToMinutes(run.pace) * (Number(run.km) || 0)),
+    source: 'garmin'
+  }));
+  const garminDates = new Set(garminActivity.map((entry) => entry.date));
+  const allActivity = [...(appData.log || []).filter((entry) => !garminDates.has(entry.date)), ...garminActivity]
+    .filter((entry) => Boolean(planDayByDate.get(entry.date) && entry.date <= today));
+  const activityByDate = new Map(allActivity.map((entry) => [entry.date, entry]));
+  const activityDates = new Set(activityByDate.keys());
+  const makeupCredits = makeupCompletionCredits(planDays, activityByDate, today);
+  const elapsedDays = planDays.filter((day) => day.type !== 'rest' && !day.isMakeup && day.dateStr <= today);
+  const completedDays = elapsedDays.filter((day) => {
+    const activity = activityByDate.get(day.dateStr);
+    // Explicit runner confirmation is authoritative. A later short Garmin
+    // activity must not turn a manually completed session back into partial.
+    return day.status === 'done' || activityCompletesDay(day, activity) || makeupCredits.has(day.dateStr);
+  });
+  const partialDays = elapsedDays.filter((day) => {
+    const activity = activityByDate.get(day.dateStr);
+    return activity && day.status !== 'done' && !activityCompletesDay(day, activity) && !makeupCredits.has(day.dateStr);
+  });
+  const creditedMakeupDates = new Set([...makeupCredits.values()].map((credit) => credit.makeupDate));
+
+  return {
+    today,
+    planDays,
+    planDayByDate,
+    allActivity,
+    activityByDate,
+    activityDates,
+    makeupCredits,
+    creditedMakeupDates,
+    elapsedDays,
+    completedDays,
+    partialDays,
+    elapsedSessions: elapsedDays.length,
+    completedSessions: completedDays.length,
+    adherence: elapsedDays.length ? Math.round((completedDays.length / elapsedDays.length) * 100) : 0,
+    totalKm: allActivity.reduce((sum, entry) => sum + (entry.actualKm || 0), 0)
+  };
+}
+
+function daysSinceDate(value) {
+  if (!value) return null;
+  const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.max(0, Math.round((new Date(`${todayStr()}T00:00:00`) - date) / 86400000));
+}
+
+function trainingDataHealth(plan = appData.plan || []) {
+  const summary = trainingCompletionSummary(plan);
+  const missingReasonDay = summary.elapsedDays.find((day) => day.status === 'missed' && !formatSkipReason(appData.skipReasons?.[day.dateStr]));
+  const missedWithoutReason = summary.elapsedDays.filter((day) => day.status === 'missed' && !formatSkipReason(appData.skipReasons?.[day.dateStr])).length;
+  const uncreditedRestRuns = summary.allActivity.filter((entry) => {
+    const day = summary.planDayByDate.get(entry.date);
+    return day?.type === 'rest' && !summary.creditedMakeupDates.has(entry.date);
+  }).length;
+  const asOf = coachReviewData?.autopilot?.asOf || coachReviewData?.analyticsUpdatedAt || coachReviewData?.updatedAt;
+  const syncAge = daysSinceDate(asOf);
+  const issues = [];
+  if (missedWithoutReason) issues.push(`${missedWithoutReason} 筆跳過尚未記錄原因`);
+  if (uncreditedRestRuns) issues.push(`${uncreditedRestRuns} 筆休息日跑步未認列補跑`);
+  if (syncAge !== null && syncAge > 2) issues.push(`Garmin 資料已 ${syncAge} 天未更新`);
+  if (summary.partialDays.length) issues.push(`${summary.partialDays.length} 堂只有部分跑量，尚未達自動完成門檻`);
+  return { summary, issues, missedWithoutReason, missingReasonDate: missingReasonDay?.dateStr || null, uncreditedRestRuns, syncAge, asOf };
+}
+
+function renderTrainingStatusCard(plan = appData.plan || []) {
+  const health = trainingDataHealth(plan);
+  const { summary, issues, syncAge, missedWithoutReason, missingReasonDate, uncreditedRestRuns } = health;
+  const reminders = [];
+  if (uncreditedRestRuns) reminders.push(`有 ${uncreditedRestRuns} 次 Garmin 跑步還沒對應課表。目前會算進本週跑量，但不會算成完成或補跑；如果它其實是補跑，請回原本跳過的課表按「重新安排」。`);
+  if (missedWithoutReason) reminders.push(`${missedWithoutReason} 個跳過課表還沒填原因；補上後，之後回顧調整才看得懂當時為什麼休息。`);
+  if (summary.partialDays.length) reminders.push(`${summary.partialDays.length} 堂跑步距離還沒達到你設定的完成比例，目前先標成部分完成。`);
+  if (syncAge !== null && syncAge > 2) reminders.push(`Garmin 已 ${syncAge} 天沒有新資料，先確認手錶或同步是否正常。`);
+  const stateTitle = reminders.length ? `有 ${reminders.length} 件訓練事項待確認` : '本週訓練狀態已同步';
+  const stateCopy = reminders.length
+    ? reminders.join(' ')
+    : `已完成 ${summary.completedSessions}/${summary.elapsedSessions || 0} 堂，執行率 ${summary.adherence}%${syncAge === null ? '' : syncAge === 0 ? '；Garmin 今日已同步。' : `；Garmin ${syncAge} 天前同步。`}`;
+  const hasInAppFix = missedWithoutReason || uncreditedRestRuns || summary.partialDays.length;
+  const action = missedWithoutReason && missingReasonDate
+    ? `<button class="btn btn-secondary" onclick="editSkipReason('${missingReasonDate}')">補填跳過原因</button>`
+    : hasInAppFix
+      ? '<button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看本週課表</button>'
+      : '';
+  return `<section class="training-status-card ${issues.length ? 'is-attention' : ''}" aria-label="訓練資料狀態">
+    <div><div class="training-status-kicker">本週提醒</div><div class="training-status-title">${reviewEscape(stateTitle)}</div><div class="training-status-copy">${reviewEscape(stateCopy)}</div></div>
+    ${action ? `<div class="training-status-actions">${action}</div>` : ''}
+  </section>`;
+}
+
+function showWeekPlanFromStatus() {
+  switchPlanTab('week');
+  document.getElementById('plan-tab-week')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function configureGarminCompletionRule() {
+  const current = garminCompletionPercent();
+  showModal('設定 Garmin 自動完成門檻', `<p style="margin:0 0 14px;line-height:1.65;color:var(--c-text-muted)">同步跑步達到課表距離的指定比例（且至少 1 km）時，系統才會自動標示完成或認列補跑。手動完成不受這個門檻影響。</p><label class="form-label" for="garmin-completion-pct">課表距離完成比例</label><select id="garmin-completion-pct" class="form-input"><option value="50" ${current === 50 ? 'selected' : ''}>50%｜寬鬆，適合恢復期</option><option value="60" ${current === 60 ? 'selected' : ''}>60%｜建議預設</option><option value="70" ${current === 70 ? 'selected' : ''}>70%｜較嚴謹</option><option value="80" ${current === 80 ? 'selected' : ''}>80%｜接近完整課表</option></select>`, [
+    { label: '儲存設定', primary: true, action: () => setGarminCompletionRule() },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+function setGarminCompletionRule() {
+  const value = Number(document.getElementById('garmin-completion-pct')?.value);
+  if (![50, 60, 70, 80].includes(value)) return;
+  appData.profile = { ...(appData.profile || {}), garminCompletionPct: value };
+  recordTrainingEvent('garmin_completion_rule_updated', { detail: `${value}%` });
+  saveData(appData);
+  closeModal();
+  const activeTab = ['week', 'autopilot', 'coach', 'periodization', 'analysis'].find((tab) => document.getElementById(`plan-tab-${tab}`)?.style.display !== 'none') || 'week';
+  renderPlanView();
+  showView('plan');
+  switchPlanTab(activeTab);
 }
 
 function renderProgressCard(profile, plan) {
@@ -3375,32 +3608,14 @@ function renderProgressCard(profile, plan) {
   const pct = Math.round((currentWeek / totalWeeks) * 100);
   const assessmentHint = getAssessmentCycleHint(plan);
   const currWeekPlan = plan[currentWeek - 1];
-  const today = todayStr();
-  const planDays = plan.flatMap((week) => week.days || []);
-  const planDayByDate = new Map(planDays.map((day) => [day.dateStr, day]));
-  const garminActivity = garminActivityRecords().map((run) => ({ date: run.date, actualKm: run.km, source: 'garmin' }));
-  const garminDates = new Set(garminActivity.map((entry) => entry.date));
-  const allActivity = [...(appData.log || []).filter((entry) => !garminDates.has(entry.date)), ...garminActivity].filter((entry) => {
-    return Boolean(planDayByDate.get(entry.date) && entry.date <= today);
-  });
-  const trackedLog = allActivity.filter((entry) => {
-    const day = planDayByDate.get(entry.date);
-    return day.type !== 'rest';
-  });
-  const activityDates = new Set(allActivity.map((entry) => entry.date));
-  const makeupCredits = makeupCompletionCredits(planDays, activityDates, today);
-  const completedDates = new Set(trackedLog.map((entry) => entry.date));
-  const elapsedDays = planDays.filter((day) => day.type !== 'rest' && !day.isMakeup && day.dateStr <= today);
-  const elapsedSessions = elapsedDays.length;
-  const completedSessions = elapsedDays.filter((day) => completedDates.has(day.dateStr) || makeupCredits.has(day.dateStr)).length;
-  const totalKm = allActivity.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const summary = trainingCompletionSummary(plan);
+  const { planDayByDate, allActivity, makeupCredits, creditedMakeupDates, elapsedSessions, completedSessions, totalKm, adherence } = summary;
   const weekDates = new Set((currWeekPlan?.days || []).map((day) => day.dateStr));
   const weekActivities = allActivity.filter((entry) => weekDates.has(entry.date));
   const currWeekDone = weekActivities.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
-  const creditedMakeupDates = new Set([...makeupCredits.values()].map((credit) => credit.makeupDate));
   const creditedMakeupKm = weekActivities.filter((entry) => creditedMakeupDates.has(entry.date)).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
   const extraKm = weekActivities.filter((entry) => planDayByDate.get(entry.date)?.type === 'rest' && !creditedMakeupDates.has(entry.date)).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
-  const adherence = elapsedSessions > 0 ? Math.round((completedSessions / elapsedSessions) * 100) : 0;
+  const volumeNotes = [creditedMakeupKm ? `認列補跑 ${creditedMakeupKm.toFixed(1)} km` : '', extraKm ? `額外跑步 ${extraKm.toFixed(1)} km` : ''].filter(Boolean);
   const weekTargetKm = currWeekPlan?.targetKm || 0;
   const weekProgressPct = weekTargetKm > 0 ? Math.min(100, Math.round((currWeekDone / weekTargetKm) * 100)) : 0;
   const pausedBanner = profile.paused
@@ -3416,11 +3631,11 @@ function renderProgressCard(profile, plan) {
   <div class="plan-overview-top"><div><div class="plan-overview-kicker">Plan progress</div><h2 class="plan-overview-title">${GOAL_NAME[profile.goal]} · 第 ${currentWeek} 週</h2></div><div class="plan-overview-meta">目標日 ${profile.targetDate} · ${secToPace(profile.racePaceSec)}/km</div></div>
   <div class="plan-progress-line"><span>計畫時間進度</span><strong>第 ${currentWeek} / ${totalWeeks} 週 · ${pct}%</strong></div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${Math.min(100, pct)}%"></div></div>
-  <div class="plan-progress-line"><span>本週跑量進度${creditedMakeupKm ? `（含認列補跑 ${creditedMakeupKm.toFixed(1)} km）` : ''}${extraKm ? `${creditedMakeupKm ? '、' : '（含'}額外跑步 ${extraKm.toFixed(1)} km${creditedMakeupKm ? '' : '）'}` : ''}</span><strong>${currWeekDone.toFixed(1)} / ${weekTargetKm || '?'} km · ${weekProgressPct}%</strong></div>
+  <div class="plan-progress-line"><span>本週跑量進度${volumeNotes.length ? `（含${volumeNotes.join('、')}）` : ''}</span><strong>${currWeekDone.toFixed(1)} / ${weekTargetKm || '?'} km · ${weekProgressPct}%</strong></div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${weekProgressPct}%"></div></div>
   <div class="plan-metric-grid">
     <div class="plan-metric"><span class="plan-metric-label">本週剩餘</span><strong class="plan-metric-value">${weekTargetKm ? `${Math.max(0, weekTargetKm - currWeekDone).toFixed(1)} km` : '—'}</strong></div>
-    <div class="plan-metric"><span class="plan-metric-label">已完成課次</span><strong class="plan-metric-value">${completedSessions} 次</strong></div>
+    <div class="plan-metric"><span class="plan-metric-label">完成 / 應完成</span><strong class="plan-metric-value">${completedSessions} / ${elapsedSessions} 次</strong></div>
     <div class="plan-metric"><span class="plan-metric-label">累積實跑</span><strong class="plan-metric-value">${totalKm.toFixed(1)} km</strong></div>
     <div class="plan-metric"><span class="plan-metric-label">執行率</span><strong class="plan-metric-value">${elapsedSessions ? `${adherence}%` : '尚未開始'}</strong></div>
   </div>
@@ -3525,10 +3740,61 @@ function renderPaceTrend(runs) {
   return `<div class="pace-trend-panel"><div class="pace-trend-summary"><div class="pace-trend-metric"><span>近 ${points.length} 趟均速</span><strong>${formatPaceSeconds(average)}</strong></div><div class="pace-trend-metric"><span>最快紀錄</span><strong>${formatPaceSeconds(min)}</strong></div><div class="pace-trend-metric"><span>最新相較均速</span><strong class="${latestTone}">${latestLabel}</strong></div></div><svg class="pace-trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="最近跑步配速趨勢；最新 ${formatPaceSeconds(latest.paceSeconds)}，近 ${points.length} 趟平均 ${formatPaceSeconds(average)}"><defs><linearGradient id="pace-trend-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#5fae79" stop-opacity=".34"/><stop offset="100%" stop-color="#5fae79" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${padX}" x2="${width - padX}" y1="${averageY}" y2="${averageY}" stroke="#9aa79f" stroke-width="1.5" stroke-dasharray="5 5"/><path d="${areaPath}" fill="url(#pace-trend-fill)"/><polyline points="${coords}" fill="none" stroke="#24724f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}${dateLabels}</svg><div class="pace-trend-legend"><span>單次跑步</span><span class="average">近 ${points.length} 趟平均 ${formatPaceSeconds(average)}</span></div><div class="pace-trend-activities">${activityRows}</div></div>`;
 }
 
+function weeklyRampInfo(trend) {
+  const currentWeekKey = weekStartLabel(todayStr());
+  const completeWeeks = trend.filter((item) => item.week !== currentWeekKey);
+  if (completeWeeks.length < 2) return null;
+  const [prev, last] = completeWeeks.slice(-2);
+  if (prev.km < 5) return null;
+  const ramp = Math.round(((last.km - prev.km) / prev.km) * 100);
+  return { prev, last, ramp };
+}
+
+function weekVolumeRecommendation(trend, adherence) {
+  const autopilot = coachReviewData?.autopilot;
+  if (autopilot && autopilot.status === 'ready') {
+    const factor = Number(autopilot.volumeFactor) || 1;
+    const tone = factor > 1 ? 'good' : factor < 1 ? 'caution' : 'good';
+    const icon = tone === 'good' ? '🟢' : '🟡';
+    const verdict = autopilot.label || (factor > 1 ? '可加量' : factor < 1 ? '持平或減量' : '持平');
+    const reasonDetail = autopilot.reasons?.[0] ? `（${autopilot.reasons[0]}）` : '';
+    return { verdict, tone, icon, reason: `${autopilot.headline || '依 Garmin 近況判讀。'}${reasonDetail}` };
+  }
+  const info = weeklyRampInfo(trend);
+  if (!info) return null;
+  const { ramp } = info;
+  if (adherence < 70) {
+    return { verdict: '持平或減量', tone: 'caution', icon: '🟡', reason: `近期執行率僅 ${adherence}%，低於 70%；這週先把課表完成度補起來，暫不加量。` };
+  }
+  if (ramp > 15) {
+    return { verdict: '減量', tone: 'danger', icon: '🔴', reason: `上週跑量比前週增加 ${ramp}%，超過安全增幅上限（10–15%）；這週建議下修，避免受傷。` };
+  }
+  if (ramp > 10) {
+    return { verdict: '持平', tone: 'caution', icon: '🟡', reason: `上週跑量比前週增加 ${ramp}%，已達安全增幅上限；這週不要再加量。` };
+  }
+  if (ramp < -30) {
+    return { verdict: '持平', tone: 'caution', icon: '🟡', reason: `上週跑量比前週大減 ${Math.abs(ramp)}%；這週先從保守量恢復，不要直接跳回原量。` };
+  }
+  return { verdict: '可加量', tone: 'good', icon: '🟢', reason: `執行率 ${adherence}%、上週增幅 ${ramp >= 0 ? '+' : ''}${ramp}% 都在安全範圍；這週可小幅加量（建議 +5–10%）。` };
+}
+
+function renderWeeklySummaryCard(trend, adherence) {
+  const rec = weekVolumeRecommendation(trend, adherence);
+  if (!rec) return '';
+  const colorMap = { good: 'var(--c-green)', caution: 'var(--c-orange)', danger: 'var(--c-red)' };
+  return `<div class="card" style="border-left:4px solid ${colorMap[rec.tone]}">
+    <div class="card-title">📅 本週總結</div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 8px"><span style="font-size:20px">${rec.icon}</span><b style="font-size:16px">下週建議：${rec.verdict}</b></div>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:var(--c-text-muted)">${rec.reason}</p>
+  </div>`;
+}
+
 function renderTrainingAnalysis() {
   const runs = coachRunRecords();
-  if (!runs.length) return `<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
+  const statusCard = renderTrainingStatusCard(appData.plan || []);
+  if (!runs.length) return `${statusCard}<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
   const trend = weeklyRunTrend(runs);
+  const weeklySummaryCard = renderWeeklySummaryCard(trend, trainingDataHealth(appData.plan || []).summary.adherence);
   const recent = runs.slice(-4);
   const averagePace = recent.filter((run) => run.paceSeconds).reduce((sum, run, _, list) => sum + run.paceSeconds / list.length, 0);
   const averageHr = recent.filter((run) => run.hr).reduce((sum, run, _, list) => sum + run.hr / list.length, 0);
@@ -3538,12 +3804,9 @@ function renderTrainingAnalysis() {
   const averageLoad = recent.filter((run) => run.trainingLoad).reduce((sum, run, _, list) => sum + run.trainingLoad / list.length, 0);
   const latestVo2 = [...runs].reverse().find((run) => run.vo2max)?.vo2max;
   const rampNote = (() => {
-    const currentWeekKey = weekStartLabel(todayStr());
-    const completeWeeks = trend.filter((item) => item.week !== currentWeekKey);
-    if (completeWeeks.length < 2) return '';
-    const [prev, last] = completeWeeks.slice(-2);
-    if (prev.km < 5) return '';
-    const ramp = Math.round(((last.km - prev.km) / prev.km) * 100);
+    const info = weeklyRampInfo(trend);
+    if (!info) return '';
+    const { prev, last, ramp } = info;
     const [icon, color, text] = ramp > 15
       ? ['🔴', 'var(--c-red)', `上週跑量比前週增加 ${ramp}%，超過安全增幅（10–15%），受傷風險升高；這週建議持平或下修。`]
       : ramp > 10
@@ -3553,12 +3816,25 @@ function renderTrainingAnalysis() {
           : ['🟢', 'var(--c-green)', `上週跑量增幅 ${ramp >= 0 ? '+' : ''}${ramp}%，在安全範圍（≤10%）內。`];
     return `<div style="margin:14px 0 0;padding:10px 14px;border-left:3px solid ${color};border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6">${icon} <b>週增幅監控</b>：${text}（${prev.km} → ${last.km} km）</div>`;
   })();
-  return `<div class="card"><div class="card-title">📈 訓練分析 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
+  return `${statusCard}${weeklySummaryCard}<div class="card"><div class="card-title">📈 訓練分析 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
     <div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">近四週跑量</span><strong class="plan-metric-value">${lastFourKm.toFixed(1)} km</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均配速</span><strong class="plan-metric-value">${formatPaceSeconds(averagePace)}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均心率</span><strong class="plan-metric-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">Garmin 資料截至</span><strong class="plan-metric-value">${reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt)}</strong></div></div>
     ${rampNote}
     <div style="margin-top:20px"><b style="font-size:15px">進階訓練指標</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 10px">只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p><div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">最近四趟平均步頻</span><strong class="plan-metric-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟累積爬升</span><strong class="plan-metric-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均負荷</span><strong class="plan-metric-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近 VO₂ Max</span><strong class="plan-metric-value">${latestVo2 || '—'}</strong></div></div></div>
     <div class="analysis-chart-grid"><section class="analysis-chart-card"><b>週跑量趨勢</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 0">每週總公里數，包含額外跑步。</p>${renderVolumeBars(trend)}</section><section class="analysis-chart-card"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
   </div>`;
+}
+
+function coachGoalGapDiffMin() {
+  const coachTarget = coachReviewData?.goal?.target;
+  const myTime = appData.profile?.targetTime;
+  if (!coachTarget || !myTime) return null;
+  const coachMatch = String(coachTarget).match(/(\d+):(\d{2})/);
+  if (!coachMatch) return null;
+  const coachSec = parseInt(coachMatch[1], 10) * 3600 + parseInt(coachMatch[2], 10) * 60;
+  const mySec = timeToSec(myTime);
+  if (!mySec || !coachSec) return null;
+  const diffMin = Math.round((coachSec - mySec) / 60);
+  return Math.abs(diffMin) < 6 ? null : diffMin;
 }
 
 function coachGoalGapNote(compact = false) {
@@ -3698,9 +3974,53 @@ function renderGarminActualCard() {
   </div>`;
 }
 
+function renderCoachPeriodizationTimeline() {
+  const phases = coachPeriodization();
+  if (!phases.length) return '';
+  const currentPhase = coachPhaseForDate(todayStr());
+  const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+  const rows = phases.map((phase) => {
+    const start = new Date(`${phase.start}T00:00:00`);
+    const end = new Date(start.getTime() + (phase.weeks || 1) * 7 * 86400000 - 86400000);
+    const isCurrent = currentPhase && currentPhase.start === phase.start && currentPhase.phase === phase.phase;
+    return `<div class="periodization-row ${isCurrent ? 'is-current' : ''}">
+      <div class="periodization-phase">${coachPhaseEmoji(phase.phase)} ${reviewEscape(phase.phase)}${isCurrent ? '<span class="coach-key-badge">目前階段</span>' : ''}</div>
+      <div class="periodization-meta"><span>${fmt(start)}–${fmt(end)}・${phase.weeks} 週</span><b>${reviewEscape(phase.km)} km</b></div>
+      ${phase.focus ? `<div class="periodization-focus">${reviewEscape(phase.focus)}</div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div class="card">
+    <div class="card-title">🗓️ 訓練週期總覽</div>
+    <p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 14px">整個週期的跑量與重點怎麼隨階段與季節調整，一次看完。</p>
+    <div class="periodization-list">${rows}</div>
+  </div>`;
+}
+
+const TRAINING_JARGON_ENTRIES = [
+  [/ST|快步/, 'ST／快步：85–95% 漸進加速，練步頻跑姿，非衝刺；組間走回，休 60–90 秒或恢復了再出發。'],
+  [/節奏跑|T\s*配速/, '節奏跑（T 配速）：乳酸閾值強度，吃力但穩定，只能講短句。'],
+  [/間歇|I\s*配速/, '間歇（I 配速）：接近最大攝氧量強度，很硬；組間走或慢跑恢復，時間抓跟快跑趟差不多長。'],
+  [/法特雷克/, '法特雷克：沒有固定距離或時間的變速跑，依體感自由加速、放鬆，不用照錶算配速。'],
+  [/坡跑/, '坡跑：上坡段全力或接近全力，練爆發力與跑姿；下坡用走或慢跑當恢復，不趕時間衝下坡。'],
+  [/E\s*跑/, 'E 跑（Easy）：輕鬆有氧配速，全程可對話，是每週跑量的主體，不追速度。']
+];
+
+function jargonNotesFor(texts) {
+  const combined = texts.join(' ');
+  const notes = [];
+  const seen = new Set();
+  for (const [pattern, note] of TRAINING_JARGON_ENTRIES) {
+    if (pattern.test(combined) && !seen.has(note)) {
+      seen.add(note);
+      notes.push(note);
+    }
+  }
+  return notes;
+}
+
 function renderCoachReviewPanel() {
   if (!coachReviewData) {
-    return `<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
+    return `${renderTrainingStatusCard(appData.plan || [])}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
   }
   const week = coachReviewData.week || {};
   const nextWeek = coachReviewData.nextWeek || {};
@@ -3710,6 +4030,9 @@ function renderCoachReviewPanel() {
   const garminOnlyNotice = coachReviewData.sourceMode === 'garmin-only'
     ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 自動駕駛模式</b><br>雲端已同步實跑資料；課表頁會依近期跑量與頻率產生輔助菜單。正式課表維持原樣，不會被暗中覆寫。</div>`
     : '';
+  const highlightMenuText = (text) => reviewEscape(text)
+    .replace(/(\d+(?:\.\d+)?\s*(?:km|m))/gi, '<b class="coach-menu-highlight">$1</b>')
+    .replace(/(HR\s*[≤~]?\s*\d+(?:\s*[–-]\s*\d+)?)/gi, '<b class="coach-menu-highlight">$1</b>');
   const menuRows = scheduledMenu.map((item) => {
     const dayName = DOW_NAMES[item.scheduledDow] || item.day || '';
     const isLong = /長跑|long/i.test(String(item.plan || ''));
@@ -3720,12 +4043,13 @@ function renderCoachReviewPanel() {
     return `<div class="coach-menu-row ${isLong ? 'is-long' : ''}">
       <span class="coach-menu-day">${reviewEscape(dayName)}</span>
       <div class="coach-menu-body">
-        <div>${reviewEscape(mainText)}${isLong ? '<span class="coach-key-badge">本週關鍵課</span>' : ''}</div>
-        ${purposeText ? `<div class="coach-menu-purpose">目的：${reviewEscape(purposeText)}</div>` : ''}
+        ${isLong ? '<div class="coach-menu-head-line"><span class="coach-key-badge">本週關鍵課</span></div>' : ''}
+        <div>${highlightMenuText(mainText)}</div>
+        ${purposeText ? `<div class="coach-menu-purpose">🎯 ${reviewEscape(purposeText)}</div>` : ''}
       </div>
     </div>`;
   }).join('');
-  return `<div class="card coach-panel">
+  return `${renderTrainingStatusCard(appData.plan || [])}<div class="card coach-panel">
     <div class="coach-head">
       <div class="card-title" style="margin:0">🏃 教練建議</div>
       <span class="coach-pill">資料截至 ${reviewEscape(coachReviewData.updatedAt)}</span>
@@ -3739,6 +4063,7 @@ function renderCoachReviewPanel() {
       <div class="coach-fineprint">此設定會優先於週報快照中的舊目標，修改訓練設定後會立即同步顯示。</div>
       ${coachGoalGapNote()}
     </div>
+    ${nextWeek.coachNote ? `<div class="coach-note-callout coach-note-priority">🗣️ <span><b>本週唯一任務</b><br>${reviewEscape(nextWeek.coachNote)}</span></div>` : ''}
     ${week.verdict || week.notes ? `<div class="coach-verdict">
       <span class="coach-verdict-icon">${reviewEscape(week.verdict || '📋')}</span>
       <div>
@@ -3756,7 +4081,11 @@ function renderCoachReviewPanel() {
       </div>
       <p class="coach-fineprint" style="margin:4px 0 10px">已依目前訓練日重排：${reviewEscape(scheduleDays)}${appData.profile?.dayState?.includes(2) ? '（長跑固定於指定長跑日）' : ''}</p>
       <div class="coach-menu-list">${menuRows}</div>
-      ${nextWeek.coachNote ? `<div class="coach-note-callout">🗣️ <span>${reviewEscape(nextWeek.coachNote)}</span></div>` : ''}
+      ${(() => {
+        const jargon = jargonNotesFor(scheduledMenu.map((item) => item.plan || ''));
+        if (!jargon.length) return '';
+        return `<details class="coach-jargon" style="margin-top:10px"><summary style="cursor:pointer;font-size:12.5px;font-weight:700;color:var(--c-text-muted)">📖 這週出現的訓練名詞是什麼意思？</summary><ul style="margin:8px 0 0;padding-left:18px;font-size:12.5px;color:var(--c-text-muted);line-height:1.6">${jargon.map((note) => `<li>${reviewEscape(note)}</li>`).join('')}</ul></details>`;
+      })()}
       ${nextWeek.weatherPlan ? `<div class="wx-chip" style="margin:10px 0 0"><span class="wx-icon">🌦️</span><span>天氣備案<span class="wx-advice">${reviewEscape(nextWeek.weatherPlan)}</span></span></div>` : ''}
     </div>
     ${renderCoachDataSignals()}
@@ -3774,8 +4103,12 @@ function refreshCoachReviewPanels() {
   }
   const coachHost = document.getElementById('coach-review-content');
   if (coachHost) coachHost.innerHTML = renderCoachReviewPanel();
+  const periodizationHost = document.getElementById('periodization-content');
+  if (periodizationHost) periodizationHost.innerHTML = renderCoachPeriodizationTimeline() || '<div class="card"><div class="card-title">🗓️ 訓練週期總覽</div><p style="color:var(--c-text-muted);margin:0">解鎖加密週報後，這裡會顯示整個週期的階段規劃。</p></div>';
   const analysisHost = document.getElementById('training-analysis-content');
   if (analysisHost) analysisHost.innerHTML = renderTrainingAnalysis();
+  const autopilotHost = document.getElementById('plan-tab-autopilot');
+  if (autopilotHost) autopilotHost.innerHTML = renderGarminAutopilotTab(appData.profile, appData.plan);
 }
 
 function paceToMinutes(pace) {
@@ -3814,7 +4147,7 @@ function syncGarminRunsToPlan(review) {
       appData.log[existingIndex] = entry;
       changed = true;
     }
-    if (day.status !== 'done' || appData.dayStatuses?.[day.dateStr] !== 'done') {
+    if (activityCompletesDay(day, entry) && (day.status !== 'done' || appData.dayStatuses?.[day.dateStr] !== 'done')) {
       day.status = 'done';
       appData.dayStatuses = appData.dayStatuses || {};
       appData.dayStatuses[day.dateStr] = 'done';
@@ -3823,7 +4156,7 @@ function syncGarminRunsToPlan(review) {
   }));
 
   const planDays = appData.plan.flatMap((week) => week.days || []);
-  const autoCredits = makeupCompletionCredits(planDays, new Set(runsByDate.keys()), todayStr());
+  const autoCredits = makeupCompletionCredits(planDays, runsByDate, todayStr());
   autoCredits.forEach((credit, sourceDate) => {
     if (credit.source !== 'garmin-auto') return;
     const sourceDay = planDays.find((day) => day.dateStr === sourceDate);
@@ -3850,9 +4183,12 @@ function syncGarminRunsToPlan(review) {
     } else if (appData.log[existingIndex].source === 'garmin') {
       appData.log[existingIndex] = entry;
     }
-    targetDay.status = 'done';
-    appData.dayStatuses = normalizeDayStatuses(appData.dayStatuses);
-    appData.dayStatuses[targetDay.dateStr] = 'done';
+    if (activityCompletesDay(targetDay, entry)) {
+      targetDay.status = 'done';
+      appData.dayStatuses = normalizeDayStatuses(appData.dayStatuses);
+      appData.dayStatuses[targetDay.dateStr] = 'done';
+    }
+    recordTrainingEvent('makeup_auto_credited', { source: 'garmin', sourceDate, targetDate: targetDay.dateStr, detail: `${Number(run.km) || 0} km` });
     changed = true;
   });
 
@@ -4025,11 +4361,49 @@ function renderSupportCards(blocks) {
   `).join('')}</div>`;
 }
 
+const GUIDE_ACTION_VIDEOS = {
+  '快走': 'https://www.youtube.com/watch?v=yaw1N65GEJs',
+  '扶牆腳踝活動': 'https://www.youtube.com/watch?v=hMIzP3RcPFw',
+  '扶牆前後擺腿': 'https://www.youtube.com/watch?v=naW8u72lOzI',
+  '原地踏步高抬膝': 'https://www.youtube.com/watch?v=-fI2BPfeTHI',
+  '腳踝繞圈': 'https://www.youtube.com/watch?v=uV0I5adTRXw',
+  '弓箭步轉體': 'https://www.youtube.com/watch?v=6bpeLr60Tkc',
+  '原地高抬腿': 'https://www.youtube.com/watch?v=IxJ1F4XpV0o',
+  '原地小跳': 'https://www.youtube.com/watch?v=jfvDjRWRKn0',
+  '小腿動態伸展': 'https://www.youtube.com/watch?v=VQO1HjKaV7w',
+  '髖關節繞圈': 'https://www.youtube.com/watch?v=JYqLwajOGjI',
+  '慢走 + 深呼吸': 'https://www.youtube.com/watch?v=RfY9CYyTAII',
+  '髖屈肌伸展': 'https://www.youtube.com/watch?v=JwvHstw_aPs',
+  '腿後側伸展': 'https://www.youtube.com/watch?v=M38dHh6iMzg',
+  '臀肌伸展': 'https://www.youtube.com/watch?v=e3DZzHcwk3o',
+  '小腿伸展': 'https://www.youtube.com/watch?v=zGLD19PC_Jg',
+  '髂脛束周邊放鬆': 'https://www.youtube.com/watch?v=RHi7_atv__k',
+  '足底按摩': 'https://www.youtube.com/watch?v=yLQjt5IWHJ4',
+  '臀橋': 'https://www.youtube.com/watch?v=caGWe89GpCA',
+  '分腿蹲': 'https://www.youtube.com/watch?v=fKRT_1IOCs0',
+  '側棒式': 'https://www.youtube.com/watch?v=ovPSZzyNPII',
+  '單腳小腿提踵': 'https://www.youtube.com/watch?v=IphGZ8OlfYg',
+  '死蟲': 'https://www.youtube.com/watch?v=Afa89jCoKuw',
+  'Bird Dog': 'https://www.youtube.com/watch?v=vRYf25I6uYo',
+  '蚌殼式': 'https://www.youtube.com/watch?v=cPjI2AoXUdE',
+  '彈力帶側走': 'https://www.youtube.com/watch?v=cvfy1kiHY58',
+  '踏台 Step-up': 'https://www.youtube.com/watch?v=5_XmhOG7b74',
+  '單腳羅馬尼亞硬舉': 'https://www.youtube.com/watch?v=mN-O1pmIdE4',
+  '後跨弓箭步': 'https://www.youtube.com/watch?v=gZAQ0lL_sGk',
+  '靠牆脛前肌抬腳': 'https://www.youtube.com/watch?v=i5ZNerGK5qs',
+  '脛前肌抬腳': 'https://www.youtube.com/watch?v=i5ZNerGK5qs',
+  '羅馬尼亞硬舉': 'https://www.youtube.com/watch?v=5u_hQA-r4yk',
+  '小腿提踵': 'https://www.youtube.com/watch?v=SVtg-1loH4c',
+  '單腳站平衡': 'https://www.youtube.com/watch?v=fbVTXhp6snI',
+  '足底短足訓練': 'https://www.youtube.com/watch?v=m1lkcg8p-48'
+};
+
 function guideVideoSearchUrl(item) {
   const action = String(item || '')
     .replace(/\s+\d+[–-]?\d*\s*(秒|分|步|次|×|x).*$/u, '')
     .replace(/\s+\d+×.*$/u, '')
     .trim();
+  if (GUIDE_ACTION_VIDEOS[action]) return GUIDE_ACTION_VIDEOS[action];
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(`${action} 動作教學 跑者`)}`;
 }
 
@@ -4117,7 +4491,16 @@ function getGarminRunForDate(dateStr) {
 
 function renderGarminRunResult(run, extra = false) {
   if (!run) return '';
-  return `<div class="garmin-run-result ${extra ? 'extra' : ''}"><span>${extra ? '⌚ Garmin 額外跑步' : '⌚ Garmin 已同步'}</span><b>${reviewEscape(run.km)} km · ${reviewEscape(run.pace)}</b>${run.hr ? `<span>HR ${reviewEscape(run.hr)}</span>` : ''}</div>`;
+  const label = extra ? 'Garmin 額外跑步' : 'Garmin 已同步';
+  const detail = extra ? '已納入本週跑量' : '已比對課表';
+  return `<div class="garmin-run-result ${extra ? 'extra' : ''}">
+    <div class="garmin-run-label"><span>⌚ ${label}</span><small>${detail}</small></div>
+    <div class="garmin-run-stats">
+      <span class="garmin-run-stat">距離<b>${reviewEscape(run.km)} km</b></span>
+      <span class="garmin-run-stat">配速<b>${reviewEscape(run.pace)}/km</b></span>
+      <span class="garmin-run-stat">心率<b>${run.hr ? `HR ${reviewEscape(run.hr)}` : '—'}</b></span>
+    </div>
+  </div>`;
 }
 
 function renderDayCard(day) {
@@ -4136,7 +4519,9 @@ function renderDayCard(day) {
     </div>`;
   }
   const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long' }[day.type] || 'badge-rest';
-  const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[day.type] || '訓練';
+  const typeName = day.type === 'easy' && day.focus === 'recovery'
+    ? '恢復跑'
+    : { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[day.type] || '訓練';
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
   const skipReason = formatSkipReason(appData.skipReasons?.[day.dateStr]);
   const actionsHTML = garminRun
@@ -4145,6 +4530,8 @@ function renderDayCard(day) {
     ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>'
     : day.status === 'missed'
       ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div><div class="skip-reason">${skipReason ? `原因：${reviewEscape(skipReason)}` : '跳過原因：尚未記錄'}</div><div class="day-card-actions"><button class="btn btn-secondary" onclick="editSkipReason('${day.dateStr}')">補填原因</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}')">重新安排</button><button class="btn btn-secondary" onclick="undoMissed('${day.dateStr}')">撤銷跳過</button></div>`
+      : day.dateStr > todayStr()
+      ? '<div style="color:var(--c-text-muted);font-size:13px">尚未到日期，無法先記錄</div>'
       : `<div class="day-card-actions">
           <button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">✓ 完成</button>
           <button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button>
@@ -4333,6 +4720,7 @@ function markDone(dateStr, type, plannedKm) {
           const rpe = parseInt(document.getElementById('m-rpe').value, 10) || 0;
           const notes = document.getElementById('m-notes').value;
           saveLogEntry({ date: dateStr, type, plannedKm, actualKm: km, actualTimeMins: mins, rpe, notes, prescribedPaceSec });
+          recordTrainingEvent('completed', { date: dateStr, detail: `${km} km · RPE ${rpe || '—'}` });
           markDayStatus(dateStr, 'done');
           autoPaceCalibration();
           closeModal();
@@ -4369,6 +4757,7 @@ function futureMakeupCandidates(sourceDate) {
 }
 
 function finishMissedDecision(dateStr) {
+  recordTrainingEvent('skipped', { date: dateStr, detail: formatSkipReason(appData.skipReasons?.[dateStr]) });
   markDayStatus(dateStr, 'missed');
   closeModal();
   renderPlanView();
@@ -4382,6 +4771,7 @@ function scheduleMakeupRun(sourceDate, targetDate) {
   applyMakeupAssignment(source, target);
   appData.makeupRecords = normalizeMakeupRecords(appData.makeupRecords);
   appData.makeupRecords[sourceDate] = { targetDate, source: 'scheduled' };
+  recordTrainingEvent('makeup_scheduled', { sourceDate, targetDate, detail: formatSkipReason(appData.skipReasons?.[sourceDate]) });
   markDayStatus(sourceDate, 'missed');
   saveData(appData);
   closeModal();
@@ -4416,6 +4806,7 @@ function undoMissed(dateStr) {
   delete appData.dayStatuses[dateStr];
   appData.makeupRecords = normalizeMakeupRecords(appData.makeupRecords);
   delete appData.makeupRecords[dateStr];
+  recordTrainingEvent('skip_reverted', { date: dateStr });
   saveData(appData);
   renderPlanView();
   showView('plan');
@@ -4435,7 +4826,16 @@ function markMissed(dateStr) {
       ...(candidates.length ? [{
         label: '確認補跑',
         primary: true,
-        action: () => scheduleMakeupRun(dateStr, document.getElementById('m-makeup-date')?.value)
+        action: () => {
+          const code = document.getElementById('m-skip-reason-code')?.value;
+          if (!SKIP_REASON_LABELS[code]) {
+            document.getElementById('m-skip-reason-code')?.focus();
+            return;
+          }
+          appData.skipReasons = normalizeSkipReasons(appData.skipReasons);
+          appData.skipReasons[dateStr] = { code, noMakeupReason: document.getElementById('m-no-makeup-reason')?.value?.trim() || '' };
+          scheduleMakeupRun(dateStr, document.getElementById('m-makeup-date')?.value);
+        }
       }] : []),
       {
         label: '不補跑',
@@ -4471,6 +4871,7 @@ function saveSkipReason(dateStr) {
   const noMakeupReason = document.getElementById('m-no-makeup-reason')?.value?.trim() || '';
   appData.skipReasons = normalizeSkipReasons(appData.skipReasons);
   appData.skipReasons[dateStr] = { code, noMakeupReason };
+  recordTrainingEvent('skip_reason_updated', { date: dateStr, detail: formatSkipReason(appData.skipReasons[dateStr]) });
   saveData(appData);
 }
 
@@ -4674,24 +5075,15 @@ function assessProgress() {
   if (!plan.length || currentWeek < 2) return;
   const completedWeeks = plan.slice(0, currentWeek - 1);
   const completedPlanDays = completedWeeks.flatMap((week) => week.days || []);
-  const completedPlanDates = new Set(completedPlanDays.map((day) => day.dateStr));
-  const garminActivity = garminActivityRecords().map((run) => ({ date: run.date, actualKm: run.km, source: 'garmin' }));
-  const garminDates = new Set(garminActivity.map((entry) => entry.date));
-  const allActivity = [...log.filter((entry) => !garminDates.has(entry.date)), ...garminActivity]
-    .filter((entry) => completedPlanDates.has(entry.date));
-  const activityDates = new Set(allActivity.map((entry) => entry.date));
-  const makeupCredits = makeupCompletionCredits(completedPlanDays, activityDates, todayStr());
+  const completedSummary = trainingCompletionSummary(completedWeeks);
   const plannedKm = completedWeeks.reduce((sum, week) => sum + week.targetKm, 0);
-  const actualKm = allActivity.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
+  const actualKm = completedSummary.totalKm;
   const progressRate = plannedKm > 0 ? actualKm / plannedKm : 1;
-  const elapsedDays = completedPlanDays.filter((day) => day.type !== 'rest' && !day.isMakeup);
-  const plannedSessions = elapsedDays.length;
-  const doneSessions = elapsedDays.filter((day) => day.status === 'done' || activityDates.has(day.dateStr) || makeupCredits.has(day.dateStr)).length;
+  const plannedSessions = completedSummary.elapsedSessions;
+  const doneSessions = completedSummary.completedSessions;
   const adherenceRate = plannedSessions > 0 ? doneSessions / plannedSessions : 1;
-  const recentLog = log.filter(entry => {
-    const weekNum = Math.floor((new Date(entry.date) - genDate) / 86400000 / 7) + 1;
-    return weekNum >= currentWeek - 2 && weekNum < currentWeek;
-  });
+  const completedPlanDates = new Set(completedPlanDays.map((day) => day.dateStr));
+  const recentLog = log.filter((entry) => completedPlanDates.has(entry.date));
   const avgRpe = recentLog.length > 0 ? recentLog.reduce((sum, entry) => sum + (entry.rpe || 6), 0) / recentLog.length : 6;
   const weeksLeft = plan.length - currentWeek + 1;
   const lowScoreStreak = hasTwoConsecutiveLowCheckins();
@@ -4907,13 +5299,28 @@ function rebuildWeeksFrom(startWeekNum, count) {
 // ============================================================
 // LOG VIEW
 // ============================================================
+function trainingEventLabel(event) {
+  const labels = {
+    completed: '手動完成',
+    skipped: '跳過課表',
+    makeup_scheduled: '已安排補跑',
+    makeup_auto_credited: 'Garmin 認列補跑',
+    skip_reverted: '撤銷跳過',
+    skip_reason_updated: '更新跳過原因',
+    garmin_completion_rule_updated: '更新 Garmin 完成門檻'
+  };
+  const date = event.targetDate || event.date || event.sourceDate || '—';
+  return `${date} · ${labels[event.type] || event.type}${event.detail ? `｜${event.detail}` : ''}`;
+}
+
 function renderLogSection() {
   const log = appData.log || [];
   const assessments = appData.assessments || [];
-  const totalKm = log.reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
   const plan = appData.plan || [];
-  const plannedSessions = plan.reduce((sum, week) => sum + week.days.filter(day => day.type !== 'rest').length, 0);
-  const adherence = plannedSessions > 0 ? Math.round((log.length / plannedSessions) * 100) : 0;
+  const summary = trainingCompletionSummary(plan);
+  const totalKm = summary.totalKm;
+  const completedSessions = summary.completedSessions;
+  const adherence = summary.adherence;
   const rows = [...log].reverse().map(entry => {
     const paceStr = entry.actualKm > 0 && entry.actualTimeMins > 0 ? `${secToPace((entry.actualTimeMins * 60) / entry.actualKm)}/km` : '—';
     const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[entry.type] || entry.type;
@@ -4938,15 +5345,22 @@ function renderLogSection() {
       <td><button class="btn btn-secondary" style="padding:6px 10px;font-size:12px" onclick="applyAssessmentToPlan(${index})">套用配速</button></td>
     </tr>`;
   }).join('');
+  const eventRows = [...normalizeTrainingEvents(appData.trainingEvents)].reverse().slice(0, 12)
+    .map((event) => `<li>${reviewEscape(trainingEventLabel(event))}</li>`).join('');
   return `
 <div class="log-stats">
   <div class="stat-card"><div class="stat-value">${totalKm.toFixed(1)}</div><div class="stat-label">累積公里</div></div>
-  <div class="stat-card"><div class="stat-value">${log.length}</div><div class="stat-label">完成次數</div></div>
+  <div class="stat-card"><div class="stat-value">${completedSessions}</div><div class="stat-label">完成次數</div></div>
   <div class="stat-card"><div class="stat-value">${adherence}%</div><div class="stat-label">遵從率</div></div>
 </div>
 <div class="card">
   <div class="card-title">使用建議</div>
   <p style="font-size:14px;color:var(--c-text-muted);line-height:1.7">正常使用時，優先做兩件事就好：1. 每天在課表卡上按完成/跳過。2. 每週到「週評估」做一次檢查。下面的手動新增記錄，是拿來補登遺漏資料，不是要你每天都填。</p>
+</div>
+<div class="card">
+  <div class="card-title">訓練狀態紀錄</div>
+  <p style="font-size:14px;color:var(--c-text-muted);margin-bottom:10px">完成、跳過、補跑與 Garmin 認列都會留下紀錄；課表重建不會把這些決策當成不存在。</p>
+  ${eventRows ? `<ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.9">${eventRows}</ul>` : '<p style="color:var(--c-text-muted);font-size:14px">尚無狀態變更紀錄</p>'}
 </div>
 <div class="card">
   <div class="card-title">檢測紀錄 / 配速校正</div>
@@ -5027,6 +5441,80 @@ function addAssessmentRecord() {
 // ============================================================
 // EXPORTS
 // ============================================================
+let pendingTrainingImport = null;
+
+function trainingBackupFileName() {
+  return `runner-training-backup-${todayStr()}.json`;
+}
+
+function exportTrainingData() {
+  const backup = {
+    app: 'Runner Training Handbook',
+    schemaVersion: PLAN_SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    data: normalizeData(appData)
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = trainingBackupFileName();
+  link.click();
+  URL.revokeObjectURL(link.href);
+  appData.lastBackupAt = backup.exportedAt;
+  saveData(appData);
+  closeModal();
+}
+
+function requestTrainingDataImport() {
+  document.getElementById('training-data-import')?.click();
+}
+
+function importTrainingData(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || ''));
+      const rawData = parsed?.data || parsed;
+      if (!rawData || typeof rawData !== 'object' || !Array.isArray(rawData.plan) || !Array.isArray(rawData.log)) throw new Error('invalid backup');
+      pendingTrainingImport = normalizeData(rawData);
+      const planDays = pendingTrainingImport.plan.flatMap((week) => week.days || []).length;
+      showModal('還原訓練資料', `<p style="margin:0 0 10px;line-height:1.65">將從 <b>${reviewEscape(file.name)}</b> 還原 ${pendingTrainingImport.plan.length} 週課表、${planDays} 天安排、${pendingTrainingImport.log.length} 筆手動紀錄與 ${pendingTrainingImport.trainingEvents.length} 筆狀態紀錄。</p><p style="margin:0;color:var(--c-orange);font-size:13px;line-height:1.6">這會取代本機目前的訓練資料；建議先匯出現有備份。</p>`, [
+        { label: '確認還原', primary: true, action: applyTrainingDataImport },
+        { label: '取消', action: () => { pendingTrainingImport = null; closeModal(); } }
+      ]);
+    } catch {
+      showModal('無法讀取備份', '<p style="margin:0;color:var(--c-text-muted);line-height:1.65">請選擇由 Runner 訓練計畫匯出的 JSON 備份檔。</p>', [{ label: '知道了', primary: true, action: closeModal }]);
+    } finally {
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function applyTrainingDataImport() {
+  if (!pendingTrainingImport) return;
+  appData = pendingTrainingImport;
+  pendingTrainingImport = null;
+  saveData(appData);
+  closeModal();
+  renderPlanView();
+  showView('plan');
+}
+
+function openTrainingDataManager() {
+  const health = trainingDataHealth(appData.plan || []);
+  const backupAt = appData.lastBackupAt ? new Date(appData.lastBackupAt).toLocaleString('zh-TW', { hour12: false }) : '尚未建立備份';
+  const issueText = health.issues.length ? health.issues.map((issue) => `<li>${reviewEscape(issue)}</li>`).join('') : '<li>資料結構與完成認列狀態正常。</li>';
+  showModal('訓練資料管理', `<div class="coach-setting-card"><div class="coach-setting-value">${reviewEscape(garminCompletionRuleLabel())}</div><div class="coach-fineprint">完成、補跑與執行率皆使用此同一條規則。手動標記完成不會被 Garmin 門檻覆寫。</div></div><div style="margin-top:14px"><b>資料健康檢查</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${issueText}</ul></div><div style="margin-top:14px;color:var(--c-text-muted);font-size:13px">最近備份：${reviewEscape(backupAt)}</div>`, [
+    { label: '匯出備份', primary: true, action: exportTrainingData },
+    { label: '還原備份', action: requestTrainingDataImport },
+    { label: '完成門檻', action: configureGarminCompletionRule },
+    { label: '關閉', action: closeModal }
+  ]);
+}
+
 function exportPDF() {
   switchPlanTab('week');
   setTimeout(() => window.print(), 100);

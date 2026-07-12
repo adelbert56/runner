@@ -14,10 +14,11 @@ function sentenceKeys(text) {
     .filter(Boolean);
 }
 
-const [html, app, contentRaw] = await Promise.all([
+const [html, app, contentRaw, trainer] = await Promise.all([
   readFile(resolve(root, "site/index.html"), "utf8"),
   readFile(resolve(root, "site/app.js"), "utf8"),
   readFile(resolve(root, "site/data/content.json"), "utf8"),
+  readFile(resolve(root, "site/trainer.html"), "utf8"),
 ]);
 
 const content = JSON.parse(contentRaw);
@@ -43,6 +44,11 @@ assertCheck(shoeCount >= 10, `published shoe count reaches target (${shoeCount})
 assertCheck(newsCount >= 10, `published news count reaches target (${newsCount})`);
 assertCheck(longSummaries.length === 0, `content summaries stay concise (${longSummaries.length} over limit)`);
 assertCheck(duplicateSummaries.length === 0, `content summaries do not repeat sentences (${duplicateSummaries.length} repeated)`);
+assertCheck(/function trainingCompletionSummary\(/.test(trainer), "trainer uses one completion summary for progress and adherence");
+assertCheck(/function trainingDataHealth\(/.test(trainer) && /renderTrainingStatusCard\(/.test(trainer), "auxiliary trainer tabs expose shared data health status");
+assertCheck(/function exportTrainingData\(/.test(trainer) && /function importTrainingData\(/.test(trainer), "trainer supports local backup and restore");
+assertCheck(/garminCompletionPct/.test(trainer) && /function garminCompletionPercent\(/.test(trainer), "Garmin automatic completion threshold is configurable");
+assertCheck(/function mondayOfWeek\(/.test(trainer) && /calcWeeks\(profile\.targetDate, profile\.generatedAt\)/.test(trainer), "trainer includes the target race week when building a plan");
 
 const failed = checks.filter((check) => !check.ok);
 checks.forEach((check) => {
