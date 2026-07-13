@@ -1745,7 +1745,7 @@ function findTodayPlanDay() {
   const today = todayStr();
   for (const week of appData.plan || []) {
     const day = (week.days || []).find((item) => item.dateStr === today);
-    if (day) return { day, weekNum: week.weekNum || null };
+    if (day) return { day: applyCoachPlanOverride(day, week), weekNum: week.weekNum || null };
   }
   return null;
 }
@@ -1781,7 +1781,7 @@ function renderHeroTodayCard() {
   return `
     <div class="trainer-side-card hero-today-card">
       <div class="trainer-side-kicker">Today · ${DOW_NAMES[day.dow]} ${day.dateStr.slice(5)}</div>
-      <div class="trainer-side-title"><span class="workout-badge ${badgeClass[day.type] || 'badge-rest'}">${typeName[day.type] || '訓練'}</span> ${day.task || ''}</div>
+      <div class="trainer-side-title"><span class="workout-badge ${day.coachPlan ? 'badge-coach' : (badgeClass[day.type] || 'badge-rest')}">${day.coachPlan ? '📌 教練課表' : (typeName[day.type] || '訓練')}</span> ${day.task || ''}</div>
       ${detail ? `<div class="trainer-side-copy">${detail}</div>` : ''}
       ${dayWeatherLine(day, { showForRest: true })}
       ${stepStrip}
@@ -3439,6 +3439,13 @@ function buildPlan(profile) {
 // ============================================================
 // 滾動校準：每次教練資料更新，用 Garmin 實跑重排未來週
 // ============================================================
+// 爬升明顯的跑步，同樣心率下配速本來就會變慢，不是體能退步——
+// 拿這種跑步去跟平地配速比較會誤判，校準前先濾掉。
+function isFlatEnoughRun(run) {
+  if (!(run.km > 0)) return true;
+  return (Number(run.elevationGainM) || 0) / run.km <= 15;
+}
+
 function autoRecalibratePlan() {
   if (!coachReviewData?.updatedAt || !appData.profile || !Array.isArray(appData.plan) || !appData.plan.length) return null;
   // 同一份教練資料只算一次；重複呼叫（例如每次重整頁面）回傳 null，避免通知/紀錄重複跳出
@@ -3483,7 +3490,7 @@ function autoRecalibratePlan() {
     const zones = hrZones(profile);
     const qualityRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
       .slice(-14)
-      .filter((run) => run.hr >= zones.tempoLow - 2 && run.hr <= zones.tempoHigh + 2 && run.paceSeconds > 0);
+      .filter((run) => run.hr >= zones.tempoLow - 2 && run.hr <= zones.tempoHigh + 2 && run.paceSeconds > 0 && isFlatEnoughRun(run));
     if (qualityRuns.length >= 2) {
       const paces = qualityRuns.map((run) => run.paceSeconds).sort((a, b) => a - b);
       const median = paces[Math.floor(paces.length / 2)];
@@ -3505,7 +3512,7 @@ function autoRecalibratePlan() {
     const zones = hrZones(profile);
     const easyRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
       .slice(-14)
-      .filter((run) => run.hr > 0 && run.hr <= zones.easyMax && run.paceSeconds > 0);
+      .filter((run) => run.hr > 0 && run.hr <= zones.easyMax && run.paceSeconds > 0 && isFlatEnoughRun(run));
     if (easyRuns.length >= 3) {
       const paces = easyRuns.map((run) => run.paceSeconds).sort((a, b) => a - b);
       const median = paces[Math.floor(paces.length / 2)];
@@ -3520,8 +3527,22 @@ function autoRecalibratePlan() {
     }
   } catch (err) { /* 資料不足時跳過 */ }
 
+  // 2c. 心率上限自動校正：Garmin 每筆跑步都有測到的當次最高心率，
+  // 比目前設定的 maxHr 高就代表原本設定偏低——只上修，不因為「最近沒再測到更高」就往下調。
+  let maxHrDelta = 0;
+  try {
+    const allRuns = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+    const observedMaxHr = Math.round(Math.max(0, ...allRuns.map((run) => Number(run.maxHr) || 0)));
+    const currentMaxHr = Number(profile.maxHr) || 0;
+    if (observedMaxHr > 0 && observedMaxHr > currentMaxHr) {
+      maxHrDelta = observedMaxHr - currentMaxHr;
+      profile.maxHr = observedMaxHr;
+      reasons.push(`心率上限依 Garmin 實測更新 → ${observedMaxHr} bpm（原設定 ${currentMaxHr || '預設值'}）`);
+    }
+  } catch (err) { /* 資料不足時跳過 */ }
+
   appData.recalibratedFor = coachReviewData.updatedAt;
-  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload) {
+  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload && !maxHrDelta) {
     appData.lastRecalibration = null;
     saveData(appData);
     return null;
@@ -3547,7 +3568,7 @@ function autoRecalibratePlan() {
     });
     week.days = newDays;
   });
-  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, reasons };
+  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, reasons };
   appData.lastRecalibration = summary;
   saveData(appData);
   return summary;
@@ -4056,7 +4077,9 @@ function coachRunStatus() {
     scheduled.setDate(scheduled.getDate() - diff);
   }
   if (scheduled > now) scheduled.setDate(scheduled.getDate() - (scheduledDow !== null ? 7 : 1));
-  const updatedAt = coachReviewData?.updatedAt || coachReviewData?.autopilot?.asOf;
+  // syncedAt＝這份加密檔最後一次被排程「成功建置」的日期（每次同步都會更新，含每天的 Garmin-only 排程）；
+  // coachReviewData.updatedAt 是人工週報自己填的日期，只有手動寫新週報才會變，用它來判斷「排程有沒有跑」會誤判。
+  const updatedAt = coachReviewData?.syncedAt || coachReviewData?.updatedAt || coachReviewData?.autopilot?.asOf;
   const scheduledDay = new Date(scheduled);
   scheduledDay.setHours(0, 0, 0, 0);
   const isFresh = updatedAt && new Date(`${updatedAt}T00:00:00`) >= scheduledDay;
@@ -4494,6 +4517,9 @@ function coachGoalGapDiffMin() {
 }
 
 function coachGoalGapNote(compact = false) {
+  // 教練評估在檢測日之前只是持續滾動的推測，不是實測結果；
+  // 沒有實際做過檢測（appData.assessments）就不該拿這個推測去說「目標需要校準」。
+  if (!appData.assessments?.length) return '';
   const coachTarget = coachReviewData?.goal?.target;
   const myTime = appData.profile?.targetTime;
   if (!coachTarget || !myTime) return '';
@@ -5037,6 +5063,27 @@ function renderDailyExecutionCard(week) {
   </section>`;
 }
 
+function coachDaysForWeek(week) {
+  const isCoachWeek = coachWeekMatches(week);
+  const coachNextWeek = isCoachWeek ? coachReviewData?.nextWeek : null;
+  return coachNextWeek ? coachMenuForCurrentSchedule(coachNextWeek.menu) : [];
+}
+
+// 保留熱身/主課/收操的卡片結構，只把教練指定的內容換進「主課」。
+// 開頭只保留方向與目的；完整處方由主課卡片承接。
+// 這是唯一套用教練課表覆蓋的地方：本週課表列表、Today 小卡、Daily focus
+// 都透過這個函式取得同一份資料，避免三處各自顯示不同版本。
+function applyCoachPlanOverride(day, week) {
+  const coachDays = coachDaysForWeek(week);
+  const entry = coachDays.find((item) => item.scheduledDow === day.dow);
+  if (!entry) return day;
+  const headline = coachPlanHeadline(entry.plan);
+  const steps = (day.steps || []).map((step) => step.title === '主課'
+    ? { ...step, dose: '', detail: entry.plan, isCoachMain: true }
+    : step);
+  return { ...day, task: headline, pace: '', hrTarget: '', steps, coachPlan: true };
+}
+
 function renderWeekSection(plan) {
   const week = plan[currentWeek - 1];
   if (!week) return '<p>找不到訓練週資料</p>';
@@ -5046,7 +5093,6 @@ function renderWeekSection(plan) {
   const isCoachWeek = coachWeekMatches(week);
   const effectiveTarget = effectiveWeekVolumeTarget(week);
   const coachNextWeek = isCoachWeek ? coachReviewData.nextWeek : null;
-  const coachDays = coachNextWeek ? coachMenuForCurrentSchedule(coachNextWeek.menu) : [];
   const goalGapNote = coachGoalGapNote(true);
   const coachBrief = coachNextWeek ? `
     <div class="week-coach-brief">
@@ -5066,17 +5112,7 @@ function renderWeekSection(plan) {
     ${goalGapNote}
     ${coachBrief}
   </section>` : '';
-  const dayCards = week.days.map(day => {
-    const entry = coachDays.find((item) => item.scheduledDow === day.dow);
-    if (!entry) return renderDayCard(day);
-    // 保留熱身/主課/收操的卡片結構，只把教練指定的內容換進「主課」。
-    // 開頭只保留方向與目的；完整處方由主課卡片承接。
-    const headline = coachPlanHeadline(entry.plan);
-    const steps = (day.steps || []).map((step) => step.title === '主課'
-      ? { ...step, dose: '', detail: entry.plan, isCoachMain: true }
-      : step);
-    return renderDayCard({ ...day, task: headline, pace: '', hrTarget: '', steps, coachPlan: true });
-  }).join('');
+  const dayCards = week.days.map(day => renderDayCard(applyCoachPlanOverride(day, week))).join('');
   return `
 <div class="card week-header-card">
   <div class="week-header-top">
@@ -6509,7 +6545,12 @@ loadRegistrationRaceCheckpoints();
     const plain = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv: b64ToBytes(payload.iv) }, key, b64ToBytes(payload.ct)
     );
-    return JSON.parse(new TextDecoder().decode(plain));
+    const data = JSON.parse(new TextDecoder().decode(plain));
+    // payload.updatedAt 是「這個檔案最後一次成功建置」的日期（Garmin 排程跑一次就會更新一次）；
+    // data.updatedAt 是人工週報自己填的日期（通常一週才手動更新一次）。
+    // 兩者意義不同，分開存，狀態徽章要判斷「排程有沒有跑」該用前者，不是後者。
+    data.syncedAt = payload.updatedAt || null;
+    return data;
   }
 
   function trendSvg(trend) {
