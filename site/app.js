@@ -2399,6 +2399,7 @@ function renderRaces() {
       }
       saveRegisteredRaces();
       render();
+      renderPlan();
     });
   });
 
@@ -2671,6 +2672,7 @@ function buildWeeklyBlocks(weekCount, targets, goalProfile, raceDateInput) {
       phase,
       weeklyKm,
       longRunKm,
+      weekEndDate: weekDate.toISOString().slice(0, 10),
       qualityFocus,
       season: seasonalTrainingContext(weekDate.toISOString().slice(0, 10)),
       focus: phase === "打底"
@@ -2682,6 +2684,27 @@ function buildWeeklyBlocks(weekCount, targets, goalProfile, raceDateInput) {
             : `保留速度與恢復｜${qualityFocus.label}`,
     };
   });
+}
+
+function sundayForTrainingWeek(dateText) {
+  const date = parseDateAsUtc(dateText);
+  date.setUTCDate(date.getUTCDate() + ((7 - date.getUTCDay()) % 7));
+  return date.toISOString().slice(0, 10);
+}
+
+function registeredSundayRaceForWeek(week) {
+  const sunday = sundayForTrainingWeek(week?.weekEndDate || TODAY);
+  return state.races.find((race) => (
+    isRegisteredRace(race)
+    && String(race.race_date || "") === sunday
+  )) || null;
+}
+
+function attachRegisteredRacesToWeeks(weeks) {
+  return weeks.map((week) => ({
+    ...week,
+    trainingRace: registeredSundayRaceForWeek(week),
+  }));
 }
 
 function buildPaceProfile(goalProfile, targetRacePace, weeklyKm, longRunKm, level, experience, readiness, injury, priority, intensity) {
@@ -2812,6 +2835,11 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, paceProfi
   const isCautious = intensity === "safe" || injury === "recovering";
   const isHalf = isHalfMarathonGoal(goalProfile);
   const longRunLabel = weekdayLabels[longRunDay] || "週日";
+  const trainingRace = currentWeek.trainingRace || null;
+  const hasSundayTrainingRace = Boolean(trainingRace);
+  const raceTitle = trainingRace?.race_name || "已報名賽事";
+  const raceWork = `${raceTitle}｜以賽代訓；依賽程距離與身體狀態調整配速，賽後以恢復為優先`;
+  const preRaceWork = `賽前休息或 20-30 分鐘輕鬆跑，保持放鬆；週日 ${raceTitle} 以賽代訓，不安排長跑`;
   const useRunWalk = shouldUseRunWalk(level, experience, priority, injury);
   const runWalk = runWalkStageForWeek(currentWeek.week, currentWeek.weekCount || 12, injury);
   const { recoveryRange, easyRange, steadyRange, tempoRange, intervalRange, longRange, marathonRange } = paceProfile;
@@ -2862,19 +2890,22 @@ function buildTrainingSchedule(dayCount, level, priority, currentWeek, paceProfi
         : baseQuality;
 
   if (dayCount <= 3) {
-    return [
+    const compactSchedule = [
       { day: "第 1 跑", type: useRunWalk ? "跑走" : "輕鬆", work: useRunWalk ? quality : `${easyKm}km，${easyRange}` },
       { day: "第 2 跑", type: useRunWalk ? "輕鬆" : qualityFocus.label, work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
-      { day: longRunLabel, type: "長跑", work: useRunWalk ? `跑走長課 ${Math.max(30, currentWeek.longRunKm * 7)} 分鐘，跑段全程可聊天` : longProgression },
+      { day: longRunLabel, type: hasSundayTrainingRace ? "賽前恢復" : "長跑", work: hasSundayTrainingRace ? preRaceWork : (useRunWalk ? `跑走長課 ${Math.max(30, currentWeek.longRunKm * 7)} 分鐘，跑段全程可聊天` : longProgression) },
+      ...(hasSundayTrainingRace ? [{ day: "週日", type: "以賽代訓", work: raceWork }] : []),
       { day: "支援日", type: "徒手", work: support },
     ];
+    return compactSchedule;
   }
 
   const schedule = [
     { day: "週二", type: useRunWalk ? "跑走" : "恢復", work: useRunWalk ? quality : `恢復跑 ${Math.max(4, easyKm - 1)}km，${recoveryRange}` },
     { day: "週四", type: useRunWalk ? "輕鬆" : (qualityMode === "remove" ? "恢復" : qualityFocus.label), work: useRunWalk ? `${Math.max(20, easyKm * 7)} 分鐘輕鬆跑走，${runWalk.cue}` : quality },
     { day: "週五", type: goalProfile.distanceKm >= 21 ? "中長跑" : "恢復", work: dayCount >= 4 ? (goalProfile.distanceKm >= 21 ? `${mediumKm}-${mediumKm + 2}km 穩定跑，控制在 ${qualityMode === "remove" ? easyRange : steadyRange}` : `短恢復跑 25-35 分鐘，${easyRange}`) : recovery },
-    { day: longRunLabel, type: "長跑", work: longProgression },
+    { day: longRunLabel, type: hasSundayTrainingRace ? "賽前恢復" : "長跑", work: hasSundayTrainingRace ? preRaceWork : longProgression },
+    ...(hasSundayTrainingRace ? [{ day: "週日", type: "以賽代訓", work: raceWork }] : []),
     { day: "支援日", type: "徒手", work: support },
   ];
 
@@ -2960,7 +2991,7 @@ function buildPlan(profileInput) {
     safeIntensity,
   );
   const targets = goalTrainingTargets(goalProfile, level, weeklyKm, longRunKm, priority, safeExperience, safeIntensity, safeInjury, safeReadiness, weekCount);
-  const weeklyBlocks = buildWeeklyBlocks(weekCount, targets, goalProfile, raceDateInput);
+  const weeklyBlocks = attachRegisteredRacesToWeeks(buildWeeklyBlocks(weekCount, targets, goalProfile, raceDateInput));
   const selectedWeek = clampNumber(Number(selectedWeekInput) || 1, 1, weekCount);
   const currentWeek = weeklyBlocks[selectedWeek - 1];
   const usesRunWalk = shouldUseRunWalk(level, safeExperience, priority, safeInjury);

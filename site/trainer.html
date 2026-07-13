@@ -1006,6 +1006,7 @@
 const LEGACY_STORAGE_KEY = 'runner-trainer-v1';
 const DEVICE_KEY = 'runner-trainer:device-id';
 const STORAGE_KEY = `runner-trainer:${getDeviceId()}:v1`;
+const RUNNER_REGISTERED_RACES_SUFFIX = ':registered-races';
 const PLAN_SCHEMA_VERSION = 10;
 const GUIDE_ASSET_VERSION = 3;
 const SKIP_REASON_LABELS = {
@@ -1032,6 +1033,130 @@ function getDeviceId() {
   } catch {
     return 'shared-device';
   }
+}
+
+function runnerRaceShortHash(value) {
+  let hash = 2166136261;
+  const text = String(value || '');
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function runnerRegisteredRaceKeys() {
+  const keys = new Set();
+  try {
+    Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index))
+      .filter((key) => key?.startsWith('runner-plaza:') && key.endsWith(RUNNER_REGISTERED_RACES_SUFFIX))
+      .forEach((key) => {
+        const saved = JSON.parse(localStorage.getItem(key) || '[]');
+        if (Array.isArray(saved)) saved.forEach((raceKey) => keys.add(raceKey));
+      });
+  } catch (err) { /* 賽事清單不可讀時保留正式課表 */ }
+  return keys;
+}
+
+function runnerRaceKey(race) {
+  const legacyKey = race.race_id || `${race.race_name || ''}|${race.race_date || ''}`;
+  return `r:${runnerRaceShortHash(legacyKey)}`;
+}
+
+function isSundayRaceDate(dateStr) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateStr || '') && new Date(`${dateStr}T00:00:00`).getDay() === 0;
+}
+
+function restoreRaceReplacement(day) {
+  if (!day?.raceReplacementBase) return false;
+  const status = day.status;
+  Object.assign(day, day.raceReplacementBase);
+  day.status = status;
+  delete day.raceReplacementBase;
+  delete day.raceReplacement;
+  delete day.raceName;
+  return true;
+}
+
+function applyRegisteredSundayRaceReplacements(races) {
+  if (!appData?.profile || !Array.isArray(appData.plan)) return false;
+  const raceByDate = new Map(races.map((race) => [race.race_date, race]));
+  const today = todayStr();
+  let changed = false;
+  appData.plan.forEach((week) => {
+    const sunday = (week.days || []).find((day) => day.dow === 0);
+    const saturday = (week.days || []).find((day) => day.dow === 6);
+    const race = sunday && sunday.dateStr >= today ? raceByDate.get(sunday.dateStr) : null;
+    const raceName = race?.race_name || '已報名賽事';
+    const alreadyApplied = race
+      && saturday?.raceReplacement === 'pre-race'
+      && sunday?.raceReplacement === 'race'
+      && sunday.raceName === raceName;
+    if (alreadyApplied) return;
+
+    (week.days || []).forEach((day) => { changed = restoreRaceReplacement(day) || changed; });
+    if (!race || !saturday || saturday.type !== 'long') return;
+
+    saturday.raceReplacementBase = { ...saturday };
+    saturday.raceReplacement = 'pre-race';
+    saturday.type = 'easy';
+    saturday.focus = 'recovery';
+    saturday.km = 0;
+    saturday.task = `賽前休息或 20–30 分鐘輕鬆跑｜明天「${raceName}」以賽代訓，不安排長跑`;
+    saturday.pace = '完全休息優先；若跑，維持能輕鬆交談的強度';
+    saturday.hrTarget = '';
+    saturday.steps = [];
+
+    sunday.raceReplacementBase = { ...sunday };
+    sunday.raceReplacement = 'race';
+    sunday.raceName = raceName;
+    sunday.type = 'race';
+    sunday.km = 0;
+    sunday.focus = 'race';
+    sunday.task = `${sunday.raceName}｜以賽代訓`;
+    sunday.pace = '依賽程距離與當日狀態執行；不另外補長跑';
+    sunday.hrTarget = '';
+    sunday.steps = [];
+    changed = true;
+  });
+  return changed;
+}
+
+function refreshPlanAfterRaceSync() {
+  const tabs = ['week', 'autopilot', 'coach', 'periodization', 'analysis'];
+  const activeTabIndex = [...document.querySelectorAll('.plan-toolbar .tab')].findIndex((button) => button.classList.contains('active'));
+  const activeTab = tabs[activeTabIndex] || loadUiState().planTab || 'week';
+  const selectedWeek = currentWeek;
+  const scrollTop = (document.scrollingElement || document.documentElement).scrollTop;
+  renderPlanView();
+  currentWeek = Math.min(Math.max(1, selectedWeek), appData.plan.length);
+  showView('plan');
+  switchPlanTab(activeTab);
+  if (activeTab === 'week') jumpToPhaseWeek(currentWeek);
+  (document.scrollingElement || document.documentElement).scrollTop = scrollTop;
+}
+
+async function syncRegisteredSundayRaces() {
+  const registeredKeys = runnerRegisteredRaceKeys();
+  if (!registeredKeys.size) {
+    if (applyRegisteredSundayRaceReplacements([])) {
+      saveData(appData);
+      refreshPlanAfterRaceSync();
+    }
+    return;
+  }
+  try {
+    const response = await fetch('./data/races.json', { cache: 'no-cache' });
+    if (!response.ok) return;
+    const races = await response.json();
+    const registeredSundayRaces = races.filter((race) => (
+      registeredKeys.has(runnerRaceKey(race)) && isSundayRaceDate(race.race_date)
+    ));
+    if (applyRegisteredSundayRaceReplacements(registeredSundayRaces)) {
+      saveData(appData);
+      refreshPlanAfterRaceSync();
+    }
+  } catch (err) { /* 離線時不影響既有正式課表 */ }
 }
 
 function normalizeDayStatuses(dayStatuses) {
@@ -1494,8 +1619,8 @@ function findTodayPlanDay() {
 
 function renderHeroTodayCard() {
   const hit = findTodayPlanDay();
-  const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', rest: '休息' };
-  const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', rest: 'badge-rest' };
+  const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓', rest: '休息' };
+  const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long', rest: 'badge-rest' };
   if (!hit) {
     return `
       <div class="trainer-side-card hero-today-card">
@@ -3456,7 +3581,7 @@ function renderGarminAutopilotCard(profile, plan) {
   const volumeFactor = Number(autopilot.volumeFactor) || 1;
   const plannedFactor = rollingDays.some((day) => day.isTaper) ? 1 : volumeFactor;
   const factorText = plannedFactor === 1 ? '維持原量' : `${plannedFactor > 1 ? '+' : ''}${Math.round((plannedFactor - 1) * 100)}%`;
-  const workoutNames = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' };
+  const workoutNames = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓' };
   const menu = rollingDays.map((day) => {
     const isRest = day.type === 'rest';
     const dropQuality = ['tempo', 'interval'].includes(day.type) && autopilot.qualityMode === 'skip';
@@ -4903,12 +5028,12 @@ function renderDayCard(day) {
       ${renderGarminRunResult(garminRun, true)}
     </div>`;
   }
-  const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long' }[day.type] || 'badge-rest';
+  const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long' }[day.type] || 'badge-rest';
   const typeName = day.coachPlan
     ? '教練課表'
     : day.type === 'easy' && day.focus === 'recovery'
     ? '恢復跑'
-    : { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[day.type] || '訓練';
+    : { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓' }[day.type] || '訓練';
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
   const skipReason = formatSkipReason(appData.skipReasons?.[day.dateStr]);
   const actionsHTML = garminRun
@@ -5710,7 +5835,7 @@ function renderLogSection() {
   const adherence = summary.adherence;
   const rows = [...log].reverse().map(entry => {
     const paceStr = entry.actualKm > 0 && entry.actualTimeMins > 0 ? `${secToPace((entry.actualTimeMins * 60) / entry.actualKm)}/km` : '—';
-    const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑' }[entry.type] || entry.type;
+    const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓' }[entry.type] || entry.type;
     return `<tr>
       <td>${entry.date}</td>
       <td>${typeName}</td>
@@ -5908,8 +6033,8 @@ function exportPDF() {
 }
 
 function generateOfflineHTML(week, profile, weekNum) {
-  const badgeMap = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', rest: 'badge-rest' };
-  const typeMap = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', rest: '休息' };
+  const badgeMap = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long', rest: 'badge-rest' };
+  const typeMap = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓', rest: '休息' };
   const meta = GOAL_META[profile.goal] || GOAL_META.half;
   const weekGuide = getPhaseRuleText(week, profile, appData.plan?.length || weekNum);
   const cards = week.days.map(day => {
@@ -6005,6 +6130,12 @@ function init() {
   loadTrainerWeather().then(() => {
     if (trainerWeather && document.getElementById('plan-tab-week')) {
       jumpToPhaseWeek(currentWeek);
+    }
+  });
+  syncRegisteredSundayRaces();
+  window.addEventListener('storage', (event) => {
+    if (event.key?.startsWith('runner-plaza:') && event.key.endsWith(RUNNER_REGISTERED_RACES_SUFFIX)) {
+      syncRegisteredSundayRaces();
     }
   });
 }
