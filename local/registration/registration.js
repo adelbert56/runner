@@ -12,6 +12,7 @@ const state = {
   filteredRaces: [],
   people: [],
   entries: [],
+  lastKnownUpdatedAt: null,
   entryBatchPersonIds: new Set(),
   peopleQuery: "",
   peoplePage: 1,
@@ -340,6 +341,7 @@ function currentPayload() {
   return {
     version: 1,
     updatedAt: new Date().toISOString(),
+    baseUpdatedAt: state.lastKnownUpdatedAt,
     people: state.people,
     entries: state.entries,
   };
@@ -878,6 +880,7 @@ async function loadPrivateData() {
     ...entry,
     distance: normalizeDistanceValue(entry.distance),
   })).sort((a, b) => String(a.raceDate || "").localeCompare(String(b.raceDate || "")));
+  state.lastKnownUpdatedAt = data.updatedAt || null;
 }
 
 async function savePrivateData() {
@@ -886,10 +889,16 @@ async function savePrivateData() {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(currentPayload()),
   });
+  if (response.status === 409) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message || "資料已被其他分頁或裝置更新，請重新整理後再試一次。");
+  }
   if (!response.ok) {
     const message = await response.text();
     throw new Error(message || "儲存失敗");
   }
+  const result = await response.json().catch(() => null);
+  if (result?.updatedAt) state.lastKnownUpdatedAt = result.updatedAt;
 }
 
 function renderSummary() {
@@ -1133,7 +1142,7 @@ function renderPeopleList() {
     button.addEventListener("click", () => editPerson(button.dataset.editPerson));
   });
   els.peopleList.querySelectorAll("[data-delete-person]").forEach((button) => {
-    button.addEventListener("click", () => deletePerson(button.dataset.deletePerson));
+    button.addEventListener("click", () => deletePerson(button.dataset.deletePerson).catch((error) => showStatus(error.message || "刪除失敗", "error")));
   });
     els.peopleList.querySelectorAll("[data-view-person]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1489,7 +1498,7 @@ function renderEntriesList() {
     button.addEventListener("click", () => editEntry(button.dataset.editEntry));
   });
   els.entriesList.querySelectorAll("[data-delete-entry]").forEach((button) => {
-    button.addEventListener("click", () => deleteEntry(button.dataset.deleteEntry));
+    button.addEventListener("click", () => deleteEntry(button.dataset.deleteEntry).catch((error) => showStatus(error.message || "刪除失敗", "error")));
   });
   renderPagination(els.entriesPagination, "entries", pagination);
 }

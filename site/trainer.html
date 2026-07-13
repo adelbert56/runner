@@ -569,6 +569,7 @@
     .badge-interval { background: #ffe0d5; color: #8a3521; }
     .badge-long { background: var(--c-blue); color: #295d6a; }
     .badge-rest { background: var(--c-surface2); color: var(--c-text-muted); }
+    .badge-coach { background: var(--c-surface2); color: var(--c-text-muted); }
     .day-card-task { font-size: 15px; font-weight: 700; margin-bottom: 6px; line-height: 1.5; }
     .day-card-pace { font-size: 13px; color: var(--c-text-muted); margin-bottom: 12px; line-height: 1.5; }
     .workout-steps { display: grid; gap: 10px; font-size: 13px; color: var(--c-text-muted); line-height: 1.8; }
@@ -5175,7 +5176,9 @@ function renderDayCard(day) {
       ${renderGarminRunResult(garminRun, true)}
     </div>`;
   }
-  const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long' }[day.type] || 'badge-rest';
+  const badgeClass = day.coachPlan
+    ? 'badge-coach'
+    : { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long' }[day.type] || 'badge-rest';
   const typeName = day.coachPlan
     ? '教練課表'
     : day.type === 'easy' && day.focus === 'recovery'

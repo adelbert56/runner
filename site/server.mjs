@@ -94,6 +94,12 @@ async function readRegistrationData() {
 
 async function writeRegistrationData(payload) {
   await mkdir(registrationDir, { recursive: true });
+  try {
+    const existing = await readFile(registrationDataPath, "utf8");
+    await writeFile(`${registrationDataPath}.bak`, existing, "utf8");
+  } catch {
+    // 第一次寫入時還沒有舊檔可備份，略過即可
+  }
   await writeFile(registrationDataPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
@@ -121,6 +127,15 @@ const server = createServer(async (req, res) => {
     try {
       const raw = await readRequestBody(req);
       const parsed = JSON.parse(raw || "{}");
+      const current = await readRegistrationData();
+      if (parsed.baseUpdatedAt !== undefined && current.updatedAt && parsed.baseUpdatedAt !== current.updatedAt) {
+        sendJson(res, 409, {
+          error: "stale-write",
+          message: "資料已被其他分頁或裝置更新，請重新整理後再試一次，避免覆蓋掉別人的修改。",
+          updatedAt: current.updatedAt,
+        });
+        return;
+      }
       const payload = {
         version: 1,
         updatedAt: new Date().toISOString(),

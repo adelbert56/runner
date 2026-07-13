@@ -35,6 +35,11 @@ const TASKS = [
       { days: [0, 1, 2, 3, 4, 5, 6], due: "18:07", deadline: "23:59" },
     ],
   },
+  {
+    name: "Sync Garmin training data",
+    workflow: "garmin-sync.yml",
+    slots: [{ days: [0, 1, 2, 3, 4, 5, 6], due: "20:30", deadline: "23:59" }],
+  },
 ];
 
 function parseHm(value) {

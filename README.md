@@ -156,7 +156,7 @@ http://localhost:4173/local/registration/registration.html
 | `npm run data:quality` | 產生資料品質、待補、異常報告 |
 | `npm run data:refresh` | 套用人工補充、同步網站資料、產生品質報告 |
 | `npm run data:weather` | 更新 7 天內賽事的當日天氣預報 |
-| `npm run data:refresh:online` | 加上官方平台補資料的完整線上更新 |
+| `npm run data:refresh:online` | 加上官方平台補資料的完整線上更新（僅本機手動用；CI 排程改用 `scripts/enrich_platforms.py`，兩者邏輯不完全相同，勿假設結果一致） |
 | `npm run content:candidates` | 收集跑鞋 / 新聞候選內容 |
 | `npm run content:publish` | 將候選內容整理成網站資料 |
 | `npm run content:refresh` | 收集並發布跑鞋 / 新聞內容 |
