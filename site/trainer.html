@@ -1110,6 +1110,10 @@ function applyRegisteredSundayRaceReplacements(races) {
   const byDateStr = new Map(flat.map((day) => [day.dateStr, day]));
   let changed = false;
   window.lastRaceIntegrationNotices = [];
+  // 通知紀錄跟持久化的 key 綁定，而不是跟當下的 day 物件狀態綁定：
+  // 就算課表被其他重排流程（rebuildStoredPlan 等）意外洗掉又重套，同一場賽事也只通知一次。
+  appData.raceIntegrationNotifiedKeys = Array.isArray(appData.raceIntegrationNotifiedKeys) ? appData.raceIntegrationNotifiedKeys : [];
+  const notifiedKeys = new Set(appData.raceIntegrationNotifiedKeys);
 
   const validRaceDates = new Set(
     flat.filter((day) => day.dateStr >= today && raceByDate.has(day.dateStr)).map((day) => day.dateStr)
@@ -1123,9 +1127,13 @@ function applyRegisteredSundayRaceReplacements(races) {
     if (!isValidRaceDay && !isValidPreRaceDay) {
       const wasRace = day.raceReplacement === 'race';
       const restoredName = day.raceName;
+      const restoredDateStr = day.dateStr;
       if (restoreRaceReplacement(day)) {
         changed = true;
-        if (wasRace) window.lastRaceIntegrationNotices.push(`「${restoredName || '已報名賽事'}」已從課表移除（賽事取消或改期），該週已還原為一般課表`);
+        if (wasRace) {
+          window.lastRaceIntegrationNotices.push(`「${restoredName || '已報名賽事'}」已從課表移除（賽事取消或改期），該週已還原為一般課表`);
+          notifiedKeys.delete(restoredDateStr);
+        }
       }
     }
   });
@@ -1139,7 +1147,10 @@ function applyRegisteredSundayRaceReplacements(races) {
     const wasAlreadyRaceDay = raceDay.raceReplacement === 'race';
 
     if (!(raceDay.raceReplacement === 'race' && raceDay.raceName === raceName)) {
-      if (!wasAlreadyRaceDay) window.lastRaceIntegrationNotices.push(`已將 ${dateStr}「${raceName}」自動排入課表（以賽代訓，賽前一天調整為休息）`);
+      if (!wasAlreadyRaceDay && !notifiedKeys.has(dateStr)) {
+        window.lastRaceIntegrationNotices.push(`已將 ${dateStr}「${raceName}」自動排入課表（以賽代訓，賽前一天調整為休息）`);
+        notifiedKeys.add(dateStr);
+      }
       if (!raceDay.raceReplacementBase) raceDay.raceReplacementBase = { ...raceDay };
       raceDay.raceReplacement = 'race';
       raceDay.raceName = raceName;
@@ -1167,6 +1178,7 @@ function applyRegisteredSundayRaceReplacements(races) {
     }
   });
 
+  appData.raceIntegrationNotifiedKeys = [...notifiedKeys];
   return changed;
 }
 
@@ -1188,7 +1200,12 @@ function recordRaceIntegrationLog(messages) {
   if (!messages?.length) return;
   const today = todayStr();
   appData.raceIntegrationLog = Array.isArray(appData.raceIntegrationLog) ? appData.raceIntegrationLog : [];
-  messages.forEach((text) => appData.raceIntegrationLog.unshift({ at: today, text }));
+  const existingTexts = new Set(appData.raceIntegrationLog.map((entry) => entry.text));
+  messages.forEach((text) => {
+    if (existingTexts.has(text)) return; // 同一則訊息只留一筆，避免重複重建把紀錄洗成一長串一樣的內容
+    existingTexts.add(text);
+    appData.raceIntegrationLog.unshift({ at: today, text });
+  });
   appData.raceIntegrationLog = appData.raceIntegrationLog.slice(0, 20);
   saveData(appData);
 }
@@ -1452,10 +1469,20 @@ function rebuildStoredPlan(data) {
   if (!data?.profile) return data;
   const preservedProfile = { ...data.profile };
   preservedProfile.planVersion = PLAN_SCHEMA_VERSION;
+  // buildPlan() 產生全新的 day 物件，賽事整合（raceReplacement）標記只存在舊 plan 的 day 上，
+  // 先抓出來，重建完再依日期貼回去，避免每次觸發完整重建都把「以賽代訓」洗掉、重新通知
+  const preservedRaceDays = (data.plan || []).flatMap((week) => week.days || []).filter((day) => day.raceReplacementBase);
   const rebuiltData = applyStoredMakeupRecords(applyStoredDayStatuses({
     ...data,
     plan: buildPlan(preservedProfile)
   }));
+  if (preservedRaceDays.length) {
+    const newDaysByDate = new Map(rebuiltData.plan.flatMap((week) => week.days || []).map((day) => [day.dateStr, day]));
+    preservedRaceDays.forEach((oldDay) => {
+      const newDay = newDaysByDate.get(oldDay.dateStr);
+      if (newDay) Object.assign(newDay, oldDay);
+    });
+  }
   return {
     ...data,
     profile: preservedProfile,
@@ -4654,6 +4681,16 @@ function jargonNotesFor(texts) {
   return notes;
 }
 
+function renderLastRecalibrationCard() {
+  const recalibration = appData.lastRecalibration;
+  if (!recalibration?.reasons?.length) return '';
+  const items = recalibration.reasons.map((reason) => `<li>${reviewEscape(reason)}</li>`).join('');
+  return `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-primary);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6">
+    <b>📊 上次滾動校準（${reviewEscape(recalibration.date)}）</b>
+    <ul style="margin:6px 0 0;padding-left:18px">${items}</ul>
+  </div>`;
+}
+
 function renderCoachReviewPanel() {
   if (!coachReviewData) {
     return `${renderTrainingStatusCard(appData.plan || [])}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
@@ -4720,6 +4757,7 @@ function renderCoachReviewPanel() {
       <button class="btn btn-secondary coach-lock-btn" onclick="lockCoachReview()">🔒 鎖定</button>
     </div>
     ${garminOnlyNotice}
+    ${renderLastRecalibrationCard()}
     ${renderLiveCoachCard(week, nextWeek)}
     ${courseSection}
     ${renderCoachDataSignals()}
@@ -6149,7 +6187,13 @@ function openTrainingDataManager() {
   const health = trainingDataHealth(appData.plan || []);
   const backupAt = appData.lastBackupAt ? new Date(appData.lastBackupAt).toLocaleString('zh-TW', { hour12: false }) : '尚未建立備份';
   const issueText = health.issues.length ? health.issues.map((issue) => `<li>${reviewEscape(issue)}</li>`).join('') : '<li>資料結構與完成認列狀態正常。</li>';
-  const raceLog = Array.isArray(appData.raceIntegrationLog) ? appData.raceIntegrationLog : [];
+  const rawRaceLog = Array.isArray(appData.raceIntegrationLog) ? appData.raceIntegrationLog : [];
+  const seenRaceLogTexts = new Set();
+  const raceLog = rawRaceLog.filter((entry) => {
+    if (seenRaceLogTexts.has(entry.text)) return false; // 顯示前再去重一次，把裝置上已經累積的舊重複紀錄濾掉
+    seenRaceLogTexts.add(entry.text);
+    return true;
+  });
   const raceLogHtml = raceLog.length
     ? `<div style="margin-top:14px"><b>賽事整合紀錄</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${raceLog.map((entry) => `<li>${reviewEscape(entry.at)}：${reviewEscape(entry.text)}</li>`).join('')}</ul></div>`
     : '';
@@ -6346,9 +6390,9 @@ loadRegistrationRaceCheckpoints();
   function render(data) {
     coachReviewData = data;
     syncGarminRunsToPlan(data);
-    const recalibration = typeof autoRecalibratePlan === 'function' ? autoRecalibratePlan() : null;
+    // 校準結果顯示在教練建議分頁的「上次滾動校準」卡片，背景自動觸發不再跳 toast
+    if (typeof autoRecalibratePlan === 'function') autoRecalibratePlan();
     refreshCoachReviewPanels();
-    if (recalibration?.reasons?.length) showCalibrationToast(recalibration.reasons);
   }
 
   function renderLoading(text) {
