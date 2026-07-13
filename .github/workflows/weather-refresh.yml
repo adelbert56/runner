@@ -66,13 +66,6 @@ jobs:
         if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run data:weather
 
-      - name: Update trainer plan weather forecast
-        if: steps.refresh-guard.outputs.should_run == 'true'
-        continue-on-error: true
-        env:
-          CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
-        run: npm run data:trainer-weather
-
       - name: Sync site race data
         if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run data:sync
@@ -93,8 +86,7 @@ jobs:
             "runner/賽事/賽事資料庫.json" \
             "site/data/races.json" \
             "site/data/announcements.json" \
-            "site/data/automation-health.json" \
-            "site/data/trainer-weather.json"
+            "site/data/automation-health.json"
 
       - name: Trigger Pages deploy
         if: steps.refresh-guard.outputs.should_run == 'true' && steps.commit.outputs.did_push == 'true'

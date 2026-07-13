@@ -1667,9 +1667,8 @@ function renderHeroPanel() {
 
 // 台中 7 日預報（open-meteo，免金鑰）；提供清晨／傍晚跑步時段，快取 90 分鐘
 let trainerWeather = null;
-const TRAINER_WEATHER_COUNTY = '臺中市';
 async function loadTrainerWeather() {
-  const CACHE_KEY = 'trainer-weather-cache-v3';
+  const CACHE_KEY = 'trainer-weather-cache-v2';
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
     if (cached?.byDate && Date.now() - cached.at < 90 * 60 * 1000) {
@@ -1678,15 +1677,32 @@ async function loadTrainerWeather() {
     }
   } catch { /* 快取壞掉就直接重抓 */ }
   try {
-    const res = await fetch('./data/trainer-weather.json', { cache: 'no-cache' });
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=24.1477&longitude=120.6736&daily=temperature_2m_max,precipitation_probability_max&hourly=precipitation_probability&timezone=Asia%2FTaipei&forecast_days=7');
     if (!res.ok) return;
     const data = await res.json();
-    const byDate = data?.counties?.[TRAINER_WEATHER_COUNTY] || {};
+    const hourlyRain = data.hourly?.time?.reduce((map, time, index) => {
+      const date = String(time).slice(0, 10);
+      const hour = Number(String(time).slice(11, 13));
+      if (!map[date]) map[date] = { morning: [], evening: [] };
+      const value = data.hourly?.precipitation_probability?.[index];
+      if (Number.isFinite(value) && hour >= 5 && hour <= 8) map[date].morning.push(value);
+      if (Number.isFinite(value) && hour >= 18 && hour <= 21) map[date].evening.push(value);
+      return map;
+    }, {}) || {};
+    const windowRain = (values) => values?.length ? Math.max(...values) : null;
+    const byDate = {};
+    (data.daily?.time || []).forEach((date, index) => {
+      const windows = hourlyRain[date] || {};
+      byDate[date] = {
+        tmax: data.daily.temperature_2m_max?.[index] ?? null,
+        rain: data.daily.precipitation_probability_max?.[index] ?? null,
+        morningRain: windowRain(windows.morning),
+        eveningRain: windowRain(windows.evening)
+      };
+    });
     trainerWeather = byDate;
     localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), byDate }));
-  } catch (err) {
-    console.warn('loadTrainerWeather: 讀取失敗（可能離線），課表天氣區塊將維持隱藏', err);
-  }
+  } catch { /* 離線或 API 掛掉：不顯示天氣，不影響課表 */ }
 }
 
 function dayWeatherLine(day, { showForRest = false } = {}) {
