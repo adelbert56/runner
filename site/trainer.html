@@ -602,6 +602,8 @@
       white-space: nowrap;
     }
     .step-detail { font-size: 13px; color: var(--c-text-muted); line-height: 1.65; }
+    .step-card.is-coach-main { border-color: rgba(36, 114, 79, 0.35); background: var(--c-surface); box-shadow: inset 0 0 0 1px rgba(36, 114, 79, 0.08); }
+    .step-card.is-coach-main .step-detail { color: var(--c-text); font-weight: 700; }
     .day-card-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
     .day-card-actions .btn { font-size: 13px; padding: 8px 12px; flex: 1 1 120px; }
     .garmin-run-result { display:grid; gap:8px; margin-top:14px; padding:11px 12px; border-radius:12px; background:#eaf5ee; color:var(--c-primary-hover); font-size:12px; font-weight:850; border:1px solid rgba(36,114,79,.1); }
@@ -4902,6 +4904,15 @@ function jumpToPhaseWeek(weekNum) {
   scroller.scrollTop = scrollBefore;
 }
 
+// 教練筆記通常是「大方向：細節」的格式；卡片標題只取大方向，
+// 完整內容留給主課卡片顯示，避免同一段話重複出現兩次。
+function coachPlanHeadline(planText) {
+  const text = String(planText || '').trim();
+  const splitIndex = text.search(/[：:]/);
+  if (splitIndex <= 0 || splitIndex > 24) return text;
+  return text.slice(0, splitIndex);
+}
+
 function renderWeekSection(plan) {
   const week = plan[currentWeek - 1];
   if (!week) return '<p>找不到訓練週資料</p>';
@@ -4933,7 +4944,15 @@ function renderWeekSection(plan) {
   </section>` : '';
   const dayCards = week.days.map(day => {
     const entry = coachDays.find((item) => item.scheduledDow === day.dow);
-    return renderDayCard(entry ? { ...day, task: entry.plan, pace: '', hrTarget: '', steps: [], coachPlan: true } : day);
+    if (!entry) return renderDayCard(day);
+    // 保留熱身/主課/收操的卡片結構，只把教練指定的內容換進「主課」，
+    // 避免整段教練筆記變成沒有分段的一大塊文字。標題只取大方向，
+    // 完整內容留在主課卡片並加強顯示，避免同一段話出現兩次。
+    const headline = coachPlanHeadline(entry.plan);
+    const steps = (day.steps || []).map((step) => step.title === '主課'
+      ? { ...step, dose: '', detail: entry.plan, isCoachMain: true }
+      : step);
+    return renderDayCard({ ...day, task: headline, pace: '', hrTarget: '', steps, coachPlan: true });
   }).join('');
   return `
 <div class="card week-header-card">
@@ -4976,10 +4995,10 @@ function navWeek(delta) {
 
 function renderStepCards(steps) {
   return `<div class="workout-steps">${(steps || []).map(step => `
-    <div class="step-card">
+    <div class="step-card ${step.isCoachMain ? 'is-coach-main' : ''}">
       <div class="step-copy">
         <div class="step-head">
-          <span class="step-title">${step.title || ''}</span>
+          <span class="step-title">${step.isCoachMain ? '📌 ' : ''}${step.title || ''}</span>
           ${step.dose ? `<span class="step-dose">${step.dose}</span>` : ''}
         </div>
         <div class="step-detail">${step.detail || step.text || ''}</div>
