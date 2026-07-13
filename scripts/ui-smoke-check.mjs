@@ -59,6 +59,9 @@ assertCheck(/coach-summary/.test(trainer) && /這週怎麼跑，一次說清楚/
 assertCheck(/function effectiveWeekVolumeTarget\(/.test(trainer) && /依教練菜單/.test(trainer), "coach weekly volume replaces the formal target across plan progress surfaces");
 assertCheck(/function loadRegistrationRaceCheckpoints\(/.test(trainer) && /function recordRaceCheckpointResult\(/.test(trainer), "October race checkpoints pair local registrations with Garmin results before applying a pace update");
 assertCheck(/switchPlanTab\('analysis'\);\s*showView\('plan'\);/.test(trainer), "applying an assessment returns the runner to a visible analysis tab");
+assertCheck(/function checkinSafetyDecision\(/.test(trainer) && /factor: 1\.05/.test(trainer) && /停止品質課/.test(trainer), "weekly check-in uses a bounded safety decision before progression");
+assertCheck(/onclick="switchPlanTab\('checkin'\)"/.test(trainer) && /function openWeeklyCheckin\(/.test(trainer), "weekly check-in is reachable from the plan and daily guidance");
+assertCheck(/const TRAINING_JARGON_ENTRIES/.test(trainer) && /輕鬆跑（E 跑）/.test(trainer) && /M 配速/.test(trainer), "coach terminology includes controlled plain-language explanations");
 
 const failed = checks.filter((check) => !check.ok);
 checks.forEach((check) => {

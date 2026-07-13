@@ -624,6 +624,15 @@
     .training-status-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
     .training-status-actions .btn { padding:7px 10px; font-size:12px; white-space:nowrap; }
     @media (max-width:620px) { .training-status-card { grid-template-columns:1fr; } .training-status-actions { justify-content:flex-start; } }
+    .runner-guide-card { margin:0 0 16px; padding:16px; border:1px solid rgba(36,114,79,.18); border-radius:14px; background:linear-gradient(135deg,#f1f9f3,#fffdf8); }
+    .runner-guide-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .runner-guide-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+    .runner-guide-title { margin-top:3px; color:var(--c-text); font-size:16px; font-weight:900; }
+    .runner-guide-copy { margin:5px 0 0; color:var(--c-text-muted); font-size:13px; font-weight:650; line-height:1.65; }
+    .runner-guide-list { display:grid; gap:8px; margin:13px 0 0; padding:0; list-style:none; }
+    .runner-guide-list li { display:flex; gap:8px; align-items:flex-start; color:var(--c-text); font-size:13px; font-weight:700; line-height:1.55; }
+    .runner-guide-list li::before { content:'✓'; display:grid; place-items:center; flex:0 0 19px; height:19px; border-radius:50%; background:#e1f1e6; color:var(--c-primary-hover); font-size:11px; font-weight:900; }
+    .runner-guide-list li.pending::before { content:'○'; background:var(--c-surface2); color:var(--c-text-muted); }
     .skip-reason { margin-top: 8px; padding: 8px 10px; border-radius: 9px; background: #fff7ed; color: #9a3412; font-size: 12px; line-height: 1.55; }
     .support-grid { display: grid; gap: 10px; margin-top: 12px; }
     .support-card {
@@ -2232,7 +2241,7 @@ const CHECKIN_QUESTIONS = [
   '身體無異常疲勞或疼痛',
   '睡眠品質良好',
   '長跑結束後隔天恢復正常',
-  '節奏跑 / 間歇跑配速達標'
+  '節奏跑 / 間歇配速達標'
 ];
 
 // ============================================================
@@ -3603,6 +3612,7 @@ function renderPlanView() {
   <button class="tab" onclick="switchPlanTab('coach')">教練建議</button>
   <button class="tab" onclick="switchPlanTab('periodization')">訓練週期</button>
   <button class="tab" onclick="switchPlanTab('analysis')">訓練分析</button>
+  <button class="tab" onclick="switchPlanTab('checkin')">週評估</button>
   <div class="spacer"></div>
   <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="openTrainingDataManager()">資料管理</button>
   <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="editSetup()">⚙️ 修改設定</button>
@@ -3625,12 +3635,15 @@ function renderPlanView() {
 <div id="plan-tab-analysis" class="container" style="display:none">
   <div id="training-analysis-content">${renderTrainingAnalysis()}</div>
 </div>
+<div id="plan-tab-checkin" class="container" style="display:none">
+  ${renderCheckinSection()}
+</div>
 `;
   window.loadCoachReview?.();
 }
 
 function switchPlanTab(tab) {
-  const tabs = ['week', 'autopilot', 'coach', 'periodization', 'analysis'];
+  const tabs = ['week', 'autopilot', 'coach', 'periodization', 'analysis', 'checkin'];
   tabs.forEach((name, index) => {
     const section = document.getElementById(`plan-tab-${name}`);
     if (section) section.style.display = name === tab ? 'block' : 'none';
@@ -3641,7 +3654,7 @@ function switchPlanTab(tab) {
 }
 
 function editSetup() {
-  const tabs = ['week', 'autopilot', 'coach', 'analysis'];
+  const tabs = ['week', 'autopilot', 'coach', 'periodization', 'analysis', 'checkin'];
   const activeIndex = [...document.querySelectorAll('.plan-toolbar .tab')].findIndex(btn => btn.classList.contains('active'));
   setupReturnTab = tabs[Math.max(0, activeIndex)] || 'week';
   renderSetupView();
@@ -4678,12 +4691,16 @@ function renderCoachPeriodizationTimeline() {
 }
 
 const TRAINING_JARGON_ENTRIES = [
-  [/ST|快步/, 'ST／快步：85–95% 漸進加速，練步頻跑姿，非衝刺；組間走回，休 60–90 秒或恢復了再出發。'],
+  [/恢復跑/, '恢復跑：比輕鬆跑再慢一階，目的只是促進恢復；腿沉、心率偏高時可直接改走跑或休息。'],
+  [/輕鬆跑|E\s*跑/, '輕鬆跑（E 跑）：可完整對話的有氧跑，是每週跑量主體；不追配速，炎熱時以心率與體感為準。'],
+  [/長跑|LSD/i, '長跑：本週距離最長的一堂，重點是耐力、補水與穩定姿勢；不是每次都要跑快或跑到很累。'],
+  [/ST|快步/, 'ST／快步：短時間的漸進加速，練步頻與跑姿，不是衝刺；組間走回或慢跑至呼吸恢復。'],
   [/節奏跑|T\s*配速/, '節奏跑（T 配速）：乳酸閾值強度，吃力但穩定，只能講短句。'],
   [/間歇|I\s*配速/, '間歇（I 配速）：接近最大攝氧量強度，很硬；組間走或慢跑恢復，時間抓跟快跑趟差不多長。'],
   [/法特雷克/, '法特雷克：沒有固定距離或時間的變速跑，依體感自由加速、放鬆，不用照錶算配速。'],
-  [/坡跑/, '坡跑：上坡段全力或接近全力，練爆發力與跑姿；下坡用走或慢跑當恢復，不趕時間衝下坡。'],
-  [/E\s*跑/, 'E 跑（Easy）：輕鬆有氧配速，全程可對話，是每週跑量的主體，不追速度。']
+  [/坡跑/, '坡跑：上坡段以動作穩定、力量輸出為主；下坡走或慢跑恢復，動作跑掉或有疼痛就停止。'],
+  [/M\s*配速|馬拉松配速/, 'M 配速：預估可在馬拉松維持的穩定配速；它是耐力練習，不是每次長跑都要跑的強度。'],
+  [/漸進/, '漸進跑：從輕鬆開始，後段才自然加快；若心率或動作失控，維持原速度即可。']
 ];
 
 function jargonNotesFor(texts) {
@@ -4931,6 +4948,8 @@ function jumpToPhaseWeek(weekNum) {
     ${renderWeekSection(appData.plan)}`;
   const autopilotHost = document.getElementById('plan-tab-autopilot');
   if (autopilotHost) autopilotHost.innerHTML = renderGarminAutopilotTab(appData.profile, appData.plan);
+  const checkinHost = document.getElementById('plan-tab-checkin');
+  if (checkinHost) checkinHost.innerHTML = renderCheckinSection();
   renderHeroPanel();
   scroller.scrollTop = scrollBefore;
 }
@@ -4952,6 +4971,54 @@ function coachPlanHeadline(planText) {
           ? TRAINING_TYPE_LABELS.long
           : '今日訓練';
   return purpose ? `${direction}｜${purpose}` : direction;
+}
+
+function openWeeklyCheckin() {
+  switchPlanTab('checkin');
+  document.getElementById('plan-tab-checkin')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function dismissRunnerOnboarding() {
+  appData.onboarding = { ...(appData.onboarding || {}), dismissedAt: new Date().toISOString() };
+  saveData(appData);
+  jumpToPhaseWeek(currentWeek);
+}
+
+function renderRunnerOnboardingCard() {
+  if (appData.onboarding?.dismissedAt) return '';
+  const completedRun = (appData.log || []).some((entry) => entry.date && entry.type !== 'rest') || (appData.plan || []).flatMap((week) => week.days || []).some((day) => day.status === 'done');
+  const completedCheckin = (appData.checkins || []).length > 0;
+  const items = [
+    { done: true, text: '今天先照卡片完成一堂；不需要另外解讀整份週期。' },
+    { done: completedRun, text: '完成後按「完成」；若跳過，填原因就好，不需要硬補課。' },
+    { done: completedCheckin, text: '每週最後做一次週評估，系統才會判斷下週維持、降載或小幅推進。' }
+  ];
+  return `<section class="runner-guide-card" aria-label="新手三步上手">
+    <div class="runner-guide-head"><div><div class="runner-guide-kicker">Start here</div><div class="runner-guide-title">先做好這三步，課表才會越來越準</div><p class="runner-guide-copy">不需要每天填一堆數字；先把執行、回報與恢復做成習慣。</p></div><button class="btn btn-secondary" style="padding:6px 10px;font-size:12px" onclick="dismissRunnerOnboarding()">暫時隱藏</button></div>
+    <ul class="runner-guide-list">${items.map((item) => `<li class="${item.done ? '' : 'pending'}">${item.text}</li>`).join('')}</ul>
+  </section>`;
+}
+
+function renderDailyExecutionCard(week) {
+  const today = findTodayPlanDay()?.day;
+  const currentCheckin = (appData.checkins || []).find((item) => item.weekNum === currentWeek);
+  const upcoming = (week?.days || []).find((day) => day.dateStr > todayStr() && day.type !== 'rest');
+  const currentDay = today || upcoming;
+  const typeLabel = currentDay ? trainingTypeLabel(currentDay.type, currentDay.focus) : '恢復';
+  const isToday = Boolean(today);
+  const task = currentDay ? trainingTaskTitle(currentDay) : '本週先完成恢復與週評估';
+  const copy = currentCheckin
+    ? '本週評估已完成。照今天卡片執行即可；有疼痛或步態異常時，直接停止品質課。'
+    : isToday
+      ? '完成後按「完成」；若不舒服，選「跳過」並留原因，系統會把這筆背景帶進下週判斷。'
+      : upcoming
+        ? `下一堂是 ${upcoming.dateStr.slice(5)} 的${typeLabel}；今天以恢復、補水與睡眠為主。`
+        : '本週課表接近結束，做完週評估後再看下週方向。';
+  return `<section class="runner-guide-card" aria-label="今日下一步">
+    <div class="runner-guide-kicker">Daily focus</div><div class="runner-guide-title">${isToday ? '今天的下一步' : '接下來的下一步'}：${reviewEscape(task)}</div>
+    <p class="runner-guide-copy">${reviewEscape(copy)}</p>
+    <div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-primary" onclick="goToToday()">${isToday ? '查看今天課表' : '查看本週課表'}</button>${currentCheckin ? '' : '<button class="btn btn-secondary" onclick="openWeeklyCheckin()">完成週評估</button>'}</div>
+  </section>`;
 }
 
 function renderWeekSection(plan) {
@@ -5018,6 +5085,8 @@ function renderWeekSection(plan) {
     <span class="week-resource-label">先看今天，再完成本週</span>
   </div>
   ${guidance}
+  ${renderRunnerOnboardingCard()}
+  ${renderDailyExecutionCard(week)}
   <div class="guide-actions">
     <button class="guide-chip" onclick="openGuideLibrary('warmup')">🤸 熱身流程</button>
     <button class="guide-chip" onclick="openGuideLibrary('cooldown')">🧘 收操恢復</button>
@@ -5627,6 +5696,7 @@ function renderCheckinSection() {
     return `<div class="card"><div class="card-title">✅ 第 ${currentWeek} 週評估完成</div>
       <p style="font-size:14px;color:var(--c-text-muted)">結果：${existing.result}　勾選 ${existing.score}/5</p>
       ${existing.fatigue ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">本週整體疲勞：${existing.fatigue}/5</p>` : ''}
+      ${existing.safetyNote ? `<p style="font-size:13px;color:var(--c-orange);margin-top:6px">安全判斷：${existing.safetyNote}</p>` : ''}
       ${existing.note ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">週記：${existing.note}</p>` : ''}
       <p style="font-size:13px;margin-top:8px">${existing.adjustment}</p>
     </div>`;
@@ -5634,23 +5704,24 @@ function renderCheckinSection() {
   const qHTML = CHECKIN_QUESTIONS.map((question, index) => `<li><input type="checkbox" id="cq-${index}"><label for="cq-${index}">${question}</label></li>`).join('');
   return `<div class="card">
     <div class="card-title">📋 第 ${currentWeek} 週評估</div>
-    <p style="font-size:14px;color:var(--c-text-muted);margin-bottom:16px">這裡是主要檢查入口。一般情況下，不需要每天手動填一大堆資料；每週做一次這份檢查，再搭配課表卡上的完成/跳過，就夠系統判斷要不要調整。</p>
+    <p style="font-size:14px;color:var(--c-text-muted);margin-bottom:16px">每週只做一次。系統會先判斷疼痛、疲勞、睡眠與長跑恢復；安全條件未滿足時，不會自動加量。</p>
     <ul class="checkin-questions">${qHTML}</ul>
     <div class="log-form-grid" style="margin-top:18px">
       <div class="form-group"><label class="form-label">本週整體疲勞 (1–5)</label><input class="form-input" id="cw-fatigue" type="number" min="1" max="5" placeholder="3"><div class="field-help">1 很輕鬆，3 正常可恢復，5 非常疲勞。</div></div>
       <div class="form-group"><label class="form-label">本週一句話備註</label><input class="form-input" id="cw-note" type="text" placeholder="例：長跑後腿有點重，但隔天恢復"></div>
     </div>
+    <label class="field-help" style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:10px;background:#fff7ed;color:#9a3412"><input id="cw-pain-concern" type="checkbox" style="margin-top:3px">本週有疼痛、跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</label>
     <button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="submitCheckin()">提交評估</button>
   </div>`;
 }
 
-function adjustNextWeek(factor, removeInterval) {
+function adjustNextWeek(factor, removeQuality) {
   const nextWeekPlan = appData.plan[currentWeek];
   if (!nextWeekPlan) return;
   nextWeekPlan.targetKm = Math.round(nextWeekPlan.targetKm * factor * 10) / 10;
   nextWeekPlan.days = nextWeekPlan.days.map(day => {
-    if (removeInterval && day.type === 'interval') {
-      return buildDayCard(day.dow, day.dateStr, 'easy', Math.round((day.km || 0) * factor * 10) / 10, appData.profile, false, false, !appData.profile.injuries.includes('none'), todayStr(), day.weekNum || currentWeek + 1, day.phaseName || nextWeekPlan.phase);
+    if (removeQuality && ['tempo', 'interval'].includes(day.type)) {
+      return buildDayCard(day.dow, day.dateStr, 'easy', Math.round((day.km || 0) * factor * 10) / 10, appData.profile, false, false, !(appData.profile?.injuries || []).includes('none'), todayStr(), day.weekNum || currentWeek + 1, day.phaseName || nextWeekPlan.phase, 'recovery', '恢復跑');
     }
     if (day.type !== 'rest') day.km = Math.round((day.km || 0) * factor * 10) / 10;
     return day;
@@ -5658,32 +5729,40 @@ function adjustNextWeek(factor, removeInterval) {
   saveData(appData);
 }
 
+function checkinSafetyDecision({ answers, fatigue, painConcern }) {
+  const noPain = Boolean(answers[1]);
+  const sleptWell = Boolean(answers[2]);
+  const recoveredFromLongRun = Boolean(answers[3]);
+  const ramp = weeklyRampInfo(weeklyRunTrend(coachRunRecords()));
+  if (painConcern || !noPain || fatigue >= 5) {
+    return { result: '停止品質課', factor: 0.7, removeQuality: true, allowIntensity: false, note: '有疼痛、異常疲勞或步態問題；下週先降量並取消節奏跑與間歇。若症狀持續或加劇，請就醫。' };
+  }
+  if (fatigue >= 4 || !sleptWell || !recoveredFromLongRun) {
+    return { result: '降載恢復', factor: 0.85, removeQuality: true, allowIntensity: false, note: '恢復條件尚未達標；下週降量 15% 並取消品質課，先把睡眠與恢復補回來。' };
+  }
+  if (answers.every(Boolean) && fatigue <= 2 && ramp && ramp.ramp <= 10) {
+    return { result: '小幅推進', factor: 1.05, removeQuality: false, allowIntensity: true, note: `完成度、恢復與實跑增幅（${ramp.ramp >= 0 ? '+' : ''}${ramp.ramp}%）皆在安全範圍；下週最多小幅增加 5%。` };
+  }
+  const note = answers.every(Boolean) && fatigue <= 2 && !ramp
+    ? '自評恢復穩定，但尚缺兩週實跑趨勢；下週先維持，不自動加量。'
+    : '本週以維持為主；先把完成度與恢復做穩，再談加量。';
+  return { result: '維持', factor: 1, removeQuality: false, allowIntensity: false, note };
+}
+
 function submitCheckin() {
-  const score = CHECKIN_QUESTIONS.filter((_, index) => document.getElementById(`cq-${index}`)?.checked).length;
+  const answers = CHECKIN_QUESTIONS.map((_, index) => Boolean(document.getElementById(`cq-${index}`)?.checked));
+  const score = answers.filter(Boolean).length;
   const fatigue = parseInt(document.getElementById('cw-fatigue')?.value, 10) || 0;
   const note = document.getElementById('cw-note')?.value?.trim() || '';
-  let result;
-  let adjustment;
-  if (score === 5) {
-    result = '升級';
-    adjustment = '下週跑量 +10%，繼續保持！';
-    adjustNextWeek(1.1, false);
-  } else if (score >= 3) {
-    result = '維持';
-    adjustment = '下週維持現有計畫。';
-  } else if (score >= 1) {
-    result = '減量';
-    adjustment = '下週跑量 -15%，移除間歇跑。';
-    adjustNextWeek(0.85, true);
-  } else {
-    result = '停止建議';
-    adjustment = '⚠️ 建議休息一週後重新評估，若有疼痛請就醫。';
-  }
+  const painConcern = Boolean(document.getElementById('cw-pain-concern')?.checked);
+  const decision = checkinSafetyDecision({ answers, fatigue, painConcern });
+  if (decision.factor !== 1 || decision.removeQuality) adjustNextWeek(decision.factor, decision.removeQuality);
   appData.checkins = appData.checkins || [];
-  appData.checkins.push({ weekNum: currentWeek, score, result, adjustment, date: todayStr(), fatigue, note });
+  appData.checkins.push({ weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note });
   saveData(appData);
   assessProgress();
-  document.getElementById('plan-tab-checkin').innerHTML = renderCheckinSection();
+  jumpToPhaseWeek(currentWeek);
+  switchPlanTab('checkin');
 }
 
 // ============================================================
@@ -5851,6 +5930,11 @@ function showAdaptationDialog(scenario, data) {
 }
 
 function upgradeIntensity() {
+  const latestCheckin = (appData.checkins || []).find((item) => item.weekNum === currentWeek);
+  if (!latestCheckin?.allowIntensity) {
+    showModal('暫不提升強度', '需要先完成本週評估，且疼痛、疲勞、睡眠、長跑恢復與近兩週跑量增幅都在安全範圍，才會開放小幅提升。', [{ label: '查看週評估', primary: true, action: () => { closeModal(); openWeeklyCheckin(); } }, { label: '維持課表', action: closeModal }]);
+    return;
+  }
   const nextWeek = appData.plan[currentWeek];
   if (!nextWeek) return;
   appData.profile.racePaceSec = Math.max(appData.profile.racePaceSec - 5, 150);
