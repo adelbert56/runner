@@ -127,6 +127,9 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
   const previousHr = average(previous.map((run) => Number(run.hr)));
   const recentLoad = average(recent.map((run) => Number(run.trainingLoad)));
   const previousLoad = average(previous.map((run) => Number(run.trainingLoad)));
+  // 跑量看的是距離，訓練負荷是 Garmin 算的強度×時長綜合值：
+  // 距離沒明顯增加、但強度拉高（例如加了間歇/爬升）時，只看 rampPct 會漏掉這種過度堆疊。
+  const loadRampPct = previousLoad > 0 ? Math.round(((recentLoad - previousLoad) / previousLoad) * 100) : null;
   const paceDeltaSeconds = recentPace && previousPace ? recentPace - previousPace : null;
   const hrDelta = recentHr && previousHr ? Math.round(recentHr - previousHr) : null;
   const fatigueSignal = paceDeltaSeconds !== null && hrDelta !== null && paceDeltaSeconds >= 8 && hrDelta >= 5;
@@ -152,13 +155,17 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
     label = '保守重建';
     headline = '近 14 天有效跑步不足 3 次，先把頻率建立回來。';
     reasons.push(`近 14 天僅 ${recent.length} 次 Garmin 跑步。`);
-  } else if (rampPct !== null && rampPct > 15) {
+  } else if ((rampPct !== null && rampPct > 15) || (loadRampPct !== null && loadRampPct > 25)) {
     decision = 'deload';
     volumeFactor = 0.85;
     qualityMode = 'reduce';
     label = '自動降量';
-    headline = '近期跑量拉升偏快，下週先收量，避免連續堆疲勞。';
-    reasons.push(`近 14 天跑量比前 14 天增加 ${rampPct}%。`);
+    headline = rampPct !== null && rampPct > 15
+      ? '近期跑量拉升偏快，下週先收量，避免連續堆疲勞。'
+      : '近期距離沒有明顯增加，但 Garmin 訓練負荷拉升偏快（強度堆疊過快），下週先收量。';
+    reasons.push(rampPct !== null && rampPct > 15
+      ? `近 14 天跑量比前 14 天增加 ${rampPct}%。`
+      : `近 14 天平均訓練負荷比前 14 天增加 ${loadRampPct}%。`);
   } else if (fatigueSignal) {
     decision = 'maintain';
     volumeFactor = 0.9;

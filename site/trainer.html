@@ -3327,6 +3327,8 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
     card.injuryNote = '傷處（左腳等）當天有任何不穩或異樣 → 本課改輕鬆跑，當週退回上一級跑量。';
   } else if (hasInjury && type === 'long') {
     card.injuryNote = '長跑距離已為傷況保護版（下修 20%）；當天有任何不穩或異樣 → 提前結束，不硬撐里程。';
+  } else if (profile.cadenceCaution && type === 'long') {
+    card.injuryNote = '近期步頻偏低（跨步過大），長跑當天有意識拉高步頻、縮短步幅，降低受傷風險。';
   }
   if (dateStr && isHotSeasonDate(new Date(`${dateStr}T00:00:00`)) && ['easy', 'long', 'tempo', 'interval'].includes(type)) {
     card.heatNote = type === 'tempo' || type === 'interval'
@@ -3522,7 +3524,22 @@ function autoRecalibratePlan() {
       if (easyDelta) {
         profile.easyPaceSec += easyDelta;
         profile.easyPace = secToPace(profile.easyPaceSec);
-        reasons.push(`輕鬆跑(Z2)配速${easyDelta < 0 ? '提升' : '放鬆'} → ${secToPace(profile.easyPaceSec)}/km`);
+        // VO2max 趨勢上升可以佐證「配速變快是真的變強」，不是巧合或量測誤差
+        let vo2Note = '';
+        if (easyDelta < 0) {
+          const avg = (values) => values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
+          const withVo2 = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+            .filter((run) => Number(run.vo2max) > 0)
+            .map((run) => Number(run.vo2max));
+          if (withVo2.length >= 6) {
+            const recentVo2 = avg(withVo2.slice(-3));
+            const priorVo2 = avg(withVo2.slice(-6, -3));
+            if (recentVo2 && priorVo2 && recentVo2 - priorVo2 >= 1) {
+              vo2Note = `（VO₂ Max 同步從 ${priorVo2.toFixed(1)} 升到 ${recentVo2.toFixed(1)}，佐證是真的變強）`;
+            }
+          }
+        }
+        reasons.push(`輕鬆跑(Z2)配速${easyDelta < 0 ? '提升' : '放鬆'} → ${secToPace(profile.easyPaceSec)}/km${vo2Note}`);
       }
     }
   } catch (err) { /* 資料不足時跳過 */ }
@@ -3541,8 +3558,29 @@ function autoRecalibratePlan() {
     }
   } catch (err) { /* 資料不足時跳過 */ }
 
+  // 2d. 步頻風險提示：長期步頻偏低（跨步過大）是常見的受傷風險因子。
+  // 步頻是軟訊號，不像心率/配速那麼確定，所以只加提醒、不直接砍跑量。
+  let cadenceCautionChanged = false;
+  try {
+    const cadenceRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+      .slice(-8)
+      .filter((run) => Number(run.cadence) > 0);
+    if (cadenceRuns.length >= 4) {
+      const avgCadence = cadenceRuns.reduce((sum, run) => sum + Number(run.cadence), 0) / cadenceRuns.length;
+      const wasCaution = !!profile.cadenceCaution;
+      const isCaution = avgCadence < 168;
+      profile.cadenceCaution = isCaution;
+      if (isCaution !== wasCaution) {
+        cadenceCautionChanged = true;
+        reasons.push(isCaution
+          ? `近期平均步頻 ${Math.round(avgCadence)} spm 偏低（建議 ≥170），跨步過大易增加受傷風險，長跑日課表卡片會加提醒`
+          : `步頻已回到建議範圍（${Math.round(avgCadence)} spm），取消步頻提醒`);
+      }
+    }
+  } catch (err) { /* 資料不足時跳過 */ }
+
   appData.recalibratedFor = coachReviewData.updatedAt;
-  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload && !maxHrDelta) {
+  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload && !maxHrDelta && !cadenceCautionChanged) {
     appData.lastRecalibration = null;
     saveData(appData);
     return null;
@@ -3568,7 +3606,7 @@ function autoRecalibratePlan() {
     });
     week.days = newDays;
   });
-  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, reasons };
+  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, cadenceCautionChanged, reasons };
   appData.lastRecalibration = summary;
   saveData(appData);
   return summary;
@@ -4657,11 +4695,13 @@ function renderCoachDataSignals() {
   const cadence = average('cadence');
   const load = average('trainingLoad');
   const aerobicTe = average('aerobicTe');
+  const anaerobicTe = average('anaerobicTe');
   const latestVo2 = [...recent].reverse().find((run) => run.vo2max)?.vo2max;
   const metrics = [
     cadence && ['步頻基準', `${Math.round(cadence)} spm`],
     load && ['平均訓練負荷', String(Math.round(load))],
     aerobicTe && ['有氧訓練效果', aerobicTe.toFixed(1)],
+    anaerobicTe && ['無氧訓練效果', anaerobicTe.toFixed(1)],
     latestVo2 && ['最近 VO₂ Max', String(latestVo2)]
   ].filter(Boolean);
   if (!metrics.length) return '';
