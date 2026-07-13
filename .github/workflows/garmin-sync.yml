@@ -87,6 +87,9 @@ jobs:
 
       - name: Build encrypted training review
         if: steps.sync-guard.outputs.should_run == 'true'
+        # CI has the review key but not the ignored local source. The builder
+        # decrypts the existing published review, preserves its menu, and only
+        # refreshes Garmin analytics before encrypting it again.
         run: node scripts/build-training-review.mjs
 
       - name: Commit encrypted training update

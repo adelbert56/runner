@@ -134,6 +134,10 @@ const [
 
 const packageJson = JSON.parse(packageJsonRaw);
 const scheduleAuditConfig = JSON.parse(scheduleAuditConfigRaw);
+const [garminWorkflow, trainingReviewBuildScript] = await Promise.all([
+  text(".github/workflows/garmin-sync.yml"),
+  text("scripts/build-training-review.mjs"),
+]);
 const appUsesDynamicDataVersion = appJs.includes("const DATA_VERSION = `${Date.now()}`;");
 const scriptVersion = indexHtml.match(/app\.js\?v=([^"]+)"/)?.[1] || "";
 const scheduledWorkflowExpectations = [
@@ -421,6 +425,8 @@ assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site
 assertCheck(pagesWorkflow.includes("actions/setup-node@v6"), "Pages deploy installs Node before derived data builds");
 assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");
 assertCheck(pagesWorkflow.includes("npm run announcements:build") && pagesWorkflow.includes("npm run automation:health"), "Pages deploy rebuilds derived site data");
+assertCheck(garminWorkflow.includes("run: node scripts/build-training-review.mjs") && garminWorkflow.includes("preserves its menu"), "Garmin CI refreshes analytics without discarding the encrypted coach menu");
+assertCheck(trainingReviewBuildScript.includes("async function decrypt") && trainingReviewBuildScript.includes("preserving the existing encrypted coach plan") && trainingReviewBuildScript.includes('TRAINING_REVIEW_ALLOW_GARMIN_ONLY'), "training review builder reuses the encrypted coach plan and requires explicit opt-in before Garmin-only fallback data");
 
 for (const [name, workflow] of [
   ["ci", ciWorkflow],

@@ -232,6 +232,20 @@
     .coach-note-callout { display: flex; gap: 8px; margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--c-surface2); font-size: 14px; font-weight: 600; line-height: 1.7; }
     .coach-note-priority { margin: 0 0 14px; border-left: 4px solid var(--c-primary); background: #edf5ef; font-size: 15px; }
     .coach-note-priority b { color: var(--c-primary-hover); }
+    .coach-summary { margin:16px 0; padding:18px; border:1px solid rgba(36,114,79,.18); border-radius:16px; background:linear-gradient(135deg,#eef7f1,#fffdf8 68%); }
+    .coach-summary-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+    .coach-summary-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+    .coach-summary-title { margin-top:3px; color:var(--c-text); font-size:18px; font-weight:900; }
+    .coach-summary-goal { margin-top:4px; color:var(--c-text-muted); font-size:13px; font-weight:700; }
+    .coach-summary-verdict { flex:0 0 auto; padding:7px 10px; border-radius:10px; background:#fff; border:1px solid rgba(36,114,79,.12); color:var(--c-primary-hover); font-size:13px; font-weight:900; }
+    .coach-summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .coach-summary-block { padding:12px; border-radius:12px; background:rgba(255,255,255,.72); border:1px solid rgba(31,42,36,.08); }
+    .coach-summary-block.is-menu { grid-column:1 / -1; }
+    .coach-summary-label { color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.04em; }
+    .coach-summary-copy { margin-top:5px; color:var(--c-text); font-size:13px; font-weight:700; line-height:1.65; }
+    .coach-summary-copy.muted { color:var(--c-text-muted); font-weight:600; }
+    .coach-summary-list { margin:7px 0 0; padding-left:19px; color:var(--c-text); font-size:13px; font-weight:700; line-height:1.7; }
+    @media (max-width:620px) { .coach-summary-grid { grid-template-columns:1fr; } }
     .periodization-list { display: flex; flex-direction: column; gap: 8px; }
     .periodization-row { padding: 10px 12px; border-radius: 10px; background: var(--c-surface); border-left: 3px solid var(--c-border); }
     .periodization-row.is-current { border-left-color: var(--c-primary); background: #edf5ef; }
@@ -1221,10 +1235,30 @@ function planHasMalformedTimeline(plan) {
   });
 }
 
+function planEndsBeforeTargetDate(plan, targetDate) {
+  if (!targetDate || !Array.isArray(plan) || !plan.length) return false;
+  const lastDate = plan.flatMap((week) => week.days || []).map((day) => day.dateStr).filter(Boolean).sort().at(-1);
+  return Boolean(lastDate && lastDate < targetDate);
+}
+
 function shouldRebuildSavedPlan(data) {
   if (!data?.profile || !Array.isArray(data.plan) || data.plan.length === 0) return false;
-  if ((data.profile.planVersion || 0) < PLAN_SCHEMA_VERSION) return true;
   return data.plan.some(weekHasMalformedVolume) || planHasMalformedTimeline(data.plan);
+}
+
+function extendSavedPlanToTarget(data) {
+  if (!data?.profile || !planEndsBeforeTargetDate(data.plan, data.profile.targetDate)) return data;
+  const regenerated = buildPlan({ ...data.profile, planVersion: PLAN_SCHEMA_VERSION });
+  const lastExistingDate = data.plan.flatMap((week) => week.days || []).map((day) => day.dateStr).filter(Boolean).sort().at(-1);
+  const missingWeeks = regenerated.filter((week) => (week.days || []).some((day) => day.dateStr > lastExistingDate));
+  if (!missingWeeks.length) return data;
+  return {
+    ...data,
+    profile: { ...data.profile, planVersion: PLAN_SCHEMA_VERSION },
+    // Keep every existing day, status, manual completion and planned workout.
+    // A timeline repair may only append the weeks that were previously absent.
+    plan: [...data.plan, ...missingWeeks]
+  };
 }
 
 function rebuildStoredPlan(data) {
@@ -1313,7 +1347,7 @@ function renderHeroPanel() {
         ? ' · 就是今天！'
         : ' · 已完賽';
   const paceText = profile?.racePaceSec ? `${secToPace(profile.racePaceSec)}/km` : '完成設定後帶入';
-  const weeklyTarget = week?.targetKm ? `${week.targetKm} km` : '依可訓練日生成';
+  const weeklyTarget = week ? effectiveWeekVolumeTarget(week).display : '依可訓練日生成';
   shell.innerHTML = `
     <div class="trainer-hero-layout">
       <div class="trainer-hero-main">
@@ -1373,26 +1407,39 @@ function renderHeroPanel() {
     </div>`;
 }
 
-// 台中 7 日預報（open-meteo，免金鑰）；快取 3 小時
+// 台中 7 日預報（open-meteo，免金鑰）；提供清晨／傍晚跑步時段，快取 90 分鐘
 let trainerWeather = null;
 async function loadTrainerWeather() {
-  const CACHE_KEY = 'trainer-weather-cache';
+  const CACHE_KEY = 'trainer-weather-cache-v2';
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-    if (cached?.byDate && Date.now() - cached.at < 3 * 3600 * 1000) {
+    if (cached?.byDate && Date.now() - cached.at < 90 * 60 * 1000) {
       trainerWeather = cached.byDate;
       return;
     }
   } catch { /* 快取壞掉就直接重抓 */ }
   try {
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=24.1477&longitude=120.6736&daily=temperature_2m_max,precipitation_probability_max&timezone=Asia%2FTaipei&forecast_days=7');
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=24.1477&longitude=120.6736&daily=temperature_2m_max,precipitation_probability_max&hourly=precipitation_probability&timezone=Asia%2FTaipei&forecast_days=7');
     if (!res.ok) return;
     const data = await res.json();
+    const hourlyRain = data.hourly?.time?.reduce((map, time, index) => {
+      const date = String(time).slice(0, 10);
+      const hour = Number(String(time).slice(11, 13));
+      if (!map[date]) map[date] = { morning: [], evening: [] };
+      const value = data.hourly?.precipitation_probability?.[index];
+      if (Number.isFinite(value) && hour >= 5 && hour <= 8) map[date].morning.push(value);
+      if (Number.isFinite(value) && hour >= 18 && hour <= 21) map[date].evening.push(value);
+      return map;
+    }, {}) || {};
+    const windowRain = (values) => values?.length ? Math.max(...values) : null;
     const byDate = {};
     (data.daily?.time || []).forEach((date, index) => {
+      const windows = hourlyRain[date] || {};
       byDate[date] = {
         tmax: data.daily.temperature_2m_max?.[index] ?? null,
-        rain: data.daily.precipitation_probability_max?.[index] ?? null
+        rain: data.daily.precipitation_probability_max?.[index] ?? null,
+        morningRain: windowRain(windows.morning),
+        eveningRain: windowRain(windows.evening)
       };
     });
     trainerWeather = byDate;
@@ -1405,17 +1452,27 @@ function dayWeatherLine(day, { showForRest = false } = {}) {
   if (!wx || wx.tmax === null) return '';
   if (day.type === 'rest' && !showForRest) return '';
   const hot = wx.tmax >= 30;
-  const wet = (wx.rain ?? 0) >= 60;
+  const runWindows = [
+    wx.morningRain !== null && wx.morningRain !== undefined ? { label: '清晨', rain: wx.morningRain } : null,
+    wx.eveningRain !== null && wx.eveningRain !== undefined ? { label: '傍晚', rain: wx.eveningRain } : null
+  ].filter(Boolean);
+  const preferredWindow = runWindows.slice().sort((a, b) => a.rain - b.rain)[0] || null;
+  const wet = (preferredWindow?.rain ?? wx.rain ?? 0) >= 60;
   const icon = wet ? '🌧' : wx.tmax >= 33 ? '🥵' : hot ? '☀️' : '🌤';
+  const rainText = runWindows.length
+    ? `${runWindows.map((window) => `${window.label} ${Math.round(window.rain)}%`).join('／')}（全天最高 ${Math.round(wx.rain ?? 0)}%）`
+    : wx.rain !== null ? `全天最高 ${Math.round(wx.rain)}%` : '';
   const advice = day.type === 'rest'
     ? ''
+    : preferredWindow && preferredWindow.rain < 60 && (wx.rain ?? 0) >= 60
+      ? `建議${preferredWindow.label}出發，避開午後陣雨`
     : hot
       ? '建議清晨或傍晚出發，配速放慢、帶水'
       : wet
         ? '雨天路滑：小步幅、避開白線與人孔蓋'
         : '';
   const variant = hot ? 'wx-hot' : wet ? 'wx-rain' : '';
-  return `<div class="wx-chip ${variant}"><span class="wx-icon">${icon}</span><span>預報 ${Math.round(wx.tmax)}°C${wx.rain !== null ? ` · 降雨 ${wx.rain}%` : ''}${advice ? `<span class="wx-advice">${advice}</span>` : ''}</span></div>`;
+  return `<div class="wx-chip ${variant}"><span class="wx-icon">${icon}</span><span>預報 ${Math.round(wx.tmax)}°C${rainText ? ` · ${rainText}` : ''}${advice ? `<span class="wx-advice">${advice}</span>` : ''}</span></div>`;
 }
 
 function daysUntilTargetDate(targetDate) {
@@ -3240,6 +3297,8 @@ function generateAndShowPlan() {
 // ============================================================
 let currentWeek = 1;
 let coachReviewData = null;
+let registrationRaceData = null;
+let registrationRaceLoadState = 'idle';
 
 function renderPlanView() {
   renderHeroPanel();
@@ -3549,11 +3608,16 @@ function daysSinceDate(value) {
 
 function trainingDataHealth(plan = appData.plan || []) {
   const summary = trainingCompletionSummary(plan);
+  const currentWeekStart = weekStartLabel(todayStr());
+  const currentWeekDays = summary.elapsedDays.filter((day) => day.dateStr >= currentWeekStart);
+  const currentWeekCompleted = currentWeekDays.filter((day) => summary.completedDays.some((completed) => completed.dateStr === day.dateStr));
   const missingReasonDay = summary.elapsedDays.find((day) => day.status === 'missed' && !formatSkipReason(appData.skipReasons?.[day.dateStr]));
   const missedWithoutReason = summary.elapsedDays.filter((day) => day.status === 'missed' && !formatSkipReason(appData.skipReasons?.[day.dateStr])).length;
   const uncreditedRestRuns = summary.allActivity.filter((entry) => {
     const day = summary.planDayByDate.get(entry.date);
-    return day?.type === 'rest' && !summary.creditedMakeupDates.has(entry.date);
+    // Extra runs remain in the history, but they are only actionable during
+    // the current week. Do not keep an old Sunday run as a permanent alert.
+    return entry.date >= currentWeekStart && day?.type === 'rest' && !summary.creditedMakeupDates.has(entry.date);
   }).length;
   const asOf = coachReviewData?.autopilot?.asOf || coachReviewData?.analyticsUpdatedAt || coachReviewData?.updatedAt;
   const syncAge = daysSinceDate(asOf);
@@ -3562,21 +3626,23 @@ function trainingDataHealth(plan = appData.plan || []) {
   if (uncreditedRestRuns) issues.push(`${uncreditedRestRuns} 筆休息日跑步未認列補跑`);
   if (syncAge !== null && syncAge > 2) issues.push(`Garmin 資料已 ${syncAge} 天未更新`);
   if (summary.partialDays.length) issues.push(`${summary.partialDays.length} 堂只有部分跑量，尚未達自動完成門檻`);
-  return { summary, issues, missedWithoutReason, missingReasonDate: missingReasonDay?.dateStr || null, uncreditedRestRuns, syncAge, asOf };
+  return { summary, issues, missedWithoutReason, missingReasonDate: missingReasonDay?.dateStr || null, uncreditedRestRuns, syncAge, asOf, currentWeekDays, currentWeekCompleted };
 }
 
 function renderTrainingStatusCard(plan = appData.plan || []) {
   const health = trainingDataHealth(plan);
-  const { summary, issues, syncAge, missedWithoutReason, missingReasonDate, uncreditedRestRuns } = health;
+  const { summary, issues, syncAge, missedWithoutReason, missingReasonDate, uncreditedRestRuns, currentWeekDays, currentWeekCompleted } = health;
   const reminders = [];
   if (uncreditedRestRuns) reminders.push(`有 ${uncreditedRestRuns} 次 Garmin 跑步還沒對應課表。目前會算進本週跑量，但不會算成完成或補跑；如果它其實是補跑，請回原本跳過的課表按「重新安排」。`);
   if (missedWithoutReason) reminders.push(`${missedWithoutReason} 個跳過課表還沒填原因；補上後，之後回顧調整才看得懂當時為什麼休息。`);
   if (summary.partialDays.length) reminders.push(`${summary.partialDays.length} 堂跑步距離還沒達到你設定的完成比例，目前先標成部分完成。`);
   if (syncAge !== null && syncAge > 2) reminders.push(`Garmin 已 ${syncAge} 天沒有新資料，先確認手錶或同步是否正常。`);
-  const stateTitle = reminders.length ? `有 ${reminders.length} 件訓練事項待確認` : '本週訓練狀態已同步';
+  const stateTitle = reminders.length ? `有 ${reminders.length} 件訓練事項待確認` : currentWeekDays.length ? '本週進度已更新' : '本週剛開始';
   const stateCopy = reminders.length
     ? reminders.join(' ')
-    : `已完成 ${summary.completedSessions}/${summary.elapsedSessions || 0} 堂，執行率 ${summary.adherence}%${syncAge === null ? '' : syncAge === 0 ? '；Garmin 今日已同步。' : `；Garmin ${syncAge} 天前同步。`}`;
+    : currentWeekDays.length
+      ? `本週目前完成 ${currentWeekCompleted.length}/${currentWeekDays.length} 堂；${syncAge === null ? '尚未取得 Garmin 同步時間。' : syncAge === 0 ? 'Garmin 今日已同步。' : `Garmin ${syncAge} 天前同步。`}`
+      : `本週還沒有到期的跑課，先照今天的正式課表即可。${syncAge === null ? '' : syncAge === 0 ? ' Garmin 今日已同步。' : ` Garmin ${syncAge} 天前同步。`}`;
   const hasInAppFix = missedWithoutReason || uncreditedRestRuns || summary.partialDays.length;
   const action = missedWithoutReason && missingReasonDate
     ? `<button class="btn btn-secondary" onclick="editSkipReason('${missingReasonDate}')">補填跳過原因</button>`
@@ -3628,7 +3694,9 @@ function renderProgressCard(profile, plan) {
   const creditedMakeupKm = weekActivities.filter((entry) => creditedMakeupDates.has(entry.date)).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
   const extraKm = weekActivities.filter((entry) => planDayByDate.get(entry.date)?.type === 'rest' && !creditedMakeupDates.has(entry.date)).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
   const volumeNotes = [creditedMakeupKm ? `認列補跑 ${creditedMakeupKm.toFixed(1)} km` : '', extraKm ? `額外跑步 ${extraKm.toFixed(1)} km` : ''].filter(Boolean);
-  const weekTargetKm = currWeekPlan?.targetKm || 0;
+  const effectiveTarget = effectiveWeekVolumeTarget(currWeekPlan);
+  const weekTargetKm = effectiveTarget.numericKm || 0;
+  const weekTargetDisplay = effectiveTarget.display;
   const weekProgressPct = weekTargetKm > 0 ? Math.min(100, Math.round((currWeekDone / weekTargetKm) * 100)) : 0;
   const pausedBanner = profile.paused
     ? `<div style="background:#7f1d1d;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:12px;color:#fca5a5">
@@ -3643,7 +3711,7 @@ function renderProgressCard(profile, plan) {
   <div class="plan-overview-top"><div><div class="plan-overview-kicker">Plan progress</div><h2 class="plan-overview-title">${GOAL_NAME[profile.goal]} · 第 ${currentWeek} 週</h2></div><div class="plan-overview-meta">目標日 ${profile.targetDate} · ${secToPace(profile.racePaceSec)}/km</div></div>
   <div class="plan-progress-line"><span>計畫時間進度</span><strong>第 ${currentWeek} / ${totalWeeks} 週 · ${pct}%</strong></div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${Math.min(100, pct)}%"></div></div>
-  <div class="plan-progress-line"><span>本週跑量進度${volumeNotes.length ? `（含${volumeNotes.join('、')}）` : ''}</span><strong>${currWeekDone.toFixed(1)} / ${weekTargetKm || '?'} km · ${weekProgressPct}%</strong></div>
+  <div class="plan-progress-line"><span>本週跑量進度${effectiveTarget.source === '教練本週目標' ? '（依教練菜單）' : ''}${volumeNotes.length ? `（含${volumeNotes.join('、')}）` : ''}</span><strong>${currWeekDone.toFixed(1)} / ${weekTargetDisplay} · ${weekProgressPct}%</strong></div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${weekProgressPct}%"></div></div>
   <div class="plan-metric-grid">
     <div class="plan-metric"><span class="plan-metric-label">本週剩餘</span><strong class="plan-metric-value">${weekTargetKm ? `${Math.max(0, weekTargetKm - currWeekDone).toFixed(1)} km` : '—'}</strong></div>
@@ -3680,13 +3748,11 @@ function coachRunStatus() {
 
 function coachScheduleLabel() {
   const sync = appData.profile?.coachSync || {};
-  const label = sync.frequency === 'weekly'
+  return sync.frequency === 'weekly'
     ? `每週${DOW_NAMES[sync.day] || '日'} ${sync.time || '20:30'} 檢查`
     : sync.frequency === 'manual'
     ? '只在手動更新時檢查'
     : `每天 ${sync.time || '20:30'} 檢查`;
-  const asOf = coachReviewData?.autopilot?.asOf || coachReviewData?.analyticsUpdatedAt || coachReviewData?.updatedAt;
-  return asOf ? `${label} · Garmin 資料截至 ${asOf}` : label;
 }
 
 function currentTrainingGoalLabel() {
@@ -3827,10 +3893,238 @@ function renderWeeklySummaryCard(trend, adherence) {
   </div>`;
 }
 
+function liveCoachPlan() {
+  const runs = coachRunRecords();
+  const summary = trainingCompletionSummary(appData.plan || []);
+  const trend = weeklyRunTrend(runs);
+  const recommendation = weekVolumeRecommendation(trend, summary.adherence);
+  const reviewedWeek = coachReviewData?.week || {};
+  const hasReviewedWeek = Boolean(reviewedWeek.range || reviewedWeek.label);
+  const recent = runs.slice(-4);
+  const latest = recent.at(-1);
+  const averagePace = recent.filter((run) => run.paceSeconds).reduce((sum, run, _, list) => sum + run.paceSeconds / list.length, 0);
+  const averageHr = recent.filter((run) => run.hr).reduce((sum, run, _, list) => sum + run.hr / list.length, 0);
+  const autopilot = coachReviewData?.autopilot || {};
+  const qualityMode = autopilot.qualityMode || '';
+  const dataLabel = hasReviewedWeek
+    ? `上週回顧 · ${reviewedWeek.range || reviewedWeek.label}`
+    : runs.length ? `最近 ${Math.min(runs.length, 4)} 趟 Garmin 跑步` : '尚未有 Garmin 跑步資料';
+  const observation = hasReviewedWeek
+    ? [
+      `上週跑了 ${reviewedWeek.runs ?? '—'} 次、${reviewedWeek.km ?? '—'} km`,
+      reviewedWeek.longKm ? `最長 ${reviewedWeek.longKm} km` : '',
+      reviewedWeek.avgHr && reviewedWeek.avgHr !== '—' ? `平均心率 HR ${reviewedWeek.avgHr}` : ''
+    ].filter(Boolean).join('；')
+    : !runs.length
+    ? '還沒有足夠的實跑資料，所以先不替你增加強度。'
+    : [
+      `近期 ${recent.length} 趟平均 ${formatPaceSeconds(averagePace)}${averageHr ? `、HR ${Math.round(averageHr)}` : ''}`,
+      latest?.paceSeconds && averagePace ? `最新一趟 ${latest.paceSeconds <= averagePace ? '較近期均速快' : '較近期均速慢'} ${Math.abs(Math.round(latest.paceSeconds - averagePace))} 秒/km` : '',
+      `已完成 ${summary.completedSessions}/${summary.elapsedSessions || 0} 堂（${summary.adherence}%）`
+    ].filter(Boolean).join('；');
+  if (!runs.length) {
+    return {
+      dataLabel,
+      observation,
+      verdict: '先維持正式課表',
+      tone: 'caution',
+      menuTitle: '本週活用菜單：不額外加課',
+      steps: ['照正式課表完成輕鬆跑與長跑。', '至少累積 3 次 Garmin 跑步後，再開始用實跑配速、心率與跑量調整。'],
+      guardrail: '目前資料不足，先建立規律比加強更重要。'
+    };
+  }
+  if (qualityMode === 'skip' || recommendation?.tone === 'danger' || summary.adherence < 60) {
+    return {
+      dataLabel,
+      observation,
+      verdict: recommendation?.verdict || '本週優先恢復',
+      tone: 'danger',
+      menuTitle: '本週活用菜單：恢復版',
+      steps: ['本週品質課改成 30–40 分鐘可對話的輕鬆跑，心率守在輕鬆跑區間。', '跑後做 10 分鐘小腿、臀部與髖部活動度；不加間歇、不補強度。'],
+      guardrail: '這是降低負荷，不是偷懶；下週恢復穩定後再把品質課放回來。'
+    };
+  }
+  if (qualityMode === 'reduce' || recommendation?.tone === 'caution') {
+    return {
+      dataLabel,
+      observation,
+      verdict: recommendation?.verdict || '維持，品質課降階',
+      tone: 'caution',
+      menuTitle: '本週活用菜單：保守加強版',
+      steps: ['正式品質課保留，但主課只做原本的前 2/3；任何一組開始失控就改回輕鬆跑。', '本週總跑量不再增加，把長跑與收操完整做完。'],
+      guardrail: '先把可控的品質做漂亮，不用靠硬撐完成所有組數。'
+    };
+  }
+  return {
+    dataLabel,
+    observation,
+    verdict: recommendation?.verdict || '可維持並小幅加強',
+    tone: 'good',
+    menuTitle: '本週活用菜單：微量加強',
+    steps: ['選一堂輕鬆跑結束後，加 4 × 20 秒放鬆快步；每趟走或慢跑到呼吸恢復再開始。', '總跑量維持原課表，不額外加長跑或再加一堂品質課。'],
+    guardrail: '快步是練跑姿與步頻，不是衝刺；腿沉、心率偏高或睡眠差就直接略過。'
+  };
+}
+
+function renderLiveCoachCard(week = {}, nextWeek = {}) {
+  const plan = liveCoachPlan();
+  const mission = nextWeek.coachNote || '先照正式課表完成，不額外加課。';
+  const hasCoachWeeklyPlan = Array.isArray(nextWeek.menu) && nextWeek.menu.length > 0;
+  const statusLabel = hasCoachWeeklyPlan ? '照週報執行' : plan.verdict;
+  const optionalAdjustment = hasCoachWeeklyPlan ? '' : `<div class="coach-summary-block is-menu"><div class="coach-summary-label">這週怎麼調整</div><div class="coach-summary-copy">${reviewEscape(plan.menuTitle)}</div><ol class="coach-summary-list">${plan.steps.map((step) => `<li>${reviewEscape(step)}</li>`).join('')}</ol><div class="coach-summary-copy muted">🛟 ${reviewEscape(plan.guardrail)}</div></div>`;
+  const weatherBackup = hasCoachWeeklyPlan && nextWeek.weatherPlan
+    ? `<div class="coach-summary-block is-menu"><div class="coach-summary-label">天氣備案</div><div class="coach-summary-copy muted">${reviewEscape(nextWeek.weatherPlan)}</div></div>`
+    : '';
+  return `<section class="coach-summary">
+    <div class="coach-summary-head">
+      <div><div class="coach-summary-kicker">Runner coach brief · ${reviewEscape(plan.dataLabel)}</div><div class="coach-summary-title">這週怎麼跑，一次說清楚</div><div class="coach-summary-goal">目標：${reviewEscape(currentTrainingGoalLabel())}</div></div>
+      <span class="coach-summary-verdict">本週：${reviewEscape(statusLabel)}</span>
+    </div>
+    <div class="coach-summary-grid">
+      <div class="coach-summary-block"><div class="coach-summary-label">本週唯一重點</div><div class="coach-summary-copy">${reviewEscape(mission)}</div></div>
+      <div class="coach-summary-block"><div class="coach-summary-label">Garmin 近況</div><div class="coach-summary-copy muted">${reviewEscape(plan.observation)}</div></div>
+      ${optionalAdjustment}
+      ${weatherBackup}
+    </div>
+    ${coachGoalGapNote()}
+  </section>`;
+}
+
+function registrationDistanceKm(value) {
+  const match = String(value || '').match(/(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : 0;
+}
+
+function selectedRegistrationRaceEntries() {
+  const personId = appData.profile?.registrationPersonId;
+  const entries = registrationRaceData?.entries;
+  if (!personId || !Array.isArray(entries)) return [];
+  const configuredDates = new Set(Array.isArray(appData.profile?.raceCheckpointDates) ? appData.profile.raceCheckpointDates : []);
+  return entries
+    .filter((entry) => entry?.personId === personId && configuredDates.has(String(entry.raceDate || '').slice(0, 10)))
+    .map((entry) => ({ ...entry, date: String(entry.raceDate || '').slice(0, 10), distanceKm: registrationDistanceKm(entry.distance) }))
+    .filter((entry) => entry.date && entry.distanceKm > 0)
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function raceCheckpointCandidate(entry) {
+  if (!entry?.date || !entry.distanceKm) return null;
+  const lower = Math.max(1, entry.distanceKm * 0.75);
+  const upper = entry.distanceKm * 1.25;
+  return garminActivityRecords()
+    .filter((run) => run.date === entry.date && run.km >= lower && run.km <= upper && run.paceSeconds)
+    .sort((a, b) => Math.abs(a.km - entry.distanceKm) - Math.abs(b.km - entry.distanceKm))[0] || null;
+}
+
+function raceCheckpointType(distanceKm) {
+  if (Math.abs(distanceKm - 5) <= 0.6) return 'race_5k';
+  if (Math.abs(distanceKm - 10) <= 1) return 'race_10k';
+  if (Math.abs(distanceKm - 21.0975) <= 1.5) return 'race_half';
+  return 'custom_race';
+}
+
+function formatRaceCheckpointResult(run) {
+  const seconds = Math.round((run?.paceSeconds || 0) * (run?.km || 0));
+  return seconds > 0 ? secToTime(seconds) : '—';
+}
+
+function selectRegistrationRunner(personId) {
+  const person = (registrationRaceData?.people || []).find((item) => item.id === personId);
+  if (!person || !appData.profile) return;
+  const targetYear = String(appData.profile.targetDate || todayStr()).slice(0, 4);
+  const checkpointDates = (registrationRaceData?.entries || [])
+    .filter((entry) => entry?.personId === personId)
+    .filter((entry) => String(entry.raceDate || '').startsWith(`${targetYear}-10-`))
+    .filter((entry) => {
+      const distanceKm = registrationDistanceKm(entry.distance);
+      return distanceKm >= 8 && distanceKm <= 12;
+    })
+    .map((entry) => String(entry.raceDate).slice(0, 10))
+    .filter((date, index, dates) => dates.indexOf(date) === index)
+    .sort();
+  appData.profile.registrationPersonId = personId;
+  appData.profile.raceCheckpointDates = checkpointDates;
+  saveData(appData);
+  refreshCoachReviewPanels();
+}
+
+function recordRaceCheckpointResult(entryId) {
+  const entry = selectedRegistrationRaceEntries().find((item) => item.id === entryId);
+  const run = raceCheckpointCandidate(entry);
+  if (!entry || !run) return;
+  const assessment = {
+    date: entry.date,
+    type: raceCheckpointType(entry.distanceKm),
+    result: formatRaceCheckpointResult(run),
+    distanceKm: entry.distanceKm,
+    rpe: 0,
+    notes: `Garmin 賽事對照｜${entry.raceName || '十月檢查賽'}｜${run.km.toFixed(2)} km · ${run.pace || '配速未回傳'}${run.hr ? ` · HR ${run.hr}` : ''}`
+  };
+  saveAssessmentEntry(assessment);
+  const assessmentIndex = (appData.assessments || []).findIndex((item) => item.date === assessment.date && item.type === assessment.type);
+  document.getElementById('training-analysis-content').innerHTML = renderTrainingAnalysis();
+  showModal(
+    '確認這場比賽成績？',
+    `<p style="margin:0 0 10px;line-height:1.7"><b>${reviewEscape(entry.raceName || '十月檢查賽')}</b><br>${reviewEscape(entry.date)} · ${entry.distanceKm} km<br>Garmin 偵測：${run.km.toFixed(2)} km · ${reviewEscape(assessment.result)} · ${reviewEscape(run.pace || '配速未回傳')}${run.hr ? ` · HR ${run.hr}` : ''}</p><p style="margin:0;color:var(--c-text-muted);line-height:1.65">套用後才會以這場成績重算後續週的配速；已完成的課表與紀錄不會被覆寫。</p>`,
+    [
+      { label: '套用並調整後續課表', primary: true, action: () => applyAssessmentToPlan(assessmentIndex) },
+      { label: '只保留成績', action: closeModal }
+    ]
+  );
+}
+
+function renderRaceCheckpointPanel() {
+  if (registrationRaceLoadState === 'loading') {
+    return '<div class="card" style="border-left:4px solid var(--c-primary)"><div class="card-title">🏁 十月實戰檢查</div><p style="margin:0;color:var(--c-text-muted)">正在讀取本機報名管理的賽事安排…</p></div>';
+  }
+  if (!registrationRaceData) return '';
+  const people = Array.isArray(registrationRaceData.people) ? registrationRaceData.people : [];
+  if (!appData.profile?.registrationPersonId) {
+    const options = people.map((person) => `<option value="${reviewEscape(person.id)}">${reviewEscape(person.name || '未命名跑者')}</option>`).join('');
+    return `<div class="card" style="border-left:4px solid var(--c-primary)"><div class="card-title">🏁 十月實戰檢查</div><p style="margin:4px 0 12px;color:var(--c-text-muted);line-height:1.65">10 月安排的 10K 賽事會作為連續三週的實戰檢查：第一場看速度基準、第二場看恢復與穩定、第三場再決定十一月如何調整。先選擇你的報名資料；此設定只保存在這台裝置。</p><select class="form-input" onchange="selectRegistrationRunner(this.value)"><option value="">選擇你的報名資料</option>${options}</select></div>`;
+  }
+  const entries = selectedRegistrationRaceEntries();
+  if (!entries.length) {
+    return '<div class="card" style="border-left:4px solid var(--c-orange)"><div class="card-title">🏁 十月實戰檢查</div><p style="margin:0;color:var(--c-text-muted)">目前選定的跑者沒有 10 月 8–12 km 賽事。可重新選擇報名資料，或在報名管理補上賽事。</p></div>';
+  }
+  const rows = entries.map((entry, index) => {
+    const run = raceCheckpointCandidate(entry);
+    const status = entry.date > todayStr()
+      ? `尚未舉行 · 第 ${index + 1} 場檢查`
+      : run
+        ? `已偵測 Garmin 成績 · ${run.km.toFixed(2)} km · ${formatRaceCheckpointResult(run)}${run.hr ? ` · HR ${run.hr}` : ''}`
+        : '尚未找到符合距離的 Garmin 跑步';
+    const plan = index === 0 ? '看目前速度基準' : index === 1 ? '確認恢復與穩定性' : '依累積成果調整十一月';
+    return `<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--c-border);align-items:center"><div><b>${reviewEscape(entry.date)} · ${reviewEscape(entry.raceName || '10K 賽事')}</b><div style="font-size:13px;color:var(--c-text-muted);margin-top:3px">${entry.distanceKm} km · ${plan}<br>${reviewEscape(status)}${entry.isRegistered ? '' : ' · 報名尚未完成'}</div></div>${run ? `<button class="btn btn-primary" style="white-space:nowrap;font-size:12px;padding:7px 10px" onclick="recordRaceCheckpointResult('${reviewEscape(entry.id)}')">確認成績</button>` : ''}</div>`;
+  }).join('');
+  return `<div class="card" style="border-left:4px solid var(--c-primary)"><div style="display:flex;justify-content:space-between;gap:12px;align-items:start"><div><div class="card-title">🏁 十月實戰檢查</div><p style="margin:4px 0 10px;color:var(--c-text-muted);line-height:1.65">賽後系統只會先配對 Garmin；按「確認成績」後，才會用結果調整未來課表。三場會一起看，不會只憑單場就大幅改動。</p></div><button class="btn btn-secondary" style="font-size:12px;padding:6px 10px;white-space:nowrap" onclick="appData.profile.registrationPersonId=''; appData.profile.raceCheckpointDates=[]; saveData(appData); refreshCoachReviewPanels()">更換跑者</button></div>${rows}</div>`;
+}
+
+async function loadRegistrationRaceCheckpoints() {
+  registrationRaceLoadState = 'loading';
+  refreshCoachReviewPanels();
+  try {
+    const response = await fetch('/api/registration-data', { cache: 'no-cache' });
+    if (!response.ok) throw new Error('registration data unavailable');
+    const data = await response.json();
+    registrationRaceData = {
+      people: Array.isArray(data?.people) ? data.people : [],
+      entries: Array.isArray(data?.entries) ? data.entries : []
+    };
+    registrationRaceLoadState = 'ready';
+  } catch {
+    // 報名資料只在本機伺服器提供；公開網站不顯示此私人區塊。
+    registrationRaceData = null;
+    registrationRaceLoadState = 'unavailable';
+  }
+  refreshCoachReviewPanels();
+}
+
 function renderTrainingAnalysis() {
   const runs = coachRunRecords();
   const statusCard = renderTrainingStatusCard(appData.plan || []);
-  if (!runs.length) return `${statusCard}<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
+  const checkpointPanel = renderRaceCheckpointPanel();
+  if (!runs.length) return `${statusCard}${checkpointPanel}<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
   const trend = weeklyRunTrend(runs);
   const weeklySummaryCard = renderWeeklySummaryCard(trend, trainingDataHealth(appData.plan || []).summary.adherence);
   const recent = runs.slice(-4);
@@ -3854,7 +4148,7 @@ function renderTrainingAnalysis() {
           : ['🟢', 'var(--c-green)', `上週跑量增幅 ${ramp >= 0 ? '+' : ''}${ramp}%，在安全範圍（≤10%）內。`];
     return `<div style="margin:14px 0 0;padding:10px 14px;border-left:3px solid ${color};border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6">${icon} <b>週增幅監控</b>：${text}（${prev.km} → ${last.km} km）</div>`;
   })();
-  return `${statusCard}${weeklySummaryCard}<div class="card"><div class="card-title">📈 訓練分析 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
+  return `${statusCard}${checkpointPanel}${weeklySummaryCard}<div class="card"><div class="card-title">📈 訓練分析 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
     <div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">近四週跑量</span><strong class="plan-metric-value">${lastFourKm.toFixed(1)} km</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均配速</span><strong class="plan-metric-value">${formatPaceSeconds(averagePace)}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均心率</span><strong class="plan-metric-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">Garmin 資料截至</span><strong class="plan-metric-value">${reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt)}</strong></div></div>
     ${rampNote}
     <div style="margin-top:20px"><b style="font-size:15px">進階訓練指標</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 10px">只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p><div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">最近四趟平均步頻</span><strong class="plan-metric-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟累積爬升</span><strong class="plan-metric-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均負荷</span><strong class="plan-metric-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近 VO₂ Max</span><strong class="plan-metric-value">${latestVo2 || '—'}</strong></div></div></div>
@@ -3943,6 +4237,17 @@ function coachWeekMatches(week) {
   return week.days.some((day) => day.dateStr === weekStart);
 }
 
+function effectiveWeekVolumeTarget(week) {
+  const formalKm = Number(week?.targetKm) || 0;
+  if (!coachWeekMatches(week) || !coachReviewData?.nextWeek?.targetKm) {
+    return { numericKm: formalKm, display: formalKm ? `${formalKm} km` : '—', source: '正式課表' };
+  }
+  const raw = String(coachReviewData.nextWeek.targetKm);
+  const values = (raw.match(/\d+(?:\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
+  const numericKm = values.length > 1 ? (values[0] + values[1]) / 2 : (values[0] || formalKm);
+  return { numericKm, display: `${raw} km`, source: '教練本週目標' };
+}
+
 function coachPhaseEmoji(label) {
   if (!label) return '📍';
   if (label.includes('重建')) return '🏗️';
@@ -3972,6 +4277,24 @@ function coachMenuForCurrentSchedule(menu) {
       : otherEntries[otherIndex++] || null;
     return entry ? { ...entry, scheduledDow: dow } : null;
   }).filter(Boolean);
+}
+
+function formalCoachFallbackMenu(preferredWeekStart = '') {
+  const weeks = appData.plan || [];
+  const today = todayStr();
+  const selectedWeek = weeks.find((week) => (week.days || []).some((day) => day.dateStr === preferredWeekStart))
+    || weeks.find((week) => (week.days || []).some((day) => day.dateStr > today))
+    || weeks[currentWeek - 1]
+    || null;
+  if (!selectedWeek) return { week: null, menu: [] };
+  const menu = (selectedWeek.days || [])
+    .filter((day) => day.type !== 'rest')
+    .map((day) => ({
+      day: DOW_NAMES[day.dow] || '',
+      scheduledDow: day.dow,
+      plan: [day.task || '依正式課表完成', day.pace, day.hrTarget].filter(Boolean).join(' · ')
+    }));
+  return { week: selectedWeek, menu };
 }
 
 function renderCoachDataSignals() {
@@ -4013,14 +4336,39 @@ function renderGarminActualCard() {
 }
 
 function renderCoachPeriodizationTimeline() {
-  const phases = coachPeriodization();
+  const coachPhases = coachPeriodization();
+  const formalPhases = (() => {
+    const groups = [];
+    (appData.plan || []).forEach((week) => {
+      const key = `${week.phase || ''}:${week.phaseLabel || ''}`;
+      const existing = groups.at(-1);
+      if (existing?.key === key) {
+        existing.endWeek = week;
+        existing.weeks += 1;
+      } else {
+        groups.push({ key, phase: week.phaseLabel || week.phase || '訓練階段', startWeek: week, endWeek: week, weeks: 1 });
+      }
+    });
+    return groups.map((group) => ({
+      ...group,
+      start: group.startWeek.days?.[0]?.dateStr,
+      km: `${group.startWeek.targetKm}–${group.endWeek.targetKm} km / 週`,
+      focus: getPhaseRuleText(group.startWeek, appData.profile || {}, (appData.plan || []).length),
+      isFormal: true
+    }));
+  })();
+  const phases = coachPhases.length ? coachPhases : formalPhases;
   if (!phases.length) return '';
-  const currentPhase = coachPhaseForDate(todayStr());
+  const currentPhase = coachPhases.length
+    ? coachPhaseForDate(todayStr())
+    : formalPhases.find((phase) => phase.startWeek.weekNum <= currentWeek && phase.endWeek.weekNum >= currentWeek);
   const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
   const rows = phases.map((phase) => {
     const start = new Date(`${phase.start}T00:00:00`);
     const end = new Date(start.getTime() + (phase.weeks || 1) * 7 * 86400000 - 86400000);
-    const isCurrent = currentPhase && currentPhase.start === phase.start && currentPhase.phase === phase.phase;
+    const isCurrent = currentPhase && (phase.isFormal
+      ? currentPhase.key === phase.key
+      : currentPhase.start === phase.start && currentPhase.phase === phase.phase);
     return `<div class="periodization-row ${isCurrent ? 'is-current' : ''}">
       <div class="periodization-phase">${coachPhaseEmoji(phase.phase)} ${reviewEscape(phase.phase)}${isCurrent ? '<span class="coach-key-badge">目前階段</span>' : ''}</div>
       <div class="periodization-meta"><span>${fmt(start)}–${fmt(end)}・${phase.weeks} 週</span><b>${reviewEscape(phase.km)} km</b></div>
@@ -4029,7 +4377,7 @@ function renderCoachPeriodizationTimeline() {
   }).join('');
   return `<div class="card">
     <div class="card-title">🗓️ 訓練週期總覽</div>
-    <p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 14px">整個週期的跑量與重點怎麼隨階段與季節調整，一次看完。</p>
+    <p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 14px">${coachPhases.length ? '依教練週報的階段規劃顯示。' : '目前使用你的正式課表週期；教練週報沒有週期資料時，這裡仍會保留完整階段規劃。'}</p>
     <div class="periodization-list">${rows}</div>
   </div>`;
 }
@@ -4062,7 +4410,12 @@ function renderCoachReviewPanel() {
   }
   const week = coachReviewData.week || {};
   const nextWeek = coachReviewData.nextWeek || {};
-  const scheduledMenu = coachMenuForCurrentSchedule(nextWeek.menu);
+  const coachMenu = coachMenuForCurrentSchedule(nextWeek.menu);
+  const formalFallback = coachMenu.length ? null : formalCoachFallbackMenu(nextWeek.weekStart);
+  const scheduledMenu = coachMenu.length ? coachMenu : formalFallback.menu;
+  const menuSource = coachMenu.length ? 'Garmin 教練參考菜單' : '正式課表（教練週報未提供菜單）';
+  const menuLabel = coachMenu.length ? nextWeek.label : `第 ${formalFallback.week?.weekNum || currentWeek} 週正式課表`;
+  const menuTargetKm = coachMenu.length ? nextWeek.targetKm : (formalFallback.week?.targetKm ?? '—');
   const scheduleDays = scheduledMenu.map((item) => DOW_NAMES[item.scheduledDow] || item.day).join('、');
   const notes = (coachReviewData.history || []).slice().reverse().map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
   const garminOnlyNotice = coachReviewData.sourceMode === 'garmin-only'
@@ -4087,6 +4440,22 @@ function renderCoachReviewPanel() {
       </div>
     </div>`;
   }).join('');
+  const courseSection = coachMenu.length
+    ? `<div class="coach-menu-card">
+        <div class="coach-menu-head"><div><div class="plan-overview-kicker">教練調整後的課程</div><b class="coach-menu-title">${reviewEscape(menuLabel)}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
+        <p class="coach-fineprint" style="margin:4px 0 10px">這是 Garmin 教練週報提供的調整內容，已依目前訓練日重排：${reviewEscape(scheduleDays)}</p>
+        <div class="coach-menu-list">${menuRows || '<div class="coach-fineprint">目前沒有可顯示的跑步課程。</div>'}</div>
+        ${(() => {
+          const jargon = jargonNotesFor(scheduledMenu.map((item) => item.plan || ''));
+          if (!jargon.length) return '';
+          return `<details class="coach-jargon" style="margin-top:10px"><summary style="cursor:pointer;font-size:12.5px;font-weight:700;color:var(--c-text-muted)">📖 這週出現的訓練名詞是什麼意思？</summary><ul style="margin:8px 0 0;padding-left:18px;font-size:12.5px;color:var(--c-text-muted);line-height:1.6">${jargon.map((note) => `<li>${reviewEscape(note)}</li>`).join('')}</ul></details>`;
+        })()}
+      </div>`
+    : `<div class="coach-menu-card">
+        <div class="coach-menu-head"><div><div class="plan-overview-kicker">正式課表維持原樣</div><b class="coach-menu-title">本週課程不重複列在這裡</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
+        <p class="coach-fineprint" style="margin:6px 0 12px">教練本次依 Garmin 給的是判讀與活用建議；完整每天課程請在「本週課表」查看，避免和輔助菜單重複。</p>
+        <button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看本週正式課表</button>
+      </div>`;
   return `${renderTrainingStatusCard(appData.plan || [])}<div class="card coach-panel">
     <div class="coach-head">
       <div class="card-title" style="margin:0">🏃 教練建議</div>
@@ -4101,37 +4470,8 @@ function renderCoachReviewPanel() {
       <button class="btn btn-secondary coach-lock-btn" onclick="lockCoachReview()">🔒 鎖定</button>
     </div>
     ${garminOnlyNotice}
-    <div class="coach-setting-card">
-      <div class="coach-section-title" style="margin:0 0 6px">🎯 目前採用訓練設定</div>
-      <div class="coach-setting-value">${reviewEscape(currentTrainingGoalLabel())}</div>
-      <div class="coach-fineprint">此設定會優先於週報快照中的舊目標，修改訓練設定後會立即同步顯示。</div>
-      ${coachGoalGapNote()}
-    </div>
-    ${nextWeek.coachNote ? `<div class="coach-note-callout coach-note-priority">🗣️ <span><b>本週唯一任務</b><br>${reviewEscape(nextWeek.coachNote)}</span></div>` : ''}
-    ${week.verdict || week.notes ? `<div class="coach-verdict">
-      <span class="coach-verdict-icon">${reviewEscape(week.verdict || '📋')}</span>
-      <div>
-        <b>本週判定</b>
-        <p>${reviewEscape(week.notes || '')}</p>
-      </div>
-    </div>` : ''}
-    <div class="coach-menu-card">
-      <div class="coach-menu-head">
-        <div>
-          <div class="plan-overview-kicker">Next Week</div>
-          <b class="coach-menu-title">下週參考菜單：${reviewEscape(nextWeek.label)}</b>
-        </div>
-        <span class="coach-menu-km">${reviewEscape(nextWeek.targetKm)} km</span>
-      </div>
-      <p class="coach-fineprint" style="margin:4px 0 10px">已依目前訓練日重排：${reviewEscape(scheduleDays)}${appData.profile?.dayState?.includes(2) ? '（長跑固定於指定長跑日）' : ''}</p>
-      <div class="coach-menu-list">${menuRows}</div>
-      ${(() => {
-        const jargon = jargonNotesFor(scheduledMenu.map((item) => item.plan || ''));
-        if (!jargon.length) return '';
-        return `<details class="coach-jargon" style="margin-top:10px"><summary style="cursor:pointer;font-size:12.5px;font-weight:700;color:var(--c-text-muted)">📖 這週出現的訓練名詞是什麼意思？</summary><ul style="margin:8px 0 0;padding-left:18px;font-size:12.5px;color:var(--c-text-muted);line-height:1.6">${jargon.map((note) => `<li>${reviewEscape(note)}</li>`).join('')}</ul></details>`;
-      })()}
-      ${nextWeek.weatherPlan ? `<div class="wx-chip" style="margin:10px 0 0"><span class="wx-icon">🌦️</span><span>天氣備案<span class="wx-advice">${reviewEscape(nextWeek.weatherPlan)}</span></span></div>` : ''}
-    </div>
+    ${renderLiveCoachCard(week, nextWeek)}
+    ${courseSection}
     ${renderCoachDataSignals()}
     <p class="coach-fineprint" style="margin-top:12px">這是依 Garmin 實績產生的參考安排；你的正式課表不會自動被覆寫。</p>
     ${notes ? `<details class="coach-history"><summary><b>分析快照歷史</b>（不覆蓋目前訓練設定）</summary><ul>${notes}</ul></details>` : ''}
@@ -4296,6 +4636,7 @@ function renderWeekSection(plan) {
   const taperBadge = week.isTaper ? '<span class="week-flag-badge is-taper">賽前減量</span>' : '';
   const phaseRuleText = getPhaseRuleText(week, appData.profile, plan.length);
   const isCoachWeek = coachWeekMatches(week);
+  const effectiveTarget = effectiveWeekVolumeTarget(week);
   const coachNextWeek = isCoachWeek ? coachReviewData.nextWeek : null;
   const coachDays = coachNextWeek ? coachMenuForCurrentSchedule(coachNextWeek.menu) : [];
   const goalGapNote = coachGoalGapNote(true);
@@ -4333,7 +4674,7 @@ function renderWeekSection(plan) {
       <button class="week-nav-btn" onclick="navWeek(1)" ${currentWeek >= plan.length ? 'disabled' : ''} aria-label="下一週">▶</button>
     </div>
     <div class="week-header-right">
-      <div class="week-target"><span>本週目標</span><strong>${week.targetKm} km</strong></div>
+      <div class="week-target"><span>${effectiveTarget.source}</span><strong>${effectiveTarget.display}</strong></div>
       <button class="btn btn-primary week-today-btn" onclick="goToToday()">📍 今天</button>
     </div>
   </div>
@@ -4713,7 +5054,7 @@ function applyAssessmentToPlan(index = 0) {
   saveData(appData);
   closeModal();
   renderPlanView();
-  switchPlanTab('log');
+  switchPlanTab('analysis');
   showView('plan');
 }
 
@@ -5621,6 +5962,13 @@ function init() {
   if (shouldRebuildSavedPlan(appData)) {
     appData = rebuildStoredPlan(appData);
     saveData(appData);
+  } else if (planEndsBeforeTargetDate(appData.plan, appData.profile?.targetDate)) {
+    appData = extendSavedPlanToTarget(appData);
+    saveData(appData);
+  } else if (appData.profile && (appData.profile.planVersion || 0) < PLAN_SCHEMA_VERSION) {
+    // A schema label alone must never rewrite a runner's existing plan.
+    appData.profile.planVersion = PLAN_SCHEMA_VERSION;
+    saveData(appData);
   }
   const ui = loadUiState();
   if (appData.profile && appData.plan && appData.plan.length > 0) {
@@ -5677,6 +6025,7 @@ function applyRacePrefill() {
 }
 
 init();
+loadRegistrationRaceCheckpoints();
 </script>
 <script>
 // ============================================================

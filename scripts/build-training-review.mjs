@@ -288,6 +288,33 @@ async function encrypt(plaintext, passphrase) {
   };
 }
 
+async function decrypt(payload, passphrase) {
+  if (!payload?.salt || !payload?.iv || !payload?.ct || !payload?.kdf) {
+    throw new Error("Encrypted training review payload is incomplete");
+  }
+  const keyMaterial = await subtle.importKey(
+    "raw", new TextEncoder().encode(passphrase), "PBKDF2", false, ["deriveKey"]
+  );
+  const key = await subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: Buffer.from(payload.salt, "base64"),
+      iterations: Number(payload.kdf.iterations),
+      hash: payload.kdf.hash,
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+  const plaintext = await subtle.decrypt(
+    { name: "AES-GCM", iv: Buffer.from(payload.iv, "base64") },
+    key,
+    Buffer.from(payload.ct, "base64")
+  );
+  return new TextDecoder().decode(plaintext);
+}
+
 async function buildPublishedReview(plaintext) {
   let review = plaintext ? JSON.parse(plaintext) : null;
   try {
@@ -325,7 +352,18 @@ async function main() {
       console.error(`Cannot read valid JSON from ${SOURCE}: ${err.message}`);
       process.exit(1);
     }
-    console.warn(`No local coach review found at ${SOURCE}; publishing Garmin-only training data.`);
+    try {
+      const existingPayload = JSON.parse(await readFile(TARGET, "utf8"));
+      plaintext = await decrypt(existingPayload, passphrase);
+      JSON.parse(plaintext); // validate before retaining the existing coach plan
+      console.warn(`No local coach review found at ${SOURCE}; preserving the existing encrypted coach plan and refreshing Garmin analytics.`);
+    } catch (existingErr) {
+      if (process.env.TRAINING_REVIEW_ALLOW_GARMIN_ONLY !== "1") {
+        console.warn(`No local coach review or readable encrypted fallback found; keeping the existing training review unchanged. (${existingErr.message})`);
+        return;
+      }
+      console.warn(`No local coach review found at ${SOURCE}; publishing Garmin-only training data by explicit opt-in.`);
+    }
   }
 
   const payload = await encrypt(await buildPublishedReview(plaintext), passphrase);

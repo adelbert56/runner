@@ -49,6 +49,16 @@ assertCheck(/function trainingDataHealth\(/.test(trainer) && /renderTrainingStat
 assertCheck(/function exportTrainingData\(/.test(trainer) && /function importTrainingData\(/.test(trainer), "trainer supports local backup and restore");
 assertCheck(/garminCompletionPct/.test(trainer) && /function garminCompletionPercent\(/.test(trainer), "Garmin automatic completion threshold is configurable");
 assertCheck(/function mondayOfWeek\(/.test(trainer) && /calcWeeks\(profile\.targetDate, profile\.generatedAt\)/.test(trainer), "trainer includes the target race week when building a plan");
+assertCheck(/function formalCoachFallbackMenu\(/.test(trainer) && /正式課表（教練週報未提供菜單）/.test(trainer), "coach panel falls back to formal workouts when Garmin review has no menu");
+assertCheck(/function liveCoachPlan\(/.test(trainer) && /function renderLiveCoachCard\(/.test(trainer), "coach panel turns recent Garmin records into a guarded live training menu");
+assertCheck(/const formalPhases =/.test(trainer) && /目前使用你的正式課表週期/.test(trainer), "periodization falls back to the formal plan when coach review has no phase data");
+assertCheck(/function extendSavedPlanToTarget\(/.test(trainer) && !/profile\.planVersion \|\| 0\) < PLAN_SCHEMA_VERSION\) return true/.test(trainer), "schema upgrades preserve existing plans and only append missing race weeks");
+assertCheck(/trainer-weather-cache-v2/.test(trainer) && /morningRain/.test(trainer) && /eveningRain/.test(trainer), "trainer weather distinguishes morning and evening running windows");
+assertCheck(/const currentWeekStart = weekStartLabel\(todayStr\(\)\)/.test(trainer), "old extra runs do not remain as permanent weekly alerts");
+assertCheck(/coach-summary/.test(trainer) && /這週怎麼跑，一次說清楚/.test(trainer), "coach page combines goal, verdict, priority, and adjustment into one runner summary");
+assertCheck(/function effectiveWeekVolumeTarget\(/.test(trainer) && /依教練菜單/.test(trainer), "coach weekly volume replaces the formal target across plan progress surfaces");
+assertCheck(/function loadRegistrationRaceCheckpoints\(/.test(trainer) && /function recordRaceCheckpointResult\(/.test(trainer), "October race checkpoints pair local registrations with Garmin results before applying a pace update");
+assertCheck(/switchPlanTab\('analysis'\);\s*showView\('plan'\);/.test(trainer), "applying an assessment returns the runner to a visible analysis tab");
 
 const failed = checks.filter((check) => !check.ok);
 checks.forEach((check) => {
