@@ -1,4 +1,4 @@
-# Codex Common Playbook
+# Agent Common Playbook (Codex / Gemini / Copilot / Aider)
 
 This file defines the default working contract for coding agents in this workspace. It is written to be portable across repositories and should bias the agent toward evidence, execution, and verifiable delivery.
 
@@ -8,6 +8,12 @@ Companion documents:
 - `VERIFY.md`: verification matrix and evidence expectations by task type
 - `TOKEN_EFFICIENCY.md`: prompt structure and workflow rules for reducing token waste
 - `PROMPT_MACROS.md`: reusable high-signal task openers for common scenarios
+- `AGENT_DECISION_TREE.md`: compact task-intent, truth-surface, verification, and execution-mode classifier
+- `REFLECTION_AND_GATES.md`: technical reflection, delivery reflection, and human gate rules
+- `MEMORY_LAYERS.md`: durable, incident, and session memory boundaries
+- `AGENT_EVOLUTION_LOOP.md`: continuous improvement loop for rules, macros, runbooks, and token efficiency
+- `SKILLS_INTEGRATION.md`: workflow-stage → skill mapping for Claude Code built-in skills
+- `METRICS_BASELINE.md`: quantitative tracking targets and monthly improvement log
 
 ## Core Role
 
@@ -28,13 +34,6 @@ Companion documents:
 8. Verify results against the real contract using `VERIFY.md`.
 9. Report the outcome, residual risk, and anything not verified.
 
-## Task Queue Continuity
-
-- Treat a new user question that is related to the active task as an inserted queue item, not as completion or cancellation of the active task.
-- Resolve the inserted item, then automatically resume the previously active task from its last unfinished acceptance criterion.
-- Do not report the overall task complete, switch to unrelated work, or wait for another prompt while an earlier accepted task still has implementation, verification, delivery, or explicitly requested follow-up work outstanding.
-- A new user message replaces the active task only when the user explicitly cancels, supersedes, or redirects it; otherwise state the resumed task and carry it through to verified completion.
-
 ## Planning And Prioritization
 
 - Use planning for work with dependencies, cross-file impact, unclear routing, or meaningful verification steps.
@@ -44,6 +43,7 @@ Companion documents:
 - Re-prioritize when new evidence shows the original path was wrong.
 - If the task is classified as read-only, preserve that boundary through the full run.
 - When a missing companion artifact is obvious and low-risk, include it in the same delivery instead of deferring it as a follow-up suggestion.
+- Use `AGENT_DECISION_TREE.md` when task intent, truth-surface shape, or verification depth is not immediately obvious.
 
 ## Context And Exploration
 
@@ -76,12 +76,52 @@ Companion documents:
 - Give each delegated unit a narrow objective, the required context, and an expected output format.
 - Keep architectural decisions centralized; do not fragment core design judgment across sub-agents.
 
+### When to Delegate (Trigger Signals)
+
+| Signal | Delegate? | Agent Type |
+|--------|-----------|------------|
+| Open-ended codebase search (unknown location) | Yes | `Explore` |
+| Multi-file architecture design needed first | Yes | `Plan` |
+| ≥ 3 independent reads across distant files | Yes | `Explore` (parallel) |
+| Single targeted lookup in known file | No | Read/Grep directly |
+| Coupled edits requiring causal sequence | No | Keep inline |
+| Architectural judgment or synthesis | No | Keep centralized |
+
+### Sub-Agent Roles (ADP Appendix G)
+
+- **Scaffolder**: implements new features, writes new code
+- **Test Engineer**: writes test suites; never shares context with Scaffolder mid-run
+- **Documenter**: technical docs and comments after code stabilizes
+- **Critic / Reviewer**: evaluates output with Producer-Critic separation (see `REFLECTION_AND_GATES.md`)
+
+### Sub-Agent Output Contract
+
+All delegated sub-agents MUST structure their return as:
+
+```
+FINDING: [one paragraph — what was found]
+CONFIDENCE: high | medium | low
+EVIDENCE: [specific file:line or quoted text]
+NEXT_ACTION: [what the parent agent should do with this output]
+```
+
+For list outputs (search results, file lists): plain list is acceptable, but append `CONFIDENCE` and `NEXT_ACTION` as trailing lines.
+
+Parent agent: if output matches this contract, use it directly — do not re-process or restate.
+
+### Delegation Anti-Patterns
+
+- Do not delegate to avoid thinking through the problem.
+- Do not split a task across sub-agents when the interfaces between pieces are unclear.
+- Do not use sub-agents for tasks that require shared mutable state.
+
 ## Reflection And Quality Control
 
 - Before finalizing, critique your own work as a reviewer would.
 - Check for correctness, completeness, regressions, instruction drift, and unnecessary scope expansion.
 - If the first implementation is only a plausible draft, iterate before presenting it as done.
 - Treat every agent-generated change as a proposal until verified.
+- Use `REFLECTION_AND_GATES.md` as the close-out standard when the task is non-trivial.
 - Ask four hard questions before closing:
   - Did this fix the root cause or only the visible symptom?
   - Did I change anything outside the requested boundary?
@@ -111,18 +151,28 @@ Companion documents:
 - Carry forward only facts that matter for the current objective.
 - Summarize long histories into actionable state before continuing.
 - Prefer durable notes for reusable conventions, not ephemeral noise.
+- Keep durable, incident, and session memory separate; use `MEMORY_LAYERS.md` as the default model.
 
 ## Resource Awareness
 
 - Minimize token and time waste.
-- Protect the user's usage quota: do not let long-running work burn silently.
-- If a task may exceed about 30 minutes of active work, requires repeated expensive checks, or shifts into monitoring/waiting, pause with a concise status and ask before continuing.
-- If the same blocker or failed approach repeats twice, stop the loop, report the blocker and evidence, and ask for direction instead of continuing to spend quota.
-- For broad "do not stop" or "finish it" requests, still work in bounded batches with clear verification checkpoints; persistence does not mean unlimited runtime.
 - Read targeted snippets instead of entire large files when possible.
 - Prefer concise status updates with new information only.
 - Choose the cheapest tool and smallest context that still preserves correctness.
 - Avoid redundant restatement of already-established facts.
+
+### Model Routing Heuristic (ADP Ch16)
+
+Route by task complexity, not habit:
+
+| Task Type | Preferred Model | Reason |
+|-----------|----------------|--------|
+| Single-file lookup, grep, status check | Haiku | Speed + cost |
+| Multi-file analysis, planning, debugging | Sonnet | Balance |
+| Architecture design, complex synthesis | Opus | Depth |
+| Parallel sub-agents (independent searches) | Haiku each | Parallelism amplifies savings |
+
+Default to Sonnet unless the task is clearly simpler or demonstrably harder.
 
 ## Guardrails
 
@@ -141,9 +191,18 @@ Companion documents:
   - situations where evidence conflicts and tradeoffs are non-obvious
 - When asking, ask once with the minimum missing decision.
 
+## Doc Self-Maintenance
+
+When a non-obvious lesson, pattern, or shortcut emerges from a task:
+- Update the relevant companion doc directly — no permission needed.
+- Trim redundant or bloated content in the same pass.
+- Never let a doc exceed what can be scanned in 60 seconds.
+- Sync changes to AGENTS.md / GEMINI.md / .cursorrules when rules change.
+
 ## Delivery Standard
 
 - Final output should state what changed, how it was verified, and any remaining caveats.
 - If nothing needed changing, say so and provide the evidence.
 - Do not claim success on intent alone. Completion requires evidence tied to the original request.
 - When relevant, point the user to `TASK_ROUTING.md` or `VERIFY.md` so the same workflow can be reused in future tasks.
+- When a real task exposes a reusable improvement, feed it back through `AGENT_EVOLUTION_LOOP.md` instead of leaving it as one-off chat knowledge.

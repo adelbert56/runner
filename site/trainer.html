@@ -571,6 +571,8 @@
     .badge-rest { background: var(--c-surface2); color: var(--c-text-muted); }
     .badge-coach { background: var(--c-surface2); color: var(--c-text-muted); }
     .day-card-task { font-size: 15px; font-weight: 700; margin-bottom: 6px; line-height: 1.5; }
+    .day-card-task.coach-headline { margin-bottom: 3px; color: var(--c-text); font-size: 16px; font-weight: 900; }
+    .coach-detail-hint { margin: 0 0 12px; color: var(--c-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
     .day-card-pace { font-size: 13px; color: var(--c-text-muted); margin-bottom: 12px; line-height: 1.5; }
     .workout-steps { display: grid; gap: 10px; font-size: 13px; color: var(--c-text-muted); line-height: 1.8; }
     .step-card {
@@ -1021,6 +1023,36 @@ const SKIP_REASON_LABELS = {
   family: '家庭／突發事件',
   other: '其他'
 };
+const TRAINING_TYPE_LABELS = Object.freeze({
+  recovery: '恢復跑',
+  easy: '輕鬆跑',
+  tempo: '節奏跑',
+  interval: '間歇',
+  long: '長跑',
+  race: '以賽代訓',
+  rest: '休息'
+});
+
+function trainingTypeLabel(type, focus = '') {
+  return type === 'easy' && focus === 'recovery'
+    ? TRAINING_TYPE_LABELS.recovery
+    : TRAINING_TYPE_LABELS[type] || '訓練';
+}
+
+function trainingTaskTitle(day) {
+  const title = String(day?.task || '').trim();
+  const typeLabel = trainingTypeLabel(day?.type, day?.focus);
+  if (!title || day?.coachPlan) return title || typeLabel;
+  if (day.type === 'easy') {
+    return title
+      .replace(/^E\s*跑/i, typeLabel)
+      .replace(/^有氧穩定跑/, `${typeLabel}（穩定有氧）`)
+      .replace(/^輕鬆漸進跑/, `${typeLabel}（漸進）`);
+  }
+  if (day.type === 'tempo') return title.replace(/^T\s*跑/i, typeLabel);
+  if (day.type === 'interval') return title.replace(/^I\s*跑/i, typeLabel);
+  return title;
+}
 
 function createEmptyData() {
   return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, trainingEvents: [], lastBackupAt: null };
@@ -1695,7 +1727,7 @@ function findTodayPlanDay() {
 
 function renderHeroTodayCard() {
   const hit = findTodayPlanDay();
-  const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓', rest: '休息' };
+  const typeName = TRAINING_TYPE_LABELS;
   const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long', rest: 'badge-rest' };
   if (!hit) {
     return `
@@ -3709,7 +3741,6 @@ function renderGarminAutopilotCard(profile, plan) {
   const volumeFactor = Number(autopilot.volumeFactor) || 1;
   const plannedFactor = rollingDays.some((day) => day.isTaper) ? 1 : volumeFactor;
   const factorText = plannedFactor === 1 ? '維持原量' : `${plannedFactor > 1 ? '+' : ''}${Math.round((plannedFactor - 1) * 100)}%`;
-  const workoutNames = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓' };
   const menu = rollingDays.map((day) => {
     const isRest = day.type === 'rest';
     const dropQuality = ['tempo', 'interval'].includes(day.type) && autopilot.qualityMode === 'skip';
@@ -3719,7 +3750,7 @@ function renderGarminAutopilotCard(profile, plan) {
       ? (day.task || '恢復 / 休息')
       : dropQuality
       ? '恢復跑（自動取代品質課）'
-      : `${workoutNames[day.type] || day.type}${reducedQuality ? '（保守版）' : ''}`;
+      : `${trainingTypeLabel(day.type, day.focus)}${reducedQuality ? '（保守版）' : ''}`;
     const detail = isRest
       ? (day.supportBlocks || []).map((block) => block.title).join('・') || '把恢復留給下一次跑課。'
       : dropQuality
@@ -4904,13 +4935,23 @@ function jumpToPhaseWeek(weekNum) {
   scroller.scrollTop = scrollBefore;
 }
 
-// 教練筆記通常是「大方向：細節」的格式；卡片標題只取大方向，
-// 完整內容留給主課卡片顯示，避免同一段話重複出現兩次。
+// 教練筆記完整處方只留在主課；卡片開頭只呈現方向與目的，避免重複。
 function coachPlanHeadline(planText) {
   const text = String(planText || '').trim();
-  const splitIndex = text.search(/[：:]/);
-  if (splitIndex <= 0 || splitIndex > 24) return text;
-  return text.slice(0, splitIndex);
+  if (!text) return '依主課完成今天訓練';
+
+  const purposeMatch = text.match(/(?:目的|重點)\s*[：:]\s*([^。；;]+)/);
+  const purpose = purposeMatch?.[1]?.trim();
+  const direction = /(?:^|\s)E\s*跑|輕鬆跑|有氧/.test(text)
+    ? TRAINING_TYPE_LABELS.easy
+    : /(?:^|\s)T\s*跑|節奏跑|閾值/.test(text)
+      ? TRAINING_TYPE_LABELS.tempo
+      : /(?:^|\s)I\s*跑|間歇|快段/.test(text)
+        ? TRAINING_TYPE_LABELS.interval
+        : /長跑|耐力跑/.test(text)
+          ? TRAINING_TYPE_LABELS.long
+          : '今日訓練';
+  return purpose ? `${direction}｜${purpose}` : direction;
 }
 
 function renderWeekSection(plan) {
@@ -4945,9 +4986,8 @@ function renderWeekSection(plan) {
   const dayCards = week.days.map(day => {
     const entry = coachDays.find((item) => item.scheduledDow === day.dow);
     if (!entry) return renderDayCard(day);
-    // 保留熱身/主課/收操的卡片結構，只把教練指定的內容換進「主課」，
-    // 避免整段教練筆記變成沒有分段的一大塊文字。標題只取大方向，
-    // 完整內容留在主課卡片並加強顯示，避免同一段話出現兩次。
+    // 保留熱身/主課/收操的卡片結構，只把教練指定的內容換進「主課」。
+    // 開頭只保留方向與目的；完整處方由主課卡片承接。
     const headline = coachPlanHeadline(entry.plan);
     const steps = (day.steps || []).map((step) => step.title === '主課'
       ? { ...step, dose: '', detail: entry.plan, isCoachMain: true }
@@ -5198,11 +5238,7 @@ function renderDayCard(day) {
   const badgeClass = day.coachPlan
     ? 'badge-coach'
     : { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long' }[day.type] || 'badge-rest';
-  const typeName = day.coachPlan
-    ? '教練課表'
-    : day.type === 'easy' && day.focus === 'recovery'
-    ? '恢復跑'
-    : { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓' }[day.type] || '訓練';
+  const typeName = day.coachPlan ? '教練課表' : trainingTypeLabel(day.type, day.focus);
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
   const skipReason = formatSkipReason(appData.skipReasons?.[day.dateStr]);
   const actionsHTML = garminRun
@@ -5223,7 +5259,8 @@ function renderDayCard(day) {
       ${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}
     </div>
     <span class="workout-badge ${badgeClass}">${day.coachPlan ? '📌 ' : ''}${typeName}</span>
-    <div class="day-card-task">${day.task || typeName}</div>
+    <div class="day-card-task ${day.coachPlan ? 'coach-headline' : ''}">${trainingTaskTitle(day)}</div>
+    ${day.coachPlan ? '<p class="coach-detail-hint">完整距離、強度與動作安排請看下方主課。</p>' : ''}
     <div class="day-card-pace">${[day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>
     ${day.injuryNote ? `<div style="font-size:12px;line-height:1.5;color:var(--c-red);margin:4px 0 8px">🦶 ${day.injuryNote}</div>` : ''}
     ${day.heatNote ? `<div style="font-size:12px;line-height:1.5;color:var(--c-orange);margin:4px 0 8px">☀️ ${day.heatNote}</div>` : ''}
@@ -6009,7 +6046,7 @@ function renderLogSection() {
   const adherence = summary.adherence;
   const rows = [...log].reverse().map(entry => {
     const paceStr = entry.actualKm > 0 && entry.actualTimeMins > 0 ? `${secToPace((entry.actualTimeMins * 60) / entry.actualKm)}/km` : '—';
-    const typeName = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓' }[entry.type] || entry.type;
+    const typeName = trainingTypeLabel(entry.type);
     return `<tr>
       <td>${entry.date}</td>
       <td>${typeName}</td>
@@ -6218,7 +6255,7 @@ function exportPDF() {
 
 function generateOfflineHTML(week, profile, weekNum) {
   const badgeMap = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long', rest: 'badge-rest' };
-  const typeMap = { easy: '輕鬆跑', tempo: '節奏跑', interval: '間歇跑', long: '長跑', race: '以賽代訓', rest: '休息' };
+  const typeMap = TRAINING_TYPE_LABELS;
   const meta = GOAL_META[profile.goal] || GOAL_META.half;
   const weekGuide = getPhaseRuleText(week, profile, appData.plan?.length || weekNum);
   const cards = week.days.map(day => {
