@@ -1047,24 +1047,28 @@ function runnerRaceShortHash(value) {
 
 function runnerRegisteredRaceKeys() {
   const keys = new Set();
+  let storageKeys = [];
   try {
-    Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index))
-      .filter((key) => key?.startsWith('runner-plaza:') && key.endsWith(RUNNER_REGISTERED_RACES_SUFFIX))
-      .forEach((key) => {
-        const saved = JSON.parse(localStorage.getItem(key) || '[]');
-        if (Array.isArray(saved)) saved.forEach((raceKey) => keys.add(raceKey));
-      });
-  } catch (err) { /* 賽事清單不可讀時保留正式課表 */ }
+    storageKeys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index))
+      .filter((key) => key?.startsWith('runner-plaza:') && key.endsWith(RUNNER_REGISTERED_RACES_SUFFIX));
+  } catch (err) {
+    console.warn('runnerRegisteredRaceKeys: localStorage 無法列舉，保留正式課表', err);
+    return keys;
+  }
+  storageKeys.forEach((key) => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || '[]');
+      if (Array.isArray(saved)) saved.forEach((raceKey) => keys.add(raceKey));
+    } catch (err) {
+      console.warn(`runnerRegisteredRaceKeys: ${key} 內容毀損，已略過該筆`, err);
+    }
+  });
   return keys;
 }
 
 function runnerRaceKey(race) {
   const legacyKey = race.race_id || `${race.race_name || ''}|${race.race_date || ''}`;
   return `r:${runnerRaceShortHash(legacyKey)}`;
-}
-
-function isSundayRaceDate(dateStr) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(dateStr || '') && new Date(`${dateStr}T00:00:00`).getDay() === 0;
 }
 
 function restoreRaceReplacement(day) {
@@ -1078,47 +1082,91 @@ function restoreRaceReplacement(day) {
   return true;
 }
 
+function addDaysToDateStr(dateStr, delta) {
+  const date = new Date(`${dateStr}T00:00:00`);
+  date.setDate(date.getDate() + delta);
+  return localDateStr(date);
+}
+
+function flattenPlanDays() {
+  const flat = [];
+  (appData.plan || []).forEach((week) => (week.days || []).forEach((day) => flat.push(day)));
+  return flat;
+}
+
+// 依報名賽事「實際日期」比對，不假設賽事一定落在週六/週日：
+// 使用者的長跑日可自訂在任何一天，比賽前一天若正好是長跑日才轉為賽前休息。
 function applyRegisteredSundayRaceReplacements(races) {
   if (!appData?.profile || !Array.isArray(appData.plan)) return false;
-  const raceByDate = new Map(races.map((race) => [race.race_date, race]));
-  const today = todayStr();
-  let changed = false;
-  appData.plan.forEach((week) => {
-    const sunday = (week.days || []).find((day) => day.dow === 0);
-    const saturday = (week.days || []).find((day) => day.dow === 6);
-    const race = sunday && sunday.dateStr >= today ? raceByDate.get(sunday.dateStr) : null;
-    const raceName = race?.race_name || '已報名賽事';
-    const alreadyApplied = race
-      && saturday?.raceReplacement === 'pre-race'
-      && sunday?.raceReplacement === 'race'
-      && sunday.raceName === raceName;
-    if (alreadyApplied) return;
-
-    (week.days || []).forEach((day) => { changed = restoreRaceReplacement(day) || changed; });
-    if (!race || !saturday || saturday.type !== 'long') return;
-
-    saturday.raceReplacementBase = { ...saturday };
-    saturday.raceReplacement = 'pre-race';
-    saturday.type = 'easy';
-    saturday.focus = 'recovery';
-    saturday.km = 0;
-    saturday.task = `賽前休息或 20–30 分鐘輕鬆跑｜明天「${raceName}」以賽代訓，不安排長跑`;
-    saturday.pace = '完全休息優先；若跑，維持能輕鬆交談的強度';
-    saturday.hrTarget = '';
-    saturday.steps = [];
-
-    sunday.raceReplacementBase = { ...sunday };
-    sunday.raceReplacement = 'race';
-    sunday.raceName = raceName;
-    sunday.type = 'race';
-    sunday.km = 0;
-    sunday.focus = 'race';
-    sunday.task = `${sunday.raceName}｜以賽代訓`;
-    sunday.pace = '依賽程距離與當日狀態執行；不另外補長跑';
-    sunday.hrTarget = '';
-    sunday.steps = [];
-    changed = true;
+  const raceByDate = new Map();
+  races.forEach((race) => {
+    const existing = raceByDate.get(race.race_date);
+    raceByDate.set(race.race_date, existing
+      ? { ...race, race_name: `${existing.race_name || '已報名賽事'}、${race.race_name || '已報名賽事'}` }
+      : race);
   });
+  const today = todayStr();
+  const flat = flattenPlanDays();
+  const byDateStr = new Map(flat.map((day) => [day.dateStr, day]));
+  let changed = false;
+  window.lastRaceIntegrationNotices = [];
+
+  const validRaceDates = new Set(
+    flat.filter((day) => day.dateStr >= today && raceByDate.has(day.dateStr)).map((day) => day.dateStr)
+  );
+
+  // 先還原已不再對應有效賽事的替換（賽事被移除、日期變更等）
+  flat.forEach((day) => {
+    if (!day.raceReplacementBase) return;
+    const isValidRaceDay = day.raceReplacement === 'race' && validRaceDates.has(day.dateStr);
+    const isValidPreRaceDay = day.raceReplacement === 'pre-race' && validRaceDates.has(addDaysToDateStr(day.dateStr, 1));
+    if (!isValidRaceDay && !isValidPreRaceDay) {
+      const wasRace = day.raceReplacement === 'race';
+      const restoredName = day.raceName;
+      if (restoreRaceReplacement(day)) {
+        changed = true;
+        if (wasRace) window.lastRaceIntegrationNotices.push(`「${restoredName || '已報名賽事'}」已從課表移除（賽事取消或改期），該週已還原為一般課表`);
+      }
+    }
+  });
+
+  // 再套用目前有效的賽事替換
+  validRaceDates.forEach((dateStr) => {
+    const raceDay = byDateStr.get(dateStr);
+    const race = raceByDate.get(dateStr);
+    const raceName = race?.race_name || '已報名賽事';
+    const preRaceDay = byDateStr.get(addDaysToDateStr(dateStr, -1));
+    const wasAlreadyRaceDay = raceDay.raceReplacement === 'race';
+
+    if (!(raceDay.raceReplacement === 'race' && raceDay.raceName === raceName)) {
+      if (!wasAlreadyRaceDay) window.lastRaceIntegrationNotices.push(`已將 ${dateStr}「${raceName}」自動排入課表（以賽代訓，賽前一天調整為休息）`);
+      if (!raceDay.raceReplacementBase) raceDay.raceReplacementBase = { ...raceDay };
+      raceDay.raceReplacement = 'race';
+      raceDay.raceName = raceName;
+      raceDay.type = 'race';
+      raceDay.km = 0;
+      raceDay.focus = 'race';
+      raceDay.task = `${raceName}｜以賽代訓`;
+      raceDay.pace = '依賽程距離與當日狀態執行；不另外補長跑';
+      raceDay.hrTarget = '';
+      raceDay.steps = [];
+      changed = true;
+    }
+
+    if (preRaceDay && preRaceDay.type === 'long' && preRaceDay.raceReplacement !== 'pre-race') {
+      preRaceDay.raceReplacementBase = { ...preRaceDay };
+      preRaceDay.raceReplacement = 'pre-race';
+      preRaceDay.type = 'easy';
+      preRaceDay.focus = 'recovery';
+      preRaceDay.km = 0;
+      preRaceDay.task = `賽前休息或 20–30 分鐘輕鬆跑｜明天「${raceName}」以賽代訓，不安排長跑`;
+      preRaceDay.pace = '完全休息優先；若跑，維持能輕鬆交談的強度';
+      preRaceDay.hrTarget = '';
+      preRaceDay.steps = [];
+      changed = true;
+    }
+  });
+
   return changed;
 }
 
@@ -1136,27 +1184,41 @@ function refreshPlanAfterRaceSync() {
   (document.scrollingElement || document.documentElement).scrollTop = scrollTop;
 }
 
+function recordRaceIntegrationLog(messages) {
+  if (!messages?.length) return;
+  const today = todayStr();
+  appData.raceIntegrationLog = Array.isArray(appData.raceIntegrationLog) ? appData.raceIntegrationLog : [];
+  messages.forEach((text) => appData.raceIntegrationLog.unshift({ at: today, text }));
+  appData.raceIntegrationLog = appData.raceIntegrationLog.slice(0, 20);
+  saveData(appData);
+}
+
 async function syncRegisteredSundayRaces() {
   const registeredKeys = runnerRegisteredRaceKeys();
   if (!registeredKeys.size) {
     if (applyRegisteredSundayRaceReplacements([])) {
       saveData(appData);
       refreshPlanAfterRaceSync();
+      recordRaceIntegrationLog(window.lastRaceIntegrationNotices);
     }
     return;
   }
   try {
     const response = await fetch('./data/races.json', { cache: 'no-cache' });
-    if (!response.ok) return;
+    if (!response.ok) { console.warn(`syncRegisteredSundayRaces: races.json 回應 ${response.status}`); return; }
     const races = await response.json();
-    const registeredSundayRaces = races.filter((race) => (
-      registeredKeys.has(runnerRaceKey(race)) && isSundayRaceDate(race.race_date)
+    const cancelledStatuses = new Set(['停辦', '停賽']);
+    const registeredRaces = races.filter((race) => (
+      registeredKeys.has(runnerRaceKey(race)) && !cancelledStatuses.has(race.registration_status)
     ));
-    if (applyRegisteredSundayRaceReplacements(registeredSundayRaces)) {
+    if (applyRegisteredSundayRaceReplacements(registeredRaces)) {
       saveData(appData);
       refreshPlanAfterRaceSync();
+      recordRaceIntegrationLog(window.lastRaceIntegrationNotices);
     }
-  } catch (err) { /* 離線時不影響既有正式課表 */ }
+  } catch (err) {
+    console.warn('syncRegisteredSundayRaces: 賽事整合失敗（可能離線）', err);
+  }
 }
 
 function normalizeDayStatuses(dayStatuses) {
@@ -3192,6 +3254,8 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
           : '';
   if (hasInjury && ['tempo', 'interval'].includes(type)) {
     card.injuryNote = '傷處（左腳等）當天有任何不穩或異樣 → 本課改輕鬆跑，當週退回上一級跑量。';
+  } else if (hasInjury && type === 'long') {
+    card.injuryNote = '長跑距離已為傷況保護版（下修 20%）；當天有任何不穩或異樣 → 提前結束，不硬撐里程。';
   }
   if (dateStr && isHotSeasonDate(new Date(`${dateStr}T00:00:00`)) && ['easy', 'long', 'tempo', 'interval'].includes(type)) {
     card.heatNote = type === 'tempo' || type === 'interval'
@@ -3225,9 +3289,11 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
 
   let otherIdx = 0;
   const today = todayStr();
-  const longKm = profile.dayState.includes(2)
+  let longKm = profile.dayState.includes(2)
     ? calcLongRunKm(targetKm, numTrain, profile.maxLongRunMins, profile.easyPaceSec, isTaper, profile.goal)
     : 0;
+  // 傷況保護：長跑對關節/組織衝擊最大，優先降階，不只降間歇
+  if (hasInjury && longKm > 0) longKm = Math.round(longKm * 0.8 * 10) / 10;
 
   for (let offset = 0; offset < 7; offset++) {
     const dow = (offset + 1) % 7; // 一、二、三、四、五、六、日
@@ -3304,7 +3370,8 @@ function buildPlan(profile) {
 // ============================================================
 function autoRecalibratePlan() {
   if (!coachReviewData?.updatedAt || !appData.profile || !Array.isArray(appData.plan) || !appData.plan.length) return null;
-  if (appData.recalibratedFor === coachReviewData.updatedAt) return appData.lastRecalibration || null;
+  // 同一份教練資料只算一次；重複呼叫（例如每次重整頁面）回傳 null，避免通知/紀錄重複跳出
+  if (appData.recalibratedFor === coachReviewData.updatedAt) return null;
   const profile = appData.profile;
   const plan = appData.plan;
   const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
@@ -3326,6 +3393,19 @@ function autoRecalibratePlan() {
     else if (avg > 1.15) volumeFactor = Math.min(avg, 1.1); // 超跑 → 小步上調，最多 +10%
   }
 
+  const reasons = [];
+
+  // 1b. 疲勞徵兆提前恢復週：deload 原本只按 weekNum % 4 排，週數沒到就算 Garmin
+  // 已經偵測到跑量拉升過快也不會提前休息。用 autopilot 的 ramp 判斷提前插一週恢復。
+  const nextWeek = plan.find((w) => w.weekNum === currentWeek + 1);
+  let forcedDeload = false;
+  if (nextWeek && !nextWeek.isTaper && !nextWeek.isDeload && coachReviewData.autopilot?.decision === 'deload') {
+    nextWeek.isDeload = true;
+    nextWeek.targetKm = Math.round(nextWeek.targetKm * 0.8 * 10) / 10;
+    forcedDeload = true;
+    reasons.push('Garmin 偵測近期跑量拉升過快，下週提前排入恢復週（未到原定第 4 週排程）');
+  }
+
   // 2. 質量配速校準：最近 T 區實跑中位 vs 課表節奏配速
   let tempoDelta = 0;
   try {
@@ -3342,16 +3422,40 @@ function autoRecalibratePlan() {
       if (tempoDelta) {
         profile.tempoPaceSec += tempoDelta;
         profile.intervalPaceSec = Math.max(profile.tempoPaceSec - 22, 180);
+        reasons.push(`節奏跑配速${tempoDelta < 0 ? '提升' : '放鬆'} → ${secToPace(profile.tempoPaceSec)}/km`);
+      }
+    }
+  } catch (err) { /* 資料不足時跳過 */ }
+
+  // 2b. 輕鬆跑(Z2)配速校準：最近 Z2 心率區間實跑中位 vs 課表輕鬆配速
+  // 同一個心率上限跑得比課表配速快，代表有氧效率真的提升了，不是硬撐（硬撐由 autoPaceCalibration() 的 RPE 邏輯處理）
+  let easyDelta = 0;
+  try {
+    const zones = hrZones(profile);
+    const easyRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+      .slice(-14)
+      .filter((run) => run.hr > 0 && run.hr <= zones.easyMax && run.paceSeconds > 0);
+    if (easyRuns.length >= 3) {
+      const paces = easyRuns.map((run) => run.paceSeconds).sort((a, b) => a - b);
+      const median = paces[Math.floor(paces.length / 2)];
+      const diff = profile.easyPaceSec - median; // 正值＝實跑比課表快
+      if (diff > 10) easyDelta = -Math.min(Math.round(diff / 2), 15);        // 穩定偏快(同心率) → 下修（進步）
+      else if (diff < -20) easyDelta = Math.min(Math.round(-diff / 2), 15); // 穩定偏慢 → 上修
+      if (easyDelta) {
+        profile.easyPaceSec += easyDelta;
+        profile.easyPace = secToPace(profile.easyPaceSec);
+        reasons.push(`輕鬆跑(Z2)配速${easyDelta < 0 ? '提升' : '放鬆'} → ${secToPace(profile.easyPaceSec)}/km`);
       }
     }
   } catch (err) { /* 資料不足時跳過 */ }
 
   appData.recalibratedFor = coachReviewData.updatedAt;
-  if (volumeFactor === 1 && !tempoDelta) {
+  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload) {
     appData.lastRecalibration = null;
     saveData(appData);
     return null;
   }
+  if (volumeFactor !== 1) reasons.unshift(`未來週跑量依實跑校準 → 目標量 ×${volumeFactor.toFixed(2)}`);
 
   // 3. 只重排未來週；過去週與本週不動（本週由教練課表覆蓋）
   const hasInjury = !profile.injuries.includes('none');
@@ -3363,9 +3467,16 @@ function autoRecalibratePlan() {
     if (week.weekNum <= currentWeek) return;
     const newTarget = Math.min(Math.round(week.targetKm * volumeFactor * 10) / 10, rule.maxWeeklyKm);
     week.targetKm = newTarget;
-    week.days = buildWeekDays(profile, trainDows, longDow, otherDows, newTarget, week.isDeload, week.isTaper, hasInjury, week.weekNum, startDate, week.phase);
+    // 保留已套用的賽事整合（raceReplacement）與完成狀態，避免每次校準都把「以賽代訓」洗掉、重新觸發通知
+    const preserved = week.days.filter((day) => day.raceReplacementBase || day.status === 'done' || day.status === 'missed' || day.isMakeup);
+    const newDays = buildWeekDays(profile, trainDows, longDow, otherDows, newTarget, week.isDeload, week.isTaper, hasInjury, week.weekNum, startDate, week.phase);
+    newDays.forEach((day) => {
+      const old = preserved.find((item) => item.dateStr === day.dateStr);
+      if (old) Object.assign(day, old);
+    });
+    week.days = newDays;
   });
-  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta };
+  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, reasons };
   appData.lastRecalibration = summary;
   saveData(appData);
   return summary;
@@ -3412,6 +3523,9 @@ function generateAndShowPlan() {
   appData.checkins = appData.checkins || [];
   appData.assessments = appData.assessments || [];
   appData.adaptationPrompts = {};
+  // 設定變了，舊的教練資料快取不該再拿來擋下一次滾動校準
+  appData.recalibratedFor = null;
+  appData.lastRecalibration = null;
   saveData(appData);
   renderPlanView();
   showView('plan');
@@ -3851,15 +3965,23 @@ function reviewEscape(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
 
-const COACH_REPORT_SCHEDULE = { day: 0, hour: 21, minute: 0 };
-
 function coachRunStatus() {
+  const sync = appData.profile?.coachSync || {};
+  if (sync.frequency === 'manual') return { level: 'ok', text: '手動更新排程，無自動時間可比對' };
+  const isWeekly = sync.frequency === 'weekly';
+  const [hourStr, minuteStr] = String(sync.time || '20:30').split(':');
+  const hour = Number.isFinite(Number(hourStr)) ? Number(hourStr) : 20;
+  const minute = Number.isFinite(Number(minuteStr)) ? Number(minuteStr) : 30;
+  const scheduledDow = isWeekly && Number.isInteger(sync.day) ? sync.day : null;
+
   const now = new Date();
   const scheduled = new Date(now);
-  scheduled.setHours(COACH_REPORT_SCHEDULE.hour, COACH_REPORT_SCHEDULE.minute, 0, 0);
-  const diff = (scheduled.getDay() - COACH_REPORT_SCHEDULE.day + 7) % 7;
-  scheduled.setDate(scheduled.getDate() - diff);
-  if (scheduled > now) scheduled.setDate(scheduled.getDate() - 7);
+  scheduled.setHours(hour, minute, 0, 0);
+  if (scheduledDow !== null) {
+    const diff = (scheduled.getDay() - scheduledDow + 7) % 7;
+    scheduled.setDate(scheduled.getDate() - diff);
+  }
+  if (scheduled > now) scheduled.setDate(scheduled.getDate() - (scheduledDow !== null ? 7 : 1));
   const updatedAt = coachReviewData?.updatedAt || coachReviewData?.autopilot?.asOf;
   const scheduledDay = new Date(scheduled);
   scheduledDay.setHours(0, 0, 0, 0);
@@ -3868,7 +3990,10 @@ function coachRunStatus() {
   const minsSince = Math.round((now - scheduled) / 60000);
   if (minsSince <= 20) return { level: 'running', text: `⏳ 產生中（通常 5–20 分鐘，已 ${Math.max(minsSince, 0)} 分）` };
   if (minsSince <= 45) return { level: 'delayed', text: `⏳ 延遲中（已超過預計時間 ${minsSince} 分）` };
-  return { level: 'failed', text: `⚠️ 可能失敗，已超過 ${minsSince} 分鐘未更新`, actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
+  if (coachReviewData?.analyticsStatus === 'missing') {
+    return { level: 'failed', text: '⚠️ Garmin 從未同步成功過，請確認帳號授權或手動觸發一次同步', actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
+  }
+  return { level: 'failed', text: `⚠️ 可能失敗，已超過 ${minsSince} 分鐘未更新（上次成功同步：${updatedAt || '未知'}）`, actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
 }
 
 function coachScheduleLabel() {
@@ -5175,6 +5300,9 @@ function applyAssessmentToPlan(index = 0) {
     lastAssessmentAt: assessment.date,
     lastAssessmentType: assessment.type
   });
+  // 配速基準變了，舊的滾動校準快取不該再拿來擋下一次校準
+  appData.recalibratedFor = null;
+  appData.lastRecalibration = null;
   rebuildWeeksFrom(currentWeek + 1, appData.plan.length - currentWeek);
   saveData(appData);
   closeModal();
@@ -5780,6 +5908,7 @@ function extendPlan(extraWeeks) {
     const days = buildWeekDays(profile, trainDows, longDow, otherDows, lastKm, false, false, hasInjury, weekNum, startDate, 'maintain');
     appData.plan.push({ weekNum, phase: 'maintain', phaseLabel: '延長期', isDeload: false, isTaper: false, targetKm: lastKm, days });
   }
+  syncRegisteredSundayRaces();
 }
 
 function rebuildWeeksFrom(startWeekNum, count) {
@@ -5793,12 +5922,12 @@ function rebuildWeeksFrom(startWeekNum, count) {
     const weekIdx = startWeekNum - 1 + wi;
     if (weekIdx >= appData.plan.length) break;
     const week = appData.plan[weekIdx];
-    const preserved = week.days.filter(day => day.status === 'done' || day.status === 'missed' || day.isMakeup);
+    const preserved = week.days.filter(day => day.status === 'done' || day.status === 'missed' || day.isMakeup || day.raceReplacementBase);
     const newDays = buildWeekDays(profile, trainDows, longDow, otherDows, week.targetKm, week.isDeload, week.isTaper, hasInjury, week.weekNum, startDate, week.phase);
     newDays.forEach(day => {
       const old = preserved.find(item => item.dateStr === day.dateStr);
       if (!old) return;
-      if (old.isMakeup) {
+      if (old.isMakeup || old.raceReplacementBase) {
         Object.assign(day, old);
         return;
       }
@@ -5806,6 +5935,7 @@ function rebuildWeeksFrom(startWeekNum, count) {
     });
     week.days = newDays;
   }
+  syncRegisteredSundayRaces();
 }
 
 // ============================================================
@@ -6019,7 +6149,11 @@ function openTrainingDataManager() {
   const health = trainingDataHealth(appData.plan || []);
   const backupAt = appData.lastBackupAt ? new Date(appData.lastBackupAt).toLocaleString('zh-TW', { hour12: false }) : '尚未建立備份';
   const issueText = health.issues.length ? health.issues.map((issue) => `<li>${reviewEscape(issue)}</li>`).join('') : '<li>資料結構與完成認列狀態正常。</li>';
-  showModal('訓練資料管理', `<div class="coach-setting-card"><div class="coach-setting-value">${reviewEscape(garminCompletionRuleLabel())}</div><div class="coach-fineprint">完成、補跑與執行率皆使用此同一條規則。手動標記完成不會被 Garmin 門檻覆寫。</div></div><div style="margin-top:14px"><b>資料健康檢查</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${issueText}</ul></div><div style="margin-top:14px;color:var(--c-text-muted);font-size:13px">最近備份：${reviewEscape(backupAt)}</div>`, [
+  const raceLog = Array.isArray(appData.raceIntegrationLog) ? appData.raceIntegrationLog : [];
+  const raceLogHtml = raceLog.length
+    ? `<div style="margin-top:14px"><b>賽事整合紀錄</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${raceLog.map((entry) => `<li>${reviewEscape(entry.at)}：${reviewEscape(entry.text)}</li>`).join('')}</ul></div>`
+    : '';
+  showModal('訓練資料管理', `<div class="coach-setting-card"><div class="coach-setting-value">${reviewEscape(garminCompletionRuleLabel())}</div><div class="coach-fineprint">完成、補跑與執行率皆使用此同一條規則。手動標記完成不會被 Garmin 門檻覆寫。</div></div><div style="margin-top:14px"><b>資料健康檢查</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${issueText}</ul></div>${raceLogHtml}<div style="margin-top:14px;color:var(--c-text-muted);font-size:13px">最近備份：${reviewEscape(backupAt)}</div>`, [
     { label: '匯出備份', primary: true, action: exportTrainingData },
     { label: '還原備份', action: requestTrainingDataImport },
     { label: '完成門檻', action: configureGarminCompletionRule },
@@ -6212,7 +6346,29 @@ loadRegistrationRaceCheckpoints();
   function render(data) {
     coachReviewData = data;
     syncGarminRunsToPlan(data);
+    const recalibration = typeof autoRecalibratePlan === 'function' ? autoRecalibratePlan() : null;
     refreshCoachReviewPanels();
+    if (recalibration?.reasons?.length) showCalibrationToast(recalibration.reasons);
+  }
+
+  function renderLoading(text) {
+    const host = document.getElementById('coach-review-content');
+    if (!host) return;
+    host.innerHTML = `
+      <div class="card" style="margin-top:24px" aria-busy="true">
+        <div class="card-title">🔒 教練建議</div>
+        <p style="margin:4px 0 0;opacity:0.85" role="status" aria-live="polite">⏳ ${esc(text)}</p>
+      </div>`;
+  }
+
+  function renderNotice(text) {
+    const host = document.getElementById('coach-review-content');
+    if (!host) return;
+    host.innerHTML = `
+      <div class="card" style="margin-top:24px">
+        <div class="card-title">🔒 教練建議</div>
+        <p style="margin:4px 0 0;opacity:0.85">${esc(text)}</p>
+      </div>`;
   }
 
   function renderUnlock(payload, wrongKey) {
@@ -6221,43 +6377,54 @@ loadRegistrationRaceCheckpoints();
     host.innerHTML = `
       <div class="card" style="margin-top:24px">
         <div class="card-title">🔒 教練建議</div>
-        <p style="margin:4px 0 10px;opacity:0.85">本區塊為加密的個人訓練紀錄。輸入通關密語後，這台裝置之後會自動解鎖。${wrongKey ? '<br><b style="color:#b3402a">密語不正確，請再試一次。</b>' : ''}</p>
+        <p style="margin:4px 0 10px;opacity:0.85">本區塊為加密的個人訓練紀錄。輸入通關密語後，這台裝置之後會自動解鎖。<span role="alert" aria-live="assertive">${wrongKey ? '<br><b style="color:#b3402a">密語不正確，請再試一次。</b>' : ''}</span></p>
         <form id="coach-review-form" style="display:flex;gap:8px;flex-wrap:wrap">
           <input type="password" id="coach-review-pass" placeholder="通關密語" autocomplete="current-password" style="flex:1;min-width:180px;padding:8px 10px" />
           <button type="submit" class="btn btn-primary">解鎖</button>
         </form>
       </div>`;
+    const passInput = document.getElementById('coach-review-pass');
+    if (wrongKey) passInput.focus();
     document.getElementById('coach-review-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const pass = document.getElementById('coach-review-pass').value;
+      const pass = passInput.value;
       if (!pass) return;
       try {
         const data = await decrypt(payload, pass);
         localStorage.setItem(KEY_LS, pass);
         render(data);
-      } catch {
+      } catch (err) {
+        console.warn('coach-review: passphrase decrypt failed', err);
         renderUnlock(payload, true);
       }
     });
   }
 
   async function init() {
-    if (!window.crypto?.subtle) return;
+    if (!window.crypto?.subtle) {
+      renderNotice('此瀏覽器環境不支援解密（需要 HTTPS 或本機安全環境），無法顯示教練建議。');
+      return;
+    }
+    renderLoading('讀取教練建議中…');
     let payload;
     try {
       const res = await fetch(DATA_URL, { cache: 'no-store' });
-      if (!res.ok) return;
+      if (!res.ok) { renderNotice('目前無法讀取教練建議資料，請稍後重新整理。'); return; }
       payload = await res.json();
-      if (!payload?.ct || !payload?.salt || !payload?.iv) return;
-    } catch {
-      return; // 檔案不存在或離線：整個區塊隱藏
+      if (!payload?.ct || !payload?.salt || !payload?.iv) { renderNotice('教練建議資料格式異常，請稍後重新整理。'); return; }
+    } catch (err) {
+      console.warn('coach-review: fetch failed', err);
+      renderNotice('讀取教練建議失敗（可能離線），請確認網路連線後重新整理。');
+      return;
     }
     const saved = localStorage.getItem(KEY_LS);
     if (saved) {
+      renderLoading('解鎖教練建議中…');
       try {
         render(await decrypt(payload, saved));
         return;
-      } catch {
+      } catch (err) {
+        console.warn('coach-review: saved passphrase no longer valid', err);
         localStorage.removeItem(KEY_LS); // 密語已改（換過金鑰）
       }
     }

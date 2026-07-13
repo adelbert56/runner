@@ -336,10 +336,21 @@ async function buildPublishedReview(plaintext) {
   return JSON.stringify(review);
 }
 
+async function appendJobSummary(text) {
+  if (!process.env.GITHUB_STEP_SUMMARY) return;
+  try {
+    await writeFile(process.env.GITHUB_STEP_SUMMARY, `${text}\n`, { flag: "a" });
+  } catch {
+    // best-effort only; never block the run over a summary write failure
+  }
+}
+
 async function main() {
   const passphrase = await resolvePassphrase();
   if (!passphrase) {
-    console.error("TRAINING_REVIEW_KEY not set (env var or .env). Aborting.");
+    const message = "⚠️ training-review sync aborted: TRAINING_REVIEW_KEY not set (env var or .env).";
+    console.error(message);
+    await appendJobSummary(message);
     process.exit(1);
   }
 
@@ -359,7 +370,9 @@ async function main() {
       console.warn(`No local coach review found at ${SOURCE}; preserving the existing encrypted coach plan and refreshing Garmin analytics.`);
     } catch (existingErr) {
       if (process.env.TRAINING_REVIEW_ALLOW_GARMIN_ONLY !== "1") {
-        console.warn(`No local coach review or readable encrypted fallback found; keeping the existing training review unchanged. (${existingErr.message})`);
+        const message = `⚠️ training-review sync skipped: no local coach review at ${SOURCE} and the existing encrypted fallback at ${TARGET} could not be read (${existingErr.message}). Training review has not been updated this run.`;
+        console.warn(message);
+        await appendJobSummary(message);
         return;
       }
       console.warn(`No local coach review found at ${SOURCE}; publishing Garmin-only training data by explicit opt-in.`);
