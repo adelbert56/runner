@@ -86,7 +86,9 @@ jobs:
 
       - name: Install scraper dependencies
         if: steps.refresh-guard.outputs.should_run == 'true'
-        run: uv sync
+        run: |
+          uv sync
+          npm ci
 
       - name: Run race scrapers
         if: steps.refresh-guard.outputs.should_run == 'true'

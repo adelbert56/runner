@@ -392,6 +392,7 @@ assertCheck(
 );
 assertCheck(weatherWorkflow.includes("runner/賽事/賽事資料庫.json") && weatherWorkflow.includes("site/data/races.json"), "weather auto-commit includes both race data outputs");
 assertCheck(dataWorkflow.includes("runner/系統配置/營運儀表板.json") && dataWorkflow.includes("site/data/races.json"), "race data auto-commit includes dashboard and site data");
+assertCheck(dataWorkflow.includes("uv sync") && dataWorkflow.includes("npm ci"), "race data workflow installs Python and Node dependencies before rebuilding reports");
 assertCheck(contentWorkflow.includes("site/data/content.json") && contentWorkflow.includes("runner/內容/內容品質報告.md"), "content auto-commit includes published content and quality report");
 assertCheck(quipsWorkflow.includes("site/data/runner-quips.json") && quipsWorkflow.includes("runner/內容/跑者碎念候補.json"), "runner quips workflow commits active and backlog data");
 assertCheck(dataWorkflow.includes("site/data/announcements.json") && quipsWorkflow.includes("site/data/announcements.json"), "announcement data is rebuilt by race and quips workflows");
