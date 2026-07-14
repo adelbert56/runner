@@ -532,9 +532,9 @@
   position: relative;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 20px 24px;
-  align-items: center;
+  align-items: stretch;
   min-height: 100%;
   padding: 22px 24px;
   border-radius: var(--panel-radius);
@@ -589,8 +589,8 @@
   background: rgba(240, 245, 238, 0.98);
   border: 1px solid rgba(20, 86, 63, 0.07);
   flex-shrink: 0;
-  justify-self: end;
-  align-self: center;
+  justify-self: start;
+  align-self: start;
   width: fit-content;
 }
 

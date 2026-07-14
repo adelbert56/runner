@@ -1,4 +1,5 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
+import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
@@ -8,11 +9,20 @@ const port = Number(process.env.PORT || 4173);
 const registrationDir = resolve(join(root, "runner", "報名管理"));
 const registrationDataPath = resolve(join(registrationDir, "報名管理資料.json"));
 const registrationPayloadLimit = 1024 * 1024;
+const garminSyncPayloadLimit = 128 * 1024;
+const garminSyncRequestPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-request.json"));
+const garminSyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-status.json"));
+const garminPublishScript = resolve(join(root, "scripts", "garmin", "publish_training_plan.py"));
 const allowedLocalHosts = new Set([
   `localhost:${port}`,
   `127.0.0.1:${port}`,
   `[::1]:${port}`,
 ]);
+const allowedGarminSyncOrigins = new Set([
+  ...allowedLocalHosts.values(),
+  "adelbert56.github.io",
+]);
+let garminSyncRunning = false;
 const emptyRegistrationData = {
   version: 1,
   updatedAt: null,
@@ -48,12 +58,27 @@ function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload, null, 2));
 }
 
-async function readRequestBody(req) {
+function sendGarminCors(res, origin) {
+  if (!origin) return;
+  try {
+    const host = new URL(origin).host;
+    if (!allowedGarminSyncOrigins.has(host)) return;
+    res.setHeader("access-control-allow-origin", origin);
+    res.setHeader("vary", "origin");
+    res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
+    res.setHeader("access-control-allow-headers", "content-type");
+    res.setHeader("access-control-allow-private-network", "true");
+  } catch {
+    // Invalid origin is rejected by the route guard below.
+  }
+}
+
+async function readRequestBody(req, limit = registrationPayloadLimit) {
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > registrationPayloadLimit) {
+    if (size > limit) {
       throw new Error("Payload too large");
     }
     chunks.push(chunk);
@@ -75,6 +100,68 @@ function isLocalRegistrationRequest(req) {
   } catch {
     return false;
   }
+}
+
+function isAllowedGarminSyncRequest(req) {
+  const origin = String(req.headers.origin || "");
+  if (!origin) return false;
+  try {
+    return allowedGarminSyncOrigins.has(new URL(origin).host);
+  } catch {
+    return false;
+  }
+}
+
+function validGarminSyncPayload(payload) {
+  if (!payload || payload.version !== 1 || !Array.isArray(payload.workouts) || !payload.workouts.length || payload.workouts.length > 7) {
+    return false;
+  }
+  if (payload.replaceExisting !== undefined && typeof payload.replaceExisting !== "boolean") return false;
+  return payload.workouts.every((workout) => (
+    workout
+    && /^\d{4}-\d{2}-\d{2}$/.test(String(workout.date || ""))
+    && typeof workout.name === "string"
+    && workout.name.length > 0
+    && workout.name.length <= 120
+    && Number.isFinite(Number(workout.km))
+    && Number(workout.km) > 0
+    && Number(workout.km) <= 100
+  ));
+}
+
+async function readGarminSyncStatus() {
+  try {
+    return JSON.parse(await readFile(garminSyncStatusPath, "utf8"));
+  } catch {
+    return { status: "idle", message: "尚未執行 Garmin 同步" };
+  }
+}
+
+async function queueGarminSync(payload) {
+  await mkdir(resolve(join(root, "runner", "訓練")), { recursive: true });
+  await writeFile(garminSyncRequestPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  await writeFile(garminSyncStatusPath, `${JSON.stringify({
+    status: "queued",
+    message: payload.replaceExisting ? "Garmin 同步器已啟動；同名課程將安全替換" : "Garmin 同步器已啟動",
+    updatedAt: new Date().toISOString(),
+    total: payload.workouts.length,
+  }, null, 2)}\n`, "utf8");
+  garminSyncRunning = true;
+  const args = ["run", "python", garminPublishScript, "--input", garminSyncRequestPath];
+  if (payload.replaceExisting) args.push("--replace-existing");
+  const child = spawn("uv", args, {
+    cwd: root,
+    detached: false,
+    stdio: "ignore",
+    windowsHide: false,
+  });
+  child.once("error", async (error) => {
+    garminSyncRunning = false;
+    await writeFile(garminSyncStatusPath, `${JSON.stringify({ status: "error", message: error.message, updatedAt: new Date().toISOString() }, null, 2)}\n`, "utf8");
+  });
+  child.once("close", () => {
+    garminSyncRunning = false;
+  });
 }
 
 async function readRegistrationData() {
@@ -105,6 +192,44 @@ async function writeRegistrationData(payload) {
 
 const server = createServer(async (req, res) => {
   const decoded = decodeURIComponent(new URL(req.url || "/", `http://localhost:${port}`).pathname);
+  const origin = String(req.headers.origin || "");
+  if (decoded.startsWith("/api/garmin-workout-sync")) {
+    sendGarminCors(res, origin);
+    if (req.method === "OPTIONS") {
+      res.writeHead(isAllowedGarminSyncRequest(req) ? 204 : 403);
+      res.end();
+      return;
+    }
+    if (!isAllowedGarminSyncRequest(req)) {
+      sendJson(res, 403, { error: "forbidden", message: "Garmin sync is only available from Runner." });
+      return;
+    }
+    if (decoded === "/api/garmin-workout-sync" && req.method === "GET") {
+      sendJson(res, 200, { ...(await readGarminSyncStatus()), running: garminSyncRunning });
+      return;
+    }
+    if (decoded === "/api/garmin-workout-sync" && req.method === "POST") {
+      if (garminSyncRunning) {
+        sendJson(res, 409, { error: "sync-in-progress", message: "已有 Garmin 同步正在執行，請等待完成。" });
+        return;
+      }
+      try {
+        const raw = await readRequestBody(req, garminSyncPayloadLimit);
+        const payload = JSON.parse(raw || "{}");
+        if (!validGarminSyncPayload(payload)) {
+          sendJson(res, 400, { error: "invalid-payload", message: "課表資料不完整，未啟動 Garmin 同步。" });
+          return;
+        }
+        await queueGarminSync(payload);
+        sendJson(res, 202, { ok: true, message: "Garmin 同步器已啟動", total: payload.workouts.length });
+      } catch (error) {
+        sendJson(res, 400, { error: "invalid-request", message: error instanceof Error ? error.message : "Invalid request" });
+      }
+      return;
+    }
+    sendJson(res, 405, { error: "method-not-allowed" });
+    return;
+  }
   if (decoded === "/") {
     res.writeHead(302, { location: "/site/" });
     res.end();

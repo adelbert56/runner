@@ -34,6 +34,7 @@
     "payment:build": "node scripts/build-payment-sheet.mjs",
     "payment:init": "node scripts/init-payment-xlsx.mjs",
     "garmin:sync": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/garmin/sync-garmin.ps1",
+    "garmin:publish-plan": "uv run python scripts/garmin/publish_training_plan.py --input runner/訓練/garmin-workout-sync-request.json",
     "garmin:schedule:daily": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/garmin/install-garmin-sync-task.ps1"
   },
   "dependencies": {

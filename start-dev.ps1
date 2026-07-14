@@ -123,14 +123,17 @@ if (Get-Command git -ErrorAction SilentlyContinue) {
             Write-Warning "Working tree is not clean; skipping full git pull, but public site data will still sync from origin/main."
         }
 
-        if (-not (Test-PublicDataMatchesOriginMain)) {
-            if (Test-PublicDataDirty) {
-                throw "Local site/data/*.json differs from origin/main and includes uncommitted changes. To preview unpublished local data, run '.\start-dev.ps1 -PreviewLocalData'. To view the same data as the website, commit/push your changes or discard the local site/data diff first."
+        # Never overwrite an unpublished site-data edit. When no local data is
+        # dirty, site-sync is the authoritative refresh path and must run
+        # before comparing with origin/main (it also refreshes the remote ref).
+        if (Test-PublicDataDirty) {
+            Write-Warning "Local site/data/*.json has uncommitted changes; skipping remote refresh and starting with the current local files."
+        } else {
+            Invoke-OptionalStep -Label "site-sync" -Command @("npm", "run", "site:sync:remote")
+            if (-not (Test-PublicDataMatchesOriginMain)) {
+                Write-Warning "Public site data could not be refreshed from origin/main; starting with the current local files."
             }
-            throw "Local site/data/*.json no longer matches origin/main, even though git does not show a local site/data diff. This usually means you are previewing data from another local commit while the website still serves older main data. Run '.\start-dev.ps1 -PreviewLocalData' if that is intentional, or sync/push main before using live mode."
         }
-
-        Invoke-OptionalStep -Label "site-sync" -Command @("npm", "run", "site:sync:remote")
     }
 } else {
     Write-Warning "git is not available; skipping public site data sync."
