@@ -426,16 +426,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-07-18",
-      "updated_at": "2026-07-14T11:21:46.155Z",
+      "updated_at": "2026-07-14T23:44:54.104Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，雷雨，25-31°C，降雨機率 100%，最大風速 10 km/h",
-      "weather_code": 95,
-      "temperature_min_c": 24.8,
-      "temperature_max_c": 31.2,
+      "summary": "臺中市縣市預報，雷雨，24-31°C，降雨機率 100%，最大風速 11 km/h",
+      "weather_code": 96,
+      "temperature_min_c": 24.2,
+      "temperature_max_c": 31.1,
       "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 10.4
+      "wind_speed_max_kmh": 10.9
     }
   },
   {
