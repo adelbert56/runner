@@ -33,9 +33,14 @@ function buildAnalyticsRuns(activities) {
   return activities.map((activity) => {
     const main = activity.main_segment;
     const qualityEligible = Boolean(main?.source === 'garmin-workout-steps' && main?.pace_per_km && main?.distance_km > 0);
+    const laps = Array.isArray(activity.lap_summary) ? activity.lap_summary : [];
+    const intensities = new Set(laps.map((lap) => String(lap?.intensity || '').toUpperCase()));
+    const sessionFamily = intensities.has('INTERVAL') ? 'interval' : intensities.has('MAIN') ? 'steady' : intensities.has('ACTIVE') && intensities.has('RECOVERY') ? 'strides' : 'easy';
     return {
+      activityId: activity.activityId,
       date: activity.date,
       startTime: activity.startTime,
+      name: activity.name,
       // Full activity stays authoritative for volume and training load.
       km: activity.distance_km,
       durationMin: activity.duration_min,
@@ -59,6 +64,11 @@ function buildAnalyticsRuns(activities) {
       qualityHr: qualityEligible ? main.avg_hr : null,
       qualityMaxHr: qualityEligible ? main.max_hr : null,
       qualityCadence: qualityEligible ? main.avg_cadence : null,
+      // A compact Garmin lap summary powers the per-session report. It never
+      // contains GPS coordinates or per-second activity streams.
+      laps,
+      sessionFamily,
+      selfEvaluation: activity.self_evaluation || null,
     };
   }).filter((activity) => activity.date && activity.km > 0);
 }
@@ -135,8 +145,10 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
   const previousKm = sumKm(previous);
   const latestRunDaysAgo = latestDate ? daysBetween(latestDate, asOf) : null;
   const rampPct = previousKm > 0 ? Math.round(((recentKm - previousKm) / previousKm) * 100) : null;
-  const recentQuality = recent.filter((run) => run.qualityEligible);
-  const previousQuality = previous.filter((run) => run.qualityEligible);
+  const structuredRuns = analyticsRuns.filter((run) => run.qualityEligible);
+  const comparisonFamily = structuredRuns.at(-1)?.sessionFamily || null;
+  const recentQuality = recent.filter((run) => run.qualityEligible && run.sessionFamily === comparisonFamily);
+  const previousQuality = previous.filter((run) => run.qualityEligible && run.sessionFamily === comparisonFamily);
   // Pace/HR course decisions need enough matched, structured evidence on both
   // sides of the comparison. Full-session averages remain visible, but cannot
   // downgrade a course because warmup or cooldown made them slower.
@@ -238,6 +250,7 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
       previousLoad,
       recentQualityRuns: recentQuality.length,
       previousQualityRuns: previousQuality.length,
+      comparisonFamily,
       qualityComparisonReady: hasComparableQuality,
       recentLongKm: longestKm(recent),
       previousLongKm: longestKm(previous),

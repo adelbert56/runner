@@ -68,3 +68,28 @@ def test_automatic_laps_are_not_misclassified_as_a_main_course() -> None:
     payload = {"lapDTOs": [_lap("INTERVAL", 1000, 480, 140), _lap("INTERVAL", 1000, 470, 142)]}
 
     assert fetch_garmin.summarize_main_segment(payload) is None
+
+
+def test_lap_summary_keeps_compact_ordered_session_evidence() -> None:
+    payload = {
+        "lapDTOs": [
+            _lap("WARMUP", 500, 300, 120),
+            _lap("MAIN", 6000, 2820, 147),
+            _lap("COOLDOWN", 300, 180, 125),
+        ]
+    }
+
+    laps = fetch_garmin.summarize_laps(payload)
+
+    assert [(lap["index"], lap["intensity"], lap["distance_km"]) for lap in laps] == [
+        (1, "WARMUP", 0.5),
+        (2, "MAIN", 6.0),
+        (3, "COOLDOWN", 0.3),
+    ]
+    assert "latitude" not in laps[0]
+
+
+def test_self_evaluation_normalizes_garmin_tenths() -> None:
+    result = fetch_garmin.extract_self_evaluation({"nested": {"directWorkoutFeel": 50, "directWorkoutRpe": 30}})
+
+    assert result == {"feel": 5, "rpe": 3, "source": "garmin-self-evaluation"}

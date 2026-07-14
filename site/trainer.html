@@ -516,6 +516,45 @@
     .pace-trend-activity span { display:block; color:var(--c-text-muted); font-size:11px; font-weight:800; }
     .pace-trend-activity b { display:block; margin-top:3px; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .pace-trend-activity small { display:block; margin-top:2px; color:var(--c-text-muted); font-size:11px; }
+    /* === Training analysis V2: one session first, trends second === */
+    .session-report { margin:0 0 20px; overflow:hidden; padding:0; border:1px solid rgba(36,114,79,.22); border-radius:22px; background:linear-gradient(140deg,#f3faf5 0%,#fffdf8 52%,#f8f3e9 100%); box-shadow:0 16px 34px rgba(31,42,36,.06); }
+    .session-report-head { display:flex; justify-content:space-between; gap:18px; padding:22px 24px 19px; border-bottom:1px solid rgba(31,42,36,.09); }
+    .session-report-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .session-report-title { margin:4px 0 0; font-size:23px; letter-spacing:-.035em; line-height:1.2; }
+    .session-report-meta { margin-top:6px; color:var(--c-text-muted); font-size:13px; font-weight:700; }
+    .session-report-status { flex:0 0 auto; align-self:flex-start; padding:7px 10px; border-radius:999px; background:#dff2e4; color:var(--c-primary-hover); font-size:12px; font-weight:900; }
+    .session-report-status.neutral { background:#eef0ea; color:#59655e; }
+    .session-report-body { padding:20px 24px 24px; }
+    .session-report-grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr); gap:20px; }
+    .session-report-label { color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; }
+    .session-report-summary { margin:6px 0 0; color:var(--c-text); font-size:17px; font-weight:850; line-height:1.55; }
+    .session-report-note { margin:8px 0 0; color:var(--c-text-muted); font-size:13px; line-height:1.65; }
+    .session-report-target { padding:14px 15px; border:1px solid rgba(31,42,36,.09); border-radius:14px; background:rgba(255,253,248,.78); }
+    .session-report-target b { display:block; margin-top:5px; font-size:14px; line-height:1.5; }
+    .session-report-target span { display:block; margin-top:3px; color:var(--c-text-muted); font-size:12px; line-height:1.5; }
+    .session-report-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; margin-top:20px; }
+    .session-report-metric { min-width:0; padding:12px 13px; border:1px solid rgba(31,42,36,.09); border-radius:14px; background:rgba(255,253,248,.82); }
+    .session-report-metric span { display:block; color:var(--c-text-muted); font-size:11px; font-weight:800; }
+    .session-report-metric strong { display:block; margin-top:4px; color:var(--c-text); font-size:18px; font-weight:950; letter-spacing:-.03em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .session-breakdown { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,.9fr); gap:20px; margin-top:20px; padding-top:20px; border-top:1px solid rgba(31,42,36,.09); }
+    .session-breakdown-card { min-width:0; }
+    .session-breakdown-title { margin:0; font-size:15px; }
+    .session-breakdown-copy { margin:4px 0 12px; color:var(--c-text-muted); font-size:12px; line-height:1.55; }
+    .session-lap-list { display:grid; gap:7px; }
+    .session-lap { display:grid; grid-template-columns:76px minmax(64px,1fr) 52px 50px; align-items:center; gap:9px; font-size:12px; }
+    .session-lap-label { color:var(--c-text); font-weight:850; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .session-lap-bar { height:8px; overflow:hidden; border-radius:999px; background:#e7ebe4; }
+    .session-lap-bar i { display:block; height:100%; min-width:5px; border-radius:inherit; background:#6dad7e; }
+    .session-lap.main .session-lap-bar i { background:linear-gradient(90deg,#24724f,#5fae79); }
+    .session-lap.recovery .session-lap-bar i { background:#c4a46d; }
+    .session-lap-meta { color:var(--c-text-muted); text-align:right; white-space:nowrap; }
+    .session-coach-callout { padding:15px 16px; border-radius:15px; border:1px solid rgba(36,114,79,.17); background:rgba(231,244,235,.78); }
+    .session-coach-callout strong { display:block; margin-top:5px; font-size:15px; line-height:1.5; }
+    .session-report-history { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; padding-top:17px; border-top:1px solid rgba(31,42,36,.09); }
+    button.session-report-history { min-width:74px; padding:8px 10px; border:1px solid rgba(31,42,36,.13); border-radius:11px; background:#fffdf8; color:var(--c-text-muted); font:inherit; font-size:12px; font-weight:850; line-height:1.2; cursor:pointer; }
+    button.session-report-history small { display:block; margin-top:3px; color:inherit; font-size:10px; font-weight:750; }
+    button.session-report-history:hover, button.session-report-history.active { border-color:rgba(36,114,79,.46); background:#e4f2e8; color:var(--c-primary-hover); }
+    .session-coach-callout p { margin:7px 0 0; color:var(--c-text-muted); font-size:12px; line-height:1.65; }
 
     /* === Plan overview === */
     .plan-alignment-note { display:flex; align-items:center; gap:7px; margin:0 0 8px; color:var(--c-text-muted); font-size:12px; font-weight:750; }
@@ -571,6 +610,7 @@
     .autopilot-menu { display:grid; gap:0; margin:0; padding:0 16px 12px; list-style:none; }
     .autopilot-menu li { display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 0; border-top:1px solid rgba(31,42,36,.08); }
     .autopilot-day { padding:5px 0; border-radius:9px; background:#e4f3e8; color:#155338; text-align:center; font-size:12px; font-weight:900; }
+    .autopilot-day small { display:block; margin-top:1px; font-size:10px; font-weight:750; }
     .autopilot-main { min-width:0; font-size:13px; font-weight:850; color:var(--c-text); }
     .autopilot-main small { display:block; margin-top:2px; color:var(--c-text-muted); font-size:12px; font-weight:600; line-height:1.45; }
     .autopilot-main .autopilot-intensity { color:#2d6a54; font-weight:800; }
@@ -987,10 +1027,16 @@
       .log-stats { grid-template-columns: 1fr; }
       .mode-brief-grid,
       .mode-summary { grid-template-columns: 1fr; }
+      .session-report-grid, .session-breakdown { grid-template-columns:1fr; }
     }
     @media (max-width: 480px) {
       .pace-trend-summary { grid-template-columns:1fr 1fr; }
       .pace-trend-activities { grid-template-columns:1fr; }
+      .session-report-head, .session-report-body { padding-left:16px; padding-right:16px; }
+      .session-report-head { display:block; }
+      .session-report-status { display:inline-block; margin-top:10px; }
+      .session-report-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .session-lap { grid-template-columns:66px minmax(45px,1fr) 46px 42px; gap:6px; }
     }
     @media (max-width: 720px) {
       .container { padding: 18px 14px 22px; }
@@ -3936,25 +3982,39 @@ function renderRaceWeekCard(profile) {
 </div>`;
 }
 
-function garminAutopilotDays(plan) {
+function garminAutopilotDays(plan, activityIndex) {
   const today = todayStr();
-  const end = new Date(`${today}T00:00:00`);
+  const todayDay = (plan || []).flatMap((week) => week.days || []).find((day) => day.dateStr === today);
+  const todayCompleted = activityCompletesDay(todayDay, activityForDate(activityIndex, today));
+  const start = new Date(`${today}T00:00:00`);
+  if (todayCompleted) start.setDate(start.getDate() + 1);
+  const startDate = localDateStr(start);
+  const end = new Date(start);
   end.setDate(end.getDate() + 6);
   const endDate = localDateStr(end);
   return (plan || []).flatMap((week) => week.days || [])
-    .filter((day) => day.dateStr >= today && day.dateStr <= endDate)
+    .filter((day) => day.dateStr >= startDate && day.dateStr <= endDate)
     .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
 }
 
 function renderGarminAutopilotCard(profile, plan) {
   const autopilot = coachReviewData?.autopilot;
   if (!autopilot) return '';
-  const rollingDays = garminAutopilotDays(plan);
+  const completion = trainingCompletionSummary(plan);
+  const today = todayStr();
+  const todayRun = activityForDate(completion.activityByDate, today);
+  const todayDay = completion.planDayByDate.get(today);
+  const todayCompleted = activityCompletesDay(todayDay, todayRun);
+  const rollingDays = garminAutopilotDays(plan, completion.activityByDate);
   const metrics = autopilot.metrics || {};
   const decisionLabel = autopilot.label || '資料判讀中';
   const volumeFactor = Number(autopilot.volumeFactor) || 1;
   const plannedFactor = rollingDays.some((day) => day.isTaper) ? 1 : volumeFactor;
   const factorText = plannedFactor === 1 ? '維持原量' : `${plannedFactor > 1 ? '+' : ''}${Math.round((plannedFactor - 1) * 100)}%`;
+  const familyLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[metrics.comparisonFamily] || '主課';
+  const qualityMetric = metrics.recentPace
+    ? `${formatPaceSeconds(metrics.recentPace)}${metrics.paceDeltaSeconds !== null && metrics.paceDeltaSeconds !== undefined ? ` · ${metrics.paceDeltaSeconds > 0 ? '+' : ''}${metrics.paceDeltaSeconds}s` : ''}${metrics.recentHr ? ` · HR ${Math.round(metrics.recentHr)}` : ''}`
+    : `${familyLabel}資料不足（近 ${metrics.recentQualityRuns || 0}/2；前期 ${metrics.previousQualityRuns || 0}/2）`;
   const menu = rollingDays.map((day) => {
     const isRest = day.type === 'rest';
     const dropQuality = ['tempo', 'interval'].includes(day.type) && autopilot.qualityMode === 'skip';
@@ -3979,23 +4039,22 @@ function renderGarminAutopilotCard(profile, plan) {
           : `強度：${[day.pace, day.hrTarget].filter(Boolean).join(' · ') || '依呼吸與可對話感受完成。'}`;
     return { day, adjustedKm, title, detail, intensity };
   });
-  const staleDays = autopilot.asOf ? Math.max(0, Math.round((new Date(`${todayStr()}T00:00:00`) - new Date(`${autopilot.asOf}T00:00:00`)) / 86400000)) : null;
-  const freshness = staleDays === null ? '同步時間未知' : staleDays === 0 ? '今日已同步' : `${staleDays} 天前同步`;
   const readiness = autopilot.status === 'ready';
   return `
 <section class="autopilot-card" aria-label="Garmin 自動駕駛輔助課表">
   <div class="autopilot-head">
-    <div><div class="autopilot-kicker">Garmin Autopilot · ${reviewEscape(freshness)}</div><h2 class="autopilot-title">⌚ 接下來 7 天輔助菜單</h2></div>
+    <div><div class="autopilot-kicker">Garmin Autopilot</div><h2 class="autopilot-title">⌚ 接下來 7 天輔助菜單</h2></div>
     <span class="autopilot-status">${reviewEscape(decisionLabel)}</span>
   </div>
   <p class="autopilot-copy">${reviewEscape(autopilot.headline || 'Garmin 資料已同步；系統會依實跑狀況生成保守建議。')} ${rollingDays.some((day) => day.isTaper) ? '賽前減量週維持原課表，不再額外推進。' : ''}</p>
   <div class="autopilot-metrics">
     <div class="autopilot-metric"><span>近 14 天</span><b>${Number(metrics.recentKm || 0).toFixed(1)} km · ${metrics.recentRuns || 0} 次</b></div>
-    <div class="autopilot-metric"><span>配速 / 心率</span><b>${metrics.recentPace ? `${formatPaceSeconds(metrics.recentPace)}${metrics.paceDeltaSeconds !== null && metrics.paceDeltaSeconds !== undefined ? ` · ${metrics.paceDeltaSeconds > 0 ? '+' : ''}${metrics.paceDeltaSeconds}s` : ''}` : '資料不足'}${metrics.recentHr ? ` · HR ${Math.round(metrics.recentHr)}` : ''}</b></div>
+    <div class="autopilot-metric"><span>主課配速 / 心率</span><b>${qualityMetric}</b></div>
     <div class="autopilot-metric"><span>最近負荷 / 長跑</span><b>${metrics.recentLoad ? `${Math.round(metrics.recentLoad)} 負荷` : '負荷資料不足'} · ${Number(metrics.recentLongKm || 0).toFixed(1)} km</b></div>
     <div class="autopilot-metric"><span>品質課 / 本次跑量</span><b>${autopilot.qualityMode === 'skip' ? '取消品質課' : autopilot.qualityMode === 'reduce' ? '品質課降階' : '保留品質課'} · ${factorText}</b></div>
   </div>
-  ${readiness && menu.length ? `<ol class="autopilot-menu">${menu.map(({ day, adjustedKm, title, detail, intensity }) => `<li><span class="autopilot-day">${DOW_NAMES[day.dow] || ''}</span><span class="autopilot-main">${reviewEscape(title)}<small>${reviewEscape(detail)}</small><small class="autopilot-intensity">${reviewEscape(intensity)}</small></span><span class="autopilot-km">${adjustedKm === null ? '恢復' : `${adjustedKm.toFixed(1)} km`}</span></li>`).join('')}</ol>` : `<div class="autopilot-footer">ℹ️ <span>再累積至少 3 次 Garmin 跑步後，系統才會產生可採用的輔助菜單；目前不假裝知道你的恢復能力。</span></div>`}
+  ${todayCompleted ? `<div class="autopilot-footer">✓ <span>今日 ${today.slice(5).replace('-', '/')} Garmin 已認列完成：${Number(todayRun.actualKm || 0).toFixed(1)} km。以下從明天開始列出 7 天輔助菜單。</span></div>` : ''}
+  ${readiness && menu.length ? `<ol class="autopilot-menu">${menu.map(({ day, adjustedKm, title, detail, intensity }) => `<li><span class="autopilot-day">${DOW_NAMES[day.dow] || ''}<small>${day.dateStr.slice(5).replace('-', '/')}</small></span><span class="autopilot-main">${reviewEscape(title)}<small>${reviewEscape(detail)}</small><small class="autopilot-intensity">${reviewEscape(intensity)}</small></span><span class="autopilot-km">${adjustedKm === null ? '恢復' : `${adjustedKm.toFixed(1)} km`}</span></li>`).join('')}</ol>` : `<div class="autopilot-footer">ℹ️ <span>再累積至少 3 次 Garmin 跑步後，系統才會產生可採用的輔助菜單；目前不假裝知道你的恢復能力。</span></div>`}
   <div class="autopilot-footer">🛟 <span>${reviewEscape(autopilot.guardrail || '身體不適時優先休息或下修；這張菜單不會覆寫正式課表。')} 正式課表保持原樣，這張可直接當作輔助參考。</span></div>
 </section>`;
 }
@@ -4139,7 +4198,7 @@ function renderTrainingStatusCard(plan = appData.plan || []) {
   const stateCopy = reminders.length
     ? reminders.join(' ')
     : currentWeekDays.length
-      ? `本週目前完成 ${currentWeekCompleted.length}/${currentWeekDays.length} 堂；${syncAge === null ? '尚未取得 Garmin 同步時間。' : syncAge === 0 ? 'Garmin 今日已同步。' : `Garmin ${syncAge} 天前同步。`}`
+      ? `本週目前完成 ${currentWeekCompleted.length}/${currentWeekDays.length} 堂。`
       : `本週還沒有到期的跑課，先照今天的正式課表即可。${syncAge === null ? '' : syncAge === 0 ? ' Garmin 今日已同步。' : ` Garmin ${syncAge} 天前同步。`}`;
   const hasInAppFix = missedWithoutReason || uncreditedRestRuns || summary.partialDays.length;
   const action = missedWithoutReason && missingReasonDate
@@ -4294,8 +4353,11 @@ function formatPaceSeconds(seconds) {
 function garminActivityRecords() {
   const rawRuns = coachReviewData?.analyticsRuns?.length ? coachReviewData.analyticsRuns : (coachReviewData?.runs || []);
   return rawRuns.map((run) => ({
+    activityId: run.activityId || null,
     date: run.date,
+    name: run.name || 'Garmin 跑步',
     km: Number(run.km) || 0,
+    durationMin: Number(run.durationMin) || null,
     pace: run.pace,
     fullPace: run.pace,
     qualityPace: run.qualityPace || null,
@@ -4305,6 +4367,7 @@ function garminActivityRecords() {
     paceSeconds: paceToSeconds(run.qualityPace || run.pace),
     hr: Number(run.hr) || null,
     qualityHr: Number(run.qualityHr) || null,
+    qualityCadence: Number(run.qualityCadence) || null,
     maxHr: Number(run.maxHr) || null,
     cadence: Number(run.cadence) || null,
     elevationGainM: Number(run.elevationGainM) || 0,
@@ -4312,7 +4375,10 @@ function garminActivityRecords() {
     anaerobicTe: Number(run.anaerobicTe) || null,
     vo2max: Number(run.vo2max) || null,
     power: Number(run.power) || null,
-    trainingLoad: Number(run.trainingLoad) || null
+    trainingLoad: Number(run.trainingLoad) || null,
+    laps: Array.isArray(run.laps) ? run.laps : [],
+    sessionFamily: run.sessionFamily || 'easy',
+    selfEvaluation: run.selfEvaluation || null
   })).filter((run) => run.date && run.km > 0);
 }
 
@@ -4342,6 +4408,104 @@ function renderVolumeBars(trend) {
   if (!trend.length) return '<p style="color:var(--c-text-muted);margin:0">尚無可用的週跑量資料。</p>';
   const max = Math.max(...trend.map((item) => item.km), 1);
   return `<div style="display:flex;align-items:flex-end;gap:10px;height:180px;padding-top:12px">${trend.map((item) => `<div style="flex:1;min-width:32px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px"><b style="font-size:12px">${item.km}</b><div title="${reviewEscape(item.week)}：${item.km} km / ${item.runs} 次" style="width:100%;max-width:42px;min-height:5px;height:${Math.max(5, (item.km / max) * 125)}px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#5fae79,#24724f)"></div><span style="font-size:11px;color:var(--c-text-muted)">${reviewEscape(item.week.slice(5))}</span></div>`).join('')}</div>`;
+}
+
+function sessionIntensityLabel(intensity, index) {
+  const labels = { WARMUP: '熱身', MAIN: '主課', ACTIVE: '活動段', INTERVAL: '間歇', RECOVERY: '恢復', COOLDOWN: '收操', REST: '休息' };
+  return labels[String(intensity || '').toUpperCase()] || `計圈 ${index || ''}`.trim();
+}
+
+function sessionIntensityClass(intensity) {
+  const value = String(intensity || '').toUpperCase();
+  if (['MAIN', 'ACTIVE', 'INTERVAL'].includes(value)) return 'main';
+  if (['RECOVERY', 'REST'].includes(value)) return 'recovery';
+  return 'neutral';
+}
+
+function plannedSessionFor(run) {
+  for (const week of appData.plan || []) {
+    const day = (week.days || []).find((item) => item.dateStr === run.date || item.date === run.date);
+    if (day) return applyCoachPlanOverride(day, week);
+  }
+  return null;
+}
+
+function formatSessionDuration(minutes) {
+  const seconds = Math.max(0, Math.round((Number(minutes) || 0) * 60));
+  return seconds ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` : '—';
+}
+
+let selectedTrainingReportActivityId = null;
+
+function sessionQualitySignals(run) {
+  const mainLaps = run.laps.filter((lap) => ['MAIN', 'INTERVAL'].includes(String(lap?.intensity || '').toUpperCase()) && paceToSeconds(lap.pace_per_km));
+  if (mainLaps.length < 2) return null;
+  const midpoint = Math.ceil(mainLaps.length / 2);
+  const average = (items, field) => items.reduce((sum, item) => sum + (Number(item[field]) || 0), 0) / items.length;
+  const first = mainLaps.slice(0, midpoint), last = mainLaps.slice(midpoint);
+  const paceDelta = Math.round(average(last, 'duration_min') / average(last, 'distance_km') * 60 - average(first, 'duration_min') / average(first, 'distance_km') * 60);
+  const hrDelta = first.some((lap) => lap.avg_hr) && last.some((lap) => lap.avg_hr) ? Math.round(average(last, 'avg_hr') - average(first, 'avg_hr')) : null;
+  return { paceDelta, hrDelta, label: paceDelta <= 5 ? '主課節奏穩定' : `後半慢 ${paceDelta} 秒/km` };
+}
+
+function plannedMainTargetKm(day) {
+  if (!day) return null;
+  const mainStep = garminManualBuilderSteps(day).find((step) => step.title === '主課');
+  const text = [mainStep?.dose, mainStep?.detail, day.task, day.detail, day.pace].filter(Boolean).join(' ');
+  const match = text.match(/(?:E\s*跑|恢復跑|長跑|慢跑)\s*(\d+(?:\.\d+)?)\s*(?:km|公里)/i) || text.match(/(\d+(?:\.\d+)?)\s*(?:km|公里)/i);
+  return match ? Number(match[1]) : garminMainDistanceKm(day);
+}
+
+function garminFeelLabel(value) {
+  return ({ 1: '非常差', 2: '差', 3: '偏差', 4: '尚可', 5: '普通', 6: '不錯', 7: '很好', 8: '極佳' })[Number(value)] || '—';
+}
+
+function selectTrainingReport(activityId) {
+  selectedTrainingReportActivityId = Number(activityId) || null;
+  refreshCoachReviewPanels();
+}
+
+function renderLatestTrainingReport(runs) {
+  const run = runs.find((item) => item.activityId === selectedTrainingReportActivityId) || runs.at(-1);
+  if (!run) return '';
+  const planned = plannedSessionFor(run);
+  const mainScope = run.qualityEligible;
+  const courseKm = mainScope ? run.qualityKm : run.km;
+  const coursePace = mainScope ? run.qualityPace : run.fullPace;
+  const courseHr = mainScope ? run.qualityHr : run.hr;
+  const courseCadence = mainScope ? run.qualityCadence || run.cadence : run.cadence;
+  const laps = run.laps.filter((lap) => Number(lap?.distance_km) > 0);
+  const maxDistance = Math.max(...laps.map((lap) => Number(lap.distance_km) || 0), 0.1);
+  const status = mainScope ? '已辨識主課' : '全程紀錄';
+  const statusClass = mainScope ? '' : ' neutral';
+  const goal = planned?.task || planned?.title || '尚無對應課表目標';
+  const target = [planned?.pace, planned?.hrTarget].filter(Boolean).join(' · ') || '以教練指示與舒適度完成';
+  const scopeText = mainScope ? `主課 ${courseKm?.toFixed(1)} km` : `全程 ${run.km.toFixed(1)} km`;
+  const summary = mainScope
+    ? `已完成 ${scopeText}，${coursePace || '配速未回傳'}${courseHr ? ` · HR ${Math.round(courseHr)}` : ''}。`
+    : `本次完成 ${scopeText}；Garmin 尚未提供可安全切分的主課段別。`;
+  const evidence = mainScope
+    ? '品質判讀只使用 Garmin 明確標記的主課；熱身、恢復與收操仍保留在總負荷，不會拖慢主課成績。'
+    : '本次僅用全程呈現，尚不會以此作為主課配速／心率的課表升降依據。';
+  const lapRows = laps.length
+    ? laps.map((lap) => `<div class="session-lap ${sessionIntensityClass(lap.intensity)}"><span class="session-lap-label">${reviewEscape(sessionIntensityLabel(lap.intensity, lap.index))}</span><span class="session-lap-bar"><i style="width:${Math.max(5, (Number(lap.distance_km) / maxDistance) * 100)}%"></i></span><span class="session-lap-meta">${Number(lap.distance_km).toFixed(2)} km</span><span class="session-lap-meta">${reviewEscape(lap.pace_per_km || '—')}</span></div>`).join('')
+    : '<p class="session-breakdown-copy">這筆舊資料尚未同步計圈摘要；下次 Garmin 同步後會補上，不影響既有總量與主課判讀。</p>';
+  const autopilot = coachReviewData?.autopilot?.metrics || {};
+  const comparisonLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[autopilot.comparisonFamily] || '主課';
+  const confidence = mainScope
+    ? `${comparisonLabel}比較資料：近 ${autopilot.recentQualityRuns || 0}/2；前期 ${autopilot.previousQualityRuns || 0}/2；只與同課型比較。`
+    : '本次尚無主課段別，教練維持保守判讀。';
+  const plannedKm = plannedMainTargetKm(planned);
+  const completion = plannedKm ? `${courseKm >= plannedKm * (garminCompletionPercent() / 100) ? '已達標' : '部分完成'} · 目標 ${plannedKm.toFixed(1)} km／實跑 ${courseKm.toFixed(1)} km` : '未找到可量化的課表目標';
+  const signals = sessionQualitySignals(run);
+  const feel = run.selfEvaluation;
+  const history = runs.slice(-8).reverse().map((item) => `<button class="session-report-history ${item.activityId === run.activityId ? 'active' : ''}" onclick="selectTrainingReport('${item.activityId || ''}')">${reviewEscape(item.date.slice(5))}<small>${item.qualityPace || item.pace || '—'}/km</small></button>`).join('');
+  return `<section class="session-report" aria-label="最新訓練報告">
+    <div class="session-report-head"><div><div class="session-report-kicker">Latest training report · Garmin</div><h2 class="session-report-title">${reviewEscape(run.name)}｜本次訓練成果</h2><div class="session-report-meta">${reviewEscape(run.date)} · 全程 ${run.km.toFixed(2)} km · ${formatSessionDuration(run.durationMin)}</div></div><span class="session-report-status${statusClass}">${status}</span></div>
+    <div class="session-report-body"><div class="session-report-grid"><div><div class="session-report-label">本次完成度</div><p class="session-report-summary">${summary}</p><p class="session-report-note">${completion}。${evidence}</p></div><div class="session-report-target"><div class="session-report-label">對應課表</div><b>${reviewEscape(goal)}</b><span>${reviewEscape(target)}</span></div></div>
+    <div class="session-report-metrics"><div class="session-report-metric"><span>判讀範圍</span><strong>${scopeText}</strong></div><div class="session-report-metric"><span>配速</span><strong>${coursePace ? `${reviewEscape(coursePace)}/km` : '—'}</strong></div><div class="session-report-metric"><span>平均心率</span><strong>${courseHr ? `HR ${Math.round(courseHr)}` : '—'}</strong></div><div class="session-report-metric"><span>平均步頻</span><strong>${courseCadence ? `${Math.round(courseCadence)} spm` : '—'}</strong></div></div>
+    <div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">課程分段</h3><p class="session-breakdown-copy">以 Garmin 計圈／訓練段別呈現；長條代表每段距離，右側為該段配速。</p><div class="session-lap-list">${lapRows}</div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '先累積可辨識的主課資料，再調整品質課。'}</strong><p>${signals ? `${signals.label}${signals.hrDelta !== null ? `；後半心率 ${signals.hrDelta >= 0 ? '+' : ''}${signals.hrDelta} bpm。` : '。'}<br>` : ''}${feel ? `Garmin 自我評量：${garminFeelLabel(feel.feel)} · RPE ${feel.rpe}/10。<br>` : 'Garmin 尚未填自我評量；只需在疼痛、睡眠或疾病異常時補充即可。<br>'}${confidence}</p></div></div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div>
+  </section>`;
 }
 
 function renderPaceTrend(runs) {
@@ -4681,7 +4845,7 @@ function renderTrainingAnalysis() {
           : ['🟢', 'var(--c-green)', `上週跑量增幅 ${ramp >= 0 ? '+' : ''}${ramp}%，在安全範圍（≤10%）內。`];
     return `<div style="margin:14px 0 0;padding:10px 14px;border-left:3px solid ${color};border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6">${icon} <b>週增幅監控</b>：${text}（${prev.km} → ${last.km} km）</div>`;
   })();
-  return `${statusCard}${checkpointPanel}${weeklySummaryCard}<div class="card"><div class="card-title">📈 訓練分析 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
+  return `${statusCard}${checkpointPanel}${renderLatestTrainingReport(runs)}${weeklySummaryCard}<div class="card"><div class="card-title">📈 長期訓練趨勢 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
     <div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">近四週跑量</span><strong class="plan-metric-value">${lastFourKm.toFixed(1)} km</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均配速</span><strong class="plan-metric-value">${formatPaceSeconds(averagePace)}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均心率</span><strong class="plan-metric-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">Garmin 資料截至</span><strong class="plan-metric-value">${reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt)}</strong></div></div>
     ${rampNote}
     <div style="margin-top:20px"><b style="font-size:15px">進階訓練指標</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 10px">只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p><div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">最近四趟平均步頻</span><strong class="plan-metric-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟累積爬升</span><strong class="plan-metric-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均負荷</span><strong class="plan-metric-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近 VO₂ Max</span><strong class="plan-metric-value">${latestVo2 || '—'}</strong></div></div></div>

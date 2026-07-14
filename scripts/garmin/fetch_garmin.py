@@ -111,6 +111,7 @@ def pace_str(seconds_per_km: float | None) -> str | None:
 
 MAIN_INTENSITY_PRIORITY = (("MAIN",), ("ACTIVE",), ("INTERVAL",))
 NON_MAIN_INTENSITIES = {"WARMUP", "COOLDOWN", "RECOVERY", "REST"}
+MAX_LAP_SUMMARY = 64
 
 
 def weighted_average(rows: list[dict], field: str) -> float | None:
@@ -124,10 +125,10 @@ def weighted_average(rows: list[dict], field: str) -> float | None:
     return round(sum(value * duration for value, duration in weighted) / sum(duration for _, duration in weighted), 1)
 
 
-def simplify_lap(lap: dict) -> dict:
+def simplify_lap(lap: dict, index: int | None = None) -> dict:
     distance_m = float(lap.get("distance") or 0)
     duration_s = float(lap.get("duration") or 0)
-    return {
+    result = {
         "intensity": str(lap.get("intensityType") or "").upper(),
         "distance_km": round(distance_m / 1000, 3),
         "duration_min": round(duration_s / 60, 2),
@@ -135,6 +136,52 @@ def simplify_lap(lap: dict) -> dict:
         "avg_hr": lap.get("averageHR"),
         "max_hr": lap.get("maxHR"),
         "avg_cadence": lap.get("averageRunCadence"),
+    }
+    if index is not None:
+        result["index"] = index
+    return result
+
+
+def summarize_laps(split_payload: dict | None) -> list[dict]:
+    """Keep a compact, privacy-safe lap summary for the session report.
+
+    The report deliberately stores no route, GPS coordinates, or per-second
+    stream.  Garmin's workout step/lap fields are enough to explain whether
+    warmup, main work, recovery and cooldown were completed as prescribed.
+    """
+    laps = (split_payload or {}).get("lapDTOs") or []
+    return [
+        simplify_lap(lap, index)
+        for index, lap in enumerate(laps[:MAX_LAP_SUMMARY], start=1)
+        if isinstance(lap, dict)
+    ]
+
+
+def extract_self_evaluation(*payloads: object) -> dict | None:
+    """Find Garmin's nested direct workout feel/RPE without storing raw detail data."""
+    found: dict[str, object] = {}
+
+    def walk(value: object) -> None:
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key in {"directWorkoutFeel", "directWorkoutRpe"}:
+                    found[key] = item
+                elif isinstance(item, (dict, list)):
+                    walk(item)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+
+    for payload in payloads:
+        walk(payload)
+    feel = float(found.get("directWorkoutFeel") or 0)
+    rpe = float(found.get("directWorkoutRpe") or 0)
+    if feel <= 0 and rpe <= 0:
+        return None
+    return {
+        "feel": round(feel / 10) if feel > 10 else round(feel),
+        "rpe": round(rpe / 10) if rpe > 10 else round(rpe),
+        "source": "garmin-self-evaluation",
     }
 
 
@@ -176,7 +223,12 @@ def summarize_main_segment(split_payload: dict | None) -> dict | None:
     }
 
 
-def simplify(activity: dict, split_payload: dict | None = None) -> dict:
+def simplify(
+    activity: dict,
+    split_payload: dict | None = None,
+    detail_payload: dict | None = None,
+    activity_payload: dict | None = None,
+) -> dict:
     distance_m = activity.get("distance") or 0
     duration_s = activity.get("duration") or 0
     sec_per_km = (duration_s / (distance_m / 1000)) if distance_m else None
@@ -203,6 +255,12 @@ def simplify(activity: dict, split_payload: dict | None = None) -> dict:
     main_segment = summarize_main_segment(split_payload)
     if main_segment:
         record["main_segment"] = main_segment
+    lap_summary = summarize_laps(split_payload)
+    if lap_summary:
+        record["lap_summary"] = lap_summary
+    self_evaluation = extract_self_evaluation(activity, activity_payload, detail_payload)
+    if self_evaluation:
+        record["self_evaluation"] = self_evaluation
     return record
 
 
@@ -249,13 +307,20 @@ def main() -> int:
         # Fetch structured steps for new activities.  Existing legacy records
         # remain valid for volume, but are never silently reinterpreted as a
         # main-course result without Garmin's explicit step labels.
-        split_payload = None
+        split_payload = detail_payload = activity_payload = None
         if args.refresh_segments or activity_id not in existing:
             try:
                 split_payload = client.get_activity_splits(activity_id)
             except Exception as exc:  # One malformed activity must not block sync.
                 print(f"警告：無法讀取活動 {activity_id} 的分段資料（{exc}）", file=sys.stderr)
-        record = simplify(activity, split_payload)
+            try:
+                # Garmin keeps the post-run feel/RPE under summaryDTO, not in
+                # the date-list response nor the chart detail endpoint.
+                activity_payload = client.get_activity(activity_id)
+                detail_payload = client.get_activity_details(activity_id, maxchart=1, maxpoly=0)
+            except Exception as exc:  # Self-evaluation is optional metadata.
+                print(f"警告：無法讀取活動 {activity_id} 的完整明細（{exc}）", file=sys.stderr)
+        record = simplify(activity, split_payload, detail_payload, activity_payload)
         runs.append(record)
     merged = existing
     new_count = sum(1 for r in runs if r["activityId"] not in merged)
@@ -265,8 +330,13 @@ def main() -> int:
         # previously fetched structured main block until a newer split response
         # explicitly replaces it, rather than regressing the coach to all-run
         # averages on the next scheduled sync.
-        if previous and previous.get("main_segment") and not r.get("main_segment"):
-            r["main_segment"] = previous["main_segment"]
+        if previous:
+            if previous.get("main_segment") and not r.get("main_segment"):
+                r["main_segment"] = previous["main_segment"]
+            if previous.get("lap_summary") and not r.get("lap_summary"):
+                r["lap_summary"] = previous["lap_summary"]
+            if previous.get("self_evaluation") and not r.get("self_evaluation"):
+                r["self_evaluation"] = previous["self_evaluation"]
         merged[r["activityId"]] = r
 
     records = sorted(merged.values(), key=lambda r: r["startTime"] or "")
