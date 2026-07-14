@@ -1,6 +1,6 @@
 [
   {
-    "race_id": "0d19a0a4-1287-4b52-bb6c-eb29ae5d736b",
+    "race_id": "1abdf759-ef5d-42a7-aa9d-43e015b59a0c",
     "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
     "race_date": "2027-03-28",
     "race_county": "臺中市",
@@ -10,7 +10,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2026-09-29",
+      "next_check_date": "2026-09-28",
       "cadence": "future",
       "reason": "距離賽事 257 天，先排到賽前約 180 天再追。"
     },
@@ -41,7 +41,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-08",
+      "next_check_date": "2027-06-07",
       "cadence": "future",
       "reason": "距離賽事 509 天，先排到賽前約 180 天再追。"
     },
@@ -157,9 +157,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-07-17",
+      "next_check_date": "2026-07-16",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-07-31，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-07-30，開報前 14 天再開始追蹤。"
     },
     "missing": [
       "official_registration_link"
@@ -447,9 +447,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-08-03",
+      "next_check_date": "2026-08-02",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
     },
     "missing": [
       "quota"
