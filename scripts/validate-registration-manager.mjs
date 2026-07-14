@@ -40,6 +40,7 @@ const appJs = await readFile(resolve(root, "site/app.js"), "utf8");
 const readme = await readFile(resolve(root, "README.md"), "utf8");
 const registrationHtml = await readFile(resolve(root, "local/registration/registration.html"), "utf8");
 const registrationJs = await readFile(resolve(root, "local/registration/registration.js"), "utf8");
+const registrationCss = await readFile(resolve(root, "local/registration/registration.css"), "utf8");
 
 assertCheck(
   entryDuplicateKey(baseEntry) === entryDuplicateKey(sameEntryDifferentSpacing),
@@ -184,6 +185,25 @@ assertCheck(
     registrationJs.includes("localStorage") &&
     registrationJs.includes("els.raceSelect.value || savedSelectedRaceId()"),
   "registration manager restores the selected race after page refresh"
+);
+assertCheck(
+  registrationHtml.includes('id="overview-work-queue"') &&
+    registrationHtml.includes("data-open-pending") &&
+    registrationHtml.includes("data-open-unpaid") &&
+    !registrationHtml.includes("sidebar-group-preview") &&
+    registrationJs.includes("openEntriesForWork") &&
+    registrationJs.includes("openNotifyForEntry") &&
+    registrationJs.includes("openUnpaidNotifications"),
+  "registration workbench routes pending tasks into entries and notifications without duplicate race context"
+);
+assertCheck(
+  registrationHtml.includes("workspace-form-details") &&
+    registrationHtml.includes("entry-advanced-fields") &&
+    registrationHtml.includes("notify-race-picker") &&
+    registrationHtml.includes("notify-people-picker") &&
+    registrationCss.includes("grid-template-areas") &&
+    registrationCss.includes(".notify-race-picker"),
+  "registration workspace layers optional form fields and keeps notification filters integrated horizontally"
 );
 
 const failed = checks.filter((check) => !check.ok);

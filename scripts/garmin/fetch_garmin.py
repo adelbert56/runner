@@ -109,11 +109,78 @@ def pace_str(seconds_per_km: float | None) -> str | None:
     return f"{minutes}:{seconds:02d}"
 
 
-def simplify(activity: dict) -> dict:
+MAIN_INTENSITY_PRIORITY = (("MAIN",), ("ACTIVE",), ("INTERVAL",))
+NON_MAIN_INTENSITIES = {"WARMUP", "COOLDOWN", "RECOVERY", "REST"}
+
+
+def weighted_average(rows: list[dict], field: str) -> float | None:
+    weighted = [
+        (float(row.get(field) or 0), float(row.get("duration_min") or row.get("duration") or 0))
+        for row in rows
+    ]
+    weighted = [(value, duration) for value, duration in weighted if value > 0 and duration > 0]
+    if not weighted:
+        return None
+    return round(sum(value * duration for value, duration in weighted) / sum(duration for _, duration in weighted), 1)
+
+
+def simplify_lap(lap: dict) -> dict:
+    distance_m = float(lap.get("distance") or 0)
+    duration_s = float(lap.get("duration") or 0)
+    return {
+        "intensity": str(lap.get("intensityType") or "").upper(),
+        "distance_km": round(distance_m / 1000, 3),
+        "duration_min": round(duration_s / 60, 2),
+        "pace_per_km": pace_str(duration_s / (distance_m / 1000)) if distance_m else None,
+        "avg_hr": lap.get("averageHR"),
+        "max_hr": lap.get("maxHR"),
+        "avg_cadence": lap.get("averageRunCadence"),
+    }
+
+
+def summarize_main_segment(split_payload: dict | None) -> dict | None:
+    """Return a quality-only main block when Garmin explicitly labels workout steps.
+
+    Automatic kilometre laps are intentionally not treated as a main block.  A
+    main-course score must come from Garmin's warmup/active/recovery/cooldown
+    structure, otherwise the coach has no safe basis for separating the run.
+    """
+    laps = (split_payload or {}).get("lapDTOs") or []
+    normalized = [simplify_lap(lap) for lap in laps if isinstance(lap, dict)]
+    intensities = {lap["intensity"] for lap in normalized if lap["intensity"]}
+    if not intensities.intersection(NON_MAIN_INTENSITIES):
+        return None
+    # Garmin labels a steady prescribed block as MAIN, while optional strides
+    # may be ACTIVE.  Prefer the most specific group so strides never improve
+    # or worsen the E-run result; interval-only workouts still fall back to
+    # INTERVAL when no MAIN/ACTIVE group exists.
+    main_intensities = next(
+        (set(group) for group in MAIN_INTENSITY_PRIORITY if intensities.intersection(group)),
+        set(),
+    )
+    main_laps = [lap for lap in normalized if lap["intensity"] in main_intensities]
+    distance_km = sum(lap["distance_km"] for lap in main_laps)
+    duration_min = sum(lap["duration_min"] for lap in main_laps)
+    if not main_laps or distance_km <= 0 or duration_min <= 0:
+        return None
+    duration_s = duration_min * 60
+    return {
+        "source": "garmin-workout-steps",
+        "lap_count": len(main_laps),
+        "distance_km": round(distance_km, 2),
+        "duration_min": round(duration_min, 1),
+        "pace_per_km": pace_str(duration_s / distance_km),
+        "avg_hr": weighted_average(main_laps, "avg_hr"),
+        "max_hr": max((float(lap.get("max_hr") or 0) for lap in main_laps), default=0) or None,
+        "avg_cadence": weighted_average(main_laps, "avg_cadence"),
+    }
+
+
+def simplify(activity: dict, split_payload: dict | None = None) -> dict:
     distance_m = activity.get("distance") or 0
     duration_s = activity.get("duration") or 0
     sec_per_km = (duration_s / (distance_m / 1000)) if distance_m else None
-    return {
+    record = {
         "activityId": activity.get("activityId"),
         "date": (activity.get("startTimeLocal") or "")[:10],
         "startTime": activity.get("startTimeLocal"),
@@ -133,6 +200,10 @@ def simplify(activity: dict) -> dict:
         "avg_power": activity.get("avgPower"),
         "training_load": activity.get("activityTrainingLoad"),
     }
+    main_segment = summarize_main_segment(split_payload)
+    if main_segment:
+        record["main_segment"] = main_segment
+    return record
 
 
 def load_existing() -> dict[int, dict]:
@@ -150,6 +221,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="抓取 Garmin 跑步紀錄")
     parser.add_argument("--days", type=int, default=90, help="回溯天數（預設 90）")
     parser.add_argument("--non-interactive", action="store_true", help="排程模式：token 失效時直接失敗，不開啟帳密提示")
+    parser.add_argument("--refresh-segments", action="store_true", help="重新抓取範圍內既有活動的課程分段")
     args = parser.parse_args()
 
     try:
@@ -166,19 +238,40 @@ def main() -> int:
         start.isoformat(), end.isoformat()
     )
 
-    runs = [
-        simplify(a)
-        for a in activities
+    running_activities = [
+        a for a in activities
         if (a.get("activityType") or {}).get("typeKey") in RUNNING_TYPE_KEYS
     ]
-    print(f"取得 {len(activities)} 筆活動，其中跑步 {len(runs)} 筆")
-
-    merged = load_existing()
+    existing = load_existing()
+    runs = []
+    for activity in running_activities:
+        activity_id = activity.get("activityId")
+        # Fetch structured steps for new activities.  Existing legacy records
+        # remain valid for volume, but are never silently reinterpreted as a
+        # main-course result without Garmin's explicit step labels.
+        split_payload = None
+        if args.refresh_segments or activity_id not in existing:
+            try:
+                split_payload = client.get_activity_splits(activity_id)
+            except Exception as exc:  # One malformed activity must not block sync.
+                print(f"警告：無法讀取活動 {activity_id} 的分段資料（{exc}）", file=sys.stderr)
+        record = simplify(activity, split_payload)
+        runs.append(record)
+    merged = existing
     new_count = sum(1 for r in runs if r["activityId"] not in merged)
     for r in runs:
+        previous = merged.get(r["activityId"])
+        # A normal daily list response has only whole-activity values.  Keep a
+        # previously fetched structured main block until a newer split response
+        # explicitly replaces it, rather than regressing the coach to all-run
+        # averages on the next scheduled sync.
+        if previous and previous.get("main_segment") and not r.get("main_segment"):
+            r["main_segment"] = previous["main_segment"]
         merged[r["activityId"]] = r
 
     records = sorted(merged.values(), key=lambda r: r["startTime"] or "")
+    structured_count = sum(1 for record in records if record.get("main_segment"))
+    print(f"取得 {len(activities)} 筆活動，其中跑步 {len(runs)} 筆；已保存可辨識主課 {structured_count} 筆")
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(
         json.dumps(

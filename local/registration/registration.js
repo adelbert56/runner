@@ -1,6 +1,6 @@
 import { findDuplicateEntry } from "./registration-core.js";
 
-const DATA_VERSION = "20260701-registration-notify8";
+const DATA_VERSION = "20260714-registration-workspace2";
 const SELECTED_RACE_STORAGE_KEY = "runner.registration.selectedRaceId";
 const WORKSPACE_VIEW_STORAGE_KEY = "runner.registration.workspaceView";
 const NOTIFY_PREFS_STORAGE_KEY = "runner.registration.notifyPrefs";
@@ -82,17 +82,16 @@ const els = {
   notifyResults: document.querySelector("#notify-results"),
   workspaceViewTabs: document.querySelector("#workspace-view-tabs"),
   workspaceViews: [...document.querySelectorAll("[data-workspace-panel]")],
+  overviewWorkQueue: document.querySelector("#overview-work-queue"),
   overviewSelectedRace: document.querySelector("#overview-selected-race"),
-  overviewInsights: document.querySelector("#overview-insights"),
   overviewActiveGroups: document.querySelector("#overview-active-groups"),
-  overviewPeopleFocus: document.querySelector("#overview-people-focus"),
   exportData: document.querySelector("#export-data"),
   importData: document.querySelector("#import-data"),
   entryStatusMessage: document.querySelector("#entry-status-message"),
   summaryRaces: document.querySelector("#summary-races"),
   summaryPeople: document.querySelector("#summary-people"),
-  summaryEntries: document.querySelector("#summary-entries"),
   summaryPending: document.querySelector("#summary-pending"),
+  summaryUnpaid: document.querySelector("#summary-unpaid"),
   personForm: document.querySelector("#person-form"),
   personId: document.querySelector("#person-id"),
   personName: document.querySelector("#person-name"),
@@ -459,6 +458,43 @@ function setWorkspaceView(view, { scroll = false } = {}) {
   if (scroll) {
     document.querySelector(`#workspace-${nextView}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
+
+function openEntriesForWork(entryId = "", progress = "all") {
+  const entry = state.entries.find((item) => item.id === entryId);
+  state.entryScope = entry ? entryTimeBucket(entry) : "active";
+  state.entryHistoryYear = "all";
+  state.entryFilterPersonId = "";
+  state.entryFilterProgress = progress;
+  state.entryFilterStatus = "";
+  state.entryQuery = "";
+  state.entriesPage = 1;
+  state.focusEntryId = entry?.id || "";
+  setWorkspaceView("entries", { scroll: true });
+  renderPeopleOptions();
+  renderEntriesList();
+}
+
+function openNotifyForEntry(entryId) {
+  const entry = state.entries.find((item) => item.id === entryId);
+  if (!entry) return;
+  state.notifySelectedRaceKeys = new Set([notifyRaceKey(entry)]);
+  state.notifySelectedPersonIds = new Set(entry.personId ? [entry.personId] : []);
+  state.notifyProgress = entry.isRegistered && !entry.isPaid ? "unpaid" : "pending";
+  setWorkspaceView("notify", { scroll: true });
+  els.notifyProgress.value = state.notifyProgress;
+  renderNotifyPickerLists();
+  renderNotifyWorkspace();
+}
+
+function openUnpaidNotifications() {
+  state.notifySelectedRaceKeys = new Set();
+  state.notifySelectedPersonIds = new Set();
+  state.notifyProgress = "unpaid";
+  setWorkspaceView("notify", { scroll: true });
+  els.notifyProgress.value = state.notifyProgress;
+  renderNotifyPickerLists();
+  renderNotifyWorkspace();
 }
 
 function notifyRaceKey(entry) {
@@ -903,10 +939,11 @@ async function savePrivateData() {
 
 function renderSummary() {
   const pendingCount = state.entries.filter((entry) => !entry.isRegistered || (entry.isRegistered && !entry.isPaid)).length;
+  const unpaidCount = state.entries.filter((entry) => entry.isRegistered && !entry.isPaid).length;
   els.summaryRaces.textContent = String(state.races.filter(isSelectableRace).length);
   els.summaryPeople.textContent = String(state.people.length);
-  els.summaryEntries.textContent = String(state.entries.length);
   els.summaryPending.textContent = String(pendingCount);
+  els.summaryUnpaid.textContent = String(unpaidCount);
 }
 
 function renderPeopleOptions() {
@@ -1046,6 +1083,7 @@ function raceEntryStats(race) {
 }
 
 function renderSelectedRaceSummary(race) {
+  if (!els.racePicker) return;
   if (!race) {
     els.racePicker.innerHTML = '<div class="empty-state">請先選擇賽事</div>';
     return;
@@ -1221,7 +1259,6 @@ function groupDistanceLabel(group) {
 }
 
 function renderOverview() {
-  const compactViewport = isCompactViewport();
   const selectedRace = selectedRaceFromDropdown();
   if (!selectedRace) {
     els.overviewSelectedRace.innerHTML = '<div class="empty-state">請先從左側選一場賽事。</div>';
@@ -1245,35 +1282,54 @@ function renderOverview() {
           <span class="meta-pill">${escapeHtml(dedupeRaceDistances(selectedRace) || "距離待補")}</span>
           <span class="meta-pill">${escapeHtml(`已建立 ${stats.total} 筆`)}</span>
         </div>
-        <div class="overview-stat-grid">
-          <article class="overview-stat">
-            <span>已建立名額</span>
-            <strong>${escapeHtml(stats.total)}</strong>
-          </article>
-          <article class="overview-stat">
-            <span>參加人員</span>
-            <strong>${escapeHtml(stats.uniquePeople)}</strong>
-          </article>
-          <article class="overview-stat">
-            <span>已報名</span>
-            <strong>${escapeHtml(stats.registeredCount)}</strong>
-          </article>
-          <article class="overview-stat">
-            <span>未完成</span>
-            <strong>${escapeHtml(stats.pendingCount)}</strong>
-          </article>
+        <div class="overview-race-facts">
+          <span><b>${escapeHtml(stats.uniquePeople)}</b> 位參加人員</span>
+          <span><b>${escapeHtml(stats.registeredCount)}</b> 筆已報名</span>
+          <span class="${stats.pendingCount ? "is-warning" : ""}"><b>${escapeHtml(stats.pendingCount)}</b> 筆待處理</span>
         </div>
       </article>
     `;
   }
 
+  const peopleById = new Map(state.people.map((person) => [person.id, person]));
+  const pendingEntries = state.entries
+    .filter((entry) => entryTimeBucket(entry) === "active" && (!entry.isRegistered || !entry.isPaid))
+    .sort((a, b) => {
+      const urgency = Number(a.isRegistered) - Number(b.isRegistered);
+      return urgency || String(a.raceDate || "").localeCompare(String(b.raceDate || ""));
+    });
+  els.overviewWorkQueue.innerHTML = pendingEntries.length
+    ? pendingEntries.slice(0, 8).map((entry) => {
+      const person = peopleById.get(entry.personId);
+      const needsSignup = !entry.isRegistered;
+      const taskLabel = needsSignup ? "待完成報名" : "待確認繳費";
+      return `
+        <article class="overview-queue-item ${needsSignup ? "is-signup" : "is-payment"}">
+          <div class="overview-queue-status">${escapeHtml(taskLabel)}</div>
+          <div class="overview-queue-copy">
+            <h3>${escapeHtml(person?.name || "未指派人員")}</h3>
+            <p>${escapeHtml(entry.raceName || "未命名賽事")}</p>
+            <div class="entry-meta">
+              ${entry.raceDate ? `<span class="meta-pill">${escapeHtml(entry.raceDate)}</span>` : ""}
+              ${entry.distance ? `<span class="meta-pill">${escapeHtml(entry.distance)}</span>` : ""}
+              ${entry.paidAmount ? `<span class="meta-pill">${escapeHtml(formatMoney(entry.paidAmount))}</span>` : ""}
+            </div>
+          </div>
+          <div class="overview-queue-actions">
+            <button class="mini-action" type="button" data-open-entry="${escapeHtml(entry.id)}">處理</button>
+            <button class="mini-action" type="button" data-open-notify-entry="${escapeHtml(entry.id)}">通知</button>
+          </div>
+        </article>
+      `;
+    }).join("") + (pendingEntries.length > 8
+      ? `<button class="ghost-action overview-list-more" type="button" data-open-pending>還有 ${escapeHtml(pendingEntries.length - 8)} 筆待辦</button>`
+      : "")
+    : '<div class="empty-state">目前沒有待處理項目，可以從左側帶入新賽事，或管理既有人員與報名紀錄。</div>';
+
   const activeGroups = groupEntriesByRace(state.entries.filter((entry) => entryTimeBucket(entry) === "active"))
     .sort((a, b) => String(a.raceDate || "").localeCompare(String(b.raceDate || "")));
-  const visibleActiveGroups = compactViewport && !state.overviewShowAllActive
-    ? activeGroups.slice(0, 4)
-    : activeGroups;
   els.overviewActiveGroups.innerHTML = activeGroups.length
-    ? visibleActiveGroups.map((group) => {
+    ? activeGroups.slice(0, 6).map((group) => {
       const pendingCount = group.entries.filter((entry) => !entry.isRegistered || !entry.isPaid).length;
       return `
         <article class="overview-item ${pendingCount ? "is-pending" : ""}">
@@ -1295,85 +1351,10 @@ function renderOverview() {
           </div>
         </article>
       `;
-    }).join("") + (
-      compactViewport && activeGroups.length > visibleActiveGroups.length
-        ? `<button class="ghost-action overview-list-more" type="button" data-overview-more="active">再看 ${escapeHtml(activeGroups.length - visibleActiveGroups.length)} 場</button>`
-        : ""
-    )
+    }).join("") + (activeGroups.length > 6
+      ? `<button class="ghost-action overview-list-more" type="button" data-open-view="entries">查看其餘 ${escapeHtml(activeGroups.length - 6)} 場</button>`
+      : "")
     : '<div class="empty-state">尚未建立目前賽事報名。</div>';
-
-  const peopleFocus = [...state.people]
-    .map((person) => ({ person, stats: personStats(person.id) }))
-    .sort((a, b) => (b.stats.active + b.stats.pending) - (a.stats.active + a.stats.pending) || String(a.person.name || "").localeCompare(String(b.person.name || "")))
-    .slice(0, 6);
-  const visiblePeopleFocus = compactViewport && !state.overviewShowAllPeople
-    ? peopleFocus.slice(0, 3)
-    : peopleFocus;
-  els.overviewPeopleFocus.innerHTML = peopleFocus.length
-    ? visiblePeopleFocus.map(({ person, stats }) => `
-      <article class="overview-person">
-        <div class="overview-person-head">
-          <div>
-            <div class="overview-card-kicker">
-              ${overviewStatusTag(stats.pending ? `待辦 ${stats.pending}` : "目前穩定", stats.pending ? "pending" : "complete")}
-            </div>
-            <h3>${escapeHtml(person.name)}</h3>
-            <p>${escapeHtml(`${person.gender || "未填性別"} · ${person.defaultShirtSize || "未填尺寸"} · ${maskedPhone(person.phone) || "未填手機"}`)}</p>
-          </div>
-          <button class="mini-action" type="button" data-open-person="${escapeHtml(person.id)}">查看</button>
-        </div>
-        <div class="person-meta">
-          ${stats.active ? `<span class="meta-pill">目前 ${escapeHtml(stats.active)} 場</span>` : ""}
-          ${stats.history ? `<span class="meta-pill">歷史 ${escapeHtml(stats.history)} 場</span>` : ""}
-          ${stats.pending ? `<span class="meta-pill">未完成 ${escapeHtml(stats.pending)}</span>` : '<span class="meta-pill">目前無待辦</span>'}
-        </div>
-      </article>
-    `).join("") + (
-      compactViewport && peopleFocus.length > visiblePeopleFocus.length
-        ? `<button class="ghost-action overview-list-more" type="button" data-overview-more="people">展開其餘 ${escapeHtml(peopleFocus.length - visiblePeopleFocus.length)} 人</button>`
-        : ""
-    )
-    : '<div class="empty-state">尚未建立人員主檔。</div>';
-
-  const activeCount = state.entries.filter((entry) => entryTimeBucket(entry) === "active").length;
-  const historyCount = state.entries.filter((entry) => entryTimeBucket(entry) === "history").length;
-  const unpaidCount = state.entries.filter((entry) => entry.isRegistered && !entry.isPaid).length;
-  const notRegisteredCount = state.entries.filter((entry) => !entry.isRegistered).length;
-  els.overviewInsights.innerHTML = `
-    <article class="overview-insight-card is-active">
-      <span class="overview-insight-label">Active</span>
-      <strong>${escapeHtml(activeCount)}</strong>
-      <p>目前賽事</p>
-    </article>
-    <article class="overview-insight-card">
-      <span class="overview-insight-label">History</span>
-      <strong>${escapeHtml(historyCount)}</strong>
-      <p>歷史紀錄</p>
-    </article>
-    <article class="overview-insight-card is-warning">
-      <span class="overview-insight-label">Payment</span>
-      <strong>${escapeHtml(unpaidCount)}</strong>
-      <p>待繳費</p>
-    </article>
-    <article class="overview-insight-card is-warning">
-      <span class="overview-insight-label">Signup</span>
-      <strong>${escapeHtml(notRegisteredCount)}</strong>
-      <p>待報名</p>
-    </article>
-  `;
-
-  els.overviewActiveGroups.querySelectorAll("[data-overview-more]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.overviewShowAllActive = true;
-      renderOverview();
-    });
-  });
-  els.overviewPeopleFocus.querySelectorAll("[data-overview-more]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.overviewShowAllPeople = true;
-      renderOverview();
-    });
-  });
 }
 
 function renderEntriesList() {
@@ -3039,6 +3020,26 @@ function wireEvents() {
     renderEntriesList();
   });
   document.addEventListener("click", (event) => {
+    const openPendingButton = event.target.closest("[data-open-pending]");
+    if (openPendingButton) {
+      openEntriesForWork("", "pending");
+      return;
+    }
+    const openUnpaidButton = event.target.closest("[data-open-unpaid]");
+    if (openUnpaidButton) {
+      openUnpaidNotifications();
+      return;
+    }
+    const openEntryButton = event.target.closest("[data-open-entry]");
+    if (openEntryButton) {
+      openEntriesForWork(openEntryButton.dataset.openEntry || "");
+      return;
+    }
+    const openNotifyEntryButton = event.target.closest("[data-open-notify-entry]");
+    if (openNotifyEntryButton) {
+      openNotifyForEntry(openNotifyEntryButton.dataset.openNotifyEntry || "");
+      return;
+    }
     const openViewButton = event.target.closest("[data-open-view]");
     if (openViewButton) {
       setWorkspaceView(openViewButton.dataset.openView || "overview", { scroll: true });
@@ -3057,11 +3058,7 @@ function wireEvents() {
     const openGroupButton = event.target.closest("[data-open-group]");
     if (openGroupButton) {
       const group = groupEntriesByRace(state.entries).find((item) => item.key === openGroupButton.dataset.openGroup);
-      if (group?.entries?.[0]?.id) {
-        state.focusEntryId = group.entries[0].id;
-      }
-      setWorkspaceView("entries", { scroll: true });
-      renderEntriesList();
+      openEntriesForWork(group?.entries?.[0]?.id || "");
       return;
     }
     const copyNotifyPersonButton = event.target.closest("[data-copy-notify-person]");

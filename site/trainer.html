@@ -4297,8 +4297,14 @@ function garminActivityRecords() {
     date: run.date,
     km: Number(run.km) || 0,
     pace: run.pace,
-    paceSeconds: paceToSeconds(run.pace),
+    fullPace: run.pace,
+    qualityPace: run.qualityPace || null,
+    qualityKm: Number(run.qualityKm) || null,
+    qualityEligible: Boolean(run.qualityEligible),
+    qualitySource: run.qualitySource || 'full-activity-only',
+    paceSeconds: paceToSeconds(run.qualityPace || run.pace),
     hr: Number(run.hr) || null,
+    qualityHr: Number(run.qualityHr) || null,
     maxHr: Number(run.maxHr) || null,
     cadence: Number(run.cadence) || null,
     elevationGainM: Number(run.elevationGainM) || 0,
@@ -4355,12 +4361,20 @@ function renderPaceTrend(runs) {
   const gridValues = [min, Math.round((min + max) / 2), max];
   const grid = gridValues.map((value) => `<g><line class="pace-trend-grid" x1="${padX}" x2="${width - padX}" y1="${y(value).toFixed(1)}" y2="${y(value).toFixed(1)}"/><text class="pace-trend-axis-label" x="0" y="${(y(value) + 4).toFixed(1)}">${formatPaceSeconds(value)}</text></g>`).join('');
   const averageY = y(average).toFixed(1);
-  const dots = points.map((item, index) => `<circle class="${index === points.length - 1 ? 'pace-trend-latest' : 'pace-trend-dot'}" cx="${x(index).toFixed(1)}" cy="${y(item.paceSeconds).toFixed(1)}" r="${index === points.length - 1 ? 5 : 4}"><title>${reviewEscape(item.date)} · ${formatPaceSeconds(item.paceSeconds)}${item.km ? ` · ${item.km.toFixed(1)} km` : ''}${item.hr ? ` · HR ${item.hr}` : ''}</title></circle>`).join('');
+  const dots = points.map((item, index) => {
+    const scope = item.qualityEligible ? `主課 ${item.qualityKm?.toFixed(1) || ''} km` : '全程（未辨識主課）';
+    const hr = item.qualityEligible ? item.qualityHr : item.hr;
+    return `<circle class="${index === points.length - 1 ? 'pace-trend-latest' : 'pace-trend-dot'}" cx="${x(index).toFixed(1)}" cy="${y(item.paceSeconds).toFixed(1)}" r="${index === points.length - 1 ? 5 : 4}"><title>${reviewEscape(item.date)} · ${scope} · ${formatPaceSeconds(item.paceSeconds)}${hr ? ` · HR ${hr}` : ''}</title></circle>`;
+  }).join('');
   const dateLabels = points.map((item, index) => index === 0 || index === points.length - 1 || index % Math.ceil(points.length / 4) === 0 ? `<text class="pace-trend-axis-label" text-anchor="middle" x="${x(index).toFixed(1)}" y="${height - 8}">${reviewEscape(item.date.slice(5))}</text>` : '').join('');
   const latestLabel = latestDiff === 0 ? '持平' : latestDiff < 0 ? `快 ${Math.abs(latestDiff)} 秒/km` : `慢 ${latestDiff} 秒/km`;
   const latestTone = latestDiff <= 0 ? 'positive' : 'caution';
-  const activityRows = points.slice(-3).map((item) => `<div class="pace-trend-activity"><span>${reviewEscape(item.date)}</span><b>${formatPaceSeconds(item.paceSeconds)}</b><small>${item.km ? `${item.km.toFixed(1)} km` : '距離未回傳'}${item.hr ? ` · HR ${item.hr}` : ''}</small></div>`).join('');
-  return `<div class="pace-trend-panel"><div class="pace-trend-summary"><div class="pace-trend-metric"><span>近 ${points.length} 趟均速</span><strong>${formatPaceSeconds(average)}</strong></div><div class="pace-trend-metric"><span>最快紀錄</span><strong>${formatPaceSeconds(min)}</strong></div><div class="pace-trend-metric"><span>最新相較均速</span><strong class="${latestTone}">${latestLabel}</strong></div></div><svg class="pace-trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="最近跑步配速趨勢；最新 ${formatPaceSeconds(latest.paceSeconds)}，近 ${points.length} 趟平均 ${formatPaceSeconds(average)}"><defs><linearGradient id="pace-trend-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#5fae79" stop-opacity=".34"/><stop offset="100%" stop-color="#5fae79" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${padX}" x2="${width - padX}" y1="${averageY}" y2="${averageY}" stroke="#9aa79f" stroke-width="1.5" stroke-dasharray="5 5"/><path d="${areaPath}" fill="url(#pace-trend-fill)"/><polyline points="${coords}" fill="none" stroke="#24724f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}${dateLabels}</svg><div class="pace-trend-legend"><span>單次跑步</span><span class="average">近 ${points.length} 趟平均 ${formatPaceSeconds(average)}</span></div><div class="pace-trend-activities">${activityRows}</div></div>`;
+  const activityRows = points.slice(-3).map((item) => {
+    const scope = item.qualityEligible ? `主課 ${item.qualityKm?.toFixed(1) || ''} km` : '全程（未辨識主課）';
+    const hr = item.qualityEligible ? item.qualityHr : item.hr;
+    return `<div class="pace-trend-activity"><span>${reviewEscape(item.date)}</span><b>${formatPaceSeconds(item.paceSeconds)}</b><small>${scope}${hr ? ` · HR ${hr}` : ''}</small></div>`;
+  }).join('');
+  return `<div class="pace-trend-panel"><div class="pace-trend-summary"><div class="pace-trend-metric"><span>近 ${points.length} 趟配速</span><strong>${formatPaceSeconds(average)}</strong></div><div class="pace-trend-metric"><span>最快紀錄</span><strong>${formatPaceSeconds(min)}</strong></div><div class="pace-trend-metric"><span>最新相較均速</span><strong class="${latestTone}">${latestLabel}</strong></div></div><svg class="pace-trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="最近跑步配速趨勢；最新 ${formatPaceSeconds(latest.paceSeconds)}，近 ${points.length} 趟平均 ${formatPaceSeconds(average)}"><defs><linearGradient id="pace-trend-fill" x1="0" x2="0" y1="0"><stop offset="0%" stop-color="#5fae79" stop-opacity=".34"/><stop offset="100%" stop-color="#5fae79" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${padX}" x2="${width - padX}" y1="${averageY}" y2="${averageY}" stroke="#9aa79f" stroke-width="1.5" stroke-dasharray="5 5"/><path d="${areaPath}" fill="url(#pace-trend-fill)"/><polyline points="${coords}" fill="none" stroke="#24724f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}${dateLabels}</svg><div class="pace-trend-legend"><span>主課優先；未辨識時只顯示全程</span><span class="average">近 ${points.length} 趟平均 ${formatPaceSeconds(average)}</span></div><div class="pace-trend-activities">${activityRows}</div></div>`;
 }
 
 function weeklyRampInfo(trend) {
@@ -5050,7 +5064,7 @@ function syncGarminRunsToPlan(review) {
     const run = runsByDate.get(day.dateStr);
     if (!run || day.type === 'rest') return;
     const actualKm = Number(run.km) || 0;
-    const actualTimeMins = Math.round(paceToMinutes(run.pace) * actualKm);
+    const actualTimeMins = Math.round(paceToMinutes(run.fullPace || run.pace) * actualKm);
     const entry = {
       date: day.dateStr,
       type: day.type,
@@ -5094,7 +5108,7 @@ function syncGarminRunsToPlan(review) {
       type: targetDay.type,
       plannedKm: targetDay.km || 0,
       actualKm: Number(run.km) || 0,
-      actualTimeMins: Math.round(paceToMinutes(run.pace) * (Number(run.km) || 0)),
+      actualTimeMins: Math.round(paceToMinutes(run.fullPace || run.pace) * (Number(run.km) || 0)),
       rpe: 0,
       notes: 'Garmin 自動認列補跑',
       source: 'garmin'

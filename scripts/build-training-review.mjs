@@ -30,23 +30,37 @@ function weekStart(dateText) {
 }
 
 function buildAnalyticsRuns(activities) {
-  return activities.map((activity) => ({
-    date: activity.date,
-    startTime: activity.startTime,
-    km: activity.distance_km,
-    durationMin: activity.duration_min,
-    pace: activity.pace_per_km,
-    hr: activity.avg_hr,
-    maxHr: activity.max_hr,
-    cadence: activity.avg_cadence,
-    elevationGainM: activity.elevation_gain_m,
-    calories: activity.calories,
-    aerobicTe: activity.aerobic_te,
-    anaerobicTe: activity.anaerobic_te,
-    vo2max: activity.vo2max,
-    power: activity.avg_power,
-    trainingLoad: activity.training_load
-  })).filter((activity) => activity.date && activity.km > 0);
+  return activities.map((activity) => {
+    const main = activity.main_segment;
+    const qualityEligible = Boolean(main?.source === 'garmin-workout-steps' && main?.pace_per_km && main?.distance_km > 0);
+    return {
+      date: activity.date,
+      startTime: activity.startTime,
+      // Full activity stays authoritative for volume and training load.
+      km: activity.distance_km,
+      durationMin: activity.duration_min,
+      pace: activity.pace_per_km,
+      hr: activity.avg_hr,
+      maxHr: activity.max_hr,
+      cadence: activity.avg_cadence,
+      elevationGainM: activity.elevation_gain_m,
+      calories: activity.calories,
+      aerobicTe: activity.aerobic_te,
+      anaerobicTe: activity.anaerobic_te,
+      vo2max: activity.vo2max,
+      power: activity.avg_power,
+      trainingLoad: activity.training_load,
+      // Course-quality metrics are populated only from explicit Garmin steps;
+      // never infer them from automatic kilometre laps.
+      qualityEligible,
+      qualitySource: qualityEligible ? main.source : 'full-activity-only',
+      qualityKm: qualityEligible ? main.distance_km : null,
+      qualityPace: qualityEligible ? main.pace_per_km : null,
+      qualityHr: qualityEligible ? main.avg_hr : null,
+      qualityMaxHr: qualityEligible ? main.max_hr : null,
+      qualityCadence: qualityEligible ? main.avg_cadence : null,
+    };
+  }).filter((activity) => activity.date && activity.km > 0);
 }
 
 function buildWeeklyTrend(runs) {
@@ -121,10 +135,16 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
   const previousKm = sumKm(previous);
   const latestRunDaysAgo = latestDate ? daysBetween(latestDate, asOf) : null;
   const rampPct = previousKm > 0 ? Math.round(((recentKm - previousKm) / previousKm) * 100) : null;
-  const recentPace = median(recent.map((run) => paceSeconds(run.pace)));
-  const previousPace = median(previous.map((run) => paceSeconds(run.pace)));
-  const recentHr = average(recent.map((run) => Number(run.hr)));
-  const previousHr = average(previous.map((run) => Number(run.hr)));
+  const recentQuality = recent.filter((run) => run.qualityEligible);
+  const previousQuality = previous.filter((run) => run.qualityEligible);
+  // Pace/HR course decisions need enough matched, structured evidence on both
+  // sides of the comparison. Full-session averages remain visible, but cannot
+  // downgrade a course because warmup or cooldown made them slower.
+  const hasComparableQuality = recentQuality.length >= 2 && previousQuality.length >= 2;
+  const recentPace = hasComparableQuality ? median(recentQuality.map((run) => paceSeconds(run.qualityPace))) : null;
+  const previousPace = hasComparableQuality ? median(previousQuality.map((run) => paceSeconds(run.qualityPace))) : null;
+  const recentHr = hasComparableQuality ? average(recentQuality.map((run) => Number(run.qualityHr))) : null;
+  const previousHr = hasComparableQuality ? average(previousQuality.map((run) => Number(run.qualityHr))) : null;
   const recentLoad = average(recent.map((run) => Number(run.trainingLoad)));
   const previousLoad = average(previous.map((run) => Number(run.trainingLoad)));
   // 跑量看的是距離，訓練負荷是 Garmin 算的強度×時長綜合值：
@@ -172,7 +192,7 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
     qualityMode = 'reduce';
     label = '恢復優先';
     headline = '近期配速變慢且平均心率上升，先下修品質課與總量。';
-    reasons.push(`同類跑步中位配速慢 ${paceDeltaSeconds} 秒 / km，平均心率高 ${hrDelta} bpm。`);
+    reasons.push(`主課中位配速慢 ${paceDeltaSeconds} 秒 / km，主課平均心率高 ${hrDelta} bpm。`);
   } else if (rampPct !== null && rampPct < -30) {
     decision = 'maintain';
     volumeFactor = 0.9;
@@ -216,6 +236,9 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
       hrDelta,
       recentLoad,
       previousLoad,
+      recentQualityRuns: recentQuality.length,
+      previousQualityRuns: previousQuality.length,
+      qualityComparisonReady: hasComparableQuality,
       recentLongKm: longestKm(recent),
       previousLongKm: longestKm(previous),
     },
