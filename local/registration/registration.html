@@ -13,7 +13,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/site/assets/favicon-32.png?v=20260630-registration-notify1">
     <link rel="apple-touch-icon" sizes="180x180" href="/site/assets/apple-touch-icon.png?v=20260630-registration-notify1">
     <link rel="stylesheet" href="/site/styles.css?v=20260701-registration-notify8">
-    <link rel="stylesheet" href="./registration.css?v=20260714-registration-workspace2">
+    <link rel="stylesheet" href="./registration.css?v=20260715-registration-hero3">
   </head>
   <body class="registration-page">
     <header class="site-header">
@@ -42,28 +42,32 @@
     <main class="registration-app">
       <section class="registration-hero">
         <div class="registration-hero-copy">
-          <p class="eyebrow">本機工具</p>
+          <p class="eyebrow">個人資料工作區</p>
           <h1>本機報名管理</h1>
           <p class="registration-hero-description">
-            這一頁只會把個資與報名狀態寫到你本機的
-            <code>runner/報名管理/報名管理資料.json</code>，
-            不會進到公開站台資料流。
+            集中管理隊員、報名與繳費；資料只留在這台電腦，不會進到公開站台。
           </p>
+          <p class="registration-storage-line"><span>儲存位置</span><code>runner/報名管理/報名管理資料.json</code></p>
           <div class="registration-hero-meta" aria-label="本機報名頁特性">
             <span class="hero-pill">只存本機</span>
-            <span class="hero-pill">不進公開站</span>
-            <span class="hero-pill">支援匯入匯出備份</span>
+            <span class="hero-pill">不公開同步</span>
+            <span class="hero-pill">可安全備份</span>
           </div>
         </div>
-        <div class="registration-hero-actions">
-          <p class="hero-actions-label">資料維護</p>
-          <p class="hero-actions-note">本機保存、可隨時備份，不會同步到公開頁面。</p>
-          <button type="button" class="primary-action" id="export-data">匯出備份 JSON</button>
+        <aside class="registration-hero-actions" aria-label="備份與還原">
+          <div class="hero-actions-heading">
+            <span class="hero-actions-icon" aria-hidden="true">↺</span>
+            <div>
+              <p class="hero-actions-label">備份與還原</p>
+              <p class="hero-actions-note">匯出一份備份，換電腦或復原資料時可使用。</p>
+            </div>
+          </div>
+          <button type="button" class="primary-action hero-data-action" id="export-data"><span>建立備份</span><small>JSON</small></button>
           <label class="secondary-action file-action">
-            匯入備份 JSON
+            <span>還原備份</span><small>選擇 JSON 檔</small>
             <input id="import-data" type="file" accept="application/json">
           </label>
-        </div>
+        </aside>
       </section>
 
       <section class="registration-layout">

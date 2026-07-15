@@ -1832,22 +1832,19 @@ function paymentHtmlRows(entries) {
     const person = peopleById.get(entry.personId) || {};
     const status = paymentReminderStatus(entry);
     const statusClassName = entry.isPaid ? "paid" : entry.isRegistered ? "due" : "not-registered";
-    const location = [entry.county, entry.location].filter(Boolean).join(" · ");
+    const paymentInfo = entry.isPaid
+      ? [entry.paymentMethod || "付款方式待補", entry.transferLastFive ? `末五碼 ${entry.transferLastFive}` : ""].filter(Boolean).join(" · ")
+      : entry.isRegistered ? "完成繳費後補登" : "完成報名後確認";
     return `
       <tr class="${statusClassName}">
         <td>${index + 1}</td>
-        <td><strong>${escapeHtml(status)}</strong></td>
-        <td>${escapeHtml(entry.personName || person.name || "")}</td>
-        <td>${escapeHtml(entry.distance || "")}</td>
+        <td class="person-cell"><strong>${escapeHtml(entry.personName || person.name || "")}</strong><small>手機末三碼 ${escapeHtml(phoneLastThree(person.phone) || "—")}</small></td>
+        <td><strong>${escapeHtml(entry.distance || "—")}</strong></td>
         <td>${escapeHtml(entry.shirtSize || person.defaultShirtSize || "")}</td>
-        <td>${escapeHtml(phoneLastThree(person.phone))}</td>
-        <td>${escapeHtml(entry.isRegistered ? "是" : "否")}</td>
-        <td>${escapeHtml(entry.isPaid ? "是" : "否")}</td>
-        <td>${escapeHtml(entry.paidAmount ?? "")}</td>
-        <td>${escapeHtml(entry.paymentMethod || "")}</td>
-        <td>${escapeHtml(entry.transferLastFive || "")}</td>
-        <td>${escapeHtml(entry.notes || "")}</td>
-        <td>${escapeHtml(location)}</td>
+        <td class="status-cell"><span class="status-chip">${escapeHtml(status)}</span><small>${escapeHtml(entry.isPaid ? "已完成繳費" : entry.isRegistered ? "待繳此筆費用" : "尚未建立報名")}</small></td>
+        <td class="amount-cell">${escapeHtml(entry.paidAmount ? formatMoney(entry.paidAmount) : "—")}</td>
+        <td class="payment-cell">${escapeHtml(paymentInfo)}</td>
+        <td class="notes-cell">${escapeHtml(entry.notes || "—")}</td>
       </tr>
     `;
   }).join("");
@@ -1874,53 +1871,51 @@ function buildPaymentReminderHtml(race, entries) {
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background:
-        radial-gradient(circle at 88% 8%, rgba(209, 236, 214, .72), transparent 30%),
-        radial-gradient(circle at 8% 92%, rgba(255, 229, 170, .38), transparent 32%),
-        linear-gradient(180deg, #fbf8ef, #f0eadf);
-      padding: 28px;
+      background: linear-gradient(180deg, #f7f5ef, #efe9df);
+      padding: 22px;
     }
     main {
       max-width: 1280px;
       margin: 0 auto;
       background: rgba(255, 253, 247, .96);
       border: 1px solid rgba(24, 55, 45, .14);
-      border-radius: 28px;
-      box-shadow: 0 22px 54px rgba(41, 51, 31, .12);
-      padding: 28px;
+      border-radius: 24px;
+      box-shadow: 0 18px 42px rgba(41, 51, 31, .09);
+      padding: 26px;
     }
     .header {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 18px;
-      align-items: start;
-      margin-bottom: 22px;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
     }
     .eyebrow {
-      margin: 0 0 8px;
+      margin: 0 0 7px;
       color: #0d6245;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 900;
       letter-spacing: .14em;
       text-transform: uppercase;
     }
     h1 {
       margin: 0;
-      font-size: clamp(30px, 4vw, 54px);
-      line-height: 1.12;
+      font-size: clamp(27px, 3.2vw, 44px);
+      line-height: 1.16;
+      letter-spacing: -.035em;
       color: #102920;
     }
     .subtitle {
-      margin: 12px 0 0;
+      margin: 9px 0 0;
       color: #51685d;
-      font-size: 17px;
-      line-height: 1.7;
+      font-size: 15px;
+      line-height: 1.55;
     }
     .meta {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin: 18px 0 24px;
+      margin: 14px 0 18px;
     }
     .pill {
       display: inline-flex;
@@ -1929,52 +1924,54 @@ function buildPaymentReminderHtml(race, entries) {
       background: #dff2e2;
       color: #145d43;
       font-weight: 800;
-      padding: 8px 12px;
+      padding: 7px 11px;
+      font-size: 13px;
     }
     .stamp {
-      min-width: 156px;
+      min-width: 136px;
       border: 1px solid rgba(13, 98, 69, .16);
-      border-radius: 22px;
+      border-radius: 16px;
       background: #eef8ef;
       color: #0d6245;
-      padding: 16px;
+      padding: 13px 15px;
       text-align: center;
     }
     .stamp span {
       display: block;
-      font-size: 13px;
+      font-size: 10px;
       font-weight: 800;
       letter-spacing: .12em;
       text-transform: uppercase;
     }
     .stamp strong {
       display: block;
-      margin-top: 8px;
-      font-size: 24px;
+      margin-top: 6px;
+      font-size: 19px;
       line-height: 1;
     }
     .summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
+      gap: 10px;
+      margin-bottom: 16px;
     }
     .summary article {
       border: 1px solid rgba(24, 55, 45, .12);
-      border-radius: 18px;
-      background: linear-gradient(180deg, #fffdf8, #fbf5e8);
-      padding: 14px;
+      border-radius: 14px;
+      background: #fbfaf6;
+      padding: 12px 14px;
     }
     .summary span {
       display: block;
       color: #587065;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
+      font-size: 13px;
     }
     .summary strong {
       display: block;
       color: #073b2b;
-      font-size: 34px;
+      font-size: 29px;
       line-height: 1;
     }
     table {
@@ -1983,15 +1980,15 @@ function buildPaymentReminderHtml(race, entries) {
       border-spacing: 0;
       overflow: hidden;
       border: 1px solid rgba(24, 55, 45, .14);
-      border-radius: 18px;
+      border-radius: 16px;
       background: #fffdf8;
     }
     th, td {
       border-bottom: 1px solid rgba(24, 55, 45, .1);
-      padding: 13px 12px;
+      padding: 12px 11px;
       text-align: left;
       vertical-align: top;
-      font-size: 15px;
+      font-size: 14px;
     }
     th {
       position: sticky;
@@ -2002,15 +1999,35 @@ function buildPaymentReminderHtml(race, entries) {
       white-space: nowrap;
     }
     tr:last-child td { border-bottom: 0; }
-    tr.due td { background: #fff5d6; }
-    tr.not-registered td { background: #f4f0e8; color: #60736a; }
-    tr.paid td { background: #edf8ef; }
-    td strong {
+    tbody tr:nth-child(even) td { background: #fcfbf7; }
+    .person-cell strong {
       display: inline-flex;
+      color: #123e30;
+    }
+    .person-cell small, .status-cell small {
+      display: block;
+      margin-top: 4px;
+      color: #718078;
+      font-size: 12px;
+    }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
       border-radius: 999px;
-      padding: 5px 9px;
-      background: rgba(255, 255, 255, .7);
-      color: #0f4f3a;
+      padding: 5px 8px;
+      background: #eef3f0;
+      color: #386052;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    tr.due .status-chip { background: #fff1d7; color: #9a5900; }
+    tr.not-registered .status-chip { background: #f1efea; color: #64736c; }
+    tr.paid .status-chip { background: #e5f3e8; color: #176246; }
+    .amount-cell { color: #0d5a41; font-weight: 900; white-space: nowrap; }
+    .payment-cell, .notes-cell { color: #5c6d64; }
+    .notes-cell { max-width: 180px; }
+    td strong {
+      font-weight: 900;
     }
     .note {
       margin: 18px 0 0;
@@ -2051,18 +2068,13 @@ function buildPaymentReminderHtml(race, entries) {
       <thead>
         <tr>
           <th>#</th>
-          <th>繳費狀態</th>
-          <th>姓名</th>
+          <th>報名者</th>
           <th>距離</th>
           <th>衣服</th>
-          <th>手機末三碼</th>
-          <th>已報名</th>
-          <th>已繳費</th>
+          <th>目前進度</th>
           <th>金額</th>
-          <th>方式</th>
-          <th>後五碼</th>
+          <th>付款資訊</th>
           <th>備註</th>
-          <th>地點</th>
         </tr>
       </thead>
       <tbody>${paymentHtmlRows(entries)}</tbody>
@@ -2084,7 +2096,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
   const exportLabel = groups.length === 1 ? "匯出此卡片 PNG" : "匯出目前報表 PNG";
   const exportHint = groups.length === 1 ? "開分頁後可直接匯出單人卡片圖片，適合直接傳給報名者。" : "目前為多人總表，匯出時會截取整張報表。";
   const previewSections = groups.map((group) => {
-    const statusLabel = group.pendingCount ? `待處理 ${group.pendingCount}` : "目前完成";
+    const statusLabel = group.pendingCount ? `待處理 ${group.pendingCount}` : "已完成";
     const statusTone = group.pendingCount ? "pending" : "complete";
     const amountHint = group.unpaidAmount ? "依未繳費項目合計" : "目前無待收";
     const message = group.pendingCount
@@ -2109,18 +2121,19 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
             </div>
             <div class="preview-summary-grid">
               <article class="preview-summary-card">
-                <div class="preview-summary-head">${notifyIcon("person")}<span>報名進度</span></div>
+                <div class="preview-summary-head">${notifyIcon("person")}<span>已完成報名</span></div>
                 <strong>${escapeHtml(`${group.registeredCount} / ${group.entries.length}`)}</strong>
               </article>
               <article class="preview-summary-card">
-                <div class="preview-summary-head">${notifyIcon("stack")}<span>涵蓋賽事</span></div>
-                <strong>${escapeHtml(`${group.raceCount} 場`)}</strong>
+                <div class="preview-summary-head">${notifyIcon("stack")}<span>待處理</span></div>
+                <strong>${escapeHtml(`${group.pendingCount} 筆`)}</strong>
               </article>
-              <article class="preview-summary-card is-wide">
+              <article class="preview-summary-card">
                 <div class="preview-summary-head">${notifyIcon("race")}<span>檔期</span></div>
                 <strong>${escapeHtml(notifyRangeLabel(group))}</strong>
               </article>
             </div>
+            <p class="preview-person-message">${escapeHtml(message)}</p>
           </div>
           <aside class="preview-person-side">
             <span class="preview-amount-label">待收金額</span>
@@ -2129,18 +2142,11 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
           </aside>
         </article>
         <div class="preview-person-body">
-          <article class="preview-brief-panel">
-            <div class="preview-brief-icon">${notifyIcon("bell")}</div>
-            <div>
-              <span>通知摘要</span>
-              <p>${escapeHtml(message)}</p>
-            </div>
-          </article>
           <section class="preview-entry-list">
             ${group.entries.map((entry) => {
-              const paymentLabel = entry.isPaid ? "已繳費" : "未繳費";
-              const registrationLabel = entry.isRegistered ? "已報名" : "未報名";
-              const processLabel = entry.status || (entry.isRegistered ? "可報名" : "待報名");
+              const progressLabel = entry.isPaid ? "已完成" : entry.isRegistered ? "待繳費" : "待報名";
+              const progressTone = entry.isPaid ? "complete" : "pending";
+              const processLabel = entry.status || (entry.isRegistered ? "已建立報名" : "可報名");
               const amountLabel = entry.paidAmount ? formatMoney(entry.paidAmount) : "金額未填";
               const amountHintText = entry.isPaid ? "費用已確認" : entry.isRegistered ? "待收此筆費用" : "尚未完成報名";
               const entryDate = escapeHtml(formatNotifyRangeDate(String(entry.raceDate || "").slice(0, 10)) || "日期待補");
@@ -2156,8 +2162,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
                     <div class="preview-entry-head">
                       <h4>${escapeHtml(entry.raceName || "未命名賽事")}</h4>
                       <div class="preview-entry-pills">
-                        <span class="preview-pill ${entry.isRegistered ? "complete" : "pending"}">${escapeHtml(registrationLabel)}</span>
-                        <span class="preview-pill ${entry.isPaid ? "complete" : "pending"}">${escapeHtml(paymentLabel)}</span>
+                        <span class="preview-pill ${progressTone}">${escapeHtml(progressLabel)}</span>
                         <span class="preview-pill neutral">${escapeHtml(processLabel)}</span>
                       </div>
                     </div>
@@ -2364,9 +2369,9 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-person-card {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 300px;
-      gap: 22px;
-      padding: 26px;
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: 18px;
+      padding: 22px;
       border: 1px solid var(--border-soft);
       border-radius: 22px;
       background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
@@ -2380,7 +2385,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-person-main {
       display: grid;
-      gap: 18px;
+      gap: 14px;
       align-content: start;
       min-width: 0;
     }
@@ -2440,15 +2445,15 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-summary-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
     }
     .preview-summary-card {
-      min-height: 92px;
-      padding: 14px 16px;
-      border: 1px solid var(--border-soft);
-      border-radius: 18px;
-      background: linear-gradient(180deg, #fcfefd 0%, #f6faf8 100%);
+      min-height: 78px;
+      padding: 12px 14px;
+      border: 1px solid #e6efea;
+      border-radius: 14px;
+      background: #f8fbf9;
       display: grid;
       gap: 8px;
       align-content: start;
@@ -2468,17 +2473,17 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-summary-card strong {
       color: var(--text-main);
-      font-size: 1.08rem;
+      font-size: 1rem;
       line-height: 1.35;
       letter-spacing: -0.01em;
       word-break: break-word;
     }
     .preview-person-side {
       min-width: 0;
-      padding: 22px 24px;
-      border: 1px solid var(--border-soft);
-      border-radius: 22px;
-      background: linear-gradient(180deg, #ffffff 0%, #f7fbf9 100%);
+      padding: 20px;
+      border: 1px solid #dcebe1;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #f5fbf7 0%, #ecf7f0 100%);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -2491,7 +2496,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-person-side strong {
       color: var(--primary);
-      font-size: clamp(2.1rem, 3vw, 3.1rem);
+      font-size: clamp(1.9rem, 2.5vw, 2.65rem);
       line-height: 1.02;
       letter-spacing: -.02em;
     }
@@ -2501,13 +2506,23 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-person-body {
       display: grid;
-      gap: 16px;
-      padding-top: 16px;
+      gap: 12px;
+      padding-top: 12px;
     }
     .report-sheet.is-multi .preview-person-body {
-      padding-top: 18px;
-      padding-left: 86px;
-      gap: 14px;
+      padding-top: 14px;
+      padding-left: 0;
+      gap: 12px;
+    }
+    .preview-person-message {
+      margin: 0;
+      padding: 10px 12px;
+      border-left: 3px solid #d5ac62;
+      color: #5c5140;
+      background: #fffaf1;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.88rem;
+      line-height: 1.55;
     }
     .preview-brief-panel {
       display: grid;
@@ -2548,19 +2563,19 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-entry-list {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
     .report-sheet.is-multi .preview-entry-list {
       gap: 10px;
     }
     .preview-entry-card {
       border: 1px solid var(--border-soft);
-      border-radius: 18px;
+      border-radius: 14px;
       background: var(--card-bg);
       overflow: hidden;
       box-shadow: var(--shadow-soft);
       display: grid;
-      grid-template-columns: 112px minmax(0, 1fr) 176px;
+      grid-template-columns: 96px minmax(0, 1fr) 148px;
       gap: 0;
       align-items: stretch;
     }
@@ -2576,7 +2591,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
       box-shadow: none;
     }
     .preview-entry-date {
-      padding: 18px 16px;
+      padding: 14px;
       border-right: 1px solid rgba(232, 239, 236, .92);
       display: grid;
       align-content: start;
@@ -2586,19 +2601,19 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     .preview-entry-date span {
       display: block;
       color: var(--primary-dark);
-      font-size: 1.08rem;
+      font-size: 1rem;
       font-weight: 900;
       letter-spacing: -.02em;
     }
     .preview-entry-date small {
       display: block;
-      margin-top: 5px;
+      margin-top: 3px;
       color: var(--text-muted);
       font-size: 0.84rem;
       font-weight: 700;
     }
     .preview-entry-amount {
-      padding: 18px 16px;
+      padding: 14px;
       border-left: 1px solid rgba(232, 239, 236, .92);
       text-align: right;
       white-space: nowrap;
@@ -2610,7 +2625,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     .preview-entry-amount strong {
       display: block;
       color: var(--primary);
-      font-size: 1.16rem;
+      font-size: 1.05rem;
       font-weight: 900;
     }
     .preview-entry-amount small {
@@ -2621,31 +2636,31 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     }
     .preview-entry-main {
       display: grid;
-      gap: 12px;
-      padding: 18px 20px;
+      gap: 8px;
+      padding: 14px 16px;
       min-width: 0;
     }
     .preview-entry-head {
       display: grid;
-      gap: 10px;
+      gap: 7px;
     }
     .preview-entry-main h4 {
       margin: 0;
       color: var(--text-strong);
-      font-size: 1.04rem;
-      line-height: 1.45;
+      font-size: 1rem;
+      line-height: 1.35;
     }
     .preview-entry-pills {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
     .preview-entry-foot {
       display: grid;
-      gap: 6px;
+      gap: 3px;
       color: var(--text-muted);
-      font-size: 0.9rem;
-      line-height: 1.55;
+      font-size: 0.84rem;
+      line-height: 1.42;
     }
     .preview-entry-foot p {
       margin: 0;
@@ -2654,7 +2669,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
       display: inline-flex;
       align-items: center;
       border-radius: 999px;
-      padding: 6px 10px;
+      padding: 5px 8px;
       font-weight: 800;
       font-size: 12px;
       white-space: nowrap;
@@ -2737,8 +2752,8 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
     <section class="report-sheet report-export-root ${singlePersonMode ? "is-single" : "is-multi"}" data-export-root>
       <div class="sheet-head">
         <div>
-          <h2>${singlePersonMode ? "通知卡片" : "通知總表"}</h2>
-          <p>${singlePersonMode ? "可直接轉傳給報名者，並作為報名與繳費確認依據。" : "以人員為主軸的連續通知卡，維持與主頁相同的資訊節奏與卡片語言。"}</p>
+          <h2>${singlePersonMode ? "報名與繳費確認" : "通知總表"}</h2>
+          <p>${singlePersonMode ? "已把需確認的項目整理成一則可直接轉傳的通知。" : "以人員為主軸整理待辦與費用，方便逐一轉傳與追蹤。"}</p>
         </div>
         <div class="sheet-badge">${groups.length} 人 / ${totalEntries} 筆</div>
       </div>

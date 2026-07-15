@@ -76,6 +76,7 @@ function buildAnalyticsRuns(activities) {
       maxHr: activity.max_hr,
       cadence: activity.avg_cadence,
       elevationGainM: activity.elevation_gain_m,
+      temperatureC: activity.avg_temperature_c,
       calories: activity.calories,
       aerobicTe: activity.aerobic_te,
       anaerobicTe: activity.anaerobic_te,

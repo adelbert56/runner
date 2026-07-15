@@ -33,24 +33,28 @@
   line-height: 1.15;
   overflow-wrap: normal;
   word-break: keep-all;
+  text-wrap: balance;
 }
 
 .registration-page h1 {
   font-size: clamp(2.5rem, 4.5vw, 4.2rem);
-  font-weight: 900;
+  font-weight: 850;
   line-height: 1.03;
+  letter-spacing: -0.035em;
 }
 
 .registration-page h2 {
   font-size: clamp(1.38rem, 2vw, 1.92rem);
-  font-weight: 900;
+  font-weight: 850;
+  letter-spacing: -0.025em;
 }
 
 .eyebrow {
   color: var(--accent);
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
@@ -66,11 +70,11 @@
 .registration-hero {
   position: relative;
   overflow: hidden;
-  padding: 24px 28px;
+  padding: 26px 30px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 286px;
-  gap: 14px 24px;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px 30px;
+  align-items: center;
   border-radius: 28px;
   border-color: rgba(32, 76, 58, 0.07);
   background:
@@ -97,9 +101,15 @@
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   align-content: start;
   max-width: 900px;
+}
+
+.registration-hero h1 {
+  font-size: clamp(2.25rem, 3.25vw, 3.28rem);
+  letter-spacing: -0.045em;
+  line-height: 1.1;
 }
 
 .registration-hero p {
@@ -114,8 +124,32 @@
 
 .registration-hero-description {
   color: var(--text-body);
-  font-size: 0.96rem;
+  max-width: 62ch;
+  font-size: 0.92rem;
   line-height: 1.68;
+}
+
+.registration-storage-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.registration-storage-line > span {
+  font-weight: 800;
+}
+
+.registration-storage-line code {
+  display: inline-block;
+  padding: 3px 7px;
+  border: 1px solid rgba(32, 76, 58, 0.08);
+  border-radius: 7px;
+  background: rgba(239, 246, 240, 0.72);
+  color: #286047;
+  font-size: 0.78rem;
 }
 
 .registration-hero-meta {
@@ -141,17 +175,17 @@
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   justify-self: end;
   align-self: start;
   min-width: 0;
   width: 100%;
-  max-width: 286px;
-  padding: 14px;
-  border: 1px solid rgba(32, 76, 58, 0.08);
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(249, 251, 247, 0.98), rgba(255, 254, 250, 0.98));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94), 0 8px 18px rgba(41, 63, 50, 0.028);
+  max-width: 300px;
+  padding: 16px;
+  border: 1px solid rgba(32, 76, 58, 0.1);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(247, 251, 247, 0.98), rgba(255, 254, 250, 0.98));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94), 0 12px 24px rgba(41, 63, 50, 0.04);
 }
 
 .registration-hero-actions::before {
@@ -165,22 +199,55 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  text-align: center;
+  text-align: left;
 }
 
 .hero-actions-note {
-  margin: 0 0 4px;
+  margin: 3px 0 0;
   color: var(--text-muted);
   font-size: 0.83rem;
   line-height: 1.48;
-  text-align: center;
+  text-align: left;
 }
 
-.registration-hero-actions > * {
+.hero-actions-heading {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+}
+
+.hero-actions-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #e4f1e8;
+  color: #176345;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.registration-hero-actions > :not(.hero-actions-heading) {
   width: 100%;
   min-width: 0;
-  justify-content: center;
-  text-align: center;
+}
+
+.hero-data-action,
+.registration-hero-actions .file-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hero-data-action small,
+.registration-hero-actions .file-action small {
+  opacity: 0.76;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
 }
 
 .primary-action,
@@ -258,8 +325,8 @@
 .registration-command-copy {
   grid-area: copy;
   display: grid;
-  gap: 7px;
-  max-width: 40ch;
+  gap: 8px;
+  max-width: 36ch;
 }
 
 .registration-command-copy h2,
@@ -269,13 +336,16 @@
 
 .registration-command-copy h2 {
   color: #153c2e;
-  font-size: clamp(1.42rem, 2vw, 1.9rem);
+  font-size: clamp(1.38rem, 1.65vw, 1.68rem);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
 }
 
 .registration-command-copy > p:last-child {
   color: var(--text-muted);
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  max-width: 34ch;
 }
 
 .registration-command-metrics {
@@ -312,14 +382,16 @@ button.command-metric:focus-visible {
 
 .command-metric span {
   color: #66766d;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 800;
+  line-height: 1.3;
 }
 
 .command-metric strong {
   color: #133d2f;
-  font-size: 1.55rem;
+  font-size: 1.42rem;
   line-height: 1;
+  letter-spacing: -0.03em;
 }
 
 .command-metric.is-warning strong {
@@ -498,15 +570,16 @@ button.command-metric:focus-visible {
 }
 
 .sidebar-header h2 {
-  font-size: clamp(1.15rem, 1.45vw, 1.55rem);
+  font-size: clamp(1.12rem, 1.35vw, 1.38rem);
+  line-height: 1.25;
 }
 
 .sidebar-intro {
   margin: 6px 0 0;
   color: #68786f;
-  line-height: 1.55;
-  font-size: 0.85rem;
-  max-width: 30ch;
+  line-height: 1.62;
+  font-size: 0.81rem;
+  max-width: 32ch;
 }
 
 .sidebar-group {
@@ -530,9 +603,9 @@ button.command-metric:focus-visible {
   align-items: center;
   gap: 8px;
   color: #5f7167;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -582,7 +655,7 @@ button.command-metric:focus-visible {
   flex-direction: column;
   gap: 5px;
   color: #30463e;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 700;
   min-width: 0;
 }
@@ -765,6 +838,13 @@ button.command-metric:focus-visible {
   border-color: rgba(24, 89, 64, 0.08);
 }
 
+.overview-context-panel .panel-heading h2,
+.overview-queue-panel .panel-heading h2,
+.overview-wide-panel .panel-heading h2 {
+  font-size: clamp(1.25rem, 1.5vw, 1.52rem);
+  line-height: 1.22;
+}
+
 .overview-queue-panel {
   background: linear-gradient(180deg, rgba(251, 253, 249, 0.99), rgba(246, 250, 246, 0.98));
 }
@@ -880,13 +960,15 @@ button.command-metric:focus-visible {
 
 .overview-queue-copy h3 {
   color: #17392d;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .overview-queue-copy p {
   margin-top: 4px;
   color: #52665c;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
 }
 
 .overview-queue-copy .entry-meta {
@@ -1011,7 +1093,8 @@ button.command-metric:focus-visible {
   overflow-wrap: anywhere;
   word-break: normal;
   -webkit-line-clamp: unset;
-  font-size: 1.16rem;
+  font-size: 1.08rem;
+  line-height: 1.35;
 }
 
 .overview-race-card p,
@@ -1031,12 +1114,13 @@ button.command-metric:focus-visible {
   gap: 8px;
   padding-top: 2px;
   color: #627268;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
 }
 
 .overview-race-facts b {
   color: #173f30;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
 }
 
 .overview-race-facts .is-warning b {

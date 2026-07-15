@@ -245,6 +245,7 @@ def simplify(
         "max_hr": activity.get("maxHR"),
         "avg_cadence": activity.get("averageRunningCadenceInStepsPerMinute"),
         "elevation_gain_m": activity.get("elevationGain"),
+        "avg_temperature_c": activity.get("averageTemperature"),
         "calories": activity.get("calories"),
         "aerobic_te": activity.get("aerobicTrainingEffect"),
         "anaerobic_te": activity.get("anaerobicTrainingEffect"),

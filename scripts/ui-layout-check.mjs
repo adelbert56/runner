@@ -289,6 +289,13 @@ async function assertTrainerReport(page, viewportName) {
   }, trainerReviewSample);
   await page.waitForSelector(".session-report", { timeout: 5000 });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-report`);
+  const decision = await page.locator("#training-analysis-content").evaluate((element) => ({
+    hasDecision: element.textContent.includes("自動訓練決策"),
+    hasLongestRun: element.textContent.includes("近四週最長跑"),
+  }));
+  if (!decision.hasDecision || !decision.hasLongestRun) {
+    throw new Error(`${viewportName}/trainer-report: automatic decision or long-term context is missing ${JSON.stringify(decision)}`);
+  }
   const report = await page.locator(".session-report").evaluate((element) => ({
     hasPlanComparison: element.textContent.includes("正式課表對照"),
     hasNextAction: element.textContent.includes("下一步"),
@@ -326,7 +333,119 @@ async function assertTrainerReport(page, viewportName) {
   await page.locator("#plan-tab-coach details").first().evaluate((element) => { element.open = true; });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-coach`);
   await page.screenshot({ path: resolve(screenshotDir, `${viewportName}-trainer-coach-structure.png`), fullPage: true });
+  const recalibration = await page.evaluate(() => {
+    appData.profile.easyPaceSec = 480;
+    appData.profile.tempoPaceSec = 390;
+    appData.profile.intervalPaceSec = 360;
+    appData.profile.maxHr = 190;
+    appData.recalibratedFor = null;
+    coachReviewData = {
+      updatedAt: "2026-07-15",
+      analyticsUpdatedAt: "2026-07-15",
+      analyticsRuns: [
+        { activityId: 8101, date: "2026-07-13", km: 6, pace: "7:05", hr: 145 },
+        { activityId: 8102, date: "2026-07-14", km: 6, pace: "7:00", hr: 146 },
+        { activityId: 8103, date: "2026-07-15", km: 6, pace: "7:02", hr: 144 },
+      ],
+    };
+    const first = autoRecalibratePlan();
+    const calibratedEasyPace = appData.profile.easyPaceSec;
+    const repeated = autoRecalibratePlan();
+    return { first, calibratedEasyPace, repeated };
+  });
+  if (!(recalibration.first?.easyDelta < 0) || recalibration.calibratedEasyPace >= 480 || recalibration.repeated !== null) {
+    throw new Error(`${viewportName}/trainer-recalibration: stable safe Garmin runs did not produce one bounded future pace calibration ${JSON.stringify(recalibration)}`);
+  }
+  const safeguards = await page.evaluate(() => {
+    const protectedDays = applyCourseSpacingGuard([
+      { dow: 1, dateStr: "2026-07-20", type: "long", km: 10 },
+      { dow: 2, dateStr: "2026-07-21", type: "tempo", km: 6, focus: "tempo" },
+    ], appData.profile, false, false, false, "2026-07-15", 3, "build");
+    const coachWeek = { days: [{ dateStr: "2026-07-20", dow: 1 }] };
+    coachReviewData = { nextWeek: { weekStart: "2026-07-20", menu: [{ plan: "節奏跑 6 km" }] } };
+    const safetyDay = applyCoachPlanOverride({ dow: 1, dateStr: "2026-07-20", type: "easy", task: "恢復跑", safetyOverride: true }, coachWeek);
+    return {
+      heatSafe: isCalibrationSafeRun({ date: "2026-07-15", km: 6, elevationGainM: 0, temperatureC: 32 }),
+      protectedType: protectedDays[1]?.type,
+      protection: protectedDays[1]?.recoveryProtection,
+      coachLocked: coachPrescriptionLocksWeek(coachWeek),
+      safetyOverride: Boolean(safetyDay.coachSafetyOverride),
+    };
+  });
+  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride) {
+    throw new Error(`${viewportName}/trainer-safeguards: environmental, recovery, or coach-priority rule failed ${JSON.stringify(safeguards)}`);
+  }
+  const planningScenarios = await page.evaluate(() => {
+    const profile = (overrides = {}) => ({
+      generatedAt: "2026-07-13",
+      targetDate: "2026-10-18",
+      goal: "half",
+      fitnessLevel: "intermediate",
+      weeklyKm: 24,
+      maxLongRunMins: 120,
+      easyPaceSec: 480,
+      tempoPaceSec: 420,
+      intervalPaceSec: 390,
+      dayState: [0, 1, 0, 1, 0, 0, 2],
+      injuries: ["none"],
+      ...overrides,
+    });
+    const highLoad = new Set(["tempo", "interval", "long"]);
+    const hasAdjacentHighLoad = (plan) => plan.some((week) => week.days.some((day, index, days) => index > 0 && highLoad.has(day.type) && highLoad.has(days[index - 1].type)));
+    const hasClearPurpose = (plan) => plan.every((week) => week.days.every((day) => day.type === "rest" || (day.steps || []).some((step) => step.title === "主課" && String(step.detail || "").length >= 12)));
+    const hasCappedProgression = (plan) => plan.every((week, index) => index === 0 || week.isTaper || week.targetKm <= plan[index - 1].targetKm * 1.1 + 0.1);
+
+    coachReviewData = { analyticsRuns: [] };
+    appData.checkins = [];
+    const beginner = buildPlan(profile({ fitnessLevel: "beginner", weeklyKm: 8 }));
+    const general = buildPlan(profile());
+    const marathon = buildPlan(profile({ goal: "full" }));
+    appData.checkins = [{ date: todayStr(), fatigue: 4, result: "降載恢復", painConcern: false }];
+    const fatigued = buildPlan(profile());
+    appData.checkins = [];
+    const raceReady = buildPlan(profile({ targetDate: "2026-08-02", weeklyKm: 30 }));
+
+    return {
+      beginnerNoEarlyQuality: beginner.slice(0, 4).every((week) => week.days.every((day) => !["tempo", "interval"].includes(day.type))),
+      generalHasQuality: general.slice(2).some((week) => week.days.some((day) => ["tempo", "interval"].includes(day.type))),
+      goalChangesLongRun: (marathon[0]?.days.find((day) => day.type === "long")?.km || 0) > (general[0]?.days.find((day) => day.type === "long")?.km || 0),
+      noAdjacentHighLoad: !hasAdjacentHighLoad(general),
+      progressionCapped: hasCappedProgression(general),
+      fatigueDeload: Boolean(fatigued[0]?.isDeload) && fatigued[0]?.days.every((day) => !["tempo", "interval"].includes(day.type)) && Boolean(fatigued[0]?.planningNote),
+      raceHasTaper: Boolean(raceReady.at(-1)?.isTaper) && raceReady.at(-1)?.targetKm < raceReady[0]?.targetKm,
+      purposeClear: hasClearPurpose(general),
+    };
+  });
+  if (!Object.values(planningScenarios).every(Boolean)) {
+    throw new Error(`${viewportName}/trainer-planning-scenarios: coach planning acceptance failed ${JSON.stringify(planningScenarios)}`);
+  }
   console.log(`OK ${viewportName}/trainer report layout`);
+}
+
+async function assertRegistrationHero(page, viewportName) {
+  await page.goto(`${baseUrl.replace("/site/", "/")}local/registration/registration.html`, { waitUntil: "networkidle" });
+  await page.waitForSelector(".registration-hero", { timeout: 5000 });
+  await assertNoHorizontalOverflow(page, `${viewportName}/registration-hero`);
+  await assertTextFitsControls(page, `${viewportName}/registration-hero`);
+  const hero = await page.locator(".registration-hero").evaluate((element) => {
+    const heading = element.querySelector("h1");
+    const actions = element.querySelector(".registration-hero-actions");
+    return {
+      hasStoragePath: (element.textContent || "").includes("runner/報名管理/報名管理資料.json"),
+      hasPrivacyPills: element.querySelectorAll(".hero-pill").length === 3,
+      hasBackupTitle: (actions?.textContent || "").includes("備份與還原"),
+      hasExport: Boolean(actions?.querySelector("#export-data")),
+      hasImport: Boolean(actions?.querySelector("#import-data")),
+      titleSize: heading ? Math.round(parseFloat(window.getComputedStyle(heading).fontSize)) : 0,
+      heroHeight: Math.round(element.getBoundingClientRect().height),
+    };
+  });
+  const heightLimit = viewportName === "mobile" ? 520 : 330;
+  if (!hero.hasStoragePath || !hero.hasPrivacyPills || !hero.hasBackupTitle || !hero.hasExport || !hero.hasImport || hero.titleSize > 60 || hero.heroHeight > heightLimit) {
+    throw new Error(`${viewportName}/registration-hero: privacy hierarchy or compact actions failed ${JSON.stringify(hero)}`);
+  }
+  await page.screenshot({ path: resolve(screenshotDir, `${viewportName}-registration-hero.png`), fullPage: true });
+  console.log(`OK ${viewportName}/registration hero layout`);
 }
 
 const { chromium } = await loadPlaywright();
@@ -345,6 +464,8 @@ try {
     await page.goto(baseUrl, { waitUntil: "networkidle" });
 
     await assertTrainerReport(page, viewport.name);
+
+    await assertRegistrationHero(page, viewport.name);
 
     await page.goto(baseUrl, { waitUntil: "networkidle" });
 
