@@ -14,11 +14,13 @@ function sentenceKeys(text) {
     .filter(Boolean);
 }
 
-const [html, app, contentRaw, trainer] = await Promise.all([
+const [html, app, contentRaw, trainer, garminPublisher, garminReviewBuilder] = await Promise.all([
   readFile(resolve(root, "site/index.html"), "utf8"),
   readFile(resolve(root, "site/app.js"), "utf8"),
   readFile(resolve(root, "site/data/content.json"), "utf8"),
   readFile(resolve(root, "site/trainer.html"), "utf8"),
+  readFile(resolve(root, "scripts/garmin/publish_training_plan.py"), "utf8"),
+  readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
 ]);
 
 const content = JSON.parse(contentRaw);
@@ -53,7 +55,13 @@ assertCheck(/function exportTrainingData\(/.test(trainer) && /function importTra
 assertCheck(/garminCompletionPct/.test(trainer) && /function garminCompletionPercent\(/.test(trainer), "Garmin automatic completion threshold is configurable");
 assertCheck(/function garminAutopilotDays\(plan, activityIndex\)/.test(trainer) && /今日 .*Garmin 已認列完成/.test(trainer) && /以下從明天開始列出 7 天輔助菜單/.test(trainer), "Garmin Autopilot removes an already-completed today from the future menu");
 assertCheck(/comparisonFamily/.test(trainer) && /只與同課型比較/.test(trainer) && /day\.dateStr\.slice\(5\)\.replace\('-', '\/'\)/.test(trainer), "Garmin Autopilot compares only matching workout families and shows menu dates");
-assertCheck(!/function openGarminManualBuilder\(/.test(trainer) && !/Garmin 手動建課助手/.test(trainer) && /function weeklyGarminCalendarIcs\(/.test(trainer) && /function weeklyGarminSyncPayload\(/.test(trainer) && /replaceExisting: true/.test(trainer) && /覆蓋並同步/.test(trainer) && /function garminMainDistanceKm\(/.test(trainer) && /mainKm: garminMainDistanceKm\(day\)/.test(trainer) && /同步結果暫時無法讀取/.test(trainer) && /不代表同步失敗/.test(trainer) && /function syncWeekToGarmin\(/.test(trainer) && /api\/garmin-workout-sync/.test(trainer) && /確認同步/.test(trainer), "trainer replaces same-named Garmin workouts after explicit confirmation while retaining guarded sync and non-misleading result status");
+assertCheck(!/function openGarminManualBuilder\(/.test(trainer) && !/Garmin 手動建課助手/.test(trainer) && /function weeklyGarminCalendarIcs\(/.test(trainer) && /function weeklyGarminSyncPayload\(/.test(trainer) && /replaceExisting: true/.test(trainer) && /覆蓋並同步/.test(trainer) && /function garminMainDistanceKm\(/.test(trainer) && /mainKm: garminMainDistanceKm\(day\)/.test(trainer) && /steps: garminManualBuilderSteps\(day\)/.test(trainer) && /同步結果暫時無法讀取/.test(trainer) && /不代表同步失敗/.test(trainer) && /function syncWeekToGarmin\(/.test(trainer) && /api\/garmin-workout-sync/.test(trainer) && /確認同步/.test(trainer), "trainer replaces same-named Garmin workouts after explicit confirmation while retaining guarded sync and non-misleading result status");
+assertCheck(/function workoutStructureForDay\(/.test(trainer) && /function coachWorkoutStructure\(/.test(trainer) && /<details class="coach-jargon" open/.test(trainer) && /每一組依序完成/.test(trainer) && /const workoutStructure = coachWorkoutStructure/.test(trainer), "coach Garmin structure stays expanded and explains every repeat sequence");
+assertCheck(/def structured_steps\(/.test(garminPublisher) && /structured_steps\(item\) or fallback_steps/.test(garminPublisher) && /STRUCTURED_STEP_TYPES/.test(garminPublisher), "local Garmin publisher consumes structured workout steps instead of parsing only summary text");
+assertCheck(/const recoverySeconds = recoveryMatch \? Number\(recoveryMatch\[1\]\) : 45/.test(trainer) && /recovery_seconds = int\(recovery_match\.group\(1\)\) if recovery_match else 45/.test(garminPublisher), "stride recovery defaults to the current 45-second prescription unless the coach specifies otherwise");
+assertCheck(/function garminSyncPreview\(/.test(trainer) && /這次同步差異/.test(trainer) && /不會寫入 Garmin/.test(trainer), "Garmin sync previews structural changes and safely excludes note-only coach text");
+assertCheck(/function preserveCoachWorkoutSteps\(/.test(garminReviewBuilder) && /function normalizeCoachSteps\(/.test(garminReviewBuilder), "encrypted coach review preserves native structured steps from the coach source");
+assertCheck(/function garminTargetSpec\(/.test(trainer) && /kind: 'heart_rate'/.test(trainer) && /kind: 'speed'/.test(trainer) && /targetSpec: garminTargetSpec/.test(trainer) && /def target_from_spec\(/.test(garminPublisher) && /TargetType\.SPEED_ZONE/.test(garminPublisher) && /TargetType\.HEART_RATE_ZONE/.test(garminPublisher), "verified Garmin speed and heart-rate targets are passed from course steps to the publisher");
 assertCheck(/function mondayOfWeek\(/.test(trainer) && /calcWeeks\(profile\.targetDate, profile\.generatedAt\)/.test(trainer), "trainer includes the target race week when building a plan");
 assertCheck(/function formalCoachFallbackMenu\(/.test(trainer) && /正式課表（教練週報未提供菜單）/.test(trainer), "coach panel falls back to formal workouts when Garmin review has no menu");
 assertCheck(/function liveCoachPlan\(/.test(trainer) && /function renderLiveCoachCard\(/.test(trainer), "coach panel turns recent Garmin records into a guarded live training menu");
@@ -67,18 +75,25 @@ assertCheck(/function loadRegistrationRaceCheckpoints\(/.test(trainer) && /funct
 assertCheck(/switchPlanTab\('analysis'\);\s*showView\('plan'\);/.test(trainer), "applying an assessment returns the runner to a visible analysis tab");
 assertCheck(/function checkinSafetyDecision\(/.test(trainer) && /factor: 1\.05/.test(trainer) && /停止品質課/.test(trainer), "weekly check-in uses a bounded safety decision before progression");
 assertCheck(/onclick="switchPlanTab\('checkin'\)"/.test(trainer) && /function openWeeklyCheckin\(/.test(trainer), "weekly check-in is reachable from the plan and daily guidance");
+assertCheck(/class="checkin-week-switcher"/.test(trainer) && /aria-label="選擇評估週數"/.test(trainer) && /jumpToPhaseWeek\(Number\(this\.value\)\)/.test(trainer), "weekly check-in supports direct week switching without leaving the review tab");
 assertCheck(/class="plan-tab-list" role="tablist"/.test(trainer) && /class="plan-workspace-tools"/.test(trainer) && /aria-selected/.test(trainer), "plan navigation exposes distinct tabs, management tools, and selected state");
 assertCheck(/class="trainer-hero-eyebrow"/.test(trainer) && /class="trainer-hero-planline"/.test(trainer) && /class="plan-pulse-head"/.test(trainer) && /class="plan-progress-grid"/.test(trainer), "plan homepage groups identity, current plan context, and progress into distinct product surfaces");
 assertCheck(!/plan-pulse-summary/.test(trainer) && /第 \$\{currentWeek\} \/ \$\{totalWeeks\} 週 · \$\{pct\}%/.test(trainer) && /\$\{weekProgressPct\}%/.test(trainer), "plan pulse presents schedule and weekly volume as two non-duplicated progress measures");
 assertCheck(/const hasCoachDirection = Boolean\(goalGapNote \|\| coachBrief\)/.test(trainer) && !/\$\{renderDailyExecutionCard\(week\)\}/.test(trainer) && /class="guide-actions week-resource-actions"/.test(trainer), "week view keeps coach direction while removing duplicate daily guidance from the header stack");
 assertCheck(/class="week-header-target"/.test(trainer) && !/class="week-target"/.test(trainer), "weekly target is integrated with the week identity instead of competing with header actions");
 assertCheck(/const TRAINING_JARGON_ENTRIES/.test(trainer) && /輕鬆跑（E 跑）/.test(trainer) && /M 配速/.test(trainer), "coach terminology includes controlled plain-language explanations");
-assertCheck(/function renderLatestTrainingReport\(/.test(trainer) && /Latest training report · Garmin/.test(trainer) && /主課成績已單獨入帳/.test(trainer), "training analysis prioritizes a single-session coach report before long-term trends");
+assertCheck(/function renderLatestTrainingReport\(/.test(trainer) && /Training report · Garmin/.test(trainer) && /主課成績已單獨入帳/.test(trainer), "training analysis prioritizes a single-session coach report before long-term trends");
 assertCheck(/function sessionIntensityLabel\(/.test(trainer) && /課程分段/.test(trainer) && /session-lap-list/.test(trainer), "latest training report presents Garmin lap summaries by workout segment");
+assertCheck(/function sessionLapLabel\(/.test(trainer) && /不應把那個原始欄位解讀成正式課表的「間歇」/.test(trainer) && /Garmin 計圈/.test(trainer), "unstructured Garmin laps stay neutral instead of being mislabeled as intervals");
+assertCheck(/class="session-report-verdict"/.test(trainer) && /正式課表對照/.test(trainer) && /下一步/.test(trainer) && /function summarizeSessionLaps\(/.test(trainer) && /function selectTrainingReportLapCategory\(/.test(trainer) && /class="session-lap-filter/.test(trainer), "session report leads with a decision, plan comparison, and filterable lap categories");
 assertCheck(/品質判讀只使用 Garmin 明確標記的主課/.test(trainer) && /不會拖慢主課成績/.test(trainer), "session report explicitly protects main-course metrics from warmup and cooldown dilution");
 assertCheck(/function plannedSessionFor\(run\)/.test(trainer) && /applyCoachPlanOverride\(day, week\)/.test(trainer), "session report uses the same effective coach override as the plan and today card");
 assertCheck(/function selectTrainingReport\(/.test(trainer) && /session-report-history/.test(trainer) && /function sessionQualitySignals\(/.test(trainer), "training analysis supports historical single-session reports with quality signals");
 assertCheck(/Garmin 自我評量/.test(trainer) && /function plannedMainTargetKm\(/.test(trainer), "session report shows official Garmin self-evaluation and a main-course completion target");
+assertCheck(/function automaticActivityAssignment\(/.test(trainer) && /function activityAssignmentFor\(/.test(trainer) && /這次對應不對？/.test(trainer), "trainer auto-maps same-day and safe makeup runs while leaving one exception path");
+assertCheck(/activityAssignments: \{\}/.test(trainer) && /function normalizeActivityAssignments\(/.test(trainer) && /function setActivityAssignment\(/.test(trainer), "activity assignment overrides persist safely in local training data");
+assertCheck(/function recordPlanChange\(/.test(trainer) && /function renderPlanChangeTimeline\(/.test(trainer) && /Garmin 實跑自動校準/.test(trainer), "automatic plan changes retain a compact before-and-after history");
+assertCheck(/function renderAutomationBrief\(/.test(trainer) && /同步可信度/.test(trainer) && /function renderCheckinTrend\(/.test(trainer), "plan workspace surfaces automatic execution, sync trust, and recovery trend");
 
 const failed = checks.filter((check) => !check.ok);
 checks.forEach((check) => {

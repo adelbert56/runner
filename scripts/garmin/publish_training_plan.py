@@ -66,13 +66,28 @@ def end_condition(kind: int, key: str) -> dict[str, Any]:
     }
 
 
-def step(step_order: int, step_type: int, step_key: str, condition: dict[str, Any], value: float) -> ExecutableStep:
+def target_from_spec(spec: Any) -> tuple[dict[str, Any], float | None, float | None]:
+    if isinstance(spec, dict) and spec.get("kind") == "speed":
+        lower, upper = float(spec.get("minMps") or 0), float(spec.get("maxMps") or 0)
+        if lower > 0 and upper >= lower:
+            return ({"workoutTargetTypeId": TargetType.SPEED_ZONE, "workoutTargetTypeKey": "speed.zone", "displayOrder": TargetType.SPEED_ZONE}, lower, upper)
+    if isinstance(spec, dict) and spec.get("kind") == "heart_rate":
+        lower, upper = float(spec.get("min") or 0), float(spec.get("max") or 0)
+        if lower > 0 and upper >= lower:
+            return ({"workoutTargetTypeId": TargetType.HEART_RATE_ZONE, "workoutTargetTypeKey": "heart.rate.zone", "displayOrder": TargetType.HEART_RATE_ZONE}, lower, upper)
+    return no_target(), None, None
+
+
+def step(step_order: int, step_type: int, step_key: str, condition: dict[str, Any], value: float, target_spec: Any = None) -> ExecutableStep:
+    target_type, target_one, target_two = target_from_spec(target_spec)
     return ExecutableStep(
         stepOrder=step_order,
         stepType={"stepTypeId": step_type, "stepTypeKey": step_key, "displayOrder": step_type},
         endCondition=condition,
         endConditionValue=value,
-        targetType=no_target(),
+        targetType=target_type,
+        targetValueOne=target_one,
+        targetValueTwo=target_two,
     )
 
 
@@ -84,6 +99,8 @@ def strides_repeat_group(item: dict[str, Any], step_order: int) -> RepeatGroup |
     repetitions, stride_seconds = (int(match.group(1)), int(match.group(2)))
     if repetitions < 1 or stride_seconds < 1:
         return None
+    recovery_match = re.search(r"(?:組間|之間|恢復)[^。；;]*?(\d+)\s*秒", summary, flags=re.IGNORECASE)
+    recovery_seconds = int(recovery_match.group(1)) if recovery_match else 45
     return RepeatGroup(
         stepOrder=step_order,
         stepType={"stepTypeId": StepType.REPEAT, "stepTypeKey": "repeat", "displayOrder": StepType.REPEAT},
@@ -92,9 +109,74 @@ def strides_repeat_group(item: dict[str, Any], step_order: int) -> RepeatGroup |
         endConditionValue=float(repetitions),
         workoutSteps=[
             step(1, StepType.INTERVAL, "interval", end_condition(ConditionType.TIME, "time"), stride_seconds),
-            step(2, StepType.RECOVERY, "recovery", end_condition(ConditionType.TIME, "time"), 60),
+            step(2, StepType.RECOVERY, "recovery", end_condition(ConditionType.TIME, "time"), recovery_seconds),
         ],
     )
+
+
+STRUCTURED_STEP_TYPES = {
+    "warmup": (StepType.WARMUP, "warmup"),
+    "main": (StepType.MAIN, "main"),
+    "interval": (StepType.INTERVAL, "interval"),
+    "recovery": (StepType.RECOVERY, "recovery"),
+    "cooldown": (StepType.COOLDOWN, "cooldown"),
+}
+
+
+def structured_executable_step(item: dict[str, Any], step_order: int) -> ExecutableStep:
+    kind = str(item.get("kind") or "main")
+    step_type, step_key = STRUCTURED_STEP_TYPES.get(kind, STRUCTURED_STEP_TYPES["main"])
+    end = item.get("end") if isinstance(item.get("end"), dict) else {}
+    end_type = str(end.get("type") or "open")
+    raw_value = float(end.get("value") or 0)
+    if end_type == "distance" and raw_value > 0:
+        condition, value = end_condition(ConditionType.DISTANCE, "distance"), raw_value
+    elif end_type == "time" and raw_value > 0:
+        condition, value = end_condition(ConditionType.TIME, "time"), raw_value
+    else:
+        # Garmin needs a concrete end condition.  A short time cap is safer
+        # than inventing a distance when the coach gave an open instruction.
+        condition, value = end_condition(ConditionType.TIME, "time"), 300
+    return step(step_order, step_type, step_key, condition, value, item.get("targetSpec"))
+
+
+def structured_steps(item: dict[str, Any]) -> list[ExecutableStep | RepeatGroup]:
+    supplied = item.get("steps")
+    if not isinstance(supplied, list) or not supplied:
+        return []
+    built: list[ExecutableStep | RepeatGroup] = []
+    for order, source in enumerate(supplied, start=1):
+        if not isinstance(source, dict):
+            continue
+        if source.get("kind") != "repeat":
+            built.append(structured_executable_step(source, order))
+            continue
+        children = [child for child in source.get("children", []) if isinstance(child, dict)]
+        if not children:
+            continue
+        repetitions = max(1, min(30, int(float(source.get("repetitions") or source.get("end", {}).get("value") or 1))))
+        built.append(RepeatGroup(
+            stepOrder=order,
+            stepType={"stepTypeId": StepType.REPEAT, "stepTypeKey": "repeat", "displayOrder": StepType.REPEAT},
+            numberOfIterations=repetitions,
+            endCondition=end_condition(ConditionType.ITERATIONS, "iterations"),
+            endConditionValue=float(repetitions),
+            workoutSteps=[structured_executable_step(child, child_order) for child_order, child in enumerate(children, start=1)],
+        ))
+    return built
+
+
+def structured_steps_note(item: dict[str, Any]) -> str:
+    steps = item.get("steps") if isinstance(item.get("steps"), list) else []
+    labels = {"warmup": "熱身", "main": "主課", "interval": "快段", "recovery": "恢復", "cooldown": "收操", "repeat": "重複組"}
+    rows = []
+    for source in steps:
+        if not isinstance(source, dict):
+            continue
+        end = source.get("end") if isinstance(source.get("end"), dict) else {}
+        label = str(end.get("label") or "依體感")
+        rows.append(f"{labels.get(str(source.get('kind')), '步驟')}｜{label}")
+    return "\n".join(rows)
 
 
 def workout_for(item: dict[str, Any]) -> RunningWorkout:
@@ -105,20 +187,22 @@ def workout_for(item: dict[str, Any]) -> RunningWorkout:
     cooldown_seconds = 600 if kind in {"tempo", "interval", "long"} else 420
     main_type = StepType.INTERVAL if kind == "interval" else StepType.MAIN
     main_key = "interval" if kind == "interval" else "main"
-    steps: list[ExecutableStep | RepeatGroup] = [
+    fallback_steps: list[ExecutableStep | RepeatGroup] = [
         step(1, StepType.WARMUP, "warmup", end_condition(ConditionType.TIME, "time"), warmup_seconds),
         step(2, main_type, main_key, end_condition(ConditionType.DISTANCE, "distance"), round(main_km * 1000)),
     ]
     strides = strides_repeat_group(item, step_order=3)
     if strides:
-        steps.append(strides)
-    steps.append(step(4 if strides else 3, StepType.COOLDOWN, "cooldown", end_condition(ConditionType.TIME, "time"), cooldown_seconds))
+        fallback_steps.append(strides)
+    fallback_steps.append(step(4 if strides else 3, StepType.COOLDOWN, "cooldown", end_condition(ConditionType.TIME, "time"), cooldown_seconds))
+    steps = structured_steps(item) or fallback_steps
     estimated = max(1800, int(float(item.get("estimatedDurationSec") or km * 420 + warmup_seconds + cooldown_seconds)))
     summary = str(item.get("summary") or "").strip()
     pace = str(item.get("pace") or "").strip()
     distance_note = f"距離定義：主課 {main_km:g} km；本日總跑量 {km:g} km（用於時間估算）。"
-    strides_note = "ST 快步：每次 20 秒，之後 60 秒恢復，依課表重複。" if strides else ""
-    note = "\n".join(part for part in [summary, pace, distance_note, strides_note, "由 Runner 本機同步建立；再次同步會依日期與名稱略過重複項。"] if part)
+    strides_note = "ST 快步：每次 20 秒，之後 45 秒恢復，依課表重複。" if strides else ""
+    structured_note = structured_steps_note(item)
+    note = "\n".join(part for part in [structured_note, summary, pace, distance_note, strides_note, "由 Runner 本機同步建立；再次同步會依日期與名稱略過重複項。"] if part)
     return RunningWorkout(
         workoutName=str(item["name"]),
         estimatedDurationInSecs=estimated,

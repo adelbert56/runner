@@ -517,44 +517,72 @@
     .pace-trend-activity b { display:block; margin-top:3px; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .pace-trend-activity small { display:block; margin-top:2px; color:var(--c-text-muted); font-size:11px; }
     /* === Training analysis V2: one session first, trends second === */
-    .session-report { margin:0 0 20px; overflow:hidden; padding:0; border:1px solid rgba(36,114,79,.22); border-radius:22px; background:linear-gradient(140deg,#f3faf5 0%,#fffdf8 52%,#f8f3e9 100%); box-shadow:0 16px 34px rgba(31,42,36,.06); }
-    .session-report-head { display:flex; justify-content:space-between; gap:18px; padding:22px 24px 19px; border-bottom:1px solid rgba(31,42,36,.09); }
+    .session-report { margin:0 0 20px; overflow:hidden; padding:0; border:1px solid rgba(36,114,79,.2); border-radius:22px; background:#fffdf8; box-shadow:0 18px 38px rgba(31,42,36,.07); }
+    .session-report-head { display:flex; justify-content:space-between; gap:18px; padding:24px 26px 21px; background:linear-gradient(120deg,#edf7f0 0%,#fffdf8 62%,#f8f2e7 100%); border-bottom:1px solid rgba(31,42,36,.09); }
     .session-report-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
-    .session-report-title { margin:4px 0 0; font-size:23px; letter-spacing:-.035em; line-height:1.2; }
+    .session-report-title { margin:4px 0 0; font-size:25px; letter-spacing:-.04em; line-height:1.18; }
     .session-report-meta { margin-top:6px; color:var(--c-text-muted); font-size:13px; font-weight:700; }
     .session-report-status { flex:0 0 auto; align-self:flex-start; padding:7px 10px; border-radius:999px; background:#dff2e4; color:var(--c-primary-hover); font-size:12px; font-weight:900; }
     .session-report-status.neutral { background:#eef0ea; color:#59655e; }
-    .session-report-body { padding:20px 24px 24px; }
-    .session-report-grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr); gap:20px; }
+    .session-report-body { padding:22px 26px 24px; }
+    .session-report-grid { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr); gap:14px; }
     .session-report-label { color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; }
-    .session-report-summary { margin:6px 0 0; color:var(--c-text); font-size:17px; font-weight:850; line-height:1.55; }
+    .session-report-summary { margin:6px 0 0; color:var(--c-text); font-size:18px; font-weight:900; letter-spacing:-.02em; line-height:1.48; }
     .session-report-note { margin:8px 0 0; color:var(--c-text-muted); font-size:13px; line-height:1.65; }
-    .session-report-target { padding:14px 15px; border:1px solid rgba(31,42,36,.09); border-radius:14px; background:rgba(255,253,248,.78); }
+    .session-report-verdict { padding:18px 19px; border:1px solid rgba(36,114,79,.16); border-radius:16px; background:linear-gradient(135deg,#f2faf4,#fffdf8); }
+    .session-report-target { padding:17px 18px; border:1px solid rgba(31,42,36,.1); border-radius:16px; background:#fbf8f0; }
     .session-report-target b { display:block; margin-top:5px; font-size:14px; line-height:1.5; }
     .session-report-target span { display:block; margin-top:3px; color:var(--c-text-muted); font-size:12px; line-height:1.5; }
-    .session-report-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; margin-top:20px; }
-    .session-report-metric { min-width:0; padding:12px 13px; border:1px solid rgba(31,42,36,.09); border-radius:14px; background:rgba(255,253,248,.82); }
+    .session-report-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:16px; }
+    .session-report-metric { min-width:0; padding:13px 14px; border:1px solid rgba(31,42,36,.09); border-radius:14px; background:#fffdf8; }
     .session-report-metric span { display:block; color:var(--c-text-muted); font-size:11px; font-weight:800; }
-    .session-report-metric strong { display:block; margin-top:4px; color:var(--c-text); font-size:18px; font-weight:950; letter-spacing:-.03em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .session-breakdown { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,.9fr); gap:20px; margin-top:20px; padding-top:20px; border-top:1px solid rgba(31,42,36,.09); }
-    .session-breakdown-card { min-width:0; }
+    .session-report-metric strong { display:block; margin-top:4px; color:var(--c-text); font-size:19px; font-weight:950; letter-spacing:-.035em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .session-secondary-metrics { display:flex; flex-wrap:wrap; gap:7px 16px; margin-top:11px; color:var(--c-text-muted); font-size:12px; font-weight:750; }
+    .session-secondary-metrics b { color:var(--c-text); }
+    .session-next-action { display:flex; gap:9px; margin-top:13px; padding-top:12px; border-top:1px solid rgba(36,114,79,.14); color:var(--c-text-muted); font-size:12px; font-weight:650; line-height:1.55; }
+    .session-next-action b { color:var(--c-primary-hover); white-space:nowrap; }
+    .session-plan-row { display:grid; grid-template-columns:72px minmax(0,1fr); gap:8px; margin-top:10px; font-size:12px; line-height:1.55; }
+    .session-plan-row span { color:var(--c-text-muted); font-weight:800; }
+    .session-plan-row b { color:var(--c-text); font-weight:850; }
+    .session-breakdown { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,.78fr); gap:16px; margin-top:21px; padding-top:20px; border-top:1px solid rgba(31,42,36,.09); }
+    .session-breakdown-card { min-width:0; padding:17px 18px; border:1px solid rgba(31,42,36,.09); border-radius:16px; background:#fffdf8; }
     .session-breakdown-title { margin:0; font-size:15px; }
     .session-breakdown-copy { margin:4px 0 12px; color:var(--c-text-muted); font-size:12px; line-height:1.55; }
-    .session-lap-list { display:grid; gap:7px; }
-    .session-lap { display:grid; grid-template-columns:76px minmax(64px,1fr) 52px 50px; align-items:center; gap:9px; font-size:12px; }
+    .session-lap-list { display:grid; gap:9px; }
+    .session-lap { display:grid; grid-template-columns:52px minmax(72px,1fr) 52px 52px; align-items:center; gap:9px; font-size:12px; }
     .session-lap-label { color:var(--c-text); font-weight:850; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .session-lap-bar { height:8px; overflow:hidden; border-radius:999px; background:#e7ebe4; }
-    .session-lap-bar i { display:block; height:100%; min-width:5px; border-radius:inherit; background:#6dad7e; }
+    .session-lap-bar { height:9px; overflow:hidden; border-radius:999px; background:#e7ebe4; }
+    .session-lap-bar i { display:block; height:100%; min-width:5px; border-radius:inherit; background:linear-gradient(90deg,#277653,#70b687); }
     .session-lap.main .session-lap-bar i { background:linear-gradient(90deg,#24724f,#5fae79); }
     .session-lap.recovery .session-lap-bar i { background:#c4a46d; }
     .session-lap-meta { color:var(--c-text-muted); text-align:right; white-space:nowrap; }
-    .session-coach-callout { padding:15px 16px; border-radius:15px; border:1px solid rgba(36,114,79,.17); background:rgba(231,244,235,.78); }
+    .session-lap-filters { display:flex; gap:7px; flex-wrap:wrap; margin:13px 0 12px; }
+    .session-lap-filter { min-height:31px; padding:6px 10px; border:1px solid rgba(31,42,36,.12); border-radius:999px; background:#fffdf8; color:var(--c-text-muted); font:inherit; font-size:12px; font-weight:850; cursor:pointer; transition:border-color .15s, background .15s, color .15s; }
+    .session-lap-filter:hover { border-color:rgba(36,114,79,.42); color:var(--c-primary-hover); }
+    .session-lap-filter.active { border-color:var(--c-primary); background:#e5f3e9; color:var(--c-primary-hover); }
+    .session-lap-filter small { margin-left:3px; font-size:10px; opacity:.8; }
+    .session-lap-filter-note { margin:0 0 10px; color:var(--c-text-muted); font-size:12px; font-weight:700; }
+    .session-coach-callout { padding:18px 18px; border-radius:16px; border:1px solid rgba(36,114,79,.18); background:#eef8f0; }
     .session-coach-callout strong { display:block; margin-top:5px; font-size:15px; line-height:1.5; }
-    .session-report-history { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; padding-top:17px; border-top:1px solid rgba(31,42,36,.09); }
+    .session-report-history-wrap { margin-top:18px; padding-top:17px; border-top:1px solid rgba(31,42,36,.09); }
+    .session-report-history-label { margin:0 0 9px; color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+    .session-report-history { display:flex; flex-wrap:wrap; gap:8px; }
     button.session-report-history { min-width:74px; padding:8px 10px; border:1px solid rgba(31,42,36,.13); border-radius:11px; background:#fffdf8; color:var(--c-text-muted); font:inherit; font-size:12px; font-weight:850; line-height:1.2; cursor:pointer; }
     button.session-report-history small { display:block; margin-top:3px; color:inherit; font-size:10px; font-weight:750; }
     button.session-report-history:hover, button.session-report-history.active { border-color:rgba(36,114,79,.46); background:#e4f2e8; color:var(--c-primary-hover); }
     .session-coach-callout p { margin:7px 0 0; color:var(--c-text-muted); font-size:12px; line-height:1.65; }
+    .checkin-card { padding:0; overflow:hidden; border:1px solid rgba(36,114,79,.18); border-radius:18px; background:linear-gradient(145deg,#f4faf6 0%,#fffdf8 54%,#fbf7ee 100%); box-shadow:0 14px 28px rgba(31,42,36,.06); }
+    .checkin-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 20px; border-bottom:1px solid rgba(31,42,36,.09); }
+    .checkin-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .checkin-title { margin-top:3px; color:var(--c-text); font-size:19px; font-weight:900; letter-spacing:-.02em; }
+    .checkin-week-switcher { display:flex; align-items:center; gap:7px; flex:0 0 auto; }
+    .checkin-week-switcher select { min-width:108px; height:36px; padding:0 30px 0 10px; border:1px solid var(--c-border); border-radius:10px; background:rgba(255,253,248,.92); color:var(--c-text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .checkin-body { padding:18px 20px 20px; }
+    .checkin-intro { margin:0 0 15px; color:var(--c-text-muted); font-size:13px; font-weight:650; line-height:1.65; }
+    .checkin-section-label { display:block; margin:18px 0 9px; color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+    .checkin-safety { display:flex; gap:9px; align-items:flex-start; margin-top:14px; padding:11px 12px; border:1px solid #f0d3ba; border-radius:11px; background:#fff7ed; color:#9a3412; font-size:12px; font-weight:650; line-height:1.55; }
+    .checkin-submit { width:100%; margin-top:14px; min-height:44px; box-shadow:0 8px 16px rgba(36,114,79,.15); }
+    @media (max-width:620px) { .checkin-head { align-items:flex-start; flex-direction:column; } .checkin-week-switcher { width:100%; } .checkin-week-switcher select { flex:1; } .checkin-body { padding:16px; } }
 
     /* === Plan overview === */
     .plan-alignment-note { display:flex; align-items:center; gap:7px; margin:0 0 8px; color:var(--c-text-muted); font-size:12px; font-weight:750; }
@@ -697,6 +725,28 @@
     .training-status-copy { margin-top:3px; color:var(--c-text-muted); font-size:12px; font-weight:650; line-height:1.55; }
     .training-status-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
     .training-status-actions .btn { padding:7px 10px; font-size:12px; white-space:nowrap; }
+    .automation-brief { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(220px,.65fr); gap:14px; margin:0 0 16px; padding:16px; border:1px solid rgba(36,114,79,.18); border-radius:18px; background:linear-gradient(135deg,#eff8f1,#fffdf8 58%,#f8f5ed); box-shadow:0 12px 24px rgba(31,42,36,.05); }
+    .automation-brief-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .automation-brief-title { margin-top:4px; color:var(--c-text); font-size:18px; font-weight:900; line-height:1.35; }
+    .automation-brief-copy { margin:6px 0 0; color:var(--c-text-muted); font-size:13px; line-height:1.6; }
+    .automation-brief-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; align-content:start; }
+    .automation-brief-stat { padding:10px; border:1px solid rgba(36,114,79,.13); border-radius:12px; background:rgba(255,255,255,.72); }
+    .automation-brief-stat span { display:block; color:var(--c-text-muted); font-size:11px; font-weight:750; }
+    .automation-brief-stat b { display:block; margin-top:3px; color:var(--c-text); font-size:14px; }
+    .automation-timeline { margin:12px 0 0; padding:12px; border:1px solid var(--c-border); border-radius:14px; background:var(--c-surface-alt); }
+    .automation-timeline-title { color:var(--c-text); font-size:13px; font-weight:900; }
+    .automation-timeline-list { display:grid; gap:8px; margin-top:9px; }
+    .automation-timeline-item { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:start; color:var(--c-text-muted); font-size:12px; line-height:1.55; }
+    .automation-timeline-item time { color:var(--c-primary-hover); font-weight:850; white-space:nowrap; }
+    .checkin-trend { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:6px; margin:14px 0 2px; padding:12px; border:1px solid rgba(36,114,79,.14); border-radius:14px; background:rgba(255,255,255,.58); }
+    .checkin-trend-item { min-width:0; text-align:center; }
+    .checkin-trend-bar { display:flex; height:38px; align-items:end; justify-content:center; }
+    .checkin-trend-bar i { display:block; width:100%; max-width:22px; min-height:5px; border-radius:6px 6px 2px 2px; background:#d3ddd5; }
+    .checkin-trend-item.good .checkin-trend-bar i { background:var(--c-primary); }
+    .checkin-trend-item.caution .checkin-trend-bar i { background:#d2aa68; }
+    .checkin-trend-item.danger .checkin-trend-bar i { background:#d77b65; }
+    .checkin-trend-item small { display:block; margin-top:4px; color:var(--c-text-muted); font-size:10px; font-weight:750; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    @media (max-width:620px) { .automation-brief { grid-template-columns:1fr; } .checkin-trend { grid-template-columns:repeat(6,minmax(0,1fr)); } }
     @media (max-width:620px) { .training-status-card { grid-template-columns:1fr; } .training-status-actions { justify-content:flex-start; } }
     .runner-guide-card { margin:0 0 16px; padding:16px; border:1px solid rgba(36,114,79,.18); border-radius:14px; background:linear-gradient(135deg,#f1f9f3,#fffdf8); }
     .runner-guide-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
@@ -838,9 +888,7 @@
     .week-resource-actions { margin:0; padding:10px 22px; background:transparent; }
     .week-resource-label { align-self:center; margin-right:2px; color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
     .guide-chip { display:inline-flex; align-items:center; gap:6px; padding:8px 11px; border-radius:10px; border:1px solid var(--c-border); background:#f7f3ea; color:var(--c-text); font:inherit; font-size:12px; font-weight:800; cursor:pointer; transition:transform .15s, border-color .15s, color .15s, background .15s; }
-    .guide-chip::after { content:'→'; color:var(--c-text-muted); font-size:13px; transition:transform .15s; }
     .guide-chip:hover { transform:translateY(-1px); border-color:var(--c-primary); color:var(--c-primary-hover); background:#f1f8f3; }
-    .guide-chip:hover::after { transform:translateX(2px); color:var(--c-primary-hover); }
     .guide-hero {
       display: grid;
       grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
@@ -1194,7 +1242,7 @@ function trainingTypeLabel(type, focus = '') {
 }
 
 function trainingTaskTitle(day) {
-  const title = String(day?.task || '').trim();
+  const title = String(day?.task || '').replace(/\bNaN(?:\.\d+)?\s*(?:km|公里)\b/gi, '').replace(/\s{2,}/g, ' ').trim();
   const typeLabel = trainingTypeLabel(day?.type, day?.focus);
   if (!title || day?.coachPlan) return title || typeLabel;
   if (day.type === 'easy') {
@@ -1209,7 +1257,7 @@ function trainingTaskTitle(day) {
 }
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, trainingEvents: [], lastBackupAt: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, planChangeHistory: [], garminSyncManifest: {}, trainingEvents: [], lastBackupAt: null };
 }
 
 function getDeviceId() {
@@ -1483,6 +1531,24 @@ function normalizeTrainingEvents(trainingEvents) {
     }));
 }
 
+function normalizeActivityAssignments(assignments) {
+  if (!assignments || typeof assignments !== 'object') return {};
+  return Object.fromEntries(Object.entries(assignments)
+    .filter(([activityId, item]) => String(activityId).trim() && /^\d{4}-\d{2}-\d{2}$/.test(item?.targetDate || ''))
+    .map(([activityId, item]) => [String(activityId), {
+      targetDate: item.targetDate,
+      mode: ['same-day', 'makeup', 'extra'].includes(item.mode) ? item.mode : 'same-day',
+      source: item.source === 'runner' ? 'runner' : 'auto',
+      updatedAt: /^\d{4}-\d{2}-\d{2}T/.test(item.updatedAt || '') ? item.updatedAt : new Date().toISOString()
+    }]));
+}
+
+function normalizePlanChangeHistory(history) {
+  if (!Array.isArray(history)) return [];
+  return history.filter((item) => item && /^\d{4}-\d{2}-\d{2}$/.test(item.date || '') && Array.isArray(item.changes))
+    .slice(-30).map((item) => ({ date: item.date, source: String(item.source || 'system').slice(0, 40), title: String(item.title || '課表已更新').slice(0, 100), changes: item.changes.slice(0, 8).map((change) => String(change).slice(0, 180)) }));
+}
+
 function recordTrainingEvent(type, payload = {}) {
   appData.trainingEvents = normalizeTrainingEvents(appData.trainingEvents);
   appData.trainingEvents.push({
@@ -1563,6 +1629,8 @@ function normalizeData(data) {
     dayStatuses: normalizeDayStatuses(data?.dayStatuses),
     skipReasons: normalizeSkipReasons(data?.skipReasons),
     makeupRecords: normalizeMakeupRecords(data?.makeupRecords),
+    activityAssignments: normalizeActivityAssignments(data?.activityAssignments),
+    planChangeHistory: normalizePlanChangeHistory(data?.planChangeHistory),
     trainingEvents: normalizeTrainingEvents(data?.trainingEvents)
   };
   normalized.dayStatuses = {
@@ -1900,7 +1968,7 @@ function findTodayPlanDay() {
 }
 
 function heroTodayStepSummary(step, day) {
-  const dose = String(step?.dose || '').trim();
+  const dose = String(step?.dose || '').replace(/\bNaN(?:\.\d+)?\s*(?:km|公里)\b/gi, '').replace(/\s{2,}/g, ' ').trim();
   if (dose) return dose;
   const detail = String(step?.detail || step?.text || '').trim();
   if (!detail) return step?.title === '主課' ? trainingTaskTitle(day) : '';
@@ -1946,7 +2014,7 @@ function renderHeroTodayCard() {
   return `
     <div class="trainer-side-card hero-today-card">
       <div class="trainer-side-kicker">Today · ${DOW_NAMES[day.dow]} ${day.dateStr.slice(5)}</div>
-      <div class="trainer-side-title"><span class="workout-badge ${day.coachPlan ? 'badge-coach' : (badgeClass[day.type] || 'badge-rest')}">${day.coachPlan ? '📌 教練課表' : (typeName[day.type] || '訓練')}</span> ${day.task || ''}</div>
+      <div class="trainer-side-title"><span class="workout-badge ${day.coachPlan ? 'badge-coach' : (badgeClass[day.type] || 'badge-rest')}">${day.coachPlan ? '📌 教練課表' : (typeName[day.type] || '訓練')}</span> ${reviewEscape(trainingTaskTitle(day))}</div>
       ${detail ? `<div class="trainer-side-copy">${detail}</div>` : ''}
       ${dayWeatherLine(day, { showForRest: true })}
       ${stepStrip}
@@ -3619,6 +3687,7 @@ function autoRecalibratePlan() {
   if (appData.recalibratedFor === coachReviewData.updatedAt) return null;
   const profile = appData.profile;
   const plan = appData.plan;
+  const beforePlan = futurePlanSnapshot();
   const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
   const today = todayStr();
 
@@ -3773,6 +3842,7 @@ function autoRecalibratePlan() {
   });
   const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, cadenceCautionChanged, reasons };
   appData.lastRecalibration = summary;
+  recordPlanChange(beforePlan, 'garmin', 'Garmin 實跑自動校準');
   saveData(appData);
   return summary;
 }
@@ -3862,6 +3932,7 @@ function renderPlanView() {
   </div>
 </nav>
 <div id="plan-tab-week" class="container">
+  ${renderAutomationBrief(plan)}
   ${renderRaceWeekCard(profile)}
   ${renderProgressCard(profile, plan)}
   ${renderPhaseTabs(plan)}
@@ -4061,7 +4132,9 @@ function renderGarminAutopilotCard(profile, plan) {
 
 function renderGarminAutopilotTab(profile, plan) {
   const content = renderGarminAutopilotCard(profile, plan);
-  return `${renderTrainingStatusCard(plan)}${content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`}`;
+  const health = trainingDataHealth(plan);
+  const trust = `<div class="automation-timeline"><div class="automation-timeline-title">同步可信度</div><div class="automation-timeline-list"><div class="automation-timeline-item"><time>${health.syncAge === null ? '—' : health.syncAge === 0 ? '今天' : `${health.syncAge} 天前`}</time><div><b>${health.syncAge !== null && health.syncAge <= 2 ? 'Garmin 資料仍在可信範圍' : '需要確認 Garmin 同步'}</b><br>${health.issues.length ? reviewEscape(health.issues.join('；')) : '完成認列、補跑與課程對應均依同一個距離門檻自動處理。'}</div></div></div></div>`;
+  return `${renderTrainingStatusCard(plan)}${trust}${content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`}`;
 }
 
 function garminCompletionPercent(profile = appData.profile) {
@@ -4210,6 +4283,23 @@ function renderTrainingStatusCard(plan = appData.plan || []) {
     <div><div class="training-status-kicker">本週提醒</div><div class="training-status-title">${reviewEscape(stateTitle)}</div><div class="training-status-copy">${reviewEscape(stateCopy)}</div></div>
     ${action ? `<div class="training-status-actions">${action}</div>` : ''}
   </section>`;
+}
+
+function renderAutomationBrief(plan = appData.plan || []) {
+  const health = trainingDataHealth(plan);
+  const today = findTodayPlanDay()?.day;
+  const next = today || (plan.find((week) => week.weekNum === currentWeek)?.days || []).find((day) => day.dateStr > todayStr() && day.type !== 'rest');
+  const assignmentCount = Object.keys(appData.activityAssignments || {}).length;
+  const syncText = health.syncAge === null ? '尚未取得' : health.syncAge === 0 ? '今天已同步' : `${health.syncAge} 天前`;
+  const course = next ? `${trainingTypeLabel(next.type, next.focus)} · ${trainingTaskTitle(next)}` : '本週先把恢復做穩';
+  const action = today ? '系統已排好今天課程；完成後 Garmin 會自動帶回完成度與跑後判讀。' : '今天沒有正式跑課；系統會保留恢復日，不會為了補量強塞訓練。';
+  return `<section class="automation-brief" aria-label="自動化訓練摘要"><div><div class="automation-brief-kicker">Runner autopilot</div><div class="automation-brief-title">${reviewEscape(course)}</div><p class="automation-brief-copy">${reviewEscape(action)}</p><div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-primary" onclick="goToToday()">查看今日執行</button>${health.issues.length ? '<button class="btn btn-secondary" onclick="switchPlanTab(\'autopilot\')">查看同步狀態</button>' : ''}</div></div><div class="automation-brief-stats"><div class="automation-brief-stat"><span>本週完成</span><b>${health.currentWeekCompleted.length}/${health.currentWeekDays.length || 0} 堂</b></div><div class="automation-brief-stat"><span>Garmin 資料</span><b>${syncText}</b></div><div class="automation-brief-stat"><span>自動對應</span><b>${assignmentCount ? `${assignmentCount} 筆已修正` : '自動判讀中'}</b></div><div class="automation-brief-stat"><span>待處理</span><b>${health.issues.length ? `${health.issues.length} 件` : '無'}</b></div></div></section>`;
+}
+
+function renderPlanChangeTimeline() {
+  const items = [...(appData.planChangeHistory || [])].slice(-4).reverse();
+  if (!items.length) return '<div class="automation-timeline"><div class="automation-timeline-title">課表變更紀錄</div><p style="margin:7px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">尚未有自動調整。系統會在 Garmin 校準、週評估保護或套用檢測後，保留前後差異。</p></div>';
+  return `<div class="automation-timeline"><div class="automation-timeline-title">課表變更紀錄</div><div class="automation-timeline-list">${items.map((item) => `<div class="automation-timeline-item"><time>${reviewEscape(item.date)}</time><div><b>${reviewEscape(item.title)}</b><br>${item.changes.map((change) => reviewEscape(change)).join('；')}</div></div>`).join('')}</div></div>`;
 }
 
 function showWeekPlanFromStatus() {
@@ -4410,9 +4500,18 @@ function renderVolumeBars(trend) {
   return `<div style="display:flex;align-items:flex-end;gap:10px;height:180px;padding-top:12px">${trend.map((item) => `<div style="flex:1;min-width:32px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px"><b style="font-size:12px">${item.km}</b><div title="${reviewEscape(item.week)}：${item.km} km / ${item.runs} 次" style="width:100%;max-width:42px;min-height:5px;height:${Math.max(5, (item.km / max) * 125)}px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#5fae79,#24724f)"></div><span style="font-size:11px;color:var(--c-text-muted)">${reviewEscape(item.week.slice(5))}</span></div>`).join('')}</div>`;
 }
 
-function sessionIntensityLabel(intensity, index) {
+function sessionIntensityLabel(intensity, index, isIntervalBlock = false) {
+  const normalized = String(intensity || '').toUpperCase();
+  if (isIntervalBlock && normalized === 'ACTIVE') return '間歇快段';
+  if (isIntervalBlock && normalized === 'RECOVERY') return '間歇恢復';
   const labels = { WARMUP: '熱身', MAIN: '主課', ACTIVE: '活動段', INTERVAL: '間歇', RECOVERY: '恢復', COOLDOWN: '收操', REST: '休息' };
-  return labels[String(intensity || '').toUpperCase()] || `計圈 ${index || ''}`.trim();
+  return labels[normalized] || `計圈 ${index || ''}`.trim();
+}
+
+function sessionLapLabel(lap, index, hasStructuredMain, isIntervalBlock = false) {
+  // Garmin 會把手動／自動計圈都標成 INTERVAL；沒有明確的課程結構時，
+  // 不應把那個原始欄位解讀成正式課表的「間歇」。
+  return hasStructuredMain ? sessionIntensityLabel(lap?.intensity, index, isIntervalBlock) : `計圈 ${index}`;
 }
 
 function sessionIntensityClass(intensity) {
@@ -4422,12 +4521,100 @@ function sessionIntensityClass(intensity) {
   return 'neutral';
 }
 
+function isStructuredIntervalBlock(laps) {
+  const intensities = laps.map((lap) => String(lap?.intensity || '').toUpperCase());
+  return intensities.filter((intensity) => intensity === 'ACTIVE').length >= 2
+    && intensities.filter((intensity) => intensity === 'RECOVERY').length >= 2;
+}
+
+function summarizeSessionLaps(laps, hasStructuredMain, isIntervalBlock = false) {
+  const groups = new Map();
+  laps.forEach((lap) => {
+    const intensity = hasStructuredMain ? String(lap?.intensity || '').toUpperCase() : 'LAP';
+    const label = hasStructuredMain ? sessionIntensityLabel(intensity, null, isIntervalBlock) : 'Garmin 計圈';
+    const group = groups.get(intensity) || { label, intensity, count: 0, distanceKm: 0, durationMin: 0 };
+    group.count += 1;
+    group.distanceKm += Number(lap?.distance_km) || 0;
+    group.durationMin += Number(lap?.duration_min) || 0;
+    groups.set(intensity, group);
+  });
+  return [...groups.values()].map((group) => ({
+    ...group,
+    paceSeconds: group.distanceKm > 0 && group.durationMin > 0 ? (group.durationMin * 60) / group.distanceKm : null,
+    className: hasStructuredMain ? sessionIntensityClass(group.intensity) : 'neutral'
+  }));
+}
+
 function plannedSessionFor(run) {
+  const assignment = activityAssignmentFor(run);
+  const targetDate = assignment?.mode === 'extra' ? '' : (assignment?.targetDate || run.date);
   for (const week of appData.plan || []) {
-    const day = (week.days || []).find((item) => item.dateStr === run.date || item.date === run.date);
+    const day = (week.days || []).find((item) => item.dateStr === targetDate || item.date === targetDate);
     if (day) return applyCoachPlanOverride(day, week);
   }
   return null;
+}
+
+function automaticActivityAssignment(run) {
+  const planDays = (appData.plan || []).flatMap((week) => week.days || []);
+  const sameDay = planDays.find((day) => day.dateStr === run.date && day.type !== 'rest');
+  if (sameDay) return { targetDate: sameDay.dateStr, mode: 'same-day', source: 'auto', confidence: 'high' };
+  const currentDay = planDays.find((day) => day.dateStr === run.date);
+  if (currentDay?.isMakeup && currentDay.makeupOf) return { targetDate: currentDay.makeupOf, mode: 'makeup', source: 'auto', confidence: 'high' };
+  const candidates = planDays.filter((day) => {
+    const apart = Math.round((new Date(`${run.date}T00:00:00`) - new Date(`${day.dateStr}T00:00:00`)) / 86400000);
+    return day.type !== 'rest' && day.status === 'missed' && apart >= 1 && apart <= 3 && activityCompletesDay(day, { actualKm: run.km, source: 'garmin' });
+  });
+  if (candidates.length === 1) return { targetDate: candidates[0].dateStr, mode: 'makeup', source: 'auto', confidence: 'medium' };
+  return { targetDate: '', mode: 'extra', source: 'auto', confidence: 'high' };
+}
+
+function activityAssignmentFor(run) {
+  const saved = appData.activityAssignments?.[String(run?.activityId || '')];
+  return saved || automaticActivityAssignment(run);
+}
+
+function setActivityAssignment(activityId, targetDate, mode = 'same-day') {
+  if (!activityId || !targetDate || !['same-day', 'makeup', 'extra'].includes(mode)) return;
+  appData.activityAssignments = normalizeActivityAssignments(appData.activityAssignments);
+  appData.activityAssignments[String(activityId)] = { targetDate, mode, source: 'runner', updatedAt: new Date().toISOString() };
+  recordTrainingEvent('activity_assignment_updated', { date: targetDate, source: 'runner', detail: `${activityId} → ${targetDate} (${mode})` });
+  saveData(appData);
+  refreshCoachReviewPanels();
+}
+
+function openActivityAssignment(activityId) {
+  const run = garminActivityRecords().find((item) => String(item.activityId) === String(activityId));
+  if (!run) return;
+  const planDays = (appData.plan || []).flatMap((week) => week.days || []).filter((day) => day.type !== 'rest' && day.dateStr <= run.date && day.dateStr >= addDaysToDateStr(run.date, -7));
+  const current = activityAssignmentFor(run);
+  const options = planDays.map((day) => `<option value="${day.dateStr}" ${day.dateStr === current.targetDate ? 'selected' : ''}>${day.dateStr} · ${trainingTypeLabel(day.type, day.focus)} · ${reviewEscape(trainingTaskTitle(day))}</option>`).join('');
+  showModal('修正這趟跑步的課程對應', `<p class="field-help" style="margin-top:0">系統預設會自動對應同日課程，或在休息日跑步時尋找 3 天內可安全認列的補跑；只有判斷不符合實際情況時才需要改。</p><div class="form-group"><label class="form-label" for="m-activity-assignment">對應的正式課程</label><select id="m-activity-assignment" class="form-input">${options}</select></div>`, [
+    { label: '儲存對應', primary: true, action: () => { setActivityAssignment(run.activityId, document.getElementById('m-activity-assignment')?.value, document.getElementById('m-activity-assignment')?.value === run.date ? 'same-day' : 'makeup'); closeModal(); } },
+    { label: '標示為額外跑', action: () => { appData.activityAssignments = normalizeActivityAssignments(appData.activityAssignments); appData.activityAssignments[String(run.activityId)] = { targetDate: run.date, mode: 'extra', source: 'runner', updatedAt: new Date().toISOString() }; saveData(appData); closeModal(); refreshCoachReviewPanels(); } },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+function futurePlanSnapshot(fromWeek = currentWeek + 1) {
+  return (appData.plan || []).filter((week) => week.weekNum >= fromWeek).map((week) => ({ weekNum: week.weekNum, targetKm: Number(week.targetKm) || 0, quality: (week.days || []).filter((day) => ['tempo', 'interval'].includes(day.type)).length, deload: Boolean(week.isDeload) }));
+}
+
+function recordPlanChange(before, source, title) {
+  const after = futurePlanSnapshot();
+  const changes = after.map((week) => {
+    const previous = before.find((item) => item.weekNum === week.weekNum);
+    if (!previous) return '';
+    const parts = [];
+    if (previous.targetKm !== week.targetKm) parts.push(`${previous.targetKm} → ${week.targetKm} km`);
+    if (previous.quality !== week.quality) parts.push(`品質課 ${previous.quality} → ${week.quality} 堂`);
+    if (!previous.deload && week.deload) parts.push('改為恢復週');
+    return parts.length ? `第 ${week.weekNum} 週：${parts.join('、')}` : '';
+  }).filter(Boolean);
+  if (!changes.length) return;
+  appData.planChangeHistory = normalizePlanChangeHistory(appData.planChangeHistory);
+  appData.planChangeHistory.push({ date: todayStr(), source, title, changes });
+  appData.planChangeHistory = appData.planChangeHistory.slice(-30);
 }
 
 function formatSessionDuration(minutes) {
@@ -4436,6 +4623,7 @@ function formatSessionDuration(minutes) {
 }
 
 let selectedTrainingReportActivityId = null;
+let selectedTrainingReportLapCategory = null;
 
 function sessionQualitySignals(run) {
   const mainLaps = run.laps.filter((lap) => ['MAIN', 'INTERVAL'].includes(String(lap?.intensity || '').toUpperCase()) && paceToSeconds(lap.pace_per_km));
@@ -4462,12 +4650,20 @@ function garminFeelLabel(value) {
 
 function selectTrainingReport(activityId) {
   selectedTrainingReportActivityId = Number(activityId) || null;
+  selectedTrainingReportLapCategory = null;
   refreshCoachReviewPanels();
+}
+
+function selectTrainingReportLapCategory(category) {
+  selectedTrainingReportLapCategory = category || null;
+  const analysisHost = document.getElementById('training-analysis-content');
+  if (analysisHost) analysisHost.innerHTML = renderTrainingAnalysis();
 }
 
 function renderLatestTrainingReport(runs) {
   const run = runs.find((item) => item.activityId === selectedTrainingReportActivityId) || runs.at(-1);
   if (!run) return '';
+  const assignment = activityAssignmentFor(run);
   const planned = plannedSessionFor(run);
   const mainScope = run.qualityEligible;
   const courseKm = mainScope ? run.qualityKm : run.km;
@@ -4475,10 +4671,10 @@ function renderLatestTrainingReport(runs) {
   const courseHr = mainScope ? run.qualityHr : run.hr;
   const courseCadence = mainScope ? run.qualityCadence || run.cadence : run.cadence;
   const laps = run.laps.filter((lap) => Number(lap?.distance_km) > 0);
-  const maxDistance = Math.max(...laps.map((lap) => Number(lap.distance_km) || 0), 0.1);
   const status = mainScope ? '已辨識主課' : '全程紀錄';
   const statusClass = mainScope ? '' : ' neutral';
-  const goal = planned?.task || planned?.title || '尚無對應課表目標';
+  const plannedType = planned ? trainingTypeLabel(planned.type, planned.focus) : '未找到同日課表';
+  const goal = planned ? trainingTaskTitle(planned) : '這筆實跑未對應到正式課表';
   const target = [planned?.pace, planned?.hrTarget].filter(Boolean).join(' · ') || '以教練指示與舒適度完成';
   const scopeText = mainScope ? `主課 ${courseKm?.toFixed(1)} km` : `全程 ${run.km.toFixed(1)} km`;
   const summary = mainScope
@@ -4487,9 +4683,33 @@ function renderLatestTrainingReport(runs) {
   const evidence = mainScope
     ? '品質判讀只使用 Garmin 明確標記的主課；熱身、恢復與收操仍保留在總負荷，不會拖慢主課成績。'
     : '本次僅用全程呈現，尚不會以此作為主課配速／心率的課表升降依據。';
-  const lapRows = laps.length
-    ? laps.map((lap) => `<div class="session-lap ${sessionIntensityClass(lap.intensity)}"><span class="session-lap-label">${reviewEscape(sessionIntensityLabel(lap.intensity, lap.index))}</span><span class="session-lap-bar"><i style="width:${Math.max(5, (Number(lap.distance_km) / maxDistance) * 100)}%"></i></span><span class="session-lap-meta">${Number(lap.distance_km).toFixed(2)} km</span><span class="session-lap-meta">${reviewEscape(lap.pace_per_km || '—')}</span></div>`).join('')
+  const intervalBlock = mainScope && isStructuredIntervalBlock(laps);
+  const lapGroups = summarizeSessionLaps(laps, mainScope, intervalBlock);
+  const defaultLapCategory = mainScope && lapGroups.some((group) => group.intensity === 'MAIN') ? 'MAIN' : 'ALL';
+  const selectedLapCategory = selectedTrainingReportLapCategory === 'ALL' || lapGroups.some((group) => group.intensity === selectedTrainingReportLapCategory)
+    ? selectedTrainingReportLapCategory
+    : defaultLapCategory;
+  const visibleLaps = selectedLapCategory === 'ALL'
+    ? laps
+    : laps.filter((lap) => (mainScope ? String(lap?.intensity || '').toUpperCase() : 'LAP') === selectedLapCategory);
+  const visiblePaces = visibleLaps.map((lap) => paceToSeconds(lap.pace_per_km)).filter((pace) => pace > 0);
+  const fastestLapPace = visiblePaces.length ? Math.min(...visiblePaces) : 0;
+  const slowestLapPace = visiblePaces.length ? Math.max(...visiblePaces) : 0;
+  const lapRows = visibleLaps.length
+    ? visibleLaps.map((lap, index) => {
+      const paceSeconds = paceToSeconds(lap.pace_per_km);
+      const relativePace = fastestLapPace && slowestLapPace > fastestLapPace && paceSeconds
+        ? 54 + ((slowestLapPace - paceSeconds) / (slowestLapPace - fastestLapPace)) * 46
+        : 76;
+      const label = mainScope ? sessionLapLabel(lap, lap.index || index + 1, true, intervalBlock) : `第 ${index + 1} 圈`;
+      return `<div class="session-lap ${mainScope ? sessionIntensityClass(lap.intensity) : 'neutral'}"><span class="session-lap-label">${reviewEscape(label)}</span><span class="session-lap-bar" title="${reviewEscape(lap.pace_per_km || '配速未提供')}"><i style="width:${relativePace.toFixed(0)}%"></i></span><span class="session-lap-meta">${Number(lap.distance_km).toFixed(2)} km</span><span class="session-lap-meta">${reviewEscape(lap.pace_per_km || '—')}</span></div>`;
+    }).join('')
     : '<p class="session-breakdown-copy">這筆舊資料尚未同步計圈摘要；下次 Garmin 同步後會補上，不影響既有總量與主課判讀。</p>';
+  const lapFilters = laps.length ? `<div class="session-lap-filters" role="group" aria-label="篩選課程分段"><button type="button" class="session-lap-filter ${selectedLapCategory === 'ALL' ? 'active' : ''}" onclick="selectTrainingReportLapCategory('ALL')">全部 <small>${laps.length}</small></button>${lapGroups.map((group) => `<button type="button" class="session-lap-filter ${selectedLapCategory === group.intensity ? 'active' : ''}" onclick="selectTrainingReportLapCategory('${group.intensity}')">${reviewEscape(group.label)} <small>${group.count}</small></button>`).join('')}</div>` : '';
+  const selectedGroup = lapGroups.find((group) => group.intensity === selectedLapCategory);
+  const lapFilterNote = selectedLapCategory === 'ALL'
+    ? `顯示全部 ${laps.length} 段 Garmin 分段。`
+    : `顯示${selectedGroup?.label || '所選類別'} ${visibleLaps.length} 段；可切換其他類別，不會重複堆疊摘要。`;
   const autopilot = coachReviewData?.autopilot?.metrics || {};
   const comparisonLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[autopilot.comparisonFamily] || '主課';
   const confidence = mainScope
@@ -4499,12 +4719,26 @@ function renderLatestTrainingReport(runs) {
   const completion = plannedKm ? `${courseKm >= plannedKm * (garminCompletionPercent() / 100) ? '已達標' : '部分完成'} · 目標 ${plannedKm.toFixed(1)} km／實跑 ${courseKm.toFixed(1)} km` : '未找到可量化的課表目標';
   const signals = sessionQualitySignals(run);
   const feel = run.selfEvaluation;
+  const signalText = signals
+    ? `${signals.label}${signals.hrDelta !== null ? `；後半心率 ${signals.hrDelta >= 0 ? '+' : ''}${signals.hrDelta} bpm。` : ''}`
+    : '';
   const history = runs.slice(-8).reverse().map((item) => `<button class="session-report-history ${item.activityId === run.activityId ? 'active' : ''}" onclick="selectTrainingReport('${item.activityId || ''}')">${reviewEscape(item.date.slice(5))}<small>${item.qualityPace || item.pace || '—'}/km</small></button>`).join('');
+  const nextAction = mainScope
+    ? '主課資料已獨立入帳；維持本週正式課表，下一堂照原安排執行。'
+    : '本次保留為實跑紀錄；下一堂仍以正式課表為準，不因自動計圈調整強度。';
+  const reportTitle = planned ? `${plannedType}完成報告` : `${reviewEscape(run.name)}｜實跑報告`;
+  const assignmentLabel = assignment.mode === 'extra'
+    ? '系統判定為額外跑，不影響正式課表完成度。'
+    : assignment.mode === 'makeup'
+      ? `系統${assignment.source === 'runner' ? '已依你的修正' : '已自動'}對應為 ${assignment.targetDate} 的補跑。`
+      : `系統已自動對應 ${assignment.targetDate} 的同日正式課程。`;
+  const assignmentConfidence = assignment.confidence === 'medium' ? '低信心，建議確認一次。' : '判讀可信；不需要額外操作。';
+  const assignmentAction = run.activityId ? `<button type="button" class="btn btn-secondary" onclick="openActivityAssignment('${run.activityId}')">這次對應不對？</button>` : '';
   return `<section class="session-report" aria-label="最新訓練報告">
-    <div class="session-report-head"><div><div class="session-report-kicker">Latest training report · Garmin</div><h2 class="session-report-title">${reviewEscape(run.name)}｜本次訓練成果</h2><div class="session-report-meta">${reviewEscape(run.date)} · 全程 ${run.km.toFixed(2)} km · ${formatSessionDuration(run.durationMin)}</div></div><span class="session-report-status${statusClass}">${status}</span></div>
-    <div class="session-report-body"><div class="session-report-grid"><div><div class="session-report-label">本次完成度</div><p class="session-report-summary">${summary}</p><p class="session-report-note">${completion}。${evidence}</p></div><div class="session-report-target"><div class="session-report-label">對應課表</div><b>${reviewEscape(goal)}</b><span>${reviewEscape(target)}</span></div></div>
-    <div class="session-report-metrics"><div class="session-report-metric"><span>判讀範圍</span><strong>${scopeText}</strong></div><div class="session-report-metric"><span>配速</span><strong>${coursePace ? `${reviewEscape(coursePace)}/km` : '—'}</strong></div><div class="session-report-metric"><span>平均心率</span><strong>${courseHr ? `HR ${Math.round(courseHr)}` : '—'}</strong></div><div class="session-report-metric"><span>平均步頻</span><strong>${courseCadence ? `${Math.round(courseCadence)} spm` : '—'}</strong></div></div>
-    <div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">課程分段</h3><p class="session-breakdown-copy">以 Garmin 計圈／訓練段別呈現；長條代表每段距離，右側為該段配速。</p><div class="session-lap-list">${lapRows}</div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '先累積可辨識的主課資料，再調整品質課。'}</strong><p>${signals ? `${signals.label}${signals.hrDelta !== null ? `；後半心率 ${signals.hrDelta >= 0 ? '+' : ''}${signals.hrDelta} bpm。` : '。'}<br>` : ''}${feel ? `Garmin 自我評量：${garminFeelLabel(feel.feel)} · RPE ${feel.rpe}/10。<br>` : 'Garmin 尚未填自我評量；只需在疼痛、睡眠或疾病異常時補充即可。<br>'}${confidence}</p></div></div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div>
+    <div class="session-report-head"><div><div class="session-report-kicker">Training report · Garmin</div><h2 class="session-report-title">${reportTitle}</h2><div class="session-report-meta">${reviewEscape(run.date)} · 全程 ${run.km.toFixed(2)} km · ${formatSessionDuration(run.durationMin)}</div></div><span class="session-report-status${statusClass}">${status}</span></div>
+    <div class="session-report-body"><div class="session-report-grid"><div class="session-report-verdict"><div class="session-report-label">這次該怎麼看</div><p class="session-report-summary">${summary}</p><p class="session-report-note">${completion}。${evidence}</p><div class="session-next-action"><b>下一步</b><span>${nextAction}</span></div></div><aside class="session-report-target"><div class="session-report-label">課程對應</div><div class="session-plan-row"><span>系統判讀</span><b>${reviewEscape(assignmentLabel)}</b></div><div class="session-plan-row"><span>可信度</span><b>${assignmentConfidence}</b></div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${assignmentAction}</div></aside></div><div class="session-report-grid" style="margin-top:12px"><aside class="session-report-target"><div class="session-report-label">正式課表對照</div><div class="session-plan-row"><span>原定課型</span><b>${reviewEscape(plannedType)}</b></div><div class="session-plan-row"><span>課表內容</span><b>${reviewEscape(goal)}</b></div><div class="session-plan-row"><span>目標提示</span><b>${reviewEscape(target)}</b></div></aside></div>
+    <div class="session-report-metrics"><div class="session-report-metric"><span>判讀範圍</span><strong>${scopeText}</strong></div><div class="session-report-metric"><span>配速</span><strong>${coursePace ? `${reviewEscape(coursePace)}/km` : '—'}</strong></div><div class="session-report-metric"><span>平均心率</span><strong>${courseHr ? `HR ${Math.round(courseHr)}` : '—'}</strong></div></div><div class="session-secondary-metrics"><span>平均步頻 <b>${courseCadence ? `${Math.round(courseCadence)} spm` : '—'}</b></span>${feel ? `<span>Garmin 自我評量 <b>${garminFeelLabel(feel.feel)} · RPE ${feel.rpe}/10</b></span>` : '<span>Garmin 自我評量 <b>尚未填寫</b></span>'}</div>
+    <div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">${mainScope ? '課程分段與配速' : 'Garmin 計圈與配速'}</h3><p class="session-breakdown-copy">${mainScope ? '預設聚焦主課；需要時可切換熱身、活動、恢復、收操或全部。' : '本次沒有可安全判讀的課程段別；以下僅顯示 Garmin 計圈，不會覆寫正式課表。'}</p>${lapFilters}<p class="session-lap-filter-note">${lapFilterNote}</p><div class="session-lap-list">${lapRows}</div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '這筆資料保留為趨勢參考，不會改寫正式課表。'}</strong><p>${signalText}${confidence}</p></div></div><div class="session-report-history-wrap"><div class="session-report-history-label">最近訓練</div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div></div>
   </section>`;
 }
 
@@ -5153,6 +5387,7 @@ function renderCoachReviewPanel() {
         ${isLong ? '<div class="coach-menu-head-line"><span class="coach-key-badge">本週關鍵課</span></div>' : ''}
         <div>${highlightMenuText(mainText)}</div>
         ${purposeText ? `<div class="coach-menu-purpose">🎯 ${reviewEscape(purposeText)}</div>` : ''}
+        ${(() => { const explicitSteps = Array.isArray(item.steps) ? item.steps : []; const confidence = explicitSteps.length ? 'coach' : coachStructureConfidence(planText); const structure = coachWorkoutStructure(planText, { km: registrationDistanceKm(planText) || 5 }, explicitSteps); return confidence === 'note-only' ? '<div class="coach-fineprint" style="margin-top:8px">⌚ 此課程缺少可安全轉換的距離／時間處方，會保留為教練備註，不會自動寫入 Garmin 結構化課程。</div>' : `<details class="coach-jargon" open style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:800;color:var(--c-primary-hover)">⌚ Garmin 課程結構 <small style="color:var(--c-text-muted)">· ${confidence === 'coach' ? '教練原始步驟' : '由教練文字轉換'}</small></summary>${renderGarminWorkoutStructure({ km: registrationDistanceKm(planText) || 5, workoutStructure: structure })}</details>`; })()}
       </div>
     </div>`;
   }).join('');
@@ -5187,6 +5422,7 @@ function renderCoachReviewPanel() {
     </div>
     ${garminOnlyNotice}
     ${renderLastRecalibrationCard()}
+    ${renderPlanChangeTimeline()}
     ${renderLiveCoachCard(week, nextWeek)}
     ${courseSection}
     ${renderCoachDataSignals()}
@@ -5433,7 +5669,9 @@ function applyCoachPlanOverride(day, week) {
   const steps = (day.steps || []).map((step) => step.title === '主課'
     ? { ...step, dose: '', detail: entry.plan, isCoachMain: true }
     : step);
-  return { ...day, task: headline, pace: '', hrTarget: '', steps, coachPlan: true };
+  const suppliedSteps = Array.isArray(entry.steps) ? entry.steps : [];
+  const workoutStructure = coachWorkoutStructure(entry.plan, day, suppliedSteps);
+  return { ...day, task: headline, pace: '', hrTarget: '', steps, workoutStructure, workoutStructureConfidence: suppliedSteps.length ? 'coach' : coachStructureConfidence(entry.plan), coachPlan: true };
 }
 
 function renderWeekSection(plan) {
@@ -5694,14 +5932,125 @@ function renderGarminRunResult(run, extra = false) {
   </div>`;
 }
 
+function workoutStepKind(title = '') {
+  const text = String(title);
+  if (/熱身/.test(text)) return 'warmup';
+  if (/收操|緩和/.test(text)) return 'cooldown';
+  if (/恢復|走|慢跑恢復/.test(text)) return 'recovery';
+  if (/快步|加速|間歇|快段/.test(text)) return 'interval';
+  return 'main';
+}
+
+function workoutEndFromText(text, fallbackKm = 0) {
+  const source = String(text || '');
+  const distance = source.match(/(\d+(?:\.\d+)?)\s*(?:km|公里)/i);
+  if (distance) return { type: 'distance', value: Math.round(Number(distance[1]) * 1000), label: `${distance[1]} km` };
+  const minutes = source.match(/(\d+(?:\.\d+)?)\s*分(?:鐘)?/);
+  if (minutes) return { type: 'time', value: Math.round(Number(minutes[1]) * 60), label: `${minutes[1]} 分` };
+  return fallbackKm ? { type: 'distance', value: Math.round(fallbackKm * 1000), label: `${fallbackKm} km` } : { type: 'open', value: 0, label: '依體感完成' };
+}
+
+function workoutStructureForDay(day) {
+  if (Array.isArray(day?.workoutStructure) && day.workoutStructure.length) return day.workoutStructure;
+  const courseSteps = attachCourseGuides(day?.steps || [], day?.type);
+  return courseSteps.map((step, index) => {
+    const kind = workoutStepKind(step.title);
+    return {
+      order: index + 1,
+      kind,
+      title: step.title || `步驟 ${index + 1}`,
+      end: workoutEndFromText(step.dose || step.detail, kind === 'main' ? Number(day?.km) || 5 : 0),
+      target: kind === 'main' || kind === 'interval' ? [day?.pace, day?.hrTarget].filter(Boolean).join(' · ') : '',
+      detail: step.detail || step.text || '依今天課表執行'
+    };
+  });
+}
+
+function normalizeCoachWorkoutSteps(steps) {
+  if (!Array.isArray(steps)) return [];
+  return steps.filter((step) => step && ['warmup', 'main', 'interval', 'recovery', 'cooldown', 'repeat'].includes(step.kind) && step.end)
+    .slice(0, 12).map((step, index) => ({
+      order: index + 1,
+      kind: step.kind,
+      title: String(step.title || '').slice(0, 60) || ({ warmup: '熱身', main: '主課', interval: '快段', recovery: '恢復', cooldown: '收操', repeat: '重複組' }[step.kind]),
+      end: { type: ['distance', 'time', 'reps', 'open'].includes(step.end.type) ? step.end.type : 'open', value: Math.max(0, Number(step.end.value) || 0), label: String(step.end.label || '').slice(0, 40) || '依體感' },
+      target: String(step.target || '').slice(0, 120), detail: String(step.detail || '').slice(0, 240),
+      repetitions: Math.max(0, Number(step.repetitions) || 0),
+      children: normalizeCoachWorkoutSteps(step.children)
+    }));
+}
+
+function coachStructureConfidence(planText) {
+  const text = String(planText || '');
+  return /(?:E\s*跑|長跑|慢跑|節奏跑|間歇)\s*\d+(?:\.\d+)?\s*(?:km|公里)/i.test(text) ? 'inferred' : 'note-only';
+}
+
+function coachWorkoutStructure(planText, day, suppliedSteps = []) {
+  const explicit = normalizeCoachWorkoutSteps(suppliedSteps);
+  if (explicit.length) return explicit;
+  if (coachStructureConfidence(planText) === 'note-only') return [];
+  const text = String(planText || '');
+  const totalMatch = text.match(/(?:E\s*跑|長跑|慢跑|節奏跑|間歇)\s*(\d+(?:\.\d+)?)\s*(?:km|公里)/i);
+  const totalKm = totalMatch ? Number(totalMatch[1]) : (Number(day?.km) || 5);
+  const warmupMatch = text.match(/(?:前|熱身)\s*(\d+(?:\.\d+)?)\s*(?:km|公里)[^。；;]*熱身/i);
+  const warmupKm = warmupMatch ? Number(warmupMatch[1]) : 0;
+  const cooldownMatch = text.match(/(?:收操|收)\s*(\d+)\s*分(?:鐘)?/i);
+  const structure = [];
+  if (warmupKm > 0) structure.push({ order: 1, kind: 'warmup', title: '熱身', end: workoutEndFromText(`${warmupKm} km`), target: '', detail: `前 ${warmupKm} km 放鬆熱身。` });
+  structure.push({ order: structure.length + 1, kind: /間歇|快段/.test(text) ? 'interval' : 'main', title: /間歇|快段/.test(text) ? '主課快段' : '主課', end: workoutEndFromText(`${Math.max(0.1, totalKm - warmupKm)} km`), target: [text.match(/\d{1,2}:\d{2}\s*[–-]?\s*\d{1,2}:\d{2}/)?.[0], text.match(/HR\s*[≤<] ?\d+/i)?.[0]].filter(Boolean).join(' · '), detail: text });
+  const strides = text.match(/(?:ST\s*快步|加速跑)\s*(\d+)\s*[×xX]\s*(\d+)\s*秒/i);
+  const recoveryMatch = text.match(/(?:組間|之間|恢復)[^。；;]*?(\d+)\s*秒/i);
+  const recoverySeconds = recoveryMatch ? Number(recoveryMatch[1]) : 45;
+  if (strides) structure.push({ order: structure.length + 1, kind: 'repeat', title: '加速跑組', repetitions: Number(strides[1]), children: [{ kind: 'interval', title: '快步', end: { type: 'time', value: Number(strides[2]), label: `${strides[2]} 秒` } }, { kind: 'recovery', title: '恢復', end: { type: 'time', value: recoverySeconds, label: `${recoverySeconds} 秒` } }], end: { type: 'reps', value: Number(strides[1]), label: `${strides[1]} 組` }, target: '', detail: `每趟之間走或慢跑 ${recoverySeconds} 秒恢復。` });
+  if (cooldownMatch) structure.push({ order: structure.length + 1, kind: 'cooldown', title: '收操', end: workoutEndFromText(`${cooldownMatch[1]} 分`), target: '', detail: '放慢、走跑並恢復呼吸。' });
+  return structure;
+}
+
 function garminManualBuilderSteps(day) {
-  return attachCourseGuides(day.steps, day.type).map((step, index) => ({
+  return workoutStructureForDay(day).map((step, index) => ({
+    ...step,
     order: index + 1,
-    title: step.title || `步驟 ${index + 1}`,
-    dose: step.dose || '依 Garmin 選項設定',
-    detail: step.detail || step.text || '依今天課表執行',
-    target: step.title === '主課' ? [day.pace, day.hrTarget].filter(Boolean).join(' · ') : '不設目標或以舒適強度完成'
+    dose: step.end?.label || '依 Garmin 選項設定',
+    detail: step.detail || '依今天課表執行',
+    target: step.target || '不設目標或以舒適強度完成',
+    targetSpec: garminTargetSpec(step.target, day?.type, step.kind)
   }));
+}
+
+function paceSecondsFromText(value) {
+  const match = String(value || '').match(/(\d{1,2}):(\d{2})/);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : 0;
+}
+
+function garminTargetSpec(targetText, workoutType = '', stepKind = '') {
+  const text = String(targetText || '');
+  const hrRange = text.match(/HR\s*(\d+)\s*[–-]\s*(\d+)/i);
+  const hrMax = text.match(/HR\s*[≤<]\s*(\d+)/i);
+  const paces = [...text.matchAll(/(\d{1,2}:\d{2})/g)].map((match) => paceSecondsFromText(match[1])).filter(Boolean);
+  const isQuality = ['tempo', 'interval'].includes(workoutType) || stepKind === 'interval';
+  if (isQuality && paces.length) {
+    const fastest = Math.min(...paces), slowest = Math.max(...paces);
+    return { kind: 'speed', minMps: Number((1000 / slowest).toFixed(4)), maxMps: Number((1000 / fastest).toFixed(4)) };
+  }
+  if (hrRange) return { kind: 'heart_rate', min: Number(hrRange[1]), max: Number(hrRange[2]) };
+  if (hrMax) return { kind: 'heart_rate', min: Math.max(1, Number(hrMax[1]) - 20), max: Number(hrMax[1]) };
+  if (paces.length) {
+    const pace = paces[0];
+    return { kind: 'speed', minMps: Number((1000 / (pace + 5)).toFixed(4)), maxMps: Number((1000 / Math.max(1, pace - 5)).toFixed(4)) };
+  }
+  return null;
+}
+
+function renderGarminWorkoutStructure(day) {
+  const labels = { warmup: '熱身', main: '主課', interval: '快段', recovery: '恢復', cooldown: '收操', repeat: '重複組' };
+  const steps = workoutStructureForDay(day);
+  return `<div class="workout-steps">${steps.map((step) => {
+    const isRepeat = step.kind === 'repeat' && Array.isArray(step.children);
+    const childSteps = isRepeat ? `<div style="display:grid;gap:3px;margin-top:5px;padding:7px 9px;border-left:2px solid var(--c-primary);background:rgba(36,114,79,.06);border-radius:0 8px 8px 0"><b>每一組依序完成：</b>${step.children.map((child) => `<span>${reviewEscape(labels[child.kind] || child.title)} ${reviewEscape(child.end?.label || '依體感')}${child.target ? ` · ${reviewEscape(child.target)}` : ''}</span>`).join('')}<span style="color:var(--c-text-muted)">${reviewEscape(step.detail || '完成後再進入下一組。')}</span></div>` : '';
+    const repeatTitle = isRepeat ? `重複 ${step.end?.label || step.repetitions || ''}` : `${labels[step.kind] || step.title}｜${step.end?.label || '依體感'}`;
+    const repeatCopy = isRepeat ? '不是獨立課程；以下動作連續算一組，再重做指定次數。' : (step.target || step.detail || '依舒適強度完成');
+    return `<div class="step"><span class="step-icon">${step.kind === 'warmup' ? '①' : step.kind === 'cooldown' ? '✓' : isRepeat ? '↻' : '•'}</span><span><b>${reviewEscape(repeatTitle)}</b><br>${reviewEscape(repeatCopy)}${childSteps}</span></div>`;
+  }).join('')}</div>`;
 }
 
 function garminManualBuilderText(day) {
@@ -5788,32 +6137,54 @@ function estimatedGarminWorkoutSeconds(day) {
 }
 
 function garminMainDistanceKm(day) {
-  const mainStep = garminManualBuilderSteps(day).find((step) => step.title === '主課');
-  const mainText = [mainStep?.dose, mainStep?.detail].filter(Boolean).join(' ');
-  const match = mainText.match(/(?:E\s*跑|恢復跑|長跑|慢跑)\s*(\d+(?:\.\d+)?)\s*(?:km|公里)/i);
-  return match ? Number(match[1]) : (Number(day.km) || 5);
+  const mainStep = garminManualBuilderSteps(day).find((step) => ['main', 'interval'].includes(step.kind));
+  return mainStep?.end?.type === 'distance' ? Number(mainStep.end.value) / 1000 : (Number(day.km) || 5);
 }
 
 function weeklyGarminSyncPayload(week) {
   const runningDays = (week?.days || [])
     .filter((day) => day.type !== 'rest' && day.dateStr)
     .map((day) => applyCoachPlanOverride(day, week));
+  const syncableDays = runningDays.filter((day) => day.workoutStructureConfidence !== 'note-only');
+  const skippedDays = runningDays.filter((day) => day.workoutStructureConfidence === 'note-only');
   return {
     version: 1,
     source: 'runner-local-garmin-sync',
     week: Number(week?.weekNum || currentWeek),
     replaceExisting: true,
-    workouts: runningDays.map((day) => ({
+    skippedDays: skippedDays.map((day) => ({ date: day.dateStr, name: trainingTaskTitle(day), reason: '教練文字缺少可安全轉換的距離／時間步驟' })),
+    workouts: syncableDays.map((day) => ({
       date: day.dateStr,
       name: `Runner｜${day.dateStr}｜${trainingTaskTitle(day)}`.slice(0, 120),
       type: day.type,
+      structureConfidence: day.workoutStructureConfidence || 'formal',
       km: Number(day.km) || 5,
       mainKm: garminMainDistanceKm(day),
       pace: day.pace || '',
+      steps: garminManualBuilderSteps(day),
       summary: garminManualBuilderText(day),
       estimatedDurationSec: estimatedGarminWorkoutSeconds(day)
     }))
   };
+}
+
+function garminWorkoutFingerprint(workout) {
+  return JSON.stringify({ type: workout.type, km: workout.km, mainKm: workout.mainKm, pace: workout.pace, steps: workout.steps });
+}
+
+function garminSyncPreview(payload) {
+  const previous = appData.garminSyncManifest && typeof appData.garminSyncManifest === 'object' ? appData.garminSyncManifest : {};
+  return payload.workouts.map((workout) => {
+    const key = `${workout.date}|${workout.name}`;
+    const before = previous[key];
+    const fingerprint = garminWorkoutFingerprint(workout);
+    return { workout, key, fingerprint, change: !before ? 'new' : before.fingerprint === fingerprint ? 'unchanged' : 'changed' };
+  });
+}
+
+function saveGarminSyncManifest(preview) {
+  appData.garminSyncManifest = Object.fromEntries(preview.map((item) => [item.key, { fingerprint: item.fingerprint, syncedAt: new Date().toISOString() }]));
+  saveData(appData);
 }
 
 async function readGarminSyncStatus() {
@@ -5846,6 +6217,11 @@ async function syncWeekToGarmin(weekNumber = currentWeek) {
   const week = appData.plan?.[weekNumber - 1];
   if (!week) return;
   const payload = weeklyGarminSyncPayload(week);
+  const preview = garminSyncPreview(payload);
+  if (!payload.workouts.length) {
+    showModal('沒有可安全同步的 Garmin 課程', '<p style="margin:0;line-height:1.7">本週教練內容缺少足以建立 Garmin 步驟的距離或時間處方，因此已保留為網頁備註，沒有寫入 Garmin。</p>', [{ label: '關閉', primary: true, action: closeModal }]);
+    return;
+  }
   try {
     const response = await fetch(garminSyncEndpoint(), {
       method: 'POST',
@@ -5863,6 +6239,7 @@ async function syncWeekToGarmin(weekNumber = currentWeek) {
             const action = item.action === 'created' ? '已建立' : item.action === 'replaced' ? '已替換舊課表' : '沿用既有課表';
             return `<li>${reviewEscape(item.date)}｜${reviewEscape(item.name)}（${action}）</li>`;
           }).join('');
+          if (status.status === 'ok') saveGarminSyncManifest(preview);
           showModal(status.status === 'ok' ? 'Garmin 同步完成' : 'Garmin 同步狀態', `<p style="margin-top:0;line-height:1.7">${reviewEscape(status.message || '同步器已結束。')}</p>${rows ? `<ul class="garmin-builder-steps">${rows}</ul>` : ''}`, [{ label: '關閉', primary: true, action: closeModal }]);
         } catch (error) {
           showModal('同步結果暫時無法讀取', `<p style="margin-top:0;line-height:1.7">同步請求已成功交給本機同步器；目前只是無法讀取進度，不代表同步失敗。</p><p style="margin:0;color:var(--c-text-muted);line-height:1.7">請稍後在 Garmin Connect 行事曆確認；若仍未出現，再重新啟動本機同步器後查看。</p><p style="color:var(--c-text-muted);font-size:12px">${reviewEscape(error instanceof Error ? error.message : '暫時無法讀取同步狀態')}</p>`, [{ label: '關閉', primary: true, action: closeModal }]);
@@ -5877,9 +6254,15 @@ async function syncWeekToGarmin(weekNumber = currentWeek) {
 function openWeeklyGarminCalendarGuide(weekNumber = currentWeek) {
   const week = appData.plan?.[weekNumber - 1];
   if (!week) return;
-  const runningDays = (week.days || []).filter((day) => day.type !== 'rest').length;
+  const payload = weeklyGarminSyncPayload(week);
+  const preview = garminSyncPreview(payload);
+  const runningDays = payload.workouts.length;
+  const changeLabel = { new: '新增 Garmin 課程', changed: '課程結構有變更，將替換', unchanged: '與上次相同，維持既有課程' };
+  const previewRows = preview.map((item) => `<li><strong>${reviewEscape(item.workout.date)}｜${reviewEscape(trainingTaskTitle({ task: item.workout.name.replace(/^Runner｜\d{4}-\d{2}-\d{2}｜/, '') }))}</strong><small>${changeLabel[item.change]} · ${item.workout.steps.map((step) => `${step.title || step.kind} ${step.dose || step.end?.label || ''}`).join(' → ')}</small></li>`).join('');
+  const skippedRows = payload.skippedDays.length ? `<div class="garmin-builder-note" style="margin-top:12px"><b>不會寫入 Garmin：</b>${payload.skippedDays.map((item) => `${reviewEscape(item.date)} ${reviewEscape(item.name)}`).join('、')}。原因：缺少可安全轉換的距離／時間步驟，已保留為教練備註。</div>` : '';
   const body = `
     <div class="garmin-builder-note" style="margin-top:0"><b>本機一鍵同步：</b>會建立或安全替換同名的 ${runningDays} 堂 Garmin 跑步訓練，排進對應日期；之後照平常用 Garmin Connect 手機同步手錶即可。</div>
+    <ol class="garmin-builder-steps" style="margin-top:12px"><li><strong>這次同步差異</strong><small>依本機上次成功同步的結構比較。</small></li>${previewRows}</ol>${skippedRows}
     <ol class="garmin-builder-steps" style="margin-top:16px">
       <li><strong>啟動本機同步器</strong><small>首次使用時雙擊「啟動 Runner Garmin 同步器.cmd」；它只在你的電腦上讀取 Runner 課表並呼叫 Garmin。</small></li>
       <li><strong>確認同步本週</strong><small>Runner 會以日期＋課名判斷同名課程，先建立新版、排回原日期，再移除舊版本。</small></li>
@@ -5887,7 +6270,7 @@ function openWeeklyGarminCalendarGuide(weekNumber = currentWeek) {
     </ol>
     <p style="margin:16px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.6">這是個人本機自動化，不是 Garmin 官方 Training API。課表與 Garmin token 都留在你的電腦；只有你按下確認後才會寫入 Garmin 行事曆。</p>`;
   showModal('同步本週課表到 Garmin', body, [
-    { label: `覆蓋並同步 ${runningDays} 堂`, primary: true, action: () => syncWeekToGarmin(weekNumber) },
+    ...(runningDays ? [{ label: `覆蓋並同步 ${runningDays} 堂`, primary: true, action: () => syncWeekToGarmin(weekNumber) }] : []),
     { label: '仍下載 ICS 備用', action: () => downloadWeeklyGarminCalendar(weekNumber) },
     { label: '關閉', action: closeModal }
   ]);
@@ -6049,6 +6432,7 @@ function applyAssessmentToPlan(index = 0) {
     showModal('無法套用檢測', '這筆檢測資料不足，請確認時間或距離格式。', [{ label: '確認', action: closeModal }]);
     return;
   }
+  const beforePlan = futurePlanSnapshot();
   Object.assign(appData.profile, nextPaces, {
     easyPace: secToPace(nextPaces.easyPaceSec),
     lastAssessmentAt: assessment.date,
@@ -6058,6 +6442,7 @@ function applyAssessmentToPlan(index = 0) {
   appData.recalibratedFor = null;
   appData.lastRecalibration = null;
   rebuildWeeksFrom(currentWeek + 1, appData.plan.length - currentWeek);
+  recordPlanChange(beforePlan, 'assessment', `檢測成績已更新：${assessment.date}`);
   saveData(appData);
   closeModal();
   renderPlanView();
@@ -6294,34 +6679,56 @@ function editSkipReason(dateStr) {
 // ============================================================
 // WEEKLY CHECK-IN
 // ============================================================
+function renderCheckinTrend() {
+  const recent = [...(appData.checkins || [])].sort((a, b) => a.weekNum - b.weekNum).slice(-8);
+  if (!recent.length) return '<p style="margin:12px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">完成每週評估後，這裡會自動顯示恢復趨勢與系統對下週做過的保護。</p>';
+  const averageFatigue = recent.filter((item) => item.fatigue).reduce((sum, item, _, items) => sum + item.fatigue / items.length, 0);
+  return `<div class="checkin-trend" aria-label="近期恢復趨勢">${recent.map((item) => {
+    const tone = item.painConcern || item.result === '停止品質課' ? 'danger' : item.fatigue >= 4 || item.result === '降載恢復' ? 'caution' : 'good';
+    const height = Math.max(14, Math.min(100, ((Number(item.fatigue) || 3) / 5) * 100));
+    return `<div class="checkin-trend-item ${tone}" title="第 ${item.weekNum} 週｜疲勞 ${item.fatigue || '未填'}/5｜${reviewEscape(item.result || '維持')}"><div class="checkin-trend-bar"><i style="height:${height}%"></i></div><small>W${item.weekNum}</small></div>`;
+  }).join('')}</div><p style="margin:8px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">近 ${recent.length} 週平均疲勞：${averageFatigue ? `${averageFatigue.toFixed(1)}/5` : '尚無主觀疲勞資料'}；柱越高代表疲勞越高，顏色反映系統是否已降載保護。</p>`;
+}
+
 function renderCheckinSection() {
   const existing = (appData.checkins || []).find(checkin => checkin.weekNum === currentWeek);
+  const totalWeeks = appData.plan?.length || 1;
+  const weekSwitcher = `<div class="checkin-week-switcher" aria-label="切換評估週數">
+    <button class="week-nav-btn" type="button" onclick="jumpToPhaseWeek(${currentWeek - 1})" ${currentWeek <= 1 ? 'disabled' : ''} aria-label="上一週">‹</button>
+    <select aria-label="選擇評估週數" onchange="jumpToPhaseWeek(Number(this.value))">${Array.from({ length: totalWeeks }, (_, index) => index + 1).map((weekNum) => `<option value="${weekNum}" ${weekNum === currentWeek ? 'selected' : ''}>第 ${weekNum} 週</option>`).join('')}</select>
+    <button class="week-nav-btn" type="button" onclick="jumpToPhaseWeek(${currentWeek + 1})" ${currentWeek >= totalWeeks ? 'disabled' : ''} aria-label="下一週">›</button>
+  </div>`;
   if (existing) {
-    return `<div class="card"><div class="card-title">✅ 第 ${currentWeek} 週評估完成</div>
-      <p style="font-size:14px;color:var(--c-text-muted)">結果：${existing.result}　勾選 ${existing.score}/5</p>
+    return `<section class="checkin-card"><div class="checkin-head"><div><div class="checkin-kicker">Weekly review · ${currentWeek} / ${totalWeeks}</div><div class="checkin-title">✅ 第 ${currentWeek} 週評估完成</div></div>${weekSwitcher}</div><div class="checkin-body">
+      <p class="checkin-intro">結果：<b>${existing.result}</b>　勾選 ${existing.score}/5</p>
       ${existing.fatigue ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">本週整體疲勞：${existing.fatigue}/5</p>` : ''}
       ${existing.safetyNote ? `<p style="font-size:13px;color:var(--c-orange);margin-top:6px">安全判斷：${existing.safetyNote}</p>` : ''}
       ${existing.note ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">週記：${existing.note}</p>` : ''}
-      <p style="font-size:13px;margin-top:8px">${existing.adjustment}</p>
-    </div>`;
+      <p style="font-size:13px;margin:10px 0 0;line-height:1.65">${existing.adjustment}</p>${renderCheckinTrend()}
+    </div>
+    </section>`;
   }
   const qHTML = CHECKIN_QUESTIONS.map((question, index) => `<li><input type="checkbox" id="cq-${index}"><label for="cq-${index}">${question}</label></li>`).join('');
-  return `<div class="card">
-    <div class="card-title">📋 第 ${currentWeek} 週評估</div>
-    <p style="font-size:14px;color:var(--c-text-muted);margin-bottom:16px">每週只做一次。系統會先判斷疼痛、疲勞、睡眠與長跑恢復；安全條件未滿足時，不會自動加量。</p>
+  return `<section class="checkin-card">
+    <div class="checkin-head"><div><div class="checkin-kicker">Weekly review · ${currentWeek} / ${totalWeeks}</div><div class="checkin-title">📋 第 ${currentWeek} 週評估</div></div>${weekSwitcher}</div>
+    <div class="checkin-body"><p class="checkin-intro">每週只做一次。系統會先判斷疼痛、疲勞、睡眠與長跑恢復；安全條件未滿足時，不會自動加量。</p>${renderCheckinTrend()}
+    <span class="checkin-section-label">恢復與完成度</span>
     <ul class="checkin-questions">${qHTML}</ul>
+    <span class="checkin-section-label">主觀感受</span>
     <div class="log-form-grid" style="margin-top:18px">
       <div class="form-group"><label class="form-label">本週整體疲勞 (1–5)</label><input class="form-input" id="cw-fatigue" type="number" min="1" max="5" placeholder="3"><div class="field-help">1 很輕鬆，3 正常可恢復，5 非常疲勞。</div></div>
       <div class="form-group"><label class="form-label">本週一句話備註</label><input class="form-input" id="cw-note" type="text" placeholder="例：長跑後腿有點重，但隔天恢復"></div>
     </div>
-    <label class="field-help" style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:10px;background:#fff7ed;color:#9a3412"><input id="cw-pain-concern" type="checkbox" style="margin-top:3px">本週有疼痛、跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</label>
-    <button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="submitCheckin()">提交評估</button>
-  </div>`;
+    <label class="checkin-safety"><input id="cw-pain-concern" type="checkbox" style="margin-top:3px">本週有疼痛、跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</label>
+    <button class="btn btn-primary checkin-submit" onclick="submitCheckin()">提交第 ${currentWeek} 週評估</button>
+    </div>
+  </section>`;
 }
 
 function adjustNextWeek(factor, removeQuality) {
   const nextWeekPlan = appData.plan[currentWeek];
   if (!nextWeekPlan) return;
+  const beforePlan = futurePlanSnapshot();
   nextWeekPlan.targetKm = Math.round(nextWeekPlan.targetKm * factor * 10) / 10;
   nextWeekPlan.days = nextWeekPlan.days.map(day => {
     if (removeQuality && ['tempo', 'interval'].includes(day.type)) {
@@ -6330,6 +6737,7 @@ function adjustNextWeek(factor, removeQuality) {
     if (day.type !== 'rest') day.km = Math.round((day.km || 0) * factor * 10) / 10;
     return day;
   });
+  recordPlanChange(beforePlan, 'checkin', removeQuality ? '週評估自動保護：下週降載並移除品質課' : '週評估已更新下週訓練量');
   saveData(appData);
 }
 

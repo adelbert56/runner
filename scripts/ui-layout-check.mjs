@@ -22,6 +22,100 @@ const viewports = [
   { name: "desktop", width: 1440, height: 1000 },
 ];
 
+const trainerVisualSample = {
+  profile: {
+    generatedAt: "2026-07-06",
+    targetDate: "2026-10-18",
+    targetTime: "02:00:00",
+    racePaceSec: 340,
+    goal: "half",
+    dayState: [0, 1, 0, 1, 0, 0, 1],
+    injuries: ["none"],
+    planVersion: 10,
+  },
+  plan: [{
+    weekNum: 1,
+    phase: "base",
+    phaseLabel: "基礎期",
+    targetKm: 24,
+    days: [{
+      dateStr: "2026-07-08",
+      dow: 3,
+      type: "easy",
+      focus: "easy",
+      task: "E 跑 6.5 km",
+      detail: "輕鬆完成，維持可以對話的強度。",
+      pace: "7:20–7:50/km",
+      km: 6.5,
+      status: "done",
+    }, {
+      dateStr: "2026-07-15",
+      dow: 3,
+      type: "easy",
+      focus: "easy",
+      task: "E 跑 5 km",
+      detail: "輕鬆完成，維持可以對話的強度。",
+      pace: "7:20–7:50/km",
+      km: 5,
+      status: "upcoming",
+    }],
+  }],
+  log: [],
+  checkins: [],
+  assessments: [],
+  trainingEvents: [],
+};
+
+const trainerReviewSample = {
+  updatedAt: "2026-07-14",
+  analyticsUpdatedAt: "2026-07-14",
+  nextWeek: {
+    label: "W1（07-13 週）— 長跑重建",
+    targetKm: "28–30",
+    menu: [
+      { day: "週一", plan: "E 跑 7 km，前 1 km 最慢當熱身，中段 8:50-9:20、守 Z2（HR≤150），收 5 分鐘慢走伸展。目的：洪掉前幾天疲勞。" },
+      { day: "週三", plan: "E 跑 6 km、守 Z2（HR≤150）＋ ST 快步 4×20 秒。目的：保持頻率。" },
+      { day: "週六", plan: "長跑 10 km，清晨開跑，8:50-9:20、守 Z2（HR≤150）。目的：本週最重要一課。" },
+    ],
+  },
+  analyticsRuns: [{
+    activityId: 7008,
+    date: "2026-07-08",
+    name: "晨跑",
+    km: 6.52,
+    durationMin: 47.6,
+    pace: "7:18",
+    hr: 156,
+    cadence: 156,
+    qualityEligible: true,
+    qualitySource: "garmin-workout-steps",
+    qualityKm: 6,
+    qualityPace: "7:40",
+    qualityHr: 154,
+    qualityCadence: 157,
+    laps: [
+      { index: 1, intensity: "WARMUP", distance_km: 0.26, duration_min: 2.95, pace_per_km: "11:43" },
+      { index: 2, intensity: "MAIN", distance_km: 1, duration_min: 7.4, pace_per_km: "7:24" },
+      { index: 3, intensity: "MAIN", distance_km: 1, duration_min: 7.98, pace_per_km: "7:59" },
+      { index: 4, intensity: "MAIN", distance_km: 1, duration_min: 7.88, pace_per_km: "7:53" },
+      { index: 5, intensity: "MAIN", distance_km: 1, duration_min: 7.75, pace_per_km: "7:45" },
+      { index: 6, intensity: "MAIN", distance_km: 1, duration_min: 7.67, pace_per_km: "7:40" },
+      { index: 7, intensity: "MAIN", distance_km: 1, duration_min: 8.43, pace_per_km: "8:26" },
+      { index: 8, intensity: "ACTIVE", distance_km: 0.05, duration_min: 0.35, pace_per_km: "6:59" },
+      { index: 9, intensity: "RECOVERY", distance_km: 0.08, duration_min: 0.76, pace_per_km: "9:30" },
+      { index: 10, intensity: "ACTIVE", distance_km: 0.06, duration_min: 0.35, pace_per_km: "5:58" },
+      { index: 11, intensity: "RECOVERY", distance_km: 0.08, duration_min: 0.73, pace_per_km: "9:06" },
+      { index: 12, intensity: "ACTIVE", distance_km: 0.08, duration_min: 0.35, pace_per_km: "4:20" },
+      { index: 13, intensity: "RECOVERY", distance_km: 0.07, duration_min: 0.72, pace_per_km: "10:23" },
+      { index: 14, intensity: "COOLDOWN", distance_km: 0.27, duration_min: 3.1, pace_per_km: "11:17" },
+      { index: 15, intensity: "COOLDOWN", distance_km: 0.03, duration_min: 0.33, pace_per_km: "10:52" },
+      { index: 16, intensity: "COOLDOWN", distance_km: 0.01, duration_min: 0.11, pace_per_km: "10:52" },
+    ],
+    selfEvaluation: { feel: 5, rpe: 3 },
+  }],
+  autopilot: { metrics: { comparisonFamily: "easy", recentQualityRuns: 0, previousQualityRuns: 0 } },
+};
+
 function fail(message) {
   console.error(`FAIL ${message}`);
   process.exit(1);
@@ -182,6 +276,59 @@ async function assertPanel(page, panel, viewportName) {
   console.log(`OK ${viewportName}/${panel.id} layout`);
 }
 
+async function assertTrainerReport(page, viewportName) {
+  await page.goto(`${baseUrl}trainer.html`, { waitUntil: "networkidle" });
+  await page.evaluate((sample) => localStorage.setItem("runner-trainer-v1", JSON.stringify(sample)), trainerVisualSample);
+  await page.reload({ waitUntil: "networkidle" });
+  await page.evaluate((review) => {
+    // This is a deterministic local visual fixture; it never writes to the product data files.
+    eval(`coachReviewData = ${JSON.stringify(review)}`);
+    renderPlanView();
+    showView("plan");
+    switchPlanTab("analysis");
+  }, trainerReviewSample);
+  await page.waitForSelector(".session-report", { timeout: 5000 });
+  await assertNoHorizontalOverflow(page, `${viewportName}/trainer-report`);
+  const report = await page.locator(".session-report").evaluate((element) => ({
+    hasPlanComparison: element.textContent.includes("正式課表對照"),
+    hasNextAction: element.textContent.includes("下一步"),
+    hasLapFilter: Boolean(element.querySelector(".session-lap-filters")),
+    activeFilterText: element.querySelector(".session-lap-filter.active")?.textContent.trim(),
+    visibleLapCount: element.querySelectorAll(".session-lap-list .session-lap").length,
+    filterLabels: [...element.querySelectorAll(".session-lap-filter")].map((button) => button.textContent.trim()),
+    hasAmbiguousActiveLabel: element.textContent.includes("活動段"),
+    hasInvalidNumber: element.textContent.includes("NaN"),
+  }));
+  if (!report.hasPlanComparison || !report.hasNextAction || !report.hasLapFilter || !/^主課\s+6$/.test(report.activeFilterText || "") || report.visibleLapCount !== 6 || !report.filterLabels.some((label) => /^間歇快段\s+3$/.test(label)) || !report.filterLabels.some((label) => /^間歇恢復\s+3$/.test(label)) || report.hasAmbiguousActiveLabel || report.hasInvalidNumber) {
+    throw new Error(`${viewportName}/trainer-report: product hierarchy or neutral lap labels are missing ${JSON.stringify(report)}`);
+  }
+  await page.screenshot({
+    path: resolve(screenshotDir, `${viewportName}-trainer-report.png`),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: /^全部\s+16$/ }).click();
+  const allLapsVisible = await page.locator(".session-report").evaluate((element) => element.querySelectorAll(".session-lap-list .session-lap").length);
+  if (allLapsVisible !== 16) throw new Error(`${viewportName}/trainer-report: all-category filter did not restore 16 laps`);
+  await page.evaluate(() => {
+    switchPlanTab("coach");
+    const host = document.getElementById("coach-review-content");
+    if (host) host.innerHTML = renderCoachReviewPanel();
+  });
+  await page.waitForSelector("#plan-tab-coach .coach-menu-card", { timeout: 5000 });
+  const coachStructure = await page.locator("#plan-tab-coach").evaluate((element) => ({
+    hasStructure: element.textContent.includes("Garmin 課程結構"),
+    detailsCount: element.querySelectorAll("details").length,
+    hasInvalidNumber: element.textContent.includes("NaN"),
+  }));
+  if (!coachStructure.hasStructure || !coachStructure.detailsCount || coachStructure.hasInvalidNumber) {
+    throw new Error(`${viewportName}/trainer-coach: Garmin structure is missing or invalid ${JSON.stringify(coachStructure)}`);
+  }
+  await page.locator("#plan-tab-coach details").first().evaluate((element) => { element.open = true; });
+  await assertNoHorizontalOverflow(page, `${viewportName}/trainer-coach`);
+  await page.screenshot({ path: resolve(screenshotDir, `${viewportName}-trainer-coach-structure.png`), fullPage: true });
+  console.log(`OK ${viewportName}/trainer report layout`);
+}
+
 const { chromium } = await loadPlaywright();
 await mkdir(screenshotDir, { recursive: true });
 
@@ -197,8 +344,14 @@ try {
     page.on("pageerror", (error) => fail(`${viewport.name}: page error: ${error.message}`));
     await page.goto(baseUrl, { waitUntil: "networkidle" });
 
-    for (const panel of panels) {
-      await assertPanel(page, panel, viewport.name);
+    await assertTrainerReport(page, viewport.name);
+
+    await page.goto(baseUrl, { waitUntil: "networkidle" });
+
+    if (process.env.UI_LAYOUT_TRAINER_ONLY !== "1") {
+      for (const panel of panels) {
+        await assertPanel(page, panel, viewport.name);
+      }
     }
 
     await page.close();

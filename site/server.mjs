@@ -117,6 +117,10 @@ function validGarminSyncPayload(payload) {
     return false;
   }
   if (payload.replaceExisting !== undefined && typeof payload.replaceExisting !== "boolean") return false;
+  const validStep = (step) => step && ["warmup", "main", "interval", "recovery", "cooldown", "repeat"].includes(step.kind)
+    && step.end && ["distance", "time", "reps", "open"].includes(step.end.type)
+    && Number.isFinite(Number(step.end.value)) && Number(step.end.value) >= 0
+    && (!step.children || (Array.isArray(step.children) && step.children.every(validStep)));
   return payload.workouts.every((workout) => (
     workout
     && /^\d{4}-\d{2}-\d{2}$/.test(String(workout.date || ""))
@@ -126,6 +130,7 @@ function validGarminSyncPayload(payload) {
     && Number.isFinite(Number(workout.km))
     && Number(workout.km) > 0
     && Number(workout.km) <= 100
+    && (!workout.steps || (Array.isArray(workout.steps) && workout.steps.length <= 12 && workout.steps.every(validStep)))
   ));
 }
 

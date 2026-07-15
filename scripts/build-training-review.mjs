@@ -23,6 +23,29 @@ const TARGET = process.env.TRAINING_REVIEW_TARGET || path.join(root, "site", "da
 const LOCAL_KEY = path.join(root, "runner", "訓練", ".review-key");
 const PBKDF2_ITERATIONS = 310000;
 
+const COACH_STEP_KINDS = new Set(["warmup", "main", "interval", "recovery", "cooldown", "repeat"]);
+const COACH_END_TYPES = new Set(["distance", "time", "reps", "open"]);
+
+function normalizeCoachSteps(steps) {
+  if (!Array.isArray(steps)) return [];
+  return steps.filter((step) => step && COACH_STEP_KINDS.has(step.kind) && step.end && COACH_END_TYPES.has(step.end.type))
+    .slice(0, 12).map((step) => ({
+      kind: step.kind,
+      title: String(step.title || "").slice(0, 60),
+      end: { type: step.end.type, value: Math.max(0, Number(step.end.value) || 0), label: String(step.end.label || "").slice(0, 40) },
+      target: String(step.target || "").slice(0, 120),
+      detail: String(step.detail || "").slice(0, 240),
+      repetitions: Math.max(0, Number(step.repetitions) || 0),
+      children: normalizeCoachSteps(step.children),
+    }));
+}
+
+function preserveCoachWorkoutSteps(review) {
+  const menu = review?.nextWeek?.menu;
+  if (!Array.isArray(menu)) return review;
+  return { ...review, nextWeek: { ...review.nextWeek, menu: menu.map((entry) => ({ ...entry, steps: normalizeCoachSteps(entry?.steps) })) } };
+}
+
 function weekStart(dateText) {
   const date = new Date(`${dateText}T00:00:00Z`);
   date.setUTCDate(date.getUTCDate() - ((date.getUTCDay() + 6) % 7));
@@ -35,7 +58,11 @@ function buildAnalyticsRuns(activities) {
     const qualityEligible = Boolean(main?.source === 'garmin-workout-steps' && main?.pace_per_km && main?.distance_km > 0);
     const laps = Array.isArray(activity.lap_summary) ? activity.lap_summary : [];
     const intensities = new Set(laps.map((lap) => String(lap?.intensity || '').toUpperCase()));
-    const sessionFamily = intensities.has('INTERVAL') ? 'interval' : intensities.has('MAIN') ? 'steady' : intensities.has('ACTIVE') && intensities.has('RECOVERY') ? 'strides' : 'easy';
+    // A bare INTERVAL lap may simply be an automatic/manual kilometre lap.
+    // Only structured Garmin workout steps can define a quality-session family.
+    const sessionFamily = qualityEligible
+      ? (intensities.has('INTERVAL') ? 'interval' : intensities.has('MAIN') ? 'steady' : intensities.has('ACTIVE') && intensities.has('RECOVERY') ? 'strides' : 'easy')
+      : 'easy';
     return {
       activityId: activity.activityId,
       date: activity.date,
@@ -359,7 +386,7 @@ async function decrypt(payload, passphrase) {
 }
 
 async function buildPublishedReview(plaintext) {
-  let review = plaintext ? JSON.parse(plaintext) : null;
+  let review = plaintext ? preserveCoachWorkoutSteps(JSON.parse(plaintext)) : null;
   try {
     const activityFeed = JSON.parse(await readFile(ACTIVITY_SOURCE, "utf8"));
     const activities = Array.isArray(activityFeed.activities) ? activityFeed.activities : [];
