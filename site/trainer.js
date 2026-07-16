@@ -3197,9 +3197,33 @@ function renderGoalCycleCard() {
   </div>`;
 }
 
+// 設定更新走「調整」而非「砍掉重建」：沿用原計畫起點（週次與進度延續）、
+// 凍結今天以前的歷史課表、保留完成／跳過／補跑／賽事整合標記，只用新設定重排未來的課。
+function updatePlanInPlace(profile) {
+  const oldPlan = appData.plan;
+  const oldProfile = appData.profile || {};
+  profile.generatedAt = oldProfile.generatedAt || profile.generatedAt;
+  const before = futurePlanSnapshot();
+  const newPlan = buildPlan(profile);
+  const today = todayStr();
+  const oldByDate = new Map(oldPlan.flatMap((week) => week.days || []).map((day) => [day.dateStr, day]));
+  newPlan.forEach((week) => {
+    (week.days || []).forEach((day, index) => {
+      const old = oldByDate.get(day.dateStr);
+      if (!old) return;
+      if (day.dateStr < today) week.days[index] = old;
+      else if (old.raceReplacementBase || old.status === 'done' || old.status === 'missed' || old.isMakeup) Object.assign(day, old);
+    });
+  });
+  appData.profile = profile;
+  appData.plan = newPlan;
+  recordPlanChange(before, 'settings', '訓練設定更新，未執行課表已重排');
+}
+
 function generateAndShowPlan() {
-  if (appData.plan && appData.plan.length > 0) {
-    if (!confirm('重新生成會取代目前計畫，訓練紀錄將保留。確定繼續？')) return;
+  const hasExistingPlan = Boolean(appData.plan && appData.plan.length > 0);
+  if (hasExistingPlan) {
+    if (!confirm('更新會以新設定重排「今天之後」的課表；已完成紀錄、過去課表與賽事安排都會保留。確定繼續？')) return;
   }
   const profile = {
     goal: formState.goal,
@@ -3232,8 +3256,12 @@ function generateAndShowPlan() {
   profile.planVersion = PLAN_SCHEMA_VERSION;
   adjustPaceByRecentResult(profile);
 
-  appData.profile = profile;
-  appData.plan = buildPlan(profile);
+  if (hasExistingPlan) {
+    updatePlanInPlace(profile);
+  } else {
+    appData.profile = profile;
+    appData.plan = buildPlan(profile);
+  }
   appData.log = appData.log || [];
   appData.checkins = appData.checkins || [];
   appData.assessments = appData.assessments || [];

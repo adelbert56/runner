@@ -25,11 +25,11 @@
     /* === Layout === */
     .view { display: none; }
     .view.active { display: block; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 24px 20px 28px; }
+    .container { max-width: min(1760px, calc(100vw - 56px)); margin: 0 auto; padding: 24px 20px 28px; }
 
     .trainer-page { padding-bottom: 56px; }
     .trainer-hero {
-      max-width: 1400px;
+      max-width: min(1760px, calc(100vw - 56px));
       margin: 0 auto;
       padding: 28px 20px 10px;
     }
@@ -829,8 +829,8 @@
 
     /* === Plan workspace navigation === */
     .plan-toolbar {
-      max-width: 1320px;
-      width: calc(100% - 40px);
+      max-width: min(1760px, calc(100vw - 56px));
+      width: 100%;
       min-height: 58px;
       margin: 0 auto 26px;
       padding: 0 4px;
@@ -1152,4 +1152,3 @@
       .card { border: 1px solid #ccc; box-shadow: none; }
       .week-calendar { display: grid; grid-template-columns: repeat(3, 1fr); }
     }
-  

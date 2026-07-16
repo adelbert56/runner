@@ -125,6 +125,7 @@ assertCheck(/function fitnessProjection\(/.test(trainer) && /function renderFitn
 assertCheck(/function weeklyCoachLetterBody\(/.test(trainer) && /本週教練信/.test(trainer) && /coach-letter-fold/.test(trainer) && !/details class="day-fold"/.test(trainer), "weekly coach letter folds into the week overview while day cards stay fully expanded");
 assertCheck(/function renderCheckinHistory\(/.test(trainer) && /歷史評估/.test(trainer) && /checkin-history-item/.test(trainer), "weekly review tab shows past check-in decisions, not only the current form");
 assertCheck(/data-requires-coach/.test(trainer) && /\[data-requires-coach\]/.test(trainer), "periodization and analysis tabs stay hidden until the coach review unlocks");
+assertCheck(/function updatePlanInPlace\(/.test(trainer) && /profile\.generatedAt = oldProfile\.generatedAt \|\| profile\.generatedAt/.test(trainer) && /已完成紀錄、過去課表與賽事安排都會保留/.test(trainer) && !/重新生成會取代目前計畫/.test(trainer), "updating handbook settings reflows only future sessions instead of resetting the whole plan");
 assertCheck(/function historyComparisonNote\(/.test(trainer) && /比上次同課型/.test(trainer) && /function runMilestones\(/.test(trainer) && /刷新個人紀錄/.test(trainer) && /創單月新高/.test(trainer) && /milestoneNote = runMilestones\(run\)\.map/.test(trainer), "post-run verdict cites the prior same-type session pace delta and celebrates farthest-run and monthly-volume milestones");
 
 const failed = checks.filter((check) => !check.ok);

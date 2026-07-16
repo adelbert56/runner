@@ -2825,7 +2825,7 @@ button.command-metric:focus-visible {
 }
 
 .registration-app {
-  width: min(1400px, calc(100% - 48px));
+  width: min(1680px, calc(100% - 64px));
   padding: 24px 0 48px;
 }
 
