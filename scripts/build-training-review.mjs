@@ -175,12 +175,15 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
   const rampPct = previousKm > 0 ? Math.round(((recentKm - previousKm) / previousKm) * 100) : null;
   const structuredRuns = analyticsRuns.filter((run) => run.qualityEligible);
   const comparisonFamily = structuredRuns.at(-1)?.sessionFamily || null;
-  const recentQuality = recent.filter((run) => run.qualityEligible && run.sessionFamily === comparisonFamily);
-  const previousQuality = previous.filter((run) => run.qualityEligible && run.sessionFamily === comparisonFamily);
-  // Pace/HR course decisions need enough matched, structured evidence on both
-  // sides of the comparison. Full-session averages remain visible, but cannot
-  // downgrade a course because warmup or cooldown made them slower.
-  const hasComparableQuality = recentQuality.length >= 2 && previousQuality.length >= 2;
+  const matchedQuality = structuredRuns
+    .filter((run) => run.sessionFamily === comparisonFamily)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  // Compare the latest matched pair instead of waiting for two 14-day windows.
+  // This makes the signal available after two same-family main sessions, while
+  // still excluding warmup/cooldown data and unrelated workout types.
+  const recentQuality = matchedQuality.slice(-1);
+  const previousQuality = matchedQuality.slice(-2, -1);
+  const hasComparableQuality = recentQuality.length >= 1 && previousQuality.length >= 1;
   const recentPace = hasComparableQuality ? median(recentQuality.map((run) => paceSeconds(run.qualityPace))) : null;
   const previousPace = hasComparableQuality ? median(previousQuality.map((run) => paceSeconds(run.qualityPace))) : null;
   const recentHr = hasComparableQuality ? average(recentQuality.map((run) => Number(run.qualityHr))) : null;
@@ -192,7 +195,9 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
   const loadRampPct = previousLoad > 0 ? Math.round(((recentLoad - previousLoad) / previousLoad) * 100) : null;
   const paceDeltaSeconds = recentPace && previousPace ? recentPace - previousPace : null;
   const hrDelta = recentHr && previousHr ? Math.round(recentHr - previousHr) : null;
-  const fatigueSignal = paceDeltaSeconds !== null && hrDelta !== null && paceDeltaSeconds >= 8 && hrDelta >= 5;
+  // A two-session comparison is intentionally more conservative than a
+  // multi-session median: do not reduce a course unless both changes are clear.
+  const fatigueSignal = paceDeltaSeconds !== null && hrDelta !== null && paceDeltaSeconds >= 12 && hrDelta >= 7;
 
   let decision = 'maintain';
   let volumeFactor = 1;
@@ -278,6 +283,7 @@ function buildGarminAutopilot(analyticsRuns, updatedAt) {
       previousLoad,
       recentQualityRuns: recentQuality.length,
       previousQualityRuns: previousQuality.length,
+      qualityComparisonSampleSize: recentQuality.length + previousQuality.length,
       comparisonFamily,
       qualityComparisonReady: hasComparableQuality,
       recentLongKm: longestKm(recent),
