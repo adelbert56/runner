@@ -396,12 +396,15 @@ async function buildPublishedReview(plaintext) {
     review.analyticsUpdatedAt = activityFeed.updatedAt || null;
     review.analyticsStatus = "synced";
     review.analyticsRuns = analyticsRuns;
+    // 手錶估的乳酸閾值心率：前端訓練區間優先用它，比 %maxHr 推算準
+    review.lactateThresholdHr = Number(activityFeed.lactateThreshold?.heartRate) || null;
     review.autopilot = buildGarminAutopilot(analyticsRuns, activityFeed.updatedAt);
   } catch {
     review = review || buildGarminOnlyReview([], null);
     review.analyticsRuns = [];
     review.analyticsUpdatedAt = null;
     review.analyticsStatus = "missing";
+    review.lactateThresholdHr = null;
     review.autopilot = buildGarminAutopilot([], null);
   }
   return JSON.stringify(review);

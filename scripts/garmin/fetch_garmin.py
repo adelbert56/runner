@@ -290,6 +290,23 @@ def main() -> int:
         print(f"Garmin authentication unavailable: {exc}", file=sys.stderr)
         return 3
 
+    # Lactate threshold (watch-estimated) gives more accurate training zones
+    # than %maxHr; optional — sync must not fail when the endpoint is missing.
+    lactate_threshold = None
+    try:
+        lt = (client.get_lactate_threshold(latest=True) or {}).get(
+            "speed_and_heart_rate"
+        ) or {}
+        lt_hr = lt.get("heartRate")
+        if lt_hr:
+            lactate_threshold = {
+                "heartRate": lt_hr,
+                "speed": lt.get("speed"),
+                "date": lt.get("calendarDate"),
+            }
+    except Exception as exc:
+        print(f"警告：無法讀取乳酸閾值資料（{exc}）", file=sys.stderr)
+
     end = date.today()
     start = end - timedelta(days=args.days)
     print(f"抓取 {start} ~ {end} 的活動…")
@@ -349,6 +366,7 @@ def main() -> int:
             {
                 "updatedAt": date.today().isoformat(),
                 "count": len(records),
+                "lactateThreshold": lactate_threshold,
                 "activities": records,
             },
             ensure_ascii=False,

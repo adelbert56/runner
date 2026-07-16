@@ -1316,7 +1316,92 @@ function restoreRaceReplacement(day) {
   delete day.raceReplacementBase;
   delete day.raceReplacement;
   delete day.raceName;
+  delete day.postRaceOf;
+  delete day.preRaceTaperOf;
   return true;
+}
+
+// 從賽事名稱與 distances 欄位解析最長距離（使用者通常報主項目）；解析不到回傳 0 由呼叫端決定 fallback。
+function raceMaxKm(race) {
+  const texts = [race?.race_name || '', ...(Array.isArray(race?.distances) ? race.distances : [])];
+  let max = 0;
+  texts.forEach((text) => {
+    const s = String(text);
+    if (/全馬|全程馬拉松/.test(s)) max = Math.max(max, 42.195);
+    if (/半馬|半程馬拉松/.test(s)) max = Math.max(max, 21.0975);
+    (s.match(/([\d.]+)\s*[kK]/g) || []).forEach((token) => {
+      const value = parseFloat(token);
+      if (value > 0 && value <= 110) max = Math.max(max, value);
+    });
+  });
+  return max;
+}
+
+// 賽日包：配速策略 + 補給 + 賽前檢查，填進「以賽代訓」卡片的 steps。
+// raceKm 與課表目標距離不同時用 Riegel 公式微調配速；profile/weather 缺資料時仍需能安全回傳。
+function raceDayPackageSteps(profile, raceKm, dateStr) {
+  const km = Number(raceKm) > 0 ? Number(raceKm) : (GOAL_DIST[profile?.goal] || 10);
+  const goalDist = GOAL_DIST[profile?.goal] || km;
+  const baseRacePaceSec = Number(profile?.racePaceSec) || 0;
+  const adjustedPaceSec = baseRacePaceSec > 0 && goalDist > 0
+    ? baseRacePaceSec * Math.pow(km / goalDist, 0.07)
+    : baseRacePaceSec;
+  const racePace = secToPace(adjustedPaceSec);
+  const startPace = adjustedPaceSec > 0 ? secToPace(adjustedPaceSec + 12) : '—';
+
+  const paceSteps = [
+    {
+      icon: '🚦', title: '配速策略・前 5K', dose: '5 km',
+      detail: adjustedPaceSec > 0
+        ? `以 ${startPace}/km 起跑（比目標配速慢 10–15 秒），先把身體開順，不搶快。`
+        : '先用輕鬆節奏起跑，觀察身體狀況，不搶快。'
+    },
+    {
+      icon: '🎯', title: '配速策略・中段穩定', dose: `${Math.max(0, Math.round((km - 5) * 10) / 10)} km 左右`,
+      detail: adjustedPaceSec > 0
+        ? `穩定守住目標配速 ${racePace}/km，靠節奏而非硬撐維持。`
+        : '找到能撐到終點的穩定節奏，靠體感控制強度。'
+    },
+    {
+      icon: '🏁', title: '配速策略・最後收尾', dose: '依當天狀況',
+      detail: '體感許可就逐步收快衝線；若後段明顯疲勞，維持節奏、不硬撐，避免抽筋或受傷。'
+    }
+  ];
+
+  const fuelSteps = [];
+  if (km >= 21) {
+    fuelSteps.push({ icon: '🍬', title: '補給・能量膠', dose: '每 40–45 分鐘 1 包', detail: '搭配水或運動飲料吞服，避免空腹一次吃太濃造成腸胃不適。' });
+  } else if (km >= 10) {
+    fuelSteps.push({ icon: '💧', title: '補給・補給站', dose: '每站小口喝水', detail: `${km} km 通常不需要能量膠，靠補給站水分即可，避免一次喝太多。` });
+  } else {
+    fuelSteps.push({ icon: '💧', title: '補給・賽前補水', dose: '起跑前', detail: '賽前喝夠水即可，短距離賽事中途不必刻意補給。' });
+  }
+  let isHot = false;
+  try {
+    const tmax = Number(trainerWeather?.[dateStr]?.tmax);
+    isHot = tmax >= 30 || (dateStr ? isHotSeasonDate(new Date(`${dateStr}T00:00:00`)) : false);
+  } catch { /* 天氣資料缺失時忽略高溫提醒，不影響其他 steps */ }
+  if (isHot) {
+    fuelSteps.push({ icon: '🥵', title: '補給・高溫警示', dose: '每個補給站', detail: '氣溫偏高，見水就喝、可澆頭降溫，配速主動放慢，以完賽安全優先。' });
+  }
+
+  const checklistSteps = [
+    { icon: '🎽', title: '賽前檢查・裝備', dose: '前一晚', detail: '號碼布、晶片、跑鞋、心率錶都先準備並試穿確認不磨腳。' },
+    { icon: '😴', title: '賽前檢查・睡眠', dose: '前一晚', detail: '提早上床，就算睡不著也躺著休息，避免臨時熬夜。' },
+    { icon: '🍚', title: '賽前檢查・進食', dose: '起跑前 2 小時完畢', detail: '吃熟悉、好消化的食物，起跑前 2 小時完成進食，避免腸胃不適。' },
+    { icon: '⏰', title: '賽前檢查・抵達時間', dose: '起跑前 60–90 分', detail: '提早抵達會場，預留熱身、上廁所與寄物時間，避免臨場匆忙。' }
+  ];
+
+  return [...paceSteps, ...fuelSteps, ...checklistSteps];
+}
+
+// 賽後恢復窗天數：窗內不排品質課與長跑（前 1–2 天全休、其餘只排短恢復跑）。
+// 全馬 7 天、半馬 5 天、10K 級 3 天、短距離 2 天。
+function postRaceRecoveryDayCount(km) {
+  if (km >= 30) return 7;
+  if (km >= 15) return 5;
+  if (km >= 8) return 3;
+  return 2;
 }
 
 function addDaysToDateStr(dateStr, delta) {
@@ -1356,12 +1441,19 @@ function applyRegisteredSundayRaceReplacements(races) {
     flat.filter((day) => day.dateStr >= today && raceByDate.has(day.dateStr)).map((day) => day.dateStr)
   );
 
+  const registeredDates = new Set(races.map((race) => race.race_date).filter(Boolean));
+
   // 先還原已不再對應有效賽事的替換（賽事被移除、日期變更等）
   flat.forEach((day) => {
     if (!day.raceReplacementBase) return;
+    // 已成為歷史的安排凍結不還原：保留「以賽代訓」紀錄供賽後恢復與賽果自動校準使用
+    if (day.dateStr < today) return;
     const isValidRaceDay = day.raceReplacement === 'race' && validRaceDates.has(day.dateStr);
     const isValidPreRaceDay = day.raceReplacement === 'pre-race' && validRaceDates.has(addDaysToDateStr(day.dateStr, 1));
-    if (!isValidRaceDay && !isValidPreRaceDay) {
+    const isValidPostRaceDay = day.raceReplacement === 'post-race'
+      && ((typeof day.postRaceOf === 'string' && day.postRaceOf !== '' && day.postRaceOf < today) || registeredDates.has(day.postRaceOf));
+    const isValidPreRaceTaperDay = day.raceReplacement === 'pre-race-taper' && validRaceDates.has(day.preRaceTaperOf);
+    if (!isValidRaceDay && !isValidPreRaceDay && !isValidPostRaceDay && !isValidPreRaceTaperDay) {
       const wasRace = day.raceReplacement === 'race';
       const restoredName = day.raceName;
       const restoredDateStr = day.dateStr;
@@ -1397,7 +1489,7 @@ function applyRegisteredSundayRaceReplacements(races) {
       raceDay.task = `${raceName}｜以賽代訓`;
       raceDay.pace = '依賽程距離與當日狀態執行；不另外補長跑';
       raceDay.hrTarget = '';
-      raceDay.steps = [];
+      raceDay.steps = raceDayPackageSteps(appData.profile, raceMaxKm(race) || GOAL_DIST[appData.profile?.goal] || 10, dateStr);
       changed = true;
     }
 
@@ -1411,6 +1503,65 @@ function applyRegisteredSundayRaceReplacements(races) {
       preRaceDay.pace = '完全休息優先；若跑，維持能輕鬆交談的強度';
       preRaceDay.hrTarget = '';
       preRaceDay.steps = [];
+      changed = true;
+    }
+  });
+
+  // 賽後恢復：比賽後 N 天內不排品質課與長跑（N 依賽事距離）。
+  // 只改今天（含）之後的課；已發生的日子凍結。已是 rest 或其他賽事替換日則跳過。
+  raceByDate.forEach((race, dateStr) => {
+    const raceKm = raceMaxKm(race) || GOAL_DIST[appData.profile?.goal] || 10;
+    const recoveryCount = postRaceRecoveryDayCount(raceKm);
+    const raceName = race?.race_name || '已報名賽事';
+    const fullRestDays = raceKm >= 30 ? 2 : 1;
+    for (let offset = 1; offset <= recoveryCount; offset++) {
+      const day = byDateStr.get(addDaysToDateStr(dateStr, offset));
+      if (!day || day.dateStr < today) continue;
+      if (day.type === 'rest' || day.raceReplacement) continue;
+      day.raceReplacementBase = { ...day };
+      day.raceReplacement = 'post-race';
+      day.postRaceOf = dateStr;
+      day.raceName = raceName;
+      day.hrTarget = '';
+      day.steps = [];
+      day.focus = 'recovery';
+      if (offset <= fullRestDays) {
+        day.type = 'rest';
+        day.km = 0;
+        day.task = `賽後恢復日｜「${raceName}」後第 ${offset} 天，完全休息或 20 分鐘散步`;
+        day.pace = '不跑步；伸展、補水、睡眠優先';
+      } else {
+        const easyKm = Math.min(Number(day.km) || 4, raceKm >= 30 ? 6 : 5);
+        day.type = 'easy';
+        day.km = easyKm;
+        day.task = `賽後恢復跑 ${easyKm} km｜「${raceName}」後第 ${offset} 天，只排恢復強度`;
+        day.pace = '很輕鬆、可完整對話；心率偏高就改走路';
+      }
+      changed = true;
+    }
+  });
+
+  // B 賽（半馬級以上、非目標賽）賽前減壓：賽前 2–3 天的品質課降為輕鬆短跑，
+  // 保留腿感、不留疲勞。C 級小賽（<15K）當成以賽代課，不需要額外減壓。
+  // 刻意排在賽後恢復之後：兩場賽事靠很近時，共用的日子讓「上一場的恢復」優先。
+  validRaceDates.forEach((dateStr) => {
+    const race = raceByDate.get(dateStr);
+    if ((raceMaxKm(race) || 0) < 15) return;
+    for (let offset = 2; offset <= 3; offset++) {
+      const day = byDateStr.get(addDaysToDateStr(dateStr, -offset));
+      if (!day || day.dateStr < today) continue;
+      if (!['tempo', 'interval'].includes(day.type) || day.raceReplacement || day.status === 'done') continue;
+      const taperKm = Math.min(Math.round((Number(day.km) || 6) * 0.6 * 10) / 10, 6);
+      day.raceReplacementBase = { ...day };
+      day.raceReplacement = 'pre-race-taper';
+      day.preRaceTaperOf = dateStr;
+      day.type = 'easy';
+      day.focus = 'recovery';
+      day.km = taperKm;
+      day.task = `賽前減壓跑 ${taperKm} km｜「${race?.race_name || '已報名賽事'}」前 ${offset} 天，維持腿感、不做強度`;
+      day.pace = '很輕鬆、可完整對話；跑完應該覺得意猶未盡';
+      day.hrTarget = '';
+      day.steps = [];
       changed = true;
     }
   });
@@ -1545,8 +1696,17 @@ function normalizeActivityAssignments(assignments) {
 
 function normalizePlanChangeHistory(history) {
   if (!Array.isArray(history)) return [];
-  return history.filter((item) => item && /^\d{4}-\d{2}-\d{2}$/.test(item.date || '') && Array.isArray(item.changes))
+  const normalized = history.filter((item) => item && /^\d{4}-\d{2}-\d{2}$/.test(item.date || '') && Array.isArray(item.changes))
     .slice(-30).map((item) => ({ date: item.date, source: String(item.source || 'system').slice(0, 40), title: String(item.title || '課表已更新').slice(0, 100), changes: item.changes.slice(0, 8).map((change) => String(change).slice(0, 180)) }));
+  // Garmin 同步資料可能在同一天分批更新；歷程只呈現最後一次校準結果，避免把同一輪自動調整誤看成兩筆事件。
+  return normalized.reduce((items, item) => {
+    const previousIndex = item.source === 'garmin'
+      ? items.findIndex((previous) => previous.date === item.date && previous.source === item.source && previous.title === item.title)
+      : -1;
+    if (previousIndex >= 0) items[previousIndex] = item;
+    else items.push(item);
+    return items;
+  }, []);
 }
 
 function recordTrainingEvent(type, payload = {}) {
@@ -2554,11 +2714,30 @@ function profileMaxHr(profile) {
 }
 
 function hrZones(profile) {
-  // 以 Z2 為輕鬆跑主區：E 上限 = 80% HRmax（Z2 頂），恢復跑再低一階
   const max = profileMaxHr(profile);
+  // Garmin 手錶有估出乳酸閾值心率時優先採用（個人化，比 %HRmax 推算準）：
+  // 區間比例取 Friel 式 LTHR 百分比，並以 max 封頂避免高於實測最大心率。
+  const lthr = Number(typeof coachReviewData !== 'undefined' ? coachReviewData?.lactateThresholdHr : 0) || 0;
+  if (lthr >= 120 && lthr < max) {
+    const lpct = (ratio) => Math.min(Math.round(lthr * ratio), max);
+    return {
+      max,
+      source: 'lthr',
+      recoveryMax: lpct(0.82),
+      easyMax: lpct(0.88),
+      steadyLow: lpct(0.88),
+      steadyHigh: lpct(0.93),
+      tempoLow: lpct(0.96),
+      tempoHigh: lpct(1.02),
+      intervalLow: lpct(1.03),
+      intervalHigh: lpct(1.08)
+    };
+  }
+  // 以 Z2 為輕鬆跑主區：E 上限 = 80% HRmax（Z2 頂），恢復跑再低一階
   const pct = (ratio) => Math.round(max * ratio);
   return {
     max,
+    source: 'maxhr',
     recoveryMax: pct(0.75),
     easyMax: pct(0.8),
     steadyLow: pct(0.8),
@@ -2577,21 +2756,24 @@ function showHrZones() {
   const source = ownMaxHr >= 140 && ownMaxHr <= 220
     ? '你的設定'
     : (Number(coachReviewData?.zones?.maxHr) >= 140 ? 'Garmin 教練資料' : `預設 ${DEFAULT_MAX_HR}（建議到「⚙️ 修改設定」填實測值，區間才準）`);
+  // 百分比標籤要跟區間的實際計算基準一致：LTHR 模式顯示 %LTHR，否則顯示 %HRmax
+  const isLthr = zones.source === 'lthr';
+  const pctUnit = isLthr ? 'LTHR' : 'HRmax';
   const rows = [
-    ['恢復跑', `≤ ${zones.recoveryMax}`, '≤75%', '很輕鬆，可完整講句子；硬課隔天用', ''],
-    ['輕鬆跑 / 長跑', `≤ ${zones.easyMax}`, '≤80%', '可對話的輕鬆有氧，週跑量主體都在這區', 'is-key'],
-    ['穩定有氧', `${zones.steadyLow}–${zones.steadyHigh}`, '80–84%', '呼吸變深但可控，存體能不追速度', ''],
-    ['節奏跑', `${zones.tempoLow}–${zones.tempoHigh}`, '85–89%', '吃力但穩定，只能講短句', ''],
-    ['間歇', `${zones.intervalLow}–${zones.intervalHigh}`, '90–95%', '很硬，趟與趟之間要完整恢復', '']
+    ['恢復跑', `≤ ${zones.recoveryMax}`, isLthr ? '≤82%' : '≤75%', '很輕鬆，可完整講句子；硬課隔天用', ''],
+    ['輕鬆跑 / 長跑', `≤ ${zones.easyMax}`, isLthr ? '≤88%' : '≤80%', '可對話的輕鬆有氧，週跑量主體都在這區', 'is-key'],
+    ['穩定有氧', `${zones.steadyLow}–${zones.steadyHigh}`, isLthr ? '88–93%' : '80–84%', '呼吸變深但可控，存體能不追速度', ''],
+    ['節奏跑', `${zones.tempoLow}–${zones.tempoHigh}`, isLthr ? '96–102%' : '85–89%', '吃力但穩定，只能講短句', ''],
+    ['間歇', `${zones.intervalLow}–${zones.intervalHigh}`, isLthr ? '103–108%' : '90–95%', '很硬，趟與趟之間要完整恢復', '']
   ];
   const body = `
-    <p style="margin:0 0 10px;font-size:13px;color:var(--c-text-muted)">最大心率 <b style="color:var(--c-text)">${zones.max} bpm</b>（來源：${source}）。跑步時看錶守區間，比守配速可靠——尤其夏天。</p>
+    <p style="margin:0 0 10px;font-size:13px;color:var(--c-text-muted)">${isLthr ? `區間以 Garmin 實測乳酸閾值心率 <b style="color:var(--c-text)">${Number(coachReviewData?.lactateThresholdHr)} bpm</b> 推算（比 %HRmax 更個人化）；最大心率 ${zones.max} bpm。` : `最大心率 <b style="color:var(--c-text)">${zones.max} bpm</b>（來源：${source}）。`}跑步時看錶守區間，比守配速可靠——尤其夏天。</p>
     <div class="hr-zone-list">
       ${rows.map(([name, bpm, pctText, desc, cls]) => `
         <div class="hr-zone-row ${cls}">
           <div class="hr-zone-name">${name}${cls ? '<span class="coach-key-badge">主區</span>' : ''}</div>
           <div class="hr-zone-bpm">${bpm} <small>bpm</small></div>
-          <div class="hr-zone-meta"><span>${pctText} HRmax</span><p>${desc}</p></div>
+          <div class="hr-zone-meta"><span>${pctText} ${pctUnit}</span><p>${desc}</p></div>
         </div>`).join('')}
     </div>
     <p style="margin:12px 0 0;font-size:12px;color:var(--c-text-muted)">超過區間上限先降速或走 1 分鐘，回落再跑；課表卡上的 HR 上限就是照這張表開的。</p>`;
@@ -2614,7 +2796,8 @@ function adaptiveEasyPaceSec(profile, date) {
       .slice(-10)
       .filter((run) => run.hr && run.hr <= zones.easyMax && run.paceSeconds > 0);
     if (records.length >= 3) {
-      const paces = records.map((run) => run.paceSeconds).sort((a, b) => a - b);
+      // 折算成涼爽等效配速當基準，季節加減（下方 seasonAdjust）才不會與夏季實跑重複計算熱壓力
+      const paces = records.map((run) => heatAdjustedPaceSec(run)).sort((a, b) => a - b);
       baseSec = paces[Math.floor(paces.length / 2)];
       source = 'garmin';
     }
@@ -3028,8 +3211,8 @@ function calcWorkoutKm(type, targetKm, goal, longKm, focus = '') {
 }
 
 function canUseIntervalBySeason(weekStart) {
-  const month = weekStart.getMonth() + 1;
-  return month >= 9;
+  // 夏季（6–9 月）高溫不排間歇；涼季（10–5 月）開放。與 isHotSeasonDate 同一定義，避免兩套季節規則。
+  return !isHotSeasonDate(weekStart);
 }
 
 function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, hasInjury, isEarlyBeginner, weekStart, readiness = {}) {
@@ -3051,6 +3234,15 @@ function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, ha
     : qualityType === 'tempo'
       ? (phaseBucket === 'base' ? 'steady' : rotation % 2 === 0 ? 'cruise' : 'progression')
       : 'aerobic';
+  // 品質課變化（half / 5k10k 專用）：涼季 build 期挑一個輪替位排坡道課；
+  // 熱季間歇被季節擋掉時，原本要排間歇的輪替位改排法特雷克，維持速度刺激但用體感控制。
+  const qualityVariant = qualityType === 'tempo'
+    ? (rotation === 2 && !canUseIntervalBySeason(weekStart)
+        ? { type: 'tempo', focus: 'fartlek', label: '法特雷克變速課' }
+        : rotation === 0 && phaseBucket === 'build' && canUseIntervalBySeason(weekStart)
+          ? { type: 'tempo', focus: 'hills', label: '坡道強化課' }
+          : null)
+    : null;
 
   if (profile.goal === 'rehab') {
     const rehabSessions = [
@@ -3081,7 +3273,7 @@ function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, ha
     const entryQuality = qualityType === 'interval'
       ? { type: 'interval', focus: rotation % 2 === 0 ? 'economy' : 'cruise', label: '速度感主課' }
       : qualityType === 'tempo'
-        ? { type: 'tempo', focus: rotation % 2 === 0 ? 'steady' : 'progression', label: rotation % 2 === 0 ? '穩定節奏課' : '漸進節奏課' }
+        ? (qualityVariant || { type: 'tempo', focus: rotation % 2 === 0 ? 'steady' : 'progression', label: rotation % 2 === 0 ? '穩定節奏課' : '漸進節奏課' })
         : { type: 'easy', focus: 'aerobic', label: '穩定慢跑' };
     const entrySessions = [
       { type: 'easy', focus: 'recovery', label: '恢復跑' },
@@ -3091,6 +3283,10 @@ function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, ha
     ];
     return entrySessions.slice(0, Math.max(1, numTrain - 1));
   }
+
+  // half（以及未落入上方專屬分支的目標）共用的品質課輪替：優先套用坡道/法特雷克變體。
+  const effectiveQualityFocus = qualityVariant ? qualityVariant.focus : qualityFocus;
+  const effectiveQualityLabel = qualityVariant ? qualityVariant.label : (qualityType === 'interval' ? '本週主課' : '本週節奏主課');
 
   if (numTrain <= 2) {
     return [{ type: 'easy', focus: 'aerobic', label: '單週維持跑' }];
@@ -3105,12 +3301,12 @@ function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, ha
     }
     return rotation % 2 === 0
       ? [
-          { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' },
+          { type: qualityType, focus: effectiveQualityFocus, label: effectiveQualityLabel },
           { type: 'easy', focus: 'prelong', label: '長跑前喚醒' }
         ]
       : [
           { type: 'easy', focus: 'recovery', label: '恢復跑' },
-          { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' }
+          { type: qualityType, focus: effectiveQualityFocus, label: effectiveQualityLabel }
         ];
   }
 
@@ -3124,7 +3320,7 @@ function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, ha
     }
     return [
       { type: 'easy', focus: 'recovery', label: '恢復跑' },
-      { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' },
+      { type: qualityType, focus: effectiveQualityFocus, label: effectiveQualityLabel },
       { type: 'easy', focus: rotation % 2 === 0 ? 'prelong' : 'aerobic', label: rotation % 2 === 0 ? '長跑前喚醒' : '穩定有氧' }
     ];
   }
@@ -3133,7 +3329,7 @@ function buildWorkoutPattern(profile, numTrain, weekNum, phaseName, isDeload, ha
     { type: 'easy', focus: 'recovery', label: '恢復跑' },
     qualityType === 'easy'
       ? { type: 'easy', focus: 'aerobic', label: '穩定有氧' }
-      : { type: qualityType, focus: qualityFocus, label: qualityType === 'interval' ? '本週主課' : '本週節奏主課' },
+      : { type: qualityType, focus: effectiveQualityFocus, label: effectiveQualityLabel },
     { type: 'easy', focus: 'aerobic', label: '穩定有氧' },
     { type: 'easy', focus: canUseInterval && phaseBucket !== 'base' ? 'strides' : easyFocusCycle[rotation], label: canUseInterval && phaseBucket !== 'base' ? '輕鬆跑 + 加速跑' : '補充有氧' }
   ];
@@ -3264,15 +3460,35 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
           { icon: '🔥', title: '主課', dose: `${Math.max(2, Math.round(km * 0.7 * 10) / 10)} km`, detail: `今天像真人教練帶的穩定主課：節奏要平、呼吸要穩，不用硬衝。` },
           { icon: '🧘', title: '收操', dose: '6–8 分', detail: '慢跑降速，再做小腿、臀部和腿後側伸展。' }
         ]
+      },
+      {
+        task: `${label || '坡道強化課'} ${km} km`,
+        pace: '看體感 / 心率，不追配速',
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '10–12 分', detail: `慢跑（${easy}/km）+ 動態伸展，先找一段 60–90 秒的緩上坡當今天的場地。` },
+          { icon: '⛰️', title: '主課', dose: '6–8 趟 60–90 秒', detail: '上坡用 RPE 7–8 的努力跑上去，注意抬膝與步頻，不看配速；下坡慢跑回起點當恢復。' },
+          { icon: '🧘', title: '收操', dose: '8–10 分', detail: '平地慢跑降速，收操做小腿與臀肌伸展，坡道課隔天肌肉痠痛正常。' }
+        ]
+      },
+      {
+        task: `${label || '法特雷克變速課'} ${km} km`,
+        pace: '看體感（RPE 7），不看錶配速',
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '10 分', detail: `慢跑（${easy}/km）+ 動態伸展，天熱時把熱身縮短、留力氣給變速段。` },
+          { icon: '💨', title: '主課', dose: '8–10 段 1 分快 / 2 分慢', detail: '快段憑體感跑到 RPE 7 左右（吃力但可控），慢段放鬆恢復，全程不盯配速，用心率或體感控制強度。' },
+          { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢跑降速、補水，天熱時特別注意收操後的補水與降溫。' }
+        ]
       }
     ];
     const focusMap = {
       steady: variants[0],
       cruise: variants[1],
       progression: variants[2],
-      marathon: variants[3]
+      marathon: variants[3],
+      hills: variants[4],
+      fartlek: variants[5]
     };
-    const variant = isDeload ? variants[0] : focusMap[focus] || variants[phaseBucket === 'peak' ? 1 : rotation % variants.length];
+    const variant = isDeload ? variants[0] : focusMap[focus] || variants[phaseBucket === 'peak' ? 1 : rotation % 4];
     if (focus === 'marathon') {
       variant.task = `${label || '馬拉松穩定主課'} ${km} km`;
       variant.pace = `配速 ${tempo}/km 附近`;
@@ -3358,6 +3574,15 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前段保守，後段專注在步頻、姿勢和補給節奏，不刻意拉速度。` },
         { icon: '🧘', title: '收操', dose: '10 分', detail: '慢走回收後補充水分與碳水，讓長跑真正被吸收。' }
       ]
+    },
+    {
+      task: `長跑 ${km} km（後段漸進收快）`,
+      pace: `前段 ${easy}/km，最後 20–25% 收至 ${tempo}/km`,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–10 分', detail: '前段完全放鬆起跑，把力氣留給後段收快。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前 75–80% 維持 ${easy}/km，最後 20–25% 逐步收到接近馬拉松配速 ${tempo}/km，練後段還能加速的節奏感。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '慢走回收、補給，記錄收快段的感受供下次微調。' }
+      ]
     }
   ] : goal === 'rehab' ? [
     {
@@ -3414,10 +3639,25 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
           { icon: '🏃', title: '主課', dose: `${km} km`, detail: '今天重點不只是距離，也包含喝水、補給、配速穩定和姿勢維持。' },
           { icon: '🧘', title: '收操', dose: '10 分', detail: '走跑回收後記一下今天補給和疲勞感，方便下次微調。' }
         ]
+      },
+      {
+        task: `長跑 ${km} km（後段漸進收快）`,
+        pace: `前段 ${easy}/km，最後 20–25% 收至 ${tempo}/km`,
+        steps: [
+          { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '前段完全放鬆起跑，把力氣留給後段收快。' },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前 75–80% 維持 ${easy}/km，最後 20–25% 逐步收到接近節奏配速 ${tempo}/km，練後段還能加速的節奏感。` },
+          { icon: '🧘', title: '收操', dose: '10 分', detail: '慢走回收、補水，記錄收快段的感受供下次微調。' }
+        ]
       }
     ];
   const taperIndex = goal === 'rehab' ? longVariants.length - 1 : Math.min(2, longVariants.length - 1);
-  const longVariant = isDeload || isTaper ? longVariants[taperIndex] : longVariants[phaseBucket === 'peak' ? Math.min(1, longVariants.length - 1) : rotation % longVariants.length];
+  // build/peak 期讓 half / full 的長跑輪替也能排到「後段漸進收快」變體，增加長跑內容多樣性。
+  const progressionEligible = (goal === 'half' || goal === 'full') && (phaseBucket === 'build' || phaseBucket === 'peak');
+  const longVariant = isDeload || isTaper
+    ? longVariants[taperIndex]
+    : progressionEligible && rotation === 3
+      ? longVariants[longVariants.length - 1]
+      : longVariants[phaseBucket === 'peak' ? Math.min(1, longVariants.length - 1) : rotation % longVariants.length];
   longVariant.paceSource = easyAdaptive.source;
   return longVariant;
 }
@@ -3542,6 +3782,28 @@ function buildSupportBlocks(kind, hasInjury, profile, weekNum = 1, daySeed = 0) 
   ];
 }
 
+// 休息日居家肌力：基礎 4 招 + 依 profile.injuries 附加對應防護動作。
+// 傷別對照設定表單的 pill 值（none/ankle/knee/plantar/other）。
+function restDayStrengthSteps(profile) {
+  const steps = [
+    { icon: '🏋️', title: '深蹲或分腿蹲', dose: '3×12', detail: '雙腳與肩同寬，臀部往後坐，膝蓋對齊腳尖；體力好可改分腿蹲，前後腳蹲低再站起。' },
+    { icon: '🦶', title: '單腳提踵', dose: '2×15 / 邊', detail: '單腳站立緩慢墊起腳尖再放下，強化小腿與腳踝穩定，扶牆保持平衡即可。' },
+    { icon: '🪵', title: '棒式 / 側棒式', dose: '3×30 秒', detail: '核心收緊，身體維持一直線；側棒式可加強髖外側與臀中肌穩定。' },
+    { icon: '🌉', title: '臀橋', dose: '3×15', detail: '躺姿屈膝，臀部夾緊往上頂，頂點停 1 秒再放下，感受臀部而非下背出力。' }
+  ];
+  const injuries = Array.isArray(profile?.injuries) ? profile.injuries : [];
+  if (injuries.includes('knee')) {
+    steps.push({ icon: '🦵', title: '臀橋 + 股四頭離心蹲', dose: '2×12', detail: '膝蓋防護重點：放慢下蹲的離心階段，加強股四頭與臀部控制，減少跑者膝壓力。' });
+  }
+  if (injuries.includes('plantar')) {
+    steps.push({ icon: '🦶', title: '小腿離心提踵 + 足底滾筒', dose: '2×12 + 60 秒', detail: '足底筋膜防護重點：單腳緩慢下放做離心提踵，再用網球或滾筒放鬆足底。' });
+  }
+  if (injuries.includes('ankle')) {
+    steps.push({ icon: '🧍', title: '單腳平衡踝穩定', dose: '3×30 秒 / 邊', detail: '腳踝防護重點：單腳站立訓練本體感覺與踝關節穩定，不穩可扶牆輔助。' });
+  }
+  return steps;
+}
+
 function buildRestDayCard(dow, dateStr, profile, today, weekNum = 1) {
   const prevState = profile.dayState[(dow + 6) % 7];
   const nextState = profile.dayState[(dow + 1) % 7];
@@ -3652,6 +3914,8 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
   // 傷況保護：長跑對關節/組織衝擊最大，優先降階，不只降間歇
   if (hasInjury && longKm > 0) longKm = Math.round(longKm * 0.8 * 10) / 10;
 
+  // 休息日居家肌力：一週最多排 2 天（依序取前兩個休息日），減量週維持完全休息。
+  let restStrengthCount = 0;
   for (let offset = 0; offset < 7; offset++) {
     const dow = (offset + 1) % 7; // 一、二、三、四、五、六、日
     const date = new Date(weekStart);
@@ -3665,7 +3929,13 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
       const km = calcWorkoutKm(session.type, targetKm, profile.goal, longKm, session.focus);
       days.push(buildDayCard(dow, dateStr, session.type, km, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName, session.focus, session.label));
     } else {
-      days.push(buildRestDayCard(dow, dateStr, profile, today, weekNum));
+      const restDay = buildRestDayCard(dow, dateStr, profile, today, weekNum);
+      if (!isTaper && restStrengthCount < 2) {
+        restStrengthCount += 1;
+        restDay.task = '休息＋居家肌力 15–20 分';
+        restDay.steps = restDayStrengthSteps(profile);
+      }
+      days.push(restDay);
     }
   }
 
@@ -3743,13 +4013,23 @@ function isFlatEnoughRun(run) {
 
 function isCalibrationSafeRun(run) {
   if (!isFlatEnoughRun(run)) return false;
-  // Garmin 有回傳實際平均溫度時才把高溫排除；沒有可靠環境資料就不猜。
-  // 高溫下同心率跑慢是正常熱壓力，不應被誤判為能力下降。
-  if (Number(run.temperatureC) >= 30) return false;
+  // 30–34°C 的跑步改用 heatAdjustedPaceSec 折算後參與校準（台灣夏季否則整季凍結）；
+  // 只有極端高溫（≥35°C）生理反應非線性，仍直接排除。
+  if (Number(run.temperatureC) >= 35) return false;
   // 當天預報只作最後一道保護，避免把熱浪日的新資料立即拿去調課表。
   const forecast = run.date === todayStr() ? trainerWeather?.[run.date] : null;
-  if (Number(forecast?.tmax) >= 34) return false;
+  if (Number(forecast?.tmax) >= 36) return false;
   return true;
+}
+
+// 熱壓力折算：同心率下，氣溫每高於 22°C 一度配速約慢 2.5 秒/km（線性近似、封頂 45 秒）。
+// 把高溫實跑折算回「涼爽等效配速」再與課表基準比較，夏天也能追蹤真實進步。
+// Garmin 溫度可能受體溫影響偏高，此為保守近似；無溫度資料時不折算。
+function heatAdjustedPaceSec(run) {
+  const pace = Number(run.paceSeconds) || 0;
+  const temp = Number(run.temperatureC);
+  if (!pace || !Number.isFinite(temp) || temp <= 22) return pace;
+  return pace - Math.min((temp - 22) * 2.5, 45);
 }
 
 function coachPrescriptionLocksWeek(week) {
@@ -3810,7 +4090,7 @@ function autoRecalibratePlan() {
       .slice(-14)
       .filter((run) => run.hr >= zones.tempoLow - 2 && run.hr <= zones.tempoHigh + 2 && run.paceSeconds > 0 && isCalibrationSafeRun(run));
     if (qualityRuns.length >= 2) {
-      const paces = qualityRuns.map((run) => run.paceSeconds).sort((a, b) => a - b);
+      const paces = qualityRuns.map((run) => heatAdjustedPaceSec(run)).sort((a, b) => a - b);
       const median = paces[Math.floor(paces.length / 2)];
       const diff = profile.tempoPaceSec - median; // 正值＝實跑比課表快
       if (diff > 8) tempoDelta = -Math.min(Math.round(diff / 2), 10);       // 穩定偏快 → 下修（半步、封頂 10 秒）
@@ -3832,7 +4112,7 @@ function autoRecalibratePlan() {
       .slice(-14)
       .filter((run) => run.hr > 0 && run.hr <= zones.easyMax && run.paceSeconds > 0 && isCalibrationSafeRun(run));
     if (easyRuns.length >= 3) {
-      const paces = easyRuns.map((run) => run.paceSeconds).sort((a, b) => a - b);
+      const paces = easyRuns.map((run) => heatAdjustedPaceSec(run)).sort((a, b) => a - b);
       const median = paces[Math.floor(paces.length / 2)];
       const diff = profile.easyPaceSec - median; // 正值＝實跑比課表快
       if (diff > 10) easyDelta = -Math.min(Math.round(diff / 2), 15);        // 穩定偏快(同心率) → 下修（進步）
@@ -3895,8 +4175,49 @@ function autoRecalibratePlan() {
     }
   } catch (err) { /* 資料不足時跳過 */ }
 
+  // 2e. 賽事成績回饋校準：比賽是最準的體能測驗。找最近 21 天內「以賽代訓」日的
+  // 同日 Garmin 實跑，用 Riegel 換算成目標距離等效配速。明顯變快 → 整組配速上修；
+  // 明顯變慢 → 只小幅放鬆節奏配速（比賽受天氣與配速策略影響大，不激進下修）。
+  let raceCalibrated = false;
+  try {
+    const raceDay = plan.flatMap((week) => week.days || [])
+      .filter((day) => day.raceReplacement === 'race' && day.dateStr < today && daysSinceDate(day.dateStr) <= 21)
+      .sort((a, b) => b.dateStr.localeCompare(a.dateStr))[0];
+    if (raceDay && appData.raceCalibratedFor !== raceDay.dateStr) {
+      const raceRun = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+        .filter((run) => run.date === raceDay.dateStr && Number(run.km) >= 5 && run.paceSeconds > 0)
+        .sort((a, b) => Number(b.km) - Number(a.km))[0];
+      if (raceRun) {
+        const goalDist = GOAL_DIST[profile.goal] || 10;
+        const impliedRacePace = raceRun.paceSeconds * Math.pow(goalDist / Number(raceRun.km), 0.07);
+        const diff = profile.racePaceSec - impliedRacePace; // 正值＝實賽比目前基準快
+        if (diff > 5) {
+          profile.racePaceSec = Math.round(impliedRacePace);
+          profile.tempoPaceSec = profile.racePaceSec + 12;
+          profile.intervalPaceSec = Math.max(profile.racePaceSec - 10, 180);
+          raceCalibrated = true;
+          // 賽果是比訓練中位數更強的訊號：同一輪若步驟 2 已調過節奏配速，以賽果為準，
+          // 撤掉中間值的歷程訊息避免前後矛盾。
+          if (tempoDelta) {
+            const staleIndex = reasons.findIndex((text) => text.startsWith('節奏跑配速'));
+            if (staleIndex >= 0) reasons.splice(staleIndex, 1);
+            tempoDelta = 0;
+          }
+          reasons.push(`「${raceDay.raceName || '賽事'}」完賽 ${Number(raceRun.km).toFixed(1)} km @ ${secToPace(raceRun.paceSeconds)}/km，依實賽成績整組上修 → 比賽配速 ${secToPace(profile.racePaceSec)}、節奏 ${secToPace(profile.tempoPaceSec)}/km`);
+        } else if (diff < -15 && !tempoDelta) {
+          // tempoDelta 已於同輪調整時不再疊加，避免一次雙重放鬆
+          const relax = Math.min(Math.round(-diff / 2), 12);
+          profile.tempoPaceSec += relax;
+          raceCalibrated = true;
+          reasons.push(`「${raceDay.raceName || '賽事'}」成績低於目前基準（可能受天氣或配速策略影響），節奏配速先放鬆 ${relax} 秒觀察 → ${secToPace(profile.tempoPaceSec)}/km`);
+        }
+        appData.raceCalibratedFor = raceDay.dateStr;
+      }
+    }
+  } catch (err) { /* 資料不足時跳過 */ }
+
   appData.recalibratedFor = calibrationSignature;
-  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload && !maxHrDelta && !cadenceCautionChanged) {
+  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload && !maxHrDelta && !cadenceCautionChanged && !raceCalibrated) {
     appData.lastRecalibration = null;
     saveData(appData);
     return null;
@@ -3928,11 +4249,126 @@ function autoRecalibratePlan() {
     week.days = newDays;
   });
   if (coachLockedWeeks) reasons.push(`${coachLockedWeeks} 個教練明確處方週維持原樣；自動校準只套用在未鎖定的後續課表`);
-  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, cadenceCautionChanged, reasons };
+  const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, cadenceCautionChanged, raceCalibrated, reasons };
   appData.lastRecalibration = summary;
   recordPlanChange(beforePlan, 'garmin', 'Garmin 實跑自動校準');
   saveData(appData);
   return summary;
+}
+
+// ============================================================
+// PHASE 4：體能推估 + 目標週期銜接
+// ============================================================
+// 用目前已校準的比賽配速反推完賽時間；racePaceSec 本身就是 Garmin/賽事回饋
+// 持續校準過的「目前體能」估值，不需要另外重新建模。
+function fitnessProjection(profile = appData.profile) {
+  if (!profile || !profile.racePaceSec) return null;
+  const goalDist = GOAL_DIST[profile.goal] || 10;
+  const predictedFinishSec = Math.round(profile.racePaceSec * goalDist);
+  const predictedPace = profile.racePaceSec;
+  let trendNote = '';
+  let deltaNote = '';
+  try {
+    const zones = hrZones(profile);
+    const easyRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+      .filter((run) => run.hr > 0 && run.hr <= zones.easyMax && run.paceSeconds > 0 && isCalibrationSafeRun(run))
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    if (easyRuns.length >= 6) {
+      const median = (values) => { const sorted = [...values].sort((a, b) => a - b); return sorted[Math.floor(sorted.length / 2)]; };
+      const recentPaces = easyRuns.slice(-5).map(heatAdjustedPaceSec);
+      // 只跟「緊接在前的 5 筆」比，不摻更早的歷史，趨勢才反映近期變化
+      const priorPaces = easyRuns.slice(-10, -5).map(heatAdjustedPaceSec);
+      if (priorPaces.length) {
+        const diff = median(priorPaces) - median(recentPaces); // 正值＝變快
+        if (diff >= 5) trendNote = `近期輕鬆跑(Z2)等效配速比先前快 ${Math.round(diff)} 秒/km，體能持續進步`;
+        else if (diff <= -5) trendNote = `近期輕鬆跑(Z2)等效配速比先前慢 ${Math.round(-diff)} 秒/km，留意恢復與量能`;
+        else trendNote = '近期體能與先前相比大致持平';
+      }
+    }
+    const withVo2 = (typeof coachRunRecords === 'function' ? coachRunRecords() : []).filter((run) => Number(run.vo2max) > 0).map((run) => Number(run.vo2max));
+    if (withVo2.length >= 6) {
+      const avg = (values) => values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
+      const recentVo2 = avg(withVo2.slice(-3));
+      const priorVo2 = avg(withVo2.slice(-6, -3));
+      if (recentVo2 && priorVo2 && Math.abs(recentVo2 - priorVo2) >= 0.5) {
+        deltaNote = `VO₂ Max ${priorVo2.toFixed(1)} → ${recentVo2.toFixed(1)}`;
+      }
+    }
+  } catch (err) { /* 資料不足時跳過趨勢 */ }
+  return { predictedFinishSec, predictedPace, trendNote, deltaNote };
+}
+
+function renderFitnessProjectionCard() {
+  const projection = fitnessProjection();
+  if (!projection) return '';
+  const goalLabel = GOAL_NAME[appData.profile?.goal] || '目標賽事';
+  return `<div class="card"><div class="card-title">🔮 預估完賽 ${secToTime(projection.predictedFinishSec)} ・ 依目前體能</div>
+    <p style="margin:0 0 6px;color:var(--c-text-muted)">依目前配速基準推算 ${reviewEscape(goalLabel)} 完賽時間約 <b style="color:var(--c-text)">${secToTime(projection.predictedFinishSec)}</b>（均速 ${secToPace(projection.predictedPace)}/km）。</p>
+    ${projection.trendNote ? `<p style="margin:0;color:var(--c-text-muted)">${reviewEscape(projection.trendNote)}${projection.deltaNote ? `（${reviewEscape(projection.deltaNote)}）` : ''}</p>` : ''}
+  </div>`;
+}
+
+// 目標賽事日期已過：對照 Garmin 實跑（同日、或最近的「以賽代訓」日）判斷達標與否，
+// 提出下一輪循環方向。找不到對應實跑時只給維持模式建議，不亂猜結果。
+function goalCycleProposal(profile = appData.profile) {
+  if (!profile || !profile.targetDate) return null;
+  const daysUntil = daysUntilTargetDate(profile.targetDate);
+  if (daysUntil === null || daysUntil >= 0) return null;
+  const runs = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+  const largest = (list) => [...list].sort((a, b) => (Number(b.km) || 0) - (Number(a.km) || 0))[0] || null;
+  let raceRun = largest(runs.filter((run) => run.date === profile.targetDate));
+  let raceDayUsed = profile.targetDate;
+  if (!raceRun) {
+    const targetTime = new Date(`${profile.targetDate}T00:00:00`).getTime();
+    const raceDay = (appData.plan || []).flatMap((week) => week.days || [])
+      .filter((day) => day.raceReplacement === 'race' && Math.abs((new Date(`${day.dateStr}T00:00:00`).getTime() - targetTime) / 86400000) <= 3)
+      .sort((a, b) => Math.abs(new Date(`${a.dateStr}T00:00:00`).getTime() - targetTime) - Math.abs(new Date(`${b.dateStr}T00:00:00`).getTime() - targetTime))[0];
+    if (raceDay) {
+      raceRun = largest(runs.filter((run) => run.date === raceDay.dateStr));
+      raceDayUsed = raceDay.dateStr;
+    }
+  }
+  if (!raceRun || !(Number(raceRun.km) > 0) || !raceRun.paceSeconds) {
+    return {
+      mode: 'maintain',
+      title: '維持模式',
+      summary: `目標賽事日期（${profile.targetDate}）已過，但尚未在 Garmin 資料中找到對應的比賽紀錄。`,
+      causes: [],
+      suggestion: '建議每週維持目前跑量的 70–80%，保留一堂輕鬆長跑，確認實際比賽結果或設定下一個目標後再重新規劃課表。'
+    };
+  }
+  const goalDist = GOAL_DIST[profile.goal] || 10;
+  const goalLabel = GOAL_NAME[profile.goal] || '目標賽事';
+  const impliedRacePaceSec = raceRun.paceSeconds * Math.pow(goalDist / Number(raceRun.km), 0.07);
+  const targetFinishSec = Math.round((profile.racePaceSec || impliedRacePaceSec) * goalDist);
+  const actualFinishSec = Math.round(impliedRacePaceSec * goalDist);
+  const diff = targetFinishSec - actualFinishSec; // 正值＝實際比目標快
+  const verdict = diff > 60 ? '超越' : diff >= 0 ? '達標' : '未達';
+  const summary = `「${raceDayUsed}」實賽 ${Number(raceRun.km).toFixed(1)} km @ ${secToPace(raceRun.paceSeconds)}/km，換算${reviewEscape(goalLabel)}等效完賽約 ${secToTime(actualFinishSec)}（目標 ${secToTime(targetFinishSec)}）。`;
+  if (verdict === '未達') {
+    const causes = [];
+    const completion = trainingCompletionSummary();
+    if (completion.adherence < 80) causes.push(`訓練完成率僅 ${completion.adherence}%，訓練量未完全落實`);
+    if (isHotSeasonDate(new Date(`${raceDayUsed}T00:00:00`))) causes.push('比賽日落在夏季高溫月份，體感配速容易被氣溫拖慢');
+    const longRunThreshold = (GOAL_RULES[profile.goal] || GOAL_RULES.half).longRunCapKm * 0.6;
+    const longRunCount = runs.filter((run) => Number(run.km) >= longRunThreshold).length;
+    if (longRunCount < 4) causes.push(`長跑訓練次數偏少（僅 ${longRunCount} 次達長跑距離門檻），耐力儲備可能不足`);
+    return { mode: 'review', verdict, title: '檢討循環', summary, causes: causes.slice(0, 3), suggestion: '先檢討本輪訓練，抓出主要落差原因，再重新排定下一輪課表。' };
+  }
+  return { mode: 'progress', verdict, title: '進步循環', summary, causes: [], suggestion: `目標配速已依實賽成績上修，建議重新排課並選定下一場目標賽事，延續這輪的${verdict === '超越' ? '突破' : '進步'}。` };
+}
+
+function renderGoalCycleCard() {
+  const proposal = goalCycleProposal();
+  if (!proposal) return '';
+  const icon = proposal.mode === 'progress' ? '📈' : proposal.mode === 'review' ? '🔁' : '⏸️';
+  const causesHtml = proposal.causes?.length ? `<ul style="margin:8px 0 0;padding-left:18px;color:var(--c-text-muted)">${proposal.causes.map((cause) => `<li>${reviewEscape(cause)}</li>`).join('')}</ul>` : '';
+  return `<div class="card"><div class="card-title">${icon} 目標週期 · ${reviewEscape(proposal.title)}</div>
+    <p style="margin:0 0 6px;color:var(--c-text-muted)">${reviewEscape(proposal.summary)}</p>
+    ${causesHtml}
+    <p style="margin:8px 0 0">${reviewEscape(proposal.suggestion)}</p>
+    <div class="training-status-actions" style="margin-top:12px"><button class="btn btn-primary" onclick="editSetup()">重新規劃下一輪課表</button></div>
+  </div>`;
 }
 
 function generateAndShowPlan() {
@@ -4021,6 +4457,7 @@ function renderPlanView() {
 </nav>
 <div id="plan-tab-week" class="container">
   ${renderAutomationBrief(plan)}
+  ${renderWeeklyCoachLetter()}
   ${renderRaceWeekCard(profile)}
   ${renderProgressCard(profile, plan)}
   ${renderPhaseTabs(plan)}
@@ -4222,7 +4659,7 @@ function renderGarminAutopilotTab(profile, plan) {
   const content = renderGarminAutopilotCard(profile, plan);
   const health = trainingDataHealth(plan);
   const trust = `<div class="automation-timeline"><div class="automation-timeline-title">同步可信度</div><div class="automation-timeline-list"><div class="automation-timeline-item"><time>${health.syncAge === null ? '—' : health.syncAge === 0 ? '今天' : `${health.syncAge} 天前`}</time><div><b>${health.syncAge !== null && health.syncAge <= 2 ? 'Garmin 資料仍在可信範圍' : '需要確認 Garmin 同步'}</b><br>${health.issues.length ? reviewEscape(health.issues.join('；')) : '完成認列、補跑與課程對應均依同一個距離門檻自動處理。'}</div></div></div></div>`;
-  return `${renderTrainingStatusCard(plan)}${trust}${content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`}`;
+  return `${renderTrainingStatusCard(plan)}${renderFitnessProjectionCard()}${renderGoalCycleCard()}${trust}${content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`}`;
 }
 
 function garminCompletionPercent(profile = appData.profile) {
@@ -4351,6 +4788,150 @@ function latestTrainingCheckin() {
   return [...(appData.checkins || [])].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || Number(b.weekNum || 0) - Number(a.weekNum || 0))[0] || null;
 }
 
+// ============================================================
+// 當日出發前調整：模擬真人教練在課前的最後一眼。
+// 高溫預報、近期疼痛/疲勞回報、昨日高強度實跑 → 自動把今天的品質課/長跑
+// 降階成輕鬆課，並嘗試把原課移到本週稍後仍符合間隔的空檔（找不到就不硬塞）。
+// ============================================================
+function findRawPlanDay(dateStr) {
+  for (const week of appData.plan || []) {
+    const day = (week.days || []).find((item) => item.dateStr === dateStr);
+    if (day) return { week, day };
+  }
+  return null;
+}
+
+function dailyAdvisoryTriggers(day) {
+  const triggers = [];
+  const wx = trainerWeather?.[day.dateStr];
+  if (Number(wx?.tmax) >= 34) triggers.push(`預報高溫 ${Math.round(wx.tmax)}°C`);
+  const checkin = latestTrainingCheckin();
+  if (checkin?.date && daysSinceDate(checkin.date) <= 7) {
+    if (checkin.painConcern) triggers.push('近期回報疼痛疑慮');
+    else if (Number(checkin.fatigue) >= 4) triggers.push(`疲勞自評 ${checkin.fatigue}/5`);
+  }
+  try {
+    const zones = hrZones(appData.profile);
+    const yesterday = addDaysToDateStr(day.dateStr, -1);
+    const hardYesterday = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+      .some((run) => run.date === yesterday && Number(run.km) >= 5 && Number(run.hr) >= zones.tempoLow);
+    if (hardYesterday) triggers.push('昨天已有高強度跑，距離品質課不足 48 小時');
+  } catch (err) { /* 心率區間資料不足時跳過 */ }
+  return triggers;
+}
+
+// 把整堂課搬到本週稍後的輕鬆日：前後一天都不能是高強度課，目的日預報不能一樣熱。
+function tryMoveSessionWithinWeek(week, fromDay, original) {
+  const hardTypes = ['tempo', 'interval', 'long', 'race'];
+  const days = week.days || [];
+  const candidates = days.filter((item) => item.dateStr > fromDay.dateStr && item.type === 'easy'
+    && !item.raceReplacement && item.status !== 'done' && !item.isMakeup);
+  for (const candidate of candidates) {
+    // 用全計畫找前後日，跨週交界（本週最後一天 vs 下週第一天）也能檢查強度間隔
+    const prevDay = findRawPlanDay(addDaysToDateStr(candidate.dateStr, -1))?.day;
+    const nextDay = findRawPlanDay(addDaysToDateStr(candidate.dateStr, 1))?.day;
+    // fromDay（今天）即將被降階成輕鬆課，不算高強度鄰日
+    if (prevDay && prevDay !== fromDay && hardTypes.includes(prevDay.type)) continue;
+    if (nextDay && nextDay !== fromDay && hardTypes.includes(nextDay.type)) continue;
+    if (Number(trainerWeather?.[candidate.dateStr]?.tmax) >= 34) continue;
+    ['type', 'focus', 'km', 'task', 'pace', 'hrTarget', 'steps'].forEach((key) => { candidate[key] = original[key]; });
+    candidate.movedFrom = fromDay.dateStr;
+    return candidate;
+  }
+  return null;
+}
+
+function applyDailySessionAdvisory() {
+  if (!appData?.profile || !Array.isArray(appData.plan) || !appData.plan.length) return null;
+  const today = todayStr();
+  // 已經調整過今天就不重複。天氣或 Garmin 教練資料是非同步載入的：
+  // 同一天內，只要這次可用的資料比上次評估時多（score 變大），就允許重新評估一次，
+  // 否則高溫以外的觸發（疼痛回報、昨日高強度）會因為評估時資料還沒到而永遠失效。
+  if (appData.lastDailyAdvisory?.date === today) return appData.lastDailyAdvisory;
+  const readinessScore = (trainerWeather ? 1 : 0) + (coachReviewData ? 2 : 0);
+  const guard = appData.dailyAdvisoryGuard;
+  if (guard?.date === today && Number(guard.score) >= readinessScore) return null;
+  appData.dailyAdvisoryGuard = { date: today, score: readinessScore };
+  const found = findRawPlanDay(today);
+  appData.lastDailyAdvisory = null;
+  const day = found?.day;
+  const isProtectable = day && ['tempo', 'interval', 'long'].includes(day.type)
+    && day.status !== 'done' && !day.raceReplacement && !day.isMakeup
+    && !coachPrescriptionLocksWeek(found.week);
+  if (isProtectable) {
+    const triggers = dailyAdvisoryTriggers(day);
+    if (triggers.length) {
+      const original = { type: day.type, focus: day.focus, km: day.km, task: day.task, pace: day.pace, hrTarget: day.hrTarget, steps: day.steps };
+      const originalLabel = trainingTypeLabel(day.type, day.focus);
+      const easyKm = Math.max(3, Math.round((Number(day.km) || 5) * (day.type === 'long' ? 0.6 : 0.7) * 10) / 10);
+      const moved = tryMoveSessionWithinWeek(found.week, day, original);
+      day.type = 'easy';
+      day.focus = 'recovery';
+      day.km = easyKm;
+      day.task = `輕鬆跑 ${easyKm} km｜出發前調整：${triggers.join('、')}`;
+      day.pace = '很輕鬆、可完整對話；狀況不佳就再縮短或改休息';
+      day.hrTarget = '';
+      day.steps = [];
+      day.advisoryAdjusted = true;
+      appData.lastDailyAdvisory = { date: today, triggers, originalLabel, movedTo: moved ? moved.dateStr : null };
+      recordTrainingEvent('daily-advisory', appData.lastDailyAdvisory);
+    }
+  }
+  saveData(appData);
+  return appData.lastDailyAdvisory;
+}
+
+// 找最近 60 天內同課型（type 相同、或同 focus 家族）的前一趟實跑，用熱調整配速比較才公平。
+// 差距太小（<3 秒/km）視為雜訊，不特別提，避免每趟都念一次數字。
+function historyComparisonNote(run, planned) {
+  if (!planned) return '';
+  try {
+    const cutoff = addDaysToDateStr(run.date, -60);
+    const prev = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+      .filter((item) => item.date && item.date < run.date && item.date >= cutoff && item.paceSeconds > 0)
+      .map((item) => ({ item, itemPlanned: plannedSessionFor(item) }))
+      .filter(({ itemPlanned }) => itemPlanned && (itemPlanned.type === planned.type || (planned.focus && itemPlanned.focus === planned.focus)))
+      .sort((a, b) => String(b.item.date).localeCompare(String(a.item.date)))[0];
+    if (!prev) return '';
+    const currentPace = heatAdjustedPaceSec(run);
+    const prevPace = heatAdjustedPaceSec(prev.item);
+    if (!currentPace || !prevPace) return '';
+    const diff = Math.round(prevPace - currentPace); // 正值＝這次比較快
+    if (Math.abs(diff) < 3) return '';
+    const typeLabel = trainingTypeLabel(planned.type, planned.focus);
+    return `比上次同課型（${prev.item.date.slice(5).replace('-', '/')}）${diff > 0 ? '快' : '慢'} ${Math.abs(diff)} 秒/km`;
+  } catch (err) {
+    return '';
+  }
+}
+
+// 里程碑：單次最遠、當月累積跑量新高。資料稀疏（沒有先前紀錄可比）時不誤判成新高，直接跳過。
+function runMilestones(run) {
+  const milestones = [];
+  try {
+    if (!run || !run.date || !(Number(run.km) > 0)) return milestones;
+    const allRuns = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+    const priorRuns = allRuns.filter((item) => item.date && item.date < run.date && Number(item.km) > 0);
+    if (priorRuns.length && Number(run.km) > Math.max(...priorRuns.map((item) => Number(item.km) || 0))) {
+      milestones.push(`單次最遠 ${Number(run.km).toFixed(1)} km，刷新個人紀錄`);
+    }
+    const runMonth = String(run.date).slice(0, 7);
+    const monthTotals = new Map();
+    allRuns.forEach((item) => {
+      // 只累計到這筆跑步當下為止，函數重用在歷史跑步時不會被之後的里程灌水
+      if (!item.date || item.date > run.date) return;
+      const month = String(item.date).slice(0, 7);
+      monthTotals.set(month, (monthTotals.get(month) || 0) + (Number(item.km) || 0));
+    });
+    const currentTotal = monthTotals.get(runMonth) || 0;
+    const priorMonthTotals = [...monthTotals.entries()].filter(([month]) => month !== runMonth).map(([, km]) => km);
+    if (priorMonthTotals.length && currentTotal > Math.max(...priorMonthTotals)) {
+      milestones.push(`當月累積跑量 ${currentTotal.toFixed(1)} km，創單月新高`);
+    }
+  } catch (err) { /* 資料不足時跳過 */ }
+  return milestones;
+}
+
 function postRunVerdict(run, planned = plannedSessionFor(run)) {
   const assignment = activityAssignmentFor(run);
   if (!planned || assignment?.mode === 'extra') {
@@ -4362,10 +4943,14 @@ function postRunVerdict(run, planned = plannedSessionFor(run)) {
   if (completionPct !== null && completionPct < garminCompletionPercent()) {
     return { level: 'caution', label: '部分完成', summary: `主課完成 ${completionPct}%（${actualKm.toFixed(1)} / ${targetKm.toFixed(1)} km），系統保留原課表，不把缺口硬塞到下一天。`, next: '先恢復；若要補跑，系統只會在安全的 3 天內認列。' };
   }
+  const milestoneNote = runMilestones(run).map((text) => `🎉 ${text}`).join('；');
   if (assignment?.mode === 'makeup') {
-    return { level: 'good', label: '補跑已認列', summary: '系統已將這趟安全對應回原本漏掉的課程，不會重複計算跑量或再排一次。', next: '回到原本排程，下一堂照表執行。' };
+    return { level: 'good', label: '補跑已認列', summary: `系統已將這趟安全對應回原本漏掉的課程，不會重複計算跑量或再排一次。${milestoneNote ? ` ${milestoneNote}。` : ''}`, next: '回到原本排程，下一堂照表執行。' };
   }
-  return { level: 'good', label: '正式課程已完成', summary: targetKm ? `主課完成 ${completionPct ?? '—'}%，已與當日課表自動對應。` : '已與當日課表自動對應；課表沒有可量化主課距離，因此只保留完成紀錄。', next: '單次不會加量；若本週同課型持續比課表快、心率仍在安全範圍，系統會自動重算下一週尚未執行的配速處方。' };
+  const historyNote = historyComparisonNote(run, planned);
+  const baseSummary = targetKm ? `主課完成 ${completionPct ?? '—'}%，已與當日課表自動對應。` : '已與當日課表自動對應；課表沒有可量化主課距離，因此只保留完成紀錄。';
+  const summary = `${baseSummary}${historyNote ? `${historyNote}。` : ''}${milestoneNote ? ` ${milestoneNote}。` : ''}`;
+  return { level: 'good', label: '正式課程已完成', summary, next: '單次不會加量；若本週同課型持續比課表快、心率仍在安全範圍，系統會自動重算下一週尚未執行的配速處方。' };
 }
 
 function trainingAutopilotDecision(plan = appData.plan || []) {
@@ -4379,6 +4964,11 @@ function trainingAutopilotDecision(plan = appData.plan || []) {
   }
   if (health.missedWithoutReason) {
     return { tone: 'caution', title: '先釐清未完成課程', reason: `有 ${health.missedWithoutReason} 堂已過期課程沒有原因；系統暫停任何加量建議，避免把補跑誤當成加量。`, next: '只需補填一次原因，後續的補跑與下週建議會自動處理。' };
+  }
+  // 排在同步過期與未完成釐清之後：資料健康問題優先於例行的當日降階說明
+  const advisory = appData.lastDailyAdvisory;
+  if (advisory?.date === todayStr()) {
+    return { tone: 'caution', title: '今天已出發前調整', reason: `原定「${advisory.originalLabel}」因${advisory.triggers.join('、')}自動降階為輕鬆跑${advisory.movedTo ? `；原課已移到 ${advisory.movedTo}（本週仍符合強度間隔）` : '；本週找不到安全空檔，原課不硬塞'}。`, next: '照調整後課表執行即可；明天出發前會重新評估。' };
   }
   const latestRun = [...garminActivityRecords()].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
   if (latestRun && daysSinceDate(latestRun.date) <= 3) {
@@ -4430,6 +5020,65 @@ function renderAutomationBrief(plan = appData.plan || []) {
   const syncText = health.syncAge === null ? '尚未取得' : health.syncAge === 0 ? '今天已同步' : `${health.syncAge} 天前`;
   const course = next ? `${trainingTypeLabel(next.type, next.focus)} · ${trainingTaskTitle(next)}` : '本週先把恢復做穩';
   return `<section class="automation-brief" aria-label="自動化訓練摘要"><div><div class="automation-brief-kicker">Runner autopilot · ${reviewEscape(decision.title)}</div><div class="automation-brief-title">${reviewEscape(course)}</div><p class="automation-brief-copy">${reviewEscape(decision.next)}</p><div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-primary" onclick="goToToday()">查看今日執行</button>${health.issues.length ? '<button class="btn btn-secondary" onclick="switchPlanTab(\'autopilot\')">查看同步狀態</button>' : ''}</div></div><div class="automation-brief-stats"><div class="automation-brief-stat"><span>本週完成</span><b>${health.currentWeekCompleted.length}/${health.currentWeekDays.length || 0} 堂</b></div><div class="automation-brief-stat"><span>Garmin 資料</span><b>${syncText}</b></div><div class="automation-brief-stat"><span>自動對應</span><b>${assignmentCount ? `${assignmentCount} 筆已修正` : '自動判讀中'}</b></div><div class="automation-brief-stat"><span>決策</span><b>${reviewEscape(decision.title)}</b></div></div></section>`;
+}
+
+// 本週教練信：把本週完成度、最近一次自動校準／出發前調整、下週安排，
+// 組成三段像真人教練寫的短文，取代散落各處的數據卡片。
+function renderWeeklyCoachLetter() {
+  const profile = appData.profile;
+  const plan = appData.plan || [];
+  if (!profile || !plan.length) return '';
+  const health = trainingDataHealth(plan);
+  const { currentWeekDays, currentWeekCompleted } = health;
+  const weekStart = weekStartLabel(todayStr());
+  const weekRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : []).filter((run) => run.date >= weekStart);
+
+  // (a) 回顧
+  let notable = '';
+  const qualityRun = weekRuns
+    .map((run) => ({ run, planned: plannedSessionFor(run) }))
+    .filter(({ planned }) => planned && ['tempo', 'interval'].includes(planned.type))
+    .sort((a, b) => String(b.run.date).localeCompare(String(a.run.date)))[0];
+  if (qualityRun) {
+    const label = trainingTypeLabel(qualityRun.planned.type, qualityRun.planned.focus);
+    notable = `這週的${label}課完成得不錯，${qualityRun.run.date.slice(5).replace('-', '/')} 這趟配速 ${secToPace(qualityRun.run.paceSeconds)}/km。`;
+  } else {
+    try {
+      const zones = hrZones(profile);
+      const easyRuns = weekRuns.filter((run) => run.hr > 0 && run.hr <= zones.easyMax && run.paceSeconds > 0);
+      if (easyRuns.length) {
+        const fastest = [...easyRuns].sort((a, b) => heatAdjustedPaceSec(a) - heatAdjustedPaceSec(b))[0];
+        notable = `這週最亮眼的一趟是 ${fastest.date.slice(5).replace('-', '/')} 的輕鬆跑，等效配速 ${secToPace(heatAdjustedPaceSec(fastest))}/km。`;
+      }
+    } catch (err) { /* 心率資料不足時跳過 */ }
+  }
+  const reviewPara = `本週目前完成 ${currentWeekCompleted.length}/${currentWeekDays.length || 0} 堂課。${notable || '這週還沒有足夠的實跑資料可以特別點名，先把該完成的課排好。'}`;
+
+  // (b) 調整
+  const recal = appData.lastRecalibration;
+  const advisory = appData.lastDailyAdvisory?.date === todayStr() ? appData.lastDailyAdvisory : null;
+  const adjustParts = [];
+  if (recal?.reasons?.length) adjustParts.push(recal.reasons.slice(0, 3).join('；') + '。');
+  if (advisory) adjustParts.push(`今天的「${advisory.originalLabel}」因${advisory.triggers.join('、')}臨時降階為輕鬆跑${advisory.movedTo ? `，原課已改排到 ${advisory.movedTo}` : '；本週找不到安全空檔，原課不硬塞'}。`);
+  const adjustPara = adjustParts.length ? adjustParts.join(' ') : '這週沒有需要特別調整的地方，課表照原計畫執行。';
+
+  // (c) 下週
+  const nextWeek = plan.find((week) => week.weekNum === currentWeek + 1);
+  let nextPara;
+  if (!nextWeek) {
+    nextPara = '目前計畫只排到本週為止，之後的安排等你重新設定或延長週期。';
+  } else {
+    const qualityDay = (nextWeek.days || []).find((day) => ['tempo', 'interval'].includes(day.type));
+    const longDay = (nextWeek.days || []).find((day) => day.type === 'long');
+    const specialNote = nextWeek.isTaper ? ' 下週是賽前減量週，量會刻意降下來，別想著硬撐加量。' : nextWeek.isDeload ? ' 下週安排恢復週，跑量會主動降低，好好把身體養回來。' : '';
+    nextPara = `下週目標跑量約 ${nextWeek.targetKm} km${qualityDay ? `，安排一堂${trainingTypeLabel(qualityDay.type, qualityDay.focus)}` : ''}${longDay ? `，長跑約 ${longDay.km} km` : ''}。${specialNote}`;
+  }
+
+  return `<div class="card"><div class="card-title">✉️ 本週教練信</div>
+    <p style="margin:0 0 10px;line-height:1.7">${reviewEscape(reviewPara)}</p>
+    <p style="margin:0 0 10px;line-height:1.7">${reviewEscape(adjustPara)}</p>
+    <p style="margin:0;line-height:1.7">${reviewEscape(nextPara)}</p>
+  </div>`;
 }
 
 function renderPlanChangeTimeline() {
@@ -6100,6 +6749,8 @@ function workoutEndFromText(text, fallbackKm = 0) {
 }
 
 function workoutStructureForDay(day) {
+  // 休息日的 steps 是居家肌力清單，不是跑步課結構；防止被誤解析成「5 km 主課」
+  if (day?.type === 'rest') return [];
   if (Array.isArray(day?.workoutStructure) && day.workoutStructure.length) return day.workoutStructure;
   const courseSteps = attachCourseGuides(day?.steps || [], day?.type);
   return courseSteps.map((step, index) => {
@@ -7628,6 +8279,8 @@ function init() {
     syncBackToTop();
   }
   loadTrainerWeather().then(() => {
+    // 天氣載入後先做出發前調整，週視圖才會直接呈現調整後的今天
+    if (typeof applyDailySessionAdvisory === 'function') applyDailySessionAdvisory();
     if (trainerWeather && document.getElementById('plan-tab-week')) {
       jumpToPhaseWeek(currentWeek);
     }
@@ -7719,6 +8372,11 @@ loadRegistrationRaceCheckpoints();
     syncGarminRunsToPlan(data);
     // 校準結果顯示在教練建議分頁的「上次滾動校準」卡片，背景自動觸發不再跳 toast
     if (typeof autoRecalibratePlan === 'function') autoRecalibratePlan();
+    if (typeof applyDailySessionAdvisory === 'function') {
+      // 教練資料到位後才可能觸發「昨日高強度」降階；有調整就同步刷新週視圖
+      const advisoryResult = applyDailySessionAdvisory();
+      if (advisoryResult && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    }
     refreshCoachReviewPanels();
   }
 
