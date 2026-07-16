@@ -78,6 +78,21 @@ function ensureMainBranch() {
   }
 }
 
+function assertOriginMainIsNotAhead() {
+  run("git", ["fetch", "origin", "main"]);
+  const head = run("git", ["rev-parse", "HEAD"]);
+  const remote = run("git", ["rev-parse", "origin/main"]);
+  if (head === remote) return;
+
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", head, remote], { cwd: root, stdio: "ignore" });
+  } catch {
+    return;
+  }
+
+  throw new Error("origin/main advanced before this publish. Run npm run main:sync, regenerate the data, then publish again.");
+}
+
 function listAllowedChanges() {
   const output = run("git", ["status", "--short"]);
   if (!output) return [];
@@ -192,6 +207,7 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
 
   ensureMainBranch();
+  assertOriginMainIsNotAhead();
 
   const changes = listAllowedChanges();
   if (!changes.length) {

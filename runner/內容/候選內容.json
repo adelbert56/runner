@@ -528,7 +528,7 @@
     ],
     "first_seen_at": "2026-07-16",
     "last_seen_at": "2026-07-16",
-    "seen_count": 2
+    "seen_count": 3
   },
   {
     "checked_at": "2026-07-16",
@@ -767,6 +767,20 @@
     "first_seen_at": "2026-07-16",
     "last_seen_at": "2026-07-16",
     "seen_count": 2
+  },
+  {
+    "checked_at": "2026-07-16",
+    "source": "運動筆記",
+    "source_type": "跑步新聞 / 跑鞋專題",
+    "title": "【話題】傳奇跑進南美洲！Kipchoge 巴西阿雷格里港完賽，世界馬拉松巡迴七大洲之旅再下一城",
+    "url": "https://running.biji.co/index.php?q=news&act=info&id=114316&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%91%E5%82%B3%E5%A5%87%E8%B7%91%E9%80%B2%E5%8D%97%E7%BE%8E%E6%B4%B2%EF%BC%81Kipchoge%20%E5%B7%B4%E8%A5%BF%E9%98%BF%E9%9B%B7%E6%A0%BC%E9%87%8C%E6%B8%AF%E5%AE%8C%E8%B3%BD%EF%BC%8C%E4%B8%96%E7%95%8C%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%B7%A1%E8%BF%B4%E4%B8%83%E5%A4%A7%E6%B4%B2%E4%B9%8B%E6%97%85%E5%86%8D%E4%B8%8B%E4%B8%80%E5%9F%8E",
+    "category": "訓練",
+    "score": 7,
+    "article_date": "2026-07-13",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "退休後的 Eliud Kipchoge 正在進行世界馬拉松巡迴七大洲之旅。這位前馬拉松世界紀錄保持人、兩屆奧運金牌得主，週日現身巴西 New Balance 42K 阿雷格里港馬拉松（NB42K Porto Alegre Marathon）"
   },
   {
     "checked_at": "2026-07-16",
@@ -1146,6 +1160,20 @@
   },
   {
     "checked_at": "2026-07-16",
+    "source": "運動筆記",
+    "source_type": "跑步新聞 / 跑鞋專題",
+    "title": "【訓練】跑步只練腿還不夠！3 個上半身重量訓練 助跑姿更穩、跑得更快",
+    "url": "https://running.biji.co/index.php?q=news&act=info&id=114280&subtitle=%E3%80%90%E8%A8%93%E7%B7%B4%E3%80%91%E8%B7%91%E6%AD%A5%E5%8F%AA%E7%B7%B4%E8%85%BF%E9%82%84%E4%B8%8D%E5%A4%A0%EF%BC%813%20%E5%80%8B%E4%B8%8A%E5%8D%8A%E8%BA%AB%E9%87%8D%E9%87%8F%E8%A8%93%E7%B7%B4%20%E5%8A%A9%E8%B7%91%E5%A7%BF%E6%9B%B4%E7%A9%A9%E3%80%81%E8%B7%91%E5%BE%97%E6%9B%B4%E5%BF%AB",
+    "category": "入門知識",
+    "score": 13,
+    "article_date": "2026-07-01",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "提到跑者的肌力訓練，多數人第一個想到的都是深蹲、分腿蹲、硬舉等下肢訓練。我們也曾在《跑者肌力訓練該練哪？8 大關鍵肌群提升你的跑步效率與馬拉松表現》中，整理跑者最值得強化的肌群與訓練方向。不過，如果想進一步提升跑步效率、改善跑姿，甚至降低長"
+  },
+  {
+    "checked_at": "2026-07-16",
     "source": "KENLU",
     "source_type": "跑鞋評測 / 裝備情報",
     "title": "勘履滑手機 / Ronnie Fieg 又出來「放毒」 Kith x Nike 經典 Linen 系列發售有譜",
@@ -1308,15 +1336,29 @@
     "checked_at": "2026-07-16",
     "source": "運動筆記",
     "source_type": "跑步新聞 / 跑鞋專題",
-    "title": "【品牌動態】UNDER ARMOUR打造「Team UA ALL STAR專屬裝備」 力挺球星征戰中職明星賽！",
-    "url": "https://running.biji.co/index.php?q=news&act=info&id=114318&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91UA%20%E6%89%93%E9%80%A0%E3%80%8CTeam%20UA%20ALL%20STAR%E5%B0%88%E5%B1%AC%E8%A3%9D%E5%82%99%E3%80%8D%20%E5%8A%9B%E6%8C%BA%E7%90%83%E6%98%9F%E5%BE%81%E6%88%B0%E4%B8%AD%E8%81%B7%E6%98%8E%E6%98%9F%E8%B3%BD%EF%BC%81&label=all",
-    "category": "跑步新聞",
+    "title": "【健康】跑者必看！臀肌無力的 5 大徵兆、受傷風險與居家訓練方法",
+    "url": "https://running.biji.co/index.php?q=news&act=info&id=114265&subtitle=%E3%80%90%E5%81%A5%E5%BA%B7%E3%80%91%E8%B7%91%E8%80%85%E5%BF%85%E7%9C%8B%EF%BC%81%E8%87%80%E8%82%8C%E7%84%A1%E5%8A%9B%E7%9A%84%205%20%E5%A4%A7%E5%BE%B5%E5%85%86%E3%80%81%E5%8F%97%E5%82%B7%E9%A2%A8%E9%9A%AA%E8%88%87%E5%B1%85%E5%AE%B6%E8%A8%93%E7%B7%B4%E6%96%B9%E6%B3%95",
+    "category": "入門知識",
     "score": 7,
-    "article_date": "2026-07-14",
+    "article_date": "2026-07-10",
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "圖｜UA 提供2026 CPBL中華職棒明星賽即將熱力引爆， UNDER ARMOUR特別為簽約球員打造專屬「Team UA ALL STAR專屬裝備」，用心支持一路在球場上全力拚戰的戰將們。今年UA攜手MFD.System，依據每位球員的"
+    "description": "很多跑者把大部分時間都花在累積里程，卻忽略了一件事──真正限制你速度的，可能不是心肺，而是腿部力量。你是否曾經遇過這些情況？跑到後半段雙腿開始沒有力量上坡跑不動下坡容易失控比賽後半程姿勢越跑越散常常膝蓋、小腿或臀部不舒服很多時候，問題並不是"
+  },
+  {
+    "checked_at": "2026-07-16",
+    "source": "運動筆記",
+    "source_type": "跑步新聞 / 跑鞋專題",
+    "title": "【話題】​跑步真的很便宜嗎？當你越愛它，錢包就越誠實",
+    "url": "https://running.biji.co/index.php?q=news&act=info&id=114304&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%91%E2%80%8B%E8%B7%91%E6%AD%A5%E7%9C%9F%E7%9A%84%E5%BE%88%E4%BE%BF%E5%AE%9C%E5%97%8E%EF%BC%9F%E7%95%B6%E4%BD%A0%E8%B6%8A%E6%84%9B%E5%AE%83%EF%BC%8C%E9%8C%A2%E5%8C%85%E5%B0%B1%E8%B6%8A%E8%AA%A0%E5%AF%A6",
+    "category": "入門知識",
+    "score": 7,
+    "article_date": "2026-07-09",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "「跑步很便宜，只要一雙鞋就能開始。」這句話，幾乎每個跑者剛入坑時都聽過，而且深信不疑。只要套上一件便宜的排汗衫，到附近公園、河濱或田徑場繞個幾圈，今天的運動目標就完成了，不用訂場地，不用揪隊友，門檻低到讓人幾乎沒有理由拒絕。圖｜AI 生成不"
   },
   {
     "checked_at": "2026-07-16",
@@ -1330,7 +1372,13 @@
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "如果說有一場路跑，能讓你在揮灑汗水的同時感受到滿滿應援與陪伴，那一定少不了寶礦力路跑。從 2018 年首屆舉辦至今，寶礦力路跑已成為許多跑者人生中的第一場賽事，也是無數跑者每年固定回歸的藍色盛典。2026 年，「POCARI SWEAT R"
+    "description": "如果說有一場路跑，能讓你在揮灑汗水的同時感受到滿滿應援與陪伴，那一定少不了寶礦力路跑。從 2018 年首屆舉辦至今，寶礦力路跑已成為許多跑者人生中的第一場賽事，也是無數跑者每年固定回歸的藍色盛典。2026 年，「POCARI SWEAT R",
+    "source_aliases": [
+      "運動筆記"
+    ],
+    "first_seen_at": "2026-07-16",
+    "last_seen_at": "2026-07-16",
+    "seen_count": 2
   },
   {
     "checked_at": "2026-07-16",
@@ -1407,6 +1455,20 @@
     "first_seen_at": "2026-07-16",
     "last_seen_at": "2026-07-16",
     "seen_count": 2
+  },
+  {
+    "checked_at": "2026-07-16",
+    "source": "運動筆記",
+    "source_type": "跑步新聞 / 跑鞋專題",
+    "title": "【賽事】最後100公尺上演大逆轉！Kebinatshipi 400公尺跑出 43.44 歷代第六快",
+    "url": "https://running.biji.co/index.php?q=news&act=info&id=114317&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%91%E6%9C%80%E5%BE%8C100%E5%85%AC%E5%B0%BA%E4%B8%8A%E6%BC%94%E5%A4%A7%E9%80%86%E8%BD%89%EF%BC%81Kebinatshipi%20400%E5%85%AC%E5%B0%BA%E8%B7%91%E5%87%BA%2043.44%20%E6%AD%B7%E4%BB%A3%E7%AC%AC%E5%85%AD%E5%BF%AB",
+    "category": "跑步新聞",
+    "score": 6,
+    "article_date": "2026-07-14",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "來自波札納短跑好手 Collen Kebinatshipi 於摩納哥鑽石聯賽（Wanda Diamond League Monaco）跑出震撼的一場比賽，他在男子 400 公尺決賽中以 43 秒44 奪下冠軍，不僅刷新個人最佳、同時改寫鑽石"
   },
   {
     "checked_at": "2026-07-16",
@@ -1875,7 +1937,7 @@
     ],
     "first_seen_at": "2026-07-16",
     "last_seen_at": "2026-07-16",
-    "seen_count": 2
+    "seen_count": 4
   },
   {
     "checked_at": "2026-07-16",
@@ -1883,19 +1945,6 @@
     "source_type": "英文跑鞋評測 / 鞋款整理",
     "title": "Asics Novablast 5 review",
     "url": "https://www.tomsguide.com/%22https://www.tomsguide.com/wellness/running/asics-novablast-5-review/%22",
-    "category": "跑步新聞",
-    "score": 12,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate"
-  },
-  {
-    "checked_at": "2026-07-16",
-    "source": "Tom's Guide Running",
-    "source_type": "英文跑鞋評測 / 鞋款整理",
-    "title": "Asics Novablast 5 review",
-    "url": "https://www.tomsguide.com/wellness/running/asics-novablast-5-review",
     "category": "跑步新聞",
     "score": 12,
     "article_date": "",
@@ -1934,7 +1983,7 @@
     ],
     "first_seen_at": "2026-07-16",
     "last_seen_at": "2026-07-16",
-    "seen_count": 2
+    "seen_count": 4
   },
   {
     "checked_at": "2026-07-16",
@@ -1976,7 +2025,13 @@
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "Nike’s updated Zegama grips mud, snowpack, and wet rock with confidence."
+    "description": "Nike’s updated Zegama grips mud, snowpack, and wet rock with confidence.",
+    "source_aliases": [
+      "Runner's World"
+    ],
+    "first_seen_at": "2026-07-16",
+    "last_seen_at": "2026-07-16",
+    "seen_count": 3
   },
   {
     "checked_at": "2026-07-16",
@@ -1990,7 +2045,13 @@
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "The super trainer pairs PEBA foam with a nylon plate. Just don’t race in this 45mm shoe if you’re a pro!"
+    "description": "The super trainer pairs PEBA foam with a nylon plate. Just don’t race in this 45mm shoe if you’re a pro!",
+    "source_aliases": [
+      "Runner's World"
+    ],
+    "first_seen_at": "2026-07-16",
+    "last_seen_at": "2026-07-16",
+    "seen_count": 3
   },
   {
     "checked_at": "2026-07-16",
@@ -2022,20 +2083,6 @@
   },
   {
     "checked_at": "2026-07-16",
-    "source": "Runner's World",
-    "source_type": "英文跑鞋評測 / 訓練知識",
-    "title": "I Switched to a Natural-Fit Running Shoe—and Finally Found My Stride",
-    "url": "https://www.runnersworld.com/gear/a65625747/i-switched-to-a-natural-fit-running-shoeand-finally-found-my-stride/",
-    "category": "跑鞋新品",
-    "score": 15,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "The Altra Experience Flow 2 gave me more comfort and control and reminded me why I run."
-  },
-  {
-    "checked_at": "2026-07-16",
     "source": "Tom's Guide Running",
     "source_type": "英文跑鞋評測 / 鞋款整理",
     "title": "Adidas Hyperboost Edge vs Adidas Adizero Evo SL: Which running shoe should you buy?",
@@ -2047,20 +2094,6 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "Which Adidas sneaker comes out on top?"
-  },
-  {
-    "checked_at": "2026-07-16",
-    "source": "Runner's World",
-    "source_type": "英文跑鞋評測 / 訓練知識",
-    "title": "The Hoka Mach 7 Has a Sporty New Look and Still Promotes Snappy Rides",
-    "url": "https://www.runnersworld.com/gear/a71138816/hoka-mach-7-review/",
-    "category": "跑步新聞",
-    "score": 14,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "An updated upper gives the shoe a modernized edge, along with an improved fit and responsive cushioning."
   },
   {
     "checked_at": "2026-07-16",
@@ -2098,45 +2131,12 @@
   },
   {
     "checked_at": "2026-07-16",
-    "source": "Runner's World",
-    "source_type": "英文跑鞋評測 / 訓練知識",
-    "title": "Thoughtful Updates Will Allow Altra Escalante 5 Fans to Breathe a Sigh of Relief. Not Much Has Changed.",
-    "url": "https://www.runnersworld.com/gear/a71783874/altra-escalante-5-preview/",
-    "category": "跑步新聞",
-    "score": 11,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "This $130 shoe delivers ground feel, roomy comfort, and better traction for fast miles.",
-    "source_aliases": [
-      "Runner's World"
-    ],
-    "first_seen_at": "2026-07-16",
-    "last_seen_at": "2026-07-16",
-    "seen_count": 2
-  },
-  {
-    "checked_at": "2026-07-16",
     "source": "Tom's Guide Running",
     "source_type": "英文跑鞋評測 / 鞋款整理",
     "title": "Nike Vomero Plus review",
     "url": "https://www.tomsguide.com/%22https://www.tomsguide.com/wellness/running/i-ran-50-miles-in-the-nike-vomero-plus-and-its-my-new-favorite-running-shoe/%22",
     "category": "跑步新聞",
     "score": 11,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate"
-  },
-  {
-    "checked_at": "2026-07-16",
-    "source": "Tom's Guide Running",
-    "source_type": "英文跑鞋評測 / 鞋款整理",
-    "title": "Hoka Skyward X review",
-    "url": "https://www.tomsguide.com/wellness/running/hoka-skyward-x-review",
-    "category": "跑步新聞",
-    "score": 10,
     "article_date": "",
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
@@ -2160,13 +2160,34 @@
     "checked_at": "2026-07-16",
     "source": "Tom's Guide Running",
     "source_type": "英文跑鞋評測 / 鞋款整理",
-    "title": "Hoka Tecton X3",
-    "url": "https://www.tomsguide.com/wellness/running/hoka-tecton-x3-review",
-    "category": "跑步新聞",
-    "score": 6,
-    "article_date": "",
+    "title": "I&rsquo;ve tested almost every Hoka running shoe and 3 of my favorites are reduced right now",
+    "url": "https://www.tomsguide.com/wellness/running/ive-tested-almost-every-hoka-running-shoe-and-3-of-my-favorites-are-reduced-right-now",
+    "category": "跑鞋新品",
+    "score": 29,
+    "article_date": "2026-07-15",
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate"
+    "publish_status": "candidate",
+    "description": "Hoka&rsquo;s in-house sale is packed with bargains right now and I&rsquo;ve picked out 3 of the best shoes I&rsquo;ve tested that are available at big discounts."
+  },
+  {
+    "checked_at": "2026-07-16",
+    "source": "Tom's Guide Running",
+    "source_type": "英文跑鞋評測 / 鞋款整理",
+    "title": "The best running shoes in 2026 &mdash; our top picks, tested by 3 runners",
+    "url": "https://www.tomsguide.com/best-picks/best-running-shoes#section-best-value-running-shoe",
+    "category": "跑鞋新品",
+    "score": 29,
+    "article_date": "2026-07-13",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "The best running shoes from Asics, Nike, Brooks, and more.",
+    "source_aliases": [
+      "Tom's Guide Running"
+    ],
+    "first_seen_at": "2026-07-16",
+    "last_seen_at": "2026-07-16",
+    "seen_count": 10
   }
 ]

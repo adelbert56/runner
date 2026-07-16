@@ -2,11 +2,15 @@
 setlocal
 cd /d "%~dp0"
 
-echo [1/2] 重新整理跑鞋與新聞資料...
+echo [1/3] 同步 GitHub main，避免與自動更新衝突...
+call npm run main:sync
+if errorlevel 1 goto :fail
+
+echo [2/3] 重新整理跑鞋與新聞資料...
 call npm run content:refresh
 if errorlevel 1 goto :fail
 
-echo [2/2] 發布到 GitHub Pages 並驗證公開網站...
+echo [3/3] 發布到 GitHub Pages 並驗證公開網站...
 call npm run site:publish
 if errorlevel 1 goto :fail
 

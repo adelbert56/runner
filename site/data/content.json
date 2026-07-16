@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T02:45:17.476Z",
+  "generated_at": "2026-07-16T02:45:59.661Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-06-chi-wei-puma-deviate-nitro-elite-4-review",
@@ -597,15 +597,32 @@
       ]
     },
     {
-      "id": "news-www-tomsguide-com-wellness-running-asics-novablast-5-review",
+      "id": "news-www-don1don-com-archives-240160-e6-89-93-e9-80-a0-e8-b3-bd-e4-ba-8b-e6-9c-80-e4-",
       "type": "news",
-      "title": "Asics Novablast 5 review",
+      "title": "打造賽事最佳狀態！BROOKS《年底賽事目標 PB...",
       "date": "2026-07-16",
+      "source": "動一動",
+      "category": "賽事資訊",
+      "summary": "這篇屬於賽事資訊，可用來判斷報名時程、距離組別、交通與是否值得排進年度目標。",
+      "url": "https://www.don1don.com/archives/240160/%e6%89%93%e9%80%a0%e8%b3%bd%e4%ba%8b%e6%9c%80%e4%bd%b3%e7%8b%80%e6%85%8b%ef%bc%81brooks%e3%80%8a%e5%b9%b4%e5%ba%95%e8%b3%bd%e4%ba%8b%e7%9b%ae%e6%a8%99-pb-%e8%a8%93%e7%b7%b4%e7%87%9f%e3%80%8b%e5%a0%b1",
+      "score": 9,
+      "source_origin": "candidate",
+      "published_at": "2026-07-16",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
+      "id": "news-www-tomsguide-com-wellness-running-ive-tested-almost-every-hoka-running-shoe-and",
+      "type": "news",
+      "title": "I&rsquo;ve tested almost every Hoka running shoe and 3 of my favorites are reduced right now",
+      "date": "2026-07-15",
       "source": "Tom's Guide Running",
       "category": "跑鞋裝備",
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://www.tomsguide.com/wellness/running/asics-novablast-5-review",
-      "score": 12,
+      "url": "https://www.tomsguide.com/wellness/running/ive-tested-almost-every-hoka-running-shoe-and-3-of-my-favorites-are-reduced-right-now",
+      "score": 29,
       "source_origin": "candidate",
       "published_at": "2026-07-16",
       "publish_status": "published",
@@ -657,23 +674,6 @@
       "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
       "url": "https://www.tomsguide.com/%22https://www.tomsguide.com/wellness/running/i-ran-50-miles-in-the-nike-vomero-plus-and-its-my-new-favorite-running-shoe/%22",
       "score": 11,
-      "source_origin": "candidate",
-      "published_at": "2026-07-16",
-      "publish_status": "published",
-      "source_aliases": [
-        "Tom's Guide Running"
-      ]
-    },
-    {
-      "id": "news-www-tomsguide-com-wellness-running-hoka-skyward-x-review",
-      "type": "news",
-      "title": "Hoka Skyward X review",
-      "date": "2026-07-16",
-      "source": "Tom's Guide Running",
-      "category": "跑鞋裝備",
-      "summary": "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。",
-      "url": "https://www.tomsguide.com/wellness/running/hoka-skyward-x-review",
-      "score": 10,
       "source_origin": "candidate",
       "published_at": "2026-07-16",
       "publish_status": "published",
@@ -911,23 +911,6 @@
       "category": "越野",
       "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
       "url": "https://kenlu.net/2026/05/hoka-speedgoat-7-feature/",
-      "score": 21,
-      "source_origin": "candidate",
-      "published_at": "2026-07-16",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "shoe-kenlu-net-2026-07-asics-novablast-6-official-images",
-      "type": "shoe",
-      "title": "官方新聞 / ASICS 彈力跑鞋 NOVABLAST 6 全面進化！FF TURBO SQUARED 中底強化動能回饋",
-      "date": "2026-07-02",
-      "source": "KENLU",
-      "category": "日常訓練",
-      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
-      "url": "https://kenlu.net/2026/07/asics-novablast-6-official-images/",
       "score": 21,
       "source_origin": "candidate",
       "published_at": "2026-07-16",
@@ -1297,7 +1280,7 @@
       "id": "shoe-www-runnersworld-com-gear-a71851763-brooks-hyperion-max-4-release",
       "type": "shoe",
       "title": "The Brooks Hyperion Max 4 Is Built for Fast, Cushioned Miles—And It’s Forgiving Enough for Marathon Day",
-      "date": "2026-07-10",
+      "date": "2026-07-16",
       "source": "Runner's World",
       "category": "跑鞋新品",
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
@@ -1314,7 +1297,7 @@
       "id": "shoe-www-runnersworld-com-gear-a71850272-nike-acg-zegama-trail-review",
       "type": "shoe",
       "title": "The Nike ACG Zegama Trail Shoe Is Built for the Messiest Runs",
-      "date": "2026-07-10",
+      "date": "2026-07-16",
       "source": "Runner's World",
       "category": "越野",
       "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
@@ -1325,6 +1308,23 @@
       "publish_status": "published",
       "source_aliases": [
         "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-tomsguide-com-best-picks-best-running-shoes",
+      "type": "shoe",
+      "title": "The best running shoes in 2026 &mdash; our top picks, tested by 3 runners",
+      "date": "2026-07-13",
+      "source": "Tom's Guide Running",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.tomsguide.com/best-picks/best-running-shoes#section-best-value-running-shoe",
+      "score": 29,
+      "source_origin": "candidate",
+      "published_at": "2026-07-16",
+      "publish_status": "published",
+      "source_aliases": [
+        "Tom's Guide Running"
       ]
     },
     {
