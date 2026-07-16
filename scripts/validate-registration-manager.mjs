@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { entryDuplicateKey, findDuplicateEntry } from "../local/registration/registration-core.js";
+import { entryDuplicateKey, findDuplicateEntry, paymentAmountPresentation } from "../local/registration/registration-core.js";
 
 const root = resolve(import.meta.dirname, "..");
 const checks = [];
@@ -59,6 +59,12 @@ assertCheck(
   "registration manager allows editing the same entry"
 );
 assertCheck(
+  paymentAmountPresentation(null).label === "金額未填" &&
+    paymentAmountPresentation(0).hint === "金額為 0" &&
+    paymentAmountPresentation(120000).label === "NT$ 120,000",
+  "payment preview distinguishes missing, zero, and large amounts"
+);
+assertCheck(
   /allowedLocalHosts/.test(server) && /Registration data is only available/.test(server),
   "registration API is restricted to local host requests"
 );
@@ -96,6 +102,12 @@ assertCheck(
     registrationJs.includes("selectedRaceFromDropdown") &&
     !registrationJs.includes("data-use-race"),
   "registration manager uses a dropdown race picker instead of a long card list"
+);
+assertCheck(
+  registrationJs.includes("hasOpenRegistrationWindow") &&
+    registrationJs.includes("workspaceRaceStatus") &&
+    registrationJs.includes('status === "已截止" && !hasOpenRegistrationWindow(race)'),
+  "registration manager keeps a future-deadline race selectable when its source status is stale"
 );
 assertCheck(
   [
@@ -149,12 +161,11 @@ assertCheck(
 );
 assertCheck(
   registrationJs.includes("maskedPhone") &&
-    registrationJs.includes("目前 ${escapeHtml(stats.active)} 場") &&
-    registrationJs.includes("歷史 ${escapeHtml(stats.history)} 場") &&
-    registrationJs.includes("查看目前賽事") &&
-    registrationJs.includes("查看歷史紀錄") &&
+    registrationJs.includes("person-row") &&
+    registrationJs.includes("目前賽事") &&
+    registrationJs.includes("data-view-scope=\"history\"") &&
     registrationJs.includes("focusRenderedCard"),
-  "registration manager masks phones, splits current and history counts, provides person shortcuts, and returns focus after save"
+  "registration manager masks phones, presents people in compact rows, keeps history shortcuts, and returns focus after save"
 );
 assertCheck(
     registrationHtml.includes('id="export-selected-race-payments"') &&
@@ -177,6 +188,16 @@ assertCheck(
     registrationJs.includes("繳費確認截圖") &&
     !registrationJs.includes("催款"),
   "registration manager exports selected-race payment confirmation screenshot HTML"
+);
+assertCheck(
+  registrationJs.includes("participant-summary-card") &&
+    registrationJs.includes("preview-status-filter") &&
+    registrationJs.includes("paymentAmountPresentation") &&
+    registrationJs.includes("正在讀取報名與賽事資料") &&
+    registrationJs.includes("資料讀取失敗：") &&
+    registrationJs.includes("@media (max-width: 767px)") &&
+    registrationJs.includes("safe-area-inset-bottom"),
+  "notification preview keeps responsive participant, status, and amount presentation"
 );
 assertCheck(
   registrationJs.includes("SELECTED_RACE_STORAGE_KEY") &&

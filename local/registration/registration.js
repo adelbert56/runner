@@ -1,9 +1,10 @@
-import { findDuplicateEntry } from "./registration-core.js";
+import { findDuplicateEntry, paymentAmountPresentation } from "./registration-core.js";
 
 const DATA_VERSION = "20260714-registration-workspace2";
 const SELECTED_RACE_STORAGE_KEY = "runner.registration.selectedRaceId";
 const WORKSPACE_VIEW_STORAGE_KEY = "runner.registration.workspaceView";
 const NOTIFY_PREFS_STORAGE_KEY = "runner.registration.notifyPrefs";
+const SIDEBAR_COLLAPSED_STORAGE_KEY = "runner.registration.sidebarCollapsed";
 const PEOPLE_PAGE_SIZE = 6;
 const ENTRY_GROUP_PAGE_SIZE = 4;
 
@@ -15,6 +16,7 @@ const state = {
   lastKnownUpdatedAt: null,
   entryBatchPersonIds: new Set(),
   peopleQuery: "",
+  peopleSort: "name",
   peoplePage: 1,
   entryQuery: "",
   entryScope: "active",
@@ -26,6 +28,7 @@ const state = {
   focusPersonId: "",
   focusEntryId: "",
   workspaceView: "overview",
+  sidebarCollapsed: false,
   overviewShowAllActive: false,
   overviewShowAllPeople: false,
   notifyScope: "active",
@@ -36,6 +39,8 @@ const state = {
   notifyDensity: "compact",
   notifyCollapsedGroups: new Set(),
   notifyWorkspacePrimed: false,
+  loadState: "idle",
+  loadError: "",
 };
 
 const els = {
@@ -45,11 +50,13 @@ const els = {
   exportSelectedRacePayments: document.querySelector("#export-selected-race-payments"),
   exportSelectedRacePaymentHtml: document.querySelector("#export-selected-race-payment-html"),
   racePicker: document.querySelector("#race-picker"),
+  sidebarCollapseToggle: document.querySelector("#sidebar-collapse-toggle"),
   peopleList: document.querySelector("#people-list"),
   peoplePagination: document.querySelector("#people-pagination"),
   entriesList: document.querySelector("#entries-list"),
   entriesPagination: document.querySelector("#entries-pagination"),
   peopleSearch: document.querySelector("#people-search"),
+  peopleSort: document.querySelector("#people-sort"),
   entriesScopeTabs: document.querySelector("#entries-scope-tabs"),
   entriesHistorySummary: document.querySelector("#entries-history-summary"),
   entriesSearch: document.querySelector("#entries-search"),
@@ -197,7 +204,8 @@ function normalizeEntryStatusValue(value) {
 }
 
 function formatMoney(value) {
-  return `NT$ ${Number(value || 0).toLocaleString("zh-TW")}`;
+  const amount = Number(value || 0);
+  return amount === 0 ? "新台幣 0 元" : `NT$ ${amount.toLocaleString("zh-TW")}`;
 }
 
 function savedSelectedRaceId() {
@@ -229,6 +237,26 @@ function savedWorkspaceView() {
     return localStorage.getItem(WORKSPACE_VIEW_STORAGE_KEY) || "overview";
   } catch {
     return "overview";
+  }
+}
+
+function savedSidebarCollapsed() {
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function setSidebarCollapsed(collapsed) {
+  state.sidebarCollapsed = Boolean(collapsed);
+  document.body.classList.toggle("registration-sidebar-collapsed", state.sidebarCollapsed);
+  els.sidebarCollapseToggle?.setAttribute("aria-expanded", String(!state.sidebarCollapsed));
+  els.sidebarCollapseToggle?.setAttribute("title", state.sidebarCollapsed ? "展開賽事側欄" : "收合賽事側欄");
+  try {
+    localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, String(state.sidebarCollapsed));
+  } catch {
+    // Sidebar preference is non-essential and must not affect registration data.
   }
 }
 
@@ -308,9 +336,25 @@ function isClosedRaceStatus(value) {
   return ["已截止", "停辦", "停賽", "取消"].includes(normalizeEntryStatusValue(value));
 }
 
+function hasOpenRegistrationWindow(race) {
+  const deadline = String(race?.registration_deadline || "").slice(0, 10);
+  return Boolean(deadline && deadline >= todayString());
+}
+
+function workspaceRaceStatus(race) {
+  if (normalizeEntryStatusValue(race?.registration_status) === "已截止" && hasOpenRegistrationWindow(race)) {
+    return "報名中";
+  }
+  return race?.registration_status || "狀態待補";
+}
+
 function isSelectableRace(race) {
   const raceDate = raceDateValue(race);
-  if (isClosedRaceStatus(race?.registration_status)) {
+  const status = normalizeEntryStatusValue(race?.registration_status);
+  if (["停辦", "停賽", "取消"].includes(status)) {
+    return false;
+  }
+  if (status === "已截止" && !hasOpenRegistrationWindow(race)) {
     return false;
   }
   return !raceDate || raceDate >= todayString();
@@ -776,6 +820,16 @@ function renderNotifyPickerLists() {
 }
 
 function renderNotifyWorkspace() {
+  if (state.loadState === "loading") {
+    els.notifyResults.className = `notify-results-shell${state.notifyDensity === "compact" ? " is-compact" : ""}`;
+    els.notifyResults.innerHTML = '<div class="empty-state">正在讀取報名與賽事資料…</div>';
+    return [];
+  }
+  if (state.loadState === "error") {
+    els.notifyResults.className = `notify-results-shell${state.notifyDensity === "compact" ? " is-compact" : ""}`;
+    els.notifyResults.innerHTML = `<div class="empty-state">資料讀取失敗：${escapeHtml(state.loadError || "請重新整理後再試一次。")}</div>`;
+    return [];
+  }
   const filteredEntries = filteredNotifyEntries();
   const groups = buildNotifyGroups(filteredEntries);
   const uniqueRaceCount = new Set(filteredEntries.map((entry) => notifyRaceKey(entry))).size;
@@ -878,7 +932,7 @@ function renderNotifyWorkspace() {
                 <p>${escapeHtml([entry.notes, [entry.county, entry.location].filter(Boolean).join(" · ")].filter(Boolean).join("｜") || "無補充說明")}</p>
               </div>
               <div class="notify-entry-amount">
-                <strong>${escapeHtml(entry.paidAmount ? formatMoney(entry.paidAmount) : "NT$ 0")}</strong>
+                <strong>${escapeHtml(formatMoney(entry.paidAmount))}</strong>
                 <small>${escapeHtml(entry.isPaid ? "費用已確認" : entry.isRegistered ? "待收此筆費用" : "尚未完成報名" )}</small>
               </div>
             </section>
@@ -1101,7 +1155,7 @@ function renderSelectedRaceSummary(race) {
       <div class="race-picker-meta">
         <span class="meta-pill">${escapeHtml(race.race_date || "日期待補")}</span>
         <span class="meta-pill">${escapeHtml(dedupeRaceDistances(race) || "距離待補")}</span>
-        <span class="meta-pill">${escapeHtml(race.registration_status || "狀態待補")}</span>
+        <span class="meta-pill">${escapeHtml(workspaceRaceStatus(race))}</span>
       </div>
       <p class="sidebar-race-location">${escapeHtml(formatRaceLocation(race) || "地點待補")}</p>
       <div class="sidebar-race-stats">
@@ -1127,54 +1181,50 @@ function renderPeopleList() {
   const filteredPeople = state.people.filter((person) => (
     !state.peopleQuery || personSearchText(person).includes(state.peopleQuery)
   ));
-  if (!filteredPeople.length) {
+  const sortedPeople = [...filteredPeople].sort((left, right) => {
+    const byName = () => String(left.name || "").localeCompare(String(right.name || ""), "zh-Hant");
+    if (state.peopleSort === "active-desc") return personStats(right.id).active - personStats(left.id).active || byName();
+    if (state.peopleSort === "pending-desc") return personStats(right.id).pending - personStats(left.id).pending || byName();
+    if (state.peopleSort === "pending-asc") return personStats(left.id).pending - personStats(right.id).pending || byName();
+    return byName();
+  });
+  if (!sortedPeople.length) {
     els.peopleList.innerHTML = `<div class="empty-state">${state.people.length ? "查無符合的人員" : "尚未建立人員"}</div>`;
     renderPagination(els.peoplePagination, "people", { total: 0 });
     return;
   }
 
   if (state.focusPersonId) {
-    const focusIndex = filteredPeople.findIndex((person) => person.id === state.focusPersonId);
+    const focusIndex = sortedPeople.findIndex((person) => person.id === state.focusPersonId);
     if (focusIndex >= 0) {
       state.peoplePage = Math.floor(focusIndex / PEOPLE_PAGE_SIZE) + 1;
     }
   }
-  const pagination = paginateItems(filteredPeople, state.peoplePage, PEOPLE_PAGE_SIZE);
+  const pagination = paginateItems(sortedPeople, state.peoplePage, PEOPLE_PAGE_SIZE);
   state.peoplePage = pagination.page;
 
-  els.peopleList.innerHTML = pagination.items.map((person) => {
+  els.peopleList.innerHTML = `<div class="person-row person-row-head" aria-hidden="true"><span>人員</span><span>目前賽事</span><span>未完成</span><span>聯絡資訊</span><span>操作</span></div>${pagination.items.map((person) => {
     const stats = personStats(person.id);
     return `
-    <article class="person-card${state.focusPersonId === person.id ? " is-focused" : ""}" id="person-card-${escapeHtml(person.id)}">
-      <div class="person-main">
-        <div class="person-head">
-          <div class="overview-card-kicker">
-            ${overviewStatusTag(stats.pending ? `待辦 ${stats.pending}` : "名單穩定", stats.pending ? "pending" : "complete")}
-          </div>
-          <h3>${escapeHtml(person.name)}</h3>
-          <div class="person-meta">
-            ${stats.active ? `<span class="meta-pill">目前 ${escapeHtml(stats.active)} 場</span>` : ""}
-            ${stats.history ? `<span class="meta-pill">歷史 ${escapeHtml(stats.history)} 場</span>` : ""}
-            ${stats.pending ? `<span class="meta-pill">未完成 ${escapeHtml(stats.pending)}</span>` : ""}
-            ${person.defaultShirtSize ? `<span class="meta-pill">衣服 ${escapeHtml(person.defaultShirtSize)}</span>` : ""}
-            ${person.gender ? `<span class="meta-pill">${escapeHtml(person.gender)}</span>` : ""}
-            ${person.phone ? `<span class="meta-pill">${escapeHtml(maskedPhone(person.phone))}</span>` : ""}
-            ${person.nationalId ? `<span class="meta-pill">身分證 ${escapeHtml(String(person.nationalId).slice(-4).padStart(String(person.nationalId).length, "*"))}</span>` : ""}
-          </div>
-        </div>
-        <p class="person-emergency">${escapeHtml(person.emergencyName ? `緊急聯絡：${person.emergencyName} / ${person.emergencyRelationship} / ${maskedPhone(person.emergencyPhone)}` : "尚無緊急聯絡資料")}</p>
-        <div class="person-quick-actions">
-          <button class="person-quick-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="active">查看目前賽事</button>
-          <button class="person-quick-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="history">查看歷史紀錄</button>
-        </div>
+    <article class="person-card person-row${state.focusPersonId === person.id ? " is-focused" : ""}" id="person-card-${escapeHtml(person.id)}">
+      <div class="person-row-identity">
+        <strong>${escapeHtml(person.name)}</strong>
+        <span>${escapeHtml([person.gender, person.defaultShirtSize].filter(Boolean).join(" · ") || "資料待補")}</span>
       </div>
-      <div class="card-actions">
-        <button class="mini-action" type="button" data-edit-person="${escapeHtml(person.id)}">編輯</button>
-        <button class="mini-action" type="button" data-delete-person="${escapeHtml(person.id)}">刪除</button>
+      <div class="person-row-stat"><span>目前賽事</span><strong>${escapeHtml(stats.active)}</strong></div>
+      <div class="person-row-stat"><span>未完成</span><strong class="${stats.pending ? "is-warning" : ""}">${escapeHtml(stats.pending)}</strong></div>
+      <div class="person-row-contact">
+        <span>${escapeHtml(person.phone ? `手機 ${maskedPhone(person.phone)}` : "手機未填")}</span>
+        <span>${escapeHtml(person.nationalId ? `身分證 ${String(person.nationalId).slice(-4).padStart(String(person.nationalId).length, "*")}` : "身分證未填")}</span>
+      </div>
+      <div class="card-actions person-row-actions">
+        <button class="mini-action person-row-icon-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="active" aria-label="查看 ${escapeHtml(person.name)}" title="查看"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="M2.5 10s2.7-4.5 7.5-4.5S17.5 10 17.5 10s-2.7 4.5-7.5 4.5S2.5 10 2.5 10Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="10" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <button class="mini-action person-row-icon-action" type="button" data-edit-person="${escapeHtml(person.id)}" aria-label="編輯 ${escapeHtml(person.name)}" title="編輯"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="m4 14.8.8-3.3L12.7 3.6a1.7 1.7 0 0 1 2.4 2.4l-7.9 7.9-3.2.9Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/><path d="m11.5 4.8 3.7 3.7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <details class="person-more-actions"><summary aria-label="更多操作" title="更多操作"><span aria-hidden="true">•••</span></summary><div class="person-more-menu"><button class="mini-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="history">歷史紀錄</button><button class="mini-action danger-action" type="button" data-delete-person="${escapeHtml(person.id)}">刪除人員</button></div></details>
       </div>
     </article>
   `;
-  }).join("");
+  }).join("")}`;
 
   els.peopleList.querySelectorAll("[data-edit-person]").forEach((button) => {
     button.addEventListener("click", () => editPerson(button.dataset.editPerson));
@@ -1270,7 +1320,7 @@ function renderOverview() {
           <div class="overview-race-copy">
             <div class="overview-card-kicker">
               ${overviewStatusTag(stats.pendingCount ? `待完成 ${stats.pendingCount}` : "目前已就緒", stats.pendingCount ? "pending" : "complete")}
-              ${overviewStatusTag(selectedRace.registration_status || "狀態待補", "neutral")}
+              ${overviewStatusTag(workspaceRaceStatus(selectedRace), "neutral")}
             </div>
             <h3>${escapeHtml(raceName(selectedRace))}</h3>
             <p>${escapeHtml(formatRaceLocation(selectedRace) || "地點待補")}</p>
@@ -1543,7 +1593,7 @@ function fillEntryFromRace(race) {
   els.entryRegistrationUrl.value = race.registration_link || "";
   els.entryRegistrationOpensAt.value = String(race.registration_opens_at || "").slice(0, 10);
   els.entryRegistrationDeadline.value = String(race.registration_deadline || "").slice(0, 10);
-  els.entryStatus.value = normalizeEntryStatusValue(race.registration_status);
+  els.entryStatus.value = normalizeEntryStatusValue(workspaceRaceStatus(race));
   const person = selectedPerson();
   els.entryShirtSize.value = person?.defaultShirtSize || "";
   showStatus(`已帶入 ${raceName(race)} 的基本資料`, "success");
@@ -2092,88 +2142,89 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
   const totalUnpaid = groups.reduce((sum, group) => sum + group.unpaidAmount, 0);
   const uniqueRaceCount = new Set(groups.flatMap((group) => group.entries.map((entry) => notifyRaceKey(entry)))).size;
   const totalRegistered = groups.reduce((sum, group) => sum + group.registeredCount, 0);
-  const coverageRatio = totalEntries ? Math.round((totalRegistered / totalEntries) * 100) : 0;
-  const exportLabel = groups.length === 1 ? "匯出此卡片 PNG" : "匯出目前報表 PNG";
-  const exportHint = groups.length === 1 ? "開分頁後可直接匯出單人卡片圖片，適合直接傳給報名者。" : "目前為多人總表，匯出時會截取整張報表。";
+  const registeredCoverage = totalEntries ? Math.round((totalRegistered / totalEntries) * 100) : 0;
+  const exportLabel = groups.length === 1 ? "匯出通知 PNG" : "匯出總表 PNG";
+
+  function entryPresentation(entry) {
+    const rawStatus = String(entry.status || "").trim();
+    const knownStatuses = new Set(["", "報名中", "可報名", "未開始", "尚未開報", "待確認", "已報名未繳費", "已完成", "已截止", "停辦", "停賽", "取消", "待報名"]);
+    const registration = entry.isRegistered ? "已完成報名" : isClosedRaceStatus(rawStatus) ? "已截止" : "待報名";
+    const payment = entry.isPaid ? "已繳費" : entry.isRegistered ? "待繳費" : "尚未繳費";
+    const amount = paymentAmountPresentation(entry.paidAmount, entry.isPaid);
+    const registrationTone = registration === "已完成報名" ? "is-positive" : registration === "已截止" ? "is-neutral" : "is-warning";
+    const paymentTone = payment === "已繳費" ? "is-positive" : payment === "待繳費" ? "is-warning" : "is-neutral";
+    const stateText = !knownStatuses.has(rawStatus) ? "狀態待確認" : normalizeEntryStatusValue(rawStatus);
+    const stateTone = !knownStatuses.has(rawStatus) ? "is-warning" : isClosedRaceStatus(stateText) ? "is-neutral" : "is-muted";
+    const dataIssue = (entry.isPaid && !entry.isRegistered) || !knownStatuses.has(rawStatus);
+    return { registration, payment, amount, registrationTone, paymentTone, stateText, stateTone, dataIssue };
+  }
+
   const previewSections = groups.map((group) => {
     const statusLabel = group.pendingCount ? `待處理 ${group.pendingCount}` : "已完成";
     const statusTone = group.pendingCount ? "pending" : "complete";
-    const amountHint = group.unpaidAmount ? "依未繳費項目合計" : "目前無待收";
+    const amountHint = group.unpaidAmount ? "依未繳費項目合計" : "目前無待收項目";
     const message = group.pendingCount
-      ? `${group.name} 您好，以下整理目前報名與繳費重點，請直接核對，若需要補件或修正再回覆即可。`
-      : `${group.name} 您好，目前所有報名與繳費紀錄都已整理完成，請直接確認內容即可。`;
+      ? `${group.name || "參與者"} 您好，以下為目前需要核對的報名與繳費項目。若需補件或修正，請依原有聯繫流程回覆。`
+      : `${group.name || "參與者"} 您好，目前列出的報名與繳費紀錄已整理完成。`;
+    const rangeLabel = notifyRangeLabel(group);
+    const pendingRegistration = group.entries.filter((entry) => !entry.isRegistered && !isClosedRaceStatus(entry.status)).length;
+    const pendingPayment = group.entries.filter((entry) => entry.isRegistered && !entry.isPaid).length;
     return `
       <section class="preview-person-section">
-        <article class="preview-person-card">
-          <div class="preview-person-main">
-            <div class="preview-person-ident">
-              <div class="preview-avatar">${escapeHtml((group.name || "?").slice(0, 1))}</div>
-              <div class="preview-person-copy">
-                <div class="preview-person-title-row">
-                  <h3>${escapeHtml(group.name)}</h3>
-                  <span class="preview-pill ${statusTone}">${escapeHtml(statusLabel)}</span>
-                </div>
-                <div class="preview-meta-row">
-                  ${group.defaultShirtSize ? `<span class="preview-meta-chip">${notifyIcon("shirt")}<span>衣服 ${escapeHtml(group.defaultShirtSize)}</span></span>` : ""}
-                  ${group.phone ? `<span class="preview-meta-chip">${notifyIcon("phone")}<span>手機 ${escapeHtml(maskedPhone(group.phone))}</span></span>` : ""}
-                </div>
-              </div>
+        <article class="participant-summary-card">
+          <div class="participant-profile">
+            <div class="preview-avatar">${escapeHtml((group.name || "?").slice(0, 1))}</div>
+            <div class="participant-profile-copy">
+              <div class="participant-title-row"><h3>${escapeHtml(group.name || "姓名待補")}</h3><span class="status-badge ${statusTone === "pending" ? "is-warning" : "is-positive"}">${escapeHtml(statusLabel)}</span></div>
+              <dl class="participant-meta">
+                <div><dt>衣服尺寸</dt><dd>${escapeHtml(group.defaultShirtSize || "未填")}</dd></div>
+                <div><dt>手機</dt><dd>${escapeHtml(maskedPhone(group.phone) || "未填")}</dd></div>
+              </dl>
             </div>
-            <div class="preview-summary-grid">
-              <article class="preview-summary-card">
-                <div class="preview-summary-head">${notifyIcon("person")}<span>已完成報名</span></div>
-                <strong>${escapeHtml(`${group.registeredCount} / ${group.entries.length}`)}</strong>
-              </article>
-              <article class="preview-summary-card">
-                <div class="preview-summary-head">${notifyIcon("stack")}<span>待處理</span></div>
-                <strong>${escapeHtml(`${group.pendingCount} 筆`)}</strong>
-              </article>
-              <article class="preview-summary-card">
-                <div class="preview-summary-head">${notifyIcon("race")}<span>檔期</span></div>
-                <strong>${escapeHtml(notifyRangeLabel(group))}</strong>
-              </article>
-            </div>
-            <p class="preview-person-message">${escapeHtml(message)}</p>
           </div>
-          <aside class="preview-person-side">
-            <span class="preview-amount-label">待收金額</span>
-            <strong>${escapeHtml(formatMoney(group.unpaidAmount))}</strong>
-            <small>${escapeHtml(amountHint)}</small>
+          <div class="participant-progress">
+            <div class="progress-kpi"><span>已完成報名數</span><strong>${escapeHtml(`${group.registeredCount} / ${group.entries.length}`)}</strong></div>
+            <div class="progress-kpi"><span>待處理數</span><strong>${escapeHtml(`${group.pendingCount} 筆`)}</strong></div>
+            <div class="progress-kpi progress-kpi-range"><span>活動日期區間</span><strong>${escapeHtml(rangeLabel)}</strong></div>
+            <p class="participant-message">${escapeHtml(message)}</p>
+          </div>
+          <aside class="participant-amount">
+            <span>待收總金額</span><strong>${escapeHtml(formatMoney(group.unpaidAmount))}</strong><small>${escapeHtml(amountHint)}</small>
           </aside>
         </article>
-        <div class="preview-person-body">
-          <section class="preview-entry-list">
+        <nav class="preview-status-filter" aria-label="目前賽事狀態範圍">
+          <span class="filter-label">目前篩選</span>
+          <span class="filter-item is-active">全部 ${group.entries.length}</span>
+          <span class="filter-item">待報名 ${pendingRegistration}</span>
+          <span class="filter-item">待繳費 ${pendingPayment}</span>
+          <span class="filter-item">已完成 ${group.entries.filter((entry) => entry.isPaid).length}</span>
+        </nav>
+        <section class="preview-person-body" aria-label="賽事清單">
+          <div class="list-heading"><h4>賽事清單</h4><span>${group.entries.length} 筆紀錄</span></div>
+          <div class="preview-entry-list">
             ${group.entries.map((entry) => {
-              const progressLabel = entry.isPaid ? "已完成" : entry.isRegistered ? "待繳費" : "待報名";
-              const progressTone = entry.isPaid ? "complete" : "pending";
-              const processLabel = entry.status || (entry.isRegistered ? "已建立報名" : "可報名");
-              const amountLabel = entry.paidAmount ? formatMoney(entry.paidAmount) : "金額未填";
-              const amountHintText = entry.isPaid ? "費用已確認" : entry.isRegistered ? "待收此筆費用" : "尚未完成報名";
+              const item = entryPresentation(entry);
               const entryDate = escapeHtml(formatNotifyRangeDate(String(entry.raceDate || "").slice(0, 10)) || "日期待補");
               const locationLabel = [entry.county, entry.location].filter(Boolean).join(" · ") || "地點待補";
               const noteLabel = entry.notes || "無補充說明";
               return `
-                <article class="preview-entry-card ${statusClass(entry)}">
+                <article class="preview-entry-card ${statusClass(entry)}${item.dataIssue ? " has-data-issue" : ""}">
                   <div class="preview-entry-date">
                     <span>${entryDate}</span>
                     <small>${escapeHtml(entry.distance || "未分組")}</small>
                   </div>
                   <div class="preview-entry-main">
-                    <div class="preview-entry-head">
-                      <h4>${escapeHtml(entry.raceName || "未命名賽事")}</h4>
-                      <div class="preview-entry-pills">
-                        <span class="preview-pill ${progressTone}">${escapeHtml(progressLabel)}</span>
-                        <span class="preview-pill neutral">${escapeHtml(processLabel)}</span>
-                      </div>
-                    </div>
-                    <div class="preview-entry-foot">
-                      <p>${escapeHtml(locationLabel)}</p>
-                      <p>${escapeHtml(noteLabel)}</p>
-                    </div>
+                    <h5>${escapeHtml(entry.raceName || "未命名賽事")}</h5>
+                    <p class="entry-location"><span>地點</span>${escapeHtml(locationLabel)}</p>
+                    <p class="entry-note"><span>備註</span>${escapeHtml(noteLabel)}</p>
                   </div>
-                  <div class="preview-entry-amount">
-                    <strong>${escapeHtml(amountLabel)}</strong>
-                    <small>${escapeHtml(amountHintText)}</small>
+                  <div class="preview-entry-status">
+                    <span class="status-badge ${item.registrationTone}">${escapeHtml(item.registration)}</span>
+                    <span class="status-badge ${item.paymentTone}">${escapeHtml(item.payment)}</span>
+                    <span class="status-badge ${item.stateTone}">${escapeHtml(item.stateText)}</span>
+                  </div>
+                  <div class="preview-entry-amount ${item.amount.isMissing ? "is-missing" : ""}">
+                    <strong>${escapeHtml(item.amount.label)}</strong><small>${escapeHtml(item.amount.hint)}</small>
                   </div>
                 </article>
               `;
@@ -2192,28 +2243,15 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
   <style>
     :root {
       --primary: #0f4c3a;
-      --primary-dark: #083b2d;
+      --primary-dark: #17332c;
       --primary-soft: #eaf3ef;
-      --blue: #245b89;
-      --blue-soft: #f1f6fb;
-      --warning: #c87500;
-      --warning-dark: #9a4b00;
-      --warning-soft: #fff3dc;
-      --warning-border: #f5d69d;
-      --text-main: #102a27;
-      --text-strong: #082f2a;
-      --text-muted: #657a73;
-      --text-light: #8a9b96;
-      --border: #dfe8e4;
-      --border-soft: #e8efec;
-      --page-bg: #f6f9f8;
+      --warning: #a76500;
+      --warning-soft: #fff5df;
+      --text-main: #17332c;
+      --text-muted: #66736f;
+      --border: #dce5e1;
+      --page-bg: #f4f7f6;
       --card-bg: #ffffff;
-      --shadow-soft: 0 6px 18px rgba(15, 60, 45, 0.06);
-      --shadow-card: 0 8px 24px rgba(20, 60, 90, 0.06);
-      --radius-xl: 24px;
-      --radius-lg: 20px;
-      --radius-md: 14px;
-      --line: #e8efec;
     }
     * { box-sizing: border-box; }
     body {
@@ -2221,506 +2259,157 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
       min-height: 100vh;
       font-family: "Microsoft JhengHei", "Noto Sans TC", "PingFang TC", Arial, sans-serif;
       color: var(--text-main);
-      background:
-        radial-gradient(circle at 10% 4%, rgba(228, 240, 232, .72), transparent 24%),
-        radial-gradient(circle at 96% 8%, rgba(255, 243, 220, .55), transparent 18%),
-        linear-gradient(180deg, var(--page-bg) 0%, #fbfcfb 100%);
-      padding: 28px 16px 64px;
+      background: var(--page-bg);
+      padding: 24px 24px 112px;
     }
-    main { width: min(${singlePersonMode ? 1320 : 1360}px, 100%); margin: 0 auto; }
+    main { width: min(1400px, 100%); margin: 0 auto; }
     .utility-bar {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-    .utility-bar p {
-      margin: 0;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-    .utility-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      position: fixed; z-index: 10; left: 0; right: 0; bottom: 0;
+      display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+      padding: 12px max(24px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+      border-top: 1px solid var(--border); background: rgba(255, 255, 255, .98);
     }
     .utility-actions button {
-      border: 0;
-      border-radius: 999px;
-      min-height: 42px;
-      padding: 0 18px;
+      border-radius: 8px; min-height: 40px; padding: 0 16px;
       font: inherit;
-      font-weight: 800;
+      font-size: 14px; font-weight: 600;
       cursor: pointer;
     }
     .utility-actions button.primary {
       background: var(--primary);
       color: white;
-      box-shadow: 0 14px 24px rgba(15, 76, 58, .14);
     }
     .utility-actions button.secondary {
-      background: rgba(255,255,255,.82);
+      background: #fff;
       color: var(--primary);
       border: 1px solid var(--border);
-    }
-    .utility-status {
-      min-height: 20px;
-      color: var(--text-muted);
-      font-size: 12px;
-      text-align: right;
     }
     .hero {
-      border-radius: var(--radius-xl);
-      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(251,252,251,.98));
-      color: var(--text-main);
-      padding: 24px 28px 22px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-soft);
-      margin-bottom: 22px;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--card-bg);
+      padding: 20px; margin-bottom: 16px;
     }
     .hero p, .hero h1, .hero small { margin: 0; }
-    .hero p { font-size: 13px; color: var(--primary); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    .hero h1 { font-size: clamp(32px, 4vw, 44px); margin-top: 10px; letter-spacing: -.02em; color: var(--primary-dark); }
-    .hero small { display: block; margin-top: 10px; color: var(--text-muted); font-size: 14px; }
+    .hero p { font-size: 12px; color: var(--primary); font-weight: 600; }
+    .hero h1 { font-size: 26px; line-height: 1.3; margin-top: 6px; color: var(--primary-dark); }
+    .hero small { display: block; margin-top: 6px; color: var(--text-muted); font-size: 13px; }
     .hero-stats {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 20px;
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 16px;
     }
     .hero-stat {
-      border-radius: 18px;
-      background: #ffffff;
-      border: 1px solid var(--border-soft);
-      padding: 14px 16px;
-      box-shadow: var(--shadow-soft);
+      border-radius: 8px; background: #f8faf9; border: 1px solid var(--border); padding: 12px;
     }
     .hero-stat span {
-      display: block;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .05em;
+      display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;
     }
     .hero-stat strong {
-      display: block;
-      font-size: 28px;
-      line-height: 1;
-      color: var(--primary-dark);
+      display: block; font-size: 22px; line-height: 1.2; color: var(--primary-dark);
     }
     .report-sheet {
-      background: rgba(255,255,255,.985);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-card);
-      overflow: hidden;
-      backdrop-filter: blur(6px);
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
     }
     .sheet-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 18px 22px;
-      border-bottom: 1px solid var(--border-soft);
-      background: linear-gradient(180deg, #ffffff, #f8fbfa);
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px;
+      border-bottom: 1px solid var(--border);
     }
-    .sheet-head h2 {
-      margin: 0;
-      font-size: 20px;
-      color: var(--primary-dark);
-    }
-    .sheet-head p {
-      margin: 4px 0 0;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
+    .sheet-head h2 { margin: 0; font-size: 17px; font-weight: 600; color: var(--primary-dark); }
+    .sheet-head p { margin: 4px 0 0; color: var(--text-muted); font-size: 13px; }
     .sheet-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 38px;
-      padding: 0 14px;
-      border-radius: 999px;
-      background: #ffffff;
-      border: 1px solid var(--border-soft);
-      color: var(--primary);
-      font-weight: 800;
-      font-size: 13px;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 12px;
+      border-radius: 999px; background: #f8faf9; border: 1px solid var(--border); color: var(--primary); font-weight: 600; font-size: 12px; white-space: nowrap;
     }
-    .report-export-root { background: transparent; }
-    .preview-person-section {
-      padding: 22px;
-    }
-    .preview-person-section + .preview-person-section {
-      border-top: 1px solid var(--line);
-    }
-    .report-sheet.is-multi .preview-person-section {
-      padding: 26px 28px 30px;
-      background:
-        linear-gradient(180deg, rgba(248, 251, 250, .84) 0%, rgba(255, 255, 255, .96) 22%, rgba(255, 255, 255, 1) 100%);
-    }
-    .report-sheet.is-multi .preview-person-section + .preview-person-section {
-      border-top: 1px solid #edf2f0;
-    }
-    .preview-person-card {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 240px;
-      gap: 18px;
-      padding: 22px;
-      border: 1px solid var(--border-soft);
-      border-radius: 22px;
-      background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
-      box-shadow: var(--shadow-soft);
-    }
-    .report-sheet.is-multi .preview-person-card {
-      border-radius: 26px;
-      border-color: #eaf1ee;
-      box-shadow: none;
-      background: linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(252,253,252,.98) 100%);
-    }
-    .preview-person-main {
-      display: grid;
-      gap: 14px;
-      align-content: start;
-      min-width: 0;
-    }
-    .preview-person-ident {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-      min-width: 0;
-    }
+    .preview-person-section { padding: 20px; }
+    .preview-person-section + .preview-person-section { border-top: 1px solid var(--border); }
+    .participant-summary-card { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 12px; }
+    .participant-profile { grid-column: span 4; display: flex; gap: 14px; align-items: flex-start; min-width: 0; }
     .preview-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      font-size: 28px;
-      font-weight: 900;
-      box-shadow: 0 14px 24px rgba(15, 76, 58, .16);
-      flex: 0 0 auto;
+      width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center; background: var(--primary); color: white; font-size: 24px; font-weight: 700; flex: 0 0 auto;
     }
-    .preview-person-copy {
-      min-width: 0;
-      display: grid;
-      gap: 10px;
-    }
-    .preview-person-title-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .preview-person-title-row h3 {
-      margin: 0;
-      font-size: clamp(30px, 3vw, 40px);
-      color: var(--text-strong);
-      line-height: 1.08;
-      letter-spacing: -.02em;
-    }
-    .preview-meta-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      color: #425a53;
-      font-size: 0.94rem;
-    }
-    .preview-meta-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-    .preview-meta-chip .notify-icon {
-      color: var(--primary);
-    }
-    .preview-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-    .preview-summary-card {
-      min-height: 78px;
-      padding: 12px 14px;
-      border: 1px solid #e6efea;
-      border-radius: 14px;
-      background: #f8fbf9;
-      display: grid;
-      gap: 8px;
-      align-content: start;
-    }
-    .preview-summary-card.is-wide {
-      grid-column: 1 / -1;
-      min-height: 0;
-    }
-    .preview-summary-head {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #71857f;
-      font-size: 0.76rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-    .preview-summary-card strong {
-      color: var(--text-main);
-      font-size: 1rem;
-      line-height: 1.35;
-      letter-spacing: -0.01em;
-      word-break: break-word;
-    }
-    .preview-person-side {
-      min-width: 0;
-      padding: 20px;
-      border: 1px solid #dcebe1;
-      border-radius: 18px;
-      background: linear-gradient(145deg, #f5fbf7 0%, #ecf7f0 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 8px;
-    }
-    .preview-amount-label {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      font-weight: 700;
-    }
-    .preview-person-side strong {
-      color: var(--primary);
-      font-size: clamp(1.9rem, 2.5vw, 2.65rem);
-      line-height: 1.02;
-      letter-spacing: -.02em;
-    }
-    .preview-person-side small {
-      color: var(--text-muted);
-      font-size: 0.88rem;
-    }
-    .preview-person-body {
-      display: grid;
-      gap: 12px;
-      padding-top: 12px;
-    }
-    .report-sheet.is-multi .preview-person-body {
-      padding-top: 14px;
-      padding-left: 0;
-      gap: 12px;
-    }
-    .preview-person-message {
-      margin: 0;
-      padding: 10px 12px;
-      border-left: 3px solid #d5ac62;
-      color: #5c5140;
-      background: #fffaf1;
-      border-radius: 0 10px 10px 0;
-      font-size: 0.88rem;
-      line-height: 1.55;
-    }
-    .preview-brief-panel {
-      display: grid;
-      grid-template-columns: 48px minmax(0, 1fr);
-      gap: 16px;
-      padding: 20px 22px;
-      border-radius: var(--radius-lg);
-      background: #fffaf3;
-      border: 1px solid #f1dfc3;
-    }
-    .preview-brief-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #fff0d8;
-      color: var(--warning);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .preview-brief-icon .notify-icon,
-    .preview-brief-icon svg {
-      width: 22px;
-      height: 22px;
-    }
-    .preview-brief-panel span {
-      display: block;
-      color: var(--warning);
-      font-size: 1rem;
-      font-weight: 900;
-      margin-bottom: 6px;
-    }
-    .preview-brief-panel p {
-      margin: 0;
-      font-size: 0.97rem;
-      line-height: 1.72;
-      color: #5f3a16;
-    }
-    .preview-entry-list {
-      display: grid;
-      gap: 10px;
-    }
-    .report-sheet.is-multi .preview-entry-list {
-      gap: 10px;
-    }
+    .participant-profile-copy { min-width: 0; }
+    .participant-title-row { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+    .participant-title-row h3 { margin: 0; font-size: 24px; line-height: 1.25; font-weight: 700; color: var(--primary-dark); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .participant-meta { display: flex; gap: 20px; margin: 14px 0 0; }
+    .participant-meta dt, .progress-kpi span, .participant-amount > span { color: var(--text-muted); font-size: 12px; font-weight: 500; }
+    .participant-meta dd { margin: 4px 0 0; color: var(--text-main); font-size: 14px; }
+    .participant-progress { grid-column: span 5; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .progress-kpi { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafcfb; }
+    .progress-kpi strong { display: block; margin-top: 6px; color: var(--primary-dark); font-size: 18px; line-height: 1.3; }
+    .progress-kpi-range { grid-column: 1 / -1; }
+    .participant-message { grid-column: 1 / -1; margin: 0; padding: 10px 12px; border-left: 3px solid #d7a84b; background: #fffaf1; color: #6b604e; font-size: 13px; line-height: 1.55; }
+    .participant-amount { grid-column: span 3; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #f0f7f3; display: flex; flex-direction: column; justify-content: center; }
+    .participant-amount strong { margin-top: 8px; color: var(--primary); font-size: 30px; line-height: 1.1; font-weight: 700; white-space: nowrap; }
+    .participant-amount small { margin-top: 8px; color: var(--text-muted); font-size: 13px; }
+    .status-badge { display: inline-flex; width: max-content; align-items: center; min-height: 24px; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 500; line-height: 1.25; }
+    .status-badge.is-positive { background: var(--primary-soft); color: var(--primary); }
+    .status-badge.is-warning { background: var(--warning-soft); color: var(--warning); }
+    .status-badge.is-neutral, .status-badge.is-muted { background: #f0f3f2; color: #586762; }
+    .preview-status-filter { display: flex; gap: 8px; overflow-x: auto; padding: 16px 0; scrollbar-width: thin; }
+    .filter-label { display: inline-flex; align-items: center; color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+    .filter-item { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--text-muted); background: #fff; white-space: nowrap; font-size: 12px; }
+    .filter-item.is-active { border-color: var(--primary); color: #fff; background: var(--primary); }
+    .preview-person-body { display: grid; gap: 12px; }
+    .list-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .list-heading h4 { margin: 0; font-size: 17px; font-weight: 600; }
+    .list-heading span { color: var(--text-muted); font-size: 13px; }
+    .preview-entry-list { display: grid; gap: 10px; }
     .preview-entry-card {
-      border: 1px solid var(--border-soft);
-      border-radius: 14px;
-      background: var(--card-bg);
-      overflow: hidden;
-      box-shadow: var(--shadow-soft);
-      display: grid;
-      grid-template-columns: 96px minmax(0, 1fr) 148px;
-      gap: 0;
-      align-items: stretch;
+      min-height: 104px; display: grid; grid-template-columns: 84px minmax(0, 1fr) 160px 160px; align-items: stretch;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--card-bg); overflow: hidden;
     }
-    .preview-entry-card.is-pending {
-      border-color: #f0dfb9;
-      background: linear-gradient(180deg, #fffdfa 0%, #fff7ea 100%);
-    }
-    .preview-entry-card.is-complete {
-      background: linear-gradient(180deg, #fcfefd 0%, #f6fbf7 100%);
-    }
-    .report-sheet.is-multi .preview-entry-card {
-      border-radius: 16px;
-      box-shadow: none;
-    }
+    .preview-entry-card.has-data-issue { border-color: #e7c878; }
     .preview-entry-date {
-      padding: 14px;
-      border-right: 1px solid rgba(232, 239, 236, .92);
-      display: grid;
-      align-content: start;
-      gap: 6px;
-      background: rgba(255, 255, 255, .56);
+      padding: 16px; border-right: 1px solid var(--border); display: grid; align-content: start; gap: 6px; background: #fafcfb;
     }
     .preview-entry-date span {
-      display: block;
-      color: var(--primary-dark);
-      font-size: 1rem;
-      font-weight: 900;
-      letter-spacing: -.02em;
+      display: block; color: var(--primary-dark); font-size: 15px; font-weight: 600;
     }
     .preview-entry-date small {
-      display: block;
-      margin-top: 3px;
-      color: var(--text-muted);
-      font-size: 0.84rem;
-      font-weight: 700;
-    }
-    .preview-entry-amount {
-      padding: 14px;
-      border-left: 1px solid rgba(232, 239, 236, .92);
-      text-align: right;
-      white-space: nowrap;
-      display: grid;
-      align-content: start;
-      justify-items: end;
-      background: rgba(255, 255, 255, .56);
-    }
-    .preview-entry-amount strong {
-      display: block;
-      color: var(--primary);
-      font-size: 1.05rem;
-      font-weight: 900;
-    }
-    .preview-entry-amount small {
-      display: block;
-      margin-top: 4px;
-      color: var(--text-muted);
-      font-size: 0.8rem;
+      display: block; color: var(--text-muted); font-size: 13px; font-weight: 500;
     }
     .preview-entry-main {
-      display: grid;
-      gap: 8px;
-      padding: 14px 16px;
-      min-width: 0;
+      display: grid; align-content: center; gap: 6px; padding: 14px 18px; min-width: 0;
     }
-    .preview-entry-head {
-      display: grid;
-      gap: 7px;
-    }
-    .preview-entry-main h4 {
-      margin: 0;
-      color: var(--text-strong);
-      font-size: 1rem;
-      line-height: 1.35;
-    }
-    .preview-entry-pills {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .preview-entry-foot {
-      display: grid;
-      gap: 3px;
-      color: var(--text-muted);
-      font-size: 0.84rem;
-      line-height: 1.42;
-    }
-    .preview-entry-foot p {
-      margin: 0;
-    }
-    .preview-pill {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 5px 8px;
-      font-weight: 800;
-      font-size: 12px;
-      white-space: nowrap;
-      background: var(--blue-soft);
-      color: var(--blue);
-    }
-    .preview-pill.pending { background: var(--warning-soft); color: var(--warning-dark); border: 1px solid var(--warning-border); }
-    .preview-pill.complete { background: var(--primary-soft); color: var(--primary); }
-    .preview-pill.neutral { background: #eef3f7; color: #496073; }
-    @media (max-width: 1080px) {
+    .preview-entry-main h5 { margin: 0; color: var(--primary-dark); font-size: 15px; font-weight: 600; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .entry-location, .entry-note { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .entry-location span, .entry-note span { display: inline; margin-right: 6px; color: #55645f; font-weight: 600; }
+    .preview-entry-status { border-left: 1px solid var(--border); padding: 14px; display: flex; align-content: center; justify-content: center; flex-direction: column; gap: 6px; }
+    .preview-entry-amount { border-left: 1px solid var(--border); padding: 14px; display: grid; align-content: center; justify-items: end; text-align: right; background: #fafcfb; }
+    .preview-entry-amount strong { color: var(--primary); font-size: 16px; font-weight: 700; white-space: nowrap; }
+    .preview-entry-amount.is-missing strong { color: var(--warning); }
+    .preview-entry-amount small { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    @media (max-width: 1199px) {
       .hero-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .preview-person-card { grid-template-columns: 1fr; }
+      .participant-summary-card { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .participant-profile, .participant-progress, .participant-amount { grid-column: auto; }
+      .participant-profile { grid-row: span 2; }
+      .participant-amount { grid-column: span 2; }
     }
-    @media (max-width: 780px) {
-      body { padding: 18px 12px 40px; }
-      .utility-bar { flex-direction: column; align-items: flex-start; }
-      .hero { padding: 24px 22px; }
+    @media (max-width: 767px) {
+      body { padding: 16px 16px 108px; }
+      .utility-bar { justify-content: stretch; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+      .utility-actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 8px; }
+      .utility-actions button { width: 100%; }
+      .hero, .sheet-head, .preview-person-section { padding: 16px; }
       .hero-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .sheet-head { flex-direction: column; align-items: flex-start; }
-      .preview-person-section { padding: 16px; }
-      .preview-person-card { padding: 20px; }
-      .preview-person-ident { align-items: flex-start; }
-      .preview-person-title-row h3 { font-size: 2rem; }
-      .preview-summary-grid { grid-template-columns: 1fr; }
-      .preview-summary-card.is-wide { grid-column: auto; }
-      .preview-person-side { padding: 18px 20px; }
-      .preview-entry-card {
-        grid-template-columns: 1fr;
-      }
-      .preview-entry-date,
-      .preview-entry-amount {
-        border: 0;
-        border-bottom: 1px solid rgba(232, 239, 236, .92);
-      }
-      .preview-entry-amount {
-        justify-items: start;
-        text-align: left;
-        white-space: normal;
-        border-top: 1px solid rgba(232, 239, 236, .92);
-        border-bottom: 0;
-      }
-      .report-sheet.is-multi .preview-person-section {
-        padding: 18px 16px 22px;
-      }
-      .report-sheet.is-multi .preview-person-body {
-        padding-left: 0;
-      }
+      .participant-summary-card { grid-template-columns: 1fr; padding: 16px; }
+      .participant-profile, .participant-progress, .participant-amount { grid-column: auto; grid-row: auto; }
+      .participant-progress { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .progress-kpi-range, .participant-message { grid-column: 1 / -1; }
+      .participant-amount { min-height: 132px; }
+      .preview-entry-card { grid-template-columns: 1fr; min-height: 0; }
+      .preview-entry-date, .preview-entry-status, .preview-entry-amount { border: 0; border-bottom: 1px solid var(--border); }
+      .preview-entry-date { grid-template-columns: 1fr auto; align-items: baseline; }
+      .preview-entry-status { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
+      .preview-entry-amount { justify-items: start; text-align: left; border-bottom: 0; }
+    }
+    @media (max-width: 479px) {
+      .hero h1 { font-size: 23px; }
+      .hero-stats, .participant-progress { grid-template-columns: 1fr; }
+      .progress-kpi-range, .participant-message { grid-column: auto; }
     }
     @media print {
       body { background: white; padding: 0; }
-      .hero, .report-sheet { box-shadow: none; }
+      .utility-bar { display: none; }
       .preview-person-section { page-break-inside: avoid; }
     }
   </style>
@@ -2728,23 +2417,17 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
 <body>
   <main>
     <div class="utility-bar">
-      <p>${escapeHtml(exportHint)}</p>
-      <div>
-        <div class="utility-actions">
-          <button class="primary" type="button" data-export-image>${escapeHtml(exportLabel)}</button>
-          <button class="secondary" type="button" data-print-report>列印 / 另存 PDF</button>
-        </div>
-        <div class="utility-status" data-export-status></div>
-      </div>
+      <div class="utility-actions"><button class="secondary" type="button" data-print-report>列印 / 另存 PDF</button><button class="primary" type="button" data-export-image>${escapeHtml(exportLabel)}</button></div>
+      <div class="utility-status" data-export-status></div>
     </div>
     <header class="hero">
-      <p>Runner Registration Notify Desk</p>
+      <p>報名管理 · 通知確認</p>
       <h1>${escapeHtml(title)}</h1>
-      <small>產生時間：${escapeHtml(todayString())} · 已報名覆蓋率 ${coverageRatio}%</small>
+      <small>產生時間：${escapeHtml(todayString())} · 已報名覆蓋率 ${registeredCoverage}%</small>
       <section class="hero-stats" aria-label="通知摘要">
-        <article class="hero-stat"><span>符合人員</span><strong>${groups.length}</strong></article>
-        <article class="hero-stat"><span>涉及賽事</span><strong>${uniqueRaceCount}</strong></article>
-        <article class="hero-stat"><span>總紀錄</span><strong>${totalEntries}</strong></article>
+        <article class="hero-stat"><span>參與者</span><strong>${groups.length}</strong></article>
+        <article class="hero-stat"><span>賽事數</span><strong>${uniqueRaceCount}</strong></article>
+        <article class="hero-stat"><span>報名紀錄</span><strong>${totalEntries}</strong></article>
         <article class="hero-stat"><span>待處理</span><strong>${totalPending}</strong></article>
         <article class="hero-stat"><span>待收總額</span><strong>${escapeHtml(formatMoney(totalUnpaid))}</strong></article>
       </section>
@@ -2753,7 +2436,7 @@ function buildNotifyPreviewHtml(groups, title = "通知卡片預覽") {
       <div class="sheet-head">
         <div>
           <h2>${singlePersonMode ? "報名與繳費確認" : "通知總表"}</h2>
-          <p>${singlePersonMode ? "已把需確認的項目整理成一則可直接轉傳的通知。" : "以人員為主軸整理待辦與費用，方便逐一轉傳與追蹤。"}</p>
+          <p>${singlePersonMode ? "依既有報名資料整理，金額與狀態均保留原始計算結果。" : "以人員為主軸整理待辦與費用，方便逐一核對。"}</p>
         </div>
         <div class="sheet-badge">${groups.length} 人 / ${totalEntries} 筆</div>
       </div>
@@ -2988,6 +2671,11 @@ function wireEvents() {
     state.peoplePage = 1;
     renderPeopleList();
   });
+  els.peopleSort.addEventListener("change", () => {
+    state.peopleSort = els.peopleSort.value;
+    state.peoplePage = 1;
+    renderPeopleList();
+  });
   els.entriesScopeTabs.querySelectorAll("[data-entry-scope]").forEach((button) => {
     button.addEventListener("click", () => {
       state.entryScope = button.dataset.entryScope || "active";
@@ -3134,6 +2822,9 @@ function wireEvents() {
     renderSelectedRaceSummary(selectedRaceFromDropdown());
     renderOverview();
   });
+  els.sidebarCollapseToggle?.addEventListener("click", () => {
+    setSidebarCollapsed(!state.sidebarCollapsed);
+  });
   els.useSelectedRace.addEventListener("click", () => {
     const race = selectedRaceFromDropdown();
     if (race) {
@@ -3259,16 +2950,25 @@ function wireEvents() {
 async function init() {
   try {
     state.workspaceView = savedWorkspaceView();
+    state.sidebarCollapsed = savedSidebarCollapsed();
     restoreNotifyPreferences();
+    state.loadState = "loading";
     await Promise.all([loadRaces(), loadPrivateData()]);
+    state.loadState = "ready";
     els.notifyScope.value = state.notifyScope;
     els.notifySearch.value = state.notifyQuery;
     els.notifyProgress.value = state.notifyProgress;
     renderAll();
+    setSidebarCollapsed(state.sidebarCollapsed);
     wireEvents();
     resetEntryForm();
   } catch (error) {
-    showStatus(error.message || "初始化失敗", "error");
+    state.loadState = "error";
+    state.loadError = error.message || "初始化失敗，請重新整理後再試一次。";
+    renderAll();
+    wireEvents();
+    showStatus(state.loadError, "error");
+    showNotifyStatus(state.loadError, "error");
   }
 }
 
