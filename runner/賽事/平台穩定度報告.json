@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-14T11:21:46.497Z",
-  "basis_date": "2026-07-14",
+  "generated_at": "2026-07-16T11:18:49.587Z",
+  "basis_date": "2026-07-16",
   "items": [
     {
       "platform": "運動筆記",
       "total": 10,
-      "official_direct": 7,
+      "official_direct": 8,
       "verified": 10,
-      "missing": 4,
+      "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 0,
@@ -16,11 +16,11 @@
         "TOYOTA RUN 台中 視障專場",
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
       ],
-      "complete_rate": "60%",
-      "official_direct_rate": "70%",
+      "complete_rate": "70%",
+      "official_direct_rate": "80%",
       "verified_rate": "100%",
-      "score": 79,
-      "status": "可用需觀察"
+      "score": 85,
+      "status": "穩定"
     },
     {
       "platform": "iRunner",

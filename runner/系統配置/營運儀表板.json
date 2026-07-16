@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-07-16T01:52:05.335Z",
+  "generated_at": "2026-07-16T11:18:49.587Z",
   "basis_date": "2026-07-16",
   "races": {
     "total": 55,
-    "follow_up_count": 17,
-    "complete_count": 38,
-    "complete_rate": "69%",
+    "follow_up_count": 16,
+    "complete_count": 39,
+    "complete_rate": "71%",
     "launch_blocking_gap_count": 4,
     "launch_ready_count": 51,
     "launch_ready_rate": "93%",
     "official_direct_count": 52,
     "official_direct_rate": "95%",
-    "verified_count": 54,
-    "verified_rate": "98%",
+    "verified_count": 55,
+    "verified_rate": "100%",
     "opened_gap_count": 0,
     "date_anomaly_count": 0,
     "due_now_count": 3,
-    "monthly_tracking_count": 1,
+    "monthly_tracking_count": 0,
     "state_counts": {
       "歷史": 4,
       "停辦": 2,
@@ -36,11 +36,11 @@
     "candidate_count": 144,
     "editorial_count": 4,
     "candidate_by_category": {
-      "跑鞋新品": 50,
-      "跑步新聞": 73,
-      "入門知識": 15,
+      "跑鞋新品": 51,
+      "跑步新聞": 68,
+      "入門知識": 18,
       "補給": 1,
-      "訓練": 4,
+      "訓練": 5,
       "恢復": 1
     },
     "source_stable_count": 10,
@@ -54,19 +54,13 @@
         "source_type": "跑步新聞 / 跑鞋專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 10,
+        "candidate_count": 15,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
         "error_kind": "",
         "error": "",
-        "error_details": [
-          {
-            "url": "https://running.biji.co/",
-            "kind": "http",
-            "detail": "403 Forbidden"
-          }
-        ]
+        "error_details": []
       },
       {
         "checked_at": "2026-07-16",
@@ -75,7 +69,7 @@
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 18,
+        "candidate_count": 19,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -105,7 +99,7 @@
         "source_type": "英文跑鞋評測 / 訓練知識",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 146,
+        "candidate_count": 148,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,
@@ -120,7 +114,7 @@
         "source_type": "英文跑鞋評測 / 鞋款整理",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 105,
+        "candidate_count": 106,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,
@@ -142,7 +136,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 7,
+        "consecutive_failures": 8,
         "base_priority": 2,
         "effective_priority": 1,
         "error_kind": "unknown",
@@ -172,7 +166,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 22,
+        "consecutive_failures": 23,
         "base_priority": 3,
         "effective_priority": 2,
         "error_kind": "unknown",
@@ -247,23 +241,23 @@
     "weak_count": 0,
     "items": [
       {
-        "platform": "Lohas",
+        "platform": "運動筆記",
         "total": 10,
-        "official_direct": 9,
-        "verified": 9,
-        "missing": 0,
+        "official_direct": 8,
+        "verified": 10,
+        "missing": 3,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
-          "2026中興新村半程馬拉松-披興戴月的想你",
-          "2026年FUN電多巴胺路跑嘉年華",
-          "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
+          "2026 KOF拳皇公益主題路跑",
+          "TOYOTA RUN 台中 視障專場",
+          "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
         ],
-        "complete_rate": "100%",
-        "official_direct_rate": "90%",
-        "verified_rate": "90%",
-        "score": 95,
+        "complete_rate": "70%",
+        "official_direct_rate": "80%",
+        "verified_rate": "100%",
+        "score": 85,
         "status": "穩定"
       },
       {
@@ -287,23 +281,23 @@
         "status": "穩定"
       },
       {
-        "platform": "運動筆記",
+        "platform": "Lohas",
         "total": 9,
-        "official_direct": 7,
+        "official_direct": 8,
         "verified": 9,
-        "missing": 3,
+        "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
         "sample_races": [
-          "2026 KOF拳皇公益主題路跑",
-          "TOYOTA RUN 台中 視障專場",
-          "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
+          "2026中興新村半程馬拉松-披興戴月的想你",
+          "2026年FUN電多巴胺路跑嘉年華",
+          "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
         ],
-        "complete_rate": "67%",
-        "official_direct_rate": "78%",
+        "complete_rate": "89%",
+        "official_direct_rate": "89%",
         "verified_rate": "100%",
-        "score": 83,
+        "score": 93,
         "status": "穩定"
       },
       {

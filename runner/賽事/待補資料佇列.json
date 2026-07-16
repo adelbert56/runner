@@ -13,7 +13,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2026-09-29",
+      "next_check_date": "2026-09-28",
       "cadence": "future",
       "reason": "距離賽事 255 天，先排到賽前約 180 天再追。"
     },
@@ -56,7 +56,7 @@
       }
     ],
     "current_links": {
-      "registration_link": "https://lohasnet.tw/#/event",
+      "registration_link": "",
       "official_event_url": "https://lohasnet.tw/#/event",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13107&subtitle=2027%E7%A5%9E%E5%B2%A1%E9%A6%AC-%E7%A5%9E%E8%B1%90%E5%9C%8B%E9%9A%9B%E5%90%8C%E6%BF%9F%E6%9C%83%E5%85%A8%E5%9C%8B%E5%85%AC%E7%9B%8A%E9%A6%AC%E6%8B%89%E6%9D%BE",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13107",
@@ -91,7 +91,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-08",
+      "next_check_date": "2027-06-07",
       "cadence": "future",
       "reason": "距離賽事 507 天，先排到賽前約 180 天再追。"
     },
@@ -210,66 +210,6 @@
     }
   },
   {
-    "race_id": "50cfc282-37ef-4aee-be62-9ce2a6a2865d",
-    "race_name": "2026 愛在幼安公益路跑",
-    "race_date": "2026-11-07",
-    "race_county": "苗栗縣",
-    "registration_opens_at": "",
-    "registration_deadline": "2026-09-30",
-    "registration_status": "報名中",
-    "source_platform": "Focusline",
-    "is_official_direct": true,
-    "priority_score": 5,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-07-16",
-      "cadence": "weekly",
-      "reason": "距離賽事 114 天且開報日未知，應每週追蹤報名頁是否釋出。"
-    },
-    "missing": [
-      {
-        "key": "registration_opens_at",
-        "label": "開報時間",
-        "severity": "medium",
-        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "start_times",
-        "label": "各距離開跑時間",
-        "severity": "low",
-        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "https://www.focusline.com.tw/261107KZ/3566",
-      "official_event_url": "https://www.focusline.com.tw/261107KZ/3566",
-      "detail_url": "https://www.focusline.com.tw/261107KZ/3566",
-      "source_registration_link": "",
-      "facebook_search_url": ""
-    },
-    "suggested_override": {
-      "race_name": "2026 愛在幼安公益路跑",
-      "race_date": "2026-11-07",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
     "race_id": "16bea2b0-6494-4e27-84f5-3b62782d983d",
     "race_name": "2026 臺中舒跑杯",
     "race_date": "2026-11-08",
@@ -283,9 +223,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-07-17",
+      "next_check_date": "2026-07-16",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-07-31，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-07-30，開報前 14 天再開始追蹤。"
     },
     "missing": [
       {
@@ -305,6 +245,60 @@
     "suggested_override": {
       "race_name": "2026 臺中舒跑杯",
       "race_date": "2026-11-08",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "50cfc282-37ef-4aee-be62-9ce2a6a2865d",
+    "race_name": "2026 愛在幼安公益路跑",
+    "race_date": "2026-11-07",
+    "race_county": "苗栗縣",
+    "registration_opens_at": "",
+    "registration_deadline": "2026-09-30",
+    "registration_status": "報名中",
+    "source_platform": "Focusline、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 4,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-07-16",
+      "cadence": "weekly",
+      "reason": "距離賽事 114 天且開報日未知，應每週追蹤報名頁是否釋出。"
+    },
+    "missing": [
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "https://www.focusline.com.tw/261107KZ/3566",
+      "official_event_url": "https://www.focusline.com.tw/261107KZ/3566",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13119&subtitle=%E6%84%9B%E5%9C%A8%E5%B9%BC%E5%AE%89%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13119",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=%E6%84%9B%E5%9C%A8%E5%B9%BC%E5%AE%89%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
+    },
+    "suggested_override": {
+      "race_name": "2026 愛在幼安公益路跑",
+      "race_date": "2026-11-07",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",
@@ -432,60 +426,6 @@
     }
   },
   {
-    "race_id": "349b31c3-5908-4e96-9987-4d5ec0befd3f",
-    "race_name": "TOYOTA RUN 台中 視障專場",
-    "race_date": "2026-09-19",
-    "race_county": "臺中市",
-    "registration_opens_at": "2026-05-05",
-    "registration_deadline": "2026-09-06",
-    "registration_status": "報名中",
-    "source_platform": "運動筆記",
-    "is_official_direct": true,
-    "priority_score": 2,
-    "tracking": {
-      "status": "monitor_weekly",
-      "status_label": "每週追蹤",
-      "next_check_date": "2026-07-16",
-      "cadence": "biweekly",
-      "reason": "開報日已過，仍缺：費用、名額。"
-    },
-    "missing": [
-      {
-        "key": "fees",
-        "label": "費用",
-        "severity": "low",
-        "hint": "補 fees，可用字串或分組物件。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
-      "official_event_url": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13091&subtitle=TOYOTA+RUN+%E5%8F%B0%E4%B8%AD+%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13091",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=TOYOTA%20RUN%20%E5%8F%B0%E4%B8%AD%20%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4"
-    },
-    "suggested_override": {
-      "race_name": "TOYOTA RUN 台中 視障專場",
-      "race_date": "2026-09-19",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
     "race_id": "db09aa75-1035-41f1-acea-59fc25f50818",
     "race_name": "2026 第二屆核泰皮拉提斯馬拉松",
     "race_date": "2026-12-05",
@@ -527,60 +467,6 @@
     "suggested_override": {
       "race_name": "2026 第二屆核泰皮拉提斯馬拉松",
       "race_date": "2026-12-05",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
-    "race_id": "18d0cd6c-7ca6-4ee2-8a5e-8c3fea7e7b42",
-    "race_name": "2026 通霄粉紅超跑馬拉松",
-    "race_date": "2026-12-13",
-    "race_county": "苗栗縣",
-    "registration_opens_at": "2026-07-08",
-    "registration_deadline": "2026-10-01",
-    "registration_status": "報名中",
-    "source_platform": "跑者廣場全國賽會",
-    "is_official_direct": true,
-    "priority_score": 2,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-07-16",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、資料查證時間。"
-    },
-    "missing": [
-      {
-        "key": "start_times",
-        "label": "各距離開跑時間",
-        "severity": "low",
-        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
-      },
-      {
-        "key": "verified_at",
-        "label": "資料查證時間",
-        "severity": "low",
-        "hint": "補 verified_at，表示人工或爬蟲最後查證日。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "https://lohasnet.tw/Tongxiao2026/",
-      "official_event_url": "https://lohasnet.tw/Tongxiao2026/",
-      "detail_url": "https://lohasnet.tw/Tongxiao2026/",
-      "source_registration_link": "",
-      "facebook_search_url": ""
-    },
-    "suggested_override": {
-      "race_name": "2026 通霄粉紅超跑馬拉松",
-      "race_date": "2026-12-13",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",
@@ -677,6 +563,54 @@
     "suggested_override": {
       "race_name": "臺灣環島跑者圓夢計畫III(火車站環島體驗賽)",
       "race_date": "2026-09-12",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "349b31c3-5908-4e96-9987-4d5ec0befd3f",
+    "race_name": "TOYOTA RUN 台中 視障專場",
+    "race_date": "2026-09-19",
+    "race_county": "臺中市",
+    "registration_opens_at": "2026-05-05",
+    "registration_deadline": "2026-09-06",
+    "registration_status": "報名中",
+    "source_platform": "運動筆記",
+    "is_official_direct": true,
+    "priority_score": 1,
+    "tracking": {
+      "status": "monitor_weekly",
+      "status_label": "每週追蹤",
+      "next_check_date": "2026-07-16",
+      "cadence": "biweekly",
+      "reason": "開報日已過，仍缺：名額。"
+    },
+    "missing": [
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+      "official_event_url": "https://www.toyota.com.tw/event/toyotarun/apply.html?eid=taichung",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13091&subtitle=TOYOTA+RUN+%E5%8F%B0%E4%B8%AD+%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13091",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=TOYOTA%20RUN%20%E5%8F%B0%E4%B8%AD%20%E8%A6%96%E9%9A%9C%E5%B0%88%E5%A0%B4"
+    },
+    "suggested_override": {
+      "race_name": "TOYOTA RUN 台中 視障專場",
+      "race_date": "2026-09-19",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",
@@ -895,9 +829,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-08-03",
+      "next_check_date": "2026-08-02",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
     },
     "missing": [
       {
