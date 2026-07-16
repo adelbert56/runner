@@ -654,6 +654,14 @@
     .day-card.type-tempo { border-left-color: #d97a3d; }
     .day-card.type-interval { border-left-color: #c2453a; }
     .day-card.type-race { border-left-color: #8a5fc2; }
+    /* 週評估歷史列表 */
+    .checkin-history { display: grid; gap: 8px; margin-top: 10px; }
+    .checkin-history-item { border: 1px solid var(--c-border); border-left: 4px solid var(--c-green); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+    .checkin-history-item.caution { border-left-color: var(--c-orange); }
+    .checkin-history-item.danger { border-left-color: var(--c-red); }
+    .checkin-history-item b { margin-right: 8px; }
+    .checkin-history-item span { color: var(--c-text-muted); }
+    .checkin-history-item p { margin: 4px 0 0; color: var(--c-text-muted); line-height: 1.55; }
     /* 教練信預設摺疊（課卡維持全展開：grid 列高跟最高卡對齊，收合省不了頁高） */
     details.coach-letter-fold > summary { cursor: pointer; font-size: 15px; font-weight: 900; list-style: none; }
     details.coach-letter-fold > summary::before { content: '▸ '; color: var(--c-primary-hover); }

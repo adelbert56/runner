@@ -3272,8 +3272,8 @@ function renderPlanView() {
     <button class="tab active" role="tab" aria-selected="true" onclick="switchPlanTab('week')">本週課表</button>
     <button class="tab" role="tab" aria-selected="false" onclick="switchPlanTab('autopilot')">輔助菜單</button>
     <button class="tab" role="tab" aria-selected="false" onclick="switchPlanTab('coach')">教練建議</button>
-    <button class="tab" role="tab" aria-selected="false" onclick="switchPlanTab('periodization')">訓練週期</button>
-    <button class="tab" role="tab" aria-selected="false" onclick="switchPlanTab('analysis')">訓練分析</button>
+    <button class="tab" role="tab" aria-selected="false" data-requires-coach ${typeof coachReviewData !== 'undefined' && coachReviewData ? '' : 'style="display:none"'} onclick="switchPlanTab('periodization')">訓練週期</button>
+    <button class="tab" role="tab" aria-selected="false" data-requires-coach ${typeof coachReviewData !== 'undefined' && coachReviewData ? '' : 'style="display:none"'} onclick="switchPlanTab('analysis')">訓練分析</button>
     <button class="tab" role="tab" aria-selected="false" onclick="switchPlanTab('checkin')">週評估</button>
   </div>
   <div class="plan-workspace-tools" aria-label="訓練管理工具">
@@ -6470,6 +6470,20 @@ function renderCheckinTrend() {
   }).join('')}</div><p style="margin:8px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">近 ${recent.length} 週平均疲勞：${averageFatigue ? `${averageFatigue.toFixed(1)}/5` : '尚無主觀疲勞資料'}；柱越高代表疲勞越高，顏色反映系統是否已降載保護。</p>`;
 }
 
+// 歷史評估紀錄：讓週評估分頁看得到「之前每週系統做了什麼決定」，不只有本週表單
+function renderCheckinHistory() {
+  const past = [...(appData.checkins || [])]
+    .filter((checkin) => checkin.weekNum !== currentWeek)
+    .sort((a, b) => b.weekNum - a.weekNum)
+    .slice(0, 5);
+  if (!past.length) return '';
+  return `<span class="checkin-section-label" style="margin-top:18px">歷史評估</span>
+    <div class="checkin-history">${past.map((item) => {
+      const tone = item.painConcern || item.result === '停止品質課' ? 'danger' : item.fatigue >= 4 || item.result === '降載恢復' ? 'caution' : 'good';
+      return `<div class="checkin-history-item ${tone}"><b>第 ${item.weekNum} 週</b><span>${reviewEscape(item.result || '維持')}｜疲勞 ${item.fatigue || '—'}/5</span><p>${reviewEscape(item.adjustment || item.safetyNote || '照計畫執行')}</p></div>`;
+    }).join('')}</div>`;
+}
+
 function renderCheckinSection() {
   const existing = (appData.checkins || []).find(checkin => checkin.weekNum === currentWeek);
   const totalWeeks = appData.plan?.length || 1;
@@ -6484,7 +6498,7 @@ function renderCheckinSection() {
       ${existing.fatigue ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">本週整體疲勞：${existing.fatigue}/5</p>` : ''}
       ${existing.safetyNote ? `<p style="font-size:13px;color:var(--c-orange);margin-top:6px">安全判斷：${existing.safetyNote}</p>` : ''}
       ${existing.note ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">週記：${existing.note}</p>` : ''}
-      <p style="font-size:13px;margin:10px 0 0;line-height:1.65">${existing.adjustment}</p>${renderCheckinTrend()}
+      <p style="font-size:13px;margin:10px 0 0;line-height:1.65">${existing.adjustment}</p>${renderCheckinTrend()}${renderCheckinHistory()}
     </div>
     </section>`;
   }
@@ -6501,6 +6515,7 @@ function renderCheckinSection() {
     </div>
     <label class="checkin-safety"><input id="cw-pain-concern" type="checkbox" style="margin-top:3px">本週有疼痛、跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</label>
     <button class="btn btn-primary checkin-submit" onclick="submitCheckin()">提交第 ${currentWeek} 週評估</button>
+    ${renderCheckinHistory()}
     </div>
   </section>`;
 }
@@ -7327,6 +7342,8 @@ loadRegistrationRaceCheckpoints();
       if (advisoryResult && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     }
     refreshCoachReviewPanels();
+    // 週報解鎖後才把「訓練週期／訓練分析」分頁顯示出來；未解鎖時只是兩個空殼分頁
+    document.querySelectorAll('[data-requires-coach]').forEach((button) => { button.style.display = ''; });
   }
 
   function renderLoading(text) {
