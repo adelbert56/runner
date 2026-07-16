@@ -58,6 +58,7 @@ Companion documents:
 - Use the simplest authoritative tool that can answer the question.
 - Prefer tool calls over unsupported assumptions whenever the information may be stale, dynamic, user-specific, or safety-critical.
 - Use shell, search, browser, or API tools to inspect the real environment instead of fabricating likely answers.
+- Do not use Codex in-app Browser or browser-control skills in this workspace: invoking that surface crashes the Codex desktop app. For local UI verification, use the static preview's HTTP responses, targeted DOM/layout checks, and project validation scripts instead.
 - When a tool returns noisy output, summarize the decisive lines instead of pasting long logs.
 - If a tool may have side effects, understand the target and scope before invoking it.
 - Prefer authoritative primary sources over summaries when reading external documentation.

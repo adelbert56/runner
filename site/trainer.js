@@ -770,7 +770,8 @@ function renderHeroPanel() {
   const meta = profile ? (GOAL_META[profile.goal] || GOAL_META.half) : GOAL_META.half;
   const week = hasPlan ? (appData.plan[currentWeek - 1] || appData.plan[0]) : null;
   const totalWeeks = hasPlan ? appData.plan.length : null;
-  const phaseText = week ? `${week.phaseLabel}` : '建立你的個人手冊';
+  // 教練規劃存在時，階段名稱以教練分期為準，與週期分頁列一致（避免兩套標籤打架）
+  const phaseText = week ? `${(typeof coachPhaseForWeek === 'function' && coachPhaseForWeek(week)?.phase) || week.phaseLabel}` : '建立你的個人手冊';
   const progressText = hasPlan ? `第 ${currentWeek} / ${totalWeeks} 週` : '尚未建立';
   const targetDateText = profile?.targetDate || '先設定模式與比賽日';
   const daysToRace = daysUntilTargetDate(profile?.targetDate);
@@ -3281,6 +3282,80 @@ let currentWeek = 1;
 let coachReviewData = null;
 let registrationRaceData = null;
 let registrationRaceLoadState = 'idle';
+const GARMIN_ACTIVITY_SYNC_API = '/api/garmin-activity-sync';
+let garminActivitySyncPollId = null;
+
+function formatGarminActivitySyncTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('zh-TW', { hour12: false, month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function formatGarminActivitySyncMessage(message) {
+  const value = String(message || '');
+  if (value === 'Garmin activities and encrypted training review synced.') return 'Garmin 活動與教練建議已更新';
+  if (value === 'Garmin activities synced; encrypted review publish was skipped.') return 'Garmin 活動已更新（略過教練建議重建）';
+  return value || '可隨時手動拉取最新活動紀錄';
+}
+
+function setGarminActivitySyncControl(status = {}) {
+  const button = document.getElementById('garmin-activity-sync-button');
+  const label = document.getElementById('garmin-activity-sync-status');
+  if (!button || !label) return;
+  const running = Boolean(status.running) || status.status === 'running';
+  const time = formatGarminActivitySyncTime(status.updatedAt);
+  button.disabled = running;
+  button.textContent = running ? '⌚ 同步中…' : '⌚ 立即同步 Garmin';
+  label.dataset.status = status.status || 'idle';
+  label.textContent = `${formatGarminActivitySyncMessage(status.message)}${time ? ` · ${time}` : ''}`;
+}
+
+function stopGarminActivitySyncPolling() {
+  if (!garminActivitySyncPollId) return;
+  window.clearInterval(garminActivitySyncPollId);
+  garminActivitySyncPollId = null;
+}
+
+async function loadGarminActivitySyncStatus({ refreshCoach = false } = {}) {
+  if (!['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) return;
+  try {
+    const response = await fetch(GARMIN_ACTIVITY_SYNC_API, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const status = await response.json();
+    setGarminActivitySyncControl(status);
+    if (status.running || status.status === 'running') {
+      if (!garminActivitySyncPollId) {
+        garminActivitySyncPollId = window.setInterval(() => loadGarminActivitySyncStatus({ refreshCoach: true }), 2500);
+      }
+      return;
+    }
+    stopGarminActivitySyncPolling();
+    if (refreshCoach && status.status === 'ok') window.loadCoachReview?.();
+  } catch (error) {
+    stopGarminActivitySyncPolling();
+    setGarminActivitySyncControl({ status: 'error', message: '無法讀取 Garmin 同步狀態，請確認本機 Runner 服務仍在執行。' });
+    console.warn('garmin-activity-sync: status unavailable', error);
+  }
+}
+
+async function startGarminActivitySync() {
+  const button = document.getElementById('garmin-activity-sync-button');
+  if (!button || button.disabled) return;
+  button.disabled = true;
+  setGarminActivitySyncControl({ status: 'running', running: true, message: '正在啟動 Garmin 活動同步…' });
+  try {
+    const response = await fetch(GARMIN_ACTIVITY_SYNC_API, { method: 'POST' });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.message || '無法啟動 Garmin 同步');
+    setGarminActivitySyncControl({ status: 'running', running: true, message: payload.message || 'Garmin 活動同步已啟動' });
+    if (!garminActivitySyncPollId) {
+      garminActivitySyncPollId = window.setInterval(() => loadGarminActivitySyncStatus({ refreshCoach: true }), 2500);
+    }
+  } catch (error) {
+    setGarminActivitySyncControl({ status: 'error', message: error instanceof Error ? error.message : '無法啟動 Garmin 同步' });
+  }
+}
 
 function renderPlanView() {
   const el = document.getElementById('view-plan');
@@ -3293,6 +3368,12 @@ function renderPlanView() {
   }
   const daysSinceGen = Math.floor((new Date() - new Date(profile.generatedAt)) / 86400000);
   currentWeek = Math.min(Math.max(1, Math.floor(daysSinceGen / 7) + 1), plan.length);
+  const garminActivitySyncControl = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+    ? `<div class="garmin-activity-sync-control" data-local-only="garmin-activity-sync">
+      <button class="btn btn-secondary" id="garmin-activity-sync-button" type="button" onclick="startGarminActivitySync()">⌚ 立即同步 Garmin</button>
+      <span id="garmin-activity-sync-status" role="status" aria-live="polite">讀取同步狀態中…</span>
+    </div>`
+    : '';
   renderHeroPanel();
   el.innerHTML = `
 <nav class="plan-toolbar" aria-label="訓練工作區導覽">
@@ -3305,6 +3386,7 @@ function renderPlanView() {
     <button class="tab" role="tab" aria-selected="false" onclick="switchPlanTab('checkin')">週評估</button>
   </div>
   <div class="plan-workspace-tools" aria-label="訓練管理工具">
+    ${garminActivitySyncControl}
     <button class="btn btn-secondary" onclick="openTrainingDataManager()">資料管理</button>
     <button class="btn btn-secondary" onclick="editSetup()">⚙️ 修改設定</button>
   </div>
@@ -3332,6 +3414,7 @@ function renderPlanView() {
 </div>
 `;
   window.loadCoachReview?.();
+  loadGarminActivitySyncStatus();
 }
 
 function switchPlanTab(tab) {
@@ -5344,7 +5427,7 @@ function renderWeekSection(plan) {
       <button class="week-nav-btn" onclick="navWeek(-1)" ${currentWeek <= 1 ? 'disabled' : ''} aria-label="上一週">◀</button>
       <div class="week-header-title">
         <div class="plan-overview-kicker">Week ${currentWeek} / ${plan.length}</div>
-        <div class="week-header-label">第 ${currentWeek} 週 · ${week.phaseLabel}${deloadBadge}${taperBadge}</div>
+        <div class="week-header-label">第 ${currentWeek} 週 · ${(typeof coachPhaseForWeek === 'function' && coachPhaseForWeek(week)?.phase) || week.phaseLabel}${deloadBadge}${taperBadge}</div>
         <div class="week-header-target"><span>${effectiveTarget.source === '教練本週目標' ? '教練本週目標' : '本週目標'}</span><strong>${effectiveTarget.display}</strong></div>
       </div>
       <button class="week-nav-btn" onclick="navWeek(1)" ${currentWeek >= plan.length ? 'disabled' : ''} aria-label="下一週">▶</button>

@@ -14,7 +14,7 @@ function sentenceKeys(text) {
     .filter(Boolean);
 }
 
-const [html, app, contentRaw, trainerHtml, trainerJs, trainerCss, garminPublisher, garminReviewBuilder] = await Promise.all([
+const [html, app, contentRaw, trainerHtml, trainerJs, trainerCss, garminPublisher, garminReviewBuilder, server] = await Promise.all([
   readFile(resolve(root, "site/index.html"), "utf8"),
   readFile(resolve(root, "site/app.js"), "utf8"),
   readFile(resolve(root, "site/data/content.json"), "utf8"),
@@ -23,6 +23,7 @@ const [html, app, contentRaw, trainerHtml, trainerJs, trainerCss, garminPublishe
   readFile(resolve(root, "site/trainer.css"), "utf8"),
   readFile(resolve(root, "scripts/garmin/publish_training_plan.py"), "utf8"),
   readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
+  readFile(resolve(root, "site/server.mjs"), "utf8"),
 ]);
 // trainer 頁面已拆成 html/js/css 三檔；既有斷言以串接內容檢查，語意不變
 const trainer = `${trainerHtml}\n${trainerJs}\n${trainerCss}`;
@@ -57,6 +58,8 @@ assertCheck(/const mainStep = steps\.find\(\(step\) => step\.title === '主課'\
 assertCheck(/function trainingDataHealth\(/.test(trainer) && /renderTrainingStatusCard\(/.test(trainer), "auxiliary trainer tabs expose shared data health status");
 assertCheck(/function exportTrainingData\(/.test(trainer) && /function importTrainingData\(/.test(trainer), "trainer supports local backup and restore");
 assertCheck(/garminCompletionPct/.test(trainer) && /function garminCompletionPercent\(/.test(trainer), "Garmin automatic completion threshold is configurable");
+assertCheck(/GARMIN_ACTIVITY_SYNC_API/.test(trainer) && /startGarminActivitySync/.test(trainer) && /loadGarminActivitySyncStatus/.test(trainer) && /formatGarminActivitySyncMessage/.test(trainer) && /data-local-only="garmin-activity-sync"/.test(trainer) && /\['localhost', '127\.0\.0\.1', '::1'\]/.test(trainer), "trainer offers a local-only manual Garmin activity sync with visible status");
+assertCheck(/api\/garmin-activity-sync/.test(server) && /sync-garmin\.ps1/.test(server) && /isLocalGarminActivitySyncRequest/.test(server) && /req\.socket\.remoteAddress/.test(server), "manual Garmin activity sync stays loopback-only and uses the existing sync script");
 assertCheck(/function garminAutopilotDays\(plan, activityIndex\)/.test(trainer) && /今日 .*Garmin 已認列完成/.test(trainer) && /以下從明天開始列出 7 天輔助菜單/.test(trainer), "Garmin Autopilot removes an already-completed today from the future menu");
 assertCheck(/comparisonFamily/.test(trainer) && /只與同課型比較/.test(trainer) && /day\.dateStr\.slice\(5\)\.replace\('-', '\/'\)/.test(trainer), "Garmin Autopilot compares only matching workout families and shows menu dates");
 assertCheck(!/function openGarminManualBuilder\(/.test(trainer) && !/Garmin 手動建課助手/.test(trainer) && /function weeklyGarminCalendarIcs\(/.test(trainer) && /function weeklyGarminSyncPayload\(/.test(trainer) && /replaceExisting: true/.test(trainer) && /覆蓋並同步/.test(trainer) && /function garminMainDistanceKm\(/.test(trainer) && /mainKm: garminMainDistanceKm\(day\)/.test(trainer) && /steps: garminManualBuilderSteps\(day\)/.test(trainer) && /同步結果暫時無法讀取/.test(trainer) && /不代表同步失敗/.test(trainer) && /function syncWeekToGarmin\(/.test(trainer) && /api\/garmin-workout-sync/.test(trainer) && /確認同步/.test(trainer), "trainer replaces same-named Garmin workouts after explicit confirmation while retaining guarded sync and non-misleading result status");

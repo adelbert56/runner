@@ -13,6 +13,8 @@ const garminSyncPayloadLimit = 128 * 1024;
 const garminSyncRequestPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-request.json"));
 const garminSyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-status.json"));
 const garminPublishScript = resolve(join(root, "scripts", "garmin", "publish_training_plan.py"));
+const garminActivitySyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-sync-status.json"));
+const garminActivitySyncScript = resolve(join(root, "scripts", "garmin", "sync-garmin.ps1"));
 const allowedLocalHosts = new Set([
   `localhost:${port}`,
   `127.0.0.1:${port}`,
@@ -23,6 +25,7 @@ const allowedGarminSyncOrigins = new Set([
   "adelbert56.github.io",
 ]);
 let garminSyncRunning = false;
+let garminActivitySyncRunning = false;
 const emptyRegistrationData = {
   version: 1,
   updatedAt: null,
@@ -112,6 +115,19 @@ function isAllowedGarminSyncRequest(req) {
   }
 }
 
+function isLocalGarminActivitySyncRequest(req) {
+  const host = String(req.headers.host || "");
+  const origin = String(req.headers.origin || "");
+  const remoteAddress = String(req.socket.remoteAddress || "");
+  if (!allowedLocalHosts.has(host) || !["::1", "127.0.0.1", "::ffff:127.0.0.1"].includes(remoteAddress)) return false;
+  if (!origin) return true;
+  try {
+    return allowedLocalHosts.has(new URL(origin).host);
+  } catch {
+    return false;
+  }
+}
+
 function validGarminSyncPayload(payload) {
   if (!payload || payload.version !== 1 || !Array.isArray(payload.workouts) || !payload.workouts.length || payload.workouts.length > 7) {
     return false;
@@ -169,6 +185,37 @@ async function queueGarminSync(payload) {
   });
 }
 
+async function readGarminActivitySyncStatus() {
+  try {
+    return JSON.parse(await readFile(garminActivitySyncStatusPath, "utf8"));
+  } catch {
+    return { status: "idle", message: "尚未同步 Garmin 活動紀錄" };
+  }
+}
+
+async function queueGarminActivitySync() {
+  await mkdir(resolve(join(root, "runner", "訓練")), { recursive: true });
+  await writeFile(garminActivitySyncStatusPath, `${JSON.stringify({
+    status: "running",
+    message: "正在同步 Garmin 活動紀錄並更新教練建議…",
+    updatedAt: new Date().toISOString(),
+  }, null, 2)}\n`, "utf8");
+  garminActivitySyncRunning = true;
+  const child = spawn("pwsh", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", garminActivitySyncScript], {
+    cwd: root,
+    detached: false,
+    stdio: "ignore",
+    windowsHide: true,
+  });
+  child.once("error", async (error) => {
+    garminActivitySyncRunning = false;
+    await writeFile(garminActivitySyncStatusPath, `${JSON.stringify({ status: "error", message: error.message, updatedAt: new Date().toISOString() }, null, 2)}\n`, "utf8");
+  });
+  child.once("close", () => {
+    garminActivitySyncRunning = false;
+  });
+}
+
 async function readRegistrationData() {
   try {
     const raw = await readFile(registrationDataPath, "utf8");
@@ -198,6 +245,31 @@ async function writeRegistrationData(payload) {
 const server = createServer(async (req, res) => {
   const decoded = decodeURIComponent(new URL(req.url || "/", `http://localhost:${port}`).pathname);
   const origin = String(req.headers.origin || "");
+  if (decoded.startsWith("/api/garmin-activity-sync")) {
+    if (!isLocalGarminActivitySyncRequest(req)) {
+      sendJson(res, 403, { error: "forbidden", message: "Garmin activity sync is only available from the local Runner server." });
+      return;
+    }
+    if (decoded === "/api/garmin-activity-sync" && req.method === "GET") {
+      sendJson(res, 200, { ...(await readGarminActivitySyncStatus()), running: garminActivitySyncRunning });
+      return;
+    }
+    if (decoded === "/api/garmin-activity-sync" && req.method === "POST") {
+      if (garminActivitySyncRunning) {
+        sendJson(res, 409, { error: "sync-in-progress", message: "Garmin 活動同步正在執行，請稍候。" });
+        return;
+      }
+      try {
+        await queueGarminActivitySync();
+        sendJson(res, 202, { ok: true, message: "Garmin 活動同步已啟動" });
+      } catch (error) {
+        sendJson(res, 500, { error: "sync-start-failed", message: error instanceof Error ? error.message : "Unable to start Garmin sync" });
+      }
+      return;
+    }
+    sendJson(res, 405, { error: "method-not-allowed" });
+    return;
+  }
   if (decoded.startsWith("/api/garmin-workout-sync")) {
     sendGarminCors(res, origin);
     if (req.method === "OPTIONS") {
