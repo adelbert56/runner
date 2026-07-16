@@ -3387,7 +3387,7 @@ function renderPlanView() {
   </div>
   <div class="plan-workspace-tools" aria-label="訓練管理工具">
     ${garminActivitySyncControl}
-    <button class="btn btn-secondary" onclick="openTrainingDataManager()">資料管理</button>
+    <button class="btn btn-secondary" onclick="openTrainingDataManager()">🗂 資料管理</button>
     <button class="btn btn-secondary" onclick="editSetup()">⚙️ 修改設定</button>
   </div>
 </nav>
@@ -3545,7 +3545,7 @@ function renderGarminAutopilotCard(profile, plan) {
   const familyLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[metrics.comparisonFamily] || '主課';
   const qualityMetric = metrics.recentPace
     ? `${formatPaceSeconds(metrics.recentPace)}${metrics.paceDeltaSeconds !== null && metrics.paceDeltaSeconds !== undefined ? ` · ${metrics.paceDeltaSeconds > 0 ? '+' : ''}${metrics.paceDeltaSeconds}s` : ''}${metrics.recentHr ? ` · HR ${Math.round(metrics.recentHr)}` : ''}`
-    : `${familyLabel}資料不足（近 ${metrics.recentQualityRuns || 0}/2；前期 ${metrics.previousQualityRuns || 0}/2）`;
+    : `${familyLabel}趨勢待建立：最近 14 天 ${metrics.recentQualityRuns || 0} 筆、前 14 天 ${metrics.previousQualityRuns || 0} 筆（同課型各需 2 筆）`;
   const menu = rollingDays.map((day) => {
     const isRest = day.type === 'rest';
     const dropQuality = ['tempo', 'interval'].includes(day.type) && autopilot.qualityMode === 'skip';
@@ -4415,7 +4415,7 @@ function renderLatestTrainingReport(runs) {
   const autopilot = coachReviewData?.autopilot?.metrics || {};
   const comparisonLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[autopilot.comparisonFamily] || '主課';
   const confidence = mainScope
-    ? `${comparisonLabel}比較資料：近 ${autopilot.recentQualityRuns || 0}/2；前期 ${autopilot.previousQualityRuns || 0}/2；只與同課型比較。`
+    ? `${comparisonLabel}比較資料：最近 14 天 ${autopilot.recentQualityRuns || 0} 筆、前 14 天 ${autopilot.previousQualityRuns || 0} 筆（同課型各需 2 筆）。`
     : '本次尚無主課段別，教練維持保守判讀。';
   const plannedKm = plannedMainTargetKm(planned);
   const completion = plannedKm ? `${courseKm >= plannedKm * (garminCompletionPercent() / 100) ? '已達標' : '部分完成'} · 目標 ${plannedKm.toFixed(1)} km／實跑 ${courseKm.toFixed(1)} km` : '未找到可量化的課表目標';
@@ -5433,7 +5433,7 @@ function renderWeekSection(plan) {
       <button class="week-nav-btn" onclick="navWeek(1)" ${currentWeek >= plan.length ? 'disabled' : ''} aria-label="下一週">▶</button>
     </div>
     <div class="week-header-right">
-      <button class="btn btn-secondary week-garmin-export-btn" onclick="openWeeklyGarminCalendarGuide(${currentWeek})">⌚ 同步 Garmin</button>
+      <button class="btn btn-secondary week-garmin-export-btn" onclick="openWeeklyGarminCalendarGuide(${currentWeek})">⌚ 同步本週課程</button>
       <button class="btn btn-primary week-today-btn" onclick="goToToday()">📍 今天</button>
     </div>
   </div>
@@ -5967,9 +5967,9 @@ async function syncWeekToGarmin(weekNumber = currentWeek) {
       body: JSON.stringify(payload)
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || 'Garmin 同步器未能啟動');
+    if (!response.ok) throw new Error(result.message || 'Garmin 課程同步器未能啟動');
     closeModal();
-    showModal('正在同步 Garmin', `<p style="margin-top:0;color:var(--c-text-muted);line-height:1.7">已將 ${payload.workouts.length} 堂課交給本機同步器。同名課程會安全替換成新版，避免保留舊內容。</p><p style="color:var(--c-text-muted);font-size:12px;line-height:1.6">Runner 只會使用你電腦既有的 Garmin 授權，不會傳送帳密到網站。</p>`, [{
+    showModal('正在同步本週課程到 Garmin', `<p style="margin-top:0;color:var(--c-text-muted);line-height:1.7">已將 ${payload.workouts.length} 堂課交給本機同步器。同名課程會安全替換成新版，避免保留舊內容。</p><p style="color:var(--c-text-muted);font-size:12px;line-height:1.6">Runner 只會使用你電腦既有的 Garmin 授權，不會傳送帳密到網站。</p>`, [{
       label: '查看結果', primary: true, action: async () => {
         try {
           const status = await waitForGarminSync();

@@ -848,7 +848,7 @@
     }
     .plan-tab-list {
       display: flex;
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-width: 0;
       gap: 4px;
       align-items: center;
@@ -877,25 +877,42 @@
     .plan-workspace-tools {
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-left:auto;
-      padding-left: 10px;
+      gap: 6px;
+      margin-left: auto;   /* 工具群固定靠右，與分頁群拉開視覺層級 */
+      padding-left: 14px;
       border-left: 1px solid rgba(31, 42, 36, 0.1);
     }
-    .garmin-activity-sync-control { display:flex; align-items:center; min-width:0; padding-right:8px; border-right:1px solid rgba(31,42,36,.1); }
+    .garmin-activity-sync-control { display:flex; align-items:center; min-width:0; }
     .garmin-activity-sync-control span { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
     .plan-workspace-tools .btn {
       white-space: nowrap;
       font-size: 12px;
-      padding: 8px 10px;
+      font-weight: 800;
+      padding: 8px 14px;
       border: 0;
-      border-radius: 8px;
+      border-radius: 999px;
       background: transparent;
-      box-shadow:none;
+      color: var(--c-text-muted);
+      box-shadow: none;
+      transition: background .16s ease, color .16s ease;
     }
-    .plan-workspace-tools .btn:last-child {
-      color: var(--c-primary-hover);
+    .plan-workspace-tools .btn:hover {
       background: rgba(36, 114, 79, 0.08);
+      color: var(--c-primary-hover);
+    }
+    /* 主行動：同步 Garmin 用實心主色膠囊，其他工具維持安靜的幽靈鈕 */
+    .plan-workspace-tools #garmin-activity-sync-button {
+      background: var(--c-primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(36, 114, 79, 0.25);
+    }
+    .plan-workspace-tools #garmin-activity-sync-button:hover {
+      background: var(--c-primary-hover);
+      color: #fff;
+    }
+    .plan-workspace-tools #garmin-activity-sync-button:disabled {
+      opacity: .65;
+      box-shadow: none;
     }
     /* Toolbar spacing is owned here; tab panels should start immediately after it. */
     .plan-toolbar + .container { padding-top: 0; }
@@ -1122,7 +1139,7 @@
       .progress-stats { grid-template-columns: 1fr; }
       .export-bar .btn { flex: 1 1 100%; }
       .plan-toolbar { min-height:54px; gap:6px; padding:0; }
-      .plan-tab-list { overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
+      .plan-tab-list { flex:1 1 auto; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
       .plan-tab-list::-webkit-scrollbar { display:none; }
       /* 右緣漸層淡出：暗示分頁列可橫向捲動（捲軸已隱藏，沒有提示會漏看後面的分頁） */
       .plan-tab-list { -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); padding-right: 28px; }
