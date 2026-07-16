@@ -61,7 +61,7 @@ function trainingTaskTitle(day) {
 }
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, planChangeHistory: [], garminSyncManifest: {}, trainingEvents: [], lastBackupAt: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, planChangeHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, lastBackupAt: null };
 }
 
 function getDeviceId() {
@@ -513,6 +513,120 @@ function normalizePlanChangeHistory(history) {
   }, []);
 }
 
+function cloneTrainingValue(value) {
+  return JSON.parse(JSON.stringify(value ?? null));
+}
+
+function cycleGoalName(goal) {
+  return ({ '5k10k': '入門 5K/10K', half: '半馬 21K', full: '全馬 42K', rehab: '傷後重建' })[goal] || '訓練';
+}
+
+function cycleSummaryFromData(data) {
+  const days = (data?.plan || []).flatMap((week) => week.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
+  const doneDates = new Set([
+    ...(data?.log || []).map((entry) => entry?.date),
+    ...days.filter((day) => day.status === 'done').map((day) => day.dateStr)
+  ].filter(Boolean));
+  const missedSessions = days.filter((day) => day.status === 'missed').length;
+  const completedSessions = days.filter((day) => doneDates.has(day.dateStr)).length;
+  const plannedKm = Math.round(days.reduce((sum, day) => sum + (Number(day.km) || 0), 0) * 10) / 10;
+  const actualKm = Math.round((data?.log || []).reduce((sum, entry) => sum + (Number(entry.actualKm) || 0), 0) * 10) / 10;
+  const rpes = (data?.log || []).map((entry) => Number(entry.rpe)).filter((value) => value > 0);
+  const averageRpe = rpes.length ? Math.round((rpes.reduce((sum, value) => sum + value, 0) / rpes.length) * 10) / 10 : null;
+  const startDate = (data?.plan || []).flatMap((week) => week.days || []).map((day) => day.dateStr).filter(Boolean).sort()[0] || null;
+  const endDate = (data?.plan || []).flatMap((week) => week.days || []).map((day) => day.dateStr).filter(Boolean).sort().at(-1) || null;
+  return {
+    startDate,
+    endDate,
+    plannedWeeks: (data?.plan || []).length,
+    plannedSessions: days.length,
+    completedSessions,
+    missedSessions,
+    adherence: days.length ? Math.round((completedSessions / days.length) * 100) : 0,
+    plannedKm,
+    actualKm,
+    averageRpe,
+    checkinCount: (data?.checkins || []).length,
+    assessmentCount: (data?.assessments || []).length
+  };
+}
+
+function cycleCoachSummary(profile, summary, archivedAt) {
+  const goal = cycleGoalName(profile?.goal);
+  const facts = [
+    `週期：${goal}，${summary.plannedWeeks} 週`,
+    `完成：${summary.completedSessions}/${summary.plannedSessions} 堂（${summary.adherence}%）`,
+    `手動紀錄：${summary.actualKm.toFixed(1)} km／計畫 ${summary.plannedKm.toFixed(1)} km`,
+    summary.averageRpe ? `平均 RPE：${summary.averageRpe}/10` : '尚無足夠 RPE 紀錄',
+    `跳過：${summary.missedSessions} 堂`
+  ];
+  return {
+    archivedAt,
+    headline: `${goal}結案摘要`,
+    facts,
+    text: facts.join('；')
+  };
+}
+
+function normalizeCycleHistory(history) {
+  if (!Array.isArray(history)) return [];
+  return history.filter((cycle) => cycle && cycle.profile && Array.isArray(cycle.plan))
+    .slice(-12).map((cycle) => ({
+      id: String(cycle.id || `cycle-${cycle.archivedAt || Date.now()}`),
+      archivedAt: /^\d{4}-\d{2}-\d{2}T/.test(cycle.archivedAt || '') ? cycle.archivedAt : new Date().toISOString(),
+      reason: cycle.reason === 'completed' ? 'completed' : 'restart',
+      title: String(cycle.title || `${cycleGoalName(cycle.profile?.goal)}週期`).slice(0, 120),
+      profile: cloneTrainingValue(cycle.profile),
+      plan: cloneTrainingValue(cycle.plan),
+      log: cloneTrainingValue(Array.isArray(cycle.log) ? cycle.log : []),
+      checkins: cloneTrainingValue(Array.isArray(cycle.checkins) ? cycle.checkins : []),
+      assessments: cloneTrainingValue(Array.isArray(cycle.assessments) ? cycle.assessments : []),
+      dayStatuses: cloneTrainingValue(cycle.dayStatuses || {}),
+      skipReasons: cloneTrainingValue(cycle.skipReasons || {}),
+      makeupRecords: cloneTrainingValue(cycle.makeupRecords || {}),
+      activityAssignments: cloneTrainingValue(cycle.activityAssignments || {}),
+      planChangeHistory: cloneTrainingValue(Array.isArray(cycle.planChangeHistory) ? cycle.planChangeHistory : []),
+      trainingEvents: cloneTrainingValue(Array.isArray(cycle.trainingEvents) ? cycle.trainingEvents : []),
+      coachSnapshot: cloneTrainingValue(cycle.coachSnapshot || null),
+      summary: cycle.summary && typeof cycle.summary === 'object' ? cycle.summary : cycleSummaryFromData(cycle),
+      coachSummary: cycle.coachSummary && typeof cycle.coachSummary === 'object' ? cycle.coachSummary : cycleCoachSummary(cycle.profile, cycle.summary || cycleSummaryFromData(cycle), cycle.archivedAt || new Date().toISOString())
+    }));
+}
+
+function archiveCurrentCycle(reason = 'restart') {
+  if (!appData?.profile || !Array.isArray(appData.plan) || !appData.plan.length) return null;
+  const archivedAt = new Date().toISOString();
+  const summary = cycleSummaryFromData(appData);
+  const title = `${cycleGoalName(appData.profile.goal)} · ${summary.startDate || '未定'} 至 ${summary.endDate || '未定'}`;
+  return {
+    id: globalThis.crypto?.randomUUID?.() || `cycle-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    archivedAt,
+    reason,
+    title,
+    profile: cloneTrainingValue(appData.profile),
+    plan: cloneTrainingValue(appData.plan),
+    log: cloneTrainingValue(appData.log || []),
+    checkins: cloneTrainingValue(appData.checkins || []),
+    assessments: cloneTrainingValue(appData.assessments || []),
+    dayStatuses: cloneTrainingValue(appData.dayStatuses || {}),
+    skipReasons: cloneTrainingValue(appData.skipReasons || {}),
+    makeupRecords: cloneTrainingValue(appData.makeupRecords || {}),
+    activityAssignments: cloneTrainingValue(appData.activityAssignments || {}),
+    planChangeHistory: cloneTrainingValue(appData.planChangeHistory || []),
+    trainingEvents: cloneTrainingValue(appData.trainingEvents || []),
+    coachSnapshot: coachReviewData ? {
+      updatedAt: coachReviewData.updatedAt || null,
+      analyticsUpdatedAt: coachReviewData.analyticsUpdatedAt || null,
+      autopilot: cloneTrainingValue(coachReviewData.autopilot || null),
+      week: cloneTrainingValue(coachReviewData.week || null),
+      history: cloneTrainingValue(Array.isArray(coachReviewData.history) ? coachReviewData.history.slice(-12) : []),
+      analyticsRuns: cloneTrainingValue((Array.isArray(coachReviewData.analyticsRuns) ? coachReviewData.analyticsRuns : coachReviewData.runs || []).slice(-80))
+    } : null,
+    summary,
+    coachSummary: cycleCoachSummary(appData.profile, summary, archivedAt)
+  };
+}
+
 function recordTrainingEvent(type, payload = {}) {
   appData.trainingEvents = normalizeTrainingEvents(appData.trainingEvents);
   appData.trainingEvents.push({
@@ -595,7 +709,10 @@ function normalizeData(data) {
     makeupRecords: normalizeMakeupRecords(data?.makeupRecords),
     activityAssignments: normalizeActivityAssignments(data?.activityAssignments),
     planChangeHistory: normalizePlanChangeHistory(data?.planChangeHistory),
-    trainingEvents: normalizeTrainingEvents(data?.trainingEvents)
+    trainingEvents: normalizeTrainingEvents(data?.trainingEvents),
+    cycleHistory: normalizeCycleHistory(data?.cycleHistory),
+    nextCycleDraft: data?.nextCycleDraft && typeof data.nextCycleDraft === 'object' ? cloneTrainingValue(data.nextCycleDraft) : null,
+    nextCycleCoachContext: data?.nextCycleCoachContext && typeof data.nextCycleCoachContext === 'object' ? cloneTrainingValue(data.nextCycleCoachContext) : null
   };
   normalized.dayStatuses = {
     ...collectLegacyDayStatuses(normalized),
@@ -1229,6 +1346,10 @@ function renderSetupView() {
   renderHeroPanel();
   const el = document.getElementById('view-setup');
   const hasExistingPlan = Boolean(appData.profile && appData.plan && appData.plan.length);
+  const nextCycleContext = appData.nextCycleCoachContext || appData.profile?.historyContext || null;
+  const nextCycleNote = nextCycleContext
+    ? `<div class="coach-setting-card" style="margin-bottom:20px"><div class="coach-setting-value">下一輪會參考上一週期</div><div class="coach-fineprint">${reviewEscape(nextCycleContext.text || '已選擇歷史訓練摘要。')} 新週期建立後，這份摘要會保留在教練建議中供調整課程時參考。</div></div>`
+    : '';
   const goalCards = ['5k10k', 'half', 'full', 'rehab'].map(goal => {
     const meta = GOAL_META[goal];
     return `<div class="goal-card" data-goal="${goal}">
@@ -1243,6 +1364,7 @@ function renderSetupView() {
     <div class="card-title">📋 訓練手冊設定</div>
     <p style="font-size:15px;line-height:1.7;color:var(--c-text-muted);margin-bottom:24px">這個功能不是只吐出課表，而是依你的目標、可訓練日、目前跑量與恢復條件，生成一份可放進手機的個人訓練手冊。所有資料只存在您的裝置上。</p>
     ${hasExistingPlan ? `<div style="background:#f3efe5;border-radius:10px;padding:12px 14px;font-size:14px;color:var(--c-text-muted);margin-bottom:20px">你目前已經有一份訓練計畫。改完設定後按「更新訓練手冊」，若只是想回去看原計畫，可直接按「返回目前計畫」。</div>` : ''}
+    ${nextCycleNote}
 
     <!-- 1. Goal -->
     <div class="form-group">
@@ -1374,7 +1496,7 @@ function renderSetupView() {
     </div>
 
     <button class="btn btn-primary" id="btn-generate" style="width:100%;padding:14px;font-size:16px" disabled>🚀 生成訓練計畫</button>
-    ${hasExistingPlan ? `<div class="setup-actions"><button class="btn btn-secondary" type="button" onclick="returnToPlan()">↩ 返回目前計畫</button></div>` : ''}
+    ${hasExistingPlan ? `<div class="setup-actions"><button class="btn btn-secondary" type="button" onclick="returnToPlan()">↩ 返回目前計畫</button><button class="btn btn-secondary" type="button" onclick="confirmRestartTrainingCycle()">🗂 封存目前週期並重新開始</button></div>` : ''}
   </div>
 </div>`;
 
@@ -1386,7 +1508,7 @@ function renderSetupView() {
   document.getElementById('btn-generate').textContent = hasExistingPlan ? '🔄 更新訓練手冊' : '🚀 生成訓練手冊';
 
   // Pre-fill if returning user
-  if (appData.profile) prefillSetupForm(appData.profile);
+  if (appData.profile || appData.nextCycleDraft) prefillSetupForm(appData.profile || appData.nextCycleDraft);
 }
 
 // ============================================================
@@ -3245,6 +3367,7 @@ function generateAndShowPlan() {
       time: document.getElementById('f-coach-time').value,
       day: parseInt(document.getElementById('f-coach-day').value, 10)
     },
+    historyContext: appData.nextCycleCoachContext || appData.profile?.historyContext || null,
     generatedAt: new Date().toISOString()
   };
   const dist = GOAL_DIST[profile.goal];
@@ -3267,12 +3390,41 @@ function generateAndShowPlan() {
   appData.checkins = appData.checkins || [];
   appData.assessments = appData.assessments || [];
   appData.adaptationPrompts = {};
+  appData.nextCycleDraft = null;
+  appData.nextCycleCoachContext = null;
   // 設定變了，舊的教練資料快取不該再拿來擋下一次滾動校準
   appData.recalibratedFor = null;
   appData.lastRecalibration = null;
   saveData(appData);
   renderPlanView();
   showView('plan');
+}
+
+function confirmRestartTrainingCycle() {
+  const archive = archiveCurrentCycle('restart');
+  if (!archive) return;
+  showModal('封存目前週期並重新開始', `<p style="margin:0 0 10px;line-height:1.7">目前的 <b>${reviewEscape(archive.title)}</b> 會完整封存：課表、完成／跳過、手動紀錄、週評估與檢測都會保留。</p><p style="margin:0;color:var(--c-text-muted);line-height:1.65">新週期會帶入一份精煉教練摘要，但不會自動覆寫任何新設定。</p>`, [
+    { label: '封存並建立新週期', primary: true, action: restartTrainingCycle },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+function restartTrainingCycle() {
+  const archive = archiveCurrentCycle('restart');
+  if (!archive) return;
+  const previousHistory = normalizeCycleHistory([...(appData.cycleHistory || []), archive]);
+  const draft = { ...archive.profile, targetDate: '', targetTime: '', recentResult: '', generatedAt: '' };
+  appData = {
+    ...createEmptyData(),
+    cycleHistory: previousHistory,
+    nextCycleDraft: draft,
+    nextCycleCoachContext: archive.coachSummary,
+    lastBackupAt: appData.lastBackupAt
+  };
+  saveData(appData);
+  closeModal();
+  renderSetupView();
+  showView('setup');
 }
 
 // ============================================================
@@ -3545,7 +3697,7 @@ function renderGarminAutopilotCard(profile, plan) {
   const familyLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[metrics.comparisonFamily] || '主課';
   const qualityMetric = metrics.recentPace
     ? `${formatPaceSeconds(metrics.recentPace)}${metrics.paceDeltaSeconds !== null && metrics.paceDeltaSeconds !== undefined ? ` · ${metrics.paceDeltaSeconds > 0 ? '+' : ''}${metrics.paceDeltaSeconds}s` : ''}${metrics.recentHr ? ` · HR ${Math.round(metrics.recentHr)}` : ''}`
-    : `${familyLabel}趨勢待建立：最近 14 天 ${metrics.recentQualityRuns || 0} 筆、前 14 天 ${metrics.previousQualityRuns || 0} 筆（同課型各需 2 筆）`;
+    : `${familyLabel}趨勢待建立：已累積 ${metrics.qualityComparisonSampleSize || 0}/2 筆同課型主課（完成兩筆即可比較）`;
   const menu = rollingDays.map((day) => {
     const isRest = day.type === 'rest';
     const dropQuality = ['tempo', 'interval'].includes(day.type) && autopilot.qualityMode === 'skip';
@@ -4415,7 +4567,7 @@ function renderLatestTrainingReport(runs) {
   const autopilot = coachReviewData?.autopilot?.metrics || {};
   const comparisonLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[autopilot.comparisonFamily] || '主課';
   const confidence = mainScope
-    ? `${comparisonLabel}比較資料：最近 14 天 ${autopilot.recentQualityRuns || 0} 筆、前 14 天 ${autopilot.previousQualityRuns || 0} 筆（同課型各需 2 筆）。`
+    ? `${comparisonLabel}比較資料：最近兩次同課型主課（${autopilot.qualityComparisonSampleSize || 0}/2 筆）；兩筆比較會採較嚴格門檻才下修課表。`
     : '本次尚無主課段別，教練維持保守判讀。';
   const plannedKm = plannedMainTargetKm(planned);
   const completion = plannedKm ? `${courseKm >= plannedKm * (garminCompletionPercent() / 100) ? '已達標' : '部分完成'} · 目標 ${plannedKm.toFixed(1)} km／實跑 ${courseKm.toFixed(1)} km` : '未找到可量化的課表目標';
@@ -5057,9 +5209,15 @@ function renderLastRecalibrationCard() {
   </div>`;
 }
 
+function renderHistoryCoachContext() {
+  const context = appData.profile?.historyContext || appData.nextCycleCoachContext;
+  if (!context?.facts?.length) return '';
+  return `<div class="coach-summary" style="margin-top:0"><div class="coach-summary-kicker">上一週期交接給教練</div><div class="coach-summary-title">${reviewEscape(context.headline || '歷史訓練摘要')}</div><ul class="coach-summary-list">${context.facts.map((fact) => `<li>${reviewEscape(fact)}</li>`).join('')}</ul><div class="coach-summary-copy muted">這份摘要會和目前 Garmin 實績一起顯示給教練判讀；它只提供背景，不會自行覆寫正式課表。</div></div>`;
+}
+
 function renderCoachReviewPanel() {
   if (!coachReviewData) {
-    return `${renderTrainingStatusCard(appData.plan || [])}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
+    return `${renderTrainingStatusCard(appData.plan || [])}${renderHistoryCoachContext()}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
   }
   const week = coachReviewData.week || {};
   const nextWeek = coachReviewData.nextWeek || {};
@@ -5124,6 +5282,7 @@ function renderCoachReviewPanel() {
       <button class="btn btn-secondary coach-lock-btn" onclick="lockCoachReview()">🔒 鎖定</button>
     </div>
     ${garminOnlyNotice}
+    ${renderHistoryCoachContext()}
     ${renderLastRecalibrationCard()}
     ${renderPlanChangeTimeline()}
     ${renderLiveCoachCard(week, nextWeek)}
@@ -7231,6 +7390,88 @@ function applyTrainingDataImport() {
   showView('plan');
 }
 
+function cycleHistoryById(id) {
+  return (appData.cycleHistory || []).find((cycle) => cycle.id === id) || null;
+}
+
+function cycleHistorySummaryHtml(cycle, { detail = false } = {}) {
+  const summary = cycle.summary || {};
+  const archivedAt = new Date(cycle.archivedAt).toLocaleDateString('zh-TW');
+  const facts = cycle.coachSummary?.facts || [];
+  return `<div class="coach-setting-card" style="margin:0 0 10px"><div class="coach-setting-value">${reviewEscape(cycle.title)}</div><div class="coach-fineprint">${archivedAt} 封存 · ${summary.plannedWeeks || 0} 週 · 完成 ${summary.completedSessions || 0}/${summary.plannedSessions || 0} 堂（${summary.adherence || 0}%）</div>${detail ? `<ul style="margin:10px 0 0;padding-left:18px;font-size:13px;line-height:1.7">${facts.map((fact) => `<li>${reviewEscape(fact)}</li>`).join('')}</ul>` : ''}</div>`;
+}
+
+function openCycleHistory() {
+  const cycles = [...(appData.cycleHistory || [])].reverse();
+  const body = cycles.length
+    ? `<p style="margin:0 0 14px;color:var(--c-text-muted);line-height:1.65">每份週期都保留完整課表與訓練紀錄；新週期只帶入精煉摘要，避免把舊課表直接覆寫進來。</p>${cycles.map((cycle) => `${cycleHistorySummaryHtml(cycle)}<div style="display:flex;gap:8px;flex-wrap:wrap;margin:-2px 0 14px"><button class="btn btn-secondary" type="button" onclick="openCycleHistoryDetail('${cycle.id}')">查看完整紀錄</button><button class="btn btn-secondary" type="button" onclick="attachCycleToCoach('${cycle.id}')">提供給教練</button><button class="btn btn-primary" type="button" onclick="restartFromCycleHistory('${cycle.id}')">以此重新開始</button></div>`).join('')}`
+    : '<p style="margin:0;color:var(--c-text-muted);line-height:1.65">尚無封存週期。當你選擇「封存目前週期並重新開始」時，系統會先建立第一份完整歷史。</p>';
+  showModal('🗂 訓練週期歷史', body, [{ label: '關閉', primary: true, action: closeModal }], { className: 'guide-modal' });
+}
+
+function openCycleHistoryDetail(id) {
+  const cycle = cycleHistoryById(id);
+  if (!cycle) return;
+  const planDays = cycle.plan.flatMap((week) => week.days || []).length;
+  const coachSnapshot = cycle.coachSnapshot;
+  const coachSnapshotText = coachSnapshot ? `；Garmin／教練快照截至 ${reviewEscape(coachSnapshot.analyticsUpdatedAt || coachSnapshot.updatedAt || '封存當下')}，含 ${(coachSnapshot.analyticsRuns || []).length} 筆近期實跑` : '';
+  const body = `${cycleHistorySummaryHtml(cycle, { detail: true })}<div style="margin-top:14px"><b>完整封存內容</b><p class="coach-fineprint">${cycle.plan.length} 週／${planDays} 天課表、${cycle.log.length} 筆手動紀錄、${cycle.checkins.length} 筆週評估、${cycle.assessments.length} 筆檢測，以及狀態與調整歷程均已保留${coachSnapshotText}。</p></div>`;
+  showModal('歷史週期明細', body, [
+    { label: '提供給教練', primary: true, action: () => attachCycleToCoach(id) },
+    { label: '以此重新開始', action: () => restartFromCycleHistory(id) },
+    { label: '返回歷史', action: openCycleHistory }
+  ]);
+}
+
+function attachCycleToCoach(id) {
+  const cycle = cycleHistoryById(id);
+  if (!cycle?.coachSummary) return;
+  if (appData.profile) {
+    appData.profile.historyContext = cloneTrainingValue(cycle.coachSummary);
+  } else {
+    appData.nextCycleDraft = { ...(appData.nextCycleDraft || cycle.profile), targetDate: appData.nextCycleDraft?.targetDate || '' };
+    appData.nextCycleCoachContext = cloneTrainingValue(cycle.coachSummary);
+  }
+  saveData(appData);
+  closeModal();
+  if (appData.profile) {
+    refreshCoachReviewPanels();
+    showView('plan');
+    switchPlanTab('coach');
+  } else {
+    renderSetupView();
+    showView('setup');
+  }
+}
+
+function restartFromCycleHistory(id) {
+  const source = cycleHistoryById(id);
+  if (!source) return;
+  const continueRestart = () => {
+    const currentArchive = archiveCurrentCycle('restart');
+    const history = normalizeCycleHistory([...(appData.cycleHistory || []), ...(currentArchive ? [currentArchive] : [])]);
+    appData = {
+      ...createEmptyData(),
+      cycleHistory: history,
+      nextCycleDraft: { ...source.profile, targetDate: '', targetTime: '', recentResult: '', generatedAt: '' },
+      nextCycleCoachContext: cloneTrainingValue(source.coachSummary),
+      lastBackupAt: appData.lastBackupAt
+    };
+    saveData(appData);
+    closeModal();
+    renderSetupView();
+    showView('setup');
+  };
+  if (appData.profile && appData.plan?.length) {
+    showModal('以歷史週期重新開始', '<p style="margin:0;line-height:1.7">目前週期會先完整封存，再以選取週期的設定與教練摘要建立新週期。</p>', [
+      { label: '封存目前週期並繼續', primary: true, action: continueRestart },
+      { label: '取消', action: closeModal }
+    ]);
+  } else {
+    continueRestart();
+  }
+}
+
 function openTrainingDataManager() {
   const health = trainingDataHealth(appData.plan || []);
   const backupAt = appData.lastBackupAt ? new Date(appData.lastBackupAt).toLocaleString('zh-TW', { hour12: false }) : '尚未建立備份';
@@ -7245,7 +7486,9 @@ function openTrainingDataManager() {
   const raceLogHtml = raceLog.length
     ? `<div style="margin-top:14px"><b>賽事整合紀錄</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${raceLog.map((entry) => `<li>${reviewEscape(entry.at)}：${reviewEscape(entry.text)}</li>`).join('')}</ul></div>`
     : '';
-  showModal('訓練資料管理', `<div class="coach-setting-card"><div class="coach-setting-value">${reviewEscape(garminCompletionRuleLabel())}</div><div class="coach-fineprint">完成、補跑與執行率皆使用此同一條規則。手動標記完成不會被 Garmin 門檻覆寫。</div></div><div style="margin-top:14px"><b>資料健康檢查</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${issueText}</ul></div>${raceLogHtml}<div style="margin-top:14px;color:var(--c-text-muted);font-size:13px">最近備份：${reviewEscape(backupAt)}</div>`, [
+  showModal('訓練資料管理', `<div class="coach-setting-card"><div class="coach-setting-value">${reviewEscape(garminCompletionRuleLabel())}</div><div class="coach-fineprint">完成、補跑與執行率皆使用此同一條規則。手動標記完成不會被 Garmin 門檻覆寫。</div></div><div style="margin-top:14px"><b>資料健康檢查</b><ul style="margin:8px 0 0;padding-left:20px;color:var(--c-text-muted);font-size:13px;line-height:1.7">${issueText}</ul></div>${raceLogHtml}<div style="margin-top:14px;color:var(--c-text-muted);font-size:13px">歷史週期：${appData.cycleHistory?.length || 0} 份 · 最近備份：${reviewEscape(backupAt)}</div>`, [
+    { label: '週期歷史', action: openCycleHistory },
+    ...(appData.profile && appData.plan?.length ? [{ label: '封存並重新開始', action: confirmRestartTrainingCycle }] : []),
     { label: '匯出備份', primary: true, action: exportTrainingData },
     { label: '還原備份', action: requestTrainingDataImport },
     { label: '完成門檻', action: configureGarminCompletionRule },
