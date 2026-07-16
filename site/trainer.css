@@ -645,6 +645,15 @@
     .day-card.done-card { background: #14532d22; border-color: var(--c-green); }
     .day-card.garmin-card { border-color: #3b8f70; box-shadow: inset 0 0 0 1px rgba(59, 143, 112, 0.12); }
     .day-card.missed-card { background: #7f1d1d22; border-color: var(--c-red); }
+    /* 強度色階：左框顏色＝課表強度，掃一眼看出本週強度分布。
+       放在狀態規則之後，today/done 只改其餘三邊，左框永遠保留強度色。 */
+    .day-card { border-left-width: 6px; }
+    .day-card.type-rest { border-left-color: var(--c-border); }
+    .day-card.type-easy { border-left-color: #3b8f70; }
+    .day-card.type-long { border-left-color: #2f6f8f; }
+    .day-card.type-tempo { border-left-color: #d97a3d; }
+    .day-card.type-interval { border-left-color: #c2453a; }
+    .day-card.type-race { border-left-color: #8a5fc2; }
     .day-card.deload-card { border-color: var(--c-orange); border-style: dashed; }
     .day-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
     .day-card-date { font-size: 13px; color: var(--c-text-muted); line-height: 1.4; }
@@ -1096,6 +1105,8 @@
       .plan-toolbar { min-height:54px; gap:6px; padding:0; }
       .plan-tab-list { overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
       .plan-tab-list::-webkit-scrollbar { display:none; }
+      /* 右緣漸層淡出：暗示分頁列可橫向捲動（捲軸已隱藏，沒有提示會漏看後面的分頁） */
+      .plan-tab-list { -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); padding-right: 28px; }
       .plan-workspace-tools { padding-left:10px; }
       .week-header-top { align-items:flex-start; flex-wrap:wrap; padding:18px 16px 16px; }
       .week-header-right { width:100%; justify-content:flex-end; flex-wrap:wrap; padding:10px 0 0; border-left:0; border-top:1px solid rgba(31,42,36,.08); }

@@ -1779,7 +1779,10 @@ function updateLiveCalc() {
   let racePaceSec = 0;
   if (timeSec > 0 && dist > 0) {
     racePaceSec = timeSec / dist;
-    document.getElementById('calc-race-pace').textContent = `${secToPace(racePaceSec)}/km`;
+    // 兩段式輸入被判讀為 H:MM 時，直接在配速格回饋系統的理解，使用者才不會誤會
+    const reinterpreted = timeSec !== timeToSec(timeVal);
+    const readAs = reinterpreted ? `（讀作 ${Math.floor(timeSec / 3600)} 小時 ${Math.round((timeSec % 3600) / 60)} 分）` : '';
+    document.getElementById('calc-race-pace').textContent = `${secToPace(racePaceSec)}/km${readAs}`;
     document.getElementById('calc-race-pace').className = 'calc-value good';
     document.getElementById('calc-tempo').textContent = `${secToPace(racePaceSec + 12)}/km`;
     document.getElementById('calc-tempo').className = 'calc-value good';
@@ -3083,6 +3086,7 @@ function fitnessProjection(profile = appData.profile) {
   const predictedFinishSec = Math.round(profile.racePaceSec * goalDist);
   const predictedPace = profile.racePaceSec;
   let trendNote = '';
+  let potentialNote = '';
   let deltaNote = '';
   try {
     const zones = hrZones(profile);
@@ -3096,7 +3100,12 @@ function fitnessProjection(profile = appData.profile) {
       const priorPaces = easyRuns.slice(-10, -5).map(heatAdjustedPaceSec);
       if (priorPaces.length) {
         const diff = median(priorPaces) - median(recentPaces); // 正值＝變快
-        if (diff >= 5) trendNote = `近期輕鬆跑(Z2)等效配速比先前快 ${Math.round(diff)} 秒/km，體能持續進步`;
+        if (diff >= 5) {
+          trendNote = `近期輕鬆跑(Z2)等效配速比先前快 ${Math.round(diff)} 秒/km，體能持續進步`;
+          // 趨勢換算成完賽時間潛力：Z2 進步約半數可轉移到比賽配速（保守估）
+          const potentialMin = Math.round((diff * 0.5 * goalDist) / 60);
+          if (potentialMin >= 1) potentialNote = `若趨勢延續，完賽時間有機會再快約 ${potentialMin} 分`;
+        }
         else if (diff <= -5) trendNote = `近期輕鬆跑(Z2)等效配速比先前慢 ${Math.round(-diff)} 秒/km，留意恢復與量能`;
         else trendNote = '近期體能與先前相比大致持平';
       }
@@ -3111,7 +3120,7 @@ function fitnessProjection(profile = appData.profile) {
       }
     }
   } catch (err) { /* 資料不足時跳過趨勢 */ }
-  return { predictedFinishSec, predictedPace, trendNote, deltaNote };
+  return { predictedFinishSec, predictedPace, trendNote, deltaNote, potentialNote };
 }
 
 function renderFitnessProjectionCard() {
@@ -3121,6 +3130,7 @@ function renderFitnessProjectionCard() {
   return `<div class="card"><div class="card-title">🔮 預估完賽 ${secToTime(projection.predictedFinishSec)} ・ 依目前體能</div>
     <p style="margin:0 0 6px;color:var(--c-text-muted)">依目前配速基準推算 ${reviewEscape(goalLabel)} 完賽時間約 <b style="color:var(--c-text)">${secToTime(projection.predictedFinishSec)}</b>（均速 ${secToPace(projection.predictedPace)}/km）。</p>
     ${projection.trendNote ? `<p style="margin:0;color:var(--c-text-muted)">${reviewEscape(projection.trendNote)}${projection.deltaNote ? `（${reviewEscape(projection.deltaNote)}）` : ''}</p>` : ''}
+    ${projection.potentialNote ? `<p style="margin:6px 0 0;color:var(--c-text-muted)">📈 ${reviewEscape(projection.potentialNote)}</p>` : ''}
   </div>`;
 }
 
@@ -6069,7 +6079,7 @@ function renderDayCard(day) {
   const garminRun = getGarminRunForDate(day.dateStr);
   const isTodayCard = day.dateStr === todayStr();
   if (day.type === 'rest') {
-    return `<div class="day-card ${isTodayCard ? 'today' : ''} ${day.status === 'missed' ? 'missed-card' : ''}">
+    return `<div class="day-card type-rest ${isTodayCard ? 'today' : ''} ${day.status === 'missed' ? 'missed-card' : ''}">
       <div class="day-card-header">
         <span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>
         ${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}
@@ -6098,7 +6108,7 @@ function renderDayCard(day) {
           <button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">✓ 完成</button>
           <button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button>
         </div>`;
-  return `<div class="day-card ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}">
+  return `<div class="day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}">
     <div class="day-card-header">
       <span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>
       ${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}
