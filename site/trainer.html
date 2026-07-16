@@ -2664,6 +2664,18 @@ function timeToSec(str) {
   return 0;
 }
 
+// 目標完賽時間寬容解析：欄位要求 H:MM:SS，但跑者常打「2:10」代表 2 小時 10 分。
+// 兩段式輸入若換算配速快到不合理（<2:30/km，比世界紀錄快），改判讀為 H:MM。
+function targetTimeToSec(str, dist) {
+  const sec = timeToSec(str);
+  if (!sec || !dist) return sec;
+  const parts = String(str || '').trim().split(':');
+  if (parts.length === 2 && sec / dist < 150) {
+    return Number(parts[0]) * 3600 + Number(parts[1]) * 60;
+  }
+  return sec;
+}
+
 function secToPace(sec) {
   if (!sec || sec <= 0) return '—';
   const rounded = Math.round(sec);
@@ -2958,7 +2970,7 @@ function updateLiveCalc() {
   }
 
   const dist = goal ? GOAL_DIST[goal] : 10;
-  const timeSec = timeToSec(timeVal);
+  const timeSec = targetTimeToSec(timeVal, dist);
   let racePaceSec = 0;
   if (timeSec > 0 && dist > 0) {
     racePaceSec = timeSec / dist;
@@ -4396,7 +4408,7 @@ function generateAndShowPlan() {
     generatedAt: new Date().toISOString()
   };
   const dist = GOAL_DIST[profile.goal];
-  const timeSec = timeToSec(profile.targetTime);
+  const timeSec = targetTimeToSec(profile.targetTime, dist);
   profile.racePaceSec = timeSec / dist;
   profile.tempoPaceSec = profile.racePaceSec + 12;
   profile.intervalPaceSec = Math.max(profile.racePaceSec - 10, 180);
@@ -6357,7 +6369,11 @@ function jumpToPhaseWeek(weekNum) {
   // innerHTML 重繪會讓瀏覽器把捲動重置回頂，先記住再還原
   const scroller = document.scrollingElement || document.documentElement;
   const scrollBefore = scroller.scrollTop;
+  // 必須與 renderPlanView 的週分頁組成一致：boot 後所有重繪都走這裡，
+  // 少列的卡片（automation brief、教練信）會永遠消失在畫面上
   document.getElementById('plan-tab-week').innerHTML = `
+    ${renderAutomationBrief(appData.plan)}
+    ${renderWeeklyCoachLetter()}
     ${renderRaceWeekCard(appData.profile)}
     ${renderProgressCard(appData.profile, appData.plan)}
     ${renderPhaseTabs(appData.plan)}
