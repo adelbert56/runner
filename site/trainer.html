@@ -811,12 +811,11 @@
     /* === Modal === */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; max-width: 520px; width: min(92vw, 520px); }
+    .modal { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; max-width: 520px; width: min(92vw, 520px); max-height: calc(100dvh - 32px); display: flex; flex-direction: column; }
     .modal.guide-modal { max-width: 980px; width: min(94vw, 980px); max-height: 88vh; display: flex; flex-direction: column; }
     .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
-    .modal-body { font-size: 14px; color: var(--c-text-muted); margin-bottom: 20px; line-height: 1.6; }
-    .modal.guide-modal .modal-body { overflow: auto; padding-right: 6px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-body { font-size: 14px; color: var(--c-text-muted); margin-bottom: 20px; line-height: 1.6; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex: 0 0 auto; }
 
     /* === Plan workspace navigation === */
     .plan-toolbar {
@@ -7105,6 +7104,146 @@ function openWeeklyGarminCalendarGuide(weekNumber = currentWeek) {
   ]);
 }
 
+function runCompanionRecommendation(day) {
+  const type = day?.type || 'easy';
+  const recommendations = {
+    easy: {
+      title: '輕鬆跑的陪伴',
+      intro: '今天的重點是把呼吸放鬆、穩穩完成，不需要被節拍追著跑。',
+      musicMix: ['indiePop', 'cityPop', 'funkDisco', 'movieScores', 'easyElectronic'],
+      podcastMix: ['runningStories', 'sportsCulture', 'deepTalk', 'historyStories', 'lightChat'],
+      tip: '能完整講話才是對的強度；若 Podcast 讓你不自覺加速，就改成較慢的音樂。'
+    },
+    tempo: {
+      title: '節奏跑的陪伴',
+      intro: '今天需要穩定專注，讓音樂幫你守住節奏，不要讓談話內容分散注意力。',
+      musicMix: ['houseDrive', 'popTempo', 'rockDrive', 'hipHopDrive', 'electronicFocus'],
+      podcastMix: ['runningTraining', 'sportsCulture', 'deepTalk', 'businessIdeas', 'lightChat'],
+      tip: '主課開始後優先選音樂；Podcast 留給熱身與收操，才能更容易維持目標配速。'
+    },
+    interval: {
+      title: '間歇跑的陪伴',
+      intro: '快段需要明確節奏，恢復段則把注意力拉回呼吸與姿勢。',
+      musicMix: ['drumBass', 'electronicFocus', 'rockDrive', 'hipHopDrive', 'popTempo'],
+      podcastMix: ['runningTraining', 'runningStories', 'sportsCulture', 'deepTalk', 'lightChat'],
+      tip: '把音樂當作節奏提示，不要為了追拍子硬加速；恢復段先確認呼吸回穩。'
+    },
+    long: {
+      title: '長跑的陪伴',
+      intro: '長跑時間較長，交替聽故事與音樂，比一路硬撐更容易把心情留在跑步上。',
+      musicMix: ['indiePop', 'cityPop', 'easyElectronic', 'movieScores', 'houseDrive', 'rockDrive', 'funkDisco'],
+      podcastMix: ['runningStories', 'runningTraining', 'sportsCulture', 'deepTalk', 'historyStories', 'travelAdventure', 'businessIdeas', 'lightChat'],
+      tip: '前半段選 Podcast，後段疲勞時再換成音樂；仍要保留對路況與身體訊號的注意力。'
+    },
+    race: {
+      title: '比賽日的陪伴',
+      intro: '今天以執行配速、補給與安全為主；熟悉的音樂就夠了，不需要嘗試新內容。',
+      musicMix: ['raceHype', 'rockDrive', 'electronicFocus', 'hipHopDrive'],
+      podcastMix: ['runningStories', 'sportsCulture', 'deepTalk', 'lightChat'],
+      tip: '賽前只聽熟悉內容；起跑後優先聽身體和環境，別讓音樂蓋過補給或安全提醒。'
+    }
+  };
+  if (type === 'easy' && ['recovery', 'rehab'].includes(day?.focus)) {
+    return {
+      title: '恢復跑的陪伴',
+      intro: '今天是為了恢復，不是為了衝成績；越能放鬆越好。',
+      musicMix: ['lofiRecovery', 'movieScores', 'cityPop', 'easyElectronic', 'indiePop'],
+      podcastMix: ['runningStories', 'sportsCulture', 'historyStories', 'deepTalk', 'lightChat'],
+      tip: '若覺得疲勞或疼痛上升，直接關掉內容、降速或改走路，完成恢復比完成里程重要。'
+    };
+  }
+  return recommendations[type] || recommendations.easy;
+}
+
+const RUN_COMPANION_PODCASTS = {
+  runningStories: { title: '跑步故事', query: '配速之外 Beyond the Pace', length: '適合 45–90 分鐘', detail: '從長跑、運動員生活到地方文化，適合想留在跑步氛圍裡的日子。' },
+  runningTraining: { title: '跑步訓練', query: '麒時跑步很簡單', length: '適合熱身／收操', detail: '教練觀點與訓練主題；品質課的主課段仍以配速和呼吸為先。' },
+  sportsCulture: { title: '運動與賽事', query: '約跑+ Podcast', length: '適合 45 分鐘以上', detail: '賽事現場、跑者旅程與運動文化，長跑時比較不容易聽膩。' },
+  deepTalk: { title: '深度訪談', query: '深度訪談 Podcast', length: '適合長跑前半段', detail: '人物、職涯、創作或社會議題；選一集完整聽完會很有陪跑感。' },
+  historyStories: { title: '歷史與知識故事', query: '杞人說故事 輕鬆說歷史', length: '適合輕鬆跑／恢復跑', detail: '故事性強、進入門檻低，適合想讓腦袋換個頻道的日子。' },
+  travelAdventure: { title: '旅行與冒險故事', query: '旅行 冒險 Podcast', length: '適合 60 分鐘以上', detail: '把長跑當成一趟移動中的旅行，適合需要景色與故事感的日子。' },
+  businessIdeas: { title: '商業與創作想法', query: '商業 創作 Podcast', length: '適合穩定配速跑', detail: '適合想在不追成績的日子，把跑步時間留給新觀點。' },
+  lightChat: { title: '喜劇與輕鬆聊天', query: '青春愛消遣 Podcast', length: '適合低強度跑', detail: '不需要費力跟上內容；若笑到呼吸亂掉，就把速度再放慢一點。' }
+};
+
+const RUN_COMPANION_MUSIC = {
+  lofiRecovery: { title: 'Lo-fi／舒緩電子', query: 'lofi recovery run 140 BPM', tempo: '140–155 BPM', detail: '恢復日用來穩住呼吸，不把身體推進亢奮狀態。' },
+  indiePop: { title: 'Indie Pop', query: 'indie pop running 160 BPM', tempo: '155–165 BPM', detail: '旋律感夠、節奏不太壓迫，適合輕鬆跑或長跑前段。' },
+  cityPop: { title: 'City Pop／日系流行', query: 'city pop running playlist', tempo: '150–165 BPM', detail: '明亮耐聽，適合想跑得輕鬆又不想太安靜的日子。' },
+  funkDisco: { title: 'Funk／Disco', query: 'funk disco running playlist', tempo: '155–170 BPM', detail: '律動明確但不過度刺激，長跑後段也容易維持心情。' },
+  movieScores: { title: '電影／遊戲配樂', query: 'movie game soundtrack running playlist', tempo: '彈性節奏', detail: '適合不想一直被固定節拍追趕、又需要故事感的長跑。' },
+  easyElectronic: { title: '輕電子／Chill House', query: 'chill house running playlist', tempo: '150–165 BPM', detail: '節拍連續、不太搶戲，適合穩定巡航。' },
+  houseDrive: { title: 'House／Dance', query: 'house running 170 BPM playlist', tempo: '165–175 BPM', detail: '適合節奏跑，用穩定拍點幫你把主課守在可控範圍。' },
+  popTempo: { title: '流行快歌', query: 'pop running 170 BPM playlist', tempo: '165–175 BPM', detail: '熟悉旋律加上清楚節拍，適合需要一點推力的主課。' },
+  rockDrive: { title: '搖滾／Pop Punk', query: 'rock running workout playlist', tempo: '165–180 BPM', detail: '適合需要氣勢的節奏跑、間歇或比賽日。' },
+  hipHopDrive: { title: 'Hip-hop Workout', query: 'hip hop running workout playlist', tempo: '165–180 BPM', detail: '重拍感明顯；若你的步頻被帶快，請優先守住課表強度。' },
+  electronicFocus: { title: 'Electro／Techno', query: 'electronic techno running workout playlist', tempo: '170–180 BPM', detail: '適合快段與間歇，把注意力放在當下這一組。' },
+  drumBass: { title: 'Drum & Bass', query: 'drum and bass running playlist', tempo: '170–180 BPM', detail: '高能量快節奏，適合短快段；恢復段請讓呼吸先降下來。' },
+  raceHype: { title: '比賽日熟悉歌單', query: 'race day running motivation playlist', tempo: '依個人習慣', detail: '比賽不要嘗試陌生曲風；熟悉的歌更容易讓你守住自己的節奏。' }
+};
+
+const RUN_COMPANION_HISTORY_KEY = 'runner-plaza:companion-podcast-history';
+const RUN_COMPANION_MUSIC_HISTORY_KEY = 'runner-plaza:companion-music-history';
+
+function companionItemHistory(historyKey, items) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(historyKey) || '[]');
+    return Array.isArray(saved) ? saved.filter((key) => items[key]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function pickCompanionItems(keys, count, historyKey, items) {
+  const history = companionItemHistory(historyKey, items);
+  const freshKeys = keys.filter((key) => !history.includes(key));
+  const candidates = freshKeys.length >= count ? freshKeys : keys;
+  const selected = [...candidates].sort(() => Math.random() - 0.5).slice(0, count);
+  localStorage.setItem(historyKey, [...selected, ...history.filter((key) => !selected.includes(key))].slice(0, 6));
+  return selected;
+}
+
+function pickCompanionPodcasts(keys, count) {
+  return pickCompanionItems(keys, count, RUN_COMPANION_HISTORY_KEY, RUN_COMPANION_PODCASTS);
+}
+
+function pickCompanionMusic(keys, count) {
+  return pickCompanionItems(keys, count, RUN_COMPANION_MUSIC_HISTORY_KEY, RUN_COMPANION_MUSIC);
+}
+
+function estimatedRunMinutes(day) {
+  const km = Number(day?.km) || 0;
+  const paceMatch = String(day?.pace || '').match(/(\d+):(\d{2})\/km/);
+  if (!km || !paceMatch) return null;
+  return Math.round(km * (Number(paceMatch[1]) + Number(paceMatch[2]) / 60));
+}
+
+function showRunCompanion(dateStr) {
+  const day = findRawPlanDay(dateStr)?.day;
+  if (!day || day.type === 'rest') return;
+  const recommendation = runCompanionRecommendation(day);
+  const estimatedMinutes = estimatedRunMinutes(day);
+  const musicCount = estimatedMinutes && estimatedMinutes >= 75 ? 4 : 3;
+  const musicCards = pickCompanionMusic(recommendation.musicMix, musicCount).map((key) => RUN_COMPANION_MUSIC[key]).filter(Boolean).map((item) => {
+    const musicQuery = encodeURIComponent(item.query);
+    return `<a class="garmin-builder-note" style="display:block;margin-top:10px;text-decoration:none;color:inherit" href="https://open.spotify.com/search/${musicQuery}" target="_blank" rel="noopener noreferrer"><b>🎵 ${reviewEscape(item.title)}</b><span style="display:block;margin-top:3px">${reviewEscape(item.tempo)} · ${reviewEscape(item.detail)}</span></a>`;
+  }).join('');
+  const podcastCount = estimatedMinutes && estimatedMinutes >= 75 ? 4 : 3;
+  const podcastCards = pickCompanionPodcasts(recommendation.podcastMix, podcastCount).map((key) => RUN_COMPANION_PODCASTS[key]).filter(Boolean).map((item) => {
+    const podcastQuery = encodeURIComponent(item.query);
+    return `<a class="garmin-builder-note" style="display:block;margin-top:10px;text-decoration:none;color:inherit" href="https://open.spotify.com/search/${podcastQuery}" target="_blank" rel="noopener noreferrer"><b>🎙️ ${reviewEscape(item.title)}</b><span style="display:block;margin-top:3px">${reviewEscape(item.length)} · ${reviewEscape(item.detail)}</span></a>`;
+  }).join('');
+  const body = `
+    <p class="field-help" style="margin-top:0">${reviewEscape(recommendation.intro)}</p>
+    <div><b>🎵 這次可選音樂</b><span class="field-help" style="display:block;margin:3px 0 0">${estimatedMinutes ? `這堂課約 ${estimatedMinutes} 分鐘；` : ''}每次會隨機換一批曲風，並避開最近出現過的選項。</span>${musicCards}</div>
+    <div style="margin-top:16px"><b>🎙️ 這次可選 Podcast</b><span class="field-help" style="display:block;margin:3px 0 0">${estimatedMinutes ? `這堂課約 ${estimatedMinutes} 分鐘；` : ''}每次會隨機換一批主題，並避開最近出現過的選項。</span>${podcastCards}</div>
+    <p class="field-help" style="margin-bottom:0">${reviewEscape(recommendation.tip)}</p>
+    <p class="field-help" style="margin-bottom:0">為了安全，請保持可聽見環境聲的音量；道路與夜跑建議使用單耳或開放式耳機。</p>`;
+  showModal(recommendation.title, body, [
+    { label: '關閉', action: closeModal }
+  ]);
+}
+
 function renderDayCard(day) {
   const garminRun = getGarminRunForDate(day.dateStr);
   const isTodayCard = day.dateStr === todayStr();
@@ -7153,6 +7292,7 @@ function renderDayCard(day) {
     ${day.heatNote ? `<div style="font-size:12px;line-height:1.5;color:var(--c-orange);margin:4px 0 8px">☀️ ${day.heatNote}</div>` : ''}
     ${dayWeatherLine(day)}
     ${renderStepCards(attachCourseGuides(day.steps, day.type))}
+    <div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button></div>
     ${actionsHTML}
   </div>`;
 }

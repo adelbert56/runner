@@ -365,7 +365,7 @@ async function assertTrainerReport(page, viewportName) {
     coachReviewData = { nextWeek: { weekStart: "2026-07-20", menu: [{ plan: "節奏跑 6 km" }] } };
     const safetyDay = applyCoachPlanOverride({ dow: 1, dateStr: "2026-07-20", type: "easy", task: "恢復跑", safetyOverride: true }, coachWeek);
     return {
-      heatSafe: isCalibrationSafeRun({ date: "2026-07-15", km: 6, elevationGainM: 0, temperatureC: 32 }),
+      heatSafe: isCalibrationSafeRun({ date: "2026-07-15", km: 6, elevationGainM: 0, temperatureC: 35 }),
       protectedType: protectedDays[1]?.type,
       protection: protectedDays[1]?.recoveryProtection,
       coachLocked: coachPrescriptionLocksWeek(coachWeek),
