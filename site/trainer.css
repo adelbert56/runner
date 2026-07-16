@@ -826,6 +826,18 @@
     .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
     .modal-body { font-size: 14px; color: var(--c-text-muted); margin-bottom: 20px; line-height: 1.6; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex: 0 0 auto; }
+    .modal.cycle-management-modal { max-width:660px; width:min(92vw,660px); padding:28px; }
+    .cycle-management-modal .modal-body { margin-bottom:18px; padding-right:0; }
+    .cycle-management-current { padding:16px; border:1px solid rgba(31,42,36,.1); border-radius:14px; background:#fffdf8; }
+    .cycle-management-label { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+    .cycle-management-title { margin-top:4px; color:var(--c-text); font-size:16px; font-weight:900; line-height:1.45; }
+    .cycle-management-stats { display:flex; gap:8px 18px; flex-wrap:wrap; margin-top:12px; color:var(--c-text-muted); font-size:12px; font-weight:750; }
+    .cycle-management-stats b { color:var(--c-text); }
+    .cycle-management-history { display:grid; grid-template-columns:minmax(150px,.78fr) minmax(0,1.22fr); gap:18px; align-items:start; margin-top:12px; padding:16px; border-radius:14px; background:#edf7f0; }
+    .cycle-management-history p { margin:0; color:var(--c-text-muted); font-size:13px; font-weight:650; line-height:1.65; }
+    .cycle-management-modal .modal-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .cycle-management-modal .modal-actions .btn { min-height:48px; padding:9px 14px; white-space:normal; line-height:1.35; }
+    @media (max-width:520px) { .modal.cycle-management-modal { padding:22px; } .cycle-management-history { grid-template-columns:1fr; gap:10px; } .cycle-management-modal .modal-actions { grid-template-columns:1fr; } }
 
     /* === Plan workspace navigation === */
     .plan-toolbar {
@@ -835,6 +847,7 @@
       margin: 0 auto 10px;
       padding: 6px 8px;
       display: flex;
+      justify-content: flex-start;
       gap: 12px;
       align-items: center;
       position: sticky;
@@ -878,7 +891,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-left: auto;   /* 工具群固定靠右，與分頁群拉開視覺層級 */
+      margin-left: auto;
       padding-left: 14px;
       border-left: 1px solid rgba(31, 42, 36, 0.1);
     }
@@ -900,7 +913,7 @@
       background: rgba(36, 114, 79, 0.08);
       color: var(--c-primary-hover);
     }
-    /* 主行動：同步 Garmin 用實心主色膠囊，其他工具維持安靜的幽靈鈕 */
+    /* 實跑讀取是唯一即時資料動作；週期與設定維持安靜的工具層級。 */
     .plan-workspace-tools #garmin-activity-sync-button {
       background: var(--c-primary);
       color: #fff;
@@ -916,6 +929,12 @@
     }
     /* Toolbar spacing is owned here; tab panels should start immediately after it. */
     .plan-toolbar + .container { padding-top: 0; }
+    .progress-hub-intro { margin-bottom:10px; }
+    .progress-hub-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 14px; padding:5px; border:1px solid rgba(31,42,36,.1); border-radius:12px; background:rgba(255,253,248,.82); }
+    .progress-hub-tab { border:0; border-radius:8px; padding:8px 11px; color:var(--c-text-muted); background:transparent; font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .progress-hub-tab:hover { color:var(--c-primary-hover); background:rgba(36,114,79,.06); }
+    .progress-hub-tab.active { color:var(--c-primary-hover); background:rgba(36,114,79,.11); }
+    .progress-hub-panel[hidden] { display:none; }
     .guide-actions { display:flex; gap:8px; flex-wrap:wrap; padding:12px 22px 16px; margin:0; border-top:1px solid rgba(31,42,36,.08); background:var(--c-surface); }
     .week-resource-actions { margin:0; padding:10px 22px; background:transparent; }
     .week-resource-label { align-self:center; margin-right:2px; color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
