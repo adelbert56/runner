@@ -654,6 +654,16 @@
     .day-card.type-tempo { border-left-color: #d97a3d; }
     .day-card.type-interval { border-left-color: #c2453a; }
     .day-card.type-race { border-left-color: #8a5fc2; }
+    /* 收合細節：非今日課卡與教練信預設摺疊，控制週視圖總高度 */
+    details.day-fold { margin: 6px 0 10px; }
+    details.day-fold > summary { cursor: pointer; font-size: 13px; font-weight: 800; color: var(--c-primary-hover); padding: 6px 0; list-style: none; }
+    details.day-fold > summary::before { content: '▸ '; }
+    details.day-fold[open] > summary::before { content: '▾ '; }
+    details.day-fold > summary::-webkit-details-marker { display: none; }
+    details.coach-letter-fold > summary { cursor: pointer; font-size: 15px; font-weight: 900; list-style: none; }
+    details.coach-letter-fold > summary::before { content: '▸ '; color: var(--c-primary-hover); }
+    details.coach-letter-fold[open] > summary::before { content: '▾ '; }
+    details.coach-letter-fold > summary::-webkit-details-marker { display: none; }
     .day-card.deload-card { border-color: var(--c-orange); border-style: dashed; }
     .day-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
     .day-card-date { font-size: 13px; color: var(--c-text-muted); line-height: 1.4; }
