@@ -14,14 +14,18 @@ function sentenceKeys(text) {
     .filter(Boolean);
 }
 
-const [html, app, contentRaw, trainer, garminPublisher, garminReviewBuilder] = await Promise.all([
+const [html, app, contentRaw, trainerHtml, trainerJs, trainerCss, garminPublisher, garminReviewBuilder] = await Promise.all([
   readFile(resolve(root, "site/index.html"), "utf8"),
   readFile(resolve(root, "site/app.js"), "utf8"),
   readFile(resolve(root, "site/data/content.json"), "utf8"),
   readFile(resolve(root, "site/trainer.html"), "utf8"),
+  readFile(resolve(root, "site/trainer.js"), "utf8"),
+  readFile(resolve(root, "site/trainer.css"), "utf8"),
   readFile(resolve(root, "scripts/garmin/publish_training_plan.py"), "utf8"),
   readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
 ]);
+// trainer 頁面已拆成 html/js/css 三檔；既有斷言以串接內容檢查，語意不變
+const trainer = `${trainerHtml}\n${trainerJs}\n${trainerCss}`;
 
 const content = JSON.parse(contentRaw);
 const items = Array.isArray(content.items) ? content.items : [];
