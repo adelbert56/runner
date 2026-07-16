@@ -654,12 +654,7 @@
     .day-card.type-tempo { border-left-color: #d97a3d; }
     .day-card.type-interval { border-left-color: #c2453a; }
     .day-card.type-race { border-left-color: #8a5fc2; }
-    /* 收合細節：非今日課卡與教練信預設摺疊，控制週視圖總高度 */
-    details.day-fold { margin: 6px 0 10px; }
-    details.day-fold > summary { cursor: pointer; font-size: 13px; font-weight: 800; color: var(--c-primary-hover); padding: 6px 0; list-style: none; }
-    details.day-fold > summary::before { content: '▸ '; }
-    details.day-fold[open] > summary::before { content: '▾ '; }
-    details.day-fold > summary::-webkit-details-marker { display: none; }
+    /* 教練信預設摺疊（課卡維持全展開：grid 列高跟最高卡對齊，收合省不了頁高） */
     details.coach-letter-fold > summary { cursor: pointer; font-size: 15px; font-weight: 900; list-style: none; }
     details.coach-letter-fold > summary::before { content: '▸ '; color: var(--c-primary-hover); }
     details.coach-letter-fold[open] > summary::before { content: '▾ '; }

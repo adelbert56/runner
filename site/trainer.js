@@ -6064,7 +6064,7 @@ function renderDayCard(day) {
       </div>
       <span class="workout-badge badge-rest">休息</span>
       <div class="day-card-task">${day.task || '主動恢復 / 完全休息'}</div>
-      ${restDetail ? (isTodayCard ? restDetail : `<details class="day-fold"><summary>課程細節</summary>${restDetail}</details>`) : ''}
+      ${restDetail}
       ${renderGarminRunResult(garminRun, true)}
     </div>`;
   }
@@ -6100,11 +6100,8 @@ function renderDayCard(day) {
     ${day.coachSafetyOverride ? `<div style="font-size:12px;line-height:1.5;color:var(--c-red);margin:4px 0 8px">🛑 安全保護已暫時覆蓋本週教練品質課；原處方已保留在變更紀錄。</div>` : ''}
     ${day.heatNote ? `<div style="font-size:12px;line-height:1.5;color:var(--c-orange);margin:4px 0 8px">☀️ ${day.heatNote}</div>` : ''}
     ${dayWeatherLine(day)}
-    ${(() => {
-      // 非今日的課卡預設收合細節：整週七張全展開會把版面拉太長，掃視只需要課型與任務一行
-      const detail = `${renderStepCards(attachCourseGuides(day.steps, day.type))}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button></div>`;
-      return isTodayCard ? detail : `<details class="day-fold"><summary>課程細節</summary>${detail}</details>`;
-    })()}
+    ${renderStepCards(attachCourseGuides(day.steps, day.type))}
+    <div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button></div>
     ${actionsHTML}
   </div>`;
 }
