@@ -3,12 +3,15 @@ import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
+import { createRegistrationBatchWorkbook, prepareRegistrationBatchImport } from "../local/registration/registration-batch-xlsx.js";
 
 const root = resolve(process.cwd());
 const port = Number(process.env.PORT || 4173);
 const registrationDir = resolve(join(root, "runner", "報名管理"));
 const registrationDataPath = resolve(join(registrationDir, "報名管理資料.json"));
+const raceDataPath = resolve(join(root, "site", "data", "races.json"));
 const registrationPayloadLimit = 1024 * 1024;
+const registrationBatchPayloadLimit = 8 * 1024 * 1024;
 const garminSyncPayloadLimit = 128 * 1024;
 const garminSyncRequestPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-request.json"));
 const garminSyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-status.json"));
@@ -32,6 +35,7 @@ const emptyRegistrationData = {
   people: [],
   entries: [],
 };
+const registrationBatchPreviews = new Map();
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -61,6 +65,15 @@ function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload, null, 2));
 }
 
+function sendBinary(res, status, content, contentType, filename) {
+  res.writeHead(status, {
+    "content-type": contentType,
+    "content-disposition": `attachment; filename="${filename}"`,
+    "content-length": content.length,
+  });
+  res.end(content);
+}
+
 function sendGarminCors(res, origin) {
   if (!origin) return;
   try {
@@ -76,7 +89,7 @@ function sendGarminCors(res, origin) {
   }
 }
 
-async function readRequestBody(req, limit = registrationPayloadLimit) {
+async function readRequestBuffer(req, limit = registrationPayloadLimit) {
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
@@ -86,7 +99,11 @@ async function readRequestBody(req, limit = registrationPayloadLimit) {
     }
     chunks.push(chunk);
   }
-  return Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
+}
+
+async function readRequestBody(req, limit = registrationPayloadLimit) {
+  return (await readRequestBuffer(req, limit)).toString("utf8");
 }
 
 function isLocalRegistrationRequest(req) {
@@ -231,6 +248,15 @@ async function readRegistrationData() {
   }
 }
 
+async function readRaceDistanceOptions() {
+  try {
+    const races = JSON.parse(await readFile(raceDataPath, "utf8"));
+    return (Array.isArray(races) ? races : []).flatMap((race) => Array.isArray(race?.distances) ? race.distances : []);
+  } catch {
+    return [];
+  }
+}
+
 async function writeRegistrationData(payload) {
   await mkdir(registrationDir, { recursive: true });
   try {
@@ -240,6 +266,13 @@ async function writeRegistrationData(payload) {
     // 第一次寫入時還沒有舊檔可備份，略過即可
   }
   await writeFile(registrationDataPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+function pruneRegistrationBatchPreviews() {
+  const now = Date.now();
+  registrationBatchPreviews.forEach((preview, token) => {
+    if (now - preview.createdAt > 15 * 60 * 1000) registrationBatchPreviews.delete(token);
+  });
 }
 
 const server = createServer(async (req, res) => {
@@ -316,6 +349,65 @@ const server = createServer(async (req, res) => {
   if (decoded === "/api/registration-data" && !isLocalRegistrationRequest(req)) {
     res.writeHead(403, { "content-type": "text/plain; charset=utf-8" });
     res.end("Registration data is only available from this local server.");
+    return;
+  }
+
+  if (decoded.startsWith("/api/registration-batch") && !isLocalRegistrationRequest(req)) {
+    sendJson(res, 403, { error: "forbidden", message: "批次匯入匯出僅能在本機報名管理使用。" });
+    return;
+  }
+
+  if (decoded === "/api/registration-batch.xlsx" && req.method === "GET") {
+    try {
+      const [registrationData, distanceOptions] = await Promise.all([readRegistrationData(), readRaceDistanceOptions()]);
+      const workbook = await createRegistrationBatchWorkbook(registrationData, { distanceOptions });
+      sendBinary(res, 200, Buffer.from(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "registration-batch.xlsx");
+    } catch (error) {
+      sendJson(res, 500, { error: "batch-export-failed", message: error instanceof Error ? error.message : "Excel 匯出失敗。" });
+    }
+    return;
+  }
+
+  if (decoded === "/api/registration-batch/preview" && req.method === "POST") {
+    try {
+      const [current, distanceOptions] = await Promise.all([readRegistrationData(), readRaceDistanceOptions()]);
+      const prepared = await prepareRegistrationBatchImport(await readRequestBuffer(req, registrationBatchPayloadLimit), current, { distanceOptions });
+      if (prepared.errors.length) {
+        sendJson(res, 422, { error: "batch-validation-failed", message: "Excel 有需要修正的資料，尚未套用。", errors: prepared.errors.slice(0, 80) });
+        return;
+      }
+      pruneRegistrationBatchPreviews();
+      const token = crypto.randomUUID();
+      registrationBatchPreviews.set(token, { ...prepared, baseUpdatedAt: current.updatedAt, createdAt: Date.now() });
+      sendJson(res, 200, { ok: true, previewToken: token, summary: prepared.summary });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Excel 讀取失敗。";
+      sendJson(res, message === "Payload too large" ? 413 : 400, { error: "batch-preview-failed", message });
+    }
+    return;
+  }
+
+  if (decoded === "/api/registration-batch/apply" && req.method === "POST") {
+    try {
+      pruneRegistrationBatchPreviews();
+      const request = JSON.parse(await readRequestBody(req) || "{}");
+      const preview = registrationBatchPreviews.get(String(request.previewToken || ""));
+      if (!preview) {
+        sendJson(res, 410, { error: "batch-preview-expired", message: "匯入預覽已過期，請重新選擇 Excel 檔。" });
+        return;
+      }
+      const current = await readRegistrationData();
+      if (current.updatedAt !== preview.baseUpdatedAt) {
+        sendJson(res, 409, { error: "stale-write", message: "資料已在預覽後更新，請重新匯出或重新預覽 Excel，避免覆蓋資料。" });
+        return;
+      }
+      const payload = { ...preview.payload, updatedAt: new Date().toISOString() };
+      await writeRegistrationData(payload);
+      registrationBatchPreviews.delete(String(request.previewToken || ""));
+      sendJson(res, 200, { ok: true, updatedAt: payload.updatedAt, summary: preview.summary });
+    } catch (error) {
+      sendJson(res, 400, { error: "batch-apply-failed", message: error instanceof Error ? error.message : "Excel 匯入失敗。" });
+    }
     return;
   }
 

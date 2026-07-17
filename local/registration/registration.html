@@ -49,19 +49,25 @@
           </p>
           <p class="registration-storage-line"><span>儲存位置</span><code>runner/報名管理/報名管理資料.json</code></p>
         </div>
-        <aside class="registration-hero-actions" aria-label="備份與還原">
+        <aside class="registration-hero-actions" aria-label="批次編輯與備份">
           <div class="hero-actions-heading">
             <span class="hero-actions-icon" aria-hidden="true">↺</span>
             <div>
-              <p class="hero-actions-label">備份與還原</p>
-              <p class="hero-actions-note">匯出一份備份，換電腦或復原資料時可使用。</p>
+              <p class="hero-actions-label">批次編輯與備份</p>
+              <p class="hero-actions-note">Excel 可批次修改團員與報名資料；JSON 保留給完整備份與還原。</p>
             </div>
           </div>
+          <button type="button" class="primary-action hero-data-action" id="export-batch-data"><span>批次匯出</span><small>Excel</small></button>
+          <label class="secondary-action file-action">
+            <span>批次匯入</span><small>選擇 Excel 檔</small>
+            <input id="import-batch-data" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx">
+          </label>
           <button type="button" class="primary-action hero-data-action" id="export-data"><span>建立備份</span><small>JSON</small></button>
           <label class="secondary-action file-action">
             <span>還原備份</span><small>選擇 JSON 檔</small>
             <input id="import-data" type="file" accept="application/json">
           </label>
+          <div id="batch-import-preview" class="batch-import-preview" hidden aria-live="polite"></div>
         </aside>
       </section>
 

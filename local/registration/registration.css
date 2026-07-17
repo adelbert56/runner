@@ -2860,6 +2860,17 @@ button.command-metric:focus-visible {
 .hero-actions-label { font-size: 12px; color: var(--color-neutral-600); }
 .hero-data-action, .registration-hero-actions .file-action { min-height: 40px; padding: 0 14px; }
 .hero-data-action small, .registration-hero-actions .file-action small { display: none; }
+.batch-import-preview { grid-column: 1 / -1; display: grid; gap: 10px; width: 100% !important; margin-top: 4px; padding: 12px; border: 1px solid var(--color-primary-200); border-radius: 9px; background: var(--color-primary-50); color: var(--color-neutral-800); }
+.batch-import-preview[hidden] { display: none; }
+.batch-import-preview.is-error { border-color: var(--color-danger-200); background: var(--color-danger-50); }
+.batch-import-preview > strong, .batch-import-preview-copy { display: grid; gap: 3px; }
+.batch-import-preview strong { color: var(--color-neutral-950); font-size: 13px; }
+.batch-import-preview span, .batch-import-preview li { color: var(--color-neutral-700); font-size: 12px; line-height: 1.45; }
+.batch-import-preview ul { display: grid; gap: 5px; max-height: 160px; margin: 0; padding-left: 18px; overflow: auto; }
+.batch-import-summary { display: flex; flex-wrap: wrap; gap: 8px; }
+.batch-import-summary span { padding: 5px 8px; border-radius: 6px; background: #fff; font-weight: 700; }
+.batch-import-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.batch-import-actions .primary-action, .batch-import-actions .ghost-action { min-height: 34px; padding: 0 11px; }
 
 .registration-layout { grid-template-columns: 280px minmax(0, 1fr); gap: 16px; margin-top: 16px; align-items: start; }
 .workspace-sidebar { padding: 20px; border-radius: 10px; }
@@ -3346,6 +3357,14 @@ button.command-metric:focus-visible {
 
 #people-list.list-shell { display: grid; grid-template-columns: 1fr; gap: 0; border: 1px solid var(--color-neutral-200); border-radius: 10px; overflow: hidden; }
 #workspace-people .split-layout { grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.28fr); }
+
+/* Keep the two data-entry workspaces horizontal on desktop: the form gets the
+   full content width, while its existing field grids retain their 2–4 columns. */
+#workspace-people .split-layout,
+#workspace-entries .entries-layout { grid-template-columns: minmax(0, 1fr); }
+#workspace-people .sticky-panel,
+#workspace-entries .sticky-panel { position: static; }
+
 :root { --people-row-columns: minmax(180px, 1.4fr) 96px 96px minmax(180px, 1fr) 102px; }
 .person-card.person-row { display: grid; grid-template-columns: var(--people-row-columns); align-items: center; gap: 8px; min-height: 64px; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--color-neutral-200); background: #fff; }
 .person-row-head { display: grid; grid-template-columns: var(--people-row-columns); gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--color-neutral-200); background: var(--color-neutral-50); color: var(--color-neutral-600); font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
@@ -3361,7 +3380,17 @@ button.command-metric:focus-visible {
 .person-row-actions .mini-action { margin: 0; min-height: 32px; padding: 0 10px; }
 .person-row-actions .person-row-icon-action { width: 30px; min-width: 30px; min-height: 30px; padding: 0; display: inline-grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: var(--color-neutral-600); }
 .person-row-icon-action svg { width: 16px; height: 16px; }
-.person-row-icon-action:hover, .person-row-icon-action:focus-visible { color: var(--color-primary-700); background: var(--color-primary-50); box-shadow: none; }
+.person-row-icon-action:hover, .person-row-icon-action:focus-visible, .person-row-icon-action.is-active { color: var(--color-primary-700); background: var(--color-primary-50); box-shadow: none; }
+.person-basic-details { grid-column: 1 / -1; display: grid; gap: 14px; margin: 4px 0 2px; padding: 16px; border: 1px solid var(--color-primary-100); border-radius: 9px; background: var(--color-primary-50); }
+.person-basic-details-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.person-basic-details-head > div { display: grid; gap: 3px; }
+.person-basic-details-head strong { color: var(--color-neutral-950); font-size: 14px; }
+.person-basic-details-head span { color: var(--color-neutral-600); font-size: 12px; }
+.person-basic-copy { flex: 0 0 auto; min-height: 34px; padding: 0 12px; }
+.person-basic-details-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; margin: 0; }
+.person-basic-detail-item { min-width: 0; }
+.person-basic-detail-item dt { margin: 0 0 3px; color: var(--color-neutral-600); font-size: 11px; font-weight: 700; }
+.person-basic-detail-item dd { margin: 0; color: var(--color-neutral-950); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
 .person-more-actions { position: relative; }
 .person-more-actions summary { list-style: none; width: 30px; min-height: 30px; display: inline-grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: var(--color-neutral-600); font-size: 13px; font-weight: 800; cursor: pointer; }
 .person-more-actions summary::-webkit-details-marker { display: none; }
@@ -3407,10 +3436,15 @@ button.command-metric:focus-visible {
 
 @media (max-width: 760px) {
   .registration-hero-actions { width: 100%; justify-self: stretch; }
+  .batch-import-actions .primary-action, .batch-import-actions .ghost-action { flex: 1 1 auto; }
   .person-card.person-row { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
   .person-row-head { display: none; }
   .person-row-stat, .person-row-contact { display: none; }
   .person-row-actions { grid-column: 1 / -1; }
+  .person-basic-details { padding: 14px; }
+  .person-basic-details-head { align-items: stretch; flex-direction: column; }
+  .person-basic-copy { width: 100%; }
+  .person-basic-details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .people-list-heading, .people-list-controls { align-items: stretch; }
   .people-list-controls { width: 100%; flex-direction: column; }
   .people-list-controls select, .people-list-heading input[type="search"] { width: 100%; }

@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import ExcelJS from "exceljs";
 import { entryDuplicateKey, findDuplicateEntry, paymentAmountPresentation } from "../local/registration/registration-core.js";
+import { createRegistrationBatchWorkbook, prepareRegistrationBatchImport } from "../local/registration/registration-batch-xlsx.js";
 
 const root = resolve(import.meta.dirname, "..");
 const checks = [];
@@ -31,6 +33,30 @@ const differentDistance = {
 const sameIdEdit = {
   ...sameEntryDifferentSpacing,
   id: "entry_1",
+};
+const registrationBatchFixture = {
+  people: [{
+    id: "person_batch_fixture",
+    name: "批次測試人員",
+    gender: "女",
+    defaultShirtSize: "M",
+    phone: "0912345678",
+    nationalId: "A123456789",
+    birthday: "1990-01-02",
+    emergencyName: "測試聯絡人",
+    emergencyRelationship: "家人",
+    emergencyPhone: "0987654321",
+  }],
+  entries: [{
+    id: "entry_batch_fixture",
+    personId: "person_batch_fixture",
+    raceName: "批次測試路跑",
+    raceDate: "2026-10-10",
+    distance: "10K",
+    status: "待報名",
+    isRegistered: false,
+    isPaid: false,
+  }],
 };
 
 const server = await readFile(resolve(root, "site/server.mjs"), "utf8");
@@ -64,6 +90,23 @@ assertCheck(
     paymentAmountPresentation(120000).label === "NT$ 120,000",
   "payment preview distinguishes missing, zero, and large amounts"
 );
+const registrationBatchDistanceOptions = ["3km", "5km", "10km", "21km"];
+const registrationBatchWorkbook = await createRegistrationBatchWorkbook(registrationBatchFixture, { distanceOptions: registrationBatchDistanceOptions });
+const registrationBatchPreview = await prepareRegistrationBatchImport(Buffer.from(registrationBatchWorkbook), registrationBatchFixture, { distanceOptions: registrationBatchDistanceOptions });
+assertCheck(
+  registrationBatchPreview.errors.length === 0 &&
+    registrationBatchPreview.summary.people.update === 1 &&
+    registrationBatchPreview.summary.entries.update === 1,
+  "registration batch Excel round-trips existing people and entries through preview validation"
+);
+const registrationBatchWorkbookModel = new ExcelJS.Workbook();
+await registrationBatchWorkbookModel.xlsx.load(Buffer.from(registrationBatchWorkbook));
+const registrationBatchEntriesSheet = registrationBatchWorkbookModel.getWorksheet("報名紀錄");
+assertCheck(
+  ["F5", "L5", "M5", "N5", "O5", "S5"].every((address) => registrationBatchEntriesSheet.getCell(address).dataValidation?.formulae?.length) &&
+    registrationBatchEntriesSheet.getCell("F5").dataValidation.formulae[0].includes("下拉選單"),
+  "registration batch Excel provides dropdowns for distance, shirt size, status, registration, payment, and payment method"
+);
 assertCheck(
   /allowedLocalHosts/.test(server) && /Registration data is only available/.test(server),
   "registration API is restricted to local host requests"
@@ -95,6 +138,18 @@ assertCheck(
     registrationJs.includes("/site/data/races.json") &&
     registrationJs.includes("/api/registration-data"),
   "local registration manager stays outside the public site path while using local server data"
+);
+assertCheck(
+  registrationHtml.includes('id="export-batch-data"') &&
+    registrationHtml.includes('id="import-batch-data"') &&
+    registrationHtml.includes('id="batch-import-preview"') &&
+    registrationJs.includes("downloadBatchWorkbook") &&
+    registrationJs.includes("previewBatchImport") &&
+    registrationJs.includes("applyBatchImport") &&
+    server.includes("/api/registration-batch.xlsx") &&
+    server.includes("/api/registration-batch/preview") &&
+    server.includes("registrationBatchPreviews"),
+  "registration manager exports editable Excel and requires a validated preview before batch apply"
 );
 assertCheck(
   registrationHtml.includes('id="race-select"') &&
@@ -163,9 +218,12 @@ assertCheck(
   registrationJs.includes("maskedPhone") &&
     registrationJs.includes("person-row") &&
     registrationJs.includes("目前賽事") &&
+    registrationJs.includes("personBasicDataText") &&
+    registrationJs.includes("data-copy-person-details") &&
+    registrationJs.includes("data-show-person-details") &&
     registrationJs.includes("data-view-scope=\"history\"") &&
     registrationJs.includes("focusRenderedCard"),
-  "registration manager masks phones, presents people in compact rows, keeps history shortcuts, and returns focus after save"
+  "registration manager masks list contacts, shows and copies full local basic details on demand, keeps history shortcuts, and returns focus after save"
 );
 assertCheck(
     registrationHtml.includes('id="export-selected-race-payments"') &&

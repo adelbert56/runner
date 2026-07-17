@@ -26,6 +26,7 @@ const state = {
   entryFilterProgress: "all",
   entryFilterStatus: "",
   focusPersonId: "",
+  personDetailsId: "",
   focusEntryId: "",
   workspaceView: "overview",
   sidebarCollapsed: false,
@@ -39,6 +40,7 @@ const state = {
   notifyDensity: "compact",
   notifyCollapsedGroups: new Set(),
   notifyWorkspacePrimed: false,
+  batchImport: null,
   loadState: "idle",
   loadError: "",
 };
@@ -94,6 +96,9 @@ const els = {
   overviewActiveGroups: document.querySelector("#overview-active-groups"),
   exportData: document.querySelector("#export-data"),
   importData: document.querySelector("#import-data"),
+  exportBatchData: document.querySelector("#export-batch-data"),
+  importBatchData: document.querySelector("#import-batch-data"),
+  batchImportPreview: document.querySelector("#batch-import-preview"),
   entryStatusMessage: document.querySelector("#entry-status-message"),
   summaryRaces: document.querySelector("#summary-races"),
   summaryPeople: document.querySelector("#summary-people"),
@@ -1177,6 +1182,47 @@ function renderSelectedRaceSummary(race) {
   `;
 }
 
+function personBasicDataRows(person) {
+  return [
+    ["姓名", person.name],
+    ["性別", person.gender],
+    ["衣服尺寸", person.defaultShirtSize],
+    ["手機", person.phone],
+    ["身分證號碼", person.nationalId],
+    ["出生年月日", person.birthday],
+    ["緊急聯絡人", person.emergencyName],
+    ["關係", person.emergencyRelationship],
+    ["緊急聯絡人手機", person.emergencyPhone],
+  ];
+}
+
+function personBasicDataText(person) {
+  return personBasicDataRows(person)
+    .map(([label, value]) => `${label}：${String(value || "").trim() || "未填"}`)
+    .join("\n");
+}
+
+function renderPersonBasicDetails(person) {
+  const details = personBasicDataRows(person).map(([label, value]) => `
+    <div class="person-basic-detail-item">
+      <dt>${escapeHtml(label)}</dt>
+      <dd>${escapeHtml(String(value || "").trim() || "未填")}</dd>
+    </div>
+  `).join("");
+  return `
+    <section class="person-basic-details" aria-label="${escapeHtml(person.name)} 的基本資料">
+      <div class="person-basic-details-head">
+        <div>
+          <strong>基本資料</strong>
+          <span>完整資料僅在本機報名管理中顯示</span>
+        </div>
+        <button class="secondary-action person-basic-copy" type="button" data-copy-person-details="${escapeHtml(person.id)}">複製基本資料</button>
+      </div>
+      <dl class="person-basic-details-grid">${details}</dl>
+    </section>
+  `;
+}
+
 function renderPeopleList() {
   const filteredPeople = state.people.filter((person) => (
     !state.peopleQuery || personSearchText(person).includes(state.peopleQuery)
@@ -1205,6 +1251,7 @@ function renderPeopleList() {
 
   els.peopleList.innerHTML = `<div class="person-row person-row-head" aria-hidden="true"><span>人員</span><span>目前賽事</span><span>未完成</span><span>聯絡資訊</span><span>操作</span></div>${pagination.items.map((person) => {
     const stats = personStats(person.id);
+    const isShowingDetails = state.personDetailsId === person.id;
     return `
     <article class="person-card person-row${state.focusPersonId === person.id ? " is-focused" : ""}" id="person-card-${escapeHtml(person.id)}">
       <div class="person-row-identity">
@@ -1218,10 +1265,11 @@ function renderPeopleList() {
         <span>${escapeHtml(person.nationalId ? `身分證 ${String(person.nationalId).slice(-4).padStart(String(person.nationalId).length, "*")}` : "身分證未填")}</span>
       </div>
       <div class="card-actions person-row-actions">
-        <button class="mini-action person-row-icon-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="active" aria-label="查看 ${escapeHtml(person.name)}" title="查看"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="M2.5 10s2.7-4.5 7.5-4.5S17.5 10 17.5 10s-2.7 4.5-7.5 4.5S2.5 10 2.5 10Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="10" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <button class="mini-action person-row-icon-action${isShowingDetails ? " is-active" : ""}" type="button" data-show-person-details="${escapeHtml(person.id)}" aria-label="${isShowingDetails ? "收合" : "查看"} ${escapeHtml(person.name)} 的基本資料" title="${isShowingDetails ? "收合基本資料" : "查看基本資料"}"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="M2.5 10s2.7-4.5 7.5-4.5S17.5 10 17.5 10s-2.7 4.5-7.5 4.5S2.5 10 2.5 10Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="10" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
         <button class="mini-action person-row-icon-action" type="button" data-edit-person="${escapeHtml(person.id)}" aria-label="編輯 ${escapeHtml(person.name)}" title="編輯"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="m4 14.8.8-3.3L12.7 3.6a1.7 1.7 0 0 1 2.4 2.4l-7.9 7.9-3.2.9Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/><path d="m11.5 4.8 3.7 3.7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
         <details class="person-more-actions"><summary aria-label="更多操作" title="更多操作"><span aria-hidden="true">•••</span></summary><div class="person-more-menu"><button class="mini-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="history">歷史紀錄</button><button class="mini-action danger-action" type="button" data-delete-person="${escapeHtml(person.id)}">刪除人員</button></div></details>
       </div>
+      ${isShowingDetails ? renderPersonBasicDetails(person) : ""}
     </article>
   `;
   }).join("")}`;
@@ -1232,7 +1280,26 @@ function renderPeopleList() {
   els.peopleList.querySelectorAll("[data-delete-person]").forEach((button) => {
     button.addEventListener("click", () => deletePerson(button.dataset.deletePerson).catch((error) => showStatus(error.message || "刪除失敗", "error")));
   });
-    els.peopleList.querySelectorAll("[data-view-person]").forEach((button) => {
+  els.peopleList.querySelectorAll("[data-show-person-details]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const personId = button.dataset.showPersonDetails || "";
+      state.personDetailsId = state.personDetailsId === personId ? "" : personId;
+      renderPeopleList();
+    });
+  });
+  els.peopleList.querySelectorAll("[data-copy-person-details]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const person = state.people.find((item) => item.id === button.dataset.copyPersonDetails);
+      if (!person) {
+        showStatus("找不到這位人員的基本資料。", "error");
+        return;
+      }
+      navigator.clipboard.writeText(personBasicDataText(person))
+        .then(() => showStatus(`已複製 ${person.name} 的基本資料`, "success"))
+        .catch((error) => showStatus(error.message || "複製基本資料失敗", "error"));
+    });
+  });
+  els.peopleList.querySelectorAll("[data-view-person]").forEach((button) => {
     button.addEventListener("click", () => {
       state.entryFilterPersonId = button.dataset.viewPerson || "";
       state.entryScope = button.dataset.viewScope || "active";
@@ -1784,6 +1851,100 @@ function downloadBackup() {
   link.download = `報名管理備份-${todayString()}.json`;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function responseMessage(response, fallback) {
+  const body = await response.json().catch(() => null);
+  if (body?.message) return body.message;
+  const text = await response.text().catch(() => "");
+  return text || fallback;
+}
+
+function renderBatchImportPreview() {
+  if (!els.batchImportPreview) return;
+  const batchImport = state.batchImport;
+  if (!batchImport) {
+    els.batchImportPreview.hidden = true;
+    els.batchImportPreview.innerHTML = "";
+    return;
+  }
+  if (batchImport.errors?.length) {
+    els.batchImportPreview.hidden = false;
+    els.batchImportPreview.className = "batch-import-preview is-error";
+    els.batchImportPreview.innerHTML = `
+      <strong>Excel 尚未匯入：請先修正 ${escapeHtml(batchImport.errors.length)} 個問題</strong>
+      <ul>${batchImport.errors.map((error) => `<li>${escapeHtml(error)}</li>`).join("")}</ul>
+      <button type="button" class="ghost-action" data-dismiss-batch-preview>關閉</button>
+    `;
+    return;
+  }
+  const { people, entries } = batchImport.summary;
+  els.batchImportPreview.hidden = false;
+  els.batchImportPreview.className = "batch-import-preview";
+  els.batchImportPreview.innerHTML = `
+    <div class="batch-import-preview-copy">
+      <strong>Excel 已完成預檢，尚未寫入資料</strong>
+      <span>確認後會一次套用，並自動備份目前資料。</span>
+    </div>
+    <div class="batch-import-summary">
+      <span>團員：新增 ${escapeHtml(people.create)}／更新 ${escapeHtml(people.update)}／刪除 ${escapeHtml(people.delete)}</span>
+      <span>報名：新增 ${escapeHtml(entries.create)}／更新 ${escapeHtml(entries.update)}／刪除 ${escapeHtml(entries.delete)}</span>
+    </div>
+    <div class="batch-import-actions">
+      <button type="button" class="primary-action" data-apply-batch-import>確認套用 Excel</button>
+      <button type="button" class="ghost-action" data-dismiss-batch-preview>取消</button>
+    </div>
+  `;
+}
+
+async function downloadBatchWorkbook() {
+  const response = await fetch("/api/registration-batch.xlsx", { cache: "no-cache" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Excel 匯出失敗"));
+  downloadBlob(await response.blob(), `報名管理批次編輯-${todayString()}.xlsx`);
+}
+
+async function previewBatchImport(file) {
+  if (!file) return;
+  const response = await fetch("/api/registration-batch/preview", {
+    method: "POST",
+    headers: { "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+    body: file,
+  });
+  const body = await response.json().catch(() => null);
+  if (response.status === 422) {
+    state.batchImport = { errors: body?.errors || [body?.message || "Excel 格式需要修正。"] };
+    renderBatchImportPreview();
+    return;
+  }
+  if (!response.ok) throw new Error(body?.message || "Excel 預檢失敗");
+  state.batchImport = { previewToken: body.previewToken, summary: body.summary };
+  renderBatchImportPreview();
+}
+
+async function applyBatchImport() {
+  if (!state.batchImport?.previewToken) return;
+  const response = await fetch("/api/registration-batch/apply", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ previewToken: state.batchImport.previewToken }),
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Excel 匯入失敗"));
+  await loadPrivateData();
+  state.batchImport = null;
+  renderAll();
+  renderBatchImportPreview();
+  resetPersonForm();
+  resetEntryForm();
+  showStatus("已完成 Excel 批次匯入，原資料已自動備份", "success");
 }
 
 function csvCell(value) {
@@ -2917,6 +3078,30 @@ function wireEvents() {
     state.notifyCollapsedGroups = new Set(groups.map((group) => group.key));
     renderNotifyWorkspace();
     showNotifyStatus("已收合全部人員卡", "success");
+  });
+  els.exportBatchData?.addEventListener("click", () => {
+    downloadBatchWorkbook().then(() => showStatus("已匯出可批次編輯的 Excel", "success")).catch((error) => showStatus(error.message || "Excel 匯出失敗", "error"));
+  });
+  els.importBatchData?.addEventListener("change", async (event) => {
+    try {
+      await previewBatchImport(event.target.files?.[0]);
+    } catch (error) {
+      state.batchImport = null;
+      renderBatchImportPreview();
+      showStatus(error.message || "Excel 預檢失敗", "error");
+    } finally {
+      event.target.value = "";
+    }
+  });
+  els.batchImportPreview?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-dismiss-batch-preview]")) {
+      state.batchImport = null;
+      renderBatchImportPreview();
+      return;
+    }
+    if (event.target.closest("[data-apply-batch-import]")) {
+      applyBatchImport().catch((error) => showStatus(error.message || "Excel 匯入失敗", "error"));
+    }
   });
   els.exportData.addEventListener("click", downloadBackup);
   els.importData.addEventListener("change", async (event) => {
