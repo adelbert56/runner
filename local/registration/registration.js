@@ -5,6 +5,7 @@ const SELECTED_RACE_STORAGE_KEY = "runner.registration.selectedRaceId";
 const WORKSPACE_VIEW_STORAGE_KEY = "runner.registration.workspaceView";
 const NOTIFY_PREFS_STORAGE_KEY = "runner.registration.notifyPrefs";
 const SIDEBAR_COLLAPSED_STORAGE_KEY = "runner.registration.sidebarCollapsed";
+let notifyStatusClearTimer = null;
 const PEOPLE_PAGE_SIZE = 6;
 const ENTRY_GROUP_PAGE_SIZE = 4;
 
@@ -18,6 +19,8 @@ const state = {
   peopleQuery: "",
   peopleSort: "name",
   peoplePage: 1,
+  selectedPersonIds: new Set(),
+  selectedEntryIds: new Set(),
   entryQuery: "",
   entryScope: "active",
   entryHistoryYear: "all",
@@ -27,6 +30,7 @@ const state = {
   entryFilterStatus: "",
   focusPersonId: "",
   personDetailsId: "",
+  entryPersonDetailsEntryId: "",
   focusEntryId: "",
   workspaceView: "overview",
   sidebarCollapsed: false,
@@ -48,6 +52,7 @@ const state = {
 const els = {
   raceSearch: document.querySelector("#race-search"),
   raceSelect: document.querySelector("#race-select"),
+  raceSelectHints: document.querySelector("#race-select-hints"),
   useSelectedRace: document.querySelector("#use-selected-race"),
   exportSelectedRacePayments: document.querySelector("#export-selected-race-payments"),
   exportSelectedRacePaymentHtml: document.querySelector("#export-selected-race-payment-html"),
@@ -55,8 +60,15 @@ const els = {
   sidebarCollapseToggle: document.querySelector("#sidebar-collapse-toggle"),
   peopleList: document.querySelector("#people-list"),
   peoplePagination: document.querySelector("#people-pagination"),
+  peopleBulkToolbar: document.querySelector("#people-bulk-toolbar"),
+  peopleBulkCopy: document.querySelector("#people-bulk-copy"),
+  peopleBulkDelete: document.querySelector("#people-bulk-delete"),
+  peopleBulkClear: document.querySelector("#people-bulk-clear"),
   entriesList: document.querySelector("#entries-list"),
   entriesPagination: document.querySelector("#entries-pagination"),
+  entriesBulkToolbar: document.querySelector("#entries-bulk-toolbar"),
+  entriesBulkDelete: document.querySelector("#entries-bulk-delete"),
+  entriesBulkClear: document.querySelector("#entries-bulk-clear"),
   peopleSearch: document.querySelector("#people-search"),
   peopleSort: document.querySelector("#people-sort"),
   entriesScopeTabs: document.querySelector("#entries-scope-tabs"),
@@ -94,6 +106,7 @@ const els = {
   overviewWorkQueue: document.querySelector("#overview-work-queue"),
   overviewSelectedRace: document.querySelector("#overview-selected-race"),
   overviewActiveGroups: document.querySelector("#overview-active-groups"),
+  overviewToggleActiveGroups: document.querySelector("#overview-toggle-active-groups"),
   exportData: document.querySelector("#export-data"),
   importData: document.querySelector("#import-data"),
   exportBatchData: document.querySelector("#export-batch-data"),
@@ -109,8 +122,11 @@ const els = {
   personName: document.querySelector("#person-name"),
   personGender: document.querySelector("#person-gender"),
   personPhone: document.querySelector("#person-phone"),
+  personPhoneError: document.querySelector("#person-phone-error"),
   personBirthday: document.querySelector("#person-birthday"),
   personNationalId: document.querySelector("#person-national-id"),
+  personNationalIdError: document.querySelector("#person-national-id-error"),
+  lastSavedIndicator: document.querySelector("#last-saved-indicator"),
   personShirtSize: document.querySelector("#person-shirt-size"),
   personEmergencyName: document.querySelector("#person-emergency-name"),
   personEmergencyRelationship: document.querySelector("#person-emergency-relationship"),
@@ -141,6 +157,72 @@ const els = {
   entryNotes: document.querySelector("#entry-notes"),
   entryReset: document.querySelector("#entry-reset"),
 };
+
+function debounce(fn, wait = 200) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
+  };
+}
+
+function showToast(message, kind = "success") {
+  if (!message) {
+    return;
+  }
+  let host = document.querySelector("#toast-host");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "toast-host";
+    document.body.appendChild(host);
+  }
+  const toast = document.createElement("div");
+  toast.className = `toast-item ${kind}`;
+  toast.textContent = message;
+  host.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 200);
+  }, 2500);
+}
+
+const PHONE_PATTERN = /^09\d{8}$/;
+const NATIONAL_ID_PATTERN = /^[A-Za-z][12]\d{8}$/;
+
+function validatePhoneField() {
+  const value = els.personPhone.value.trim();
+  const ok = !value || PHONE_PATTERN.test(value);
+  if (els.personPhoneError) {
+    els.personPhoneError.textContent = ok ? "" : "格式須為 09 開頭共 10 碼數字";
+  }
+  return ok;
+}
+
+function validateNationalIdField() {
+  const value = els.personNationalId.value.trim();
+  const ok = !value || NATIONAL_ID_PATTERN.test(value);
+  if (els.personNationalIdError) {
+    els.personNationalIdError.textContent = ok ? "" : "格式須為 1 位英文字母加 9 碼數字";
+  }
+  return ok;
+}
+
+function formatSavedTime(iso) {
+  const date = iso ? new Date(iso) : new Date();
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function updateLastSavedIndicator() {
+  if (!els.lastSavedIndicator) {
+    return;
+  }
+  const time = formatSavedTime(state.lastKnownUpdatedAt);
+  els.lastSavedIndicator.textContent = time ? `已同步・${time}` : "";
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -321,6 +403,29 @@ function raceName(race) {
   return race.race_name || race.name || "未命名賽事";
 }
 
+function compactRaceName(race) {
+  return raceName(race)
+    .replace(/20\d{2}\s*(?:年)?/g, "")
+    .replace(/第[一二三四五六七八九十\d]+屆/g, "")
+    .replace(/[〈〉《》「」]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 14) || "未命名賽事";
+}
+
+function raceDateTag(race) {
+  const date = String(race.race_date || "").slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date.slice(5).replace("-", "/") : "日期待補";
+}
+
+function compactRaceOptionLabel(race) {
+  return [
+    raceDateTag(race),
+    compactRaceName(race),
+    dedupeRaceDistances(race) || "距離待補",
+  ].join("｜");
+}
+
 function raceCounty(race) {
   return race.race_county || race.county || "";
 }
@@ -405,6 +510,13 @@ function isCompactViewport() {
 
 function overviewStatusTag(label, tone = "neutral") {
   return `<span class="status-tag status-tag-${escapeHtml(tone)}">${escapeHtml(label)}</span>`;
+}
+
+function pendingTone(count) {
+  if (count >= 2) {
+    return "danger";
+  }
+  return count ? "pending" : "complete";
 }
 
 function entryTimeBucket(entry) {
@@ -871,7 +983,7 @@ function renderNotifyWorkspace() {
         <div class="notify-card-main">
           <div class="notify-card-title-row">
             <h3>${escapeHtml(group.name)}</h3>
-            ${overviewStatusTag(group.pendingCount ? `待處理 ${group.pendingCount}` : "目前完成", group.pendingCount ? "pending" : "complete")}
+            ${overviewStatusTag(group.pendingCount ? `待處理 ${group.pendingCount}` : "目前完成", pendingTone(group.pendingCount))}
           </div>
           <div class="notify-card-meta">
             ${group.defaultShirtSize ? notifyMetaItem("shirt", "衣服", group.defaultShirtSize) : ""}
@@ -997,12 +1109,27 @@ async function savePrivateData() {
 }
 
 function renderSummary() {
-  const pendingCount = state.entries.filter((entry) => !entry.isRegistered || (entry.isRegistered && !entry.isPaid)).length;
-  const unpaidCount = state.entries.filter((entry) => entry.isRegistered && !entry.isPaid).length;
+  const missingSignupCount = state.entries.filter((entry) => !entry.isRegistered).length;
+  const awaitingPaymentCount = state.entries.filter((entry) => entry.isRegistered && !entry.isPaid).length;
+  const pendingCount = missingSignupCount + awaitingPaymentCount;
+  const unpaidCount = awaitingPaymentCount;
+  const unpaidTotal = state.entries
+    .filter((entry) => entry.isRegistered && !entry.isPaid)
+    .reduce((sum, entry) => sum + Number(entry.paidAmount || 0), 0);
   els.summaryRaces.textContent = String(state.races.filter(isSelectableRace).length);
   els.summaryPeople.textContent = String(state.people.length);
   els.summaryPending.textContent = String(pendingCount);
   els.summaryUnpaid.textContent = String(unpaidCount);
+  const pendingCaption = document.querySelector("#summary-pending-caption");
+  if (pendingCaption) {
+    pendingCaption.textContent = pendingCount
+      ? `${awaitingPaymentCount}筆繳費確認・${missingSignupCount}筆表單缺漏`
+      : "";
+  }
+  const unpaidCaption = document.querySelector("#summary-unpaid-caption");
+  if (unpaidCaption) {
+    unpaidCaption.textContent = unpaidCount ? `合計 ${formatMoney(unpaidTotal)}` : "";
+  }
 }
 
 function renderPeopleOptions() {
@@ -1057,6 +1184,7 @@ function renderEntryPersonBatch() {
 function renderRacePicker() {
   if (!state.filteredRaces.length) {
     els.raceSelect.innerHTML = '<option value="">目前沒有可處理的未開賽賽事</option>';
+    if (els.raceSelectHints) els.raceSelectHints.innerHTML = "";
     els.useSelectedRace.disabled = true;
     els.exportSelectedRacePayments.disabled = true;
     els.exportSelectedRacePaymentHtml.disabled = true;
@@ -1066,12 +1194,7 @@ function renderRacePicker() {
 
   const previousValue = els.raceSelect.value || savedSelectedRaceId();
   els.raceSelect.innerHTML = state.filteredRaces.map((race) => {
-    const label = [
-      race.race_date || "日期待補",
-      raceName(race),
-      dedupeRaceDistances(race) || "距離待補",
-    ].join("｜");
-    return `<option value="${escapeHtml(raceId(race))}">${escapeHtml(label)}</option>`;
+    return `<option value="${escapeHtml(raceId(race))}">${escapeHtml(compactRaceOptionLabel(race))}</option>`;
   }).join("");
   const hasPrevious = state.filteredRaces.some((race) => String(raceId(race)) === previousValue);
   els.raceSelect.value = hasPrevious ? previousValue : String(raceId(state.filteredRaces[0]));
@@ -1080,6 +1203,18 @@ function renderRacePicker() {
   els.exportSelectedRacePayments.disabled = false;
   els.exportSelectedRacePaymentHtml.disabled = false;
   renderSelectedRaceSummary(selectedRaceFromDropdown());
+  renderRaceSelectHints(selectedRaceFromDropdown());
+}
+
+function renderRaceSelectHints(race) {
+  if (!els.raceSelectHints) return;
+  if (!race) {
+    els.raceSelectHints.innerHTML = "";
+    return;
+  }
+  const location = raceCounty(race) || formatRaceLocation(race);
+  const hints = [raceDateTag(race), dedupeRaceDistances(race), location].filter(Boolean);
+  els.raceSelectHints.innerHTML = hints.map((hint) => `<span>${escapeHtml(hint)}</span>`).join("");
 }
 
 function selectedRaceFromDropdown() {
@@ -1155,7 +1290,7 @@ function renderSelectedRaceSummary(race) {
           <span class="sidebar-race-label">目前鎖定</span>
           <h3>${escapeHtml(raceName(race))}</h3>
         </div>
-        ${overviewStatusTag(stats.pendingCount ? "待處理" : "已就緒", stats.pendingCount ? "pending" : "complete")}
+        ${overviewStatusTag(stats.pendingCount ? "待處理" : "已就緒", pendingTone(stats.pendingCount))}
       </div>
       <div class="race-picker-meta">
         <span class="meta-pill">${escapeHtml(race.race_date || "日期待補")}</span>
@@ -1223,7 +1358,81 @@ function renderPersonBasicDetails(person) {
   `;
 }
 
+function renderEntryPersonDetails(person) {
+  const details = personBasicDataRows(person).map(([label, value]) => `
+    <div class="entry-person-detail-item">
+      <dt>${escapeHtml(label)}</dt>
+      <dd>${escapeHtml(String(value || "").trim() || "未填")}</dd>
+    </div>
+  `).join("");
+  return `
+    <section class="entry-person-details" aria-label="${escapeHtml(person.name)} 的基本資料">
+      <div class="entry-person-details-head">
+        <div>
+          <strong>${escapeHtml(person.name)} 的基本資料</strong>
+          <span>與人員名單即時連動，完整資料只在本機顯示</span>
+        </div>
+        <button class="secondary-action entry-person-details-copy" type="button" data-copy-person-details="${escapeHtml(person.id)}">複製基本資料</button>
+      </div>
+      <dl class="entry-person-details-grid">${details}</dl>
+    </section>
+  `;
+}
+
+function updatePeopleBulkToolbar() {
+  if (!els.peopleBulkToolbar) {
+    return;
+  }
+  const count = state.selectedPersonIds.size;
+  els.peopleBulkToolbar.hidden = count === 0;
+  const countEl = els.peopleBulkToolbar.querySelector(".bulk-toolbar-count");
+  if (countEl) {
+    countEl.textContent = `已選 ${count} 筆`;
+  }
+}
+
+async function bulkDeleteSelectedPeople() {
+  const ids = [...state.selectedPersonIds];
+  if (!ids.length) {
+    return;
+  }
+  const blocked = ids.filter((id) => state.entries.some((entry) => entry.personId === id));
+  const deletable = ids.filter((id) => !blocked.includes(id));
+  if (!deletable.length) {
+    showStatus("已選人員都還有報名紀錄，請先刪除相關紀錄。", "error");
+    return;
+  }
+  const names = state.people.filter((person) => deletable.includes(person.id)).map((person) => person.name).join("、");
+  if (!window.confirm(`確定刪除 ${deletable.length} 位人員（${names}）？此動作無法復原。`)) {
+    return;
+  }
+  state.people = state.people.filter((person) => !deletable.includes(person.id));
+  state.selectedPersonIds.clear();
+  const message = blocked.length
+    ? `已刪除 ${deletable.length} 位人員，${blocked.length} 位因仍有報名紀錄被略過`
+    : `已刪除 ${deletable.length} 位人員`;
+  await persistAndRender(message);
+}
+
+function bulkCopySelectedPeople() {
+  const ids = [...state.selectedPersonIds];
+  const selected = state.people.filter((person) => ids.includes(person.id));
+  if (!selected.length) {
+    showStatus("尚未選取人員。", "error");
+    return;
+  }
+  const text = selected.map((person) => personBasicDataText(person)).join("\n\n");
+  navigator.clipboard.writeText(text)
+    .then(() => showStatus(`已複製 ${selected.length} 位人員的基本資料`, "success"))
+    .catch((error) => showStatus(error.message || "複製失敗", "error"));
+}
+
 function renderPeopleList() {
+  state.selectedPersonIds.forEach((id) => {
+    if (!state.people.some((person) => person.id === id)) {
+      state.selectedPersonIds.delete(id);
+    }
+  });
   const filteredPeople = state.people.filter((person) => (
     !state.peopleQuery || personSearchText(person).includes(state.peopleQuery)
   ));
@@ -1237,6 +1446,7 @@ function renderPeopleList() {
   if (!sortedPeople.length) {
     els.peopleList.innerHTML = `<div class="empty-state">${state.people.length ? "查無符合的人員" : "尚未建立人員"}</div>`;
     renderPagination(els.peoplePagination, "people", { total: 0 });
+    updatePeopleBulkToolbar();
     return;
   }
 
@@ -1249,17 +1459,21 @@ function renderPeopleList() {
   const pagination = paginateItems(sortedPeople, state.peoplePage, PEOPLE_PAGE_SIZE);
   state.peoplePage = pagination.page;
 
-  els.peopleList.innerHTML = `<div class="person-row person-row-head" aria-hidden="true"><span>人員</span><span>目前賽事</span><span>未完成</span><span>聯絡資訊</span><span>操作</span></div>${pagination.items.map((person) => {
+  els.peopleList.innerHTML = `<div class="person-row person-row-head" aria-hidden="true"><span>人員</span><span>目前賽事</span><span>待處理</span><span>聯絡資訊</span><span>操作</span></div>${pagination.items.map((person) => {
     const stats = personStats(person.id);
     const isShowingDetails = state.personDetailsId === person.id;
     return `
     <article class="person-card person-row${state.focusPersonId === person.id ? " is-focused" : ""}" id="person-card-${escapeHtml(person.id)}">
       <div class="person-row-identity">
-        <strong>${escapeHtml(person.name)}</strong>
+        <label class="row-select-check">
+          <input type="checkbox" class="person-select" value="${escapeHtml(person.id)}" aria-label="選取 ${escapeHtml(person.name)}"${state.selectedPersonIds.has(person.id) ? " checked" : ""}>
+          <span class="person-avatar" aria-hidden="true">${escapeHtml((person.name || "?").trim().slice(0, 1))}</span>
+          <strong>${escapeHtml(person.name)}</strong>
+        </label>
         <span>${escapeHtml([person.gender, person.defaultShirtSize].filter(Boolean).join(" · ") || "資料待補")}</span>
       </div>
       <div class="person-row-stat"><span>目前賽事</span><strong>${escapeHtml(stats.active)}</strong></div>
-      <div class="person-row-stat"><span>未完成</span><strong class="${stats.pending ? "is-warning" : ""}">${escapeHtml(stats.pending)}</strong></div>
+      <div class="person-row-stat person-row-pending${stats.pending ? " has-pending" : " is-clear"}"><span>${stats.pending ? "待處理" : "全部完成"}</span><strong>${escapeHtml(stats.pending)}</strong><small>${stats.pending ? "筆需要處理" : "目前無待辦"}</small></div>
       <div class="person-row-contact">
         <span>${escapeHtml(person.phone ? `手機 ${maskedPhone(person.phone)}` : "手機未填")}</span>
         <span>${escapeHtml(person.nationalId ? `身分證 ${String(person.nationalId).slice(-4).padStart(String(person.nationalId).length, "*")}` : "身分證未填")}</span>
@@ -1274,11 +1488,28 @@ function renderPeopleList() {
   `;
   }).join("")}`;
 
+  els.peopleList.querySelectorAll(".person-select").forEach((checkbox) => {
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        state.selectedPersonIds.add(checkbox.value);
+      } else {
+        state.selectedPersonIds.delete(checkbox.value);
+      }
+      updatePeopleBulkToolbar();
+    });
+  });
   els.peopleList.querySelectorAll("[data-edit-person]").forEach((button) => {
     button.addEventListener("click", () => editPerson(button.dataset.editPerson));
   });
   els.peopleList.querySelectorAll("[data-delete-person]").forEach((button) => {
-    button.addEventListener("click", () => deletePerson(button.dataset.deletePerson).catch((error) => showStatus(error.message || "刪除失敗", "error")));
+    button.addEventListener("click", () => {
+      const personId = button.dataset.deletePerson;
+      const person = state.people.find((item) => item.id === personId);
+      if (!window.confirm(`確定刪除人員「${person?.name || ""}」？此動作無法復原。`)) {
+        return;
+      }
+      deletePerson(personId).catch((error) => showStatus(error.message || "刪除失敗", "error"));
+    });
   });
   els.peopleList.querySelectorAll("[data-show-person-details]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1319,6 +1550,7 @@ function renderPeopleList() {
     });
   });
   renderPagination(els.peoplePagination, "people", pagination);
+  updatePeopleBulkToolbar();
 }
 
 function statusClass(entry) {
@@ -1386,23 +1618,25 @@ function renderOverview() {
         <div class="overview-race-head">
           <div class="overview-race-copy">
             <div class="overview-card-kicker">
-              ${overviewStatusTag(stats.pendingCount ? `待完成 ${stats.pendingCount}` : "目前已就緒", stats.pendingCount ? "pending" : "complete")}
+              ${overviewStatusTag(stats.pendingCount ? `待完成 ${stats.pendingCount}` : "目前已就緒", pendingTone(stats.pendingCount))}
               ${overviewStatusTag(workspaceRaceStatus(selectedRace), "neutral")}
             </div>
             <h3>${escapeHtml(raceName(selectedRace))}</h3>
             <p>${escapeHtml(formatRaceLocation(selectedRace) || "地點待補")}</p>
           </div>
-          ${selectedRace.registration_link ? `<div class="overview-race-actions"><a class="mini-action" href="${escapeHtml(selectedRace.registration_link)}" target="_blank" rel="noreferrer">開啟報名站</a></div>` : ""}
         </div>
         <div class="race-picker-meta">
           <span class="meta-pill">${escapeHtml(selectedRace.race_date || "日期待補")}</span>
           <span class="meta-pill">${escapeHtml(dedupeRaceDistances(selectedRace) || "距離待補")}</span>
           <span class="meta-pill">${escapeHtml(`已建立 ${stats.total} 筆`)}</span>
         </div>
-        <div class="overview-race-facts">
-          <span><b>${escapeHtml(stats.uniquePeople)}</b> 位參加人員</span>
-          <span><b>${escapeHtml(stats.registeredCount)}</b> 筆已報名</span>
-          <span class="${stats.pendingCount ? "is-warning" : ""}"><b>${escapeHtml(stats.pendingCount)}</b> 筆待處理</span>
+        <div class="overview-race-side">
+          <div class="overview-race-facts">
+            <span><b>${escapeHtml(stats.uniquePeople)}</b> 位參加人員</span>
+            <span><b>${escapeHtml(stats.registeredCount)}</b> 筆已報名</span>
+            <span class="${stats.pendingCount ? "is-warning" : ""}"><b>${escapeHtml(stats.pendingCount)}</b> 筆待處理</span>
+          </div>
+          ${selectedRace.registration_link ? `<div class="overview-race-actions"><a class="mini-action" href="${escapeHtml(selectedRace.registration_link)}" target="_blank" rel="noreferrer">開啟報名站</a></div>` : ""}
         </div>
       </article>
     `;
@@ -1422,17 +1656,19 @@ function renderOverview() {
       const taskLabel = needsSignup ? "待完成報名" : "待確認繳費";
       return `
         <article class="overview-queue-item ${needsSignup ? "is-signup" : "is-payment"}">
-          <div class="overview-queue-status">${escapeHtml(taskLabel)}</div>
           <div class="overview-queue-copy">
-            <h3>${escapeHtml(person?.name || "未指派人員")}</h3>
+            <h3>
+              ${escapeHtml(person?.name || "未指派人員")}
+              <span class="overview-queue-status">${escapeHtml(taskLabel)}</span>
+            </h3>
             <p>${escapeHtml(entry.raceName || "未命名賽事")}</p>
             <div class="entry-meta">
               ${entry.raceDate ? `<span class="meta-pill">${escapeHtml(entry.raceDate)}</span>` : ""}
               ${entry.distance ? `<span class="meta-pill">${escapeHtml(entry.distance)}</span>` : ""}
-              ${entry.paidAmount ? `<span class="meta-pill">${escapeHtml(formatMoney(entry.paidAmount))}</span>` : ""}
             </div>
           </div>
           <div class="overview-queue-actions">
+            ${entry.paidAmount ? `<span class="overview-queue-amount">${escapeHtml(formatMoney(entry.paidAmount))}</span>` : ""}
             <button class="mini-action" type="button" data-open-entry="${escapeHtml(entry.id)}">處理</button>
             <button class="mini-action" type="button" data-open-notify-entry="${escapeHtml(entry.id)}">通知</button>
           </div>
@@ -1445,15 +1681,24 @@ function renderOverview() {
 
   const activeGroups = groupEntriesByRace(state.entries.filter((entry) => entryTimeBucket(entry) === "active"))
     .sort((a, b) => String(a.raceDate || "").localeCompare(String(b.raceDate || "")));
+  const hasMoreActiveGroups = activeGroups.length > 6;
+  if (els.overviewToggleActiveGroups) {
+    els.overviewToggleActiveGroups.hidden = !hasMoreActiveGroups;
+    els.overviewToggleActiveGroups.setAttribute("aria-expanded", String(state.overviewShowAllActive));
+    const defaultVisibleCount = Math.min(6, activeGroups.length);
+    els.overviewToggleActiveGroups.textContent = state.overviewShowAllActive
+      ? `收合至 ${defaultVisibleCount} 場・已顯示 ${activeGroups.length}／${activeGroups.length} 場`
+      : `展開其餘 ${activeGroups.length - defaultVisibleCount} 場・目前 ${defaultVisibleCount}／${activeGroups.length} 場`;
+  }
   els.overviewActiveGroups.innerHTML = activeGroups.length
-    ? activeGroups.slice(0, 6).map((group) => {
+    ? (state.overviewShowAllActive ? activeGroups : activeGroups.slice(0, 6)).map((group) => {
       const pendingCount = group.entries.filter((entry) => !entry.isRegistered || !entry.isPaid).length;
       return `
         <article class="overview-item ${pendingCount ? "is-pending" : ""}">
           <div class="overview-item-head">
             <div>
               <div class="overview-card-kicker">
-                ${overviewStatusTag(pendingCount ? `待處理 ${pendingCount}` : "全部完成", pendingCount ? "pending" : "complete")}
+                ${overviewStatusTag(pendingCount ? `待處理 ${pendingCount}` : "全部完成", pendingTone(pendingCount))}
               </div>
               <h3>${escapeHtml(group.raceName)}</h3>
               <p>${escapeHtml([group.county, group.location].filter(Boolean).join(" · ") || "地點未填")}</p>
@@ -1468,13 +1713,41 @@ function renderOverview() {
           </div>
         </article>
       `;
-    }).join("") + (activeGroups.length > 6
-      ? `<button class="ghost-action overview-list-more" type="button" data-open-view="entries">查看其餘 ${escapeHtml(activeGroups.length - 6)} 場</button>`
-      : "")
+    }).join("")
     : '<div class="empty-state">尚未建立目前賽事報名。</div>';
 }
 
+function updateEntriesBulkToolbar() {
+  if (!els.entriesBulkToolbar) {
+    return;
+  }
+  const count = state.selectedEntryIds.size;
+  els.entriesBulkToolbar.hidden = count === 0;
+  const countEl = els.entriesBulkToolbar.querySelector(".bulk-toolbar-count");
+  if (countEl) {
+    countEl.textContent = `已選 ${count} 筆`;
+  }
+}
+
+async function bulkDeleteSelectedEntries() {
+  const ids = [...state.selectedEntryIds];
+  if (!ids.length) {
+    return;
+  }
+  if (!window.confirm(`確定刪除已選的 ${ids.length} 筆報名紀錄？此動作無法復原。`)) {
+    return;
+  }
+  state.entries = state.entries.filter((entry) => !ids.includes(entry.id));
+  state.selectedEntryIds.clear();
+  await persistAndRender(`已刪除 ${ids.length} 筆報名紀錄`);
+}
+
 function renderEntriesList() {
+  state.selectedEntryIds.forEach((id) => {
+    if (!state.entries.some((entry) => entry.id === id)) {
+      state.selectedEntryIds.delete(id);
+    }
+  });
   const summary = historySummary(state.entries);
   els.entriesHistorySummary.hidden = state.entryScope === "active";
   els.entriesHistorySummary.innerHTML = state.entryScope === "active" ? "" : `
@@ -1512,6 +1785,7 @@ function renderEntriesList() {
     [...els.entriesScopeTabs.querySelectorAll("[data-entry-scope]")].forEach((button) => {
       button.classList.toggle("active", button.dataset.entryScope === state.entryScope);
     });
+    updateEntriesBulkToolbar();
     return;
   }
 
@@ -1549,7 +1823,7 @@ function renderEntriesList() {
         <div class="entry-group-header">
           <div>
             <div class="overview-card-kicker">
-              ${overviewStatusTag(pendingCount ? `待處理 ${pendingCount}` : "本組完成", pendingCount ? "pending" : "complete")}
+              ${overviewStatusTag(pendingCount ? `待處理 ${pendingCount}` : "本組完成", pendingTone(pendingCount))}
             </div>
             <h3>${escapeHtml(group.raceName)}</h3>
             <div class="entry-meta">
@@ -1561,30 +1835,35 @@ function renderEntriesList() {
           </div>
         </div>
         <p>${escapeHtml([group.county, group.location].filter(Boolean).join(" · ") || "地點未填")}</p>
-        <div class="entry-group-people">
-          ${group.entries.map((entry) => {
-            const person = peopleById.get(entry.personId);
-            const personName = entry.personName || person?.name || "未指定";
-            return `
-              <section class="entry-person-row ${statusClass(entry)}">
-                <div class="entry-person-main">
-                  <div class="entry-person-head">
-                    <strong>${escapeHtml(personName)}</strong>
-                    <div class="entry-meta">
-                      ${entry.distance ? `<span class="meta-pill">${escapeHtml(entry.distance)}</span>` : ""}
-                      ${entry.shirtSize ? `<span class="meta-pill">衣服 ${escapeHtml(entry.shirtSize)}</span>` : ""}
-                      <span class="meta-pill">${escapeHtml(entry.status || "待報名")}</span>
-                    </div>
-                  </div>
-                  <p>${escapeHtml(`報名: ${entry.isRegistered ? "是" : "否"} / 繳費: ${entry.isPaid ? "是" : "否"}`)}</p>
-                </div>
-                <div class="card-actions">
-                  <button class="mini-action" type="button" data-edit-entry="${escapeHtml(entry.id)}">編輯</button>
-                  <button class="mini-action" type="button" data-delete-entry="${escapeHtml(entry.id)}">刪除</button>
-                </div>
-              </section>
-            `;
-          }).join("")}
+        <div class="entry-table-wrap">
+          <table class="entry-table">
+            <thead>
+              <tr><th class="entry-table-check"></th><th>姓名</th><th>距離</th><th>衣服</th><th>報名</th><th>繳費</th><th class="entry-table-actions"></th></tr>
+            </thead>
+            <tbody>
+              ${group.entries.map((entry) => {
+                const person = peopleById.get(entry.personId);
+                const personName = entry.personName || person?.name || "未指定";
+                const isShowingPersonDetails = person && state.entryPersonDetailsEntryId === entry.id;
+                return `
+                <tr class="${statusClass(entry)}">
+                  <td class="entry-table-check"><input type="checkbox" class="entry-select" value="${escapeHtml(entry.id)}" aria-label="選取 ${escapeHtml(personName)} 的報名紀錄"${state.selectedEntryIds.has(entry.id) ? " checked" : ""}></td>
+                  <td><strong class="avatar-name">${escapeHtml(personName)}</strong></td>
+                  <td>${escapeHtml(entry.distance || "—")}</td>
+                  <td>${escapeHtml(entry.shirtSize || "—")}</td>
+                  <td><span class="status-dot ${entry.isRegistered ? "is-on" : "is-off"}"></span>${entry.isRegistered ? "是" : "否"}</td>
+                  <td><span class="status-dot ${entry.isPaid ? "is-on" : "is-off"}"></span>${entry.isPaid ? "是" : "否"}</td>
+                  <td class="entry-table-actions">
+                    ${person ? `<button class="mini-action${isShowingPersonDetails ? " is-active" : ""}" type="button" data-show-entry-person-details="${escapeHtml(entry.id)}" aria-expanded="${isShowingPersonDetails ? "true" : "false"}">查看</button>` : ""}
+                    <button class="mini-action" type="button" data-edit-entry="${escapeHtml(entry.id)}">編輯</button>
+                    <button class="mini-action" type="button" data-delete-entry="${escapeHtml(entry.id)}">刪除</button>
+                  </td>
+                </tr>
+                ${isShowingPersonDetails ? `<tr class="entry-person-details-row"><td colspan="7">${renderEntryPersonDetails(person)}</td></tr>` : ""}
+              `;
+              }).join("")}
+            </tbody>
+          </table>
         </div>
       </article>
     `;
@@ -1592,13 +1871,51 @@ function renderEntriesList() {
     </section>
   `).join("");
 
+  els.entriesList.querySelectorAll(".entry-select").forEach((checkbox) => {
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        state.selectedEntryIds.add(checkbox.value);
+      } else {
+        state.selectedEntryIds.delete(checkbox.value);
+      }
+      updateEntriesBulkToolbar();
+    });
+  });
   els.entriesList.querySelectorAll("[data-edit-entry]").forEach((button) => {
     button.addEventListener("click", () => editEntry(button.dataset.editEntry));
   });
+  els.entriesList.querySelectorAll("[data-show-entry-person-details]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const entryId = button.dataset.showEntryPersonDetails || "";
+      state.entryPersonDetailsEntryId = state.entryPersonDetailsEntryId === entryId ? "" : entryId;
+      renderEntriesList();
+    });
+  });
+  els.entriesList.querySelectorAll("[data-copy-person-details]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const person = state.people.find((item) => item.id === button.dataset.copyPersonDetails);
+      if (!person) {
+        showStatus("找不到這位人員的基本資料。", "error");
+        return;
+      }
+      navigator.clipboard.writeText(personBasicDataText(person))
+        .then(() => showStatus(`已複製 ${person.name} 的基本資料`, "success"))
+        .catch((error) => showStatus(error.message || "複製基本資料失敗", "error"));
+    });
+  });
   els.entriesList.querySelectorAll("[data-delete-entry]").forEach((button) => {
-    button.addEventListener("click", () => deleteEntry(button.dataset.deleteEntry).catch((error) => showStatus(error.message || "刪除失敗", "error")));
+    button.addEventListener("click", () => {
+      const entryId = button.dataset.deleteEntry;
+      const entry = state.entries.find((item) => item.id === entryId);
+      const label = entry ? `${entry.raceName}（${entry.raceDate || "未定日期"}）` : "這筆報名紀錄";
+      if (!window.confirm(`確定刪除「${label}」的報名紀錄？此動作無法復原。`)) {
+        return;
+      }
+      deleteEntry(entryId).catch((error) => showStatus(error.message || "刪除失敗", "error"));
+    });
   });
   renderPagination(els.entriesPagination, "entries", pagination);
+  updateEntriesBulkToolbar();
 }
 
 function renderAll() {
@@ -1738,14 +2055,20 @@ async function deleteEntry(entryId) {
 function showStatus(message, kind = "success") {
   els.entryStatusMessage.textContent = message;
   els.entryStatusMessage.className = `status-message ${kind}`;
+  showToast(message, kind);
 }
 
 function showNotifyStatus(message, kind = "success") {
-  if (!els.notifyStatusMessage) {
-    return;
+  if (els.notifyStatusMessage) {
+    window.clearTimeout(notifyStatusClearTimer);
+    els.notifyStatusMessage.textContent = message;
+    els.notifyStatusMessage.className = `status-message ${kind}`;
+    notifyStatusClearTimer = window.setTimeout(() => {
+      els.notifyStatusMessage.textContent = "";
+      els.notifyStatusMessage.className = "status-message";
+    }, 3500);
   }
-  els.notifyStatusMessage.textContent = message;
-  els.notifyStatusMessage.className = `status-message ${kind}`;
+  showToast(message, kind);
 }
 
 async function persistAndRender(message) {
@@ -1753,6 +2076,7 @@ async function persistAndRender(message) {
   state.entries.sort((a, b) => String(a.raceDate || "").localeCompare(String(b.raceDate || "")) || String(a.raceName || "").localeCompare(String(b.raceName || "")));
   await savePrivateData();
   renderAll();
+  updateLastSavedIndicator();
   showStatus(message, "success");
 }
 
@@ -1851,6 +2175,7 @@ function downloadBackup() {
   link.download = `報名管理備份-${todayString()}.json`;
   link.click();
   URL.revokeObjectURL(url);
+  showStatus("已下載備份檔", "success");
 }
 
 function downloadBlob(blob, filename) {
@@ -2771,6 +3096,12 @@ async function onPersonSubmit(event) {
     showStatus(`人員主檔缺少必填欄位：${missing.join("、")}`, "error");
     return;
   }
+  const phoneOk = validatePhoneField();
+  const nationalIdOk = validateNationalIdField();
+  if (!phoneOk || !nationalIdOk) {
+    showStatus("請修正手機或身分證號碼格式後再儲存。", "error");
+    return;
+  }
   state.people = state.people.filter((item) => item.id !== person.id).concat(person);
   state.focusPersonId = person.id;
   await persistAndRender(`已儲存 ${person.name}`);
@@ -2812,6 +3143,41 @@ async function onEntrySubmit(event) {
 
 function wireEvents() {
   els.raceSearch.addEventListener("input", applyRaceSearch);
+  els.personPhone.addEventListener("blur", validatePhoneField);
+  els.personNationalId.addEventListener("blur", validateNationalIdField);
+  els.peopleBulkCopy?.addEventListener("click", bulkCopySelectedPeople);
+  els.peopleBulkDelete?.addEventListener("click", () => {
+    bulkDeleteSelectedPeople().catch((error) => showStatus(error.message || "批次刪除失敗", "error"));
+  });
+  els.peopleBulkClear?.addEventListener("click", () => {
+    state.selectedPersonIds.clear();
+    renderPeopleList();
+  });
+  els.entriesBulkDelete?.addEventListener("click", () => {
+    bulkDeleteSelectedEntries().catch((error) => showStatus(error.message || "批次刪除失敗", "error"));
+  });
+  els.entriesBulkClear?.addEventListener("click", () => {
+    state.selectedEntryIds.clear();
+    renderEntriesList();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+    let handled = false;
+    document.querySelectorAll("details[open]").forEach((detail) => {
+      detail.open = false;
+      handled = true;
+    });
+    if (state.personDetailsId) {
+      state.personDetailsId = "";
+      renderPeopleList();
+      handled = true;
+    }
+    if (handled) {
+      event.stopPropagation();
+    }
+  });
   [
     els.notifyRacesAll,
     els.notifyRacesClear,
@@ -2827,11 +3193,11 @@ function wireEvents() {
       setWorkspaceView(button.dataset.workspaceView || "overview", { scroll: true });
     });
   });
-  els.peopleSearch.addEventListener("input", () => {
+  els.peopleSearch.addEventListener("input", debounce(() => {
     state.peopleQuery = els.peopleSearch.value.trim().toLowerCase();
     state.peoplePage = 1;
     renderPeopleList();
-  });
+  }, 200));
   els.peopleSort.addEventListener("change", () => {
     state.peopleSort = els.peopleSort.value;
     state.peoplePage = 1;
@@ -2844,11 +3210,11 @@ function wireEvents() {
       renderEntriesList();
     });
   });
-  els.entriesSearch.addEventListener("input", () => {
+  els.entriesSearch.addEventListener("input", debounce(() => {
     state.entryQuery = els.entriesSearch.value.trim().toLowerCase();
     state.entriesPage = 1;
     renderEntriesList();
-  });
+  }, 200));
   els.entriesFilterYear.addEventListener("change", () => {
     state.entryHistoryYear = els.entriesFilterYear.value;
     state.entriesPage = 1;
@@ -2884,6 +3250,12 @@ function wireEvents() {
     renderEntriesList();
   });
   document.addEventListener("click", (event) => {
+    const toggleOverviewActiveButton = event.target.closest("[data-toggle-overview-active]");
+    if (toggleOverviewActiveButton) {
+      state.overviewShowAllActive = !state.overviewShowAllActive;
+      renderOverview();
+      return;
+    }
     const openPendingButton = event.target.closest("[data-open-pending]");
     if (openPendingButton) {
       openEntriesForWork("", "pending");
@@ -2981,6 +3353,7 @@ function wireEvents() {
   els.raceSelect.addEventListener("change", () => {
     saveSelectedRaceId(els.raceSelect.value);
     renderSelectedRaceSummary(selectedRaceFromDropdown());
+    renderRaceSelectHints(selectedRaceFromDropdown());
     renderOverview();
   });
   els.sidebarCollapseToggle?.addEventListener("click", () => {
@@ -2999,10 +3372,10 @@ function wireEvents() {
     state.notifyScope = els.notifyScope.value;
     renderNotifyWorkspace();
   });
-  els.notifySearch?.addEventListener("input", () => {
+  els.notifySearch?.addEventListener("input", debounce(() => {
     state.notifyQuery = els.notifySearch.value.trim().toLowerCase();
     renderNotifyWorkspace();
-  });
+  }, 200));
   els.notifyProgress?.addEventListener("change", () => {
     state.notifyProgress = els.notifyProgress.value;
     renderNotifyWorkspace();
@@ -3144,6 +3517,7 @@ async function init() {
     els.notifySearch.value = state.notifyQuery;
     els.notifyProgress.value = state.notifyProgress;
     renderAll();
+    updateLastSavedIndicator();
     setSidebarCollapsed(state.sidebarCollapsed);
     wireEvents();
     resetEntryForm();

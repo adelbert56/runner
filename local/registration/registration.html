@@ -48,18 +48,19 @@
             集中管理隊員、報名與繳費；資料只留在這台電腦，不會進到公開站台。
           </p>
           <p class="registration-storage-line"><span>儲存位置</span><code>runner/報名管理/報名管理資料.json</code></p>
+          <p class="last-saved-indicator" id="last-saved-indicator"></p>
         </div>
-        <aside class="registration-hero-actions" aria-label="批次編輯與備份">
+        <aside class="registration-hero-actions" aria-label="資料工具">
           <div class="hero-actions-heading">
             <span class="hero-actions-icon" aria-hidden="true">↺</span>
             <div>
-              <p class="hero-actions-label">批次編輯與備份</p>
+              <p class="hero-actions-label">資料工具</p>
               <p class="hero-actions-note">Excel 可批次修改團員與報名資料；JSON 保留給完整備份與還原。</p>
             </div>
           </div>
-          <button type="button" class="primary-action hero-data-action" id="export-batch-data"><span>批次匯出</span><small>Excel</small></button>
+          <button type="button" class="primary-action hero-data-action" id="export-batch-data"><span>匯出</span><small>Excel</small></button>
           <label class="secondary-action file-action">
-            <span>批次匯入</span><small>選擇 Excel 檔</small>
+            <span>匯入</span><small>選擇 Excel 檔</small>
             <input id="import-batch-data" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx">
           </label>
           <button type="button" class="primary-action hero-data-action" id="export-data"><span>建立備份</span><small>JSON</small></button>
@@ -96,6 +97,7 @@
                   <option value="">賽事整理中...</option>
                 </select>
               </label>
+              <div id="race-select-hints" class="race-select-hints" aria-live="polite"></div>
               <button class="primary-action" type="button" id="use-selected-race">帶入賽事</button>
             </div>
           </section>
@@ -118,20 +120,28 @@
               </div>
               <div class="registration-command-metrics" aria-label="目前工作狀態">
                 <button type="button" class="command-metric is-warning" data-open-pending>
+                  <svg class="command-metric-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
                   <span>待處理</span>
                   <strong id="summary-pending">0</strong>
+                  <small class="command-metric-caption" id="summary-pending-caption"></small>
                 </button>
-                <button type="button" class="command-metric" data-open-unpaid>
+                <button type="button" class="command-metric is-danger" data-open-unpaid>
+                  <svg class="command-metric-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/></svg>
                   <span>待繳費</span>
                   <strong id="summary-unpaid">0</strong>
+                  <small class="command-metric-caption" id="summary-unpaid-caption"></small>
                 </button>
                 <button type="button" class="command-metric" data-open-view="people">
+                  <svg class="command-metric-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 19c0-3 2.5-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>
                   <span>人員名單</span>
                   <strong id="summary-people">0</strong>
+                  <small class="command-metric-caption">活躍隊員</small>
                 </button>
                 <div class="command-metric is-passive">
+                  <svg class="command-metric-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 21V4a1 1 0 011-1h9l6 6v12a1 1 0 01-1 1H5a1 1 0 01-1-1z" stroke="currentColor" stroke-width="1.6"/><path d="M14 3v6h6" stroke="currentColor" stroke-width="1.6"/></svg>
                   <span>可報名賽事</span>
                   <strong id="summary-races">0</strong>
+                  <small class="command-metric-caption">已帶入賽事庫</small>
                 </div>
               </div>
               <div class="workspace-tabs" id="workspace-view-tabs" aria-label="報名工作區">
@@ -177,7 +187,7 @@
                       <p class="eyebrow">進行中</p>
                       <h2>近期賽事</h2>
                     </div>
-                    <button class="ghost-action" type="button" data-open-view="entries">查看全部報名</button>
+                    <button class="ghost-action" type="button" id="overview-toggle-active-groups" data-toggle-overview-active aria-expanded="false">查看全部報名</button>
                   </div>
                   <div id="overview-active-groups" class="overview-list">
                     <div class="empty-state">尚未建立目前賽事報名。</div>
@@ -243,10 +253,12 @@
                           <label>
                             <span>手機 <b aria-hidden="true">*</b></span>
                             <input id="person-phone" required inputmode="tel">
+                            <small class="field-error" id="person-phone-error"></small>
                           </label>
                           <label>
                             <span>身分證號碼 <b aria-hidden="true">*</b></span>
                             <input id="person-national-id" required autocomplete="off">
+                            <small class="field-error" id="person-national-id-error"></small>
                           </label>
                           <label>
                             <span>出生年月日 <b aria-hidden="true">*</b></span>
@@ -291,6 +303,12 @@
                       </select>
                       <input id="people-search" type="search" placeholder="搜尋姓名、手機末三碼、身分證末四碼">
                     </div>
+                  </div>
+                  <div class="bulk-toolbar" id="people-bulk-toolbar" hidden>
+                    <span class="bulk-toolbar-count"></span>
+                    <button type="button" class="secondary-action" id="people-bulk-copy">複製已選基本資料</button>
+                    <button type="button" class="secondary-action danger-action" id="people-bulk-delete">刪除已選</button>
+                    <button type="button" class="ghost-action" id="people-bulk-clear">清除選取</button>
                   </div>
                   <div id="people-list" class="list-shell">
                     <div class="empty-state">尚未建立人員</div>
@@ -482,25 +500,39 @@
                     <select id="entries-filter-person">
                       <option value="">全部人員</option>
                     </select>
-                    <select id="entries-filter-progress">
-                      <option value="all">全部進度</option>
-                      <option value="pending">只看未完成</option>
-                      <option value="complete">只看已完成</option>
-                    </select>
-                    <select id="entries-filter-status">
-                      <option value="">全部狀態</option>
-                      <option value="待報名">待報名</option>
-                      <option value="待確認">待確認</option>
-                      <option value="尚未開報">尚未開報</option>
-                      <option value="可報名">可報名</option>
-                      <option value="已報名未繳費">已報名未繳費</option>
-                      <option value="已完成">已完成</option>
-                      <option value="已截止">已截止</option>
-                      <option value="停辦">停辦</option>
-                      <option value="停賽">停賽</option>
-                      <option value="取消">取消</option>
-                    </select>
+                    <details class="entries-advanced-filters">
+                      <summary>更多篩選</summary>
+                      <div class="entries-advanced-filter-menu">
+                        <label>進度
+                          <select id="entries-filter-progress">
+                            <option value="all">全部進度</option>
+                            <option value="pending">只看未完成</option>
+                            <option value="complete">只看已完成</option>
+                          </select>
+                        </label>
+                        <label>狀態
+                          <select id="entries-filter-status">
+                            <option value="">全部狀態</option>
+                            <option value="待報名">待報名</option>
+                            <option value="待確認">待確認</option>
+                            <option value="尚未開報">尚未開報</option>
+                            <option value="可報名">可報名</option>
+                            <option value="已報名未繳費">已報名未繳費</option>
+                            <option value="已完成">已完成</option>
+                            <option value="已截止">已截止</option>
+                            <option value="停辦">停辦</option>
+                            <option value="停賽">停賽</option>
+                            <option value="取消">取消</option>
+                          </select>
+                        </label>
+                      </div>
+                    </details>
                     <button class="ghost-action" type="button" id="entries-filter-reset">清空篩選</button>
+                  </div>
+                  <div class="bulk-toolbar" id="entries-bulk-toolbar" hidden>
+                    <span class="bulk-toolbar-count"></span>
+                    <button type="button" class="secondary-action danger-action" id="entries-bulk-delete">刪除已選</button>
+                    <button type="button" class="ghost-action" id="entries-bulk-clear">清除選取</button>
                   </div>
                   <div id="entries-list" class="list-shell">
                     <div class="empty-state">尚未建立報名紀錄</div>
@@ -529,11 +561,11 @@
                       <span>符合賽事</span>
                       <strong id="notify-summary-races">0</strong>
                     </article>
-                    <article class="notify-summary-card">
+                    <article class="notify-summary-card is-warning">
                       <span>待通知</span>
                       <strong id="notify-summary-pending">0</strong>
                     </article>
-                    <article class="notify-summary-card">
+                    <article class="notify-summary-card is-danger">
                       <span>待收金額</span>
                       <strong id="notify-summary-unpaid">0</strong>
                     </article>
