@@ -1,0 +1,44 @@
+# Cursor Rules — Common Playbook
+# Full rules in AGENTS.md — read at session start.
+
+## Language
+Reply Traditional Chinese. Code/commits/PRs in English.
+
+## Autonomy
+- Small fixes (< 10 lines, clear bug): do directly, explain after.
+- New features / schema changes / multi-file refactor: give plan first, wait for confirmation.
+- Destructive ops (delete, reset, force push): always confirm.
+
+## Every Non-Trivial Task — Use This Header
+OBJECTIVE: [what must be true when done]
+TRUTH SURFACE: [authoritative file / API to verify against]
+CONSTRAINTS: [hard limits — no commit / read-only / etc.]
+FINISH LINE: [observable evidence of completion]
+
+## Core Rules
+- Fix root cause, not symptom.
+- Read targeted snippets — never full files when symbol lookup suffices.
+- Parallel independent reads; sequential coupled edits.
+- No drip-feeding: sweep adjacent required work in same pass.
+- Verify before claiming done. State what was not verified.
+
+## Sub-Agent Output Contract
+FINDING: [one paragraph]
+CONFIDENCE: high | medium | low
+EVIDENCE: [file:line or quote]
+NEXT_ACTION: [what to do with this output]
+
+## Reflection Before Closing
+1. Root cause fixed (not just symptom)?
+2. Anything changed outside task boundary?
+3. Verification covers user's acceptance criteria?
+4. Adjacent required work included in this pass?
+
+## On Repeated Errors / Loops
+→ Read RUNBOOK_agent_loop.md before next attempt.
+
+## On Context / Token Explosion
+→ Read RUNBOOK_context_explosion.md.
+
+## On Subagent Output Mismatch
+→ Read RUNBOOK_delegation_mismatch.md.
