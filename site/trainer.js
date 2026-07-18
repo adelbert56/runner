@@ -4816,7 +4816,7 @@ function renderRaceCheckpointPanel() {
         ? `已偵測 Garmin 成績 · ${run.km.toFixed(2)} km · ${formatRaceCheckpointResult(run)}${run.hr ? ` · HR ${run.hr}` : ''}`
         : '尚未找到符合距離的 Garmin 跑步';
     const plan = index === 0 ? '看目前速度基準' : index === 1 ? '確認恢復與穩定性' : '依累積成果調整十一月';
-    return `<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--c-border);align-items:center"><div><b>${reviewEscape(entry.date)} · ${reviewEscape(entry.raceName || '10K 賽事')}</b><div style="font-size:13px;color:var(--c-text-muted);margin-top:3px">${entry.distanceKm} km · ${plan}<br>${reviewEscape(status)}${entry.isRegistered ? '' : ' · 報名尚未完成'}</div></div>${run ? `<button class="btn btn-primary" style="white-space:nowrap;font-size:12px;padding:7px 10px" onclick="recordRaceCheckpointResult('${reviewEscape(entry.id)}')">確認成績</button>` : ''}</div>`;
+    return `<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--c-border);align-items:center"><div><b>${reviewEscape(entry.date)} · ${reviewEscape(entry.raceName || '10K 賽事')}</b><div style="font-size:13px;color:var(--c-text-muted);margin-top:3px">${entry.distanceKm} km · ${plan}<br>${reviewEscape(status)}${entry.isRegistered ? '' : ' · 報名尚未完成'}</div></div>${run ? `<button class="btn btn-primary" style="white-space:nowrap;font-size:12px;padding:7px 10px" data-entry-id="${reviewEscape(entry.id)}" onclick="recordRaceCheckpointResult(this.dataset.entryId)">確認成績</button>` : ''}</div>`;
   }).join('');
   return `<div class="card" style="border-left:4px solid var(--c-primary)"><div style="display:flex;justify-content:space-between;gap:12px;align-items:start"><div><div class="card-title">🏁 十月實戰檢查</div><p style="margin:4px 0 10px;color:var(--c-text-muted);line-height:1.65">賽後系統只會先配對 Garmin；按「確認成績」後，才會用結果調整未來課表。三場會一起看，不會只憑單場就大幅改動。</p></div><button class="btn btn-secondary" style="font-size:12px;padding:6px 10px;white-space:nowrap" onclick="appData.profile.registrationPersonId=''; appData.profile.raceCheckpointDates=[]; saveData(appData); refreshCoachReviewPanels()">更換跑者</button></div>${rows}</div>`;
 }
@@ -7798,11 +7798,11 @@ loadRegistrationRaceCheckpoints();
     host.innerHTML = `
       <div class="card" style="margin-top:24px">
         <div class="card-title">🔒 教練建議</div>
-        <p style="margin:4px 0 10px;opacity:0.85">本區塊為加密的個人訓練紀錄。若這是你專用的本機瀏覽器，可記住密語以便下次自動解鎖。<span role="alert" aria-live="assertive">${wrongKey ? '<br><b style="color:#b3402a">密語不正確，請再試一次。</b>' : ''}</span></p>
+        <p style="margin:4px 0 10px;opacity:0.85">本區塊為加密的個人訓練紀錄。密語預設只保留在目前頁面；若這是你專用且受信任的本機瀏覽器，才可選擇記住。<span role="alert" aria-live="assertive">${wrongKey ? '<br><b style="color:#b3402a">密語不正確，請再試一次。</b>' : ''}</span></p>
         <form id="coach-review-form" style="display:flex;gap:8px;flex-wrap:wrap">
           <input type="password" id="coach-review-pass" placeholder="通關密語" autocomplete="current-password" style="flex:1;min-width:180px;padding:8px 10px" />
           <button type="submit" class="btn btn-primary">解鎖</button>
-          <label style="flex-basis:100%;font-size:12px;color:var(--c-text-muted);cursor:pointer"><input type="checkbox" id="coach-review-remember" checked> 在這台裝置記住密語</label>
+          <label style="flex-basis:100%;font-size:12px;color:var(--c-text-muted);cursor:pointer"><input type="checkbox" id="coach-review-remember"> 在這台受信任裝置記住密語</label>
         </form>
       </div>`;
     const passInput = document.getElementById('coach-review-pass');
