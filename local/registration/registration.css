@@ -58,6 +58,13 @@
   text-transform: uppercase;
 }
 
+.panel-subtitle {
+  margin-top: 4px;
+  color: var(--text-muted, #68756f);
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .registration-hero,
 .panel,
 .summary-card {
@@ -192,20 +199,6 @@
 
 .bulk-toolbar .danger-action {
   border-color: rgba(163, 58, 50, 0.3);
-}
-
-.row-select-check {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.row-select-check input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--accent, #1b6a4d);
-  flex: 0 0 auto;
 }
 
 .registration-hero-meta {
@@ -1493,7 +1486,7 @@ button.command-metric:focus-visible {
 }
 
 .people-list-heading {
-  align-items: end;
+  align-items: start;
 }
 
 .people-list-heading input[type="search"] {
@@ -1524,6 +1517,11 @@ button.command-metric:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.list-pagination {
+  align-items: center;
+  justify-content: space-between;
 }
 
 .list-tabs {
@@ -1568,11 +1566,59 @@ button.command-metric:focus-visible {
   cursor: default;
 }
 
-.pagination-note {
+.pagination-status {
   display: inline-flex;
   align-items: center;
   color: #5d705d;
   font-weight: 700;
+  font-size: 13px;
+}
+
+.pagination-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-button-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.page-number {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #44524c;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.page-number:hover {
+  background: var(--accent-soft, #edf3ef);
+}
+
+.page-number.is-current {
+  background: var(--accent, #1b6a4d);
+  color: #fff;
+}
+
+.page-ellipsis {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  color: #8a9690;
 }
 
 .history-summary {
@@ -3576,6 +3622,7 @@ button.command-metric:focus-visible {
 .person-basic-detail-item dd { margin: 0; color: var(--color-neutral-950); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
 .person-more-actions { position: relative; }
 .person-more-actions summary { list-style: none; width: 30px; min-height: 30px; display: inline-grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: var(--color-neutral-600); font-size: 13px; font-weight: 800; cursor: pointer; }
+.person-more-actions summary svg { width: 16px; height: 16px; }
 .person-more-actions summary::-webkit-details-marker { display: none; }
 .person-more-actions summary:hover, .person-more-actions summary:focus-visible, .person-more-actions[open] summary { color: var(--color-primary-700); background: var(--color-primary-50); outline: none; }
 .person-more-actions[open] { z-index: 2; }
@@ -3620,7 +3667,7 @@ button.command-metric:focus-visible {
 @media (max-width: 760px) {
   .registration-hero-actions { width: 100%; justify-self: stretch; }
   .batch-import-actions .primary-action, .batch-import-actions .ghost-action { flex: 1 1 auto; }
-  .person-card.person-row { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+  .person-card.person-row { grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
   .person-row-head { display: none; }
   .person-row-stat, .person-row-contact { display: none; }
   .person-row-actions { grid-column: 1 / -1; }
@@ -3631,6 +3678,9 @@ button.command-metric:focus-visible {
   .people-list-heading, .people-list-controls { align-items: stretch; }
   .people-list-controls { width: 100%; flex-direction: column; }
   .people-list-controls select, .people-list-heading input[type="search"] { width: 100%; }
+  .pagination-status { width: 100%; }
+  .pagination-controls .page-button-icon,
+  .pagination-controls .page-number { flex: 0 0 auto; }
   .notify-filter-panel { grid-template-columns: 1fr; grid-template-areas: "hero" "summary" "filters" "races" "people" "actions" "status"; }
   .notify-filter-stack { grid-template-columns: 1fr; }
   .notify-card-head, .notify-results-shell.is-compact .notify-card-head { grid-template-columns: 36px minmax(0, 1fr); }
@@ -3737,26 +3787,6 @@ button.command-metric:focus-visible {
   color: var(--color-primary-700);
 }
 
-.row-select-check strong {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-strong[data-avatar-initial]::before {
-  content: attr(data-avatar-initial);
-  display: inline-grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--color-primary-50);
-  color: var(--color-primary-700);
-  font-size: 12px;
-  font-weight: 800;
-  margin-right: 8px;
-  vertical-align: middle;
-}
 
 .entry-table-wrap {
   overflow-x: auto;
@@ -4452,7 +4482,7 @@ strong[data-avatar-initial]::before {
 }
 
 :root {
-  --people-row-columns: minmax(250px, 1.65fr) 92px 128px minmax(200px, 1.15fr) 108px;
+  --people-row-columns: 34px minmax(200px, 320px) 92px 128px minmax(200px, 1fr) 108px;
 }
 
 .person-row-head {
@@ -4492,11 +4522,21 @@ strong[data-avatar-initial]::before {
   background: var(--accent-soft, #edf3ef);
 }
 
-.person-row-identity {
-  gap: 5px;
+.person-row-check {
+  display: grid;
+  place-items: center;
 }
 
-.row-select-check {
+.person-row-check input[type="checkbox"],
+.person-row-head .person-row-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent, #1b6a4d);
+}
+
+.person-row-identity {
+  display: flex;
+  align-items: center;
   gap: 10px;
 }
 
@@ -4504,26 +4544,28 @@ strong[data-avatar-initial]::before {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
+  align-self: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(155deg, #1b6a4d, #2f8f68);
+  border-radius: 9px;
   color: #fff;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
   letter-spacing: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18), 0 1px 2px rgba(23, 57, 45, .18);
 }
 
-.row-select-check strong,
-.person-row-identity strong {
+.person-identity-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.person-identity-text strong {
   font-size: 14.5px;
   font-weight: 750;
   letter-spacing: .01em;
   color: var(--text-strong, #17392d);
-}
-
-.person-row-identity > span {
-  padding-left: 42px;
 }
 
 .person-row-stat {
@@ -4533,18 +4575,16 @@ strong[data-avatar-initial]::before {
   text-align: center;
 }
 
-.person-row-stat > span {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .03em;
-  color: #8a9690;
-  text-transform: uppercase;
-}
-
 .person-row-stat > strong {
   font-size: 19px;
   font-weight: 800;
   color: var(--text-strong, #17392d);
+}
+
+.person-row-stat > small {
+  font-size: 10px;
+  color: var(--color-neutral-600);
+  letter-spacing: .02em;
 }
 
 .registration-page .person-row-pending,
@@ -4561,10 +4601,16 @@ strong[data-avatar-initial]::before {
   background: transparent;
 }
 
-.registration-page .person-row-pending span,
-.registration-page .person-row-pending strong,
 .registration-page .person-row-pending small {
   color: var(--color-neutral-600);
+}
+
+.registration-page .person-row-pending.has-pending small {
+  color: var(--workspace-warning);
+}
+
+.registration-page .person-row-pending.is-clear small {
+  color: var(--workspace-success);
 }
 
 .registration-page .person-row-pending strong,
@@ -4666,7 +4712,1228 @@ strong[data-avatar-initial]::before {
     padding: 14px 16px;
   }
 
-  .person-row-identity span {
+  .person-row-identity .person-identity-text span {
     display: block;
+  }
+
+  #workspace-people .person-avatar {
+    display: grid;
+    place-items: center;
+    line-height: 1;
+  }
+}
+
+/* People directory follows the compact table hierarchy: the heading sits on the
+   workspace canvas and only the data grid is elevated as a card. */
+#workspace-people .people-list-panel {
+  order: -1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#workspace-people .people-list-heading {
+  align-items: center;
+  margin: 0 0 16px;
+}
+
+#workspace-people .people-list-heading h2 {
+  font-size: 28px;
+  line-height: 34px;
+}
+
+#workspace-people .people-list-heading .eyebrow {
+  margin-bottom: 3px;
+}
+
+#workspace-people .people-list-heading .panel-subtitle {
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+#workspace-people .people-list-controls {
+  gap: 12px;
+}
+
+#workspace-people .people-add-action {
+  min-height: 40px;
+  padding: 0 15px;
+  white-space: nowrap;
+}
+
+#workspace-people .people-list-controls select {
+  min-width: 150px;
+}
+
+#workspace-people .people-list-heading input[type="search"] {
+  width: 326px;
+}
+
+#workspace-people .person-row-head {
+  min-height: 48px;
+  padding: 0 20px;
+  gap: 12px;
+}
+
+#workspace-people .person-row-head > span:nth-child(2) {
+  justify-self: start;
+  padding-left: 52px;
+  text-align: left;
+}
+
+#workspace-people .person-row-head > span:nth-child(3),
+#workspace-people .person-row-head > span:nth-child(4) {
+  justify-self: center;
+  text-align: center;
+}
+
+#workspace-people .person-row-head > span:nth-child(5) {
+  justify-self: start;
+  text-align: left;
+}
+
+#workspace-people .person-row-head > span:last-child {
+  justify-self: center;
+  text-align: center;
+}
+
+#workspace-people .person-row-contact {
+  justify-items: start;
+  text-align: left;
+}
+
+#workspace-people .person-row-actions {
+  justify-content: center;
+}
+
+/* On a wide workspace, stop stretching the directory across the full canvas:
+   cap and center the whole people workspace so headers, controls, and rows
+   share one bounded reading width instead of leaving dead space in the grid. */
+@media (min-width: 1700px) {
+  #workspace-people .split-layout {
+    max-width: 1400px;
+    margin-inline: auto;
+  }
+
+  #workspace-people #people-list {
+    --people-row-columns: 34px minmax(260px, 400px) 120px 150px minmax(300px, 1fr) 132px;
+  }
+}
+
+#workspace-people .person-card.person-row {
+  min-height: 66px;
+  padding: 8px 20px;
+}
+
+#workspace-people .person-row-identity {
+  align-items: center;
+  gap: 12px;
+}
+
+#workspace-people .person-avatar {
+  align-self: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  text-align: center;
+  text-indent: 0;
+}
+
+#workspace-people .person-identity-text strong {
+  font-size: 16px;
+}
+
+#workspace-people .person-row-pending {
+  justify-self: center;
+  width: 122px;
+  min-height: 44px;
+}
+
+#workspace-people .list-pagination {
+  margin-top: 10px;
+  padding: 0 2px;
+}
+
+#workspace-people .sticky-panel {
+  margin-top: 8px;
+}
+
+.back-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 88px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-primary-600);
+  border-radius: 999px;
+  background: var(--color-primary-700);
+  box-shadow: 0 8px 20px rgba(23, 57, 45, .2);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity .18s ease, transform .18s ease, background .18s ease;
+  visibility: hidden;
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.back-to-top:hover,
+.back-to-top:focus-visible {
+  background: var(--color-primary-800);
+}
+
+.back-to-top svg {
+  width: 16px;
+  height: 16px;
+}
+
+.back-to-top span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  #workspace-people .people-list-panel {
+    padding: 0;
+  }
+
+  #workspace-people .people-list-heading h2 {
+    font-size: 22px;
+    line-height: 29px;
+  }
+
+  #workspace-people .person-card.person-row {
+    min-height: 0;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "check identity pending"
+      "check actions actions";
+    gap: 8px 10px;
+    padding: 12px 16px 10px;
+  }
+
+  #workspace-people .person-row-check {
+    grid-area: check;
+  }
+
+  #workspace-people .person-row-identity {
+    grid-area: identity;
+    gap: 8px;
+  }
+
+  #workspace-people .person-row-pending {
+    grid-area: pending;
+    justify-self: end;
+    width: 84px;
+    min-height: 42px;
+  }
+
+  #workspace-people .person-row-actions {
+    grid-area: actions;
+    min-height: 30px;
+    justify-content: flex-end;
+    padding-top: 2px;
+  }
+
+  #workspace-people .person-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    font-size: 13px;
+  }
+
+  #workspace-people .person-identity-text strong {
+    font-size: 15px;
+  }
+
+  .back-to-top {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+/* Preserve the full-width workspace rhythm while allocating that space by
+   information priority: identity leads, the three operational fields share an
+   even cadence, and the action group sits slightly in from the outer edge. */
+@media (min-width: 1180px) {
+  #workspace-people #people-list {
+    --people-row-columns: 34px minmax(260px, 1.25fr) repeat(3, minmax(150px, 1fr)) 136px;
+  }
+
+  #workspace-people .person-row-head,
+  #workspace-people .person-card.person-row {
+    justify-content: center;
+  }
+
+  #workspace-people .person-row-head > span:nth-child(2),
+  #workspace-people .person-row-head > span:nth-child(5) {
+    justify-self: center;
+    padding-left: 0;
+    text-align: center;
+  }
+
+  #workspace-people .person-row-identity {
+    justify-content: center;
+  }
+
+  #workspace-people .person-row-contact {
+    justify-items: center;
+    text-align: left;
+  }
+
+  #workspace-people .person-row-contact span {
+    width: 160px;
+  }
+}
+
+/* Registration workbench: each workspace uses the same calm canvas, while
+   keeping its task-specific information groups intact.  This replaces the
+   previous edge-to-edge action placement that made the overview feel pasted
+   together from unrelated cards. */
+.workspace-view {
+  gap: 22px;
+}
+
+#workspace-overview .overview-context-panel,
+#workspace-overview .overview-queue-panel,
+#workspace-overview .overview-wide-panel,
+#workspace-entries .panel,
+#workspace-notify .panel {
+  border-color: #e2e9e3;
+  box-shadow: 0 10px 28px rgba(23, 57, 45, .045);
+}
+
+#workspace-overview .overview-context-panel,
+#workspace-overview .overview-queue-panel {
+  padding: 24px;
+  background: #fff;
+}
+
+#workspace-overview .overview-context-panel::before,
+#workspace-overview .overview-queue-panel::before {
+  display: none;
+}
+
+#workspace-overview .overview-context-panel .overview-race-card {
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
+  gap: 20px 32px;
+  padding: 20px 22px;
+  border-color: #e6eee8;
+  background: #fbfdfb;
+  box-shadow: none;
+}
+
+#workspace-overview .overview-context-panel .overview-race-side {
+  justify-items: start;
+  padding: 4px 0 4px 32px;
+  border-left-color: #dce8df;
+}
+
+#workspace-overview .overview-context-panel .overview-race-facts {
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#workspace-overview .overview-context-panel .overview-race-facts span {
+  padding: 0 14px;
+}
+
+#workspace-overview .overview-context-panel .overview-race-actions {
+  justify-content: flex-start;
+}
+
+#workspace-overview .overview-work-queue {
+  gap: 0;
+  max-height: none;
+  overflow: visible;
+}
+
+#workspace-overview .overview-queue-item {
+  grid-template-columns: minmax(0, 1fr) minmax(360px, .75fr);
+  gap: 28px;
+  padding: 18px 20px;
+  border-left: 0;
+  border-bottom-color: #e7eee9;
+}
+
+#workspace-overview .overview-queue-actions {
+  justify-content: flex-start;
+}
+
+#workspace-overview .overview-queue-copy .entry-meta {
+  margin-top: 10px;
+}
+
+#workspace-people .people-list-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+#workspace-people .people-list-controls {
+  padding-bottom: 2px;
+}
+
+@media (min-width: 1180px) {
+  #workspace-people #people-list {
+    --people-row-columns: 34px minmax(260px, 1.25fr) repeat(3, minmax(150px, 1fr)) 160px;
+  }
+}
+
+#workspace-entries .sticky-panel,
+#workspace-entries .panel:not(.sticky-panel),
+#workspace-notify .notify-filter-panel,
+#workspace-notify .notify-results-panel {
+  background: #fff;
+}
+
+@media (max-width: 900px) {
+  #workspace-overview .overview-context-panel .overview-race-card,
+  #workspace-overview .overview-queue-item {
+    grid-template-columns: 1fr;
+  }
+
+  #workspace-overview .overview-context-panel .overview-race-side {
+    padding: 18px 0 0;
+    border-top: 1px solid #dce8df;
+    border-left: 0;
+  }
+}
+
+/* Dedicated queue rows keep the priority list scannable without turning the
+   whole panel into one long, disconnected table. */
+#workspace-overview .overview-queue-panel .panel-heading {
+  align-items: flex-start;
+}
+
+#workspace-overview .overview-queue-panel .panel-subtitle {
+  margin: 6px 0 0;
+  color: var(--color-neutral-600);
+  font-size: 13px;
+}
+
+#workspace-overview .overview-work-queue {
+  display: grid;
+  gap: 10px;
+}
+
+#workspace-overview .overview-queue-item {
+  grid-template-columns: 32px minmax(360px, 1fr) auto;
+  gap: 18px;
+  min-height: 96px;
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+  transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+#workspace-overview .overview-queue-item:hover {
+  border-color: #d5e2d9;
+  background: #fbfdfb;
+  box-shadow: 0 4px 12px rgba(16, 24, 40, .04);
+}
+
+#workspace-overview .overview-queue-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff4e5;
+  color: #b76800;
+}
+
+#workspace-overview .overview-queue-icon svg,
+#workspace-overview .overview-queue-meta svg {
+  width: 16px;
+  height: 16px;
+}
+
+#workspace-overview .overview-queue-copy h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-neutral-950);
+  font-size: 16px;
+}
+
+#workspace-overview .overview-queue-status {
+  margin: 0;
+  background: #eef4e6;
+  color: #617a2a;
+}
+
+#workspace-overview .overview-queue-copy p {
+  margin-top: 6px;
+  overflow: hidden;
+  color: var(--color-neutral-600);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#workspace-overview .overview-queue-meta {
+  display: flex;
+  gap: 16px;
+}
+
+#workspace-overview .overview-queue-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-neutral-600);
+  font-size: 13px;
+}
+
+#workspace-overview .overview-queue-meta svg {
+  color: var(--color-neutral-500);
+}
+
+#workspace-overview .overview-queue-actions {
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+#workspace-overview .overview-queue-amount {
+  min-width: 120px;
+  color: #0b3b2e;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  text-align: right;
+}
+
+#workspace-overview .overview-queue-actions .mini-action {
+  min-width: 72px;
+  min-height: 40px;
+  border-radius: 9px;
+}
+
+#workspace-overview .overview-queue-actions .overview-queue-process {
+  border-color: var(--color-primary-700);
+  background: var(--color-primary-700);
+  color: #fff;
+}
+
+#workspace-overview .overview-queue-actions .overview-queue-process:hover,
+#workspace-overview .overview-queue-actions .overview-queue-process:focus-visible {
+  border-color: var(--color-primary-800);
+  background: var(--color-primary-800);
+}
+
+#workspace-people .people-filter-menu {
+  position: relative;
+}
+
+#workspace-people .people-filter-menu summary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--color-neutral-700);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  list-style: none;
+  padding: 0 14px;
+}
+
+#workspace-people .people-filter-menu summary::-webkit-details-marker { display: none; }
+#workspace-people .people-filter-menu summary::before { content: "⌘"; margin-right: 7px; color: var(--color-primary-700); }
+#workspace-people .people-filter-menu summary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(22, 115, 75, .14); }
+
+#workspace-people .people-filter-popover {
+  position: absolute;
+  z-index: 7;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: 236px;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(16, 24, 40, .12);
+}
+
+#workspace-people .people-filter-popover label { display: grid; gap: 5px; color: var(--color-neutral-600); font-size: 12px; font-weight: 700; }
+#workspace-people .people-filter-popover select { min-height: 36px; min-width: 0; font-size: 13px; }
+#workspace-people .people-filter-popover .ghost-action { justify-self: start; min-height: 34px; }
+
+.pagination-page-size { display: inline-flex; align-items: center; gap: 7px; color: var(--color-neutral-600); font-size: 12px; font-weight: 700; }
+.pagination-page-size select { min-height: 36px; border-radius: 8px; font: inherit; }
+
+@media (max-width: 900px) {
+  #workspace-overview .overview-queue-item { grid-template-columns: 32px minmax(0, 1fr); gap: 12px; padding: 16px; }
+  #workspace-overview .overview-queue-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  #workspace-overview .overview-queue-amount { min-width: 0; margin-right: auto; text-align: left; }
+}
+
+@media (max-width: 767px) {
+  #workspace-overview .overview-queue-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  #workspace-overview .overview-queue-amount { grid-column: 1 / -1; }
+  #workspace-overview .overview-queue-actions .mini-action { width: 100%; }
+  #workspace-people .people-filter-menu { width: calc(50% - 6px); }
+  #workspace-people .people-filter-menu summary { justify-content: center; width: 100%; }
+}
+
+/* ============================================================
+   People directory second-pass redesign: the roster table is the
+   page's primary surface. Wider main column, header-integrated
+   sorting, larger rows/avatars/status cards, card-footer paging.
+   ============================================================ */
+
+/* --- Page + layout width: free the main column. --- */
+@media (min-width: 1024px) {
+  .registration-app {
+    width: min(1880px, calc(100% - 56px));
+  }
+
+  .registration-layout {
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .registration-sidebar-collapsed .registration-layout {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  #workspace-people .split-layout {
+    max-width: none;
+    margin-inline: 0;
+  }
+}
+
+/* --- Left sidebar: keep it useful but visually quiet. --- */
+.workspace-sidebar {
+  gap: 14px;
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.workspace-sidebar .sidebar-header {
+  padding-bottom: 14px;
+}
+
+.workspace-sidebar .sidebar-group {
+  padding-top: 14px;
+}
+
+.workspace-sidebar .sidebar-group input,
+.workspace-sidebar .sidebar-group select {
+  min-height: 42px;
+}
+
+.workspace-sidebar .primary-action {
+  min-height: 44px;
+}
+
+/* --- Top stat cards: lower, calmer, spaced 16px from what follows. --- */
+.command-metric {
+  min-height: 72px;
+  max-height: 80px;
+  padding: 10px 16px !important;
+}
+
+.command-metric strong {
+  font-size: 24px !important;
+}
+
+/* --- Tabs: 44px pills on a soft tray, 24px before the title block. --- */
+.registration-command-bar .workspace-tabs {
+  min-height: 44px;
+  margin: 16px 0 0;
+  padding: 3px;
+  border-radius: 999px;
+  background: #f1f2ec;
+}
+
+.registration-command-bar .workspace-tab {
+  min-height: 38px;
+  border-radius: 999px;
+}
+
+.registration-command-bar .workspace-tab.active {
+  background: #fff;
+  color: #16734b;
+}
+
+.workspace-views {
+  margin-top: 24px;
+}
+
+/* --- Title block. --- */
+#workspace-people .people-list-heading .eyebrow {
+  margin-bottom: 4px;
+  color: #16734b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#workspace-people .people-list-heading h2 {
+  color: #101828;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+#workspace-people .people-list-heading .panel-subtitle {
+  margin-top: 6px;
+  color: #667085;
+  font-size: 14px;
+}
+
+/* --- Toolbar: add / filter / search on one row. --- */
+#workspace-people .people-list-controls {
+  gap: 12px;
+}
+
+#workspace-people .people-add-action {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: #16734b;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#workspace-people .people-add-action:hover {
+  background: #125e3d;
+}
+
+#workspace-people .people-filter-menu summary {
+  min-height: 44px;
+  gap: 7px;
+  padding: 0 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  background: #fff;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#workspace-people .people-filter-menu summary::before {
+  content: none;
+}
+
+#workspace-people .people-filter-menu summary svg {
+  width: 16px;
+  height: 16px;
+  color: #16734b;
+}
+
+#workspace-people .people-list-heading input[type="search"] {
+  min-height: 44px;
+  padding-left: 38px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='9' cy='9' r='5.5' fill='none' stroke='%23667085' stroke-width='1.7'/%3E%3Cpath d='m13.2 13.2 3.6 3.6' stroke='%23667085' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 12px center / 16px 16px;
+}
+
+#workspace-people .people-list-heading input[type="search"]:focus {
+  outline: none;
+  border-color: #16734b;
+  box-shadow: 0 0 0 3px rgba(22, 115, 75, .16);
+}
+
+@media (min-width: 761px) {
+  #workspace-people .people-list-heading input[type="search"] {
+    width: 360px;
+  }
+}
+
+/* --- Table card. --- */
+#workspace-people #people-list.list-shell {
+  width: 100%;
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(16, 24, 40, .04);
+  overflow: hidden;
+}
+
+@media (min-width: 761px) {
+  #workspace-people #people-list.list-shell {
+    --people-row-columns: 56px minmax(280px, 1.5fr) minmax(130px, .7fr) minmax(180px, .85fr) minmax(250px, 1fr) 150px;
+  }
+
+  /* --- Header row with in-place sorting. --- */
+  #workspace-people .person-row-head {
+    min-height: 60px;
+    gap: 12px;
+    padding: 0 20px;
+    align-items: center;
+    background: #f8faf8;
+    border-bottom: 1px solid #dde5df;
+    color: #475467;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+
+  #workspace-people .person-row-head > span {
+    justify-self: start;
+    padding-left: 0;
+    text-align: left;
+  }
+
+  /* Beat the legacy ≥1180px rule that re-centers span:nth-child(5). */
+  #workspace-people .person-row-head > span:nth-child(5) {
+    justify-self: start;
+    text-align: left;
+  }
+
+  /* Numeric and status columns render centered, so their sort headers
+     must center on the same axis. */
+  #workspace-people .person-row-head > .person-sort-button:nth-child(3),
+  #workspace-people .person-row-head > .person-sort-button:nth-child(4) {
+    justify-self: center;
+    margin-left: 0;
+  }
+
+  #workspace-people .person-row-head > .person-row-check {
+    justify-self: center;
+  }
+
+  #workspace-people .person-row-head > .person-head-actions {
+    justify-self: center;
+    text-align: center;
+  }
+
+  /* --- Data rows. --- */
+  #workspace-people .person-card.person-row {
+    min-height: 90px;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e6ebe7;
+    border-left: 3px solid transparent;
+  }
+
+  #workspace-people .person-card.person-row:nth-child(even) {
+    background: #fff;
+  }
+
+  #workspace-people .person-card.person-row:hover {
+    background: #fafcfa;
+    border-left-color: transparent;
+  }
+
+  #workspace-people .person-card.person-row.is-selected {
+    background: #f2faf5;
+    border-left-color: #16734b;
+  }
+
+  #workspace-people .person-card.person-row.is-focused {
+    background: #f2faf5;
+    border-left-color: #16734b;
+  }
+
+  #workspace-people .person-row-identity {
+    justify-content: flex-start;
+    gap: 14px;
+  }
+
+  #workspace-people .person-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  #workspace-people .person-identity-text strong {
+    color: #101828;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  #workspace-people .person-identity-text span {
+    margin-top: 4px;
+    color: #667085;
+    font-size: 13px;
+  }
+
+  #workspace-people .person-row-stat {
+    justify-self: center;
+  }
+
+  #workspace-people .person-row-stat > strong {
+    color: #101828;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  #workspace-people .person-row-stat > small {
+    color: #667085;
+    font-size: 12px;
+  }
+
+  #workspace-people .person-row-contact {
+    justify-items: start;
+    gap: 8px;
+    text-align: left;
+  }
+
+  #workspace-people .person-row-contact span {
+    width: auto;
+  }
+}
+
+/* --- Sortable header buttons. --- */
+.person-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-left: -10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: inherit;
+  justify-self: start;
+}
+
+.person-sort-button:hover,
+.person-sort-button:focus-visible {
+  background: #eef3ef;
+  color: #101828;
+  outline: none;
+}
+
+.person-sort-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+.person-sort-icon path {
+  stroke: #c3ccc6;
+}
+
+.person-sort-button.is-asc .sort-up-path,
+.person-sort-button.is-desc .sort-down-path {
+  stroke: #16734b;
+}
+
+/* --- Pending / done status card. --- */
+.registration-page .person-row-pending,
+.registration-page .person-row-pending.has-pending,
+.registration-page .person-row-pending.is-clear {
+  justify-content: center;
+  width: 152px;
+  min-height: 58px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  gap: 1px;
+}
+
+#workspace-people .person-row-pending {
+  width: 152px;
+  min-height: 58px;
+}
+
+.registration-page .person-row-pending strong,
+.registration-page .person-row-pending.has-pending strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: #b76800;
+}
+
+.registration-page .person-row-pending small {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.registration-page .person-row-pending.has-pending {
+  border-color: #f3d28d;
+  background: #fff8e8;
+}
+
+.registration-page .person-row-pending.has-pending small {
+  color: #a06409;
+}
+
+.registration-page .person-row-pending.is-clear {
+  border-color: #c9e7d4;
+  background: #eff8f3;
+}
+
+.registration-page .person-row-pending.is-clear strong,
+.registration-page .person-row-pending.is-clear small {
+  color: #16834d;
+}
+
+/* --- Contact column. --- */
+.person-contact-line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.person-contact-line .contact-label {
+  color: #667085;
+}
+
+.person-contact-line .contact-value {
+  color: #475467;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Row action buttons: explicit bordered 36px targets. --- */
+#workspace-people .person-row-actions {
+  gap: 8px;
+  justify-content: center;
+}
+
+#workspace-people .person-row-actions .person-row-icon-action,
+#workspace-people .person-more-actions summary {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  border: 1px solid #e4e7ec;
+  border-radius: 9px;
+  background: #fff;
+  color: #5c6d64;
+}
+
+#workspace-people .person-row-actions .person-row-icon-action svg,
+#workspace-people .person-more-actions summary svg {
+  width: 17px;
+  height: 17px;
+}
+
+#workspace-people .person-row-actions .person-row-icon-action:hover,
+#workspace-people .person-row-actions .person-row-icon-action:focus-visible,
+#workspace-people .person-row-actions .person-row-icon-action.is-active,
+#workspace-people .person-more-actions summary:hover,
+#workspace-people .person-more-actions summary:focus-visible,
+#workspace-people .person-more-actions[open] summary {
+  border-color: #bfcbc3;
+  background: #f8faf8;
+  color: #17392d;
+  box-shadow: none;
+}
+
+/* --- Pagination footer joined to the table card. --- */
+#workspace-people #people-list.list-shell:has(+ #people-pagination:not(:empty)) {
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+}
+
+#workspace-people .list-pagination:not(:empty) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  margin-top: 0;
+  padding: 12px 20px;
+  border: 1px solid #e4e7ec;
+  border-top: 1px solid #e4e7ec;
+  border-radius: 0 0 16px 16px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(16, 24, 40, .04);
+}
+
+#workspace-people .list-pagination:empty {
+  display: none;
+}
+
+.pagination-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.list-pagination .page-button,
+.list-pagination .page-number {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #e4e7ec;
+  border-radius: 9px;
+  background: #fff;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.list-pagination .page-button:hover:not([disabled]),
+.list-pagination .page-number:hover:not(.is-current) {
+  border-color: #bfcbc3;
+  background: #f8faf8;
+}
+
+.list-pagination .page-number.is-current {
+  border-color: #16734b;
+  background: #16734b;
+  color: #fff;
+}
+
+@media (max-width: 760px) {
+  #workspace-people .list-pagination:not(:empty) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    border-radius: 0 0 14px 14px;
+  }
+
+  .pagination-controls {
+    flex-wrap: wrap;
+  }
+}
+
+/* --- Ultra-wide refinement: spread the three middle data groups evenly
+   instead of letting the identity column absorb all extra width and the
+   contact column trail dead space before the actions. --- */
+@media (min-width: 1400px) {
+  #workspace-people #people-list.list-shell {
+    --people-row-columns: 56px minmax(300px, 1.15fr) minmax(150px, 1fr) minmax(200px, 1fr) minmax(280px, 1fr) 170px;
+  }
+
+  #workspace-people .person-row-contact {
+    justify-self: center;
+  }
+
+  #workspace-people .person-row-head > span:nth-child(5) {
+    justify-self: center;
+    text-align: center;
+  }
+}
+
+/* --- Mobile pass for the redesigned people directory: stack the title
+   block and toolbar, and restore compact status cards that the desktop
+   sizing rules above were overriding. --- */
+@media (max-width: 760px) {
+  #workspace-people .people-list-heading {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  #workspace-people .people-list-heading h2 {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  #workspace-people .people-list-heading .panel-subtitle {
+    font-size: 13px;
+  }
+
+  #workspace-people .people-list-controls {
+    width: 100%;
+    padding-bottom: 0;
+  }
+
+  #workspace-people .people-add-action {
+    width: 100%;
+  }
+
+  #workspace-people .people-filter-menu {
+    width: 100%;
+  }
+
+  #workspace-people .people-filter-menu summary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #workspace-people .people-list-heading input[type="search"] {
+    width: 100%;
+  }
+
+  .registration-page .person-row-pending,
+  .registration-page .person-row-pending.has-pending,
+  .registration-page .person-row-pending.is-clear,
+  #workspace-people .person-row-pending {
+    width: 110px;
+    min-height: 48px;
+    padding: 4px 10px;
+    border-radius: 10px;
+  }
+
+  .registration-page .person-row-pending strong,
+  .registration-page .person-row-pending.has-pending strong,
+  .registration-page .person-row-pending.is-clear strong {
+    font-size: 16px;
+  }
+
+  .registration-page .person-row-pending small {
+    font-size: 11px;
+  }
+
+  #workspace-people .person-row-check {
+    align-self: start;
+    padding-top: 12px;
+  }
+
+  #workspace-people .person-row-actions {
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
+/* --- Mobile row polish: tighter card rhythm, top-aligned status card,
+   and a quiet divider before the action row. --- */
+@media (max-width: 760px) {
+  #workspace-people .person-card.person-row {
+    gap: 10px 12px;
+    padding: 14px 16px 10px;
+  }
+
+  #workspace-people .person-row-pending {
+    align-self: start;
+    margin-top: 2px;
+  }
+
+  #workspace-people .person-row-actions {
+    min-height: 0;
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f3ee;
+  }
+
+  #workspace-people .person-identity-text strong {
+    font-size: 15px;
+  }
+
+  #workspace-people .person-identity-text span {
+    margin-top: 2px;
+    font-size: 12.5px;
   }
 }

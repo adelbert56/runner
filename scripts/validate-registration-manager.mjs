@@ -226,6 +226,31 @@ assertCheck(
   "registration manager masks list contacts, shows and copies full local basic details on demand, keeps history shortcuts, and returns focus after save"
 );
 assertCheck(
+  registrationHtml.includes('class="panel-subtitle"') &&
+    registrationHtml.includes('id="people-add"') &&
+    registrationJs.includes("people-select-all-page") &&
+    registrationJs.includes("els.peopleAdd") &&
+    registrationJs.includes("AVATAR_PALETTE") &&
+    registrationJs.includes("page-number") &&
+    registrationCss.includes("--people-row-columns: 34px") &&
+    registrationCss.includes(".person-row-pending.has-pending") &&
+    registrationCss.includes(".pagination-controls"),
+  "registration people directory keeps its compact table hierarchy, visual status badges, numeric pagination, and direct new-person entry"
+);
+assertCheck(
+  registrationHtml.includes('id="overview-queue-summary"') &&
+    registrationHtml.includes('id="people-filter-menu"') &&
+    registrationHtml.includes('id="people-filter-gender"') &&
+    registrationHtml.includes('id="people-filter-size"') &&
+    registrationHtml.includes('id="people-filter-pending"') &&
+    registrationJs.includes("workspaceViewFromHash") &&
+    registrationJs.includes("data-people-page-size") &&
+    registrationJs.includes("selectAll.indeterminate") &&
+    registrationCss.includes(".overview-queue-icon") &&
+    registrationCss.includes(".people-filter-popover"),
+  "registration pending queue and team directory retain their B2B UI controls, direct workspace hashes, and selection state"
+);
+assertCheck(
     registrationHtml.includes('id="export-selected-race-payments"') &&
     registrationJs.includes("downloadSelectedRacePaymentCsv") &&
     registrationJs.includes("paymentExportRows") &&

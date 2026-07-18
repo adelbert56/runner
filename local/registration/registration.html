@@ -13,7 +13,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/site/assets/favicon-32.png?v=20260630-registration-notify1">
     <link rel="apple-touch-icon" sizes="180x180" href="/site/assets/apple-touch-icon.png?v=20260630-registration-notify1">
     <link rel="stylesheet" href="/site/styles.css?v=20260701-registration-notify8">
-    <link rel="stylesheet" href="./registration.css?v=20260716-saas-workspace1">
+    <link rel="stylesheet" href="./registration.css?v=20260718-avatar-center1">
   </head>
   <body class="registration-page">
     <header class="site-header">
@@ -173,6 +173,7 @@
                     <div>
                       <p class="eyebrow">優先處理</p>
                       <h2>待辦佇列</h2>
+                      <p class="panel-subtitle" id="overview-queue-summary">目前沒有待處理事項</p>
                     </div>
                     <button class="ghost-action" type="button" data-open-pending>查看全部待辦</button>
                   </div>
@@ -293,14 +294,19 @@
                     <div>
                       <p class="eyebrow">隊員資料</p>
                       <h2>隊員名單</h2>
+                      <p class="panel-subtitle">管理隊員基本資料、賽事進度與待處理事項</p>
                     </div>
                     <div class="people-list-controls">
-                      <select id="people-sort" aria-label="隊員排序">
-                        <option value="name">依姓名排序</option>
-                        <option value="active-desc">目前賽事：多到少</option>
-                        <option value="pending-desc">未完成：多到少</option>
-                        <option value="pending-asc">未完成：少到多</option>
-                      </select>
+                      <button class="primary-action people-add-action" type="button" id="people-add">新增隊員</button>
+                      <details class="people-filter-menu" id="people-filter-menu">
+                        <summary aria-label="篩選條件" title="篩選條件"><svg aria-hidden="true" viewBox="0 0 20 20" focusable="false"><path d="M3 4.5h14l-5.4 6.3v4.4l-3.2 1.6v-6L3 4.5Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/></svg>篩選條件</summary>
+                        <div class="people-filter-popover">
+                          <label>性別<select id="people-filter-gender"><option value="all">全部</option><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></label>
+                          <label>衣服尺寸<select id="people-filter-size"><option value="all">全部</option><option value="M">M</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option></select></label>
+                          <label>待處理<select id="people-filter-pending"><option value="all">全部</option><option value="pending">有待處理</option><option value="completed">已全部完成</option></select></label>
+                          <button class="ghost-action" type="button" id="people-filter-reset">清除條件</button>
+                        </div>
+                      </details>
                       <input id="people-search" type="search" placeholder="搜尋姓名、手機末三碼、身分證末四碼">
                     </div>
                   </div>
@@ -652,6 +658,11 @@
       </section>
     </main>
 
-    <script type="module" src="./registration.js?v=20260716-saas-workspace1"></script>
+    <button class="back-to-top" type="button" id="back-to-top" aria-label="回到頁面頂端" aria-hidden="true">
+      <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m5 11 5-5 5 5M10 6v9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+      <span>置頂</span>
+    </button>
+
+    <script type="module" src="./registration.js?v=20260718-people-table3"></script>
   </body>
 </html>

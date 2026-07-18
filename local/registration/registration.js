@@ -5,6 +5,8 @@ const SELECTED_RACE_STORAGE_KEY = "runner.registration.selectedRaceId";
 const WORKSPACE_VIEW_STORAGE_KEY = "runner.registration.workspaceView";
 const NOTIFY_PREFS_STORAGE_KEY = "runner.registration.notifyPrefs";
 const SIDEBAR_COLLAPSED_STORAGE_KEY = "runner.registration.sidebarCollapsed";
+const WORKSPACE_VIEW_HASHES = { "#pending-queue": "overview", "#team-members": "people", "#entries": "entries", "#notifications": "notify" };
+const VIEW_WORKSPACE_HASHES = { overview: "#pending-queue", people: "#team-members", entries: "#entries", notify: "#notifications" };
 let notifyStatusClearTimer = null;
 const PEOPLE_PAGE_SIZE = 6;
 const ENTRY_GROUP_PAGE_SIZE = 4;
@@ -17,8 +19,10 @@ const state = {
   lastKnownUpdatedAt: null,
   entryBatchPersonIds: new Set(),
   peopleQuery: "",
-  peopleSort: "name",
+  peopleSort: "",
   peoplePage: 1,
+  peoplePageSize: PEOPLE_PAGE_SIZE,
+  peopleFilters: { gender: "all", size: "all", pending: "all" },
   selectedPersonIds: new Set(),
   selectedEntryIds: new Set(),
   entryQuery: "",
@@ -64,13 +68,18 @@ const els = {
   peopleBulkCopy: document.querySelector("#people-bulk-copy"),
   peopleBulkDelete: document.querySelector("#people-bulk-delete"),
   peopleBulkClear: document.querySelector("#people-bulk-clear"),
+  peopleAdd: document.querySelector("#people-add"),
+  backToTop: document.querySelector("#back-to-top"),
   entriesList: document.querySelector("#entries-list"),
   entriesPagination: document.querySelector("#entries-pagination"),
   entriesBulkToolbar: document.querySelector("#entries-bulk-toolbar"),
   entriesBulkDelete: document.querySelector("#entries-bulk-delete"),
   entriesBulkClear: document.querySelector("#entries-bulk-clear"),
   peopleSearch: document.querySelector("#people-search"),
-  peopleSort: document.querySelector("#people-sort"),
+  peopleFilterGender: document.querySelector("#people-filter-gender"),
+  peopleFilterSize: document.querySelector("#people-filter-size"),
+  peopleFilterPending: document.querySelector("#people-filter-pending"),
+  peopleFilterReset: document.querySelector("#people-filter-reset"),
   entriesScopeTabs: document.querySelector("#entries-scope-tabs"),
   entriesHistorySummary: document.querySelector("#entries-history-summary"),
   entriesSearch: document.querySelector("#entries-search"),
@@ -104,6 +113,7 @@ const els = {
   workspaceViewTabs: document.querySelector("#workspace-view-tabs"),
   workspaceViews: [...document.querySelectorAll("[data-workspace-panel]")],
   overviewWorkQueue: document.querySelector("#overview-work-queue"),
+  overviewQueueSummary: document.querySelector("#overview-queue-summary"),
   overviewSelectedRace: document.querySelector("#overview-selected-race"),
   overviewActiveGroups: document.querySelector("#overview-active-groups"),
   overviewToggleActiveGroups: document.querySelector("#overview-toggle-active-groups"),
@@ -542,6 +552,21 @@ function paginateItems(items, page, pageSize) {
   };
 }
 
+function paginationPageNumbers(page, totalPages) {
+  const pages = new Set([1, totalPages, page, page - 1, page + 1]);
+  return [...pages]
+    .filter((n) => n >= 1 && n <= totalPages)
+    .sort((a, b) => a - b)
+    .reduce((list, n) => {
+      const prev = list[list.length - 1];
+      if (prev !== undefined && n - prev > 1) {
+        list.push("…");
+      }
+      list.push(n);
+      return list;
+    }, []);
+}
+
 function renderPagination(target, kind, pagination) {
   if (!target) {
     return;
@@ -550,10 +575,23 @@ function renderPagination(target, kind, pagination) {
     target.innerHTML = "";
     return;
   }
+  const numberButtons = paginationPageNumbers(pagination.page, pagination.totalPages)
+    .map((n) => (n === "…"
+      ? `<span class="page-ellipsis">…</span>`
+      : `<button type="button" class="page-number${n === pagination.page ? " is-current" : ""}" data-page-kind="${escapeHtml(kind)}" data-page-set="${n}"${n === pagination.page ? ' aria-current="page"' : ""}>${n}</button>`))
+    .join("");
+  const pageSizeControl = kind === "people"
+    ? `<label class="pagination-page-size">每頁顯示<select data-people-page-size aria-label="每頁顯示筆數"><option value="6"${state.peoplePageSize === 6 ? " selected" : ""}>6 筆</option><option value="12"${state.peoplePageSize === 12 ? " selected" : ""}>12 筆</option><option value="24"${state.peoplePageSize === 24 ? " selected" : ""}>24 筆</option></select></label>`
+    : "";
   target.innerHTML = `
-    <button type="button" class="page-button" data-page-kind="${escapeHtml(kind)}" data-page-direction="-1" ${pagination.page <= 1 ? "disabled" : ""}>上一頁</button>
-    <span class="pagination-note">第 ${escapeHtml(pagination.page)} / ${escapeHtml(pagination.totalPages)} 頁 · 顯示 ${escapeHtml(pagination.start)}-${escapeHtml(pagination.end)} / ${escapeHtml(pagination.total)}</span>
-    <button type="button" class="page-button" data-page-kind="${escapeHtml(kind)}" data-page-direction="1" ${pagination.page >= pagination.totalPages ? "disabled" : ""}>下一頁</button>
+    <span class="pagination-status">顯示 ${escapeHtml(pagination.start)}–${escapeHtml(pagination.end)}，共 ${escapeHtml(pagination.total)} 筆</span>
+    <span class="pagination-controls">${pageSizeControl}
+      <button type="button" class="page-button page-button-icon" data-page-kind="${escapeHtml(kind)}" data-page-set="1" aria-label="第一頁" ${pagination.page <= 1 ? "disabled" : ""}>«</button>
+      <button type="button" class="page-button page-button-icon" data-page-kind="${escapeHtml(kind)}" data-page-direction="-1" aria-label="上一頁" ${pagination.page <= 1 ? "disabled" : ""}>‹</button>
+      ${numberButtons}
+      <button type="button" class="page-button page-button-icon" data-page-kind="${escapeHtml(kind)}" data-page-direction="1" aria-label="下一頁" ${pagination.page >= pagination.totalPages ? "disabled" : ""}>›</button>
+      <button type="button" class="page-button page-button-icon" data-page-kind="${escapeHtml(kind)}" data-page-set="${escapeHtml(pagination.totalPages)}" aria-label="最後一頁" ${pagination.page >= pagination.totalPages ? "disabled" : ""}>»</button>
+    </span>
   `;
 }
 
@@ -604,7 +642,11 @@ function historySummary(entries) {
   };
 }
 
-function setWorkspaceView(view, { scroll = false } = {}) {
+function workspaceViewFromHash() {
+  return WORKSPACE_VIEW_HASHES[window.location.hash] || "";
+}
+
+function setWorkspaceView(view, { scroll = false, syncHash = false } = {}) {
   const nextView = ["overview", "people", "entries", "notify"].includes(view) ? view : "overview";
   state.workspaceView = nextView;
   saveWorkspaceView(nextView);
@@ -616,6 +658,9 @@ function setWorkspaceView(view, { scroll = false } = {}) {
   els.workspaceViewTabs?.querySelectorAll("[data-workspace-view]").forEach((button) => {
     button.classList.toggle("active", button.dataset.workspaceView === nextView);
   });
+  if (syncHash && VIEW_WORKSPACE_HASHES[nextView] && window.location.hash !== VIEW_WORKSPACE_HASHES[nextView]) {
+    window.history.pushState(null, "", VIEW_WORKSPACE_HASHES[nextView]);
+  }
   if (scroll) {
     document.querySelector(`#workspace-${nextView}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -1427,21 +1472,41 @@ function bulkCopySelectedPeople() {
     .catch((error) => showStatus(error.message || "複製失敗", "error"));
 }
 
+const AVATAR_PALETTE = ["#1b6a4d", "#1c5f8a", "#a3671a", "#6a3f8a", "#3f6a1c", "#2f6f7d"];
+
+function avatarColor(name) {
+  const key = String(name || "?").trim();
+  let hash = 0;
+  for (let i = 0; i < key.length; i += 1) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+
 function renderPeopleList() {
   state.selectedPersonIds.forEach((id) => {
     if (!state.people.some((person) => person.id === id)) {
       state.selectedPersonIds.delete(id);
     }
   });
-  const filteredPeople = state.people.filter((person) => (
-    !state.peopleQuery || personSearchText(person).includes(state.peopleQuery)
-  ));
+  const filteredPeople = state.people.filter((person) => {
+    const stats = personStats(person.id);
+    return (!state.peopleQuery || personSearchText(person).includes(state.peopleQuery))
+      && (state.peopleFilters.gender === "all" || person.gender === state.peopleFilters.gender)
+      && (state.peopleFilters.size === "all" || person.defaultShirtSize === state.peopleFilters.size)
+      && (state.peopleFilters.pending === "all"
+        || (state.peopleFilters.pending === "pending" && stats.pending > 0)
+        || (state.peopleFilters.pending === "completed" && stats.pending === 0));
+  });
   const sortedPeople = [...filteredPeople].sort((left, right) => {
     const byName = () => String(left.name || "").localeCompare(String(right.name || ""), "zh-Hant");
+    if (state.peopleSort === "name") return byName();
+    if (state.peopleSort === "name-desc") return byName() * -1;
     if (state.peopleSort === "active-desc") return personStats(right.id).active - personStats(left.id).active || byName();
+    if (state.peopleSort === "active-asc") return personStats(left.id).active - personStats(right.id).active || byName();
     if (state.peopleSort === "pending-desc") return personStats(right.id).pending - personStats(left.id).pending || byName();
     if (state.peopleSort === "pending-asc") return personStats(left.id).pending - personStats(right.id).pending || byName();
-    return byName();
+    return 0;
   });
   if (!sortedPeople.length) {
     els.peopleList.innerHTML = `<div class="empty-state">${state.people.length ? "查無符合的人員" : "尚未建立人員"}</div>`;
@@ -1456,38 +1521,70 @@ function renderPeopleList() {
       state.peoplePage = Math.floor(focusIndex / PEOPLE_PAGE_SIZE) + 1;
     }
   }
-  const pagination = paginateItems(sortedPeople, state.peoplePage, PEOPLE_PAGE_SIZE);
+  const pagination = paginateItems(sortedPeople, state.peoplePage, state.peoplePageSize);
   state.peoplePage = pagination.page;
 
-  els.peopleList.innerHTML = `<div class="person-row person-row-head" aria-hidden="true"><span>人員</span><span>目前賽事</span><span>待處理</span><span>聯絡資訊</span><span>操作</span></div>${pagination.items.map((person) => {
+  const pageIds = pagination.items.map((person) => person.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => state.selectedPersonIds.has(id));
+
+  const sortHeaderCell = (label, ascValue, descValue) => {
+    const direction = state.peopleSort === ascValue ? "asc" : state.peopleSort === descValue ? "desc" : "";
+    const sortHint = direction === "asc" ? "目前升冪，點擊改為降冪" : direction === "desc" ? "目前降冪，點擊取消排序" : "點擊排序";
+    return `<button type="button" class="person-sort-button${direction ? ` is-${direction}` : ""}" data-people-sort-asc="${escapeHtml(ascValue)}" data-people-sort-desc="${escapeHtml(descValue)}" aria-label="${escapeHtml(`${label}：${sortHint}`)}" title="${escapeHtml(sortHint)}">
+        <span>${escapeHtml(label)}</span>
+        <svg class="person-sort-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path class="sort-up-path" d="M4.8 6.4 8 3.2l3.2 3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+          <path class="sort-down-path" d="M4.8 9.6 8 12.8l3.2-3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+        </svg>
+      </button>`;
+  };
+  els.peopleList.innerHTML = `<div class="person-row person-row-head">
+      <span class="person-row-check"><input type="checkbox" id="people-select-all-page" aria-label="全選本頁隊員"${allPageSelected ? " checked" : ""}></span>
+      ${sortHeaderCell("隊員資訊", "name", "name-desc")}
+      ${sortHeaderCell("目前賽事", "active-asc", "active-desc")}
+      ${sortHeaderCell("待處理", "pending-asc", "pending-desc")}
+      <span>聯絡資訊</span><span class="person-head-actions">操作</span>
+    </div>${pagination.items.map((person) => {
     const stats = personStats(person.id);
     const isShowingDetails = state.personDetailsId === person.id;
     return `
-    <article class="person-card person-row${state.focusPersonId === person.id ? " is-focused" : ""}" id="person-card-${escapeHtml(person.id)}">
-      <div class="person-row-identity">
-        <label class="row-select-check">
-          <input type="checkbox" class="person-select" value="${escapeHtml(person.id)}" aria-label="選取 ${escapeHtml(person.name)}"${state.selectedPersonIds.has(person.id) ? " checked" : ""}>
-          <span class="person-avatar" aria-hidden="true">${escapeHtml((person.name || "?").trim().slice(0, 1))}</span>
-          <strong>${escapeHtml(person.name)}</strong>
-        </label>
-        <span>${escapeHtml([person.gender, person.defaultShirtSize].filter(Boolean).join(" · ") || "資料待補")}</span>
+    <article class="person-card person-row${state.focusPersonId === person.id ? " is-focused" : ""}${state.selectedPersonIds.has(person.id) ? " is-selected" : ""}" id="person-card-${escapeHtml(person.id)}">
+      <div class="person-row-check">
+        <input type="checkbox" class="person-select" value="${escapeHtml(person.id)}" aria-label="選取 ${escapeHtml(person.name)}"${state.selectedPersonIds.has(person.id) ? " checked" : ""}>
       </div>
-      <div class="person-row-stat"><span>目前賽事</span><strong>${escapeHtml(stats.active)}</strong></div>
-      <div class="person-row-stat person-row-pending${stats.pending ? " has-pending" : " is-clear"}"><span>${stats.pending ? "待處理" : "全部完成"}</span><strong>${escapeHtml(stats.pending)}</strong><small>${stats.pending ? "筆需要處理" : "目前無待辦"}</small></div>
+      <div class="person-row-identity">
+        <span class="person-avatar" aria-hidden="true" style="background:${avatarColor(person.name)}">${escapeHtml((person.name || "?").trim().slice(0, 1))}</span>
+        <div class="person-identity-text">
+          <strong>${escapeHtml(person.name)}</strong>
+          <span>${escapeHtml([person.gender, person.defaultShirtSize].filter(Boolean).join(" · ") || "資料待補")}</span>
+        </div>
+      </div>
+      <div class="person-row-stat"><strong>${escapeHtml(stats.active)}</strong><small>場賽事</small></div>
+      <div class="person-row-stat person-row-pending${stats.pending ? " has-pending" : " is-clear"}"><strong>${escapeHtml(stats.pending)}</strong><small>${stats.pending ? "筆待處理" : "已全部完成"}</small></div>
       <div class="person-row-contact">
-        <span>${escapeHtml(person.phone ? `手機 ${maskedPhone(person.phone)}` : "手機未填")}</span>
-        <span>${escapeHtml(person.nationalId ? `身分證 ${String(person.nationalId).slice(-4).padStart(String(person.nationalId).length, "*")}` : "身分證未填")}</span>
+        <span class="person-contact-line"><span class="contact-label">手機</span><span class="contact-value">${escapeHtml(person.phone ? maskedPhone(person.phone) : "未填")}</span></span>
+        <span class="person-contact-line"><span class="contact-label">身分證</span><span class="contact-value">${escapeHtml(person.nationalId ? String(person.nationalId).slice(-4).padStart(String(person.nationalId).length, "*") : "未填")}</span></span>
       </div>
       <div class="card-actions person-row-actions">
         <button class="mini-action person-row-icon-action${isShowingDetails ? " is-active" : ""}" type="button" data-show-person-details="${escapeHtml(person.id)}" aria-label="${isShowingDetails ? "收合" : "查看"} ${escapeHtml(person.name)} 的基本資料" title="${isShowingDetails ? "收合基本資料" : "查看基本資料"}"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="M2.5 10s2.7-4.5 7.5-4.5S17.5 10 17.5 10s-2.7 4.5-7.5 4.5S2.5 10 2.5 10Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="10" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
         <button class="mini-action person-row-icon-action" type="button" data-edit-person="${escapeHtml(person.id)}" aria-label="編輯 ${escapeHtml(person.name)}" title="編輯"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="m4 14.8.8-3.3L12.7 3.6a1.7 1.7 0 0 1 2.4 2.4l-7.9 7.9-3.2.9Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/><path d="m11.5 4.8 3.7 3.7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
-        <details class="person-more-actions"><summary aria-label="更多操作" title="更多操作"><span aria-hidden="true">•••</span></summary><div class="person-more-menu"><button class="mini-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="history">歷史紀錄</button><button class="mini-action danger-action" type="button" data-delete-person="${escapeHtml(person.id)}">刪除人員</button></div></details>
+        <details class="person-more-actions"><summary aria-label="更多操作" title="更多操作"><svg aria-hidden="true" viewBox="0 0 20 20"><circle cx="4.5" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="15.5" cy="10" r="1.6" fill="currentColor"/></svg></summary><div class="person-more-menu"><button class="mini-action" type="button" data-view-person="${escapeHtml(person.id)}" data-view-scope="history">歷史紀錄</button><button class="mini-action danger-action" type="button" data-delete-person="${escapeHtml(person.id)}">刪除人員</button></div></details>
       </div>
       ${isShowingDetails ? renderPersonBasicDetails(person) : ""}
     </article>
   `;
   }).join("")}`;
 
+  els.peopleList.querySelectorAll("[data-people-sort-asc]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const { peopleSortAsc, peopleSortDesc } = button.dataset;
+      state.peopleSort = state.peopleSort === peopleSortAsc
+        ? peopleSortDesc
+        : state.peopleSort === peopleSortDesc ? "" : peopleSortAsc;
+      state.peoplePage = 1;
+      renderPeopleList();
+    });
+  });
   els.peopleList.querySelectorAll(".person-select").forEach((checkbox) => {
     checkbox.addEventListener("change", () => {
       if (checkbox.checked) {
@@ -1495,8 +1592,21 @@ function renderPeopleList() {
       } else {
         state.selectedPersonIds.delete(checkbox.value);
       }
+      checkbox.closest(".person-row")?.classList.toggle("is-selected", checkbox.checked);
       updatePeopleBulkToolbar();
     });
+  });
+  const selectAll = els.peopleList.querySelector("#people-select-all-page");
+  if (selectAll) {
+    selectAll.indeterminate = !allPageSelected && pageIds.some((id) => state.selectedPersonIds.has(id));
+  }
+  selectAll?.addEventListener("change", (event) => {
+    if (event.target.checked) {
+      pageIds.forEach((id) => state.selectedPersonIds.add(id));
+    } else {
+      pageIds.forEach((id) => state.selectedPersonIds.delete(id));
+    }
+    renderPeopleList();
   });
   els.peopleList.querySelectorAll("[data-edit-person]").forEach((button) => {
     button.addEventListener("click", () => editPerson(button.dataset.editPerson));
@@ -1550,6 +1660,11 @@ function renderPeopleList() {
     });
   });
   renderPagination(els.peoplePagination, "people", pagination);
+  els.peoplePagination.querySelector("[data-people-page-size]")?.addEventListener("change", (event) => {
+    state.peoplePageSize = Number(event.target.value) || PEOPLE_PAGE_SIZE;
+    state.peoplePage = 1;
+    renderPeopleList();
+  });
   updatePeopleBulkToolbar();
 }
 
@@ -1649,6 +1764,11 @@ function renderOverview() {
       const urgency = Number(a.isRegistered) - Number(b.isRegistered);
       return urgency || String(a.raceDate || "").localeCompare(String(b.raceDate || ""));
     });
+  if (els.overviewQueueSummary) {
+    els.overviewQueueSummary.textContent = pendingEntries.length
+      ? `目前有 ${pendingEntries.length} 個待處理事項`
+      : "所有待辦項目都已完成";
+  }
   els.overviewWorkQueue.innerHTML = pendingEntries.length
     ? pendingEntries.slice(0, 8).map((entry) => {
       const person = peopleById.get(entry.personId);
@@ -1656,20 +1776,23 @@ function renderOverview() {
       const taskLabel = needsSignup ? "待完成報名" : "待確認繳費";
       return `
         <article class="overview-queue-item ${needsSignup ? "is-signup" : "is-payment"}">
+          <span class="overview-queue-icon" aria-hidden="true">${needsSignup
+    ? '<svg viewBox="0 0 20 20"><path d="M10 2.8a7.2 7.2 0 1 0 0 14.4 7.2 7.2 0 0 0 0-14.4Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 6.2v4.1l2.6 1.6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/></svg>'
+    : '<svg viewBox="0 0 20 20"><path d="M10 2.8a7.2 7.2 0 1 0 0 14.4 7.2 7.2 0 0 0 0-14.4Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 6.2v4.1l2.6 1.6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/></svg>'}</span>
           <div class="overview-queue-copy">
             <h3>
               ${escapeHtml(person?.name || "未指派人員")}
               <span class="overview-queue-status">${escapeHtml(taskLabel)}</span>
             </h3>
             <p>${escapeHtml(entry.raceName || "未命名賽事")}</p>
-            <div class="entry-meta">
-              ${entry.raceDate ? `<span class="meta-pill">${escapeHtml(entry.raceDate)}</span>` : ""}
-              ${entry.distance ? `<span class="meta-pill">${escapeHtml(entry.distance)}</span>` : ""}
+            <div class="entry-meta overview-queue-meta">
+              ${entry.raceDate ? `<span><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="3.2" y="4.4" width="13.6" height="12.4" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.4 2.8v3.4M13.6 2.8v3.4M3.2 8h13.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>${escapeHtml(entry.raceDate)}</span>` : ""}
+              ${entry.distance ? `<span><svg aria-hidden="true" viewBox="0 0 20 20"><path d="M10 17.2s5-4.5 5-8.7A5 5 0 0 0 5 8.5c0 4.2 5 8.7 5 8.7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="8.5" r="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>${escapeHtml(entry.distance)}</span>` : ""}
             </div>
           </div>
           <div class="overview-queue-actions">
             ${entry.paidAmount ? `<span class="overview-queue-amount">${escapeHtml(formatMoney(entry.paidAmount))}</span>` : ""}
-            <button class="mini-action" type="button" data-open-entry="${escapeHtml(entry.id)}">處理</button>
+            <button class="mini-action overview-queue-process" type="button" data-open-entry="${escapeHtml(entry.id)}">處理</button>
             <button class="mini-action" type="button" data-open-notify-entry="${escapeHtml(entry.id)}">通知</button>
           </div>
         </article>
@@ -1999,7 +2122,7 @@ function editPerson(personId) {
   els.personEmergencyRelationship.value = person.emergencyRelationship || "";
   els.personEmergencyPhone.value = person.emergencyPhone || "";
   setWorkspaceView("people");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  els.personForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function editEntry(entryId) {
@@ -3141,6 +3264,12 @@ async function onEntrySubmit(event) {
   resetEntryForm();
 }
 
+function syncBackToTop() {
+  const visible = window.scrollY > 360;
+  els.backToTop?.classList.toggle("is-visible", visible);
+  els.backToTop?.setAttribute("aria-hidden", String(!visible));
+}
+
 function wireEvents() {
   els.raceSearch.addEventListener("input", applyRaceSearch);
   els.personPhone.addEventListener("blur", validatePhoneField);
@@ -3153,6 +3282,17 @@ function wireEvents() {
     state.selectedPersonIds.clear();
     renderPeopleList();
   });
+  els.peopleAdd?.addEventListener("click", () => {
+    resetPersonForm();
+    els.personForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    els.personName.focus({ preventScroll: true });
+  });
+  els.backToTop?.addEventListener("click", () => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  });
+  window.addEventListener("scroll", syncBackToTop, { passive: true });
+  syncBackToTop();
   els.entriesBulkDelete?.addEventListener("click", () => {
     bulkDeleteSelectedEntries().catch((error) => showStatus(error.message || "批次刪除失敗", "error"));
   });
@@ -3190,16 +3330,35 @@ function wireEvents() {
   });
   els.workspaceViewTabs?.querySelectorAll("[data-workspace-view]").forEach((button) => {
     button.addEventListener("click", () => {
-      setWorkspaceView(button.dataset.workspaceView || "overview", { scroll: true });
+      setWorkspaceView(button.dataset.workspaceView || "overview", { scroll: true, syncHash: true });
     });
+  });
+  window.addEventListener("hashchange", () => {
+    const view = workspaceViewFromHash();
+    if (view) setWorkspaceView(view, { scroll: true });
   });
   els.peopleSearch.addEventListener("input", debounce(() => {
     state.peopleQuery = els.peopleSearch.value.trim().toLowerCase();
     state.peoplePage = 1;
     renderPeopleList();
-  }, 200));
-  els.peopleSort.addEventListener("change", () => {
-    state.peopleSort = els.peopleSort.value;
+  }, 300));
+  [els.peopleFilterGender, els.peopleFilterSize, els.peopleFilterPending].filter(Boolean).forEach((field) => {
+    field.addEventListener("change", () => {
+      state.peopleFilters = {
+        gender: els.peopleFilterGender.value,
+        size: els.peopleFilterSize.value,
+        pending: els.peopleFilterPending.value,
+      };
+      state.peoplePage = 1;
+      renderPeopleList();
+    });
+  });
+  els.peopleFilterReset?.addEventListener("click", () => {
+    state.peopleFilters = { gender: "all", size: "all", pending: "all" };
+    els.peopleFilterGender.value = "all";
+    els.peopleFilterSize.value = "all";
+    els.peopleFilterPending.value = "all";
+    document.querySelector("#people-filter-menu").open = false;
     state.peoplePage = 1;
     renderPeopleList();
   });
@@ -3341,13 +3500,14 @@ function wireEvents() {
     if (!pageButton) {
       return;
     }
+    const targetPage = pageButton.dataset.pageSet ? Number(pageButton.dataset.pageSet) : null;
     const direction = Number(pageButton.dataset.pageDirection || 0);
     if (pageButton.dataset.pageKind === "people") {
-      state.peoplePage += direction;
+      state.peoplePage = targetPage ?? state.peoplePage + direction;
       renderPeopleList();
       return;
     }
-    state.entriesPage += direction;
+    state.entriesPage = targetPage ?? state.entriesPage + direction;
     renderEntriesList();
   });
   els.raceSelect.addEventListener("change", () => {
@@ -3507,7 +3667,7 @@ function wireEvents() {
 
 async function init() {
   try {
-    state.workspaceView = savedWorkspaceView();
+    state.workspaceView = workspaceViewFromHash() || savedWorkspaceView();
     state.sidebarCollapsed = savedSidebarCollapsed();
     restoreNotifyPreferences();
     state.loadState = "loading";

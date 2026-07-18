@@ -454,7 +454,7 @@ const server = createServer(async (req, res) => {
   }
 
   const contentType = mimeTypes[extname(filePath).toLowerCase()] || "application/octet-stream";
-  res.writeHead(200, { "content-type": contentType });
+  res.writeHead(200, { "content-type": contentType, "cache-control": "no-cache" });
   createReadStream(filePath).pipe(res);
 });
 
