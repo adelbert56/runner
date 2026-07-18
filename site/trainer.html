@@ -52,8 +52,8 @@
 <button id="back-to-top" aria-label="回到頂端" onclick="scrollPageTop()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></button>
 
 <!-- Modal -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
+<div class="modal-overlay" id="modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
     <div class="modal-title" id="modal-title"></div>
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-actions" id="modal-actions"></div>
@@ -61,7 +61,12 @@
 </div>
 <input type="file" id="training-data-import" accept="application/json,.json" hidden onchange="importTrainingData(event)">
 
-<script src="trainer.js?v=20260716-toolbar1"></script>
+<script src="trainer-garmin-assignments.js?v=20260718-garmin1"></script>
+<script src="trainer-garmin-sync.js?v=20260718-garmin-sync1"></script>
+<script src="trainer-garmin-calibration.js?v=20260718-garmin-calibration1"></script>
+<script src="trainer-safety.js?v=20260718-safety1"></script>
+<script src="trainer.js?v=20260718-core1"></script>
+<script src="trainer-data.js?v=20260718-data1"></script>
 
 </body>
 </html>

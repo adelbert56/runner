@@ -14,19 +14,29 @@ function sentenceKeys(text) {
     .filter(Boolean);
 }
 
-const [html, app, contentRaw, trainerHtml, trainerJs, trainerCss, garminPublisher, garminReviewBuilder, server] = await Promise.all([
+const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGarminSyncJs, trainerGarminCalibrationJs, trainerSafetyJs, trainerJs, trainerDataJs, trainerCss, garminPublisher, garminReviewBuilder, server] = await Promise.all([
   readFile(resolve(root, "site/index.html"), "utf8"),
   readFile(resolve(root, "site/app.js"), "utf8"),
   readFile(resolve(root, "site/data/content.json"), "utf8"),
   readFile(resolve(root, "site/trainer.html"), "utf8"),
+  readFile(resolve(root, "site/trainer-garmin-assignments.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-garmin-sync.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-garmin-calibration.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-safety.js"), "utf8"),
   readFile(resolve(root, "site/trainer.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-data.js"), "utf8"),
   readFile(resolve(root, "site/trainer.css"), "utf8"),
   readFile(resolve(root, "scripts/garmin/publish_training_plan.py"), "utf8"),
   readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
   readFile(resolve(root, "site/server.mjs"), "utf8"),
 ]);
 // trainer 頁面已拆成 html/js/css 三檔；既有斷言以串接內容檢查，語意不變
-const trainer = `${trainerHtml}\n${trainerJs}\n${trainerCss}`;
+const trainer = `${trainerHtml}\n${trainerGarminAssignmentsJs}\n${trainerGarminSyncJs}\n${trainerGarminCalibrationJs}\n${trainerSafetyJs}\n${trainerJs}\n${trainerDataJs}\n${trainerCss}`;
+assertCheck(/trainer-garmin-assignments\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-assignments.js") < trainerHtml.indexOf("trainer.js"), "trainer loads Garmin assignment rules before the core script");
+assertCheck(/trainer-garmin-sync\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-sync.js") < trainerHtml.indexOf("trainer.js") && /GARMIN_ACTIVITY_SYNC_API/.test(trainerGarminSyncJs), "trainer loads local Garmin sync controls before the core script");
+assertCheck(/trainer-garmin-calibration\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-calibration.js") < trainerHtml.indexOf("trainer.js") && /function heatAdjustedPaceSec\(/.test(trainerGarminCalibrationJs), "trainer loads Garmin calibration guards before the core script");
+assertCheck(/trainer-safety\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-safety.js") < trainerHtml.indexOf("trainer.js"), "trainer loads the safety boundary before the core script");
+assertCheck(/trainer-data\.js/.test(trainerHtml) && /window\.TrainerData/.test(trainerDataJs) && /TrainerData\?\.exportData/.test(trainerJs), "trainer delegates backup actions to the data boundary while retaining existing controls");
 
 const content = JSON.parse(contentRaw);
 const items = Array.isArray(content.items) ? content.items : [];
@@ -56,7 +66,7 @@ assertCheck(!/<a href="local\/registration\/registration\.html">報名管理<\/a
 assertCheck(/function heroTodayStepSummary\(/.test(trainer) && /step\?\.detail/.test(trainer), "today hero falls back to the detailed main-course instruction when its dose is empty");
 assertCheck(/const mainStep = steps\.find\(\(step\) => step\.title === '主課'\)/.test(trainer) && /hero-today-side-steps/.test(trainer) && /hero-today-main-copy/.test(trainer), "today hero gives a detailed main course its own priority layout without crowding warmup and cooldown");
 assertCheck(/function trainingDataHealth\(/.test(trainer) && /renderTrainingStatusCard\(/.test(trainer), "auxiliary trainer tabs expose shared data health status");
-assertCheck(/function exportTrainingData\(/.test(trainer) && /function importTrainingData\(/.test(trainer), "trainer supports local backup and restore");
+assertCheck(/function exportTrainingData\(/.test(trainer) && /function importTrainingData\(/.test(trainer) && /PRE_RESTORE_STORAGE_KEY/.test(trainer) && /function trainingDataCounts\(/.test(trainer) && /function confirmRestorePreImportSnapshot\(/.test(trainer), "trainer previews backups and preserves a local pre-restore recovery snapshot");
 assertCheck(/function archiveCurrentCycle\(/.test(trainer) && /function restartTrainingCycle\(/.test(trainer) && /cycleHistory: \[\]/.test(trainer) && /function openCycleHistory\(/.test(trainer), "trainer archives complete training cycles before a restart and keeps them reviewable");
 assertCheck(/nextCycleCoachContext/.test(trainer) && /historyContext/.test(trainer) && /function renderHistoryCoachContext\(/.test(trainer) && /提供給教練/.test(trainer), "trainer carries a selected cycle summary into the next coach context without overwriting the formal plan");
 assertCheck(/garminCompletionPct/.test(trainer) && /function garminCompletionPercent\(/.test(trainer), "Garmin automatic completion threshold is configurable");
@@ -85,6 +95,7 @@ assertCheck(/function effectiveWeekVolumeTarget\(/.test(trainer) && /教練目�
 assertCheck(/function loadRegistrationRaceCheckpoints\(/.test(trainer) && /function recordRaceCheckpointResult\(/.test(trainer), "October race checkpoints pair local registrations with Garmin results before applying a pace update");
 assertCheck(/switchPlanTab\('progress'\);\s*showView\('plan'\);/.test(trainer), "applying an assessment returns the runner to the visible progress hub");
 assertCheck(/function checkinSafetyDecision\(/.test(trainer) && /factor: 1\.05/.test(trainer) && /停止品質課/.test(trainer), "weekly check-in uses a bounded safety decision before progression");
+assertCheck(/function normalizeSafetyHold\(/.test(trainer) && /function activateSafetyHold\(/.test(trainer) && /function confirmClearSafetyHold\(/.test(trainer) && /傷痛保護模式/.test(trainer) && /\['tempo', 'interval', 'long'\]/.test(trainer), "pain or severe fatigue activates a persistent safety hold that masks quality and long runs until confirmed clear");
 assertCheck(/onclick="switchPlanTab\('checkin'\)"/.test(trainer) && /function openWeeklyCheckin\(/.test(trainer), "weekly check-in is reachable from the plan and daily guidance");
 assertCheck(/class="checkin-week-switcher"/.test(trainer) && /aria-label="選擇評估週數"/.test(trainer) && /jumpToPhaseWeek\(Number\(this\.value\)\)/.test(trainer), "weekly check-in supports direct week switching without leaving the review tab");
 assertCheck(/class="plan-tab-list" role="tablist"/.test(trainer) && /class="plan-workspace-tools"/.test(trainer) && /aria-selected/.test(trainer), "plan navigation exposes distinct tabs, management tools, and selected state");
@@ -99,6 +110,9 @@ assertCheck(/const hasCoachDirection = Boolean\(goalGapNote \|\| coachBrief \|\|
 assertCheck(/class="week-header-target"/.test(trainer) && !/class="week-target"/.test(trainer), "weekly target is integrated with the week identity instead of competing with header actions");
 assertCheck(/const TRAINING_JARGON_ENTRIES/.test(trainer) && /輕鬆跑（E 跑）/.test(trainer) && /M 配速/.test(trainer), "coach terminology includes controlled plain-language explanations");
 assertCheck(/function renderLatestTrainingReport\(/.test(trainer) && /Training report · Garmin/.test(trainer) && /主課成績已單獨入帳/.test(trainer), "training analysis prioritizes a single-session coach report before long-term trends");
+assertCheck(/PASSPHRASE_STORAGE_KEY/.test(trainer) && /coach-review-remember/.test(trainer) && /localStorage\.setItem\(PASSPHRASE_STORAGE_KEY, pass\)/.test(trainer) && /localStorage\.removeItem\(PASSPHRASE_STORAGE_KEY\)/.test(trainer), "coach review supports opt-out while remembering the passphrase on this device by default");
+assertCheck(/role="dialog" aria-modal="true" aria-labelledby="modal-title"/.test(trainerHtml) && /function modalFocusableElements\(/.test(trainer) && /event\.key === 'Escape'/.test(trainer), "trainer modal has dialog semantics, focus containment, and Escape close");
+assertCheck(/aria-controls="plan-tab-week"/.test(trainer) && /aria-controls="progress-panel-analysis"/.test(trainer) && /\['ArrowLeft', 'ArrowRight', 'Home', 'End'\]/.test(trainer), "trainer tabs expose linked panels and keyboard navigation");
 assertCheck(/function sessionIntensityLabel\(/.test(trainer) && /課程分段/.test(trainer) && /session-lap-list/.test(trainer), "latest training report presents Garmin lap summaries by workout segment");
 assertCheck(/function sessionLapLabel\(/.test(trainer) && /不應把那個原始欄位解讀成正式課表的「間歇」/.test(trainer) && /Garmin 計圈/.test(trainer), "unstructured Garmin laps stay neutral instead of being mislabeled as intervals");
 assertCheck(/class="session-report-verdict"/.test(trainer) && /正式課表對照/.test(trainer) && /下一步/.test(trainer) && /function summarizeSessionLaps\(/.test(trainer) && /function selectTrainingReportLapCategory\(/.test(trainer) && /progress-panel-analysis/.test(trainer) && /class="session-lap-filter/.test(trainer), "session report keeps lap filters interactive after analysis moved into the progress hub");
@@ -106,8 +120,9 @@ assertCheck(/品質判讀只使用 Garmin 明確標記的主課/.test(trainer) &
 assertCheck(/function plannedSessionFor\(run\)/.test(trainer) && /applyCoachPlanOverride\(day, week\)/.test(trainer), "session report uses the same effective coach override as the plan and today card");
 assertCheck(/function selectTrainingReport\(/.test(trainer) && /session-report-history/.test(trainer) && /function sessionQualitySignals\(/.test(trainer), "training analysis supports historical single-session reports with quality signals");
 assertCheck(/Garmin 自我評量/.test(trainer) && /function plannedMainTargetKm\(/.test(trainer), "session report shows official Garmin self-evaluation and a main-course completion target");
-assertCheck(/function automaticActivityAssignment\(/.test(trainer) && /function activityAssignmentFor\(/.test(trainer) && /這次對應不對？/.test(trainer), "trainer auto-maps same-day and safe makeup runs while leaving one exception path");
+assertCheck(/function automaticActivityAssignment\(/.test(trainerGarminAssignmentsJs) && /function activityAssignmentFor\(/.test(trainerGarminAssignmentsJs) && /這次對應不對？/.test(trainer), "trainer auto-maps same-day and safe makeup runs while leaving one exception path");
 assertCheck(/activityAssignments: \{\}/.test(trainer) && /function normalizeActivityAssignments\(/.test(trainer) && /function setActivityAssignment\(/.test(trainer), "activity assignment overrides persist safely in local training data");
+assertCheck(/function pendingGarminAssignmentReviews\(/.test(trainer) && /低信心對應/.test(trainer) && /確認 Garmin 對應/.test(trainer), "low-confidence Garmin makeup assignments are surfaced for runner review");
 assertCheck(/function recordPlanChange\(/.test(trainer) && /function renderPlanChangeTimeline\(/.test(trainer) && /Garmin 實跑自動校準/.test(trainer) && /previous\.date === item\.date && previous\.source === item\.source && previous\.title === item\.title/.test(trainer), "automatic plan changes retain a compact, same-day deduplicated before-and-after history");
 assertCheck(/function renderWeekOverviewCard\(/.test(trainer) && /同步可信度/.test(trainer) && /function renderCheckinTrend\(/.test(trainer), "plan workspace surfaces automatic execution, sync trust, and recovery trend");
 assertCheck(/function runCompanionRecommendation\(/.test(trainer) && /const RUN_COMPANION_PODCASTS =/.test(trainer) && /const RUN_COMPANION_MUSIC =/.test(trainer) && /function estimatedRunMinutes\(/.test(trainer) && /function pickCompanionPodcasts\(keys, count\)/.test(trainer) && /function pickCompanionMusic\(keys, count\)/.test(trainer) && /RUN_COMPANION_HISTORY_KEY/.test(trainer) && /RUN_COMPANION_MUSIC_HISTORY_KEY/.test(trainer) && /每次會隨機換一批主題/.test(trainer) && /每次會隨機換一批曲風/.test(trainer) && /onclick="showRunCompanion\('\$\{day\.dateStr\}'\)"/.test(trainer) && /跑步故事/.test(trainer) && /深度訪談/.test(trainer) && /電影／遊戲配樂/.test(trainer), "course cards randomize varied podcast and music choices by workout while avoiding recently shown topics");
@@ -120,6 +135,7 @@ assertCheck(/lactateThresholdHr/.test(trainer) && /source: 'lthr'/.test(trainer)
 assertCheck(/raceReplacement = 'pre-race-taper'/.test(trainer) && /preRaceTaperOf/.test(trainer) && /賽前減壓跑/.test(trainer) && /raceMaxKm\(race\) \|\| 0\) < 15\) return;/.test(trainer), "B-tier registered races get a 2-3 day mini-taper while short races stay train-through");
 assertCheck((trainer.match(/\$\{renderWeekOverviewCard\(/g) || []).length >= 2, "week tab re-renders keep the merged week overview card after boot");
 assertCheck(/function targetTimeToSec\(/.test(trainer) && /targetTimeToSec\(profile\.targetTime, dist\)/.test(trainer) && /targetTimeToSec\(timeVal, dist\)/.test(trainer) && /讀作 \$\{Math\.floor\(timeSec \/ 3600\)\} 小時/.test(trainer), "a two-part goal time like 2:10 is read as hours and minutes and the interpretation is echoed back live");
+assertCheck(/function isValidClockInput\(/.test(trainer) && /function trainingProfileValidationErrors\(/.test(trainer) && /trainingProfileValidationErrors\(profile\)/.test(trainer) && /避免不完整或不合理的資料直接進入課表/.test(trainer), "trainer rejects malformed time and unsafe numeric setup before generating a plan");
 assertCheck(/type-\$\{day\.type\}/.test(trainer) && /\.day-card\.type-interval/.test(trainer) && /\.day-card\.type-long/.test(trainer) && /border-left-width: 6px/.test(trainer), "week view day cards carry an intensity color scale on the left border");
 assertCheck(/potentialNote/.test(trainer) && /若趨勢延續，完賽時間有機會再快約/.test(trainer) && /mask-image: linear-gradient\(90deg/.test(trainer), "fitness projection quantifies trend upside and the mobile tab list hints at horizontal scroll");
 assertCheck(/function canUseIntervalBySeason\(/.test(trainer) && /!isHotSeasonDate\(weekStart\)/.test(trainer), "interval season rule reuses the single hot-season definition instead of a conflicting month threshold");

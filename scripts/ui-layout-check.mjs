@@ -19,8 +19,23 @@ const panels = [
 
 const viewports = [
   { name: "mobile", width: 390, height: 844 },
+  { name: "tablet-portrait", width: 768, height: 1024 },
+  { name: "tablet-landscape", width: 1024, height: 768 },
+  { name: "laptop", width: 1280, height: 900 },
   { name: "desktop", width: 1440, height: 1000 },
+  { name: "wide-desktop", width: 1920, height: 1080 },
 ];
+const requestedViewportNames = String(process.env.UI_LAYOUT_VIEWPORTS || "")
+  .split(",")
+  .map((name) => name.trim())
+  .filter(Boolean);
+const selectedViewports = requestedViewportNames.length
+  ? viewports.filter((viewport) => requestedViewportNames.includes(viewport.name))
+  : viewports;
+
+if (requestedViewportNames.length && selectedViewports.length !== requestedViewportNames.length) {
+  throw new Error(`Unknown UI_LAYOUT_VIEWPORTS value: ${requestedViewportNames.join(", ")}`);
+}
 
 const trainerVisualSample = {
   profile: {
@@ -285,16 +300,44 @@ async function assertTrainerReport(page, viewportName) {
     eval(`coachReviewData = ${JSON.stringify(review)}`);
     renderPlanView();
     showView("plan");
-    switchPlanTab("analysis");
+    switchPlanTab("progress");
+    switchProgressPanel("analysis");
   }, trainerReviewSample);
   await page.waitForSelector(".session-report", { timeout: 5000 });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-report`);
-  const decision = await page.locator("#training-analysis-content").evaluate((element) => ({
+  const decision = await page.locator("#progress-panel-analysis").evaluate((element) => ({
     hasDecision: element.textContent.includes("自動訓練決策"),
     hasLongestRun: element.textContent.includes("近四週最長跑"),
   }));
   if (!decision.hasDecision || !decision.hasLongestRun) {
     throw new Error(`${viewportName}/trainer-report: automatic decision or long-term context is missing ${JSON.stringify(decision)}`);
+  }
+  const inputValidation = await page.evaluate(() => {
+    const valid = {
+      goal: "half",
+      targetDate: "2026-10-18",
+      targetTime: "2:10",
+      dayState: [0, 1, 0, 1, 0, 0, 2],
+      weeklyKm: 24,
+      easyPace: "7:30",
+      maxHr: 180,
+    };
+    return {
+      validErrors: trainingProfileValidationErrors(valid),
+      malformedErrors: trainingProfileValidationErrors({ ...valid, targetTime: "2:99", easyPace: "7:88", weeklyKm: 999 }),
+    };
+  });
+  if (inputValidation.validErrors.length || inputValidation.malformedErrors.length < 3) {
+    throw new Error(`${viewportName}/trainer-profile-validation: expected valid setup to pass and malformed setup to be blocked ${JSON.stringify(inputValidation)}`);
+  }
+  const safetyHold = await page.evaluate(() => {
+    appData.safetyHold = { active: true, startedOn: todayStr(), reason: "test safety hold" };
+    const adjusted = applyCoachPlanOverride({ dateStr: todayStr(), type: "tempo", focus: "tempo", task: "T 跑", pace: "5:00/km" }, { weekNum: 1 });
+    appData.safetyHold = null;
+    return { type: adjusted.type, focus: adjusted.focus, task: adjusted.task };
+  });
+  if (safetyHold.type !== "easy" || safetyHold.focus !== "recovery" || !safetyHold.task.includes("傷痛保護模式")) {
+    throw new Error(`${viewportName}/trainer-safety-hold: quality workout was not safely masked ${JSON.stringify(safetyHold)}`);
   }
   const report = await page.locator(".session-report").evaluate((element) => ({
     hasPlanComparison: element.textContent.includes("正式課表對照"),
@@ -432,7 +475,8 @@ async function assertRegistrationHero(page, viewportName) {
     const actions = element.querySelector(".registration-hero-actions");
     return {
       hasStoragePath: (element.textContent || "").includes("runner/報名管理/報名管理資料.json"),
-      hasPrivacyPills: element.querySelectorAll(".hero-pill").length === 3,
+      hasLocalOnlyContext: (element.textContent || "").includes("資料只留在這台電腦")
+        && (element.textContent || "").includes("runner/報名管理/報名管理資料.json"),
       hasBackupTitle: (actions?.textContent || "").includes("備份與還原"),
       hasExport: Boolean(actions?.querySelector("#export-data")),
       hasImport: Boolean(actions?.querySelector("#import-data")),
@@ -441,7 +485,7 @@ async function assertRegistrationHero(page, viewportName) {
     };
   });
   const heightLimit = viewportName === "mobile" ? 520 : 330;
-  if (!hero.hasStoragePath || !hero.hasPrivacyPills || !hero.hasBackupTitle || !hero.hasExport || !hero.hasImport || hero.titleSize > 60 || hero.heroHeight > heightLimit) {
+  if (!hero.hasStoragePath || !hero.hasLocalOnlyContext || !hero.hasBackupTitle || !hero.hasExport || !hero.hasImport || hero.titleSize > 60 || hero.heroHeight > heightLimit) {
     throw new Error(`${viewportName}/registration-hero: privacy hierarchy or compact actions failed ${JSON.stringify(hero)}`);
   }
   await page.screenshot({ path: resolve(screenshotDir, `${viewportName}-registration-hero.png`), fullPage: true });
@@ -458,7 +502,7 @@ try {
   await waitForServer(baseUrl);
   browser = await chromium.launch({ headless: true });
 
-  for (const viewport of viewports) {
+  for (const viewport of selectedViewports) {
     const page = await browser.newPage({ viewport });
     page.on("pageerror", (error) => fail(`${viewport.name}: page error: ${error.message}`));
     await page.goto(baseUrl, { waitUntil: "networkidle" });
