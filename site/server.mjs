@@ -18,6 +18,10 @@ const garminSyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-work
 const garminPublishScript = resolve(join(root, "scripts", "garmin", "publish_training_plan.py"));
 const garminActivitySyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-sync-status.json"));
 const garminActivitySyncScript = resolve(join(root, "scripts", "garmin", "sync-garmin.ps1"));
+const preferredPowerShellPath = process.env.RUNNER_PWSH_PATH || "C:\\Program Files\\PowerShell\\7\\pwsh.exe";
+const powerShellExecutable = process.platform === "win32" && existsSync(preferredPowerShellPath)
+  ? preferredPowerShellPath
+  : "pwsh";
 const allowedLocalHosts = new Set([
   `localhost:${port}`,
   `127.0.0.1:${port}`,
@@ -218,7 +222,7 @@ async function queueGarminActivitySync() {
     updatedAt: new Date().toISOString(),
   }, null, 2)}\n`, "utf8");
   garminActivitySyncRunning = true;
-  const child = spawn("pwsh", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", garminActivitySyncScript], {
+  const child = spawn(powerShellExecutable, ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", garminActivitySyncScript], {
     cwd: root,
     detached: false,
     stdio: "ignore",
