@@ -950,27 +950,11 @@ function renderHeroPanel() {
       <aside class="trainer-hero-side" aria-label="${hasPlan ? '今日課表' : '功能重點'}">
         ${hasPlan ? renderHeroTodayCard() : `
         <div class="trainer-side-card">
-          <div class="trainer-side-kicker">This Week</div>
-          <div class="trainer-side-title">建立設定後，從第一週開始執行</div>
-          <div class="trainer-side-copy">系統會將主課、長跑、恢復跑與休息日排入可執行的週計畫。</div>
-          <div class="trainer-side-metric">建立後才會出現本週資訊</div>
-        </div>
-        <div class="trainer-side-row">
-          <div class="trainer-side-card">
-            <div class="trainer-side-kicker">Plan</div>
-            <div class="trainer-side-title">正式課表</div>
-            <div class="trainer-side-list">
-              <div class="trainer-side-item"><b>本週重點</b><span>節奏 / 長跑 / 恢復分流</span></div>
-              <div class="trainer-side-item"><b>每日操作</b><span>照卡片執行</span></div>
-            </div>
-          </div>
-          <div class="trainer-side-card">
-            <div class="trainer-side-kicker">Coach</div>
-            <div class="trainer-side-title">教練資料</div>
-            <div class="trainer-side-list">
-              <div class="trainer-side-item"><b>實績來源</b><span>Garmin 跑步紀錄</span></div>
-              <div class="trainer-side-item"><b>建議用途</b><span>下週訓練參考</span></div>
-            </div>
+          <div class="trainer-side-kicker">Getting Started</div>
+          <div class="trainer-side-title">往下填設定，一次生成本週課表</div>
+          <div class="trainer-side-list">
+            <div class="trainer-side-item"><b>Plan</b><span>節奏 / 長跑 / 恢復分流</span></div>
+            <div class="trainer-side-item"><b>Coach</b><span>依 Garmin 實績給下週建議</span></div>
           </div>
         </div>`}
       </aside>
@@ -1473,26 +1457,28 @@ function renderSetupView() {
       </div>
     </div>
 
-    <!-- 10. Coach Sync Schedule -->
-    <div class="form-group">
-      <div class="form-label">教練資料更新</div>
-      <p class="field-help" style="margin-top:0">排程會讀取 Garmin 實績並更新教練建議；正式課表不會自動被覆寫。</p>
-      <div class="log-form-grid">
-        <div><label class="form-label" for="f-coach-sync">檢查頻率</label><select class="form-input" id="f-coach-sync"><option value="manual">只手動更新</option><option value="daily">每天</option><option value="weekly">每週</option></select></div>
-        <div><label class="form-label" for="f-coach-time">檢查時間</label><input class="form-input" type="time" id="f-coach-time" value="20:30"></div>
-        <div><label class="form-label" for="f-coach-day">每週檢查日</label><select class="form-input" id="f-coach-day"><option value="0" selected>週日</option><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option></select></div>
+    <!-- 10. Coach Sync Schedule (advanced/optional — defaults work fine, collapsed to reduce first-time setup weight) -->
+    <details class="form-group">
+      <summary class="form-label" style="cursor:pointer">⚙️ 進階：Garmin 自動化排程與完成門檻（預設值可直接用，非必填）</summary>
+      <div style="margin-top:14px">
+        <div class="form-label">教練資料更新</div>
+        <p class="field-help" style="margin-top:0">排程會讀取 Garmin 實績並更新教練建議；正式課表不會自動被覆寫。</p>
+        <div class="log-form-grid">
+          <div><label class="form-label" for="f-coach-sync">檢查頻率</label><select class="form-input" id="f-coach-sync"><option value="manual">只手動更新</option><option value="daily">每天</option><option value="weekly">每週</option></select></div>
+          <div><label class="form-label" for="f-coach-time">檢查時間</label><input class="form-input" type="time" id="f-coach-time" value="20:30"></div>
+          <div><label class="form-label" for="f-coach-day">每週檢查日</label><select class="form-input" id="f-coach-day"><option value="0" selected>週日</option><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option></select></div>
+        </div>
+        <div class="field-help">雲端排程設定完成後，儲存訓練手冊會同步更新這些規則；資料更新狀態會顯示在教練建議中。</div>
       </div>
-      <div class="field-help">雲端排程設定完成後，儲存訓練手冊會同步更新這些規則；資料更新狀態會顯示在教練建議中。</div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="f-garmin-completion">Garmin 自動完成門檻</label>
-      <select class="form-input" id="f-garmin-completion"><option value="50">50%｜恢復期較寬鬆</option><option value="60" selected>60%｜建議預設</option><option value="70">70%｜較嚴謹</option><option value="80">80%｜接近完整課表</option></select>
-      <div class="field-help">同步跑量達課表距離的比例（至少 1 km）才會自動完成或認列補跑；手動完成不受影響。</div>
-    </div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label" for="f-garmin-completion">Garmin 自動完成門檻</label>
+        <select class="form-input" id="f-garmin-completion"><option value="50">50%｜恢復期較寬鬆</option><option value="60" selected>60%｜建議預設</option><option value="70">70%｜較嚴謹</option><option value="80">80%｜接近完整課表</option></select>
+        <div class="field-help">同步跑量達課表距離的比例（至少 1 km）才會自動完成或認列補跑；手動完成不受影響。</div>
+      </div>
+    </details>
 
     <!-- Live Calc -->
-    <div class="form-group">
+    <div class="form-group" id="live-calc-group">
       <div class="form-label">即時評估</div>
       <div class="live-calc">
         <div class="live-calc-grid" id="live-calc-grid">
@@ -1904,6 +1890,15 @@ function initInjuryPills() {
   });
 }
 
+function setCalcCell(id, text, extraClass) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = `calc-value${extraClass ? ' ' + extraClass : ''}`;
+  const item = el.closest('.calc-item');
+  if (item) item.classList.toggle('is-empty', text === '—');
+}
+
 function updateLiveCalc() {
   const dateVal = document.getElementById('f-date')?.value;
   const timeVal = document.getElementById('f-target-time')?.value;
@@ -1914,20 +1909,17 @@ function updateLiveCalc() {
   if (!weeksEl || !warnEl) return;
 
   if (!dateVal) {
-    weeksEl.textContent = '—';
-    weeksEl.className = 'calc-value';
+    setCalcCell('calc-weeks', '—');
     warnEl.style.display = 'none';
   } else {
     const diffWeeks = Math.floor((new Date(dateVal) - new Date()) / (1000 * 86400 * 7));
     if (diffWeeks < 0) {
-      weeksEl.textContent = '已過期';
-      weeksEl.className = 'calc-value warn';
+      setCalcCell('calc-weeks', '已過期', 'warn');
       warnEl.textContent = '日期已過，請重新選擇。';
       warnEl.style.display = 'block';
     } else {
-      weeksEl.textContent = `${diffWeeks} 週`;
       const minWeeks = goal ? MIN_WEEKS[goal] : 8;
-      weeksEl.className = `calc-value${diffWeeks < minWeeks ? ' warn' : ' good'}`;
+      setCalcCell('calc-weeks', `${diffWeeks} 週`, diffWeeks < minWeeks ? 'warn' : 'good');
       if (diffWeeks > 0 && diffWeeks < minWeeks) {
         warnEl.textContent = `⚠️ 建議至少 ${minWeeks} 週，目前只有 ${diffWeeks} 週，計畫會壓縮。`;
         warnEl.style.display = 'block';
@@ -1948,66 +1940,51 @@ function updateLiveCalc() {
     // 兩段式輸入被判讀為 H:MM 時，直接在配速格回饋系統的理解，使用者才不會誤會
     const reinterpreted = timeSec !== timeToSec(timeVal);
     const readAs = reinterpreted ? `（讀作 ${Math.floor(timeSec / 3600)} 小時 ${Math.round((timeSec % 3600) / 60)} 分）` : '';
-    document.getElementById('calc-race-pace').textContent = `${secToPace(racePaceSec)}/km${readAs}`;
-    document.getElementById('calc-race-pace').className = 'calc-value good';
-    document.getElementById('calc-tempo').textContent = `${secToPace(racePaceSec + 12)}/km`;
-    document.getElementById('calc-tempo').className = 'calc-value good';
-    document.getElementById('calc-interval').textContent = `${secToPace(Math.max(racePaceSec - 10, 180))}/km`;
-    document.getElementById('calc-interval').className = 'calc-value good';
+    setCalcCell('calc-race-pace', `${secToPace(racePaceSec)}/km${readAs}`, 'good');
+    setCalcCell('calc-tempo', `${secToPace(racePaceSec + 12)}/km`, 'good');
+    setCalcCell('calc-interval', `${secToPace(Math.max(racePaceSec - 10, 180))}/km`, 'good');
   } else {
-    ['calc-race-pace', 'calc-tempo', 'calc-interval'].forEach(id => {
-      document.getElementById(id).textContent = '—';
-      document.getElementById(id).className = 'calc-value';
-    });
+    ['calc-race-pace', 'calc-tempo', 'calc-interval'].forEach(id => setCalcCell(id, '—'));
   }
 
   const trainCount = formState.dayState.filter(s => s >= 1).length;
-  const daysEl = document.getElementById('calc-days');
-  daysEl.textContent = trainCount > 0 ? `${trainCount} 天/週` : '—';
-  daysEl.className = `calc-value${trainCount > 0 ? ' good' : ''}`;
+  setCalcCell('calc-days', trainCount > 0 ? `${trainCount} 天/週` : '—', trainCount > 0 ? 'good' : '');
 
-  const diffEl = document.getElementById('calc-difficulty');
   const easyPaceSec = timeToSec(easyVal);
   if (racePaceSec > 0 && easyPaceSec > 0) {
     const gap = easyPaceSec - racePaceSec;
     if (gap < 30) {
-      diffEl.textContent = '挑戰';
-      diffEl.className = 'calc-value warn';
+      setCalcCell('calc-difficulty', '挑戰', 'warn');
     } else if (gap < 90) {
-      diffEl.textContent = '適中';
-      diffEl.className = 'calc-value good';
+      setCalcCell('calc-difficulty', '適中', 'good');
     } else {
-      diffEl.textContent = '保守';
-      diffEl.className = 'calc-value good';
+      setCalcCell('calc-difficulty', '保守', 'good');
     }
   } else {
-    diffEl.textContent = '—';
-    diffEl.className = 'calc-value';
+    setCalcCell('calc-difficulty', '—');
   }
 
-  const bmiEl = document.getElementById('calc-bmi');
-  if (bmiEl) {
-    const h = parseFloat(document.getElementById('f-height')?.value) || 0;
-    const w = parseFloat(document.getElementById('f-weight')?.value) || 0;
-    if (h > 0 && w > 0) {
-      const bmi = w / Math.pow(h / 100, 2);
-      bmiEl.textContent = bmi.toFixed(1);
-      bmiEl.className = `calc-value${bmi >= 18.5 && bmi < 25 ? ' good' : ' warn'}`;
-    } else {
-      bmiEl.textContent = '—';
-      bmiEl.className = 'calc-value';
-    }
+  const h = parseFloat(document.getElementById('f-height')?.value) || 0;
+  const w = parseFloat(document.getElementById('f-weight')?.value) || 0;
+  if (h > 0 && w > 0) {
+    const bmi = w / Math.pow(h / 100, 2);
+    setCalcCell('calc-bmi', bmi.toFixed(1), bmi >= 18.5 && bmi < 25 ? 'good' : 'warn');
+  } else {
+    setCalcCell('calc-bmi', '—');
   }
-  const easyHrEl = document.getElementById('calc-easy-hr');
-  if (easyHrEl) {
+  {
     const maxHrVal = parseInt(document.getElementById('f-max-hr')?.value, 10) || 0;
     if (maxHrVal >= 140 && maxHrVal <= 220) {
-      easyHrEl.textContent = `≤${Math.round(maxHrVal * 0.8)} bpm`;
-      easyHrEl.className = 'calc-value good';
+      setCalcCell('calc-easy-hr', `≤${Math.round(maxHrVal * 0.8)} bpm`, 'good');
     } else {
-      easyHrEl.textContent = '—';
-      easyHrEl.className = 'calc-value';
+      setCalcCell('calc-easy-hr', '—');
     }
+  }
+
+  const groupEl = document.getElementById('live-calc-group');
+  if (groupEl) {
+    const anyVisible = groupEl.querySelectorAll('.calc-item:not(.is-empty)').length > 0;
+    groupEl.style.display = anyVisible ? '' : 'none';
   }
 }
 
@@ -2018,6 +1995,7 @@ function initLiveCalc() {
       updateGenButton();
     });
   });
+  updateLiveCalc();
 }
 
 function updateGenButton() {
@@ -5081,7 +5059,7 @@ function renderGarminActualCard() {
   const rows = runs.slice().reverse().map((run) => `<tr><td>${reviewEscape(run.date)}</td><td>${reviewEscape(run.km)} km</td><td>${reviewEscape(run.pace)}</td><td>${run.hr ? `HR ${reviewEscape(run.hr)}` : '—'}</td></tr>`).join('');
   return `<div class="card" id="plan-week-garmin-actual"><div class="card-title">⌚ 本週實績 <span style="font-weight:normal;font-size:0.7em;opacity:0.7">Garmin · 資料截至 ${reviewEscape(coachReviewData.updatedAt)}</span></div>
     <div class="progress-stats"><span>跑步 <strong>${reviewEscape(week.runs)}</strong> 次</span><span>實際 <strong>${reviewEscape(week.km)} km</strong></span><span>最長 <strong>${reviewEscape(week.longKm)} km</strong></span><span>週均 <strong>HR ${reviewEscape(week.avgHr)}</strong></span></div>
-    <details style="margin-top:14px"><summary><b>查看最近 Garmin 跑步明細（${runs.length} 筆）</b></summary><table class="log-table" style="margin-top:8px"><thead><tr><th>日期</th><th>距離</th><th>配速</th><th>心率</th></tr></thead><tbody>${rows || '<tr><td colspan="4">尚無可顯示紀錄</td></tr>'}</tbody></table></details>
+    <details style="margin-top:14px"><summary><b>查看最近 Garmin 跑步明細（${runs.length} 筆）</b></summary><div class="table-scroll"><table class="log-table" style="margin-top:8px"><thead><tr><th>日期</th><th>距離</th><th>配速</th><th>心率</th></tr></thead><tbody>${rows || '<tr><td colspan="4">尚無可顯示紀錄</td></tr>'}</tbody></table></div></details>
   </div>`;
 }
 
@@ -7307,11 +7285,11 @@ function renderLogSection() {
 </details>
 <div class="card">
   <div class="card-title">檢測歷史</div>
-  ${assessments.length === 0 ? '<p style="color:var(--c-text-muted);font-size:14px">尚無檢測紀錄</p>' : `<table class="log-table"><thead><tr><th>日期</th><th>類型</th><th>結果</th><th>RPE</th><th>操作</th></tr></thead><tbody>${assessmentRows}</tbody></table>`}
+  ${assessments.length === 0 ? '<p style="color:var(--c-text-muted);font-size:14px">尚無檢測紀錄</p>' : `<div class="table-scroll"><table class="log-table"><thead><tr><th>日期</th><th>類型</th><th>結果</th><th>RPE</th><th>操作</th></tr></thead><tbody>${assessmentRows}</tbody></table></div>`}
 </div>
 <div class="card">
   <div class="card-title">訓練記錄</div>
-  ${log.length === 0 ? '<p style="color:var(--c-text-muted);font-size:14px">尚無記錄</p>' : `<table class="log-table"><thead><tr><th>日期</th><th>類型</th><th>距離</th><th>時間</th><th>配速</th><th>RPE</th></tr></thead><tbody>${rows}</tbody></table>`}
+  ${log.length === 0 ? '<p style="color:var(--c-text-muted);font-size:14px">尚無記錄</p>' : `<div class="table-scroll"><table class="log-table"><thead><tr><th>日期</th><th>類型</th><th>距離</th><th>時間</th><th>配速</th><th>RPE</th></tr></thead><tbody>${rows}</tbody></table></div>`}
 </div>`;
 }
 
