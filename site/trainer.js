@@ -6993,8 +6993,11 @@ function submitEarlyCoachPlanning(manualConfirmation = false) {
 function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigger = false, plannedSessionCount = 0, manualCompletionConfirmed = false }) {
   const existing = (appData.checkins || []).find((item) => item.weekNum === currentWeek);
   if (existing && !existing.provisional) {
-    jumpToPhaseWeek(currentWeek);
-    switchPlanTab('checkin');
+    closeModal();
+    showModal('下週已安排', `<p style="margin:0;line-height:1.7">第 ${currentWeek} 週已完成正式評估；為避免重複套用跑量調整，下週課表維持目前已安排的版本。</p>`, [
+      { label: '查看下週課表', primary: true, action: () => { closeModal(); jumpToPhaseWeek(currentWeek + 1); switchPlanTab('week'); } },
+      { label: '留在本週', action: closeModal }
+    ]);
     return;
   }
   const score = answers.filter(Boolean).length;

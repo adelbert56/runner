@@ -394,11 +394,17 @@ async function assertTrainerReport(page, viewportName) {
       document.getElementById("early-fatigue").value = "3";
       submitEarlyCoachPlanning();
       const checkin = appData.checkins.find((item) => item.weekNum === currentWeek);
+      if (checkin) checkin.provisional = false;
+      openEarlyCoachPlanning();
+      CHECKIN_QUESTIONS.slice(1).forEach((_, index) => { document.getElementById(`early-check-${index + 1}`).checked = true; });
+      document.getElementById("early-fatigue").value = "3";
+      submitEarlyCoachPlanning();
       return {
         recorded: Boolean(checkin),
         earlyTrigger: checkin?.earlyTrigger === true,
         hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.length > 0,
         nextWeekExists: Boolean(appData.plan[currentWeek]),
+        repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim(),
       };
     } finally {
       appData = previousData;
@@ -411,7 +417,7 @@ async function assertTrainerReport(page, viewportName) {
       closeModal();
     }
   });
-  if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.nextWeekExists) {
+  if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
     throw new Error(`${viewportName}/trainer-early-planning-submit: completed Garmin sessions did not complete the next-week scheduling flow ${JSON.stringify(earlyPlanningSubmission)}`);
   }
   const manualEarlyPlanning = await page.evaluate(() => {
