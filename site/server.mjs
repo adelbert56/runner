@@ -335,6 +335,7 @@ const server = createServer(async (req, res) => {
     return;
   }
   if (decoded === "/api/garmin-workout-pairing") {
+    sendGarminCors(res, origin);
     if (!isLocalGarminActivitySyncRequest(req)) {
       sendJson(res, 403, { error: "local-only", message: "Garmin 配對碼只可在本機 Runner 查看。" });
       return;

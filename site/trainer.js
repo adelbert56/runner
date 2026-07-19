@@ -6005,7 +6005,7 @@ async function showLocalGarminPairingCode() {
     if (!response.ok || !pairing.code) throw new Error(pairing.message || '無法讀取本機配對碼');
     showModal('本機 Garmin 配對碼', `<p style="margin-top:0;line-height:1.7">在公開訓練頁第一次同步時輸入這組碼。它只存在這台電腦，公開頁不會自動讀取。</p><input class="form-input" value="${reviewEscape(pairing.code)}" readonly onclick="this.select()" aria-label="本機 Garmin 配對碼"><p style="margin:12px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.6">請在同一台電腦、同一個瀏覽器完成配對；關閉分頁後，公開頁會要求再次輸入。</p>`, [{ label: '關閉', primary: true, action: closeModal }]);
   } catch (error) {
-    showModal('無法讀取本機配對碼', `<p style="margin:0;line-height:1.7">請確認你是從本機 Runner 開啟此頁，且「啟動 Runner Garmin 同步器.cmd」正在執行。</p><p style="color:var(--c-text-muted);font-size:12px">${reviewEscape(error instanceof Error ? error.message : '未知錯誤')}</p>`, [{ label: '關閉', primary: true, action: closeModal }]);
+    showModal('無法讀取本機配對碼', `<p style="margin:0;line-height:1.7">請確認你是從本機 Runner 開啟此頁，且本機網站服務（<code>http://localhost:4173/site/</code>）仍在執行。</p><p style="color:var(--c-text-muted);font-size:12px">${reviewEscape(error instanceof Error ? error.message : '未知錯誤')}</p>`, [{ label: '關閉', primary: true, action: closeModal }]);
   }
 }
 
