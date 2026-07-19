@@ -4411,8 +4411,8 @@ function futurePlanSnapshot(fromWeek = currentWeek + 1) {
   return (appData.plan || []).filter((week) => week.weekNum >= fromWeek).map((week) => ({ weekNum: week.weekNum, targetKm: Number(week.targetKm) || 0, quality: (week.days || []).filter((day) => ['tempo', 'interval'].includes(day.type)).length, deload: Boolean(week.isDeload) }));
 }
 
-function recordPlanChange(before, source, title, fromWeek = currentWeek + 1) {
-  const after = futurePlanSnapshot(fromWeek);
+function recordPlanChange(before, source, title) {
+  const after = futurePlanSnapshot();
   const changes = after.map((week) => {
     const previous = before.find((item) => item.weekNum === week.weekNum);
     if (!previous) return '';
@@ -5030,69 +5030,6 @@ function coachMenuForCurrentSchedule(menu) {
   }).filter(Boolean);
 }
 
-function garminCoachMenuForNextWeek() {
-  const autopilot = coachReviewData?.autopilot;
-  const asOf = autopilot?.asOf || coachReviewData?.analyticsUpdatedAt || coachReviewData?.updatedAt || '';
-  const week = (appData.plan || []).find((candidate) => candidate.days?.[0]?.dateStr > asOf);
-  if (!week || autopilot?.status !== 'ready') return null;
-  const sourceFactor = Math.min(1, Math.max(0.75, Number(autopilot.volumeFactor) || 1));
-  const signature = `${autopilot.asOf || coachReviewData?.analyticsUpdatedAt || ''}|${sourceFactor}|${autopilot.qualityMode || 'keep'}`;
-  const alreadyApplied = week.garminCoachAppliedFor === signature;
-  const factor = alreadyApplied ? 1 : sourceFactor;
-  const qualityMode = autopilot.qualityMode || 'keep';
-  const adjusted = (km) => Math.max(1, Math.round((Number(km) || 0) * factor * 10) / 10);
-  const menu = (week.days || []).filter((day) => day.type !== 'rest').map((day) => {
-    const isQuality = ['tempo', 'interval'].includes(day.type);
-    const km = adjusted(day.km);
-    const base = `${trainingTypeLabel(day.type, day.focus)} ${km} km`;
-    const plan = isQuality && qualityMode === 'skip'
-      ? `恢復跑 ${km} km：Garmin 偵測到恢復不足，本週品質課改為 Z2 可對話跑。`
-      : isQuality && qualityMode === 'reduce'
-        ? `${base}（降階）：主課只做原處方前 2/3；任何一組失控即改輕鬆跑。`
-        : `${base}：${day.task || day.pace || '依正式課表完成。'}${factor < 1 ? `（原 ${Number(day.km) || 0} km，依 Garmin 降量）` : ''}`;
-    return { day: DOW_NAMES[day.dow] || '', scheduledDow: day.dow, plan };
-  });
-  const targetKm = Math.round((Number(week.targetKm) || 0) * factor * 10) / 10;
-  const requiresAdjustment = factor < 1 || qualityMode !== 'keep';
-  return { week, menu, targetKm, signature, qualityMode, requiresAdjustment, alreadyApplied, label: `${week.phaseLabel || '下週'}｜${autopilot.label || 'Garmin 教練調整'}` };
-}
-
-function applyGarminCoachPlanForNextWeek() {
-  const generated = garminCoachMenuForNextWeek();
-  if (!generated) return;
-  if (generated.alreadyApplied || !generated.requiresAdjustment) {
-    jumpToPhaseWeek(generated.week.weekNum);
-    switchPlanTab('week');
-    return;
-  }
-  const beforePlan = futurePlanSnapshot(generated.week.weekNum);
-  const factor = Math.min(1, Math.max(0.75, Number(coachReviewData.autopilot?.volumeFactor) || 1));
-  const nextWeek = generated.week;
-  nextWeek.targetKm = generated.targetKm;
-  nextWeek.days = nextWeek.days.map((day) => {
-    if (day.type === 'rest') return day;
-    const adjusted = { ...day, km: Math.max(1, Math.round((Number(day.km) || 0) * factor * 10) / 10) };
-    if (['tempo', 'interval'].includes(adjusted.type) && generated.qualityMode === 'skip') {
-      adjusted.type = 'easy';
-      adjusted.focus = 'recovery';
-      adjusted.task = `恢復跑 ${adjusted.km} km｜Garmin 教練調整：本週品質課改為 Z2 可對話跑。`;
-      adjusted.pace = 'Z2 輕鬆可對話';
-      adjusted.hrTarget = `HR≤${appData.profile?.easyMaxHr || 150}`;
-      adjusted.steps = [];
-      adjusted.safetyOverride = true;
-    } else if (['tempo', 'interval'].includes(adjusted.type) && generated.qualityMode === 'reduce') {
-      adjusted.task = `${adjusted.task || '品質課'}｜Garmin 教練調整：主課只做原處方前 2/3，失控即改輕鬆跑。`;
-      adjusted.coachPlan = { source: 'garmin-autopilot', qualityMode: 'reduce' };
-    }
-    return adjusted;
-  });
-  nextWeek.garminCoachAppliedFor = generated.signature;
-  recordPlanChange(beforePlan, 'garmin-coach', `Garmin 教練建議：${coachReviewData.autopilot?.label || '下週調整'}`, generated.week.weekNum);
-  saveData(appData);
-  jumpToPhaseWeek(generated.week.weekNum);
-  switchPlanTab('week');
-}
-
 function formalCoachFallbackMenu(preferredWeekStart = '') {
   const weeks = appData.plan || [];
   const today = todayStr();
@@ -5260,15 +5197,13 @@ function renderCoachReviewPanel() {
   const nextWeek = coachReviewData.nextWeek || {};
   const activePlanWeek = appData.plan?.[currentWeek - 1] || null;
   const hasCurrentCoachPlan = coachWeekMatches(activePlanWeek);
-  const generatedCoachPlan = hasCurrentCoachPlan ? null : garminCoachMenuForNextWeek();
-  const coachMenu = hasCurrentCoachPlan ? coachMenuForCurrentSchedule(nextWeek.menu) : (generatedCoachPlan?.menu || []);
-  const hasGeneratedCoachMenu = !hasCurrentCoachPlan && Boolean(generatedCoachPlan?.menu?.length);
+  const coachMenu = hasCurrentCoachPlan ? coachMenuForCurrentSchedule(nextWeek.menu) : [];
   const upcomingWeekStart = appData.plan?.[currentWeek]?.days?.[0]?.dateStr || '';
   const formalFallback = coachMenu.length ? null : formalCoachFallbackMenu(hasCurrentCoachPlan ? nextWeek.weekStart : upcomingWeekStart);
   const scheduledMenu = coachMenu.length ? coachMenu : formalFallback.menu;
-  const menuSource = hasCurrentCoachPlan ? 'Garmin 教練參考菜單' : hasGeneratedCoachMenu ? 'Garmin 教練調整後的下週課表' : '下週正式課表（依本週 Garmin 實跑判讀）';
-  const menuLabel = hasCurrentCoachPlan ? nextWeek.label : hasGeneratedCoachMenu ? generatedCoachPlan.label : `第 ${formalFallback.week?.weekNum || currentWeek} 週正式課表`;
-  const menuTargetKm = hasCurrentCoachPlan ? nextWeek.targetKm : hasGeneratedCoachMenu ? generatedCoachPlan.targetKm : (formalFallback.week?.targetKm ?? '—');
+  const menuSource = coachMenu.length ? 'Garmin 教練參考菜單' : '下週正式課表（依本週 Garmin 實跑判讀）';
+  const menuLabel = coachMenu.length ? nextWeek.label : `第 ${formalFallback.week?.weekNum || currentWeek} 週正式課表`;
+  const menuTargetKm = coachMenu.length ? nextWeek.targetKm : (formalFallback.week?.targetKm ?? '—');
   const garminUpdatedAt = coachReviewData.analyticsUpdatedAt || coachReviewData.syncedAt || coachReviewData.updatedAt;
   const reviewFreshness = garminUpdatedAt === coachReviewData.updatedAt
     ? `Garmin 資料截至 ${garminUpdatedAt}`
@@ -5303,10 +5238,9 @@ function renderCoachReviewPanel() {
   }).join('');
   const courseSection = coachMenu.length
     ? `<div class="coach-menu-card">
-        <div class="coach-menu-head"><div><div class="plan-overview-kicker">${hasGeneratedCoachMenu ? 'Garmin 實跑後的下週調整' : '教練調整後的課程'}</div><b class="coach-menu-title">${reviewEscape(menuLabel)}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
-        <p class="coach-fineprint" style="margin:4px 0 10px">${hasGeneratedCoachMenu ? `已依本週 Garmin 判定「${reviewEscape(coachReviewData.autopilot?.label || '訓練調整')}」生成；下方是可套用的調整版課表，不是原排課程。` : `這是 Garmin 教練週報提供的調整內容，已依目前訓練日重排：${reviewEscape(scheduleDays)}`}</p>
+        <div class="coach-menu-head"><div><div class="plan-overview-kicker">教練調整後的課程</div><b class="coach-menu-title">${reviewEscape(menuLabel)}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
+        <p class="coach-fineprint" style="margin:4px 0 10px">這是 Garmin 教練週報提供的調整內容，已依目前訓練日重排：${reviewEscape(scheduleDays)}</p>
         <div class="coach-menu-list">${menuRows || '<div class="coach-fineprint">目前沒有可顯示的跑步課程。</div>'}</div>
-        ${hasGeneratedCoachMenu ? `<div class="training-status-actions" style="margin-top:12px"><button class="btn btn-primary" type="button" onclick="applyGarminCoachPlanForNextWeek()">${generatedCoachPlan.alreadyApplied ? '查看已套用的教練課表' : '套用教練調整並查看下週'}</button></div>` : ''}
         ${(() => {
           const jargon = jargonNotesFor(scheduledMenu.map((item) => item.plan || ''));
           if (!jargon.length) return '';
@@ -5373,39 +5307,25 @@ function earlyCoachPlanningEligibility() {
 function renderEarlyCoachPlanningCard() {
   const eligibility = earlyCoachPlanningEligibility();
   const completed = eligibility.plannedSessions?.length || 0;
-  return `<div class="coach-setting-card" style="margin:14px 0"><div class="coach-setting-value">手動提前排課</div><div class="coach-fineprint">${eligibility.eligible ? `本週 ${completed} 堂排定跑步課均已完成；現在會依 Garmin 實跑與恢復判定，產生可套用的下週教練調整。休息與居家肌力不列入完成門檻，也不會被硬塞或自動補跑。` : reviewEscape(eligibility.reason)}</div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${renderEarlyCoachPlanningAction(eligibility)}</div></div>`;
+  return `<div class="coach-setting-card" style="margin:14px 0"><div class="coach-setting-value">手動提前排課</div><div class="coach-fineprint">${eligibility.eligible ? `本週 ${completed} 堂排定跑步課均已完成，可先做恢復檢核並提前安排下週。休息與居家肌力不列入完成門檻，也不會被硬塞或自動補跑。` : reviewEscape(eligibility.reason)}</div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${renderEarlyCoachPlanningAction(eligibility)}</div></div>`;
 }
 
 function renderEarlyCoachPlanningAction(eligibility = earlyCoachPlanningEligibility()) {
-  if (eligibility.eligible) return '<button class="btn btn-secondary" type="button" onclick="applyGarminCoachPlanForNextWeek()">套用教練調整並查看下週</button>';
-  if (Array.isArray(eligibility.pending) && eligibility.pending.length > 0) return '<button class="btn btn-secondary" type="button" onclick="openEarlyScheduledWeek(true)">確認完成後查看下週課程</button>';
+  if (eligibility.eligible) return '<button class="btn btn-secondary" type="button" onclick="openEarlyCoachPlanning()">依本週完成紀錄安排下週</button>';
+  if (Array.isArray(eligibility.pending) && eligibility.pending.length > 0) return '<button class="btn btn-secondary" type="button" onclick="openEarlyCoachPlanning(true)">確認已完成並安排下週</button>';
   return '';
 }
 
-function openEarlyScheduledWeek(manualConfirmation = false) {
+function openEarlyCoachPlanning(manualConfirmation = false) {
   const eligibility = earlyCoachPlanningEligibility();
-  if (eligibility.eligible) {
-    jumpToPhaseWeek(currentWeek + 1);
-    switchPlanTab('week');
-    return;
-  }
-  if (!manualConfirmation || !Array.isArray(eligibility.pending)) return;
+  if (!eligibility.eligible && !manualConfirmation) return;
+  const checks = CHECKIN_QUESTIONS.slice(1).map((question, index) => `<label class="checkin-safety"><input id="early-check-${index + 1}" type="checkbox" style="margin-top:3px">${reviewEscape(question)}</label>`).join('');
   const planned = eligibility.plannedSessions || [];
-  const checks = planned.map((day, index) => `<label class="checkin-safety"><input id="early-complete-${index}" type="checkbox" style="margin-top:3px">${reviewEscape(day.dateStr)}｜${reviewEscape(trainingTaskTitle(day))}</label>`).join('');
-  showModal('確認本週完成後查看下週', `<p style="margin:0 0 12px;line-height:1.65">Garmin 日期未能和目前課表對上。請逐堂確認已完成；這只會提前開啟<b>既有的下週課表</b>，不會修改距離、強度或課程內容。</p><div class="coach-setting-card" style="margin:0 0 12px">${checks}</div>`, [
-    { label: '查看下週原排課程', primary: true, action: () => confirmEarlyScheduledWeek(planned) },
+  const manualChecks = manualConfirmation ? `<div class="coach-setting-card" style="margin:0 0 12px"><b>手動完成確認</b><div class="coach-fineprint">Garmin 日期未能和目前課表對上。請逐堂確認已完成，系統才會提前排課。</div>${planned.map((day, index) => `<label class="checkin-safety"><input id="early-complete-${index}" type="checkbox" style="margin-top:3px">${reviewEscape(day.dateStr)}｜${reviewEscape(trainingTaskTitle(day))}</label>`).join('')}</div>` : `<div class="checkin-safety" style="background:var(--c-surface-alt)">✓ 已完成 ${planned.length} 堂排定跑步課</div>`;
+  showModal('提前排定下週', `<p style="margin:0 0 12px;line-height:1.65">系統只會依恢復狀態微調<b>下一週尚未執行的課程</b>；若有疲勞或疼痛，仍會降載並移除品質課。</p>${manualChecks}${checks}<div class="form-group" style="margin-top:14px"><label class="form-label" for="early-fatigue">目前整體疲勞 (1–5)</label><input class="form-input" id="early-fatigue" type="number" min="1" max="5" placeholder="3"><div class="field-help">4–5 會自動降載；有疼痛請不要勾選「身體無異常疲勞或疼痛」。</div></div><div class="form-group"><label class="form-label" for="early-note">提前排課備註（選填）</label><input class="form-input" id="early-note" type="text" maxlength="240" placeholder="例：本週跑步課已提前完成，週末只安排輕鬆恢復"></div>`, [
+    { label: '依恢復狀態提前排定', primary: true, action: () => submitEarlyCoachPlanning(manualConfirmation) },
     { label: '取消', action: closeModal }
   ]);
-}
-
-function confirmEarlyScheduledWeek(planned) {
-  if (planned.some((_, index) => !document.getElementById(`early-complete-${index}`)?.checked)) {
-    showModal('請確認已完成的跑步課', '<p style="margin:0;line-height:1.7">請逐堂勾選已完成的跑步課後，再查看下週課表。</p>', [{ label: '返回確認', primary: true, action: () => openEarlyScheduledWeek(true) }]);
-    return;
-  }
-  closeModal();
-  jumpToPhaseWeek(currentWeek + 1);
-  switchPlanTab('week');
 }
 
 function refreshCoachReviewPanels() {
@@ -7013,7 +6933,7 @@ function renderCheckinSection() {
   </section>`;
 }
 
-function adjustNextWeek(factor, removeQuality) {
+function adjustNextWeek(factor, removeQuality, qualityMode = 'keep') {
   const nextWeekPlan = appData.plan[currentWeek];
   if (!nextWeekPlan) return;
   const beforePlan = futurePlanSnapshot();
@@ -7026,9 +6946,13 @@ function adjustNextWeek(factor, removeQuality) {
       return recovery;
     }
     if (day.type !== 'rest') day.km = Math.round((day.km || 0) * factor * 10) / 10;
+    if (qualityMode === 'reduce' && ['tempo', 'interval'].includes(day.type)) {
+      day.task = `${day.task || '品質課'}｜Garmin 教練調整：主課只做原處方前 2/3，失控即改輕鬆跑。`;
+      day.coachPlan = { source: 'garmin-autopilot', qualityMode: 'reduce' };
+    }
     return day;
   });
-  recordPlanChange(beforePlan, 'checkin', removeQuality ? '週評估自動保護：下週降載並移除品質課' : '週評估已更新下週訓練量');
+  recordPlanChange(beforePlan, 'checkin', removeQuality ? '週評估自動保護：下週降載並移除品質課' : qualityMode === 'reduce' ? 'Garmin 教練建議：下週降量並降階品質課' : '週評估已更新下週訓練量');
   saveData(appData);
 }
 
@@ -7047,6 +6971,26 @@ function submitCheckin() {
     fatigue: parseInt(document.getElementById('cw-fatigue')?.value, 10) || 0,
     note: document.getElementById('cw-note')?.value?.trim() || '',
     painConcern: Boolean(document.getElementById('cw-pain-concern')?.checked)
+  });
+}
+
+function submitEarlyCoachPlanning(manualConfirmation = false) {
+  const eligibility = earlyCoachPlanningEligibility();
+  const planned = eligibility.plannedSessions || [];
+  if (!eligibility.eligible && !manualConfirmation) return;
+  if (manualConfirmation && (!planned.length || planned.some((_, index) => !document.getElementById(`early-complete-${index}`)?.checked))) {
+    showModal('請確認已完成的跑步課', '<p style="margin:0;line-height:1.7">請逐堂勾選已完成的跑步課後，再進行提前排課。</p>', [{ label: '返回確認', primary: true, action: () => openEarlyCoachPlanning(true) }]);
+    return;
+  }
+  const answers = [true, ...CHECKIN_QUESTIONS.slice(1).map((_, index) => Boolean(document.getElementById(`early-check-${index + 1}`)?.checked))];
+  completeWeeklyCheckin({
+    answers,
+    fatigue: parseInt(document.getElementById('early-fatigue')?.value, 10) || 0,
+    note: document.getElementById('early-note')?.value?.trim() || '',
+    painConcern: !answers[1],
+    earlyTrigger: true,
+    plannedSessionCount: planned.length,
+    manualCompletionConfirmed: manualConfirmation
   });
 }
 
@@ -7069,8 +7013,18 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
     decision.allowIntensity = false;
     decision.note = `本週尚未結束（目前 ${timing.completed}/${timing.planned} 堂）；先保留恢復判讀，最後一堂完成後再評估是否推進。`;
   }
-  if (earlyTrigger && decision.allowIntensity) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
-  if (decision.factor !== 1 || decision.removeQuality) adjustNextWeek(decision.factor, decision.removeQuality);
+  const garminDecision = earlyTrigger && coachReviewData?.autopilot?.status === 'ready' ? coachReviewData.autopilot : null;
+  if (garminDecision?.decision === 'deload' && !painConcern && fatigue < 5 && answers[1]) {
+    const garminFactor = Math.min(1, Math.max(0.75, Number(garminDecision.volumeFactor) || 1));
+    decision.factor = Math.min(decision.factor, garminFactor);
+    decision.removeQuality = decision.removeQuality || garminDecision.qualityMode === 'skip';
+    decision.qualityMode = garminDecision.qualityMode || 'keep';
+    decision.result = '降載恢復';
+    decision.note = `Garmin 已判定「${garminDecision.label || '自動降量'}」：下週跑量調整為 ${Math.round(garminFactor * 100)}%，${garminDecision.qualityMode === 'reduce' ? '品質課降階為原處方前 2/3。' : garminDecision.qualityMode === 'skip' ? '品質課改為恢復跑。' : '維持原品質課。'}`;
+  }
+  if (earlyTrigger && garminDecision?.decision !== 'deload' && decision.allowIntensity) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
+  if (earlyTrigger && garminDecision?.decision === 'deload' && !painConcern && fatigue < 5 && answers[1]) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；${decision.note}`;
+  if (decision.factor !== 1 || decision.removeQuality || decision.qualityMode === 'reduce') adjustNextWeek(decision.factor, decision.removeQuality, decision.qualityMode);
   if (!decision.allowIntensity && (painConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
   const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);

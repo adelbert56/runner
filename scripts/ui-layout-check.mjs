@@ -365,14 +365,13 @@ async function assertTrainerReport(page, viewportName) {
   if (!earlyPlanning.eligible || earlyPlanning.planned < 2) {
     throw new Error(`${viewportName}/trainer-early-planning: matched Garmin sessions did not unlock early planning ${JSON.stringify(earlyPlanning)}`);
   }
-  const earlyPlanningNavigation = await page.evaluate(() => {
+  const earlyPlanningSubmission = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;
     const previousReview = cloneTrainingValue(coachReviewData);
     const originalJumpToPhaseWeek = window.jumpToPhaseWeek;
     const originalSwitchPlanTab = window.switchPlanTab;
-    let targetWeek = null;
-    let targetTab = null;
+    const originalShowCheckinOutcome = window.showCheckinOutcome;
     try {
       currentWeek = 1;
       const week = appData.plan[0];
@@ -380,27 +379,39 @@ async function assertTrainerReport(page, viewportName) {
       appData.log = [];
       appData.dayStatuses = {};
       planned.forEach((day) => { day.status = "planned"; });
-      const targetPlan = appData.plan[1];
-      const asOf = planned.map((day) => day.dateStr).sort().at(-1);
-      coachReviewData.analyticsRuns = planned.map((day, index) => ({ activityId: `early-view-${index}`, date: day.dateStr, km: day.km, pace: "6:00" }));
-      coachReviewData.autopilot = { status: "ready", asOf, volumeFactor: 0.85, qualityMode: "reduce", label: "自動降量" };
-      window.jumpToPhaseWeek = (weekNum) => { targetWeek = weekNum; };
-      window.switchPlanTab = (tab) => { targetTab = tab; };
-      const generated = garminCoachMenuForNextWeek();
-      applyGarminCoachPlanForNextWeek();
-      return { targetWeek, targetTab, targetKm: targetPlan.targetKm, generatedTargetKm: generated?.targetKm, applied: Boolean(targetPlan.garminCoachAppliedFor), changedCheckins: appData.checkins?.length || 0 };
+      appData.checkins = [];
+      const nextWeek = appData.plan[1];
+      const originalTargetKm = nextWeek.targetKm;
+      window.jumpToPhaseWeek = () => {};
+      window.switchPlanTab = () => {};
+      window.showCheckinOutcome = () => {};
+      coachReviewData.analyticsRuns = planned.map((day, index) => ({ activityId: `early-submit-${index}`, date: day.dateStr, km: day.km, pace: "6:00" }));
+      coachReviewData.autopilot = { status: "ready", decision: "deload", label: "自動降量", volumeFactor: 0.85, qualityMode: "reduce" };
+      openEarlyCoachPlanning();
+      CHECKIN_QUESTIONS.slice(1).forEach((_, index) => { document.getElementById(`early-check-${index + 1}`).checked = true; });
+      document.getElementById("early-fatigue").value = "3";
+      submitEarlyCoachPlanning();
+      const checkin = appData.checkins.find((item) => item.weekNum === currentWeek);
+      if (checkin) checkin.provisional = false;
+      openEarlyCoachPlanning();
+      CHECKIN_QUESTIONS.slice(1).forEach((_, index) => { document.getElementById(`early-check-${index + 1}`).checked = true; });
+      document.getElementById("early-fatigue").value = "3";
+      submitEarlyCoachPlanning();
+      const hasQuality = nextWeek.days.some((day) => ["tempo", "interval"].includes(day.type));
+      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), nextWeekExists: Boolean(appData.plan[currentWeek]), adjustedTargetKm: nextWeek.targetKm, expectedTargetKm: Math.round(originalTargetKm * 0.85 * 10) / 10, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
     } finally {
       appData = previousData;
       currentWeek = previousWeek;
       coachReviewData = previousReview;
       window.jumpToPhaseWeek = originalJumpToPhaseWeek;
       window.switchPlanTab = originalSwitchPlanTab;
+      window.showCheckinOutcome = originalShowCheckinOutcome;
       saveData(appData);
       closeModal();
     }
   });
-  if (earlyPlanningNavigation.targetWeek !== 2 || earlyPlanningNavigation.targetTab !== "week" || !earlyPlanningNavigation.applied || earlyPlanningNavigation.targetKm !== earlyPlanningNavigation.generatedTargetKm || earlyPlanningNavigation.changedCheckins) {
-    throw new Error(`${viewportName}/trainer-early-planning-navigation: completed Garmin sessions did not apply the generated deload plan ${JSON.stringify(earlyPlanningNavigation)}`);
+  if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.adjustedTargetKm !== earlyPlanningSubmission.expectedTargetKm || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
+    throw new Error(`${viewportName}/trainer-early-planning-submit: completed Garmin sessions did not complete the next-week scheduling flow ${JSON.stringify(earlyPlanningSubmission)}`);
   }
   const manualEarlyPlanning = await page.evaluate(() => {
     const previousWeek = currentWeek;
@@ -422,7 +433,7 @@ async function assertTrainerReport(page, viewportName) {
       const card = renderEarlyCoachPlanningCard();
       return {
         pending: eligibility.pending?.length || 0,
-        offersManualConfirmation: card.includes("確認完成後查看下週課程"),
+        offersManualConfirmation: card.includes("確認已完成並安排下週"),
       };
     } finally {
       appData.log = previous.log;
