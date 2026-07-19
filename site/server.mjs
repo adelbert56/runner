@@ -309,6 +309,14 @@ function pruneRegistrationBatchPreviews() {
 const server = createServer(async (req, res) => {
   const decoded = decodeURIComponent(new URL(req.url || "/", `http://localhost:${port}`).pathname);
   const origin = String(req.headers.origin || "");
+  const requestHost = String(req.headers.host || "");
+  // Training data is browser-local. Canonicalize the local UI origin so
+  // localhost and 127.0.0.1 do not appear as different empty profiles.
+  if (req.method === "GET" && requestHost === `localhost:${port}` && !decoded.startsWith("/api/")) {
+    res.writeHead(302, { location: `http://127.0.0.1:${port}${req.url || "/"}` });
+    res.end();
+    return;
+  }
   if (decoded.startsWith("/api/garmin-activity-sync")) {
     if (!isLocalGarminActivitySyncRequest(req)) {
       sendJson(res, 403, { error: "forbidden", message: "Garmin activity sync is only available from the local Runner server." });
@@ -511,5 +519,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(port, () => {
-  console.log(`Runner Plaza is running at http://localhost:${port}/site/`);
+  console.log(`Runner Plaza is running at http://127.0.0.1:${port}/site/`);
 });
