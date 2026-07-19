@@ -4159,7 +4159,7 @@ function weeklyCoachLetterBody() {
     const qualityDay = (nextWeek.days || []).find((day) => ['tempo', 'interval'].includes(day.type));
     const longDay = (nextWeek.days || []).find((day) => day.type === 'long');
     const specialNote = nextWeek.isTaper ? ' 下週是賽前減量週，量會刻意降下來，別想著硬撐加量。' : nextWeek.isDeload ? ' 下週安排恢復週，跑量會主動降低，好好把身體養回來。' : '';
-    nextPara = `下週目標跑量約 ${nextWeek.targetKm} km${qualityDay ? `，安排一堂${trainingTypeLabel(qualityDay.type, qualityDay.focus)}` : ''}${longDay ? `，長跑約 ${longDay.km} km` : ''}。${specialNote}`;
+    nextPara = `下週目標跑量約 ${weekPlannedKm(nextWeek)} km${qualityDay ? `，安排一堂${trainingTypeLabel(qualityDay.type, qualityDay.focus)}` : ''}${longDay ? `，長跑約 ${longDay.km} km` : ''}。${specialNote}`;
   }
 
   return `<p style="margin:0 0 10px;line-height:1.7">${reviewEscape(reviewPara)}</p>
@@ -4422,7 +4422,7 @@ function plannedSessionFor(run) {
 }
 
 function futurePlanSnapshot(fromWeek = currentWeek + 1) {
-  return (appData.plan || []).filter((week) => week.weekNum >= fromWeek).map((week) => ({ weekNum: week.weekNum, targetKm: Number(week.targetKm) || 0, quality: (week.days || []).filter((day) => ['tempo', 'interval'].includes(day.type)).length, deload: Boolean(week.isDeload) }));
+  return (appData.plan || []).filter((week) => week.weekNum >= fromWeek).map((week) => ({ weekNum: week.weekNum, plannedKm: weekPlannedKm(week), quality: (week.days || []).filter((day) => ['tempo', 'interval'].includes(day.type)).length, deload: Boolean(week.isDeload) }));
 }
 
 function recordPlanChange(before, source, title) {
@@ -4431,7 +4431,7 @@ function recordPlanChange(before, source, title) {
     const previous = before.find((item) => item.weekNum === week.weekNum);
     if (!previous) return '';
     const parts = [];
-    if (previous.targetKm !== week.targetKm) parts.push(`${previous.targetKm} → ${week.targetKm} km`);
+    if (previous.plannedKm !== week.plannedKm) parts.push(`${previous.plannedKm} → ${week.plannedKm} km`);
     if (previous.quality !== week.quality) parts.push(`品質課 ${previous.quality} → ${week.quality} 堂`);
     if (!previous.deload && week.deload) parts.push('改為恢復週');
     return parts.length ? `第 ${week.weekNum} 週：${parts.join('、')}` : '';
@@ -4990,13 +4990,17 @@ function coachWeekMatches(week) {
   return week.days.some((day) => day.dateStr === weekStart);
 }
 
+// week.targetKm 是課表產生器分配每日課表前的參考目標，calcWorkoutKm/
+// calcLongRunKm 依課型權重分天配額後，加總本來就會小於這個目標（權重
+// 設計上就留了緩衝，不是要湊滿）。凡是要顯示「這週排了多少 km」的地方，
+// 一律用這個函式加總實際排定課表，不要直接讀 week.targetKm——不然這裡
+// 跟每日卡片、跟本週跑量進度條會各講各的數字。
+function weekPlannedKm(week) {
+  return Math.round((week?.days || []).reduce((sum, day) => sum + (day.type !== 'rest' && !day.isMakeup ? (Number(day.km) || 0) : 0), 0) * 10) / 10;
+}
+
 function effectiveWeekVolumeTarget(week) {
-  // week.targetKm 是課表產生器分配每日課表前的參考目標，calcWorkoutKm/
-  // calcLongRunKm 依課型權重分天配額後，加總本來就會小於這個目標（權重
-  // 設計上就留了緩衝，不是要湊滿）。顯示用的分母改成當週實際排定課表
-  // 總和，才會在全部跑完時顯示 100%，跟每日卡片的數字對得上。
-  const daysKmSum = Math.round((week?.days || []).reduce((sum, day) => sum + (day.type !== 'rest' && !day.isMakeup ? (Number(day.km) || 0) : 0), 0) * 10) / 10;
-  const formalKm = daysKmSum || Number(week?.targetKm) || 0;
+  const formalKm = weekPlannedKm(week) || Number(week?.targetKm) || 0;
   // nextWeek.menu 為空代表教練週報還沒有真人手動菜單，targetKm 只會是像
   // 「依正式課表安排」這種說明文字，不是數字；此時一律回退正式課表，
   // 避免把說明文字硬接上「km」顯示成亂碼，也避免誤標成「教練本週目標」。
@@ -5115,7 +5119,7 @@ function renderCoachPeriodizationTimeline() {
     return groups.map((group) => ({
       ...group,
       start: group.startWeek.days?.[0]?.dateStr,
-      km: `${group.startWeek.targetKm}–${group.endWeek.targetKm} km / 週`,
+      km: `${weekPlannedKm(group.startWeek)}–${weekPlannedKm(group.endWeek)} km / 週`,
       focus: getPhaseRuleText(group.startWeek, appData.profile || {}, (appData.plan || []).length),
       isFormal: true
     }));
@@ -5260,6 +5264,7 @@ function renderCoachReviewPanel() {
     : `<div class="coach-menu-card">
         <div class="coach-menu-head"><div><div class="plan-overview-kicker">${hasCurrentCoachPlan ? '正式課表維持原樣' : 'Garmin 實跑已納入判讀'}</div><b class="coach-menu-title">${hasCurrentCoachPlan ? '本週課程不重複列在這裡' : '下週安排已依正式課表準備'}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
         <p class="coach-fineprint" style="margin:6px 0 12px">${hasCurrentCoachPlan ? '完整每天課程請在「本週課表」查看；目前只顯示與本週日期相符的教練調整，避免歷史週報重複拉長頁面。' : '已讀取本週 Garmin 主課與完成度；完成恢復確認後，系統會把安全調整套用到這份下週正式課表。'}</p>
+        ${!hasCurrentCoachPlan && nextWeek.weekStart && nextWeek.weekStart !== upcomingWeekStart ? `<p class="coach-fineprint" style="margin:0 0 12px;color:var(--c-orange)">⚠️ 真人週報最後寫到 ${reviewEscape(nextWeek.weekStart)} 那週，還沒更新到下週（${reviewEscape(upcomingWeekStart)}）；下週先照正式課表執行，等真人週報補上再看那邊的調整。</p>` : ''}
         <button class="btn btn-secondary" onclick="${hasCurrentCoachPlan ? 'showWeekPlanFromStatus()' : `jumpToPhaseWeek(${currentWeek + 1}); switchPlanTab('week')`}">${hasCurrentCoachPlan ? '查看本週正式課表' : '查看下週正式課表'}</button>
         ${historicalReviewNotice}
       </div>`;
@@ -7853,8 +7858,11 @@ function init() {
   }
   const ui = loadUiState();
   if (appData.profile && appData.plan && appData.plan.length > 0) {
+    // renderPlanView() 已經用今天的日期算出真正的 currentWeek；不要在開機時
+    // 用「上次瀏覽到哪一週」（ui.week，單純翻頁記憶）覆寫回去。翻頁看其他
+    // 週跟「目前實際進行到第幾週」是兩件事，混在同一個變數裡，重新整理
+    // 一次就會把提前排課、週評估等判斷全部帶去錯的週。
     renderPlanView();
-    if (ui.week && appData.plan[ui.week - 1]) jumpToPhaseWeek(ui.week);
     if (ui.view === 'setup') {
       renderSetupView();
       showView('setup');
