@@ -423,20 +423,7 @@
     "start_times": "3公里 起跑 17:30、10公里 起跑 18:00",
     "first_seen_at": "2026-05-16",
     "cancellation_notice": "",
-    "cancellation_notice_url": "",
-    "weather_forecast": {
-      "forecast_for": "2026-07-18",
-      "updated_at": "2026-07-16T23:52:57.288Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "臺中市",
-      "summary": "臺中市縣市預報，雷雨，25-31°C，降雨機率 100%，最大風速 12 km/h",
-      "weather_code": 96,
-      "temperature_min_c": 24.9,
-      "temperature_max_c": 31.4,
-      "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 12
-    }
+    "cancellation_notice_url": ""
   },
   {
     "race_id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
