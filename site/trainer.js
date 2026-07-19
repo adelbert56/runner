@@ -4621,7 +4621,11 @@ function liveCoachPlan() {
   const trend = weeklyRunTrend(runs);
   const recommendation = weekVolumeRecommendation(trend, summary.adherence);
   const reviewedWeek = coachReviewData?.week || {};
-  const hasReviewedWeek = Boolean(reviewedWeek.range || reviewedWeek.label);
+  const reviewedPlanStart = coachReviewData?.nextWeek?.weekStart || '';
+  // 人工週報描述的是 nextWeek 開始前的那週。只要該週已有 Garmin 實跑，
+  // 就不能再用前一週的摘要冒充目前狀況，必須改讀本週的實跑紀錄。
+  const hasNewerGarminRuns = Boolean(reviewedPlanStart) && runs.some((run) => run.date >= reviewedPlanStart);
+  const hasReviewedWeek = Boolean(reviewedWeek.range || reviewedWeek.label) && !hasNewerGarminRuns;
   const recent = runs.slice(-4);
   const latest = recent.at(-1);
   const averagePace = recent.filter((run) => run.paceSeconds).reduce((sum, run, _, list) => sum + run.paceSeconds / list.length, 0);
@@ -5175,9 +5179,10 @@ function renderCoachReviewPanel() {
   const activePlanWeek = appData.plan?.[currentWeek - 1] || null;
   const hasCurrentCoachPlan = coachWeekMatches(activePlanWeek);
   const coachMenu = hasCurrentCoachPlan ? coachMenuForCurrentSchedule(nextWeek.menu) : [];
-  const formalFallback = coachMenu.length ? null : formalCoachFallbackMenu(nextWeek.weekStart);
+  const upcomingWeekStart = appData.plan?.[currentWeek]?.days?.[0]?.dateStr || '';
+  const formalFallback = coachMenu.length ? null : formalCoachFallbackMenu(hasCurrentCoachPlan ? nextWeek.weekStart : upcomingWeekStart);
   const scheduledMenu = coachMenu.length ? coachMenu : formalFallback.menu;
-  const menuSource = coachMenu.length ? 'Garmin 教練參考菜單' : '正式課表（教練週報未提供菜單）';
+  const menuSource = coachMenu.length ? 'Garmin 教練參考菜單' : '下週正式課表（依本週 Garmin 實跑判讀）';
   const menuLabel = coachMenu.length ? nextWeek.label : `第 ${formalFallback.week?.weekNum || currentWeek} 週正式課表`;
   const menuTargetKm = coachMenu.length ? nextWeek.targetKm : (formalFallback.week?.targetKm ?? '—');
   const scheduleDays = scheduledMenu.map((item) => DOW_NAMES[item.scheduledDow] || item.day).join('、');
@@ -5220,9 +5225,9 @@ function renderCoachReviewPanel() {
         })()}
       </div>`
     : `<div class="coach-menu-card">
-        <div class="coach-menu-head"><div><div class="plan-overview-kicker">正式課表維持原樣</div><b class="coach-menu-title">本週課程不重複列在這裡</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
-        <p class="coach-fineprint" style="margin:6px 0 12px">完整每天課程請在「本週課表」查看；目前只顯示與本週日期相符的教練調整，避免歷史週報重複拉長頁面。</p>
-        <button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看本週正式課表</button>
+        <div class="coach-menu-head"><div><div class="plan-overview-kicker">${hasCurrentCoachPlan ? '正式課表維持原樣' : 'Garmin 實跑已納入判讀'}</div><b class="coach-menu-title">${hasCurrentCoachPlan ? '本週課程不重複列在這裡' : '下週安排已依正式課表準備'}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
+        <p class="coach-fineprint" style="margin:6px 0 12px">${hasCurrentCoachPlan ? '完整每天課程請在「本週課表」查看；目前只顯示與本週日期相符的教練調整，避免歷史週報重複拉長頁面。' : '已讀取本週 Garmin 主課與完成度；完成恢復確認後，系統會把安全調整套用到這份下週正式課表。'}</p>
+        <button class="btn btn-secondary" onclick="${hasCurrentCoachPlan ? 'showWeekPlanFromStatus()' : `jumpToPhaseWeek(${currentWeek + 1}); switchPlanTab('week')`}">${hasCurrentCoachPlan ? '查看本週正式課表' : '查看下週正式課表'}</button>
         ${historicalReviewNotice}
       </div>`;
   return `${renderTrainingStatusCard(appData.plan || [])}<div class="card coach-panel">
@@ -5236,6 +5241,7 @@ function renderCoachReviewPanel() {
         const link = status.actionUrl ? ` <a class="coach-pill" href="${reviewEscape(status.actionUrl)}" target="_blank" rel="noopener">${reviewEscape(status.actionLabel)} ↗</a>` : '';
         return `<span class="coach-pill status-${status.level}">${reviewEscape(status.text)}</span>${link}`;
       })()}
+      ${renderEarlyCoachPlanningAction()}
       ${renderLocalGarminPairingButton()}
       <button class="btn btn-secondary coach-lock-btn" onclick="lockCoachReview()">🔒 鎖定</button>
     </div>
@@ -5244,7 +5250,6 @@ function renderCoachReviewPanel() {
     ${renderLastRecalibrationCard()}
     ${renderPlanChangeTimeline()}
     ${renderLiveCoachCard(week, nextWeek, hasCurrentCoachPlan)}
-    ${renderEarlyCoachPlanningCard()}
     ${courseSection}
     ${renderCoachDataSignals()}
     <p class="coach-fineprint" style="margin-top:12px">這是依 Garmin 實績產生的參考安排；你的正式課表不會自動被覆寫。</p>
@@ -5279,8 +5284,13 @@ function earlyCoachPlanningEligibility() {
 function renderEarlyCoachPlanningCard() {
   const eligibility = earlyCoachPlanningEligibility();
   const completed = eligibility.plannedSessions?.length || 0;
-  const canManuallyConfirm = Array.isArray(eligibility.pending) && eligibility.pending.length > 0;
-  return `<div class="coach-setting-card" style="margin:14px 0"><div class="coach-setting-value">手動提前排課</div><div class="coach-fineprint">${eligibility.eligible ? `本週 ${completed} 堂排定跑步課均已完成，可先做恢復檢核並提前安排下週。休息與居家肌力不列入完成門檻，也不會被硬塞或自動補跑。` : reviewEscape(eligibility.reason)}</div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${eligibility.eligible ? '<button class="btn btn-secondary" type="button" onclick="openEarlyCoachPlanning()">手動提前排定下週</button>' : canManuallyConfirm ? '<button class="btn btn-secondary" type="button" onclick="openEarlyCoachPlanning(true)">我已完成，手動確認排課</button>' : ''}</div></div>`;
+  return `<div class="coach-setting-card" style="margin:14px 0"><div class="coach-setting-value">手動提前排課</div><div class="coach-fineprint">${eligibility.eligible ? `本週 ${completed} 堂排定跑步課均已完成，可先做恢復檢核並提前安排下週。休息與居家肌力不列入完成門檻，也不會被硬塞或自動補跑。` : reviewEscape(eligibility.reason)}</div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${renderEarlyCoachPlanningAction(eligibility)}</div></div>`;
+}
+
+function renderEarlyCoachPlanningAction(eligibility = earlyCoachPlanningEligibility()) {
+  if (eligibility.eligible) return '<button class="btn btn-secondary" type="button" onclick="openEarlyCoachPlanning()">依本週完成紀錄安排下週</button>';
+  if (Array.isArray(eligibility.pending) && eligibility.pending.length > 0) return '<button class="btn btn-secondary" type="button" onclick="openEarlyCoachPlanning(true)">確認已完成並安排下週</button>';
+  return '';
 }
 
 function openEarlyCoachPlanning(manualConfirmation = false) {
