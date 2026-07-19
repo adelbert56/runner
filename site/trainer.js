@@ -515,15 +515,30 @@ function normalizePlanChangeHistory(history) {
   if (!Array.isArray(history)) return [];
   const normalized = history.filter((item) => item && /^\d{4}-\d{2}-\d{2}$/.test(item.date || '') && Array.isArray(item.changes))
     .slice(-30).map((item) => ({ date: item.date, source: String(item.source || 'system').slice(0, 40), title: String(item.title || '課表已更新').slice(0, 100), changes: item.changes.slice(0, 8).map((change) => String(change).slice(0, 180)) }));
-  // Garmin 同步資料可能在同一天分批更新；歷程只呈現最後一次校準結果，避免把同一輪自動調整誤看成兩筆事件。
+  // Garmin 同步可能跨日補齊同一週資料；歷程只呈現同一結果的最後一次，
+  // 避免把同一輪自動校準誤看成多筆不同事件。
   return normalized.reduce((items, item) => {
     const previousIndex = item.source === 'garmin'
-      ? items.findIndex((previous) => previous.date === item.date && previous.source === item.source && previous.title === item.title)
+      ? items.findIndex((previous) => previous.source === item.source && previous.title === item.title && previous.changes.join('|') === item.changes.join('|'))
       : -1;
     if (previousIndex >= 0) items[previousIndex] = item;
     else items.push(item);
     return items;
   }, []);
+}
+
+function normalizeTrainingCheckins(checkins) {
+  if (!Array.isArray(checkins)) return [];
+  const byWeek = new Map();
+  checkins.forEach((item) => {
+    const weekNum = Number(item?.weekNum);
+    if (!Number.isInteger(weekNum) || weekNum < 1 || !item || typeof item !== 'object') return;
+    const candidate = { ...item, weekNum };
+    const previous = byWeek.get(weekNum);
+    // 同一週只保留最後一次有效評估；正式評估優先於先前的提前／暫定評估。
+    if (!previous || (previous.provisional && !candidate.provisional) || (!previous.provisional === !candidate.provisional)) byWeek.set(weekNum, candidate);
+  });
+  return [...byWeek.values()].sort((a, b) => a.weekNum - b.weekNum);
 }
 
 function cloneTrainingValue(value) {
@@ -714,7 +729,7 @@ function normalizeData(data) {
     profile: data?.profile || null,
     plan: Array.isArray(data?.plan) ? data.plan : [],
     log: Array.isArray(data?.log) ? data.log : [],
-    checkins: Array.isArray(data?.checkins) ? data.checkins : [],
+    checkins: normalizeTrainingCheckins(data?.checkins),
     assessments: Array.isArray(data?.assessments) ? data.assessments : [],
     adaptationPrompts: data?.adaptationPrompts && typeof data.adaptationPrompts === 'object' ? data.adaptationPrompts : {},
     dayStatuses: normalizeDayStatuses(data?.dayStatuses),
@@ -2976,20 +2991,24 @@ function coachPrescriptionLocksWeek(week) {
 
 function autoRecalibratePlan() {
   if (!coachReviewData?.updatedAt || !appData.profile || !Array.isArray(appData.plan) || !appData.plan.length) return null;
-  // Garmin 每日同步會更新 analyticsRuns，但教練週報的 updatedAt 不一定會變。
-  // 用最近實跑快照當去重鍵，才能在同一週穩定出現「課表配速外、心率仍安全」時重算未來課表；
-  // 同一份快照重整頁面則不會重複加速或產生重複歷程。
+  const today = todayStr();
+  const completedWeek = [...appData.plan]
+    .filter((week) => (week.days || []).every((day) => !day.dateStr || day.dateStr < today))
+    .sort((a, b) => b.weekNum - a.weekNum)[0];
+  // 當週尚在進行時，只提供教練建議與提前排課，不反覆把每天同步都當成新的一輪校準。
+  if (!completedWeek) return null;
+  const completedWeekEnd = (completedWeek.days || []).map((day) => day.dateStr).filter(Boolean).sort().at(-1);
   const calibrationRuns = Array.isArray(coachReviewData.analyticsRuns) && coachReviewData.analyticsRuns.length ? coachReviewData.analyticsRuns : (coachReviewData.runs || []);
+  const completedRuns = calibrationRuns.filter((run) => !completedWeekEnd || run.date <= completedWeekEnd).slice(-14);
   const calibrationSignature = [
-    coachReviewData.syncedAt || coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt,
-    ...calibrationRuns.slice(-14).map((run) => [run.activityId || '', run.date || '', run.km || '', run.qualityPace || run.pace || '', run.qualityHr || run.hr || '', run.temperatureC || ''].join(':'))
+    `week:${completedWeek.weekNum}:${completedWeekEnd || ''}`,
+    ...completedRuns.map((run) => [run.activityId || '', run.date || '', run.km || '', run.qualityPace || run.pace || '', run.qualityHr || run.hr || '', run.temperatureC || ''].join(':'))
   ].join('|');
   if (appData.recalibratedFor === calibrationSignature) return null;
   const profile = appData.profile;
   const plan = appData.plan;
   const beforePlan = futurePlanSnapshot();
   const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
-  const today = todayStr();
 
   // 1. 跑量校準：最近完整週實跑 vs 課表目標
   const trend = Array.isArray(coachReviewData.trend) ? coachReviewData.trend.slice(-3) : [];
@@ -5185,6 +5204,10 @@ function renderCoachReviewPanel() {
   const menuSource = coachMenu.length ? 'Garmin 教練參考菜單' : '下週正式課表（依本週 Garmin 實跑判讀）';
   const menuLabel = coachMenu.length ? nextWeek.label : `第 ${formalFallback.week?.weekNum || currentWeek} 週正式課表`;
   const menuTargetKm = coachMenu.length ? nextWeek.targetKm : (formalFallback.week?.targetKm ?? '—');
+  const garminUpdatedAt = coachReviewData.analyticsUpdatedAt || coachReviewData.syncedAt || coachReviewData.updatedAt;
+  const reviewFreshness = garminUpdatedAt === coachReviewData.updatedAt
+    ? `Garmin 資料截至 ${garminUpdatedAt}`
+    : `Garmin 資料截至 ${garminUpdatedAt} · 人工週報 ${coachReviewData.updatedAt}`;
   const scheduleDays = scheduledMenu.map((item) => DOW_NAMES[item.scheduledDow] || item.day).join('、');
   const notes = (coachReviewData.history || []).slice().reverse().map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
   const historicalReviewNotice = !hasCurrentCoachPlan && Array.isArray(nextWeek.menu) && nextWeek.menu.length
@@ -5233,7 +5256,7 @@ function renderCoachReviewPanel() {
   return `${renderTrainingStatusCard(appData.plan || [])}<div class="card coach-panel">
     <div class="coach-head">
       <div class="card-title" style="margin:0">🏃 教練建議</div>
-      <span class="coach-pill">資料截至 ${reviewEscape(coachReviewData.updatedAt)}</span>
+      <span class="coach-pill">${reviewEscape(reviewFreshness)}</span>
       <span class="coach-pill">${reviewEscape(coachScheduleLabel())}</span>
       ${(() => {
         const status = coachRunStatus();
@@ -6968,6 +6991,12 @@ function submitEarlyCoachPlanning(manualConfirmation = false) {
 }
 
 function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigger = false, plannedSessionCount = 0, manualCompletionConfirmed = false }) {
+  const existing = (appData.checkins || []).find((item) => item.weekNum === currentWeek);
+  if (existing && !existing.provisional) {
+    jumpToPhaseWeek(currentWeek);
+    switchPlanTab('checkin');
+    return;
+  }
   const score = answers.filter(Boolean).length;
   const timing = weeklyCheckinTiming();
   const decision = checkinSafetyDecision({ answers, fatigue, painConcern });
@@ -6980,8 +7009,8 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   if (earlyTrigger && decision.allowIntensity) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
   if (decision.factor !== 1 || decision.removeQuality) adjustNextWeek(decision.factor, decision.removeQuality);
   if (!decision.allowIntensity && (painConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
-  appData.checkins = appData.checkins || [];
-  appData.checkins.push({ weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed });
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed };
+  appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();
   jumpToPhaseWeek(currentWeek);

@@ -398,6 +398,21 @@ async function assertTrainerReport(page, viewportName) {
   if (!manualEarlyPlanning.pending || !manualEarlyPlanning.offersManualConfirmation) {
     throw new Error(`${viewportName}/trainer-manual-early-planning: unmatched Garmin dates did not offer a per-course confirmation ${JSON.stringify(manualEarlyPlanning)}`);
   }
+  const duplicateGuards = await page.evaluate(() => {
+    const checkins = normalizeTrainingCheckins([
+      { weekNum: 2, date: "2026-07-17", provisional: true, result: "維持", fatigue: 3 },
+      { weekNum: 2, date: "2026-07-19", provisional: false, result: "降載恢復", fatigue: 4 },
+      { weekNum: 3, date: "2026-07-20", provisional: false, result: "維持", fatigue: 2 },
+    ]);
+    const planChanges = normalizePlanChangeHistory([
+      { date: "2026-07-16", source: "garmin", title: "Garmin 實跑自動校準", changes: ["第 3 週：37.8 → 30.2 km、改為恢復週"] },
+      { date: "2026-07-18", source: "garmin", title: "Garmin 實跑自動校準", changes: ["第 3 週：37.8 → 30.2 km、改為恢復週"] },
+    ]);
+    return { checkinWeeks: checkins.map((item) => item.weekNum), finalWeek2: checkins.find((item) => item.weekNum === 2)?.result, planChangeCount: planChanges.length, planChangeDate: planChanges[0]?.date };
+  });
+  if (duplicateGuards.checkinWeeks.join(",") !== "2,3" || duplicateGuards.finalWeek2 !== "降載恢復" || duplicateGuards.planChangeCount !== 1 || duplicateGuards.planChangeDate !== "2026-07-18") {
+    throw new Error(`${viewportName}/trainer-duplicate-guards: weekly reviews or repeated Garmin calibration results were not collapsed ${JSON.stringify(duplicateGuards)}`);
+  }
   const safetyHold = await page.evaluate(() => {
     appData.safetyHold = { active: true, startedOn: todayStr(), reason: "test safety hold" };
     const adjusted = applyCoachPlanOverride({ dateStr: todayStr(), type: "tempo", focus: "tempo", task: "T 跑", pace: "5:00/km" }, { weekNum: 1 });
