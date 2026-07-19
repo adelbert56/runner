@@ -333,6 +333,38 @@ async function assertTrainerReport(page, viewportName) {
   if (inputValidation.validErrors.length || inputValidation.malformedErrors.length < 3) {
     throw new Error(`${viewportName}/trainer-profile-validation: expected valid setup to pass and malformed setup to be blocked ${JSON.stringify(inputValidation)}`);
   }
+  const earlyPlanning = await page.evaluate(() => {
+    currentWeek = 1;
+    const week = appData.plan[0];
+    const planned = (week?.days || []).filter((day) => day.type !== "rest" && !day.isMakeup);
+    const previous = {
+      log: appData.log,
+      dayStatuses: appData.dayStatuses,
+      runs: coachReviewData.analyticsRuns,
+      statuses: planned.map((day) => day.status),
+    };
+    try {
+      appData.log = [];
+      appData.dayStatuses = {};
+      planned.forEach((day) => { day.status = "planned"; });
+      coachReviewData.analyticsRuns = planned.map((day, index) => ({
+        activityId: `early-plan-${index}`,
+        date: day.dateStr,
+        km: day.km,
+        pace: "6:00",
+      }));
+      const eligibility = earlyCoachPlanningEligibility();
+      return { eligible: eligibility.eligible, planned: eligibility.plannedSessions?.length || 0 };
+    } finally {
+      appData.log = previous.log;
+      appData.dayStatuses = previous.dayStatuses;
+      coachReviewData.analyticsRuns = previous.runs;
+      planned.forEach((day, index) => { day.status = previous.statuses[index]; });
+    }
+  });
+  if (!earlyPlanning.eligible || earlyPlanning.planned < 2) {
+    throw new Error(`${viewportName}/trainer-early-planning: matched Garmin sessions did not unlock early planning ${JSON.stringify(earlyPlanning)}`);
+  }
   const safetyHold = await page.evaluate(() => {
     appData.safetyHold = { active: true, startedOn: todayStr(), reason: "test safety hold" };
     const adjusted = applyCoachPlanOverride({ dateStr: todayStr(), type: "tempo", focus: "tempo", task: "T 跑", pace: "5:00/km" }, { weekNum: 1 });

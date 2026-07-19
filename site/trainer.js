@@ -5251,7 +5251,8 @@ function earlyCoachPlanningEligibility() {
   const plannedSessions = (week.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
   if (!plannedSessions.length) return { eligible: false, reason: '本週沒有可提前結案的跑步課。' };
   const completedDates = new Set([...(appData.log || []).map((entry) => entry.date), ...plannedSessions.filter((day) => day.status === 'done').map((day) => day.dateStr)]);
-  const pending = plannedSessions.filter((day) => !completedDates.has(day.dateStr));
+  const garminRunsByDate = new Map(garminActivityRecords().map((run) => [run.date, { actualKm: Number(run.km) || 0, source: 'garmin' }]));
+  const pending = plannedSessions.filter((day) => !completedDates.has(day.dateStr) && !activityCompletesDay(day, garminRunsByDate.get(day.dateStr)));
   if (pending.length) return { eligible: false, reason: `尚有 ${pending.length} 堂跑步課未完成。` };
   return { eligible: true, plannedSessions };
 }
