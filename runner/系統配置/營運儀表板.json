@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-17T02:05:46.283Z",
-  "basis_date": "2026-07-17",
+  "generated_at": "2026-07-19T01:48:44.646Z",
+  "basis_date": "2026-07-19",
   "races": {
     "total": 55,
     "follow_up_count": 16,
@@ -30,30 +30,30 @@
   "content": {
     "shoe_cards": 40,
     "news_cards": 40,
-    "newest_shoe_date": "2026-07-17",
-    "newest_news_date": "2026-07-17",
+    "newest_shoe_date": "2026-07-19",
+    "newest_news_date": "2026-07-19",
     "published_count": 80,
     "candidate_count": 144,
     "editorial_count": 4,
     "candidate_by_category": {
-      "跑鞋新品": 52,
-      "跑步新聞": 71,
-      "入門知識": 15,
+      "跑鞋新品": 54,
+      "跑步新聞": 70,
+      "入門知識": 14,
       "訓練": 5,
       "恢復": 1
     },
-    "source_stable_count": 10,
+    "source_stable_count": 11,
     "source_watch_count": 0,
-    "source_weak_count": 2,
+    "source_weak_count": 1,
     "source_health": [
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "運動筆記",
         "url": "https://running.biji.co/",
         "source_type": "跑步新聞 / 跑鞋專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 13,
+        "candidate_count": 5,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -68,13 +68,13 @@
         ]
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "動一動",
         "url": "https://www.don1don.com/",
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 18,
+        "candidate_count": 23,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -83,7 +83,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "Bounce",
         "url": "https://bouncin.net/",
         "source_type": "跑鞋新品",
@@ -98,13 +98,13 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "Runner's World",
         "url": "https://www.runnersworld.com/",
         "source_type": "英文跑鞋評測 / 訓練知識",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 148,
+        "candidate_count": 147,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,
@@ -113,7 +113,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "Tom's Guide Running",
         "url": "https://www.tomsguide.com/",
         "source_type": "英文跑鞋評測 / 鞋款整理",
@@ -134,28 +134,28 @@
         ]
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "T3 Running",
         "url": "https://www.t3.com/",
         "source_type": "英文跑鞋新品 / 發表資訊",
-        "status": "需補強",
-        "ok": false,
-        "candidate_count": 0,
-        "consecutive_failures": 9,
+        "status": "穩定",
+        "ok": true,
+        "candidate_count": 1,
+        "consecutive_failures": 0,
         "base_priority": 2,
         "effective_priority": 1,
-        "error_kind": "unknown",
-        "error": "No crawlable entry URLs for T3 Running",
+        "error_kind": "",
+        "error": "",
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "Women's Health Taiwan",
         "url": "https://www.womenshealthmag.com/tw/fitness/",
         "source_type": "跑鞋選購 / 健康訓練",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 37,
+        "candidate_count": 36,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,
@@ -164,14 +164,14 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "HK01 跑步",
         "url": "https://www.hk01.com/channel/跑步",
         "source_type": "跑步裝備 / 跑步知識",
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 24,
+        "consecutive_failures": 25,
         "base_priority": 3,
         "effective_priority": 2,
         "error_kind": "unknown",
@@ -179,13 +179,13 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "KENLU",
         "url": "https://kenlu.net/",
         "source_type": "跑鞋評測 / 裝備情報",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 68,
+        "candidate_count": 66,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -194,7 +194,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "KENLU 越野",
         "url": "https://kenlu.net/tag/trail-run/",
         "source_type": "越野跑鞋 / 越野訓練",
@@ -209,7 +209,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "運動科學網",
         "url": "https://www.sportscience.com.tw/",
         "source_type": "訓練知識 / 運動科學",
@@ -224,7 +224,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-07-17",
+        "checked_at": "2026-07-19",
         "source": "IR SPORTS",
         "url": "https://irsports.com.tw/",
         "source_type": "路跑活動 / 訓練資訊",
@@ -273,7 +273,7 @@
         "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 0,
+        "due_now": 1,
         "sample_races": [
           "2026 專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
           "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
@@ -333,7 +333,7 @@
         "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 2,
+        "due_now": 1,
         "sample_races": [
           "2026 VISOGE 夜跑派對 台中場",
           "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
