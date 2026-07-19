@@ -303,9 +303,61 @@ async function assertTrainerReport(page, viewportName) {
     eval(`coachReviewData = ${JSON.stringify(review)}`);
     renderPlanView();
     showView("plan");
+    switchPlanTab("week");
+  }, trainerReviewSample);
+  await page.waitForSelector(".course-decision-panel", { timeout: 5000 });
+  const courseDecision = await page.locator(".course-decision-panel").evaluate((element) => ({
+    hasRule: element.textContent.includes("安全保護優先，沒有風險才採用教練處方與正式課表"),
+    hasActionableTitle: element.textContent.includes("本週先照哪個版本跑？"),
+    hasSource: element.textContent.includes("正式課表") || element.textContent.includes("教練處方"),
+    hasNextCourse: Boolean(element.querySelector(".course-decision-focus")),
+  }));
+  if (!courseDecision.hasRule || !courseDecision.hasActionableTitle || !courseDecision.hasSource || !courseDecision.hasNextCourse) {
+    throw new Error(`${viewportName}/trainer-course-decision: visible resolution summary is incomplete ${JSON.stringify(courseDecision)}`);
+  }
+  const weekDecisionOwnership = await page.locator("#plan-tab-week").evaluate((element) => ({
+    hasLegacyCoachLetter: element.textContent.includes("本週教練信"),
+    hasLegacyGuidance: element.textContent.includes("教練指引"),
+    decisionPanels: element.querySelectorAll(".course-decision-panel").length,
+  }));
+  if (weekDecisionOwnership.hasLegacyCoachLetter || weekDecisionOwnership.hasLegacyGuidance || weekDecisionOwnership.decisionPanels !== 1) {
+    throw new Error(`${viewportName}/trainer-course-decision: weekly decision ownership is duplicated ${JSON.stringify(weekDecisionOwnership)}`);
+  }
+  await assertNoHorizontalOverflow(page, `${viewportName}/trainer-course-decision`);
+  await page.screenshot({
+    path: resolve(screenshotDir, `${viewportName}-trainer-decision-summary.png`),
+    fullPage: true,
+  });
+  await page.evaluate(() => {
+    switchPlanTab("coach");
+    const host = document.getElementById("coach-review-content");
+    if (host) host.innerHTML = renderCoachReviewPanel();
+  });
+  const coachWorkspaceReady = await page.locator("#coach-review-content").evaluate((element) => ({
+    hasWorkspace: Boolean(element.querySelector(".coach-decision-workspace")),
+    text: element.textContent.trim().slice(0, 240),
+  }));
+  if (!coachWorkspaceReady.hasWorkspace) {
+    throw new Error(`${viewportName}/trainer-coach-decision: shared workspace was not rendered ${JSON.stringify(coachWorkspaceReady)}`);
+  }
+  const coachDecisionOwnership = await page.locator("#plan-tab-coach").evaluate((element) => ({
+    hasSharedDecision: Boolean(element.querySelector(".coach-decision-workspace")),
+    hasEvidence: Boolean(element.querySelector(".coach-evidence")),
+    hasLegacyMenu: element.textContent.includes("下週教練菜單") || Boolean(element.querySelector(".coach-menu-card")),
+    hasWeekLink: element.textContent.includes("查看本週正式課表"),
+  }));
+  if (!coachDecisionOwnership.hasSharedDecision || !coachDecisionOwnership.hasEvidence || coachDecisionOwnership.hasLegacyMenu || !coachDecisionOwnership.hasWeekLink) {
+    throw new Error(`${viewportName}/trainer-coach-decision: coach ownership is incomplete ${JSON.stringify(coachDecisionOwnership)}`);
+  }
+  await assertNoHorizontalOverflow(page, `${viewportName}/trainer-coach-decision`);
+  await page.screenshot({
+    path: resolve(screenshotDir, `${viewportName}-trainer-coach-decision.png`),
+    fullPage: true,
+  });
+  await page.evaluate(() => {
     switchPlanTab("progress");
     switchProgressPanel("analysis");
-  }, trainerReviewSample);
+  });
   await page.waitForSelector(".session-report", { timeout: 5000 });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-report`);
   const analysisContext = await page.locator("#progress-panel-analysis").evaluate((element) => ({
@@ -495,16 +547,17 @@ async function assertTrainerReport(page, viewportName) {
     const host = document.getElementById("coach-review-content");
     if (host) host.innerHTML = renderCoachReviewPanel();
   });
-  await page.waitForSelector("#plan-tab-coach .coach-menu-card", { timeout: 5000 });
   const coachStructure = await page.locator("#plan-tab-coach").evaluate((element) => ({
-    showsUpcomingPlan: element.textContent.includes("下週安排已依正式課表準備"),
+    hasSharedDecision: Boolean(element.querySelector(".coach-decision-workspace")),
+    hasEvidence: Boolean(element.querySelector(".coach-evidence")),
+    hasSecondSchedule: Boolean(element.querySelector(".coach-menu-card")),
     hasHistoricalReview: element.textContent.includes("查看歷史教練週報"),
     detailsCount: element.querySelectorAll("details").length,
     openDetailsCount: element.querySelectorAll("details[open]").length,
     hasInvalidNumber: element.textContent.includes("NaN"),
   }));
-  if (!coachStructure.showsUpcomingPlan || !coachStructure.hasHistoricalReview || !coachStructure.detailsCount || coachStructure.openDetailsCount || coachStructure.hasInvalidNumber) {
-    throw new Error(`${viewportName}/trainer-coach: stale coach review did not select a compact upcoming plan ${JSON.stringify(coachStructure)}`);
+  if (!coachStructure.hasSharedDecision || !coachStructure.hasEvidence || coachStructure.hasSecondSchedule || !coachStructure.hasHistoricalReview || !coachStructure.detailsCount || coachStructure.openDetailsCount || coachStructure.hasInvalidNumber) {
+    throw new Error(`${viewportName}/trainer-coach: stale coach review did not remain a compact evidence surface ${JSON.stringify(coachStructure)}`);
   }
   const pendingCoachReview = await page.evaluate(() => {
     const priorWeek = currentWeek;
@@ -525,8 +578,8 @@ async function assertTrainerReport(page, viewportName) {
     currentWeek = priorWeek;
     return text;
   });
-  if (!pendingCoachReview.includes("下週教練調整後的課程") || !pendingCoachReview.includes("恢復跑 5 km") || pendingCoachReview.includes("查看歷史教練週報")) {
-    throw new Error(`${viewportName}/trainer-coach: a future next-week review was not shown as a directly usable plan ${pendingCoachReview}`);
+  if (pendingCoachReview.includes("恢復跑 5 km") || pendingCoachReview.includes("下週教練調整後的課程")) {
+    throw new Error(`${viewportName}/trainer-coach: a future next-week review was not kept as evidence ${pendingCoachReview}`);
   }
   await page.locator("#plan-tab-coach details").first().evaluate((element) => { element.open = true; });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-coach`);

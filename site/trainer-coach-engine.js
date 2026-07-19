@@ -164,7 +164,25 @@ function courseRationale(day, ctx) {
   }
   if (day.raceReplacement === 'post-race') return '賽事調整：賽後恢復優先，暫不補原本的訓練量。';
   if (day.raceReplacement === 'pre-race-taper') return '賽事調整：保留賽前減壓，避免累積疲勞。';
-  return '';
+  if (day.isDeload) return '週期安排：本週降低訓練量，讓身體吸收前一階段的累積。';
+  return `正式課表：依${day.phaseName || '目前'}週期、目標與可訓練日安排。`;
+}
+
+function courseResolutionSource(day) {
+  if (day.advisoryAdjusted) return 'daily-adjust';
+  if (day.raceReplacement) return 'race-adjustment';
+  return 'baseline';
+}
+
+function courseResolutionLabel(source) {
+  return {
+    'safety-hold': '安全保護',
+    'safety-override': '恢復保護',
+    'coach-prescription': '教練處方',
+    'daily-adjust': '出發前調整',
+    'race-adjustment': '賽事調整',
+    baseline: '正式課表'
+  }[source] || '課表決策';
 }
 
 // 持久調整的 adapter 只描述「是否需要調整」與依據；實際寫入仍由既有函式處理，
@@ -222,8 +240,36 @@ function resolveCourse(day, ctx = buildContext(), week = null) {
     || (day.dateStr && (item.days || []).some((itemDay) => itemDay.dateStr === day.dateStr)));
   const course = day;
   const adapter = safetyGuard(course, ctx) || coachPrescription(course, ctx, resolvedWeek);
-  if (!adapter) return { course, paces: paceResolver(ctx, day.dateStr), rationale: courseRationale(course, ctx), source: 'baseline' };
+  if (!adapter) return { course, paces: paceResolver(ctx, day.dateStr), rationale: courseRationale(course, ctx), source: courseResolutionSource(course) };
   return { course: adapter.course, paces: paceResolver(ctx, day.dateStr), rationale: adapter.rationale || courseRationale(adapter.course, ctx), source: adapter.source };
+}
+
+// 週級決策也只從同一套 resolver 取得資料；顯示層不再各自重算「本週採用哪一版」。
+function resolveWeeklyDecision(ctx = buildContext(), week = ctx.plan[currentWeek - 1]) {
+  if (!week) return null;
+  const rows = (week.days || [])
+    .filter((day) => day.type !== 'rest')
+    .map((day) => ({ day, resolved: resolveCourse(day, ctx, week) }));
+  const thisWeekNext = rows.find(({ day }) => day.dateStr >= ctx.today);
+  const nextWeek = !thisWeekNext && ctx.plan.slice(Number(week.weekNum || currentWeek)).find((candidate) => (candidate.days || [])
+    .some((day) => day.type !== 'rest' && day.dateStr >= ctx.today));
+  const nextWeekDay = nextWeek?.days?.find((day) => day.type !== 'rest' && day.dateStr >= ctx.today);
+  const next = thisWeekNext || (nextWeekDay
+    ? { day: nextWeekDay, resolved: resolveCourse(nextWeekDay, ctx, nextWeek) }
+    : rows.at(-1));
+  const sourceCounts = rows.reduce((counts, { resolved }) => ({
+    ...counts,
+    [resolved.source]: (counts[resolved.source] || 0) + 1
+  }), {});
+  return {
+    week,
+    rows,
+    sourceCounts,
+    next,
+    focusLabel: thisWeekNext ? '下一堂' : nextWeekDay ? '下週第一堂' : '本週最後一堂',
+    coachNote: coachWeekMatches(week) ? ctx.coachReview?.nextWeek?.coachNote || '' : '',
+    planningNote: week.planningNote || ''
+  };
 }
 
 function runCoachAdaptation(trigger, options = {}) {

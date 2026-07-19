@@ -615,17 +615,6 @@
     .week-brief-label { display:block; margin-bottom:3px; color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
     .week-explainer { color:var(--c-text-muted); font-size:13px; font-weight:600; line-height:1.65; }
     .week-resource-label { color:var(--c-text-muted); font-size:12px; font-weight:800; white-space:nowrap; }
-    .week-guidance { display:grid; gap:10px; padding:16px 22px; border-top:1px solid rgba(31,42,36,.08); background:linear-gradient(180deg, rgba(247,251,248,.72), var(--c-surface)); }
-    .week-guidance-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .week-guidance-title { color:var(--c-text); font-size:14px; font-weight:900; }
-    .week-guidance-caption { color:var(--c-text-muted); font-size:12px; font-weight:700; }
-    .week-coach-brief { display:grid; grid-template-columns:auto minmax(0, 1fr); gap:11px; padding:13px 14px; border:1px solid rgba(36,114,79,.2); border-radius: var(--radius); background:var(--c-tint-green); }
-    .week-coach-icon { display:grid; place-items:center; width:30px; height:30px; border-radius:9px; background:#e1f1e6; font-size:15px; }
-    .week-coach-copy { min-width:0; }
-    .week-coach-title { color:var(--c-text); font-size:13px; font-weight:900; line-height:1.45; }
-    .week-coach-meta { display:inline-flex; margin-left:6px; padding:2px 7px; border-radius: var(--radius-pill); background:#e1f1e6; color:var(--c-primary-hover); font-size:11px; font-weight:900; vertical-align:1px; white-space:nowrap; }
-    .week-coach-note, .week-coach-weather { margin:5px 0 0; color:var(--c-text-muted); font-size:13px; font-weight:650; line-height:1.55; }
-    .week-coach-weather { color:#53726a; }
     .autopilot-card { margin-bottom:16px; border:1px solid rgba(36,114,79,.22); border-radius: var(--radius-xl); overflow:hidden; background:linear-gradient(135deg,#f0f9f2,#fffdf8 62%); box-shadow:0 12px 26px rgba(21,83,56,.07); }
     .autopilot-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding:16px 16px 12px; }
     .autopilot-kicker { color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
@@ -675,11 +664,6 @@
     .checkin-history-item b { margin-right: 8px; }
     .checkin-history-item span { color: var(--c-text-muted); }
     .checkin-history-item p { margin: 4px 0 0; color: var(--c-text-muted); line-height: 1.55; }
-    /* 教練信預設摺疊（課卡維持全展開：grid 列高跟最高卡對齊，收合省不了頁高） */
-    details.coach-letter-fold > summary { cursor: pointer; font-size: 15px; font-weight: 900; list-style: none; }
-    details.coach-letter-fold > summary::before { content: '▸ '; color: var(--c-primary-hover); }
-    details.coach-letter-fold[open] > summary::before { content: '▾ '; }
-    details.coach-letter-fold > summary::-webkit-details-marker { display: none; }
     .day-card.deload-card { border-color: var(--c-orange); border-style: dashed; }
     .day-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
     .day-card-date { font-size: 13px; color: var(--c-text-muted); line-height: 1.4; }
@@ -693,7 +677,38 @@
     .badge-coach { background: var(--c-surface2); color: var(--c-text-muted); }
     .day-card-task { font-size: 15px; font-weight: 700; margin-bottom: 6px; line-height: 1.5; }
     .day-card-task.coach-headline { margin-bottom: 3px; color: var(--c-text); font-size: 16px; font-weight: 900; }
-    .course-rationale { margin: 0 0 8px; color: var(--c-text-muted); font-size: 12px; font-weight: 700; line-height: 1.55; }
+    .course-rationale { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 8px; color: var(--c-text-muted); font-size: 12px; font-weight: 700; line-height: 1.55; }
+    .course-rationale span, .course-decision-source { flex: 0 0 auto; color: var(--c-primary-hover); font-size: 11px; font-weight: 900; }
+    .course-decision-panel { margin: 16px 0; padding: 16px; border: 1px solid rgba(31, 42, 36, 0.1); border-radius: var(--radius-lg); background: linear-gradient(135deg, #f4fbf6, #fffdf8); }
+    .course-decision-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .course-decision-kicker { color: var(--c-primary-hover); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .course-decision-title { margin-top: 2px; color: var(--c-text); font-size: 17px; font-weight: 900; }
+    .course-decision-rule { max-width: 280px; color: var(--c-text-muted); font-size: 11px; font-weight: 700; line-height: 1.45; text-align: right; }
+    .course-decision-copy { margin: 8px 0 12px; color: var(--c-text-muted); font-size: 13px; line-height: 1.6; }
+    .course-decision-focus { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px; padding: 11px 12px; border: 1px solid rgba(36, 125, 82, .16); border-radius: var(--radius-md); background: rgba(255, 255, 255, .82); }
+    .course-decision-focus-label { color: var(--c-primary-hover); font-size: 11px; font-weight: 900; }
+    .course-decision-focus b { color: var(--c-text); font-size: 13px; }
+    .course-decision-focus p { margin: 3px 0 0; color: var(--c-text-muted); font-size: 12px; line-height: 1.55; }
+    .course-decision-note { margin-top: 10px; padding: 9px 11px; border-radius: var(--radius-md); background: rgba(255, 247, 225, .8); color: var(--c-text-muted); font-size: 12px; line-height: 1.55; }
+    .course-decision-note b { margin-right: 7px; color: var(--c-text); }
+    .course-decision-source { margin-left: 7px; }
+    @media (max-width: 640px) { .course-decision-head { display: block; } .course-decision-rule { display: block; max-width: none; margin-top: 6px; text-align: left; } }
+    .coach-decision-workspace { margin: 16px 0; padding: 16px; border: 1px solid rgba(36, 125, 82, .2); border-radius: var(--radius-lg); background: linear-gradient(135deg, #eef8f1, #fffdf8); }
+    .coach-decision-kicker { color: var(--c-primary-hover); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .coach-decision-headline { margin-top: 3px; color: var(--c-text); font-size: 18px; font-weight: 900; }
+    .coach-decision-copy { margin: 7px 0 12px; color: var(--c-text-muted); font-size: 13px; line-height: 1.6; }
+    .coach-decision-next { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; padding: 12px; border-radius: var(--radius-md); background: rgba(255,255,255,.78); border: 1px solid rgba(36, 125, 82, .15); }
+    .coach-decision-next > span { color: var(--c-primary-hover); font-size: 11px; font-weight: 900; }
+    .coach-decision-next b { color: var(--c-text); font-size: 13px; }
+    .coach-decision-next p { margin: 3px 0 0; color: var(--c-text-muted); font-size: 12px; line-height: 1.55; }
+    .coach-decision-note { margin-top: 9px; padding: 9px 11px; border-radius: var(--radius-md); background: rgba(255,247,225,.72); color: var(--c-text-muted); font-size: 12px; line-height: 1.55; }
+    .coach-decision-note b { margin-right: 7px; color: var(--c-text); }
+    .coach-evidence { margin-top: 14px; border: 1px solid var(--c-border); border-radius: var(--radius-md); background: var(--c-surface-alt); }
+    .coach-evidence > summary { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 12px 14px; cursor: pointer; color: var(--c-text); }
+    .coach-evidence > summary span { color: var(--c-text-muted); font-size: 12px; font-weight: 600; text-align: right; }
+    .coach-evidence-body { padding: 0 14px 14px; }
+    .coach-evidence-body .automation-timeline, .coach-evidence-body .coach-signals { margin-top: 12px; }
+    @media (max-width: 640px) { .coach-decision-next { grid-template-columns: 1fr; } .coach-evidence > summary { display: block; } .coach-evidence > summary span { display: block; margin-top: 4px; text-align: left; } }
     .coach-detail-hint { margin: 0 0 12px; color: var(--c-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
     .day-card-pace { font-size: 13px; color: var(--c-text-muted); margin-bottom: 12px; line-height: 1.5; }
     .workout-steps { display: grid; gap: 10px; font-size: 13px; color: var(--c-text-muted); line-height: 1.8; }
@@ -1186,8 +1201,6 @@
       .week-garmin-export-btn { flex:1 1 168px; }
       .week-brief { grid-template-columns:1fr; gap:8px; padding:14px 16px; }
       .week-resource-label { display:none; }
-      .week-guidance { padding:14px 16px; }
-      .week-guidance-caption { display:none; }
       .guide-actions { padding:12px 16px 16px; }
       .week-resource-actions { padding:10px 16px; }
       .week-resource-label { flex:1 1 100%; }
