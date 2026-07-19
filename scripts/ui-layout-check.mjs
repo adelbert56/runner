@@ -291,9 +291,13 @@ async function assertPanel(page, panel, viewportName) {
 }
 
 async function assertTrainerReport(page, viewportName) {
-  await page.goto(`${baseUrl}trainer.html`, { waitUntil: "networkidle" });
+  // The trainer loads encrypted coach data in the background.  Network idle is
+  // not a page-readiness signal here and can time out on CI despite a usable UI.
+  await page.goto(`${baseUrl}trainer.html`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#trainer-hero-shell", { timeout: 5000 });
   await page.evaluate((sample) => localStorage.setItem("runner-trainer-v1", JSON.stringify(sample)), trainerVisualSample);
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#trainer-hero-shell", { timeout: 5000 });
   await page.evaluate((review) => {
     // This is a deterministic local visual fixture; it never writes to the product data files.
     eval(`coachReviewData = ${JSON.stringify(review)}`);
