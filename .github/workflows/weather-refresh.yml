@@ -62,6 +62,10 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Install Node dependencies
+        if: steps.refresh-guard.outputs.should_run == 'true'
+        run: npm ci
+
       - name: Update race weather forecast
         if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run data:weather

@@ -57,5 +57,8 @@ jobs:
       - name: Check Python syntax
         run: uv run python -m compileall scripts
 
+      - name: Run Python tests
+        run: uv run pytest -q
+
       - name: Check browser layout
         run: npm run ui:layout

@@ -66,6 +66,10 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Install Node dependencies
+        if: steps.refresh-guard.outputs.should_run == 'true'
+        run: npm ci
+
       - name: Collect and publish running content
         if: steps.refresh-guard.outputs.should_run == 'true'
         run: npm run content:refresh

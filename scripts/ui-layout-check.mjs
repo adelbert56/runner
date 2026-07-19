@@ -13,7 +13,6 @@ const panels = [
   { id: "announcements", label: "公告" },
   { id: "gear", label: "跑鞋" },
   { id: "academy", label: "入門" },
-  { id: "training", label: "練跑" },
   { id: "news", label: "新聞" },
 ];
 

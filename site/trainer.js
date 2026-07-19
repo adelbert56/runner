@@ -5166,7 +5166,7 @@ function clearHistoryCoachContext() {
 
 function renderCoachReviewPanel() {
   if (!coachReviewData) {
-    return `${renderTrainingStatusCard(appData.plan || [])}${renderHistoryCoachContext()}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
+    return `${renderTrainingStatusCard(appData.plan || [])}${renderHistoryCoachContext()}${renderEarlyCoachPlanningCard()}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
   }
   const week = coachReviewData.week || {};
   const nextWeek = coachReviewData.nextWeek || {};
@@ -5235,11 +5235,41 @@ function renderCoachReviewPanel() {
     ${renderLastRecalibrationCard()}
     ${renderPlanChangeTimeline()}
     ${renderLiveCoachCard(week, nextWeek)}
+    ${renderEarlyCoachPlanningCard()}
     ${courseSection}
     ${renderCoachDataSignals()}
     <p class="coach-fineprint" style="margin-top:12px">這是依 Garmin 實績產生的參考安排；你的正式課表不會自動被覆寫。</p>
     ${notes ? `<details class="coach-history"><summary><b>分析快照歷史</b>（不覆蓋目前訓練設定）</summary><ul>${notes}</ul></details>` : ''}
   </div>`;
+}
+
+function earlyCoachPlanningEligibility() {
+  const week = appData.plan?.[currentWeek - 1];
+  const nextWeek = appData.plan?.[currentWeek];
+  if (!week || !nextWeek) return { eligible: false, reason: '本輪沒有下一週可提前安排。' };
+  if (appData.safetyHold?.active) return { eligible: false, reason: '傷痛保護模式啟用中；請先完成恢復確認。' };
+  const plannedSessions = (week.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
+  if (!plannedSessions.length) return { eligible: false, reason: '本週沒有可提前結案的跑步課。' };
+  const completedDates = new Set([...(appData.log || []).map((entry) => entry.date), ...plannedSessions.filter((day) => day.status === 'done').map((day) => day.dateStr)]);
+  const pending = plannedSessions.filter((day) => !completedDates.has(day.dateStr));
+  if (pending.length) return { eligible: false, reason: `尚有 ${pending.length} 堂跑步課未完成。` };
+  return { eligible: true, plannedSessions };
+}
+
+function renderEarlyCoachPlanningCard() {
+  const eligibility = earlyCoachPlanningEligibility();
+  const completed = eligibility.plannedSessions?.length || 0;
+  return `<div class="coach-setting-card" style="margin:14px 0"><div class="coach-setting-value">手動提前排課</div><div class="coach-fineprint">${eligibility.eligible ? `本週 ${completed} 堂排定跑步課均已完成，可先做恢復檢核並提前安排下週。休息與居家肌力不列入完成門檻，也不會被硬塞或自動補跑。` : reviewEscape(eligibility.reason)}</div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start"><button class="btn btn-secondary" type="button" onclick="openEarlyCoachPlanning()" ${eligibility.eligible ? '' : 'disabled'}>手動提前排定下週</button></div></div>`;
+}
+
+function openEarlyCoachPlanning() {
+  const eligibility = earlyCoachPlanningEligibility();
+  if (!eligibility.eligible) return;
+  const checks = CHECKIN_QUESTIONS.slice(1).map((question, index) => `<label class="checkin-safety"><input id="early-check-${index + 1}" type="checkbox" style="margin-top:3px">${reviewEscape(question)}</label>`).join('');
+  showModal('提前排定下週', `<p style="margin:0 0 12px;line-height:1.65">本週排定的跑步課已完成。系統只會依恢復狀態微調<b>下一週尚未執行的課程</b>；若有疲勞或疼痛，仍會降載並移除品質課。</p><div class="checkin-safety" style="background:var(--c-surface-alt)">✓ 已完成 ${eligibility.plannedSessions.length} 堂排定跑步課</div>${checks}<div class="form-group" style="margin-top:14px"><label class="form-label" for="early-fatigue">目前整體疲勞 (1–5)</label><input class="form-input" id="early-fatigue" type="number" min="1" max="5" placeholder="3"><div class="field-help">4–5 會自動降載；有疼痛請不要勾選「身體無異常疲勞或疼痛」。</div></div><div class="form-group"><label class="form-label" for="early-note">提前排課備註（選填）</label><input class="form-input" id="early-note" type="text" maxlength="240" placeholder="例：本週跑步課已提前完成，週末只安排輕鬆恢復"></div>`, [
+    { label: '依恢復狀態提前排定', primary: true, action: submitEarlyCoachPlanning },
+    { label: '取消', action: closeModal }
+  ]);
 }
 
 function refreshCoachReviewPanels() {
@@ -6812,27 +6842,48 @@ function weeklyCheckinTiming() {
 
 function submitCheckin() {
   const answers = CHECKIN_QUESTIONS.map((_, index) => Boolean(document.getElementById(`cq-${index}`)?.checked));
+  completeWeeklyCheckin({
+    answers,
+    fatigue: parseInt(document.getElementById('cw-fatigue')?.value, 10) || 0,
+    note: document.getElementById('cw-note')?.value?.trim() || '',
+    painConcern: Boolean(document.getElementById('cw-pain-concern')?.checked)
+  });
+}
+
+function submitEarlyCoachPlanning() {
+  const eligibility = earlyCoachPlanningEligibility();
+  if (!eligibility.eligible) return;
+  const answers = [true, ...CHECKIN_QUESTIONS.slice(1).map((_, index) => Boolean(document.getElementById(`early-check-${index + 1}`)?.checked))];
+  completeWeeklyCheckin({
+    answers,
+    fatigue: parseInt(document.getElementById('early-fatigue')?.value, 10) || 0,
+    note: document.getElementById('early-note')?.value?.trim() || '',
+    painConcern: !answers[1],
+    earlyTrigger: true,
+    plannedSessionCount: eligibility.plannedSessions.length
+  });
+}
+
+function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigger = false, plannedSessionCount = 0 }) {
   const score = answers.filter(Boolean).length;
-  const fatigue = parseInt(document.getElementById('cw-fatigue')?.value, 10) || 0;
-  const note = document.getElementById('cw-note')?.value?.trim() || '';
-  const painConcern = Boolean(document.getElementById('cw-pain-concern')?.checked);
   const timing = weeklyCheckinTiming();
   const decision = checkinSafetyDecision({ answers, fatigue, painConcern });
-  if (!timing.ready && decision.allowIntensity) {
+  if (!timing.ready && decision.allowIntensity && !earlyTrigger) {
     decision.result = '維持';
     decision.factor = 1;
     decision.allowIntensity = false;
     decision.note = `本週尚未結束（目前 ${timing.completed}/${timing.planned} 堂）；先保留恢復判讀，最後一堂完成後再評估是否推進。`;
   }
+  if (earlyTrigger && decision.allowIntensity) decision.note = `本週 ${plannedSessionCount} 堂排定跑步課已完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
   if (decision.factor !== 1 || decision.removeQuality) adjustNextWeek(decision.factor, decision.removeQuality);
   if (!decision.allowIntensity && (painConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
   appData.checkins = appData.checkins || [];
-  appData.checkins.push({ weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready });
+  appData.checkins.push({ weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger });
   saveData(appData);
   assessProgress();
   jumpToPhaseWeek(currentWeek);
   switchPlanTab('checkin');
-  showCheckinOutcome(decision, timing);
+  showCheckinOutcome(decision, { ...timing, earlyTrigger });
 }
 
 function reopenWeeklyCheckin() {
@@ -6847,7 +6898,7 @@ function showCheckinOutcome(decision, timing) {
   const nextStep = hasNextWeek
     ? decision.result === '小幅推進' ? '下週最多增加 5%，並保留品質課。' : decision.result === '維持' ? '下週課表維持，先把完成度與恢復做穩。' : '下週已依安全規則降量，品質課也已改為恢復安排。'
     : '本輪課表已到最後一週；可到「週期管理」封存本輪，並決定是否引用歷史給下一輪教練。';
-  showModal('週評估結果', `<p style="margin:0 0 10px;line-height:1.7"><b>${reviewEscape(decision.result)}</b>：${reviewEscape(decision.note)}</p><div class="coach-setting-card"><div class="coach-setting-value">下一步</div><div class="coach-fineprint">${reviewEscape(nextStep)}${timing.ready ? '' : ' 本次評估僅做保護判讀，沒有提前加量。'}</div></div>`, [
+  showModal('週評估結果', `<p style="margin:0 0 10px;line-height:1.7"><b>${reviewEscape(decision.result)}</b>：${reviewEscape(decision.note)}</p><div class="coach-setting-card"><div class="coach-setting-value">下一步</div><div class="coach-fineprint">${reviewEscape(nextStep)}${timing.ready ? '' : (timing.earlyTrigger ? ' 本次由手動提前排課觸發；本週結束後仍可重新完成最終評估。' : ' 本次評估僅做保護判讀，沒有提前加量。')}</div></div>`, [
     ...(hasNextWeek ? [{ label: '查看下週課表', primary: true, action: () => { closeModal(); jumpToPhaseWeek(currentWeek + 1); switchPlanTab('week'); } }] : [{ label: '前往週期管理', primary: true, action: () => { closeModal(); openCycleManagement(); } }]),
     { label: '留在週評估', action: closeModal }
   ]);

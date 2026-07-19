@@ -62,6 +62,10 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Install Node dependencies
+        if: steps.refresh-guard.outputs.should_run == 'true'
+        run: npm ci
+
       - name: Build message cloud
         if: steps.refresh-guard.outputs.should_run == 'true'
         env:

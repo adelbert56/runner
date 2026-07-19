@@ -282,7 +282,7 @@ def _distance_groups(value: str) -> list[str]:
     # (e.g. "EP全馬組"). Capture that prefix too instead of only matching from
     # the CJK "組" label, otherwise the code silently drops off the label.
     generic_composite_pattern = r"(?:[A-Za-z]{1,4})?[一-鿿]{1,6}組\s*[（(]\s*\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)\s*[）)]"
-    group_pattern = rf"\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|全程馬拉松|半程馬拉松|半馬|全馬|{label_pattern}"
+    group_pattern = rf"\d+(?:\.\d+)?\s?(?:K|KM|公里|k|km)|{label_pattern}|全程馬拉松|半程馬拉松|半馬|全馬"
     groups: list[str] = []
     occupied: list[tuple[int, int]] = []
     # generic_composite_pattern first: it's a superset of composite_pattern
@@ -412,7 +412,9 @@ def _start_time_rows_from_grouped_schedule(lines: list[str]) -> list[str]:
             groups.extend(_distance_groups(candidate))
 
         if found_start_line and groups:
-            rows.extend(_format_start_time(group, time) for group in dict.fromkeys(groups))
+            for group in dict.fromkeys(groups):
+                normalized_group = _semantic_distance_label(group) if re.match(r"^(?:路跑組|健康組|趣味組)[（(]", group) else group
+                rows.append(_format_start_time(normalized_group, time))
     return rows
 
 
@@ -505,15 +507,15 @@ def extract_start_times(lines: list[str]) -> str:
     # 2 of 3 groups because the 3rd's start-keyword sits just outside its
     # look-ahead window) — taking the first non-empty result unconditionally
     # would lock in that incomplete answer instead of the more complete one.
+    grouped_schedule_rows = _start_time_rows_from_grouped_schedule(lines)
+    if grouped_schedule_rows:
+        return "、".join(dict.fromkeys(grouped_schedule_rows[:8]))
+
     schedule_rows = _start_time_rows_from_schedule(lines)
     labeled_block_rows = _start_time_rows_from_labeled_blocks(lines)
     if schedule_rows or labeled_block_rows:
         best_rows = labeled_block_rows if len(labeled_block_rows) > len(schedule_rows) else schedule_rows
         return "、".join(dict.fromkeys(best_rows[:8]))
-
-    grouped_schedule_rows = _start_time_rows_from_grouped_schedule(lines)
-    if grouped_schedule_rows:
-        return "、".join(dict.fromkeys(grouped_schedule_rows[:8]))
 
     inline_rows = _start_time_rows_from_inline(lines)
     if inline_rows:

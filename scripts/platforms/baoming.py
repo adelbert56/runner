@@ -53,7 +53,8 @@ def _section_text_map(html: str) -> dict[str, str]:
         heading = item.select_one("h6, h5, h4")
         if not heading:
             continue
-        label = _normalize_label(heading.get_text(" ", strip=True))
+        heading_text = heading.get_text(" ", strip=True)
+        label = _normalize_label(re.split(r"[：:]", heading_text, maxsplit=1)[0])
         full_text = compact_text(item.get_text(" ", strip=True))
         value = _usable_value(re.sub(rf"^{re.escape(label)}\s*[：:]?\s*", "", full_text))
         if label and value and label not in sections:
@@ -98,11 +99,12 @@ def _extract_fee_summary(text: str) -> str:
     matches: list[str] = []
     pattern = re.compile(
         r"((?:\d+(?:\.\d+)?\s?(?:K|KM)|全馬組|半馬組|超半馬組|接力組|個人半馬組|挑戰組|樂活組|健康組|健跑組|健走組|親子組)"
-        r"[^。；;]{0,18}?)(?:每隊|每人|報名費(?:用)?(?:為)?)?[^0-9]{0,8}?(\d{2,5}(?:,\d{3})?)\s*元",
+        r"[^。；;]{0,18}?)(?:每隊|每人|報名費(?:用)?(?:為)?)?[^0-9]{0,8}?(\d{1,5}(?:,\d{3})?)\s*元",
         flags=re.IGNORECASE,
     )
     for match in pattern.finditer(text):
         label = compact_text(match.group(1)).replace(" ", "")
+        label = re.split(r"[，,]?報名費(?:用)?(?:為)?", label, maxsplit=1)[0].strip("，,。；;：:")
         amount = match.group(2).replace(",", "")
         if len(label) > 24:
             continue
