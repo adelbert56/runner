@@ -411,19 +411,19 @@ function findRawPlanDay(dateStr) {
   return null;
 }
 
-function dailyAdvisoryTriggers(day) {
+function dailyAdvisoryTriggers(day, ctx = buildContext()) {
   const triggers = [];
-  const wx = trainerWeather?.[day.dateStr];
+  const wx = ctx.weather?.[day.dateStr];
   if (Number(wx?.tmax) >= 34) triggers.push(`預報高溫 ${Math.round(wx.tmax)}°C`);
-  const checkin = latestTrainingCheckin();
+  const checkin = [...(ctx.checkins || [])].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || Number(b.weekNum || 0) - Number(a.weekNum || 0))[0] || null;
   if (checkin?.date && daysSinceDate(checkin.date) <= 7) {
     if (checkin.painConcern) triggers.push('近期回報疼痛疑慮');
     else if (Number(checkin.fatigue) >= 4) triggers.push(`疲勞自評 ${checkin.fatigue}/5`);
   }
   try {
-    const zones = hrZones(appData.profile);
+    const zones = hrZones(ctx.profile);
     const yesterday = addDaysToDateStr(day.dateStr, -1);
-    const hardYesterday = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+    const hardYesterday = (ctx.garminRuns || [])
       .some((run) => run.date === yesterday && Number(run.km) >= 5 && Number(run.hr) >= zones.tempoLow);
     if (hardYesterday) triggers.push('昨天已有高強度跑，距離品質課不足 48 小時');
   } catch (err) { /* 心率區間資料不足時跳過 */ }
@@ -696,7 +696,7 @@ function renderWeekOverviewCard(profile, plan = appData.plan || []) {
         <div class="plan-progress-line"><span>本週跑量${s.weekTargetSource === '教練本週目標' ? '（教練目標）' : ''}</span><strong>${s.weekDoneKm.toFixed(1)} / ${s.weekTargetDisplay} · ${s.weekProgressPct}%</strong></div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${s.weekProgressPct}%"></div></div>
       </div>
-      ${s.health.issues.length ? '<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'autopilot\')">查看同步狀態</button></div>' : ''}
+      ${s.health.issues.length ? '<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'coach\')">查看同步狀態</button></div>' : ''}
     </div>
     <div class="automation-brief-stats">
       <div class="automation-brief-stat"><span>本週完成</span><b>${s.currentWeekCompleted}/${s.currentWeekDays || 0} 堂</b></div>
@@ -863,7 +863,7 @@ function plannedSessionFor(run) {
   const targetDate = assignment?.mode === 'extra' ? '' : (assignment?.targetDate || run.date);
   for (const week of appData.plan || []) {
     const day = (week.days || []).find((item) => item.dateStr === targetDate || item.date === targetDate);
-    if (day) return applyCoachPlanOverride(day, week);
+    if (day) return resolveCourse(day, buildContext(), week).course;
   }
   return null;
 }
@@ -1306,10 +1306,10 @@ async function loadRegistrationRaceCheckpoints() {
 
 function renderTrainingAnalysis() {
   const runs = coachRunRecords();
-  const statusCard = renderTrainingStatusCard(appData.plan || []);
-  const decisionCard = renderAutopilotDecisionCard(appData.plan || []);
   const checkpointPanel = renderRaceCheckpointPanel();
-  if (!runs.length) return `${statusCard}${decisionCard}${checkpointPanel}<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
+  // 完成度／提醒／自動決策已各自固定在本週總覽與教練建議；進度分頁只保留
+  // 預測、趨勢與單堂分析，避免同一狀態資料跨 tab 重複出現。
+  if (!runs.length) return `${checkpointPanel}<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
   const trend = weeklyRunTrend(runs);
   const recent = runs.slice(-4);
   const averagePace = recent.filter((run) => run.paceSeconds).reduce((sum, run, _, list) => sum + run.paceSeconds / list.length, 0);
@@ -1333,7 +1333,7 @@ function renderTrainingAnalysis() {
           : ['🟢', 'var(--c-green)', `上週跑量增幅 ${ramp >= 0 ? '+' : ''}${ramp}%，在安全範圍（≤10%）內。`];
     return `<div style="margin:14px 0 0;padding:10px 14px;border-left:3px solid ${color};border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6">${icon} <b>週增幅監控</b>：${text}（${prev.km} → ${last.km} km）</div>`;
   })();
-  return `${statusCard}${decisionCard}${checkpointPanel}${renderLatestTrainingReport(runs)}<div class="card"><div class="card-title">📈 長期訓練趨勢 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
+  return `${checkpointPanel}${renderLatestTrainingReport(runs)}<div class="card"><div class="card-title">📈 長期訓練趨勢 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
     <div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">近四週跑量</span><strong class="plan-metric-value">${lastFourKm.toFixed(1)} km</strong></div><div class="plan-metric"><span class="plan-metric-label">近四週最長跑</span><strong class="plan-metric-value">${longestRun ? `${longestRun.toFixed(1)} km` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均配速</span><strong class="plan-metric-value">${formatPaceSeconds(averagePace)}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均心率</span><strong class="plan-metric-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">Garmin 資料截至</span><strong class="plan-metric-value">${reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt)}</strong></div></div>
     ${rampNote}
     <div style="margin-top:20px"><b style="font-size:15px">進階訓練指標</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 10px">只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p><div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">最近四趟平均步頻</span><strong class="plan-metric-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟累積爬升</span><strong class="plan-metric-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均負荷</span><strong class="plan-metric-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近 VO₂ Max</span><strong class="plan-metric-value">${latestVo2 || '—'}</strong></div></div></div>
@@ -1603,6 +1603,17 @@ function renderHistoryCoachContext() {
   return `<div class="coach-summary" style="margin-top:0"><div class="coach-summary-kicker">已引用的歷史週期</div><div class="coach-summary-title">${reviewEscape(context.headline || '歷史訓練摘要')}</div><ul class="coach-summary-list">${context.facts.map((fact) => `<li>${reviewEscape(fact)}</li>`).join('')}</ul><div class="coach-summary-copy muted">這份摘要會和目前 Garmin 實績一起提供給教練判讀；它只提供背景，不會自行覆寫正式課表。</div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start"><button class="btn btn-secondary" onclick="clearHistoryCoachContext()">不引用這份歷史</button></div></div>`;
 }
 
+function renderCourseRationaleSummary() {
+  const context = buildContext();
+  const week = context.plan.find((item) => item.weekNum === currentWeek) || context.plan.find((item) => (item.days || []).some((day) => day.dateStr >= context.today));
+  const items = (week?.days || [])
+    .filter((day) => day.type !== 'rest' && day.dateStr >= context.today)
+    .map((day) => ({ day, resolved: resolveCourse(day, context, week) }))
+    .filter(({ resolved }) => Boolean(resolved.rationale));
+  if (!items.length) return '';
+  return `<section class="automation-timeline" aria-label="本週課程調整依據"><div class="automation-timeline-title">本週課程調整依據</div><div class="automation-timeline-list">${items.map(({ day, resolved }) => `<div class="automation-timeline-item"><time>${reviewEscape(day.dateStr.slice(5).replace('-', '/'))}</time><div><b>${reviewEscape(trainingTaskTitle(resolved.course))}</b><br>${reviewEscape(resolved.rationale)}</div></div>`).join('')}</div></section>`;
+}
+
 function clearHistoryCoachContext() {
   const setupVisible = document.getElementById('view-setup')?.classList.contains('active');
   if (appData.profile?.historyContext) delete appData.profile.historyContext;
@@ -1705,6 +1716,7 @@ function renderCoachReviewPanel() {
     ${renderHistoryCoachContext()}
     ${renderLastRecalibrationCard()}
     ${renderPlanChangeTimeline()}
+    ${renderCourseRationaleSummary()}
     ${renderLiveCoachCard(week, nextWeek, hasCurrentCoachPlan)}
     ${courseSection}
     ${renderCoachDataSignals()}
@@ -2002,7 +2014,11 @@ function renderWeekSection(plan) {
     ${coachBrief}
   </section>` : '';
   const hasCoachDirection = Boolean(goalGapNote || coachBrief || planningNote);
-  const dayCards = week.days.map(day => renderDayCard(applyCoachPlanOverride(day, week))).join('');
+  const context = buildContext();
+  const dayCards = week.days.map((day) => {
+    const resolved = resolveCourse(day, context, week);
+    return renderDayCard(resolved.course, resolved.rationale);
+  }).join('');
   return `
 <div class="card week-header-card">
   <div class="week-header-top">
@@ -2345,7 +2361,7 @@ function garminManualBuilderText(day) {
 function weeklyGarminCalendarIcs(week) {
   const runningDays = (week?.days || [])
     .filter((day) => day.type !== 'rest' && day.dateStr)
-    .map((day) => applyCoachPlanOverride(day, week));
+    .map((day) => resolveCourse(day, buildContext(), week).course);
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const lines = [
     'BEGIN:VCALENDAR',
@@ -2459,7 +2475,7 @@ function garminMainDistanceKm(day) {
 function weeklyGarminSyncPayload(week) {
   const runningDays = (week?.days || [])
     .filter((day) => day.type !== 'rest' && day.dateStr)
-    .map((day) => applyCoachPlanOverride(day, week));
+    .map((day) => resolveCourse(day, buildContext(), week).course);
   const syncableDays = runningDays.filter((day) => day.workoutStructureConfidence !== 'note-only');
   const skippedDays = runningDays.filter((day) => day.workoutStructureConfidence === 'note-only');
   return {
@@ -2719,7 +2735,7 @@ function showRunCompanion(dateStr) {
   ]);
 }
 
-function renderDayCard(day) {
+function renderDayCard(day, rationale = '') {
   const garminRun = getGarminRunForDate(day.dateStr);
   const isTodayCard = day.dateStr === todayStr();
   if (day.type === 'rest') {
@@ -2760,6 +2776,7 @@ function renderDayCard(day) {
     </div>
     <span class="workout-badge ${badgeClass}">${day.coachPlan ? '📌 ' : ''}${typeName}</span>
     <div class="day-card-task ${day.coachPlan ? 'coach-headline' : ''}">${trainingTaskTitle(day)}</div>
+    ${rationale ? `<div class="course-rationale">${reviewEscape(rationale)}</div>` : ''}
     ${day.coachPlan ? '<p class="coach-detail-hint">完整距離、強度與動作安排請看下方主課。</p>' : ''}
     <div class="day-card-pace">${[day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>
     ${day.injuryNote ? `<div style="font-size:12px;line-height:1.5;color:var(--c-red);margin:4px 0 8px">🦶 ${day.injuryNote}</div>` : ''}

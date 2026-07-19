@@ -693,6 +693,7 @@
     .badge-coach { background: var(--c-surface2); color: var(--c-text-muted); }
     .day-card-task { font-size: 15px; font-weight: 700; margin-bottom: 6px; line-height: 1.5; }
     .day-card-task.coach-headline { margin-bottom: 3px; color: var(--c-text); font-size: 16px; font-weight: 900; }
+    .course-rationale { margin: 0 0 8px; color: var(--c-text-muted); font-size: 12px; font-weight: 700; line-height: 1.55; }
     .coach-detail-hint { margin: 0 0 12px; color: var(--c-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
     .day-card-pace { font-size: 13px; color: var(--c-text-muted); margin-bottom: 12px; line-height: 1.5; }
     .workout-steps { display: grid; gap: 10px; font-size: 13px; color: var(--c-text-muted); line-height: 1.8; }

@@ -308,12 +308,12 @@ async function assertTrainerReport(page, viewportName) {
   }, trainerReviewSample);
   await page.waitForSelector(".session-report", { timeout: 5000 });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-report`);
-  const decision = await page.locator("#progress-panel-analysis").evaluate((element) => ({
-    hasDecision: element.textContent.includes("自動訓練決策"),
+  const analysisContext = await page.locator("#progress-panel-analysis").evaluate((element) => ({
+    hasDuplicatedDecision: element.textContent.includes("自動訓練決策"),
     hasLongestRun: element.textContent.includes("近四週最長跑"),
   }));
-  if (!decision.hasDecision || !decision.hasLongestRun) {
-    throw new Error(`${viewportName}/trainer-report: automatic decision or long-term context is missing ${JSON.stringify(decision)}`);
+  if (analysisContext.hasDuplicatedDecision || !analysisContext.hasLongestRun) {
+    throw new Error(`${viewportName}/trainer-report: analysis must keep long-term context without duplicating the week decision ${JSON.stringify(analysisContext)}`);
   }
   const inputValidation = await page.evaluate(() => {
     const valid = {
@@ -463,11 +463,11 @@ async function assertTrainerReport(page, viewportName) {
   }
   const safetyHold = await page.evaluate(() => {
     appData.safetyHold = { active: true, startedOn: todayStr(), reason: "test safety hold" };
-    const adjusted = applyCoachPlanOverride({ dateStr: todayStr(), type: "tempo", focus: "tempo", task: "T 跑", pace: "5:00/km" }, { weekNum: 1 });
+    const resolved = resolveCourse({ dateStr: todayStr(), type: "tempo", focus: "tempo", task: "T 跑", pace: "5:00/km" }, buildContext(), { weekNum: 1 });
     appData.safetyHold = null;
-    return { type: adjusted.type, focus: adjusted.focus, task: adjusted.task };
+    return { type: resolved.course.type, focus: resolved.course.focus, task: resolved.course.task, rationale: resolved.rationale };
   });
-  if (safetyHold.type !== "easy" || safetyHold.focus !== "recovery" || !safetyHold.task.includes("傷痛保護模式")) {
+  if (safetyHold.type !== "easy" || safetyHold.focus !== "recovery" || !safetyHold.task.includes("傷痛保護模式") || !safetyHold.rationale.includes("安全保護")) {
     throw new Error(`${viewportName}/trainer-safety-hold: quality workout was not safely masked ${JSON.stringify(safetyHold)}`);
   }
   const report = await page.locator(".session-report").evaluate((element) => ({
@@ -572,16 +572,21 @@ async function assertTrainerReport(page, viewportName) {
     ], appData.profile, false, false, false, "2026-07-15", 3, "build");
     const coachWeek = { days: [{ dateStr: "2026-07-20", dow: 1 }] };
     coachReviewData = { nextWeek: { weekStart: "2026-07-20", menu: [{ plan: "節奏跑 6 km" }] } };
-    const safetyDay = applyCoachPlanOverride({ dow: 1, dateStr: "2026-07-20", type: "easy", task: "恢復跑", safetyOverride: true }, coachWeek);
+    const safetyDay = resolveCourse({ dow: 1, dateStr: "2026-07-20", type: "easy", task: "恢復跑", safetyOverride: true }, buildContext(), coachWeek);
+    const nextWeekDecision = progression(buildContext(), "weekly-checkin", { factor: 0.85, removeQuality: true, qualityMode: "keep" });
+    const paces = paceResolver(buildContext(), "2026-07-20");
     return {
       heatSafe: isCalibrationSafeRun({ date: "2026-07-15", km: 6, elevationGainM: 0, temperatureC: 35 }),
       protectedType: protectedDays[1]?.type,
       protection: protectedDays[1]?.recoveryProtection,
       coachLocked: coachPrescriptionLocksWeek(coachWeek),
-      safetyOverride: Boolean(safetyDay.coachSafetyOverride),
+      safetyOverride: Boolean(safetyDay.course.coachSafetyOverride),
+      progressionSafety: nextWeekDecision?.removeQuality,
+      paceSource: paces?.easy?.source,
+      paceHrMax: paces?.hrZones?.max,
     };
   });
-  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride) {
+  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax) {
     throw new Error(`${viewportName}/trainer-safeguards: environmental, recovery, or coach-priority rule failed ${JSON.stringify(safeguards)}`);
   }
   const planningScenarios = await page.evaluate(() => {

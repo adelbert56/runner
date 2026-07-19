@@ -1043,7 +1043,7 @@ function findTodayPlanDay() {
   const today = todayStr();
   for (const week of appData.plan || []) {
     const day = (week.days || []).find((item) => item.dateStr === today);
-    if (day) return { day: applyCoachPlanOverride(day, week), weekNum: week.weekNum || null };
+    if (day) return { day: resolveCourse(day, buildContext(), week).course, weekNum: week.weekNum || null };
   }
   return null;
 }
@@ -2272,7 +2272,7 @@ function init() {
   }
   loadTrainerWeather().then(() => {
     // 天氣載入後先做出發前調整，週視圖才會直接呈現調整後的今天
-    if (typeof applyDailySessionAdvisory === 'function') applyDailySessionAdvisory();
+    if (typeof runCoachAdaptation === 'function') runCoachAdaptation('weather-ready');
     if (trainerWeather && document.getElementById('plan-tab-week')) {
       jumpToPhaseWeek(currentWeek);
     }
@@ -2364,13 +2364,9 @@ loadRegistrationRaceCheckpoints();
     coachReviewData = data;
     coachReviewLoadState = 'ready';
     syncGarminRunsToPlan(data);
-    // 校準結果顯示在教練建議分頁的「上次滾動校準」卡片，背景自動觸發不再跳 toast
-    if (typeof autoRecalibratePlan === 'function') autoRecalibratePlan();
-    if (typeof applyDailySessionAdvisory === 'function') {
-      // 教練資料到位後才可能觸發「昨日高強度」降階；有調整就同步刷新週視圖
-      const advisoryResult = applyDailySessionAdvisory();
-      if (advisoryResult && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
-    }
+    // 校準與出發前調整都經單一 mutation 入口；背景觸發不跳 toast。
+    const adaptation = runCoachAdaptation('coach-review-ready');
+    if (adaptation.dailyAdvisory && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }
 

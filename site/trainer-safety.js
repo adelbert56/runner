@@ -40,33 +40,6 @@ function clearSafetyHold() {
   renderPlanView();
 }
 
-function applyCoachPlanOverride(day, week) {
-  // 安全保護高於教練處方；疼痛保護中不顯示原本的品質或長跑內容。
-  const safetyHold = activeSafetyHold();
-  if (safetyHold && day.dateStr >= todayStr() && ['tempo', 'interval', 'long'].includes(day.type)) {
-    return {
-      ...day,
-      type: 'easy',
-      focus: 'recovery',
-      task: '恢復跑或休息（傷痛保護模式）',
-      detail: '暫停品質課與長跑；若仍有疼痛、步態異常或不適，改為完全休息。',
-      pace: '非常輕鬆／可完整對話；不適即停止',
-      coachSafetyOverride: true
-    };
-  }
-  if (day.safetyOverride) return { ...day, coachSafetyOverride: true };
-  const coachDays = coachDaysForWeek(week);
-  const entry = coachDays.find((item) => item.scheduledDow === day.dow);
-  if (!entry) return day;
-  const headline = coachPlanHeadline(entry.plan);
-  const steps = (day.steps || []).map((step) => step.title === '主課'
-    ? { ...step, dose: '', detail: entry.plan, isCoachMain: true }
-    : step);
-  const suppliedSteps = Array.isArray(entry.steps) ? entry.steps : [];
-  const workoutStructure = coachWorkoutStructure(entry.plan, day, suppliedSteps);
-  return { ...day, task: headline, pace: '', hrTarget: '', steps, workoutStructure, workoutStructureConfidence: suppliedSteps.length ? 'coach' : coachStructureConfidence(entry.plan), coachPlan: true };
-}
-
 function checkinSafetyDecision({ answers, fatigue, painConcern }) {
   const noPain = Boolean(answers[1]);
   const sleptWell = Boolean(answers[2]);
