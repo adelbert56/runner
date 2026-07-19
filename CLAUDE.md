@@ -89,8 +89,23 @@ site/index.html 不存在 → build-operational-dashboard.mjs 用 "" fallback
 
 ---
 
+## 練跑計畫（trainer）模組結構（2026-07-19 拆檔後）
+
+`site/trainer.js` 原 8162 行單檔已拆成 5 檔（classic script，全域共享，載入順序＝依賴順序，全部在 `trainer.js` 前載入）：
+
+| 檔 | 行數 | 職責 |
+|----|------|------|
+| `trainer-copy.js` | ~198 | 面向使用者的文案、label、格式化 helper（secToPace、trainingTypeLabel、教練信句式…） |
+| `trainer-plan.js` | ~1449 | 課表產生（buildPlan/buildPhases/buildWorkoutContent）、滾動校準、體能推估、週期 apply/restart |
+| `trainer-render.js` | ~2838 | 所有 renderXxx／卡片／教練面板／週期時間軸／週日課卡／modal |
+| `trainer-actions.js` | ~1238 | 課程動作、週評估、配速校準、調適、log、備份、週期管理、匯出 |
+| `trainer.js` | ~2455 | 資料模型（normalizeData/loadData/saveData）、常數表、setup、pace/zone utils、init、事件接線 |
+
+改動注意：函式名皆全域、被 59 個 inline `onclick` 引用，**不可改名**；載入順序改動要同步更新 `trainer.html`、`package.json` check、`ui-smoke-check.mjs` 串接清單、`?v=` 快取參數。詳見 `docs/superpowers/plans/2026-07-19-trainer-refactor.md`（含未執行的資料整合待確認清單 D1–D4）。
+
 ## 未完成事項
 
+- [x] 練跑計畫資料整合：D1 發布檔 laps 瘦身、D2 心率區間單一真相（`hrZones` 優先教練明訂區間）、D3 `runner/訓練/教練目標.json`（機器可讀 zones+periodization，build 覆蓋週報值）皆已做並驗證；D4 Garmin 4 檔合併經評估**否決**（是跨行程 handshake 非碎片化，合併會競態）。細節見 plan 檔。心率區間／週期日後改 `教練目標.json`。
 - [ ] Issue #35「Refresh race data failure」→ root cause 已修，需手動關閉
 - [ ] `workflow-run-monitor.yml` 已涵蓋主要 workflow 失敗通報，但未做更細的分類或升級策略
 - [ ] Python scrapers (`scrapers/`) 已寫但需確認是否真的在 CI 跑

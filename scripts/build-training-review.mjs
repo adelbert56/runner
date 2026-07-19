@@ -19,6 +19,8 @@ const getRandomValues = (arr) => webcrypto.getRandomValues(arr);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = process.env.TRAINING_REVIEW_SOURCE || path.join(root, "runner", "訓練", "週報.json");
 const ACTIVITY_SOURCE = process.env.TRAINING_ACTIVITY_SOURCE || path.join(root, "runner", "訓練", "訓練紀錄.json");
+// 機器可讀的教練真相源：存在時 zones/periodization 以此檔為準，避免與 週報.json 漂移。
+const COACH_GOAL_SOURCE = process.env.TRAINING_COACH_GOAL_SOURCE || path.join(root, "runner", "訓練", "教練目標.json");
 const TARGET = process.env.TRAINING_REVIEW_TARGET || path.join(root, "site", "data", "training-review.enc.json");
 const LOCAL_KEY = path.join(root, "runner", "訓練", ".review-key");
 const PBKDF2_ITERATIONS = 310000;
@@ -99,6 +101,17 @@ function buildAnalyticsRuns(activities) {
       selfEvaluation: activity.self_evaluation || null,
     };
   }).filter((activity) => activity.date && activity.km > 0);
+}
+
+// Publish slimming: the per-session lap detail only powers the recent-run
+// report (front-end history picker shows the last 8 activities). Keep laps for
+// the most recent runs and drop them from older ones so the published, encrypted
+// review stays lean. Volume/trend/completion use km & hr, not laps.
+function slimAnalyticsLaps(runs, keepRecent = 20) {
+  const keep = new Set(
+    [...runs].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, keepRecent).map((run) => run.activityId)
+  );
+  return runs.map((run) => (keep.has(run.activityId) ? run : { ...run, laps: [] }));
 }
 
 function buildWeeklyTrend(runs) {
@@ -447,7 +460,7 @@ async function buildPublishedReview(plaintext) {
     review = refreshReviewFromGarmin(review, analyticsRuns, activityFeed.updatedAt, autopilot);
     review.analyticsUpdatedAt = activityFeed.updatedAt || null;
     review.analyticsStatus = "synced";
-    review.analyticsRuns = analyticsRuns;
+    review.analyticsRuns = slimAnalyticsLaps(analyticsRuns);
     // 手錶估的乳酸閾值心率：前端訓練區間優先用它，比 %maxHr 推算準
     review.lactateThresholdHr = Number(activityFeed.lactateThreshold?.heartRate) || null;
     review.autopilot = autopilot;
@@ -459,6 +472,15 @@ async function buildPublishedReview(plaintext) {
     review.lactateThresholdHr = null;
     review.autopilot = buildGarminAutopilot([], null);
   }
+  // 教練目標.json 為單一真相：存在且結構有效時，覆蓋 zones/periodization。
+  // 找不到或格式不符則沿用 週報.json 既有值（向後相容，不會清空）。
+  try {
+    const coachGoal = JSON.parse(await readFile(COACH_GOAL_SOURCE, "utf8"));
+    if (review && coachGoal && typeof coachGoal === "object") {
+      if (coachGoal.zones && typeof coachGoal.zones === "object") review.zones = coachGoal.zones;
+      if (Array.isArray(coachGoal.periodization) && coachGoal.periodization.length) review.periodization = coachGoal.periodization;
+    }
+  } catch { /* 沒有 教練目標.json 就沿用週報值 */ }
   return JSON.stringify(review);
 }
 
