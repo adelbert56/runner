@@ -365,6 +365,39 @@ async function assertTrainerReport(page, viewportName) {
   if (!earlyPlanning.eligible || earlyPlanning.planned < 2) {
     throw new Error(`${viewportName}/trainer-early-planning: matched Garmin sessions did not unlock early planning ${JSON.stringify(earlyPlanning)}`);
   }
+  const manualEarlyPlanning = await page.evaluate(() => {
+    const previousWeek = currentWeek;
+    currentWeek = 1;
+    const week = appData.plan[0];
+    const planned = (week?.days || []).filter((day) => day.type !== "rest" && !day.isMakeup);
+    const previous = {
+      log: appData.log,
+      dayStatuses: appData.dayStatuses,
+      runs: coachReviewData.analyticsRuns,
+      statuses: planned.map((day) => day.status),
+    };
+    try {
+      appData.log = [];
+      appData.dayStatuses = {};
+      planned.forEach((day) => { day.status = "planned"; });
+      coachReviewData.analyticsRuns = [];
+      const eligibility = earlyCoachPlanningEligibility();
+      const card = renderEarlyCoachPlanningCard();
+      return {
+        pending: eligibility.pending?.length || 0,
+        offersManualConfirmation: card.includes("我已完成，手動確認排課"),
+      };
+    } finally {
+      appData.log = previous.log;
+      appData.dayStatuses = previous.dayStatuses;
+      coachReviewData.analyticsRuns = previous.runs;
+      planned.forEach((day, index) => { day.status = previous.statuses[index]; });
+      currentWeek = previousWeek;
+    }
+  });
+  if (!manualEarlyPlanning.pending || !manualEarlyPlanning.offersManualConfirmation) {
+    throw new Error(`${viewportName}/trainer-manual-early-planning: unmatched Garmin dates did not offer a per-course confirmation ${JSON.stringify(manualEarlyPlanning)}`);
+  }
   const safetyHold = await page.evaluate(() => {
     appData.safetyHold = { active: true, startedOn: todayStr(), reason: "test safety hold" };
     const adjusted = applyCoachPlanOverride({ dateStr: todayStr(), type: "tempo", focus: "tempo", task: "T 跑", pace: "5:00/km" }, { weekNum: 1 });
@@ -401,12 +434,14 @@ async function assertTrainerReport(page, viewportName) {
   });
   await page.waitForSelector("#plan-tab-coach .coach-menu-card", { timeout: 5000 });
   const coachStructure = await page.locator("#plan-tab-coach").evaluate((element) => ({
-    hasStructure: element.textContent.includes("Garmin 課程結構"),
+    keepsCurrentPlanCompact: element.textContent.includes("本週課程不重複列在這裡"),
+    hasHistoricalReview: element.textContent.includes("查看歷史教練週報"),
     detailsCount: element.querySelectorAll("details").length,
+    openDetailsCount: element.querySelectorAll("details[open]").length,
     hasInvalidNumber: element.textContent.includes("NaN"),
   }));
-  if (!coachStructure.hasStructure || !coachStructure.detailsCount || coachStructure.hasInvalidNumber) {
-    throw new Error(`${viewportName}/trainer-coach: Garmin structure is missing or invalid ${JSON.stringify(coachStructure)}`);
+  if (!coachStructure.keepsCurrentPlanCompact || !coachStructure.hasHistoricalReview || !coachStructure.detailsCount || coachStructure.openDetailsCount || coachStructure.hasInvalidNumber) {
+    throw new Error(`${viewportName}/trainer-coach: stale coach review did not stay compact and collapsible ${JSON.stringify(coachStructure)}`);
   }
   await page.locator("#plan-tab-coach details").first().evaluate((element) => { element.open = true; });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-coach`);
