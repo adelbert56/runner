@@ -8,6 +8,7 @@ const PRE_RESTORE_STORAGE_KEY = `${STORAGE_KEY}:pre-restore`;
 const RUNNER_REGISTERED_RACES_SUFFIX = ':registered-races';
 const PLAN_SCHEMA_VERSION = 10;
 const GUIDE_ASSET_VERSION = 3;
+const GARMIN_WORKOUT_PAIRING_KEY = 'runner-garmin-workout-pairing-v1';
 const SKIP_REASON_LABELS = {
   work: '工作／行程',
   sleep: '睡眠不足',
@@ -3444,6 +3445,7 @@ function restartTrainingCycle() {
 // ============================================================
 let currentWeek = 1;
 let coachReviewData = null;
+let coachReviewLoadState = 'loading';
 let registrationRaceData = null;
 let registrationRaceLoadState = 'idle';
 
@@ -5166,7 +5168,7 @@ function clearHistoryCoachContext() {
 
 function renderCoachReviewPanel() {
   if (!coachReviewData) {
-    return `${renderTrainingStatusCard(appData.plan || [])}${renderHistoryCoachContext()}${renderEarlyCoachPlanningCard()}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
+    return `${renderTrainingStatusCard(appData.plan || [])}${renderHistoryCoachContext()}${renderEarlyCoachPlanningCard()}${renderLocalGarminPairingCard()}<div class="card"><div class="card-title">🏃 教練建議</div><p style="color:var(--c-text-muted);font-size:14px;margin:0">解鎖加密週報後，這裡會顯示 Garmin 分析、跑量趨勢與下週參考菜單。</p></div>`;
   }
   const week = coachReviewData.week || {};
   const nextWeek = coachReviewData.nextWeek || {};
@@ -5236,6 +5238,7 @@ function renderCoachReviewPanel() {
     ${renderPlanChangeTimeline()}
     ${renderLiveCoachCard(week, nextWeek)}
     ${renderEarlyCoachPlanningCard()}
+    ${renderLocalGarminPairingCard()}
     ${courseSection}
     ${renderCoachDataSignals()}
     <p class="coach-fineprint" style="margin-top:12px">這是依 Garmin 實績產生的參考安排；你的正式課表不會自動被覆寫。</p>
@@ -5248,6 +5251,16 @@ function earlyCoachPlanningEligibility() {
   const nextWeek = appData.plan?.[currentWeek];
   if (!week || !nextWeek) return { eligible: false, reason: '本輪沒有下一週可提前安排。' };
   if (appData.safetyHold?.active) return { eligible: false, reason: '傷痛保護模式啟用中；請先完成恢復確認。' };
+  if (!coachReviewData) {
+    return {
+      eligible: false,
+      reason: coachReviewLoadState === 'loading'
+        ? '正在核對 Garmin 已同步紀錄，完成前不會把課程誤判為未完成。'
+        : coachReviewLoadState === 'locked'
+          ? '請先解鎖教練建議，系統才能核對 Garmin 已同步紀錄。'
+          : '目前無法讀取 Garmin 已同步紀錄，請重新整理後再試。'
+    };
+  }
   const plannedSessions = (week.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
   if (!plannedSessions.length) return { eligible: false, reason: '本週沒有可提前結案的跑步課。' };
   const completedDates = new Set([...(appData.log || []).map((entry) => entry.date), ...plannedSessions.filter((day) => day.status === 'done').map((day) => day.dateStr)]);
@@ -5964,6 +5977,66 @@ function garminSyncEndpoint() {
   return 'http://127.0.0.1:4173/api/garmin-workout-sync';
 }
 
+function garminPairingEndpoint() {
+  return 'http://127.0.0.1:4173/api/garmin-workout-pairing';
+}
+
+function isLocalRunnerPage() {
+  return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+}
+
+function garminWorkoutPairingCode() {
+  try {
+    return sessionStorage.getItem(GARMIN_WORKOUT_PAIRING_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function garminSyncHeaders() {
+  const code = garminWorkoutPairingCode();
+  return code ? { 'x-runner-garmin-pairing': code } : {};
+}
+
+async function showLocalGarminPairingCode() {
+  try {
+    const response = await fetch(garminPairingEndpoint(), { cache: 'no-store' });
+    const pairing = await response.json().catch(() => ({}));
+    if (!response.ok || !pairing.code) throw new Error(pairing.message || '無法讀取本機配對碼');
+    showModal('本機 Garmin 配對碼', `<p style="margin-top:0;line-height:1.7">在公開訓練頁第一次同步時輸入這組碼。它只存在這台電腦，公開頁不會自動讀取。</p><input class="form-input" value="${reviewEscape(pairing.code)}" readonly onclick="this.select()" aria-label="本機 Garmin 配對碼"><p style="margin:12px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.6">請在同一台電腦、同一個瀏覽器完成配對；關閉分頁後，公開頁會要求再次輸入。</p>`, [{ label: '關閉', primary: true, action: closeModal }]);
+  } catch (error) {
+    showModal('無法讀取本機配對碼', `<p style="margin:0;line-height:1.7">請確認你是從本機 Runner 開啟此頁，且「啟動 Runner Garmin 同步器.cmd」正在執行。</p><p style="color:var(--c-text-muted);font-size:12px">${reviewEscape(error instanceof Error ? error.message : '未知錯誤')}</p>`, [{ label: '關閉', primary: true, action: closeModal }]);
+  }
+}
+
+function openGarminWorkoutPairing(weekNumber = currentWeek) {
+  showModal('配對本機 Garmin 同步器', `<p style="margin-top:0;line-height:1.7">這是第一次從公開訓練頁控制本機 Garmin 同步器。請在<b>同一台電腦</b>開啟 <code>http://127.0.0.1:4173/site/trainer.html</code>，於「教練建議」按「查看本機 Garmin 配對碼」，再貼到下方。</p><label class="form-label" for="garmin-workout-pairing-code">本機配對碼</label><input class="form-input" id="garmin-workout-pairing-code" autocomplete="off" spellcheck="false" placeholder="貼上配對碼"><p style="margin:12px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.6">此碼只儲存在目前瀏覽器分頁；重新開啟公開頁時需要再次配對。</p>`, [
+    { label: '配對並同步', primary: true, action: () => saveGarminWorkoutPairing(weekNumber) },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+async function saveGarminWorkoutPairing(weekNumber = currentWeek) {
+  const input = document.getElementById('garmin-workout-pairing-code');
+  const code = String(input?.value || '').trim();
+  if (!code) {
+    input?.focus();
+    return;
+  }
+  try {
+    sessionStorage.setItem(GARMIN_WORKOUT_PAIRING_KEY, code);
+  } catch {
+    showModal('瀏覽器無法保存配對', '<p style="margin:0;line-height:1.7">目前瀏覽器禁止工作階段儲存，無法安全保存本機 Garmin 配對。請允許本網站使用工作階段儲存後再試。</p>', [{ label: '關閉', primary: true, action: closeModal }]);
+    return;
+  }
+  await syncWeekToGarmin(weekNumber);
+}
+
+function renderLocalGarminPairingCard() {
+  if (!isLocalRunnerPage()) return '';
+  return `<div class="coach-setting-card" style="margin:14px 0"><div class="coach-setting-value">本機 Garmin 配對</div><div class="coach-fineprint">公開訓練頁第一次同步前，先在這裡查看配對碼。未配對的公開頁不能啟動或讀取本機 Garmin 同步。</div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start"><button class="btn btn-secondary" type="button" onclick="showLocalGarminPairingCode()">查看本機 Garmin 配對碼</button></div></div>`;
+}
+
 function estimatedGarminWorkoutSeconds(day) {
   const paceMatch = String(day.pace || '').match(/(\d+):(\d{2})/);
   const paceSeconds = paceMatch ? Number(paceMatch[1]) * 60 + Number(paceMatch[2]) : 420;
@@ -6022,7 +6095,7 @@ function saveGarminSyncManifest(preview) {
 }
 
 async function readGarminSyncStatus() {
-  const response = await fetch(garminSyncEndpoint(), { cache: 'no-store' });
+  const response = await fetch(garminSyncEndpoint(), { cache: 'no-store', headers: garminSyncHeaders() });
   if (!response.ok) throw new Error('無法讀取 Garmin 同步器狀態');
   return response.json();
 }
@@ -6079,10 +6152,14 @@ async function syncWeekToGarmin(weekNumber = currentWeek) {
   try {
     const response = await fetch(garminSyncEndpoint(), {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', ...garminSyncHeaders() },
       body: JSON.stringify(payload)
     });
     const result = await response.json().catch(() => ({}));
+    if (response.status === 401 && result.error === 'pairing-required') {
+      openGarminWorkoutPairing(weekNumber);
+      return;
+    }
     if (!response.ok) throw new Error(result.message || 'Garmin 課程同步器未能啟動');
     closeModal();
     showModal('正在同步本週課程到 Garmin', `<p style="margin-top:0;color:var(--c-text-muted);line-height:1.7">已將 ${payload.workouts.length} 堂課交給本機同步器。同名課程會安全替換成新版，避免保留舊內容。</p><p style="color:var(--c-text-muted);font-size:12px;line-height:1.6">Runner 只會使用你電腦既有的 Garmin 授權，不會傳送帳密到網站。</p>`, [{
@@ -7813,6 +7890,7 @@ loadRegistrationRaceCheckpoints();
 
   function render(data) {
     coachReviewData = data;
+    coachReviewLoadState = 'ready';
     syncGarminRunsToPlan(data);
     // 校準結果顯示在教練建議分頁的「上次滾動校準」卡片，背景自動觸發不再跳 toast
     if (typeof autoRecalibratePlan === 'function') autoRecalibratePlan();
@@ -7835,6 +7913,7 @@ loadRegistrationRaceCheckpoints();
   }
 
   function renderNotice(text) {
+    coachReviewLoadState = 'unavailable';
     const host = document.getElementById('coach-review-content');
     if (!host) return;
     host.innerHTML = `
@@ -7845,6 +7924,7 @@ loadRegistrationRaceCheckpoints();
   }
 
   function renderUnlock(payload, wrongKey) {
+    coachReviewLoadState = 'locked';
     const host = document.getElementById('coach-review-content');
     if (!host) return;
     host.innerHTML = `
@@ -7916,6 +7996,7 @@ loadRegistrationRaceCheckpoints();
     unlockedPassphrase = '';
     localStorage.removeItem(PASSPHRASE_STORAGE_KEY);
     coachReviewData = null;
+    coachReviewLoadState = 'loading';
     refreshCoachReviewPanels();
     init();
   };

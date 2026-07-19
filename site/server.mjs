@@ -1,5 +1,6 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { spawn } from "node:child_process";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
@@ -15,6 +16,7 @@ const registrationBatchPayloadLimit = 8 * 1024 * 1024;
 const garminSyncPayloadLimit = 128 * 1024;
 const garminSyncRequestPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-request.json"));
 const garminSyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-workout-sync-status.json"));
+const garminPairingPath = resolve(join(root, "runner", "訓練", "garmin-workout-pairing.json"));
 const garminPublishScript = resolve(join(root, "scripts", "garmin", "publish_training_plan.py"));
 const garminActivitySyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-sync-status.json"));
 const garminActivitySyncScript = resolve(join(root, "scripts", "garmin", "sync-garmin.ps1"));
@@ -27,10 +29,8 @@ const allowedLocalHosts = new Set([
   `127.0.0.1:${port}`,
   `[::1]:${port}`,
 ]);
-const allowedGarminSyncOrigins = new Set([
-  ...allowedLocalHosts.values(),
-  "adelbert56.github.io",
-]);
+const publicGarminSyncOrigin = "https://adelbert56.github.io";
+const garminPairingHeader = "x-runner-garmin-pairing";
 let garminSyncRunning = false;
 let garminActivitySyncRunning = false;
 const emptyRegistrationData = {
@@ -80,16 +80,12 @@ function sendBinary(res, status, content, contentType, filename) {
 
 function sendGarminCors(res, origin) {
   if (!origin) return;
-  try {
-    const host = new URL(origin).host;
-    if (!allowedGarminSyncOrigins.has(host)) return;
+  if (isAllowedGarminSyncOrigin(origin)) {
     res.setHeader("access-control-allow-origin", origin);
     res.setHeader("vary", "origin");
     res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
-    res.setHeader("access-control-allow-headers", "content-type");
+    res.setHeader("access-control-allow-headers", `content-type, ${garminPairingHeader}`);
     res.setHeader("access-control-allow-private-network", "true");
-  } catch {
-    // Invalid origin is rejected by the route guard below.
   }
 }
 
@@ -127,13 +123,20 @@ function isLocalRegistrationRequest(req) {
 }
 
 function isAllowedGarminSyncRequest(req) {
-  const origin = String(req.headers.origin || "");
+  return isAllowedGarminSyncOrigin(String(req.headers.origin || ""));
+}
+
+function isAllowedGarminSyncOrigin(origin) {
   if (!origin) return false;
   try {
-    return allowedGarminSyncOrigins.has(new URL(origin).host);
+    return origin === publicGarminSyncOrigin || allowedLocalHosts.has(new URL(origin).host);
   } catch {
     return false;
   }
+}
+
+function isPublicGarminSyncRequest(req) {
+  return String(req.headers.origin || "") === publicGarminSyncOrigin;
 }
 
 function isLocalGarminActivitySyncRequest(req) {
@@ -177,6 +180,30 @@ async function readGarminSyncStatus() {
   } catch {
     return { status: "idle", message: "尚未執行 Garmin 同步" };
   }
+}
+
+async function readOrCreateGarminPairing() {
+  try {
+    const pairing = JSON.parse(await readFile(garminPairingPath, "utf8"));
+    if (typeof pairing.code === "string" && pairing.code.length >= 32) return pairing;
+  } catch {
+    // First pairing creates a local-only secret below.
+  }
+  await mkdir(resolve(join(root, "runner", "訓練")), { recursive: true });
+  const pairing = {
+    version: 1,
+    code: randomBytes(24).toString("base64url"),
+    createdAt: new Date().toISOString(),
+  };
+  await writeFile(garminPairingPath, `${JSON.stringify(pairing, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+  return pairing;
+}
+
+function hasValidGarminPairing(req, pairing) {
+  const supplied = String(req.headers[garminPairingHeader] || "");
+  const expected = String(pairing.code || "");
+  if (!supplied || supplied.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(supplied), Buffer.from(expected));
 }
 
 async function queueGarminSync(payload) {
@@ -307,6 +334,19 @@ const server = createServer(async (req, res) => {
     sendJson(res, 405, { error: "method-not-allowed" });
     return;
   }
+  if (decoded === "/api/garmin-workout-pairing") {
+    if (!isLocalGarminActivitySyncRequest(req)) {
+      sendJson(res, 403, { error: "local-only", message: "Garmin 配對碼只可在本機 Runner 查看。" });
+      return;
+    }
+    if (req.method !== "GET") {
+      sendJson(res, 405, { error: "method-not-allowed" });
+      return;
+    }
+    const pairing = await readOrCreateGarminPairing();
+    sendJson(res, 200, { code: pairing.code, createdAt: pairing.createdAt });
+    return;
+  }
   if (decoded.startsWith("/api/garmin-workout-sync")) {
     sendGarminCors(res, origin);
     if (req.method === "OPTIONS") {
@@ -317,6 +357,13 @@ const server = createServer(async (req, res) => {
     if (!isAllowedGarminSyncRequest(req)) {
       sendJson(res, 403, { error: "forbidden", message: "Garmin sync is only available from Runner." });
       return;
+    }
+    if (isPublicGarminSyncRequest(req)) {
+      const pairing = await readOrCreateGarminPairing();
+      if (!hasValidGarminPairing(req, pairing)) {
+        sendJson(res, 401, { error: "pairing-required", message: "請先在本機 Runner 查看配對碼，並在公開訓練頁完成配對。" });
+        return;
+      }
     }
     if (decoded === "/api/garmin-workout-sync" && req.method === "GET") {
       sendJson(res, 200, { ...(await readGarminSyncStatus()), running: garminSyncRunning });

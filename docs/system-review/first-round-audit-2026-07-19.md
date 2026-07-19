@@ -35,7 +35,7 @@
 GitHub Actions ──產生／提交──> site/data + runner reports ──> GitHub Pages
 ```
 
-資料流的公開→本機 Garmin 課表橋接以及報名資料 API 的 LAN 邊界，均需列為 P1 安全工作，不應只以 UI 不顯示連結作為權限保護。
+資料流的公開→本機 Garmin 課表橋接以及報名資料 API 的 LAN 邊界，均需列為 P1 安全工作，不應只以 UI 不顯示連結作為權限保護。2026-07-19 已依 Product Owner 決策保留 Garmin 橋接，並加入本機配對碼；報名 API 的 LAN 邊界仍待處理。
 
 ## 四、排程與部署實際紀錄
 
@@ -82,10 +82,10 @@ GitHub Actions ──產生／提交──> site/data + runner reports ──> G
 | P2 | 3 |
 | P3 | 1 |
 
-優先處理順序：SEC-001 → SEC-002（需決策）→ DEV-001／TEST-001 發布驗證 → DATA-001 → DATA-002 → TEST-002 → DEP-001。
+優先處理順序：SEC-001 → DEV-001／TEST-001 發布驗證 → DATA-001 → DATA-002 → TEST-002 → DEP-001。SEC-002 已依 Product Owner 決策完成本機配對碼保護。
 
 ## 八、需要 Product Owner 決策
 
-1. 公開 GitHub Pages 是否必須能跨來源操作本機 Garmin 課表同步？若是，接受加入本機配對授權；若否，移除該橋接。
+1. 已決策：公開 GitHub Pages 保留跨來源操作本機 Garmin 課表同步，並已加入本機配對授權。
 2. 本機報名管理是否只允許本機 loopback 使用？建議是；若需要 LAN 協作，需改為真正的帳號／權限模型，而非 Host 標頭判斷。
 3. 是否授權將既有 workflow／CI／測試修正 commit 並 push 至 `main`，以完成線上排程的實際回歸驗證？
