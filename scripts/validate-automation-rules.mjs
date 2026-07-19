@@ -429,7 +429,7 @@ assertCheck(pagesWorkflow.includes('cp "runner/賽事/賽事資料庫.json" site
 assertCheck(pagesWorkflow.includes("actions/setup-node@v6"), "Pages deploy installs Node before derived data builds");
 assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");
 assertCheck(pagesWorkflow.includes("npm run announcements:build") && pagesWorkflow.includes("npm run automation:health"), "Pages deploy rebuilds derived site data");
-assertCheck(garminWorkflow.includes("run: node scripts/build-training-review.mjs") && garminWorkflow.includes("preserves its menu"), "Garmin CI refreshes analytics without discarding the encrypted coach menu");
+assertCheck(garminWorkflow.includes("run: node scripts/build-training-review.mjs") && garminWorkflow.includes("expires an old menu"), "Garmin CI refreshes the current Garmin week and expires stale encrypted coach menus");
 assertCheck(trainingReviewBuildScript.includes("async function decrypt") && trainingReviewBuildScript.includes("preserving the existing encrypted coach plan") && trainingReviewBuildScript.includes('TRAINING_REVIEW_ALLOW_GARMIN_ONLY'), "training review builder reuses the encrypted coach plan and requires explicit opt-in before Garmin-only fallback data");
 
 for (const [name, workflow] of [

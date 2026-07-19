@@ -321,6 +321,50 @@ function buildGarminOnlyReview(analyticsRuns, updatedAt) {
   };
 }
 
+function shortRange(start, end) {
+  return `${start.slice(5)} ~ ${end.slice(5)}`;
+}
+
+function refreshReviewFromGarmin(review, analyticsRuns, updatedAt, autopilot) {
+  const asOf = /^\d{4}-\d{2}-\d{2}$/.test(updatedAt || '')
+    ? updatedAt
+    : new Date().toISOString().slice(0, 10);
+  const currentStart = weekStart(asOf);
+  const currentEnd = isoDateOffset(currentStart, 6);
+  const nextStart = isoDateOffset(currentStart, 7);
+  const currentRuns = analyticsRuns.filter((run) => run.date >= currentStart && run.date <= currentEnd);
+  const currentKm = sumKm(currentRuns);
+  const currentHr = average(currentRuns.map((run) => Number(run.hr)));
+  const previousMenuStart = review?.nextWeek?.weekStart || '';
+  // 人工菜單只在它真的對應「下一週」時才保留；過期後清空，讓前端讀取跑者
+  // 本機的正式下週課表，而不是把已完成的舊週課表再次當成教練建議。
+  const hasCurrentManualMenu = previousMenuStart === nextStart;
+  return {
+    ...review,
+    updatedAt: asOf,
+    week: {
+      ...(review?.week || {}),
+      label: `本週回顧（${shortRange(currentStart, currentEnd)}）`,
+      range: shortRange(currentStart, currentEnd),
+      runs: currentRuns.length,
+      km: currentKm,
+      longKm: longestKm(currentRuns),
+      avgHr: currentHr ?? '—',
+      verdict: autopilot.label,
+      notes: `Garmin 已同步至 ${asOf}：本週 ${currentRuns.length} 次、${currentKm} km；${autopilot.headline}`,
+    },
+    nextWeek: {
+      ...(review?.nextWeek || {}),
+      label: hasCurrentManualMenu ? review.nextWeek.label : `下週（${shortRange(nextStart, isoDateOffset(nextStart, 6))}）`,
+      weekStart: nextStart,
+      targetKm: hasCurrentManualMenu ? review.nextWeek.targetKm : '依正式課表安排',
+      menu: hasCurrentManualMenu ? review.nextWeek.menu : [],
+      coachNote: hasCurrentManualMenu ? review.nextWeek.coachNote : autopilot.headline,
+      weatherPlan: hasCurrentManualMenu ? review.nextWeek.weatherPlan : '',
+    },
+  };
+}
+
 async function resolvePassphrase() {
   if (process.env.TRAINING_REVIEW_KEY) return process.env.TRAINING_REVIEW_KEY;
   try {
@@ -399,12 +443,14 @@ async function buildPublishedReview(plaintext) {
     const activities = Array.isArray(activityFeed.activities) ? activityFeed.activities : [];
     const analyticsRuns = buildAnalyticsRuns(activities);
     review = review || buildGarminOnlyReview(analyticsRuns, activityFeed.updatedAt);
+    const autopilot = buildGarminAutopilot(analyticsRuns, activityFeed.updatedAt);
+    review = refreshReviewFromGarmin(review, analyticsRuns, activityFeed.updatedAt, autopilot);
     review.analyticsUpdatedAt = activityFeed.updatedAt || null;
     review.analyticsStatus = "synced";
     review.analyticsRuns = analyticsRuns;
     // 手錶估的乳酸閾值心率：前端訓練區間優先用它，比 %maxHr 推算準
     review.lactateThresholdHr = Number(activityFeed.lactateThreshold?.heartRate) || null;
-    review.autopilot = buildGarminAutopilot(analyticsRuns, activityFeed.updatedAt);
+    review.autopilot = autopilot;
   } catch {
     review = review || buildGarminOnlyReview([], null);
     review.analyticsRuns = [];
