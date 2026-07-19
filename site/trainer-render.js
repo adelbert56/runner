@@ -235,7 +235,9 @@ function renderGarminAutopilotTab(profile, plan) {
   const content = renderGarminAutopilotCard(profile, plan);
   const health = trainingDataHealth(plan);
   const trust = `<div class="automation-timeline"><div class="automation-timeline-title">同步可信度</div><div class="automation-timeline-list"><div class="automation-timeline-item"><time>${health.syncAge === null ? '—' : health.syncAge === 0 ? '今天' : `${health.syncAge} 天前`}</time><div><b>${health.syncAge !== null && health.syncAge <= 2 ? 'Garmin 資料仍在可信範圍' : '需要確認 Garmin 同步'}</b><br>${health.issues.length ? reviewEscape(health.issues.join('；')) : '完成認列、補跑與課程對應均依同一個距離門檻自動處理。'}</div></div></div></div>`;
-  return `${renderTrainingStatusCard(plan)}${renderFitnessProjectionCard()}${renderGoalCycleCard()}${trust}${content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`}`;
+  // 資料衛生提醒卡（renderTrainingStatusCard）已固定在「教練建議」tab，且「本週課表」
+  // 總覽卡於有問題時會給同步狀態入口；此處不再重貼，避免同一組提醒橫跨三個 tab。
+  return `${renderFitnessProjectionCard()}${renderGoalCycleCard()}${trust}${content || `<div class="card"><div class="card-title">⌚ Garmin 輔助菜單</div><p style="margin:0;color:var(--c-text-muted);line-height:1.7">解鎖 Garmin 訓練資料後，這裡會依最近 14 天的跑量、配速、心率與負荷，產生接下來 7 天的輔助菜單。</p></div>`}`;
 }
 
 function renderProgressHub(profile, plan) {
@@ -2035,7 +2037,7 @@ function renderWeekSection(plan) {
       <div class="week-header-title">
         <div class="plan-overview-kicker">Week ${currentWeek} / ${plan.length}</div>
         <div class="week-header-label">第 ${currentWeek} 週 · ${(typeof coachPhaseForWeek === 'function' && coachPhaseForWeek(week)?.phase) || week.phaseLabel}${deloadBadge}${taperBadge}</div>
-        <div class="week-header-target"><span>${effectiveTarget.source === '教練本週目標' ? '教練本週目標' : '本週目標'}</span><strong>${effectiveTarget.display}</strong></div>
+        ${currentWeek !== todayWeekNum() ? `<div class="week-header-target"><span>${effectiveTarget.source === '教練本週目標' ? '教練本週目標' : '本週目標'}</span><strong>${effectiveTarget.display}</strong></div>` : ''}
       </div>
       <button class="week-nav-btn" onclick="navWeek(1)" ${currentWeek >= plan.length ? 'disabled' : ''} aria-label="下一週">▶</button>
     </div>
@@ -2066,6 +2068,15 @@ function renderWeekSection(plan) {
 function navWeek(delta) {
   currentWeek = Math.max(1, Math.min(appData.plan.length, currentWeek + delta));
   jumpToPhaseWeek(currentWeek);
+}
+
+// 今天實際落在第幾週（與 renderPlanView 的 currentWeek 初值同公式）。currentWeek 會被
+// 週導覽改動，需要一個不受瀏覽影響的「今日週次」來判斷是否在看當前週。
+function todayWeekNum() {
+  const gen = appData.profile?.generatedAt;
+  if (!gen) return currentWeek;
+  const days = Math.floor((new Date() - new Date(gen)) / 86400000);
+  return Math.min(Math.max(1, Math.floor(days / 7) + 1), (appData.plan || []).length || 1);
 }
 
 function renderStepCards(steps) {
