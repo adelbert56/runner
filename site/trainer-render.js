@@ -604,29 +604,9 @@ function pendingGarminAssignmentReviews() {
 }
 
 function renderTrainingStatusCard(plan = appData.plan || []) {
+  // 提醒資料由 buildStatusReminders（trainer-coach-engine）統一組裝，避免與 planStatus 各算一份。
   const health = trainingDataHealth(plan);
-  const { summary, issues, syncAge, missedWithoutReason, missingReasonDate, uncreditedRestRuns, currentWeekDays, currentWeekCompleted } = health;
-  const pendingAssignmentReviews = pendingGarminAssignmentReviews();
-  const reminders = [];
-  if (pendingAssignmentReviews.length) reminders.push(`有 ${pendingAssignmentReviews.length} 趟 Garmin 跑步是依補跑規則低信心對應；請確認一次，避免把實跑歸到錯的課。`);
-  if (uncreditedRestRuns) reminders.push(`有 ${uncreditedRestRuns} 次 Garmin 跑步還沒對應課表。目前會算進本週跑量，但不會算成完成或補跑；如果它其實是補跑，請回原本跳過的課表按「重新安排」。`);
-  if (missedWithoutReason) reminders.push(`${missedWithoutReason} 個跳過課表還沒填原因；補上後，之後回顧調整才看得懂當時為什麼休息。`);
-  if (summary.partialDays.length) reminders.push(`${summary.partialDays.length} 堂跑步距離還沒達到你設定的完成比例，目前先標成部分完成。`);
-  if (syncAge !== null && syncAge > 2) reminders.push(`Garmin 已 ${syncAge} 天沒有新資料，先確認手錶或同步是否正常。`);
-  const stateTitle = reminders.length ? `有 ${reminders.length} 件訓練事項待確認` : currentWeekDays.length ? '本週進度已更新' : '本週剛開始';
-  const stateCopy = reminders.length
-    ? reminders.join(' ')
-    : currentWeekDays.length
-      ? `本週目前完成 ${currentWeekCompleted.length}/${currentWeekDays.length} 堂。`
-      : `本週還沒有到期的跑課，先照今天的正式課表即可。${syncAge === null ? '' : syncAge === 0 ? ' Garmin 今日已同步。' : ` Garmin ${syncAge} 天前同步。`}`;
-  const hasInAppFix = missedWithoutReason || uncreditedRestRuns || summary.partialDays.length;
-  const action = pendingAssignmentReviews[0]?.activityId
-    ? `<button class="btn btn-secondary" onclick="openActivityAssignment('${pendingAssignmentReviews[0].activityId}')">確認 Garmin 對應</button>`
-    : missedWithoutReason && missingReasonDate
-    ? `<button class="btn btn-secondary" onclick="editSkipReason('${missingReasonDate}')">補填跳過原因</button>`
-    : hasInAppFix
-      ? '<button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看本週課表</button>'
-      : '';
+  const { issues, stateTitle, stateCopy, action } = buildStatusReminders(health);
   return `<section class="training-status-card ${issues.length ? 'is-attention' : ''}" aria-label="訓練資料狀態">
     <div><div class="training-status-kicker">本週提醒</div><div class="training-status-title">${reviewEscape(stateTitle)}</div><div class="training-status-copy">${reviewEscape(stateCopy)}</div></div>
     ${action ? `<div class="training-status-actions">${action}</div>` : ''}
