@@ -29,3 +29,6 @@ runner/報名管理/報名管理資料.json.bak
 
 # Garmin 訓練紀錄為個人健康資料，只留本機不進 git
 runner/訓練/
+
+# 本機驗證用 seed（個人備份複本），絕不進 git
+site/_verify-seed.json
