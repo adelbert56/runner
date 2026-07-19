@@ -506,6 +506,28 @@ async function assertTrainerReport(page, viewportName) {
   if (!coachStructure.showsUpcomingPlan || !coachStructure.hasHistoricalReview || !coachStructure.detailsCount || coachStructure.openDetailsCount || coachStructure.hasInvalidNumber) {
     throw new Error(`${viewportName}/trainer-coach: stale coach review did not select a compact upcoming plan ${JSON.stringify(coachStructure)}`);
   }
+  const pendingCoachReview = await page.evaluate(() => {
+    const priorWeek = currentWeek;
+    const currentPlanIndex = appData.plan.findIndex((week) => (week.days || []).some((day) => day.dateStr === todayStr()));
+    if (currentPlanIndex >= 0) currentWeek = currentPlanIndex + 1;
+    const upcomingWeek = appData.plan?.[currentWeek];
+    coachReviewData = {
+      updatedAt: todayStr(),
+      nextWeek: {
+        weekStart: upcomingWeek?.days?.[0]?.dateStr,
+        label: `${upcomingWeek?.days?.[0]?.dateStr} 週`,
+        menu: [{ day: "週一", plan: "恢復跑 5 km" }],
+      },
+    };
+    const host = document.getElementById("coach-review-content");
+    if (host) host.innerHTML = renderCoachReviewPanel();
+    const text = host?.textContent || "";
+    currentWeek = priorWeek;
+    return text;
+  });
+  if (!pendingCoachReview.includes("下週教練調整後的課程") || !pendingCoachReview.includes("恢復跑 5 km") || pendingCoachReview.includes("查看歷史教練週報")) {
+    throw new Error(`${viewportName}/trainer-coach: a future next-week review was not shown as a directly usable plan ${pendingCoachReview}`);
+  }
   await page.locator("#plan-tab-coach details").first().evaluate((element) => { element.open = true; });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-coach`);
   await page.screenshot({ path: resolve(screenshotDir, `${viewportName}-trainer-coach-structure.png`), fullPage: true });
@@ -527,10 +549,21 @@ async function assertTrainerReport(page, viewportName) {
     const first = autoRecalibratePlan();
     const calibratedEasyPace = appData.profile.easyPaceSec;
     const repeated = autoRecalibratePlan();
-    return { first, calibratedEasyPace, repeated };
+    return { first, calibratedEasyPace, repeated, analysisSnapshots: appData.garminAnalysisHistory || [] };
   });
-  if (!(recalibration.first?.easyDelta < 0) || recalibration.calibratedEasyPace >= 480 || recalibration.repeated !== null) {
+  if (!(recalibration.first?.easyDelta < 0) || recalibration.calibratedEasyPace >= 480 || recalibration.repeated !== null || !recalibration.analysisSnapshots.length || !recalibration.analysisSnapshots.at(-1)?.summary) {
     throw new Error(`${viewportName}/trainer-recalibration: stable safe Garmin runs did not produce one bounded future pace calibration ${JSON.stringify(recalibration)}`);
+  }
+  const loadDecision = await page.evaluate(() => garminLoadDecision([
+    { trainingLoad: 50, aerobicTe: 2.8, anaerobicTe: 0.5 },
+    { trainingLoad: 55, aerobicTe: 3.0, anaerobicTe: 0.7 },
+    { trainingLoad: 52, aerobicTe: 2.9, anaerobicTe: 0.6 },
+    { trainingLoad: 85, aerobicTe: 4.2, anaerobicTe: 2.7 },
+    { trainingLoad: 90, aerobicTe: 4.1, anaerobicTe: 2.8 },
+    { trainingLoad: 88, aerobicTe: 4.3, anaerobicTe: 2.6 },
+  ]));
+  if (loadDecision.factor !== 0.8 || loadDecision.status !== "reduce" || !loadDecision.message.includes("下週跑量下修 20%")) {
+    throw new Error(`${viewportName}/trainer-load-decision: sustained Garmin load was not linked to a bounded future-week reduction ${JSON.stringify(loadDecision)}`);
   }
   const safeguards = await page.evaluate(() => {
     const protectedDays = applyCourseSpacingGuard([

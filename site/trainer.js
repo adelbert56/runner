@@ -63,7 +63,7 @@ function trainingTaskTitle(day) {
 }
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, planChangeHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, lastBackupAt: null, safetyHold: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, lastBackupAt: null, safetyHold: null };
 }
 
 function getDeviceId() {
@@ -3003,20 +3003,62 @@ function coachPrescriptionLocksWeek(week) {
   return coachWeekMatches(week) && coachDaysForWeek(week).length > 0;
 }
 
+// Garmin 的訓練負荷沒有跨使用者可共用的絕對門檻，因此只和自己的近期基準比較。
+// 單趟高 TE 不會擅自降載；必須同時看見負荷連續上升與高強度效果，才下修未來週。
+function garminLoadDecision(runs = []) {
+  const validRuns = runs.filter((run) => Number(run.trainingLoad) > 0).slice(-6);
+  if (validRuns.length < 3) {
+    return { factor: 1, status: 'insufficient', message: 'Garmin 訓練負荷資料未滿 3 趟，暫不以單次數值調整課表。' };
+  }
+  const average = (items, field) => {
+    const values = items.map((item) => Number(item[field])).filter((value) => Number.isFinite(value) && value > 0);
+    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  };
+  const recent = validRuns.slice(-3);
+  const previous = validRuns.slice(-6, -3);
+  const recentLoad = average(recent, 'trainingLoad');
+  const previousLoad = average(previous, 'trainingLoad');
+  const aerobicTe = average(recent, 'aerobicTe');
+  const anaerobicTe = average(recent, 'anaerobicTe');
+  if (!previousLoad) {
+    return { factor: 1, status: 'baseline', recentLoad, aerobicTe, anaerobicTe, message: `已建立近 3 趟平均負荷 ${Math.round(recentLoad)} 的個人基準；累積到前後兩組資料後才會判定是否降載。` };
+  }
+  const loadRatio = recentLoad / previousLoad;
+  const highEffect = (aerobicTe || 0) >= 3.8 || (anaerobicTe || 0) >= 2.5;
+  if (loadRatio >= 1.2 && highEffect) {
+    const factor = loadRatio >= 1.4 || (aerobicTe || 0) >= 4.5 || (anaerobicTe || 0) >= 3.5 ? 0.8 : 0.9;
+    return {
+      factor,
+      status: 'reduce',
+      recentLoad,
+      previousLoad,
+      aerobicTe,
+      anaerobicTe,
+      message: `近 3 趟平均負荷 ${Math.round(recentLoad)} 較前 3 趟增加 ${Math.round((loadRatio - 1) * 100)}%，且訓練效果偏高；下週跑量下修 ${Math.round((1 - factor) * 100)}%。`
+    };
+  }
+  return { factor: 1, status: 'steady', recentLoad, previousLoad, aerobicTe, anaerobicTe, message: `近 3 趟平均負荷 ${Math.round(recentLoad)}（前 3 趟 ${Math.round(previousLoad)}），未達降載條件；下週維持原課表。` };
+}
+
+function recordGarminAnalysisSnapshot(signature, reasons) {
+  const history = Array.isArray(appData.garminAnalysisHistory) ? appData.garminAnalysisHistory : [];
+  if (history.some((item) => item?.signature === signature)) return;
+  history.push({ date: todayStr(), signature, summary: reasons.join('；') });
+  appData.garminAnalysisHistory = history.slice(-20);
+}
+
 function autoRecalibratePlan() {
   if (!coachReviewData?.updatedAt || !appData.profile || !Array.isArray(appData.plan) || !appData.plan.length) return null;
   const today = todayStr();
-  const completedWeek = [...appData.plan]
+  const reviewWeek = appData.plan.find((week) => week.weekNum === currentWeek) || [...appData.plan]
     .filter((week) => (week.days || []).every((day) => !day.dateStr || day.dateStr < today))
     .sort((a, b) => b.weekNum - a.weekNum)[0];
-  // 當週尚在進行時，只提供教練建議與提前排課，不反覆把每天同步都當成新的一輪校準。
-  if (!completedWeek) return null;
-  const completedWeekEnd = (completedWeek.days || []).map((day) => day.dateStr).filter(Boolean).sort().at(-1);
+  if (!reviewWeek) return null;
   const calibrationRuns = Array.isArray(coachReviewData.analyticsRuns) && coachReviewData.analyticsRuns.length ? coachReviewData.analyticsRuns : (coachReviewData.runs || []);
-  const completedRuns = calibrationRuns.filter((run) => !completedWeekEnd || run.date <= completedWeekEnd).slice(-14);
+  const completedRuns = calibrationRuns.filter((run) => run.date <= today).slice(-14);
   const calibrationSignature = [
-    `week:${completedWeek.weekNum}:${completedWeekEnd || ''}`,
-    ...completedRuns.map((run) => [run.activityId || '', run.date || '', run.km || '', run.qualityPace || run.pace || '', run.qualityHr || run.hr || '', run.temperatureC || ''].join(':'))
+    `week:${reviewWeek.weekNum}:as-of:${today}`,
+    ...completedRuns.map((run) => [run.activityId || '', run.date || '', run.km || '', run.qualityPace || run.pace || '', run.qualityHr || run.hr || '', run.temperatureC || '', run.trainingLoad || '', run.aerobicTe || '', run.anaerobicTe || '', run.cadence || '', run.vo2max || ''].join(':'))
   ].join('|');
   if (appData.recalibratedFor === calibrationSignature) return null;
   const profile = appData.profile;
@@ -3041,6 +3083,11 @@ function autoRecalibratePlan() {
   }
 
   const reasons = [];
+  const loadDecision = garminLoadDecision(completedRuns);
+  if (loadDecision.factor < 1) {
+    volumeFactor = Math.min(volumeFactor, loadDecision.factor);
+    reasons.push(loadDecision.message);
+  }
 
   // 1b. 疲勞徵兆提前恢復週：deload 原本只按 weekNum % 4 排，週數沒到就算 Garmin
   // 已經偵測到跑量拉升過快也不會提前休息。用 autopilot 的 ramp 判斷提前插一週恢復。
@@ -3188,11 +3235,10 @@ function autoRecalibratePlan() {
   } catch (err) { /* 資料不足時跳過 */ }
 
   appData.recalibratedFor = calibrationSignature;
-  if (volumeFactor === 1 && !tempoDelta && !easyDelta && !forcedDeload && !maxHrDelta && !cadenceCautionChanged && !raceCalibrated) {
-    appData.lastRecalibration = null;
-    saveData(appData);
-    return null;
-  }
+  const nextLongRun = plan.find((week) => week.weekNum === currentWeek + 1)?.days?.find((day) => day.type === 'long');
+  const averageCadence = completedRuns.filter((run) => Number(run.cadence) > 0).reduce((sum, run, _, items) => sum + Number(run.cadence) / items.length, 0);
+  if (profile.cadenceCaution && nextLongRun && averageCadence > 0) reasons.push(`步頻 ${Math.round(averageCadence)} spm 偏低，已套用到 ${nextLongRun.dateStr.slice(5).replace('-', '/')} 長跑的步頻提醒`);
+  if (!reasons.length) reasons.push('本週 Garmin 實績已分析，未達需調整課表的門檻，未來週維持原安排');
   if (volumeFactor !== 1) reasons.unshift(`未來週跑量依實跑校準 → 目標量 ×${volumeFactor.toFixed(2)}`);
 
   // 3. 只重排未來週；過去週與本週不動（本週由教練課表覆蓋）
@@ -3222,7 +3268,8 @@ function autoRecalibratePlan() {
   if (coachLockedWeeks) reasons.push(`${coachLockedWeeks} 個教練明確處方週維持原樣；自動校準只套用在未鎖定的後續課表`);
   const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, cadenceCautionChanged, raceCalibrated, reasons };
   appData.lastRecalibration = summary;
-  recordPlanChange(beforePlan, 'garmin', 'Garmin 實跑自動校準');
+  recordGarminAnalysisSnapshot(calibrationSignature, reasons);
+  if (volumeFactor !== 1 || tempoDelta || easyDelta || forcedDeload || maxHrDelta || cadenceCautionChanged || raceCalibrated) recordPlanChange(beforePlan, 'garmin', 'Garmin 實跑自動校準');
   saveData(appData);
   return summary;
 }
@@ -4199,7 +4246,7 @@ function renderWeekOverviewCard(profile, plan = appData.plan || []) {
         <div class="plan-progress-line"><span>本週跑量${effectiveTarget.source === '教練本週目標' ? '（教練目標）' : ''}</span><strong>${currWeekDone.toFixed(1)} / ${effectiveTarget.display} · ${weekProgressPct}%</strong></div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${weekProgressPct}%"></div></div>
       </div>
-      <div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-primary" onclick="goToToday()">查看今日執行</button>${health.issues.length ? '<button class="btn btn-secondary" onclick="switchPlanTab(\'autopilot\')">查看同步狀態</button>' : ''}</div>
+      ${health.issues.length ? '<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'autopilot\')">查看同步狀態</button></div>' : ''}
     </div>
     <div class="automation-brief-stats">
       <div class="automation-brief-stat"><span>本週完成</span><b>${health.currentWeekCompleted.length}/${health.currentWeekDays.length || 0} 堂</b></div>
@@ -5063,7 +5110,9 @@ function formalCoachFallbackMenu(preferredWeekStart = '') {
 }
 
 function renderCoachDataSignals() {
-  const recent = garminActivityRecords().slice(-4);
+  const allRuns = garminActivityRecords();
+  const currentWeekStart = appData.plan?.[currentWeek - 1]?.days?.[0]?.dateStr || weekStartLabel(todayStr());
+  const recent = allRuns.filter((run) => run.date >= currentWeekStart && run.date <= todayStr()).slice(-4);
   if (!recent.length) return '';
   const average = (field) => {
     const values = recent.map((run) => run[field]).filter((value) => Number.isFinite(value) && value > 0);
@@ -5083,9 +5132,8 @@ function renderCoachDataSignals() {
   ].filter(Boolean);
   if (!metrics.length) return '';
   return `<div class="coach-signals">
-    <div class="coach-section-title">⌚ Garmin 進階觀測</div>
+    <div class="coach-section-title">⌚ Garmin 進階觀測 · 本週已同步 ${recent.length} 趟</div>
     <div class="plan-metric-grid">${metrics.map(([label, value]) => `<div class="plan-metric"><span class="plan-metric-label">${reviewEscape(label)}</span><strong class="plan-metric-value">${reviewEscape(value)}</strong></div>`).join('')}</div>
-    <p class="coach-fineprint">教練建議會以這些數值搭配跑量、配速與心率判讀恢復狀態。</p>
   </div>`;
 }
 
@@ -5210,9 +5258,12 @@ function renderCoachReviewPanel() {
   const week = coachReviewData.week || {};
   const nextWeek = coachReviewData.nextWeek || {};
   const activePlanWeek = appData.plan?.[currentWeek - 1] || null;
+  const upcomingPlanWeek = appData.plan?.[currentWeek] || null;
   const hasCurrentCoachPlan = coachWeekMatches(activePlanWeek);
-  const coachMenu = hasCurrentCoachPlan ? coachMenuForCurrentSchedule(nextWeek.menu) : [];
+  const hasUpcomingCoachPlan = !hasCurrentCoachPlan && coachWeekMatches(upcomingPlanWeek);
+  const coachMenu = hasCurrentCoachPlan || hasUpcomingCoachPlan ? coachMenuForCurrentSchedule(nextWeek.menu) : [];
   const upcomingWeekStart = appData.plan?.[currentWeek]?.days?.[0]?.dateStr || '';
+  const reviewWeekStart = nextWeek.weekStart || '';
   const formalFallback = coachMenu.length ? null : formalCoachFallbackMenu(hasCurrentCoachPlan ? nextWeek.weekStart : upcomingWeekStart);
   const scheduledMenu = coachMenu.length ? coachMenu : formalFallback.menu;
   const menuSource = coachMenu.length ? 'Garmin 教練參考菜單' : '下週正式課表（依本週 Garmin 實跑判讀）';
@@ -5223,9 +5274,11 @@ function renderCoachReviewPanel() {
     ? `Garmin 資料截至 ${garminUpdatedAt}`
     : `Garmin 資料截至 ${garminUpdatedAt} · 人工週報 ${coachReviewData.updatedAt}`;
   const scheduleDays = scheduledMenu.map((item) => DOW_NAMES[item.scheduledDow] || item.day).join('、');
-  const notes = (coachReviewData.history || []).slice().reverse().map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
-  const historicalReviewNotice = !hasCurrentCoachPlan && Array.isArray(nextWeek.menu) && nextWeek.menu.length
-    ? `<details class="coach-history" style="margin-top:10px"><summary><b>查看歷史教練週報</b>（${reviewEscape(nextWeek.label || nextWeek.weekStart || '日期未標示')}）</summary><p class="coach-fineprint">這份週報與目前第 ${currentWeek} 週的日期不一致，僅保留作為參考，不會覆寫正式課表或計入提前排課完成度。</p></details>`
+  const notes = [...(coachReviewData.history || []), ...(appData.garminAnalysisHistory || [])].slice(-12).reverse().map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
+  const reviewNotice = !hasCurrentCoachPlan && !hasUpcomingCoachPlan && Array.isArray(nextWeek.menu) && nextWeek.menu.length
+    ? reviewWeekStart >= todayStr()
+      ? `<details class="coach-history" style="margin-top:10px"><summary><b>${reviewWeekStart === upcomingWeekStart ? '查看下週教練週報（待套用）' : '查看未來教練週報（待對應）'}</b>（${reviewEscape(nextWeek.label || reviewWeekStart || '日期未標示')}）</summary><p class="coach-fineprint">這份週報尚未開始${reviewWeekStart === upcomingWeekStart ? '，會在下週課表顯示時套用；目前不會提早計入完成度。' : `，目前下週從 ${reviewEscape(upcomingWeekStart || '日期未標示')} 開始；待日期對應後才會套用。`}</p></details>`
+      : `<details class="coach-history" style="margin-top:10px"><summary><b>查看歷史教練週報</b>（${reviewEscape(nextWeek.label || reviewWeekStart || '日期未標示')}）</summary><p class="coach-fineprint">這份週報與目前第 ${currentWeek} 週的日期不一致，僅保留作為參考，不會覆寫正式課表或計入提前排課完成度。</p></details>`
     : '';
   const garminOnlyNotice = coachReviewData.sourceMode === 'garmin-only'
     ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 自動駕駛模式</b><br>雲端已同步實跑資料；課表頁會依近期跑量與頻率產生輔助菜單。正式課表維持原樣，不會被暗中覆寫。</div>`
@@ -5252,21 +5305,22 @@ function renderCoachReviewPanel() {
   }).join('');
   const courseSection = coachMenu.length
     ? `<div class="coach-menu-card">
-        <div class="coach-menu-head"><div><div class="plan-overview-kicker">教練調整後的課程</div><b class="coach-menu-title">${reviewEscape(menuLabel)}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
-        <p class="coach-fineprint" style="margin:4px 0 10px">這是 Garmin 教練週報提供的調整內容，已依目前訓練日重排：${reviewEscape(scheduleDays)}</p>
+        <div class="coach-menu-head"><div><div class="plan-overview-kicker">${hasUpcomingCoachPlan ? '下週教練調整後的課程' : '教練調整後的課程'}</div><b class="coach-menu-title">${reviewEscape(menuLabel)}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
+        <p class="coach-fineprint" style="margin:4px 0 10px">這是 Garmin 教練週報提供的調整內容，已依目前訓練日重排：${reviewEscape(scheduleDays)}${hasUpcomingCoachPlan ? '。下週已可直接照這份執行。' : ''}</p>
         <div class="coach-menu-list">${menuRows || '<div class="coach-fineprint">目前沒有可顯示的跑步課程。</div>'}</div>
         ${(() => {
           const jargon = jargonNotesFor(scheduledMenu.map((item) => item.plan || ''));
           if (!jargon.length) return '';
           return `<details class="coach-jargon" style="margin-top:10px"><summary style="cursor:pointer;font-size:12.5px;font-weight:700;color:var(--c-text-muted)">📖 這週出現的訓練名詞是什麼意思？</summary><ul style="margin:8px 0 0;padding-left:18px;font-size:12.5px;color:var(--c-text-muted);line-height:1.6">${jargon.map((note) => `<li>${reviewEscape(note)}</li>`).join('')}</ul></details>`;
         })()}
+        ${hasUpcomingCoachPlan ? `<button class="btn btn-secondary" style="margin-top:12px" onclick="jumpToPhaseWeek(${currentWeek + 1}); switchPlanTab('week')">查看下週正式課表</button>` : ''}
       </div>`
     : `<div class="coach-menu-card">
         <div class="coach-menu-head"><div><div class="plan-overview-kicker">${hasCurrentCoachPlan ? '正式課表維持原樣' : 'Garmin 實跑已納入判讀'}</div><b class="coach-menu-title">${hasCurrentCoachPlan ? '本週課程不重複列在這裡' : '下週安排已依正式課表準備'}</b></div><span class="coach-menu-km">${reviewEscape(menuTargetKm)} km</span></div>
         <p class="coach-fineprint" style="margin:6px 0 12px">${hasCurrentCoachPlan ? '完整每天課程請在「本週課表」查看；目前只顯示與本週日期相符的教練調整，避免歷史週報重複拉長頁面。' : '已讀取本週 Garmin 主課與完成度；完成恢復確認後，系統會把安全調整套用到這份下週正式課表。'}</p>
         ${!hasCurrentCoachPlan && nextWeek.weekStart && nextWeek.weekStart !== upcomingWeekStart ? `<p class="coach-fineprint" style="margin:0 0 12px;color:var(--c-orange)">⚠️ 真人週報最後寫到 ${reviewEscape(nextWeek.weekStart)} 那週，還沒更新到下週（${reviewEscape(upcomingWeekStart)}）；下週先照正式課表執行，等真人週報補上再看那邊的調整。</p>` : ''}
         <button class="btn btn-secondary" onclick="${hasCurrentCoachPlan ? 'showWeekPlanFromStatus()' : `jumpToPhaseWeek(${currentWeek + 1}); switchPlanTab('week')`}">${hasCurrentCoachPlan ? '查看本週正式課表' : '查看下週正式課表'}</button>
-        ${historicalReviewNotice}
+        ${reviewNotice}
       </div>`;
   return `${renderTrainingStatusCard(appData.plan || [])}<div class="card coach-panel">
     <div class="coach-head">
@@ -5290,7 +5344,7 @@ function renderCoachReviewPanel() {
     ${renderLiveCoachCard(week, nextWeek, hasCurrentCoachPlan)}
     ${courseSection}
     ${renderCoachDataSignals()}
-    <p class="coach-fineprint" style="margin-top:12px">這是依 Garmin 實績產生的參考安排；你的正式課表不會自動被覆寫。</p>
+    <p class="coach-fineprint" style="margin-top:12px">Garmin 實績會保守更新未來課表；已完成課程與教練明確處方不會被覆寫。</p>
     ${notes ? `<details class="coach-history"><summary><b>分析快照歷史</b>（不覆蓋目前訓練設定）</summary><ul>${notes}</ul></details>` : ''}
   </div>`;
 }
