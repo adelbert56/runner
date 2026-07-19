@@ -14,7 +14,7 @@ function sentenceKeys(text) {
     .filter(Boolean);
 }
 
-const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGarminSyncJs, trainerGarminCalibrationJs, trainerSafetyJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerActionsJs, trainerJs, trainerDataJs, trainerCss, garminPublisher, garminReviewBuilder, server] = await Promise.all([
+const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGarminSyncJs, trainerGarminCalibrationJs, trainerSafetyJs, trainerCoachEngineJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerActionsJs, trainerJs, trainerDataJs, trainerCss, garminPublisher, garminReviewBuilder, server] = await Promise.all([
   readFile(resolve(root, "site/index.html"), "utf8"),
   readFile(resolve(root, "site/app.js"), "utf8"),
   readFile(resolve(root, "site/data/content.json"), "utf8"),
@@ -23,6 +23,7 @@ const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGa
   readFile(resolve(root, "site/trainer-garmin-sync.js"), "utf8"),
   readFile(resolve(root, "site/trainer-garmin-calibration.js"), "utf8"),
   readFile(resolve(root, "site/trainer-safety.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-coach-engine.js"), "utf8"),
   readFile(resolve(root, "site/trainer-copy.js"), "utf8"),
   readFile(resolve(root, "site/trainer-plan.js"), "utf8"),
   readFile(resolve(root, "site/trainer-render.js"), "utf8"),
@@ -34,9 +35,10 @@ const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGa
   readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
   readFile(resolve(root, "site/server.mjs"), "utf8"),
 ]);
-// trainer 頁面已拆成多檔（copy/plan/render/actions/core）；既有斷言以串接內容檢查，語意不變
-const trainer = `${trainerHtml}\n${trainerGarminAssignmentsJs}\n${trainerGarminSyncJs}\n${trainerGarminCalibrationJs}\n${trainerSafetyJs}\n${trainerCopyJs}\n${trainerPlanJs}\n${trainerRenderJs}\n${trainerActionsJs}\n${trainerJs}\n${trainerDataJs}\n${trainerCss}`;
+// trainer 頁面已拆成多檔（coach-engine/copy/plan/render/actions/core）；既有斷言以串接內容檢查，語意不變
+const trainer = `${trainerHtml}\n${trainerGarminAssignmentsJs}\n${trainerGarminSyncJs}\n${trainerGarminCalibrationJs}\n${trainerSafetyJs}\n${trainerCoachEngineJs}\n${trainerCopyJs}\n${trainerPlanJs}\n${trainerRenderJs}\n${trainerActionsJs}\n${trainerJs}\n${trainerDataJs}\n${trainerCss}`;
 assertCheck(/trainer-garmin-assignments\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-assignments.js") < trainerHtml.indexOf("trainer.js"), "trainer loads Garmin assignment rules before the core script");
+assertCheck(/trainer-coach-engine\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-coach-engine.js") < trainerHtml.indexOf("trainer.js"), "trainer loads the coach engine before the core script");
 assertCheck(/trainer-garmin-sync\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-sync.js") < trainerHtml.indexOf("trainer.js") && /GARMIN_ACTIVITY_SYNC_API/.test(trainerGarminSyncJs), "trainer loads local Garmin sync controls before the core script");
 assertCheck(/trainer-garmin-calibration\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-calibration.js") < trainerHtml.indexOf("trainer.js") && /function heatAdjustedPaceSec\(/.test(trainerGarminCalibrationJs), "trainer loads Garmin calibration guards before the core script");
 assertCheck(/trainer-safety\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-safety.js") < trainerHtml.indexOf("trainer.js"), "trainer loads the safety boundary before the core script");
