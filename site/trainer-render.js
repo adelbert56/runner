@@ -674,19 +674,13 @@ function weeklyCoachLetterBody() {
 // 同一批數據（今日課、完成堂數、週跑量）原本重複出現三次，把版面拉得太長；
 // 現在決策與進度各出現一次，教練信預設摺疊。
 function renderWeekOverviewCard(profile, plan = appData.plan || []) {
-  const health = trainingDataHealth(plan);
-  const decision = trainingAutopilotDecision(plan);
+  // 狀態數據全部取自 planStatus（單一狀態源）；此處只保留顯示專屬的組裝
+  // （下一堂課文字、評估提示、暫停橫幅、教練信）。
+  const s = planStatus();
   const today = findTodayPlanDay()?.day;
   const next = today || (plan.find((week) => week.weekNum === currentWeek)?.days || []).find((day) => day.dateStr > todayStr() && day.type !== 'rest');
   const course = next ? `${trainingTypeLabel(next.type, next.focus)} · ${trainingTaskTitle(next)}` : '本週先把恢復做穩';
-  const syncText = health.syncAge === null ? '尚未取得' : health.syncAge === 0 ? '今天已同步' : `${health.syncAge} 天前`;
-  const summary = trainingCompletionSummary(plan);
-  const currWeekPlan = plan[currentWeek - 1];
-  const weekDates = new Set((currWeekPlan?.days || []).map((day) => day.dateStr));
-  const currWeekDone = summary.allActivity.filter((entry) => weekDates.has(entry.date)).reduce((sum, entry) => sum + (entry.actualKm || 0), 0);
-  const effectiveTarget = effectiveWeekVolumeTarget(currWeekPlan);
-  const weekTargetKm = effectiveTarget.numericKm || 0;
-  const weekProgressPct = weekTargetKm > 0 ? Math.min(100, Math.round((currWeekDone / weekTargetKm) * 100)) : 0;
+  const syncText = s.syncAge === null ? '尚未取得' : s.syncAge === 0 ? '今天已同步' : `${s.syncAge} 天前`;
   const assessmentHint = getAssessmentCycleHint(plan);
   const pausedBanner = profile?.paused
     ? `<div style="background:#7f1d1d;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:12px;color:#fca5a5">⏸ 計畫已暫停（${profile.pausedAt}）<button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;margin-left:10px" onclick="resumePlan()">繼續計畫</button></div>`
@@ -695,19 +689,19 @@ function renderWeekOverviewCard(profile, plan = appData.plan || []) {
   return `<section class="automation-brief" aria-label="本週總覽"><div>
       ${pausedBanner}
       ${assessmentHint ? `<div style="background:#edf5ef;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:12px;color:var(--c-primary-hover)">🧪 ${assessmentHint}</div>` : ''}
-      <div class="automation-brief-kicker">Runner autopilot · ${reviewEscape(decision.title)}</div>
+      <div class="automation-brief-kicker">Runner autopilot · ${reviewEscape(s.decision.title)}</div>
       <div class="automation-brief-title">${reviewEscape(course)}</div>
-      <p class="automation-brief-copy">${reviewEscape(decision.next)}</p>
+      <p class="automation-brief-copy">${reviewEscape(s.decision.next)}</p>
       <div class="plan-progress-track" style="margin-top:12px">
-        <div class="plan-progress-line"><span>本週跑量${effectiveTarget.source === '教練本週目標' ? '（教練目標）' : ''}</span><strong>${currWeekDone.toFixed(1)} / ${effectiveTarget.display} · ${weekProgressPct}%</strong></div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${weekProgressPct}%"></div></div>
+        <div class="plan-progress-line"><span>本週跑量${s.weekTargetSource === '教練本週目標' ? '（教練目標）' : ''}</span><strong>${s.weekDoneKm.toFixed(1)} / ${s.weekTargetDisplay} · ${s.weekProgressPct}%</strong></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${s.weekProgressPct}%"></div></div>
       </div>
-      ${health.issues.length ? '<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'autopilot\')">查看同步狀態</button></div>' : ''}
+      ${s.health.issues.length ? '<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'autopilot\')">查看同步狀態</button></div>' : ''}
     </div>
     <div class="automation-brief-stats">
-      <div class="automation-brief-stat"><span>本週完成</span><b>${health.currentWeekCompleted.length}/${health.currentWeekDays.length || 0} 堂</b></div>
-      <div class="automation-brief-stat"><span>執行率</span><b>${summary.elapsedSessions ? `${summary.adherence}%` : '尚未開始'}</b></div>
-      <div class="automation-brief-stat"><span>累積實跑</span><b>${summary.totalKm.toFixed(1)} km</b></div>
+      <div class="automation-brief-stat"><span>本週完成</span><b>${s.currentWeekCompleted}/${s.currentWeekDays || 0} 堂</b></div>
+      <div class="automation-brief-stat"><span>執行率</span><b>${s.completion.elapsedSessions ? `${s.completion.adherence}%` : '尚未開始'}</b></div>
+      <div class="automation-brief-stat"><span>累積實跑</span><b>${s.totalKm.toFixed(1)} km</b></div>
       <div class="automation-brief-stat"><span>Garmin 資料</span><b>${syncText}</b></div>
     </div></section>
   ${letterBody ? `<details class="card coach-letter-fold"><summary>✉️ 本週教練信</summary><div style="margin-top:10px">${letterBody}</div></details>` : ''}`;

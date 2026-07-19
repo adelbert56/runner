@@ -65,7 +65,9 @@ function planStatus(ctx = buildContext()) {
   const health = trainingDataHealth(plan);
   const decision = trainingAutopilotDecision(plan);
   const projection = (typeof fitnessProjection === 'function' ? fitnessProjection(ctx.profile) : null);
-  const currWeekPlan = plan[ctx.todayWeek - 1] || plan[currentWeek - 1];
+  // 用 currentWeek（app 目前聚焦週，瀏覽會變）對齊 renderWeekOverviewCard 既有行為；
+  // health.currentWeekCompleted 仍是今日日曆週（既有卡本就是這樣混用，保留不改）。
+  const currWeekPlan = plan[currentWeek - 1] || plan[ctx.todayWeek - 1];
   const effectiveTarget = effectiveWeekVolumeTarget(currWeekPlan);
   const weekDates = new Set((currWeekPlan?.days || []).map((d) => d.dateStr));
   const currWeekDone = ctx.completion.allActivity
