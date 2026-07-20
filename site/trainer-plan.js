@@ -977,6 +977,7 @@ function recordGarminAnalysisSnapshot(signature, reasons) {
 
 function autoRecalibratePlan() {
   if (!coachReviewData?.updatedAt || !appData.profile || !Array.isArray(appData.plan) || !appData.plan.length) return null;
+  const cadencePolicy = COACH_SIGNAL_POLICY.cadence;
   const today = todayStr();
   const reviewWeek = appData.plan.find((week) => week.weekNum === currentWeek) || [...appData.plan]
     .filter((week) => (week.days || []).every((day) => !day.dateStr || day.dateStr < today))
@@ -985,7 +986,7 @@ function autoRecalibratePlan() {
   const calibrationRuns = Array.isArray(coachReviewData.analyticsRuns) && coachReviewData.analyticsRuns.length ? coachReviewData.analyticsRuns : (coachReviewData.runs || []);
   const completedRuns = calibrationRuns.filter((run) => run.date <= today).slice(-14);
   const calibrationSignature = [
-    `week:${reviewWeek.weekNum}:as-of:${today}`,
+    `week:${reviewWeek.weekNum}:as-of:${today}:cadence-policy:${cadencePolicy.minPassingSpm}`,
     ...completedRuns.map((run) => [run.activityId || '', run.date || '', run.km || '', run.qualityPace || run.pace || '', run.qualityHr || run.hr || '', run.temperatureC || '', run.trainingLoad || '', run.aerobicTe || '', run.anaerobicTe || '', run.cadence || '', run.vo2max || ''].join(':'))
   ].join('|');
   if (appData.recalibratedFor === calibrationSignature) return null;
@@ -1101,22 +1102,25 @@ function autoRecalibratePlan() {
   } catch (err) { /* 資料不足時跳過 */ }
 
   // 2d. 步頻風險提示：長期步頻偏低（跨步過大）是常見的受傷風險因子。
+  // 只採 Garmin 明確標記的主課段（qualityCadence），不以整筆活動平均步頻
+  // 判讀，避免走路、熱身、收操或補給段把跑步步頻拉低。
   // 步頻是軟訊號，不像心率/配速那麼確定，所以只加提醒、不直接砍跑量。
   let cadenceCautionChanged = false;
+  let cadenceEvidenceRuns = [];
+  let cadenceAssessment = null;
   try {
-    const cadenceRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
-      .slice(-8)
-      .filter((run) => Number(run.cadence) > 0);
-    if (cadenceRuns.length >= 4) {
-      const avgCadence = cadenceRuns.reduce((sum, run) => sum + Number(run.cadence), 0) / cadenceRuns.length;
+    cadenceAssessment = coachCadenceAssessment();
+    cadenceEvidenceRuns = cadenceAssessment.evidenceRuns;
+    if (cadenceAssessment.sufficient) {
       const wasCaution = !!profile.cadenceCaution;
-      const isCaution = avgCadence < 168;
+      const displayedCadence = cadenceAssessment.displayed;
+      const isCaution = !cadenceAssessment.passed;
       profile.cadenceCaution = isCaution;
       if (isCaution !== wasCaution) {
         cadenceCautionChanged = true;
         reasons.push(isCaution
-          ? `近期平均步頻 ${Math.round(avgCadence)} spm 偏低（建議 ≥170），跨步過大易增加受傷風險，長跑日課表卡片會加提醒`
-          : `步頻已回到建議範圍（${Math.round(avgCadence)} spm），取消步頻提醒`);
+          ? `近 ${cadencePolicy.sampleRuns} 次有效跑步分圈平均步頻 ${displayedCadence} spm，未達 ${cadencePolicy.minPassingSpm} spm；長跑日保留步頻提醒`
+          : `近 ${cadencePolicy.sampleRuns} 次有效跑步分圈平均步頻 ${displayedCadence} spm，已達 ${cadencePolicy.minPassingSpm} spm；取消步頻提醒`);
       }
     }
   } catch (err) { /* 資料不足時跳過 */ }
@@ -1164,8 +1168,7 @@ function autoRecalibratePlan() {
 
   appData.recalibratedFor = calibrationSignature;
   const nextLongRun = plan.find((week) => week.weekNum === currentWeek + 1)?.days?.find((day) => day.type === 'long');
-  const averageCadence = completedRuns.filter((run) => Number(run.cadence) > 0).reduce((sum, run, _, items) => sum + Number(run.cadence) / items.length, 0);
-  if (profile.cadenceCaution && nextLongRun && averageCadence > 0) reasons.push(`步頻 ${Math.round(averageCadence)} spm 偏低，已套用到 ${nextLongRun.dateStr.slice(5).replace('-', '/')} 長跑的步頻提醒`);
+  if (profile.cadenceCaution && nextLongRun && cadenceAssessment?.displayed > 0) reasons.push(`近 ${cadencePolicy.sampleRuns} 次有效跑步分圈平均步頻 ${cadenceAssessment.displayed} spm 未達 ${cadencePolicy.minPassingSpm} spm，已套用到 ${nextLongRun.dateStr.slice(5).replace('-', '/')} 長跑的步頻提醒`);
   if (!reasons.length) reasons.push('本週 Garmin 實績已分析，未達需調整課表的門檻，未來週維持原安排');
   if (volumeFactor !== 1) reasons.unshift(`未來週跑量依實跑校準 → 目標量 ×${volumeFactor.toFixed(2)}`);
 
@@ -1193,6 +1196,11 @@ function autoRecalibratePlan() {
     });
     week.days = newDays;
   });
+  if (!profile.cadenceCaution) {
+    plan.flatMap((week) => week.days || []).forEach((day) => {
+      if (String(day.injuryNote || '').startsWith('近期步頻偏低')) delete day.injuryNote;
+    });
+  }
   if (coachLockedWeeks) reasons.push(`${coachLockedWeeks} 個教練明確處方週維持原樣；自動校準只套用在未鎖定的後續課表`);
   const summary = { date: today, volumePct: Math.round(volumeFactor * 100), tempoDelta, easyDelta, forcedDeload, maxHrDelta, cadenceCautionChanged, raceCalibrated, reasons };
   appData.lastRecalibration = summary;
@@ -1254,11 +1262,10 @@ function renderFitnessProjectionCard() {
   const projection = fitnessProjection();
   if (!projection) return '';
   const goalLabel = GOAL_NAME[appData.profile?.goal] || '目標賽事';
-  return `<div class="card"><div class="card-title">🔮 預估完賽 ${secToTime(projection.predictedFinishSec)} ・ 依目前體能</div>
-    <p style="margin:0 0 6px;color:var(--c-text-muted)">依目前配速基準推算 ${reviewEscape(goalLabel)} 完賽時間約 <b style="color:var(--c-text)">${secToTime(projection.predictedFinishSec)}</b>（均速 ${secToPace(projection.predictedPace)}/km）。</p>
-    ${projection.trendNote ? `<p style="margin:0;color:var(--c-text-muted)">${reviewEscape(projection.trendNote)}${projection.deltaNote ? `（${reviewEscape(projection.deltaNote)}）` : ''}</p>` : ''}
-    ${projection.potentialNote ? `<p style="margin:6px 0 0;color:var(--c-text-muted)">📈 ${reviewEscape(projection.potentialNote)}</p>` : ''}
-  </div>`;
+  return `<section class="card fitness-projection-card"><div class="fitness-projection-kicker">FITNESS OUTLOOK</div><div class="fitness-projection-main"><div><h2>預估完賽</h2><p>${reviewEscape(goalLabel)}・依目前體能</p></div><strong>${secToTime(projection.predictedFinishSec)}<small>${secToPace(projection.predictedPace)}/km</small></strong></div>
+    <p class="fitness-projection-copy">依目前配速基準推算；${projection.trendNote ? `${reviewEscape(projection.trendNote)}${projection.deltaNote ? `（${reviewEscape(projection.deltaNote)}）` : ''}` : '持續累積實跑，讓推估更穩定。'}</p>
+    ${projection.potentialNote ? `<p class="fitness-projection-potential">${reviewEscape(projection.potentialNote)}</p>` : ''}
+  </section>`;
 }
 
 // 目標賽事日期已過：對照 Garmin 實跑（同日、或最近的「以賽代訓」日）判斷達標與否，

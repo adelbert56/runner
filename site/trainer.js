@@ -926,22 +926,27 @@ function renderHeroPanel() {
           <div class="trainer-hero-kicker">Runner Planner · Active Plan</div>
           ${hasPlan ? `<span class="trainer-hero-phase">${reviewEscape(phaseText)}</span>` : ''}
         </div>
-        <h1 class="trainer-hero-title" id="trainer-hero-title">${hasPlan ? meta.label : '建立你的個人訓練計畫'}</h1>
-        <p class="trainer-hero-planline">${hasPlan ? `第 ${currentWeek} / ${totalWeeks} 週 · ${reviewEscape(phaseText)}` : '從目標、可訓練日到每日課表，一次建立。'}</p>
+        <div class="trainer-hero-title-row">
+          <div>
+            <h1 class="trainer-hero-title" id="trainer-hero-title">${hasPlan ? meta.label : '建立你的個人訓練計畫'}</h1>
+            <p class="trainer-hero-planline">${hasPlan ? `第 ${currentWeek} / ${totalWeeks} 週 · ${reviewEscape(phaseText)}` : '從目標、可訓練日到每日課表，一次建立。'}</p>
+          </div>
+          ${hasPlan ? `<div class="trainer-hero-progress" role="img" aria-label="計畫進度 ${Math.round((currentWeek / totalWeeks) * 100)}%"><svg viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="43"/><circle class="trainer-hero-progress-value" cx="56" cy="56" r="43" style="stroke-dasharray:270.18;stroke-dashoffset:${270.18 * (1 - currentWeek / totalWeeks)}"/></svg><strong>${Math.round((currentWeek / totalWeeks) * 100)}%</strong><span>計畫進度</span></div>` : ''}
+        </div>
         ${hasPlan ? '' : '<p class="trainer-hero-copy">設定目標、可訓練日與目前跑量，建立一份能每天照著執行的個人訓練計畫。</p>'}
         <div class="trainer-hero-stats">
           <div class="trainer-stat">
-            <div class="trainer-stat-label">賽事日</div>
+            <div class="trainer-stat-label"><span aria-hidden="true">▣</span> 賽事日</div>
             <div class="trainer-stat-value">${hasPlan ? targetDateText : meta.label}</div>
             <div class="trainer-stat-sub">${hasPlan ? [(daysToRace === null ? '目標日尚未設定' : daysToRace > 0 ? `距離目標日 ${daysToRace} 天` : daysToRace === 0 ? '就是今天' : '已完賽'), racePaceText].filter(Boolean).join(' · ') : '入門 / 半馬 / 全馬 / 傷後重建'}</div>
           </div>
           <div class="trainer-stat">
-            <div class="trainer-stat-label">當週處方</div>
+            <div class="trainer-stat-label"><span aria-hidden="true">♨</span> 當週處方</div>
             <div class="trainer-stat-value">${hasPlan ? weeklyTarget : progressText}</div>
             <div class="trainer-stat-sub">${hasPlan ? '正式課表總跑量' : '先完成設定後開始'}</div>
           </div>
           <div class="trainer-stat">
-            <div class="trainer-stat-label">${hasPlan ? easyPace.label : '配速基準'}</div>
+            <div class="trainer-stat-label"><span aria-hidden="true">♡</span> ${hasPlan ? easyPace.label : '配速基準'}</div>
             <div class="trainer-stat-value">${hasPlan ? easyPace.value : weeklyTarget}</div>
             <div class="trainer-stat-sub">${hasPlan ? easyPace.sub : '會依你的條件自動估算'}</div>
           </div>
@@ -1061,6 +1066,16 @@ function heroTodayStepSummary(step, day) {
     : detail;
 }
 
+function heroTodaySummaryParts(summary, supportingSteps = []) {
+  const supportingTitles = supportingSteps
+    .map((step) => String(step?.title || '').trim())
+    .filter(Boolean);
+  return String(summary || '')
+    .split(/\s*[·・｜；;]\s*|(?<=。)\s*/)
+    .map((part) => part.trim())
+    .filter((part) => part && !supportingTitles.some((title) => part.startsWith(title)));
+}
+
 function renderHeroTodayCard() {
   const hit = findTodayPlanDay();
   const typeName = TRAINING_TYPE_LABELS;
@@ -1089,7 +1104,13 @@ function renderHeroTodayCard() {
   const steps = day.steps || [];
   const mainStep = steps.find((step) => step.title === '主課');
   const supportingSteps = steps.filter((step) => step !== mainStep);
-  const renderHeroStep = (step, isMain = false) => `<div class="hero-today-step${isMain ? ' is-main' : ''}"><b>${reviewEscape(step.title || '')}</b><span${isMain ? ' class="hero-today-main-copy"' : ''}>${reviewEscape(heroTodayStepSummary(step, day))}</span></div>`;
+  const renderHeroStep = (step, isMain = false) => {
+    const summary = heroTodayStepSummary(step, day);
+    const summaryMarkup = isMain
+      ? `<div class="hero-today-main-copy">${heroTodaySummaryParts(summary, supportingSteps).map((part) => `<span>${reviewEscape(part)}</span>`).join('')}</div>`
+      : `<span>${reviewEscape(summary)}</span>`;
+    return `<div class="hero-today-step${isMain ? ' is-main' : ''}"><b>${reviewEscape(step.title || '')}</b>${summaryMarkup}</div>`;
+  };
   const stepStrip = mainStep
     ? `<div class="hero-today-steps">${renderHeroStep(mainStep, true)}${supportingSteps.length ? `<div class="hero-today-side-steps">${supportingSteps.map((step) => renderHeroStep(step)).join('')}</div>` : ''}</div>`
     : steps.length

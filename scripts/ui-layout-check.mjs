@@ -307,14 +307,33 @@ async function assertTrainerReport(page, viewportName) {
   }, trainerReviewSample);
   await page.waitForSelector(".course-decision-panel", { timeout: 5000 });
   const courseDecision = await page.locator(".course-decision-panel").evaluate((element) => ({
-    hasRule: element.textContent.includes("安全保護優先，沒有風險才採用教練處方與正式課表"),
-    hasActionableTitle: element.textContent.includes("本週先照哪個版本跑？"),
-    hasSource: element.textContent.includes("正式課表") || element.textContent.includes("教練處方"),
-    hasNextCourse: Boolean(element.querySelector(".course-decision-focus")),
+    hasFocus: Boolean(element.querySelector(".weekly-coach-insight")) || Boolean(element.querySelector(".course-decision-context")),
+    hasDuplicateFocus: Boolean(element.querySelector(".weekly-coach-insight") && element.querySelector(".course-decision-context")),
+    hasActionableTitle: element.textContent.includes("本週執行重點") || element.textContent.includes("這週怎麼跑，先看這裡"),
+    hasVisibleGuidance: element.textContent.trim().length > 40,
   }));
-  if (!courseDecision.hasRule || !courseDecision.hasActionableTitle || !courseDecision.hasSource || !courseDecision.hasNextCourse) {
-    throw new Error(`${viewportName}/trainer-course-decision: visible resolution summary is incomplete ${JSON.stringify(courseDecision)}`);
+  if (!courseDecision.hasFocus || courseDecision.hasDuplicateFocus || !courseDecision.hasActionableTitle || !courseDecision.hasVisibleGuidance) {
+    throw new Error(`${viewportName}/trainer-course-decision: visible coaching brief is incomplete ${JSON.stringify(courseDecision)}`);
   }
+  await page.evaluate(() => window.scrollTo(0, Math.min(960, document.documentElement.scrollHeight)));
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const stickyToolbar = await page.locator(".plan-toolbar").evaluate((element) => {
+    const header = document.querySelector(".site-header");
+    const toolbarRect = element.getBoundingClientRect();
+    const headerRect = header?.getBoundingClientRect();
+    return {
+      position: getComputedStyle(element).position,
+      toolbarTop: toolbarRect.top,
+      headerBottom: headerRect?.bottom || 0,
+      isVisible: toolbarRect.bottom > 0 && toolbarRect.top < window.innerHeight,
+    };
+  });
+  const toolbarClearsHeader = stickyToolbar.toolbarTop >= stickyToolbar.headerBottom + 6;
+  const toolbarNeedsPin = stickyToolbar.toolbarTop <= stickyToolbar.headerBottom + 12;
+  if (!stickyToolbar.isVisible || !toolbarClearsHeader || (toolbarNeedsPin && stickyToolbar.position !== "fixed")) {
+    throw new Error(`${viewportName}/trainer-toolbar: sticky workspace navigation is obscured or unavailable ${JSON.stringify(stickyToolbar)}`);
+  }
+  await page.evaluate(() => window.scrollTo(0, 0));
   const weekDecisionOwnership = await page.locator("#plan-tab-week").evaluate((element) => ({
     hasLegacyCoachLetter: element.textContent.includes("本週教練信"),
     hasLegacyGuidance: element.textContent.includes("教練指引"),
@@ -551,12 +570,12 @@ async function assertTrainerReport(page, viewportName) {
     hasSharedDecision: Boolean(element.querySelector(".coach-decision-workspace")),
     hasEvidence: Boolean(element.querySelector(".coach-evidence")),
     hasSecondSchedule: Boolean(element.querySelector(".coach-menu-card")),
-    hasHistoricalReview: element.textContent.includes("查看歷史教練週報"),
+    hasHistoricalReview: element.textContent.includes("歷史教練週報"),
     detailsCount: element.querySelectorAll("details").length,
     openDetailsCount: element.querySelectorAll("details[open]").length,
     hasInvalidNumber: element.textContent.includes("NaN"),
   }));
-  if (!coachStructure.hasSharedDecision || !coachStructure.hasEvidence || coachStructure.hasSecondSchedule || !coachStructure.hasHistoricalReview || !coachStructure.detailsCount || coachStructure.openDetailsCount || coachStructure.hasInvalidNumber) {
+  if (!coachStructure.hasSharedDecision || !coachStructure.hasEvidence || coachStructure.hasSecondSchedule || !coachStructure.hasHistoricalReview || !coachStructure.detailsCount || coachStructure.openDetailsCount < 1 || coachStructure.hasInvalidNumber) {
     throw new Error(`${viewportName}/trainer-coach: stale coach review did not remain a compact evidence surface ${JSON.stringify(coachStructure)}`);
   }
   const pendingCoachReview = await page.evaluate(() => {
@@ -574,9 +593,9 @@ async function assertTrainerReport(page, viewportName) {
     };
     const host = document.getElementById("coach-review-content");
     if (host) host.innerHTML = renderCoachReviewPanel();
-    const text = host?.textContent || "";
+    const futureReviewEvidence = host?.querySelector(".coach-evidence .coach-history")?.textContent || "";
     currentWeek = priorWeek;
-    return text;
+    return futureReviewEvidence;
   });
   if (pendingCoachReview.includes("恢復跑 5 km") || pendingCoachReview.includes("下週教練調整後的課程")) {
     throw new Error(`${viewportName}/trainer-coach: a future next-week review was not kept as evidence ${pendingCoachReview}`);

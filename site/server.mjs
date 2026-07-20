@@ -506,7 +506,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const filePath = resolveRequestPath(req.url || "/");
+  const requestedPath = resolveRequestPath(req.url || "/");
+  const filePath = requestedPath && existsSync(requestedPath) && statSync(requestedPath).isDirectory()
+    ? join(requestedPath, "index.html")
+    : requestedPath;
   if (!filePath || !existsSync(filePath) || !statSync(filePath).isFile()) {
     res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
     res.end("Not found");

@@ -8,6 +8,48 @@
 // ============================================================
 // buildContext：一次組好全部輸入，下游共用（不再各卡各自重抓）
 // ============================================================
+const COACH_SIGNAL_POLICY = Object.freeze({
+  cadence: Object.freeze({
+    minPassingSpm: 165,
+    sampleRuns: 8,
+    minEvidenceRuns: 4,
+    minLapKm: 0.5,
+    minLapCadence: 150,
+    maxRunningPaceSec: 570
+  })
+});
+
+function coachCadenceAssessment(runs = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])) {
+  const policy = COACH_SIGNAL_POLICY.cadence;
+  const evidenceFor = (run) => {
+    if (run.qualityEligible && Number(run.qualityCadence) > 0) {
+      return { ...run, cadence: Number(run.qualityCadence), cadenceSource: 'garmin-workout-steps' };
+    }
+    const runningLaps = (run.laps || []).filter((lap) => {
+      const cadence = Number(lap?.avg_cadence) || 0;
+      const pace = typeof paceToSeconds === 'function' ? paceToSeconds(lap?.pace_per_km) : null;
+      return Number(lap?.distance_km) >= policy.minLapKm && cadence >= policy.minLapCadence && pace > 0 && pace <= policy.maxRunningPaceSec;
+    });
+    const totalMinutes = runningLaps.reduce((sum, lap) => sum + (Number(lap.duration_min) || 0), 0);
+    if (!runningLaps.length || totalMinutes <= 0) return null;
+    const cadence = runningLaps.reduce((sum, lap) => sum + (Number(lap.avg_cadence) || 0) * (Number(lap.duration_min) || 0), 0) / totalMinutes;
+    return { ...run, cadence, cadenceSource: 'garmin-running-laps' };
+  };
+  const evidenceRuns = runs.slice(-policy.sampleRuns).map(evidenceFor).filter(Boolean);
+  const average = evidenceRuns.length
+    ? evidenceRuns.reduce((sum, run) => sum + Number(run.cadence), 0) / evidenceRuns.length
+    : 0;
+  const displayed = Math.round(average);
+  return {
+    policy,
+    evidenceRuns,
+    average,
+    displayed,
+    sufficient: evidenceRuns.length >= policy.minEvidenceRuns,
+    passed: evidenceRuns.length >= policy.minEvidenceRuns && displayed >= policy.minPassingSpm
+  };
+}
+
 function buildContext() {
   const plan = appData.plan || [];
   const summary = trainingCompletionSummary(plan);
@@ -280,7 +322,9 @@ function runCoachAdaptation(trigger, options = {}) {
   if (trigger === 'coach-review-ready') {
     const progressionDecision = progression(ctx, trigger, options);
     if (progressionDecision) result.decisions.push(progressionDecision);
-    result.recalibration = progressionDecision ? autoRecalibratePlan() : null;
+    // 校準本身有資料簽章保護；即使沒有週進階決策，也要重算軟性規則，
+    // 才能撤掉已達標後殘留在本機資料中的提醒。
+    result.recalibration = autoRecalibratePlan();
     const dailyDecision = dailyAdjust(findRawPlanDay(ctx.today)?.day, ctx);
     if (dailyDecision) result.decisions.push(dailyDecision);
     result.dailyAdvisory = applyDailySessionAdvisory();
