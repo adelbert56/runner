@@ -806,7 +806,7 @@ function weeklyRunTrend(runs) {
 function renderVolumeBars(trend) {
   if (!trend.length) return '<p style="color:var(--c-text-muted);margin:0">尚無可用的週跑量資料。</p>';
   const max = Math.max(...trend.map((item) => item.km), 1);
-  return `<div style="display:flex;align-items:flex-end;gap:10px;height:180px;padding-top:12px">${trend.map((item) => `<div style="flex:1;min-width:32px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px"><b style="font-size:12px">${item.km}</b><div title="${reviewEscape(item.week)}：${item.km} km / ${item.runs} 次" style="width:100%;max-width:42px;min-height:5px;height:${Math.max(5, (item.km / max) * 125)}px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#5fae79,#24724f)"></div><span style="font-size:11px;color:var(--c-text-muted)">${reviewEscape(item.week.slice(5))}</span></div>`).join('')}</div>`;
+  return `<div class="trend-bar-chart">${trend.map((item) => `<div class="trend-bar-col"><b class="trend-bar-value">${item.km}</b><div class="trend-bar-fill" title="${reviewEscape(item.week)}：${item.km} km / ${item.runs} 次" style="height:${Math.max(5, (item.km / max) * 150)}px"></div><span class="trend-bar-week">${reviewEscape(item.week.slice(5))}</span></div>`).join('')}</div>`;
 }
 
 function isStructuredIntervalBlock(laps) {
@@ -920,9 +920,6 @@ function renderLatestTrainingReport(runs) {
   const goal = planned ? trainingTaskTitle(planned) : '這筆實跑未對應到正式課表';
   const target = [planned?.pace, planned?.hrTarget].filter(Boolean).join(' · ') || '以教練指示與舒適度完成';
   const scopeText = mainScope ? `主課 ${courseKm?.toFixed(1)} km` : `全程 ${run.km.toFixed(1)} km`;
-  const summary = mainScope
-    ? `已完成 ${scopeText}，${coursePace || '配速未回傳'}${courseHr ? ` · HR ${Math.round(courseHr)}` : ''}。`
-    : `本次完成 ${scopeText}；Garmin 尚未提供可安全切分的主課段別。`;
   const evidence = mainScope
     ? '品質判讀只使用 Garmin 明確標記的主課；熱身、恢復與收操仍保留在總負荷，不會拖慢主課成績。'
     : '本次僅用全程呈現，尚不會以此作為主課配速／心率的課表升降依據。';
@@ -945,7 +942,7 @@ function renderLatestTrainingReport(runs) {
         ? 54 + ((slowestLapPace - paceSeconds) / (slowestLapPace - fastestLapPace)) * 46
         : 76;
       const label = mainScope ? sessionLapLabel(lap, lap.index || index + 1, true, intervalBlock) : `第 ${index + 1} 圈`;
-      return `<div class="session-lap ${mainScope ? sessionIntensityClass(lap.intensity) : 'neutral'}"><span class="session-lap-label">${reviewEscape(label)}</span><span class="session-lap-bar" title="${reviewEscape(lap.pace_per_km || '配速未提供')}"><i style="width:${relativePace.toFixed(0)}%"></i></span><span class="session-lap-meta">${Number(lap.distance_km).toFixed(2)} km</span><span class="session-lap-meta">${reviewEscape(lap.pace_per_km || '—')}</span></div>`;
+      return `<div class="session-lap ${mainScope ? sessionIntensityClass(lap.intensity) : 'neutral'}"><span class="col-segment">${reviewEscape(label)}</span><span class="col-rhythm"><span class="session-lap-bar" title="${reviewEscape(lap.pace_per_km || '配速未提供')}"><i style="width:${relativePace.toFixed(0)}%"></i></span></span><span class="col-distance">${Number(lap.distance_km).toFixed(2)} km</span><span class="col-pace">${reviewEscape(lap.pace_per_km || '—')}</span><span class="col-cadence">${Number(lap.avg_cadence) > 0 ? `${Math.round(lap.avg_cadence)} spm` : '—'}</span><span class="col-hr">${Number(lap.avg_hr) > 0 ? `HR ${Math.round(lap.avg_hr)}` : '—'}</span></div>`;
     }).join('')
     : '<p class="session-breakdown-copy">這筆舊資料尚未同步計圈摘要；下次 Garmin 同步後會補上，不影響既有總量與主課判讀。</p>';
   const lapFilters = laps.length ? `<div class="session-lap-filters" role="group" aria-label="篩選課程分段"><button type="button" class="session-lap-filter ${selectedLapCategory === 'ALL' ? 'active' : ''}" onclick="selectTrainingReportLapCategory('ALL')">全部 <small>${laps.length}</small></button>${lapGroups.map((group) => `<button type="button" class="session-lap-filter ${selectedLapCategory === group.intensity ? 'active' : ''}" onclick="selectTrainingReportLapCategory('${group.intensity}')">${reviewEscape(group.label)} <small>${group.count}</small></button>`).join('')}</div>` : '';
@@ -958,8 +955,6 @@ function renderLatestTrainingReport(runs) {
   const confidence = mainScope
     ? `${comparisonLabel}比較資料：最近兩次同課型主課（${autopilot.qualityComparisonSampleSize || 0}/2 筆）；兩筆比較會採較嚴格門檻才下修課表。`
     : '本次尚無主課段別，教練維持保守判讀。';
-  const plannedKm = plannedMainTargetKm(planned);
-  const completion = plannedKm ? `${courseKm >= plannedKm * (garminCompletionPercent() / 100) ? '已達標' : '部分完成'} · 目標 ${plannedKm.toFixed(1)} km／實跑 ${courseKm.toFixed(1)} km` : '未找到可量化的課表目標';
   const postRun = postRunVerdict(run, planned);
   const signals = sessionQualitySignals(run);
   const feel = run.selfEvaluation;
@@ -969,18 +964,17 @@ function renderLatestTrainingReport(runs) {
   const history = runs.slice(-8).reverse().map((item) => `<button class="session-report-history ${item.activityId === run.activityId ? 'active' : ''}" onclick="selectTrainingReport('${item.activityId || ''}')">${reviewEscape(item.date.slice(5))}<small>${item.qualityPace || item.pace || '—'}/km</small></button>`).join('');
   const nextAction = postRun.next;
   const reportTitle = planned ? `${plannedType}完成報告` : `${reviewEscape(run.name)}｜實跑報告`;
-  const assignmentLabel = assignment.mode === 'extra'
-    ? '這趟我當額外跑看，不會影響你正式課表的完成度。'
-    : assignment.mode === 'makeup'
-      ? `${assignment.source === 'runner' ? '我已依你的修正' : '我已自動'}把它對應成 ${assignment.targetDate} 的補跑。`
-      : `我已自動把它對應到 ${assignment.targetDate} 同一天的正式課程。`;
-  const assignmentConfidence = assignment.confidence === 'medium' ? '低信心，建議確認一次。' : '判讀可信；不需要額外操作。';
+  // makeup 的目標日期是唯一資訊（postRun 只講「已認列」不講哪天）；其他模式跟 postRun 完全重複，不重講一次。
+  const assignmentDateNote = assignment.mode === 'makeup'
+    ? `${assignment.source === 'runner' ? '依你的修正' : '自動'}對應成 ${assignment.targetDate} 的補跑。`
+    : '';
+  const assignmentConfidenceNote = assignment.confidence === 'medium' ? '低信心，建議確認一次。' : '';
   const assignmentAction = run.activityId ? `<button type="button" class="btn btn-secondary" onclick="openActivityAssignment('${run.activityId}')">這次對應不對？</button>` : '';
   return `<section class="session-report" aria-label="最新訓練報告">
     <div class="session-report-head"><div><div class="session-report-kicker">Training report · Garmin</div><h2 class="session-report-title">${reportTitle}</h2><div class="session-report-meta">${reviewEscape(run.date)} · 全程 ${run.km.toFixed(2)} km · ${formatSessionDuration(run.durationMin)}</div></div><span class="session-report-status${statusClass}">${status}</span></div>
-    <div class="session-report-body"><div class="session-report-grid"><div class="session-report-verdict"><div class="session-report-label">這次該怎麼看</div><p class="session-report-summary">${summary}</p><p class="session-report-note">${completion}。${evidence}</p><div class="session-next-action"><b>${reviewEscape(postRun.label)}</b><span>${reviewEscape(postRun.summary)}<br><b>下一步：</b>${reviewEscape(nextAction)}</span></div></div><aside class="session-report-target"><div class="session-report-label">課程對應</div><div class="session-plan-row"><span>課程判讀</span><b>${reviewEscape(assignmentLabel)}</b></div><div class="session-plan-row"><span>可信度</span><b>${assignmentConfidence}</b></div><div class="session-plan-divider"></div><div class="session-report-label">正式課表對照</div><div class="session-plan-row"><span>原定課型</span><b>${reviewEscape(plannedType)}</b></div><div class="session-plan-row"><span>課表內容</span><b>${reviewEscape(goal)}</b></div><div class="session-plan-row"><span>目標提示</span><b>${reviewEscape(target)}</b></div><div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${assignmentAction}</div></aside></div>
+    <div class="session-report-body"><div class="session-report-grid"><div class="session-report-verdict"><div class="session-report-label">這次該怎麼看</div><p class="session-report-summary"><b>${reviewEscape(postRun.label)}</b>　${reviewEscape(postRun.summary)}</p><p class="session-report-note">${evidence}</p><div class="session-next-action"><b>下一步</b><span>${reviewEscape(nextAction)}</span></div></div><aside class="session-report-target"><div class="session-report-label">正式課表對照</div><div class="session-plan-row"><span>課表內容</span><b>${reviewEscape(goal)}</b></div><div class="session-plan-row"><span>目標提示</span><b>${reviewEscape(target)}</b></div>${assignmentDateNote ? `<div class="session-plan-row"><span>對應日期</span><b>${reviewEscape(assignmentDateNote)}</b></div>` : ''}${assignmentConfidenceNote ? `<div class="session-plan-row"><span>可信度</span><b>${assignmentConfidenceNote}</b></div>` : ''}<div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${assignmentAction}</div></aside></div>
     <div class="session-report-metrics"><div class="session-report-metric"><span>判讀範圍</span><strong>${scopeText}</strong></div><div class="session-report-metric"><span>配速</span><strong>${coursePace ? `${reviewEscape(coursePace)}/km` : '—'}</strong></div><div class="session-report-metric"><span>平均心率</span><strong>${courseHr ? `HR ${Math.round(courseHr)}` : '—'}</strong></div></div><div class="session-secondary-metrics"><span>平均步頻 <b>${courseCadence ? `${Math.round(courseCadence)} spm` : '—'}</b></span>${feel ? `<span>Garmin 自我評量 <b>${garminFeelLabel(feel.feel)} · RPE ${feel.rpe}/10</b></span>` : '<span>Garmin 自我評量 <b>尚未填寫</b></span>'}</div>
-    <details class="session-report-details"><summary>查看分圈配速與教練判讀</summary><div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">${mainScope ? '課程分段與配速' : 'Garmin 計圈與配速'}</h3><p class="session-breakdown-copy">${mainScope ? '預設聚焦主課；需要時可切換熱身、活動、恢復、收操或全部。' : '本次沒有可安全判讀的課程段別；以下僅顯示 Garmin 計圈，不會覆寫正式課表。'}</p>${lapFilters}<p class="session-lap-filter-note">${lapFilterNote}</p><div class="session-lap-list">${lapRows}</div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '這筆資料保留為趨勢參考，不會改寫正式課表。'}</strong><p>${signalText}${confidence}</p></div></div></details><div class="session-report-history-wrap"><div class="session-report-history-label">最近訓練</div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div></div>
+    <details class="session-report-details" open><summary>查看分圈配速與教練判讀</summary><div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">${mainScope ? '課程分段與配速' : 'Garmin 計圈與配速'}</h3><p class="session-breakdown-copy">${mainScope ? '預設聚焦主課；需要時可切換熱身、活動、恢復、收操或全部。' : '本次沒有可安全判讀的課程段別；以下僅顯示 Garmin 計圈，不會覆寫正式課表。'}</p>${lapFilters}<p class="session-lap-filter-note">${lapFilterNote}</p><div class="session-lap-table">${visibleLaps.length ? `<div class="session-lap-head"><span class="col-segment">分段</span><span class="col-rhythm">節奏</span><span class="col-distance">距離</span><span class="col-pace">配速</span><span class="col-cadence">步頻</span><span class="col-hr">心率</span></div>` : ''}<div class="session-lap-list">${lapRows}</div></div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '這筆資料保留為趨勢參考，不會改寫正式課表。'}</strong><p>${signalText}${confidence}</p></div></div></details><div class="session-report-history-wrap"><div class="session-report-history-label">最近訓練</div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div></div>
   </section>`;
 }
 
@@ -1379,20 +1373,20 @@ function renderTrainingAnalysis() {
     const info = weeklyRampInfo(trend);
     if (!info) return '';
     const { prev, last, ramp } = info;
-    const [icon, color, text] = ramp > 15
-      ? ['🔴', 'var(--c-red)', `上週跑量比前週增加 ${ramp}%，超過安全增幅（10–15%），受傷風險升高；這週建議持平或下修。`]
+    const [tone, text] = ramp > 15
+      ? ['bad', `上週跑量比前週增加 ${ramp}%，超過安全增幅（10–15%），受傷風險升高；這週建議持平或下修。`]
       : ramp > 10
-        ? ['🟡', 'var(--c-orange)', `上週跑量比前週增加 ${ramp}%，已達安全增幅上限（10–15%）；這週不要再加量。`]
+        ? ['warn', `上週跑量比前週增加 ${ramp}%，已達安全增幅上限（10–15%）；這週不要再加量。`]
         : ramp < -30
-          ? ['🟡', 'var(--c-orange)', `上週跑量比前週大減 ${Math.abs(ramp)}%；若非減量週，這週從保守量恢復，不要直接跳回原量。`]
-          : ['🟢', 'var(--c-green)', `上週跑量增幅 ${ramp >= 0 ? '+' : ''}${ramp}%，在安全範圍（≤10%）內。`];
-    return `<div style="margin:14px 0 0;padding:10px 14px;border-left:3px solid ${color};border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6">${icon} <b>週增幅監控</b>：${text}（${prev.km} → ${last.km} km）</div>`;
+          ? ['warn', `上週跑量比前週大減 ${Math.abs(ramp)}%；若非減量週，這週從保守量恢復，不要直接跳回原量。`]
+          : ['good', `上週跑量增幅 ${ramp >= 0 ? '+' : ''}${ramp}%，在安全範圍（≤10%）內。`];
+    return `<div class="trend-ramp trend-ramp-${tone}"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>${text}（${prev.km} → ${last.km} km）</p></div></div>`;
   })();
-  return `${renderLatestTrainingReport(runs)}<div class="card"><div class="card-title">📈 長期訓練趨勢 <span style="font-size:0.65em;font-weight:normal;color:var(--c-text-muted)">Garmin 最近 ${runs.length} 筆</span></div>
-    <div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">近四週跑量</span><strong class="plan-metric-value">${lastFourKm.toFixed(1)} km</strong></div><div class="plan-metric"><span class="plan-metric-label">近四週最長跑</span><strong class="plan-metric-value">${longestRun ? `${longestRun.toFixed(1)} km` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均配速</span><strong class="plan-metric-value">${formatPaceSeconds(averagePace)}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均心率</span><strong class="plan-metric-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">Garmin 資料截至</span><strong class="plan-metric-value">${reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt)}</strong></div></div>
-    ${rampNote}
-    <div style="margin-top:20px"><b style="font-size:15px">進階訓練指標</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 10px">只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p><div class="plan-metric-grid"><div class="plan-metric"><span class="plan-metric-label">最近四趟平均步頻</span><strong class="plan-metric-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟累積爬升</span><strong class="plan-metric-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近四趟平均負荷</span><strong class="plan-metric-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="plan-metric"><span class="plan-metric-label">最近 VO₂ Max</span><strong class="plan-metric-value">${latestVo2 || '—'}</strong></div></div></div>
-    <div class="analysis-chart-grid"><section class="analysis-chart-card"><b>週跑量趨勢</b><p style="font-size:13px;color:var(--c-text-muted);margin:4px 0 0">每週總公里數，包含額外跑步。</p>${renderVolumeBars(trend)}</section><section class="analysis-chart-card"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
+  const analyticsDate = reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt);
+  return `${renderLatestTrainingReport(runs)}<div class="card trend-card"><div class="trend-card-head"><div class="trend-card-icon" aria-hidden="true">📈</div><div><h2 class="trend-card-title">長期訓練趨勢</h2><span class="trend-card-badge">Garmin 最近 ${runs.length} 筆</span></div><span class="trend-card-updated">📅 Garmin 資料匯至 <b>${analyticsDate}</b></span></div>
+    <div class="trend-hero-row"><div class="trend-hero-item trend-hero-primary"><span class="trend-hero-label"><i aria-hidden="true">🛣️</i>近四週跑量</span><strong class="trend-hero-value">${lastFourKm.toFixed(1)}<small>km</small></strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">👟</i>近四週最長跑</span><strong class="trend-hero-value">${longestRun ? `${longestRun.toFixed(1)}<small>km</small>` : '—'}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">⏱️</i>最近四趟平均配速</span><strong class="trend-hero-value">${formatPaceSeconds(averagePace)}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">❤️</i>最近四趟平均心率</span><strong class="trend-hero-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div></div>
+    <div class="trend-monitor"><div class="trend-monitor-top"><div class="trend-monitor-col">${rampNote || '<div class="trend-ramp trend-ramp-good"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>資料不足，暫無法評估增幅。</p></div></div>'}</div><div class="trend-monitor-divider"></div><div class="trend-monitor-col trend-advanced-head"><b>進階訓練指標</b><p>只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p></div></div><div class="trend-tile-grid"><div class="trend-tile"><span class="trend-tile-label">最近四趟平均步頻</span><strong class="trend-tile-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟累積爬升</span><strong class="trend-tile-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟平均負荷</span><strong class="trend-tile-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近 VO₂ Max</span><strong class="trend-tile-value">${latestVo2 || '—'}</strong></div></div></div>
+    <div class="analysis-chart-grid"><section class="analysis-chart-card"><b>週跑量趨勢</b><p>每週總公里數，包含額外跑步。</p>${renderVolumeBars(trend)}</section><section class="analysis-chart-card"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
   </div>`;
 }
 
@@ -1550,13 +1544,14 @@ function renderCoachDataSignals() {
     const values = recent.map((run) => run[field]).filter((value) => Number.isFinite(value) && value > 0);
     return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
   };
-  const cadence = average('cadence');
   const load = average('trainingLoad');
   const aerobicTe = average('aerobicTe');
   const anaerobicTe = average('anaerobicTe');
   const latestVo2 = [...recent].reverse().find((run) => run.vo2max)?.vo2max;
+  const cadenceAssessment = typeof coachCadenceAssessment === 'function' ? coachCadenceAssessment(recent) : null;
+  const cadence = cadenceAssessment?.evidenceRuns?.length ? cadenceAssessment.displayed : null;
   const metrics = [
-    cadence && ['步頻基準', `${Math.round(cadence)} spm`],
+    cadence && ['步頻基準（主課）', `${cadence} spm`],
     load && ['平均訓練負荷', String(Math.round(load))],
     aerobicTe && ['有氧訓練效果', aerobicTe.toFixed(1)],
     anaerobicTe && ['無氧訓練效果', anaerobicTe.toFixed(1)],
