@@ -334,11 +334,43 @@ function buildGarminOnlyReview(analyticsRuns, updatedAt) {
   };
 }
 
+// 菜單裡的配速是人工寫的，不會自動回校；跑者變快後很容易留著過時的數字。
+// 這裡拿最近同心率（Z2）實跑的中位配速去對，差太多就在 coachNote 標出來，
+// 讓下一份週報知道要更新——顯示端本來就以心率為主控，不會被舊配速帶偏。
+function menuPaceDriftNote(review, analyticsRuns) {
+  const easyMax = Number(review?.zones?.easyMax) || 0;
+  const menu = Array.isArray(review?.nextWeek?.menu) ? review.nextWeek.menu : [];
+  if (!easyMax || !menu.length) return '';
+  const prescribed = menu
+    .map((entry) => /(\d{1,2}:\d{2})\s*[–—~-]\s*(\d{1,2}:\d{2})/.exec(String(entry?.plan || '')))
+    .filter(Boolean)
+    .map((match) => paceSeconds(match[1]))
+    .filter((seconds) => Number.isFinite(seconds));
+  if (!prescribed.length) return '';
+  // 取最近 6 筆 Z2 實跑而非固定天數窗口：跑量週期起伏時，天數窗口會把幾週前
+  // 的慢跑一起算進中位，反而看不出跑者現在的水準。
+  const easyRuns = analyticsRuns
+    .filter((run) => {
+      const hr = Number(run.hr);
+      return hr > 0 && hr <= easyMax && paceSeconds(run.pace) > 0;
+    })
+    .slice(-6);
+  if (easyRuns.length < 3) return '';
+  const actual = median(easyRuns.map((run) => paceSeconds(run.pace)));
+  // 取最慢的那筆處方：菜單可能一部分已更新、一部分還留著舊數字，
+  // 只要有任何一筆明顯慢於實跑就值得提醒。
+  const slowestPrescribed = Math.max(...prescribed);
+  const drift = slowestPrescribed - actual;
+  if (!Number.isFinite(drift) || drift < 30) return '';
+  const asPace = (seconds) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, '0')}`;
+  return `⚠️ 處方參考配速最慢到 ${asPace(slowestPrescribed)}，比最近 ${easyRuns.length} 筆同心率實跑中位（${asPace(actual)}）慢 ${Math.round(drift)} 秒／km，數字可能已過時；課表以心率為主控。`;
+}
+
 function shortRange(start, end) {
   return `${start.slice(5)} ~ ${end.slice(5)}`;
 }
 
-function refreshReviewFromGarmin(review, analyticsRuns, updatedAt, autopilot) {
+function refreshReviewFromGarmin(review, analyticsRuns, updatedAt, autopilot, missingStepsNote = '') {
   const asOf = /^\d{4}-\d{2}-\d{2}$/.test(updatedAt || '')
     ? updatedAt
     : new Date().toISOString().slice(0, 10);
@@ -349,9 +381,10 @@ function refreshReviewFromGarmin(review, analyticsRuns, updatedAt, autopilot) {
   const currentKm = sumKm(currentRuns);
   const currentHr = average(currentRuns.map((run) => Number(run.hr)));
   const previousMenuStart = review?.nextWeek?.weekStart || '';
-  // 人工菜單只在它真的對應「下一週」時才保留；過期後清空，讓前端讀取跑者
-  // 本機的正式下週課表，而不是把已完成的舊週課表再次當成教練建議。
-  const hasCurrentManualMenu = previousMenuStart === nextStart;
+  // 人工菜單在「還沒跑完」之前都要保留：菜單週開始日 >= 本週一即有效（本週要
+  // 照做的那份，以及提早寫好的下週那份）。只有真的過期（上一週以前）才清空，
+  // 讓前端讀跑者本機的正式課表，而不是把已完成的舊週課表當成教練建議。
+  const hasCurrentManualMenu = Boolean(previousMenuStart) && previousMenuStart >= currentStart;
   return {
     ...review,
     updatedAt: asOf,
@@ -369,10 +402,12 @@ function refreshReviewFromGarmin(review, analyticsRuns, updatedAt, autopilot) {
     nextWeek: {
       ...(review?.nextWeek || {}),
       label: hasCurrentManualMenu ? review.nextWeek.label : `下週（${shortRange(nextStart, isoDateOffset(nextStart, 6))}）`,
-      weekStart: nextStart,
+      weekStart: hasCurrentManualMenu ? previousMenuStart : nextStart,
       targetKm: hasCurrentManualMenu ? review.nextWeek.targetKm : '依正式課表安排',
       menu: hasCurrentManualMenu ? review.nextWeek.menu : [],
-      coachNote: hasCurrentManualMenu ? review.nextWeek.coachNote : autopilot.headline,
+      coachNote: hasCurrentManualMenu
+        ? [review.nextWeek.coachNote, menuPaceDriftNote(review, analyticsRuns), missingStepsNote].filter(Boolean).join(' ')
+        : autopilot.headline,
       weatherPlan: hasCurrentManualMenu ? review.nextWeek.weatherPlan : '',
     },
   };
@@ -449,15 +484,31 @@ async function decrypt(payload, passphrase) {
   return new TextDecoder().decode(plaintext);
 }
 
+// 跑步課一定要帶 steps：Garmin 同步是逐步讀 steps 的，只有敘述文字時前端得靠
+// 正則猜結構，猜不出來的那天會被 skippedDays 丟掉。這裡在發布前先喊出來——
+// 回傳文字讓呼叫端決定要不要寫進 coachNote／CI summary，而不是只印在 console
+// （排程跑的時候沒人在看 Action log，之前這條警告等於白喊）。
+function warnMenuWithoutSteps(review) {
+  const menu = Array.isArray(review?.nextWeek?.menu) ? review.nextWeek.menu : [];
+  const missing = menu.filter((entry) => /(?:E\s*跑|長跑|慢跑|節奏跑|間歇)/i.test(String(entry?.plan || ''))
+    && !(Array.isArray(entry?.steps) && entry.steps.length));
+  if (!missing.length) return '';
+  const note = `⚠️ 教練菜單有 ${missing.length} 天是跑步課但沒有 steps（${missing.map((entry) => entry.day || '?').join('、')}）；Garmin 同步只能靠文字推測結構，這幾天可能被排除。`;
+  console.warn(note);
+  return note;
+}
+
 async function buildPublishedReview(plaintext) {
   let review = plaintext ? preserveCoachWorkoutSteps(JSON.parse(plaintext)) : null;
+  const missingStepsNote = warnMenuWithoutSteps(review);
+  await appendJobSummary(missingStepsNote);
   try {
     const activityFeed = JSON.parse(await readFile(ACTIVITY_SOURCE, "utf8"));
     const activities = Array.isArray(activityFeed.activities) ? activityFeed.activities : [];
     const analyticsRuns = buildAnalyticsRuns(activities);
     review = review || buildGarminOnlyReview(analyticsRuns, activityFeed.updatedAt);
     const autopilot = buildGarminAutopilot(analyticsRuns, activityFeed.updatedAt);
-    review = refreshReviewFromGarmin(review, analyticsRuns, activityFeed.updatedAt, autopilot);
+    review = refreshReviewFromGarmin(review, analyticsRuns, activityFeed.updatedAt, autopilot, missingStepsNote);
     review.analyticsUpdatedAt = activityFeed.updatedAt || null;
     review.analyticsStatus = "synced";
     review.analyticsRuns = slimAnalyticsLaps(analyticsRuns);
@@ -471,6 +522,11 @@ async function buildPublishedReview(plaintext) {
     review.analyticsStatus = "missing";
     review.lactateThresholdHr = null;
     review.autopilot = buildGarminAutopilot([], null);
+    // Garmin 實跑讀不到時 refreshReviewFromGarmin 不會跑，missingStepsNote 就沒機會
+    // 併進 coachNote——這裡補上，避免這條警告只在沒有 Garmin 資料的那次靜靜消失。
+    if (missingStepsNote && review.nextWeek) {
+      review.nextWeek.coachNote = [review.nextWeek.coachNote, missingStepsNote].filter(Boolean).join(' ');
+    }
   }
   // 教練目標.json 為單一真相：存在且結構有效時，覆蓋 zones/periodization。
   // 找不到或格式不符則沿用 週報.json 既有值（向後相容，不會清空）。
@@ -485,7 +541,7 @@ async function buildPublishedReview(plaintext) {
 }
 
 async function appendJobSummary(text) {
-  if (!process.env.GITHUB_STEP_SUMMARY) return;
+  if (!text || !process.env.GITHUB_STEP_SUMMARY) return;
   try {
     await writeFile(process.env.GITHUB_STEP_SUMMARY, `${text}\n`, { flag: "a" });
   } catch {

@@ -12,8 +12,7 @@ function renderPlanView() {
     showView('setup');
     return;
   }
-  const daysSinceGen = Math.floor((new Date() - new Date(profile.generatedAt)) / 86400000);
-  currentWeek = Math.min(Math.max(1, Math.floor(daysSinceGen / 7) + 1), plan.length);
+  currentWeek = Math.min(todayWeekNum(), plan.length);
   const garminActivitySyncControl = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
     ? `<div class="garmin-activity-sync-control" data-local-only="garmin-activity-sync">
       <button class="btn btn-secondary" id="garmin-activity-sync-button" type="button" onclick="startGarminActivitySync()">⌚ 讀取 Garmin 實跑</button>
@@ -668,10 +667,28 @@ function renderCourseDecisionPanel(plan = appData.plan || []) {
   </section>`;
 }
 
+// 同一天同一種調整只留最新一筆：自動校準一天可能跑好幾次，逐筆列出會讓
+// 同樣的差異重複出現，看起來像課表被改了很多次。
+function dedupePlanChangeItems(history) {
+  const latest = new Map();
+  for (const item of history) {
+    const key = `${item?.date || ''}::${item?.title || ''}`;
+    latest.set(key, item); // 後寫入的是較新的一筆
+  }
+  return [...latest.values()].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+}
+
+// 差異太多時只先秀前三條，其餘收在展開區，避免一次噴出十幾個週次。
+function planChangeSummary(changes) {
+  const list = (changes || []).map((change) => reviewEscape(change));
+  if (list.length <= 3) return list.join('；');
+  return `${list.slice(0, 3).join('；')}<details class="plan-change-more"><summary>其餘 ${list.length - 3} 項調整</summary>${list.slice(3).join('；')}</details>`;
+}
+
 function renderPlanChangeTimeline() {
-  const items = [...(appData.planChangeHistory || [])].slice(-4).reverse();
+  const items = dedupePlanChangeItems(appData.planChangeHistory || []).slice(0, 4);
   if (!items.length) return '<div class="automation-timeline"><div class="automation-timeline-title">課表變更紀錄</div><p style="margin:7px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">還沒有任何自動調整。等 Garmin 校準、週評估保護或套用檢測之後，我會把前後的差異留在這裡給你看。</p></div>';
-  return `<div class="automation-timeline"><div class="automation-timeline-title">課表變更紀錄</div><div class="automation-timeline-list">${items.map((item) => `<div class="automation-timeline-item"><time>${reviewEscape(item.date)}</time><div><b>${reviewEscape(item.title)}</b><br>${item.changes.map((change) => reviewEscape(change)).join('；')}</div></div>`).join('')}</div></div>`;
+  return `<div class="automation-timeline"><div class="automation-timeline-title">課表變更紀錄</div><div class="automation-timeline-list">${items.map((item) => `<div class="automation-timeline-item"><time>${reviewEscape(item.date)}</time><div><b>${reviewEscape(item.title)}</b><br>${planChangeSummary(item.changes)}</div></div>`).join('')}</div></div>`;
 }
 
 function showWeekPlanFromStatus() {
@@ -846,7 +863,15 @@ function recordPlanChange(before, source, title) {
   }).filter(Boolean);
   if (!changes.length) return;
   appData.planChangeHistory = normalizePlanChangeHistory(appData.planChangeHistory);
-  appData.planChangeHistory.push({ date: todayStr(), source, title, changes });
+  const today = todayStr();
+  // 同一天同一種調整（例如同天跑了兩次滾動校準）合併成一筆，而不是各自留存——
+  // 顯示層原本要在讀取時去重，但寫入端一直重複塞資料，陣列會無止盡變大。
+  const existing = appData.planChangeHistory.find((item) => item.date === today && item.title === title);
+  if (existing) {
+    existing.changes = [...new Set([...existing.changes, ...changes])];
+  } else {
+    appData.planChangeHistory.push({ date: today, source, title, changes });
+  }
   appData.planChangeHistory = appData.planChangeHistory.slice(-30);
 }
 
@@ -1591,11 +1616,22 @@ function renderCoachReviewPanel() {
   const reviewFreshness = garminUpdatedAt === coachReviewData.updatedAt
     ? `Garmin 資料截至 ${garminUpdatedAt}`
     : `Garmin 資料截至 ${garminUpdatedAt} · 人工週報 ${coachReviewData.updatedAt}`;
-  const notes = [...(coachReviewData.history || []), ...(appData.garminAnalysisHistory || [])].slice(-12).reverse().map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
+  // 同一天的同一段分析文字會被雲端與本機各記一次，去重後才不會整頁都是同樣的句子
+  const noteEntries = [...(coachReviewData.history || []), ...(appData.garminAnalysisHistory || [])]
+    .filter((item) => item?.summary)
+    .reduce((unique, item) => {
+      const key = `${item.date || ''}::${item.summary}`;
+      if (!unique.has(key)) unique.set(key, item);
+      return unique;
+    }, new Map());
+  const notes = [...noteEntries.values()]
+    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+    .slice(0, 8)
+    .map((item) => `<li>${reviewEscape(item.date)}：${reviewEscape(item.summary)}</li>`).join('');
   const reviewNotice = !hasCurrentCoachPlan && !hasUpcomingCoachPlan && Array.isArray(nextWeek.menu) && nextWeek.menu.length
     ? reviewWeekStart >= todayStr()
-      ? `<details class="coach-history" style="margin-top:10px"><summary><b>${reviewWeekStart === upcomingWeekStart ? '查看下週教練週報（待套用）' : '查看未來教練週報（待對應）'}</b>（${reviewEscape(nextWeek.label || reviewWeekStart || '日期未標示')}）</summary><p class="coach-fineprint">這份週報尚未開始${reviewWeekStart === upcomingWeekStart ? '，會在下週課表顯示時套用；目前不會提早計入完成度。' : `，目前下週從 ${reviewEscape(upcomingWeekStart || '日期未標示')} 開始；待日期對應後才會套用。`}</p></details>`
-      : `<details class="coach-history" style="margin-top:10px"><summary><b>查看歷史教練週報</b>（${reviewEscape(nextWeek.label || reviewWeekStart || '日期未標示')}）</summary><p class="coach-fineprint">這份週報與目前第 ${currentWeek} 週的日期不一致，僅保留作為參考，不會覆寫正式課表或計入提前排課完成度。</p></details>`
+      ? `<details class="coach-history" open style="margin-top:10px"><summary><b>${reviewWeekStart === upcomingWeekStart ? '查看下週教練週報（待套用）' : '查看未來教練週報（待對應）'}</b>（${reviewEscape(nextWeek.label || reviewWeekStart || '日期未標示')}）</summary><p class="coach-fineprint">這份週報尚未開始${reviewWeekStart === upcomingWeekStart ? '，會在下週課表顯示時套用；目前不會提早計入完成度。' : `，目前下週從 ${reviewEscape(upcomingWeekStart || '日期未標示')} 開始；待日期對應後才會套用。`}</p></details>`
+      : `<details class="coach-history" open style="margin-top:10px"><summary><b>查看歷史教練週報</b>（${reviewEscape(nextWeek.label || reviewWeekStart || '日期未標示')}）</summary><p class="coach-fineprint">這份週報與目前第 ${currentWeek} 週的日期不一致，僅保留作為參考，不會覆寫正式課表或計入提前排課完成度。</p></details>`
     : '';
   const garminOnlyNotice = coachReviewData.sourceMode === 'garmin-only'
     ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 自動駕駛模式</b><br>雲端已同步實跑資料；課表頁會依近期跑量與頻率產生輔助菜單。正式課表維持原樣，不會被暗中覆寫。</div>`
@@ -1619,8 +1655,11 @@ function renderCoachReviewPanel() {
     ${garminOnlyNotice}
     ${renderHistoryCoachContext()}
     ${renderCoachDecisionWorkspace(appData.plan || [])}
-    <details class="coach-evidence"><summary><b>查看資料依據與變更紀錄</b><span>Garmin 指標、校準與歷史快照</span></summary>
-      <div class="coach-evidence-body">${reviewNotice}${renderLastRecalibrationCard()}${renderPlanChangeTimeline()}${renderCoachDataSignals()}${notes ? `<details class="coach-history"><summary><b>分析快照歷史</b>（不覆蓋目前訓練設定）</summary><ul>${notes}</ul></details>` : ''}</div>
+    <details class="coach-evidence" open><summary><b>查看資料依據與變更紀錄</b><span>Garmin 指標、校準與歷史快照</span></summary>
+      <div class="coach-evidence-body">${reviewNotice}
+        <div class="coach-evidence-group"><div class="coach-evidence-group-title">最近調整</div>${renderLastRecalibrationCard()}${renderPlanChangeTimeline()}</div>
+        <div class="coach-evidence-group"><div class="coach-evidence-group-title">資料訊號與歷史</div>${renderCoachDataSignals()}${notes ? `<details class="coach-history" open><summary><b>分析快照歷史</b>（不覆蓋目前訓練設定）</summary><ul>${notes}</ul></details>` : ''}</div>
+      </div>
     </details>
     <p class="coach-fineprint" style="margin-top:12px">正式課程只在「本週課表」呈現；這裡只說明它為何被採用，以及可追溯的資料依據。</p>
   </div>`;
@@ -1928,12 +1967,13 @@ function navWeek(delta) {
   jumpToPhaseWeek(currentWeek);
 }
 
-// 今天實際落在第幾週（與 renderPlanView 的 currentWeek 初值同公式）。currentWeek 會被
-// 週導覽改動，需要一個不受瀏覽影響的「今日週次」來判斷是否在看當前週。
+// 今天實際落在第幾週。currentWeek 會被週導覽改動，需要一個不受瀏覽影響的
+// 「今日週次」。課表每一週都錨定在生成日所在週的週一（見 buildWeekDays），
+// 所以週次也必須用週一對齊算，否則生成日不是週一時會落後最多 6 天。
 function todayWeekNum() {
   const gen = appData.profile?.generatedAt;
   if (!gen) return currentWeek;
-  const days = Math.floor((new Date() - new Date(gen)) / 86400000);
+  const days = Math.floor((mondayOfWeek(new Date()) - mondayOfWeek(gen)) / 86400000);
   return Math.min(Math.max(1, Math.floor(days / 7) + 1), (appData.plan || []).length || 1);
 }
 
@@ -2164,14 +2204,18 @@ function coachWorkoutStructure(planText, day, suppliedSteps = []) {
 }
 
 function garminManualBuilderSteps(day) {
-  return workoutStructureForDay(day).map((step, index) => ({
+  // 重複組的子步驟（快段／恢復）也要帶 targetSpec：發布腳本是逐步讀 targetSpec 的，
+  // 只算最外層會讓組內快段在 Garmin 上變成沒有目標的空步驟。
+  const withSpec = (step, index) => ({
     ...step,
     order: index + 1,
     dose: step.end?.label || '依 Garmin 選項設定',
     detail: step.detail || '依今天課表執行',
     target: step.target || '不設目標或以舒適強度完成',
-    targetSpec: garminTargetSpec(step.target, day?.type, step.kind)
-  }));
+    targetSpec: garminTargetSpec(step.target, day?.type, step.kind),
+    ...(Array.isArray(step.children) && step.children.length ? { children: step.children.map(withSpec) } : {})
+  });
+  return workoutStructureForDay(day).map(withSpec);
 }
 
 function paceSecondsFromText(value) {
@@ -2371,6 +2415,28 @@ function garminWorkoutFingerprint(workout) {
   return JSON.stringify({ type: workout.type, km: workout.km, mainKm: workout.mainKm, pace: workout.pace, steps: workout.steps });
 }
 
+// 同步預覽要看得到「這一步會不會帶目標」：只列步驟名與距離的話，跑者無從判斷
+// 手錶上會不會有心率／配速提示，出問題也不知道是哪一步沒設定。
+function garminStepTargetLabel(step) {
+  const spec = step?.targetSpec;
+  if (!spec) return '';
+  if (spec.kind === 'heart_rate') return `HR ${Math.round(spec.min)}–${Math.round(spec.max)}`;
+  if (spec.kind === 'speed' && spec.minMps > 0 && spec.maxMps >= spec.minMps) {
+    // maxMps 是比較快的那端，換成配速後是比較小的秒數
+    return `${secToPace(Math.round(1000 / spec.maxMps))}–${secToPace(Math.round(1000 / spec.minMps))}/km`;
+  }
+  return '';
+}
+
+function garminStepPreviewLabel(step) {
+  const dose = step.dose || step.end?.label || '';
+  const target = garminStepTargetLabel(step);
+  const children = Array.isArray(step.children) && step.children.length
+    ? `（${step.children.map(garminStepPreviewLabel).join(' + ')}）`
+    : '';
+  return `${step.title || step.kind} ${dose}${target ? ` @${target}` : ''}${children}`.trim();
+}
+
 function garminSyncPreview(payload) {
   const previous = appData.garminSyncManifest && typeof appData.garminSyncManifest === 'object' ? appData.garminSyncManifest : {};
   return payload.workouts.map((workout) => {
@@ -2475,7 +2541,7 @@ function openWeeklyGarminCalendarGuide(weekNumber = currentWeek) {
   const preview = garminSyncPreview(payload);
   const runningDays = payload.workouts.length;
   const changeLabel = { new: '新增 Garmin 課程', changed: '課程結構有變更，將替換', unchanged: '與上次相同，維持既有課程' };
-  const previewRows = preview.map((item) => `<li><strong>${reviewEscape(item.workout.date)}｜${reviewEscape(trainingTaskTitle({ task: item.workout.name.replace(/^Runner｜\d{4}-\d{2}-\d{2}｜/, '') }))}</strong><small>${changeLabel[item.change]} · ${item.workout.steps.map((step) => `${step.title || step.kind} ${step.dose || step.end?.label || ''}`).join(' → ')}</small></li>`).join('');
+  const previewRows = preview.map((item) => `<li><strong>${reviewEscape(item.workout.date)}｜${reviewEscape(trainingTaskTitle({ task: item.workout.name.replace(/^Runner｜\d{4}-\d{2}-\d{2}｜/, '') }))}</strong><small>${changeLabel[item.change]} · ${item.workout.steps.map(garminStepPreviewLabel).join(' → ')}</small></li>`).join('');
   const skippedRows = payload.skippedDays.length ? `<div class="garmin-builder-note" style="margin-top:12px"><b>不會寫入 Garmin：</b>${payload.skippedDays.map((item) => `${reviewEscape(item.date)} ${reviewEscape(item.name)}`).join('、')}。原因：缺少可安全轉換的距離／時間步驟，已保留為教練備註。</div>` : '';
   const body = `
     <div class="garmin-builder-note" style="margin-top:0"><b>本機一鍵同步：</b>會建立或安全替換同名的 ${runningDays} 堂 Garmin 跑步訓練，排進對應日期；之後照平常用 Garmin Connect 手機同步手錶即可。</div>

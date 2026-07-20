@@ -708,6 +708,11 @@
     .coach-evidence > summary span { color: var(--c-text-muted); font-size: 12px; font-weight: 600; text-align: right; }
     .coach-evidence-body { padding: 0 14px 14px; }
     .coach-evidence-body .automation-timeline, .coach-evidence-body .coach-signals { margin-top: 12px; }
+    .coach-evidence-group { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--c-border); }
+    .coach-evidence-group:first-of-type { border-top: 0; padding-top: 0; }
+    .coach-evidence-group-title { font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--c-text-muted); text-transform: uppercase; }
+    .plan-change-more { margin-top: 6px; }
+    .plan-change-more > summary { cursor: pointer; color: var(--c-text-muted); font-size: 12px; }
     @media (max-width: 640px) { .coach-decision-next { grid-template-columns: 1fr; } .coach-evidence > summary { display: block; } .coach-evidence > summary span { display: block; margin-top: 4px; text-align: left; } }
     .coach-detail-hint { margin: 0 0 12px; color: var(--c-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
     .day-card-pace { font-size: 13px; color: var(--c-text-muted); margin-bottom: 12px; line-height: 1.5; }

@@ -914,7 +914,10 @@ function renderHeroPanel() {
       : daysToRace === 0
         ? ' · 就是今天！'
         : ' · 已完賽';
-  const paceText = profile?.racePaceSec ? `${secToPace(profile.racePaceSec)}/km` : '完成設定後帶入';
+  // Hero 的配速格顯示「會隨實跑校準的」輕鬆跑配速；賽事目標配速是靜態值，
+  // 移到賽事日那格當副標，避免兩個不同語意的配速擠在同一個標籤下。
+  const easyPace = heroEasyPaceInfo(profile);
+  const racePaceText = profile?.racePaceSec ? `目標配速 ${secToPace(profile.racePaceSec)}/km` : '';
   const weeklyTarget = week ? effectiveWeekVolumeTarget(week).display : '依可訓練日生成';
   shell.innerHTML = `
     <div class="trainer-hero-layout">
@@ -930,7 +933,7 @@ function renderHeroPanel() {
           <div class="trainer-stat">
             <div class="trainer-stat-label">賽事日</div>
             <div class="trainer-stat-value">${hasPlan ? targetDateText : meta.label}</div>
-            <div class="trainer-stat-sub">${hasPlan ? (daysToRace === null ? '目標日尚未設定' : daysToRace > 0 ? `距離目標日 ${daysToRace} 天` : daysToRace === 0 ? '就是今天' : '已完賽') : '入門 / 半馬 / 全馬 / 傷後重建'}</div>
+            <div class="trainer-stat-sub">${hasPlan ? [(daysToRace === null ? '目標日尚未設定' : daysToRace > 0 ? `距離目標日 ${daysToRace} 天` : daysToRace === 0 ? '就是今天' : '已完賽'), racePaceText].filter(Boolean).join(' · ') : '入門 / 半馬 / 全馬 / 傷後重建'}</div>
           </div>
           <div class="trainer-stat">
             <div class="trainer-stat-label">當週處方</div>
@@ -938,9 +941,9 @@ function renderHeroPanel() {
             <div class="trainer-stat-sub">${hasPlan ? '正式課表總跑量' : '先完成設定後開始'}</div>
           </div>
           <div class="trainer-stat">
-            <div class="trainer-stat-label">配速基準</div>
-            <div class="trainer-stat-value">${hasPlan ? paceText : weeklyTarget}</div>
-            <div class="trainer-stat-sub">${hasPlan ? '依身體狀態彈性調整' : '會依你的條件自動估算'}</div>
+            <div class="trainer-stat-label">${hasPlan ? easyPace.label : '配速基準'}</div>
+            <div class="trainer-stat-value">${hasPlan ? easyPace.value : weeklyTarget}</div>
+            <div class="trainer-stat-sub">${hasPlan ? easyPace.sub : '會依你的條件自動估算'}</div>
           </div>
         </div>
         ${hasPlan ? '' : `<div class="trainer-hero-points">
@@ -1789,6 +1792,37 @@ function adaptiveEasyPaceSec(profile, date) {
   } catch (err) { /* 教練資料未解鎖時退回設定值 */ }
   const seasonAdjust = date ? (isHotSeasonDate(date) ? 20 : -15) : 0;
   return { sec: Math.max(baseSec + seasonAdjust, 240), source };
+}
+
+// Hero 配速格：心率是教練的主控指令，配速永遠由最近同心率實跑推算。
+// 教練菜單裡的配速文字是人工維護、不會自動回校，拿它當顯示值會蓋掉真正
+// 跟得上跑者現況的校準值——所以這裡只採用教練的心率上限，不採用它的配速數字。
+function heroEasyPaceInfo(profile) {
+  if (!profile) return { label: '配速基準', value: '完成設定後帶入', sub: '會依你的條件自動估算' };
+  const adaptive = adaptiveEasyPaceSec(profile, new Date());
+  const seasonNote = isHotSeasonDate(new Date()) ? '夏季高溫 +20 秒' : '涼季紅利 −15 秒';
+  const calibratedAt = appData.lastRecalibration?.date;
+  const hrCap = coachEasyHrCap(profile);
+  const basis = adaptive.source === 'garmin'
+    ? `依最近同心率實跑校準${calibratedAt ? `（${calibratedAt}）` : ''} · ${seasonNote}`
+    : '目前用設定值 · Z2 實跑滿 3 筆後自動校準';
+  return {
+    label: '本週輕鬆跑配速',
+    value: `${secToPace(adaptive.sec)}/km`,
+    sub: `${hrCap ? `守 Z2 HR≤${hrCap} 為主 · ` : ''}${basis}`.trim()
+  };
+}
+
+// 心率上限的真相源：教練週報 zones（背後是 教練目標.json）> 本機 hrZones 推算。
+function coachEasyHrCap(profile) {
+  const coachMax = Number(coachReviewData?.zones?.easyMax);
+  if (coachMax > 0) return coachMax;
+  try {
+    const zones = hrZones(profile);
+    return Number(zones?.easyMax) || 0;
+  } catch (err) {
+    return 0;
+  }
 }
 
 function fitnessLevel(profile) {
