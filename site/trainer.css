@@ -563,6 +563,13 @@
     .session-plan-row { display:grid; grid-template-columns:72px minmax(0,1fr); gap:8px; margin-top:10px; font-size:12px; line-height:1.55; }
     .session-plan-row span { color:var(--c-text-muted); font-weight:800; }
     .session-plan-row b { color:var(--c-text); font-weight:850; }
+    .session-plan-divider { height:1px; margin:14px 0; background:rgba(31,42,36,.1); }
+    .session-report-details { margin-top:21px; padding-top:18px; border-top:1px solid rgba(31,42,36,.09); }
+    .session-report-details > summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 13px; border:1px solid rgba(31,42,36,.1); border-radius:12px; background:#f8fbf8; color:var(--c-primary-hover); font-size:13px; font-weight:850; cursor:pointer; list-style:none; }
+    .session-report-details > summary::-webkit-details-marker { display:none; }
+    .session-report-details > summary::after { content:'＋'; color:var(--c-text-muted); font-size:19px; font-weight:500; }
+    .session-report-details[open] > summary { border-color:rgba(36,114,79,.28); background:#eef7f0; }
+    .session-report-details[open] > summary::after { content:'−'; }
     .session-breakdown { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,.78fr); gap:16px; margin-top:21px; padding-top:20px; border-top:1px solid rgba(31,42,36,.09); }
     .session-breakdown-card { min-width:0; padding:17px 18px; border:1px solid rgba(31,42,36,.09); border-radius: var(--radius-xl); background:#fffdf8; }
     .session-breakdown-title { margin:0; font-size:15px; }
