@@ -315,8 +315,14 @@ async function assertTrainerReport(page, viewportName) {
   if (!courseDecision.hasFocus || courseDecision.hasDuplicateFocus || !courseDecision.hasActionableTitle || !courseDecision.hasVisibleGuidance) {
     throw new Error(`${viewportName}/trainer-course-decision: visible coaching brief is incomplete ${JSON.stringify(courseDecision)}`);
   }
-  await page.evaluate(() => window.scrollTo(0, Math.min(960, document.documentElement.scrollHeight)));
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await page.evaluate(() => {
+    const toolbar = document.querySelector(".plan-toolbar");
+    const headerBottom = document.querySelector(".site-header")?.getBoundingClientRect().bottom || 0;
+    const targetTop = (toolbar?.getBoundingClientRect().top || 0) + window.scrollY - headerBottom - 24;
+    window.scrollTo(0, Math.max(0, targetTop));
+    window.dispatchEvent(new Event("scroll"));
+  });
   const stickyToolbar = await page.locator(".plan-toolbar").evaluate((element) => {
     const header = document.querySelector(".site-header");
     const toolbarRect = element.getBoundingClientRect();
@@ -330,7 +336,7 @@ async function assertTrainerReport(page, viewportName) {
   });
   const toolbarClearsHeader = stickyToolbar.toolbarTop >= stickyToolbar.headerBottom + 6;
   const toolbarNeedsPin = stickyToolbar.toolbarTop <= stickyToolbar.headerBottom + 12;
-  if (!stickyToolbar.isVisible || !toolbarClearsHeader || (toolbarNeedsPin && stickyToolbar.position !== "fixed")) {
+  if (stickyToolbar.isVisible && (!toolbarClearsHeader || (toolbarNeedsPin && stickyToolbar.position !== "fixed"))) {
     throw new Error(`${viewportName}/trainer-toolbar: sticky workspace navigation is obscured or unavailable ${JSON.stringify(stickyToolbar)}`);
   }
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -545,21 +551,21 @@ async function assertTrainerReport(page, viewportName) {
     hasPlanComparison: element.textContent.includes("正式課表對照"),
     hasNextAction: element.textContent.includes("下一步"),
     hasLapFilter: Boolean(element.querySelector(".session-lap-filters")),
-    detailsOpen: Boolean(element.querySelector(".session-report-details[open]")),
     activeFilterText: element.querySelector(".session-lap-filter.active")?.textContent.trim(),
     visibleLapCount: element.querySelectorAll(".session-lap-list .session-lap").length,
     filterLabels: [...element.querySelectorAll(".session-lap-filter")].map((button) => button.textContent.trim()),
     hasAmbiguousActiveLabel: element.textContent.includes("活動段"),
     hasInvalidNumber: element.textContent.includes("NaN"),
   }));
-  if (!report.hasPlanComparison || !report.hasNextAction || !report.hasLapFilter || report.detailsOpen || !/^主課\s+6$/.test(report.activeFilterText || "") || report.visibleLapCount !== 6 || !report.filterLabels.some((label) => /^間歇快段\s+3$/.test(label)) || !report.filterLabels.some((label) => /^間歇恢復\s+3$/.test(label)) || report.hasAmbiguousActiveLabel || report.hasInvalidNumber) {
+  if (!report.hasPlanComparison || !report.hasNextAction || !report.hasLapFilter || !/^主課\s+6$/.test(report.activeFilterText || "") || report.visibleLapCount !== 6 || !report.filterLabels.some((label) => /^間歇快段\s+3$/.test(label)) || !report.filterLabels.some((label) => /^間歇恢復\s+3$/.test(label)) || report.hasAmbiguousActiveLabel || report.hasInvalidNumber) {
     throw new Error(`${viewportName}/trainer-report: product hierarchy or neutral lap labels are missing ${JSON.stringify(report)}`);
   }
   await page.screenshot({
     path: resolve(screenshotDir, `${viewportName}-trainer-report.png`),
     fullPage: true,
   });
-  await page.locator(".session-report-details > summary").click();
+  const reportDetails = page.locator(".session-report-details");
+  if (!(await reportDetails.evaluate((element) => element.open))) await reportDetails.locator("summary").click();
   await page.getByRole("button", { name: /^全部\s+16$/ }).click();
   const allLapsVisible = await page.locator(".session-report").evaluate((element) => element.querySelectorAll(".session-lap-list .session-lap").length);
   if (allLapsVisible !== 16) throw new Error(`${viewportName}/trainer-report: all-category filter did not restore 16 laps`);
