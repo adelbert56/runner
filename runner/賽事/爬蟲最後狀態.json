@@ -1,8 +1,8 @@
 {
-  "scrape_date": "2026-07-16 11:10",
-  "added": 0,
+  "scrape_date": "2026-07-21 10:36",
+  "added": 3,
   "updated": 2,
-  "total": 55,
+  "total": 57,
   "sources": [
     "運動筆記",
     "中華民國路跑協會",
@@ -10,47 +10,19 @@
     "跑者廣場全國賽會"
   ],
   "errors": [
-    "2026 KOF拳皇公益主題路跑||2026-07-12: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026KOF/signup",
-    "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0||2026-08-02: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/RunForDAD2026",
-    "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0||2026-08-02: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/RunForDAD2026/signup",
     "2026 HOT DOG Trail 台中系列活動-熱血接力賽||2026-08-30: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6974",
-    "2026 東城盃合歡山越野馬拉松||2026-09-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Hehuanshan",
-    "2026 東城盃合歡山越野馬拉松||2026-09-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Hehuanshan/signup",
-    "2026 Puli Power 埔里山城派對馬拉松||2026-10-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026PuliPower",
-    "2026 Puli Power 埔里山城派對馬拉松||2026-10-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026PuliPower/signup",
-    "第一屆樂敗國際精品路跑||2026-10-11: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Lovebuy",
     "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華||2026-10-17: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7066",
-    "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026SpongeBob-TXG",
     "2026 聯大八甲馬拉松||2026-10-31: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7087",
-    "2026 日月潭環湖馬拉松||2026-11-01: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/sunmoonlakemarathon2026",
-    "2026 台灣米倉田中馬拉松||2026-11-08: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/Tianzhong2026/signup",
     "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7016",
-    "2026 第二屆麗晨臺中國際馬拉松||2026-12-06: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026-2livetruemarathon",
-    "2026 第二屆食安盃馬拉松||2026-12-19: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
-    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004",
-    "2027 第九屆臺中資訊盃公益馬拉松||2027-01-24: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2027TCCA/signup"
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004"
   ],
   "has_errors": true,
   "enrichment_errors": [
-    "2026 KOF拳皇公益主題路跑||2026-07-12: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026KOF/signup",
-    "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0||2026-08-02: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/RunForDAD2026",
-    "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0||2026-08-02: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/RunForDAD2026/signup",
     "2026 HOT DOG Trail 台中系列活動-熱血接力賽||2026-08-30: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/6974",
-    "2026 東城盃合歡山越野馬拉松||2026-09-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Hehuanshan",
-    "2026 東城盃合歡山越野馬拉松||2026-09-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Hehuanshan/signup",
-    "2026 Puli Power 埔里山城派對馬拉松||2026-10-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026PuliPower",
-    "2026 Puli Power 埔里山城派對馬拉松||2026-10-04: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026PuliPower/signup",
-    "第一屆樂敗國際精品路跑||2026-10-11: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Lovebuy",
     "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華||2026-10-17: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7066",
-    "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026SpongeBob-TXG",
     "2026 聯大八甲馬拉松||2026-10-31: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7087",
-    "2026 日月潭環湖馬拉松||2026-11-01: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/sunmoonlakemarathon2026",
-    "2026 台灣米倉田中馬拉松||2026-11-08: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/Tianzhong2026/signup",
     "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7016",
-    "2026 第二屆麗晨臺中國際馬拉松||2026-12-06: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026-2livetruemarathon",
-    "2026 第二屆食安盃馬拉松||2026-12-19: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026Foodsafetymarathon?page=5254",
-    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004",
-    "2027 第九屆臺中資訊盃公益馬拉松||2027-01-24: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2027TCCA/signup"
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004"
   ],
   "has_enrichment_errors": true
 }

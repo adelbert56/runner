@@ -1,36 +1,36 @@
 {
-  "generated_at": "2026-07-21T02:04:55.773Z",
+  "generated_at": "2026-07-21T10:41:29.375Z",
   "basis_date": "2026-07-21",
   "races": {
-    "total": 55,
-    "follow_up_count": 16,
-    "complete_count": 39,
-    "complete_rate": "71%",
+    "total": 57,
+    "follow_up_count": 17,
+    "complete_count": 40,
+    "complete_rate": "70%",
     "launch_blocking_gap_count": 4,
-    "launch_ready_count": 51,
+    "launch_ready_count": 53,
     "launch_ready_rate": "93%",
-    "official_direct_count": 52,
-    "official_direct_rate": "95%",
-    "verified_count": 55,
+    "official_direct_count": 53,
+    "official_direct_rate": "93%",
+    "verified_count": 57,
     "verified_rate": "100%",
     "opened_gap_count": 0,
     "date_anomaly_count": 0,
     "due_now_count": 3,
-    "monthly_tracking_count": 0,
+    "monthly_tracking_count": 1,
     "state_counts": {
       "歷史": 4,
       "停辦": 2,
       "已截止": 15,
-      "報名中": 30,
+      "報名中": 31,
       "尚未開報": 2,
-      "報名時間未定": 1,
+      "報名時間未定": 2,
       "待確認": 1
     }
   },
   "content": {
     "shoe_cards": 40,
     "news_cards": 40,
-    "newest_shoe_date": "2026-07-21",
+    "newest_shoe_date": "2026-07-20",
     "newest_news_date": "2026-07-21",
     "published_count": 80,
     "candidate_count": 144,
@@ -247,10 +247,10 @@
     "items": [
       {
         "platform": "運動筆記",
-        "total": 10,
+        "total": 11,
         "official_direct": 8,
-        "verified": 10,
-        "missing": 3,
+        "verified": 11,
+        "missing": 4,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
@@ -259,10 +259,10 @@
           "TOYOTA RUN 台中 視障專場",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
         ],
-        "complete_rate": "70%",
-        "official_direct_rate": "80%",
+        "complete_rate": "64%",
+        "official_direct_rate": "73%",
         "verified_rate": "100%",
-        "score": 85,
+        "score": 80,
         "status": "穩定"
       },
       {
@@ -326,6 +326,26 @@
         "status": "穩定"
       },
       {
+        "platform": "Focusline",
+        "total": 8,
+        "official_direct": 8,
+        "verified": 8,
+        "missing": 6,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 1,
+        "sample_races": [
+          "夏日馬拉松 - 南投埔里場",
+          "2026 梨山水蜜桃路跑",
+          "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站"
+        ],
+        "complete_rate": "25%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 74,
+        "status": "可用需觀察"
+      },
+      {
         "platform": "CTRun",
         "total": 7,
         "official_direct": 7,
@@ -344,26 +364,6 @@
         "verified_rate": "100%",
         "score": 95,
         "status": "穩定"
-      },
-      {
-        "platform": "Focusline",
-        "total": 7,
-        "official_direct": 7,
-        "verified": 7,
-        "missing": 6,
-        "opened_gap": 0,
-        "date_anomaly": 0,
-        "due_now": 1,
-        "sample_races": [
-          "夏日馬拉松 - 南投埔里場",
-          "2026 梨山水蜜桃路跑",
-          "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站"
-        ],
-        "complete_rate": "14%",
-        "official_direct_rate": "100%",
-        "verified_rate": "100%",
-        "score": 70,
-        "status": "可用需觀察"
       },
       {
         "platform": "JoinNow",

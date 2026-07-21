@@ -1,6 +1,37 @@
 [
   {
-    "race_id": "a8aeb126-c820-4701-bb74-edc1f306ecf1",
+    "race_id": "b2652d1a-13ae-4b78-ad4c-e14d204d3118",
+    "race_name": "2027彰化同濟盃全國馬拉松暨兒童親子路跑",
+    "race_date": "2027-02-28",
+    "race_county": "彰化縣",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "priority_score": 14,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-08-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 222 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      "official_registration_link",
+      "registration_opens_at",
+      "registration_deadline",
+      "start_times",
+      "fees",
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13123",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13123&subtitle=2027%E5%BD%B0%E5%8C%96%E5%90%8C%E6%BF%9F%E7%9B%83%E5%85%A8%E5%9C%8B%E9%A6%AC%E6%8B%89%E6%9D%BE%E6%9A%A8%E5%85%92%E7%AB%A5%E8%A6%AA%E5%AD%90%E8%B7%AF%E8%B7%91",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13123",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E5%BD%B0%E5%8C%96%E5%90%8C%E6%BF%9F%E7%9B%83%E5%85%A8%E5%9C%8B%E9%A6%AC%E6%8B%89%E6%9D%BE%E6%9A%A8%E5%85%92%E7%AB%A5%E8%A6%AA%E5%AD%90%E8%B7%AF%E8%B7%91"
+    }
+  },
+  {
+    "race_id": "a8d0f627-023b-406a-8cfa-2c17cb5e7282",
     "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
     "race_date": "2027-03-28",
     "race_county": "臺中市",
@@ -10,7 +41,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2026-09-29",
+      "next_check_date": "2026-09-28",
       "cadence": "future",
       "reason": "距離賽事 250 天，先排到賽前約 180 天再追。"
     },
@@ -41,7 +72,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-08",
+      "next_check_date": "2027-06-07",
       "cadence": "future",
       "reason": "距離賽事 502 天，先排到賽前約 180 天再追。"
     },
@@ -99,9 +130,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待開報當天",
-      "next_check_date": "2026-07-31",
+      "next_check_date": "2026-07-30",
       "cadence": "on_open_date",
-      "reason": "已知開報日 2026-07-31，尚有 10 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+      "reason": "已知開報日 2026-07-30，尚有 10 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
     },
     "missing": [
       "official_registration_link"
@@ -416,9 +447,9 @@
     "tracking": {
       "status": "wait_until_open_window",
       "status_label": "等待接近開報",
-      "next_check_date": "2026-08-03",
+      "next_check_date": "2026-08-02",
       "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-17，開報前 14 天再開始追蹤。"
+      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
     },
     "missing": [
       "quota"
