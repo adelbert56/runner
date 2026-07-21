@@ -57,6 +57,18 @@ function itemIssues(item, index, seenUrls) {
   if (!hasText(summary) || summary.length < 18) {
     issues.push({ severity: "high", label, issue: "摘要缺漏或太短" });
   }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ""))) {
+    issues.push({ severity: "high", label, issue: "缺少穩定的內容日期" });
+  }
+  if (!['source', 'first_seen'].includes(item.date_source)) {
+    issues.push({ severity: "high", label, issue: "日期來源未標示為來源發布或首次收錄" });
+  }
+  if (item.date_source === 'source' && item.date !== item.article_date) {
+    issues.push({ severity: "high", label, issue: "來源發布日期與顯示日期不一致" });
+  }
+  if (item.date_source === 'first_seen' && item.date !== item.first_seen_at) {
+    issues.push({ severity: "high", label, issue: "首次收錄日期與顯示日期不一致" });
+  }
   if (summary.length > 180) {
     issues.push({ severity: "medium", label, issue: "摘要過長" });
   }

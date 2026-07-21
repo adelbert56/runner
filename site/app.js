@@ -3640,7 +3640,7 @@ function formatContentOriginDate(date) {
   return month && day ? `${month}/${day}` : value.replaceAll("-", "/");
 }
 
-function contentOriginLabel(sourceOrigin, publishedAt, date) {
+function contentOriginLabel(sourceOrigin, publishedAt, date, dateSource) {
   if (sourceOrigin === "editorial") {
     return "精選";
   }
@@ -3650,10 +3650,11 @@ function contentOriginLabel(sourceOrigin, publishedAt, date) {
   const sourceDate = date || publishedAt;
   const ageDays = dateDiffDays(sourceDate);
   const sourceDateLabel = formatContentOriginDate(sourceDate);
+  const dateLabel = dateSource === "source" ? "發布" : "收錄";
   if (ageDays === 0) {
-    return sourceDateLabel ? `新抓到 · ${sourceDateLabel}` : "新抓到";
+    return sourceDateLabel ? `${dateLabel} · ${sourceDateLabel}` : dateLabel;
   }
-  return sourceDateLabel ? `候選 · ${sourceDateLabel}` : "候選";
+  return sourceDateLabel ? `${dateLabel} · ${sourceDateLabel}` : dateLabel;
 }
 
 function contentArticleHtml(item) {
@@ -3662,7 +3663,7 @@ function contentArticleHtml(item) {
   const category = item.category || (type === "shoe" ? "跑鞋新品" : "跑步新聞");
   const sourceText = item.source ? `${item.source} 來源` : "閱讀來源";
   const sourceOrigin = item.source_origin || "candidate";
-  const originLabel = contentOriginLabel(sourceOrigin, item.published_at, item.date);
+  const originLabel = contentOriginLabel(sourceOrigin, item.published_at, item.date, item.date_source);
   return `
     <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-published-at="${escapeHtml(item.published_at || item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}" data-source-origin="${escapeHtml(sourceOrigin)}" data-source-date="${escapeHtml(item.date || item.published_at || TODAY)}">
       <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>

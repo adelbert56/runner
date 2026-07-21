@@ -19,6 +19,7 @@ function renderPlanView() {
       <span id="garmin-activity-sync-status" role="status" aria-live="polite">讀取同步狀態中…</span>
     </div>`
     : '';
+  const trainingSyncControl = window.TrainerSync?.renderControl?.() || '';
   renderHeroPanel();
   el.innerHTML = `
 <div class="plan-toolbar-anchor" aria-hidden="true"></div>
@@ -31,6 +32,7 @@ function renderPlanView() {
   </div>
   <div class="plan-workspace-tools" aria-label="訓練管理工具">
     ${garminActivitySyncControl}
+    ${trainingSyncControl}
     <button class="btn btn-secondary" onclick="openCycleManagement()">🗂 週期管理</button>
     <button class="btn btn-secondary" onclick="editSetup()">⚙️ 修改設定</button>
   </div>
@@ -55,6 +57,7 @@ function renderPlanView() {
   setupPlanToolbarPinning();
   window.loadCoachReview?.();
   loadGarminActivitySyncStatus();
+  window.TrainerSync?.refreshControl?.();
 }
 
 let planToolbarPinController;
@@ -941,8 +944,20 @@ function renderLatestTrainingReport(runs) {
       const relativePace = fastestLapPace && slowestLapPace > fastestLapPace && paceSeconds
         ? 54 + ((slowestLapPace - paceSeconds) / (slowestLapPace - fastestLapPace)) * 46
         : 76;
+      const paceGap = paceSeconds && fastestLapPace ? paceSeconds - fastestLapPace : 0;
+      const paceRange = slowestLapPace - fastestLapPace;
+      const speedHeat = !paceRange || !paceSeconds
+        ? 'steady'
+        : paceGap <= Math.max(8, paceRange * .25)
+          ? 'fast'
+          : paceGap <= paceRange * .65
+            ? 'steady'
+            : 'easy';
+      const speedLabel = paceSeconds && fastestLapPace
+        ? (paceGap <= 1 ? '最快' : `慢 ${Math.round(paceGap)} 秒`)
+        : '配速未提供';
       const label = mainScope ? sessionLapLabel(lap, lap.index || index + 1, true, intervalBlock) : `第 ${index + 1} 圈`;
-      return `<div class="session-lap ${mainScope ? sessionIntensityClass(lap.intensity) : 'neutral'}"><span class="col-segment">${reviewEscape(label)}</span><span class="col-rhythm"><span class="session-lap-bar" title="${reviewEscape(lap.pace_per_km || '配速未提供')}"><i style="width:${relativePace.toFixed(0)}%"></i></span></span><span class="col-distance">${Number(lap.distance_km).toFixed(2)} km</span><span class="col-pace">${reviewEscape(lap.pace_per_km || '—')}</span><span class="col-cadence">${Number(lap.avg_cadence) > 0 ? `${Math.round(lap.avg_cadence)} spm` : '—'}</span><span class="col-hr">${Number(lap.avg_hr) > 0 ? `HR ${Math.round(lap.avg_hr)}` : '—'}</span></div>`;
+      return `<div class="session-lap ${mainScope ? sessionIntensityClass(lap.intensity) : 'neutral'}"><span class="col-segment">${reviewEscape(label)}</span><span class="col-rhythm"><span class="session-lap-bar heat-${speedHeat}" title="${reviewEscape(`${lap.pace_per_km || '配速未提供'} · ${speedLabel}/km`)}" aria-label="${reviewEscape(`相對本組最快配速：${speedLabel}/km`)}"><i style="width:${relativePace.toFixed(0)}%"></i>${paceGap <= 1 && paceSeconds ? '<b>最快</b>' : ''}</span></span><span class="col-distance">${Number(lap.distance_km).toFixed(2)} km</span><span class="col-pace">${reviewEscape(lap.pace_per_km || '—')}</span><span class="col-cadence">${Number(lap.avg_cadence) > 0 ? `${Math.round(lap.avg_cadence)} spm` : '—'}</span><span class="col-hr">${Number(lap.avg_hr) > 0 ? `HR ${Math.round(lap.avg_hr)}` : '—'}</span></div>`;
     }).join('')
     : '<p class="session-breakdown-copy">這筆舊資料尚未同步計圈摘要；下次 Garmin 同步後會補上，不影響既有總量與主課判讀。</p>';
   const lapFilters = laps.length ? `<div class="session-lap-filters" role="group" aria-label="篩選課程分段"><button type="button" class="session-lap-filter ${selectedLapCategory === 'ALL' ? 'active' : ''}" onclick="selectTrainingReportLapCategory('ALL')">全部 <small>${laps.length}</small></button>${lapGroups.map((group) => `<button type="button" class="session-lap-filter ${selectedLapCategory === group.intensity ? 'active' : ''}" onclick="selectTrainingReportLapCategory('${group.intensity}')">${reviewEscape(group.label)} <small>${group.count}</small></button>`).join('')}</div>` : '';
@@ -974,7 +989,7 @@ function renderLatestTrainingReport(runs) {
     <div class="session-report-head"><div><div class="session-report-kicker">Training report · Garmin</div><h2 class="session-report-title">${reportTitle}</h2><div class="session-report-meta">${reviewEscape(run.date)} · 全程 ${run.km.toFixed(2)} km · ${formatSessionDuration(run.durationMin)}</div></div><span class="session-report-status${statusClass}">${status}</span></div>
     <div class="session-report-body"><div class="session-report-grid"><div class="session-report-verdict"><div class="session-report-label">這次該怎麼看</div><p class="session-report-summary"><b>${reviewEscape(postRun.label)}</b>　${reviewEscape(postRun.summary)}</p><p class="session-report-note">${evidence}</p><div class="session-next-action"><b>下一步</b><span>${reviewEscape(nextAction)}</span></div></div><aside class="session-report-target"><div class="session-report-label">正式課表對照</div><div class="session-plan-row"><span>課表內容</span><b>${reviewEscape(goal)}</b></div><div class="session-plan-row"><span>目標提示</span><b>${reviewEscape(target)}</b></div>${assignmentDateNote ? `<div class="session-plan-row"><span>對應日期</span><b>${reviewEscape(assignmentDateNote)}</b></div>` : ''}${assignmentConfidenceNote ? `<div class="session-plan-row"><span>可信度</span><b>${assignmentConfidenceNote}</b></div>` : ''}<div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${assignmentAction}</div></aside></div>
     <div class="session-report-metrics"><div class="session-report-metric"><span>判讀範圍</span><strong>${scopeText}</strong></div><div class="session-report-metric"><span>配速</span><strong>${coursePace ? `${reviewEscape(coursePace)}/km` : '—'}</strong></div><div class="session-report-metric"><span>平均心率</span><strong>${courseHr ? `HR ${Math.round(courseHr)}` : '—'}</strong></div></div><div class="session-secondary-metrics"><span>平均步頻 <b>${courseCadence ? `${Math.round(courseCadence)} spm` : '—'}</b></span>${feel ? `<span>Garmin 自我評量 <b>${garminFeelLabel(feel.feel)} · RPE ${feel.rpe}/10</b></span>` : '<span>Garmin 自我評量 <b>尚未填寫</b></span>'}</div>
-    <details class="session-report-details" open><summary>查看分圈配速與教練判讀</summary><div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">${mainScope ? '課程分段與配速' : 'Garmin 計圈與配速'}</h3><p class="session-breakdown-copy">${mainScope ? '預設聚焦主課；需要時可切換熱身、活動、恢復、收操或全部。' : '本次沒有可安全判讀的課程段別；以下僅顯示 Garmin 計圈，不會覆寫正式課表。'}</p>${lapFilters}<p class="session-lap-filter-note">${lapFilterNote}</p><div class="session-lap-table">${visibleLaps.length ? `<div class="session-lap-head"><span class="col-segment">分段</span><span class="col-rhythm">節奏</span><span class="col-distance">距離</span><span class="col-pace">配速</span><span class="col-cadence">步頻</span><span class="col-hr">心率</span></div>` : ''}<div class="session-lap-list">${lapRows}</div></div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '這筆資料保留為趨勢參考，不會改寫正式課表。'}</strong><p>${signalText}${confidence}</p></div></div></details><div class="session-report-history-wrap"><div class="session-report-history-label">最近訓練</div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div></div>
+    <details class="session-report-details" open><summary>查看分圈配速與教練判讀</summary><div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">${mainScope ? '課程分段與配速' : 'Garmin 計圈與配速'}</h3><p class="session-breakdown-copy">${mainScope ? '預設聚焦主課；需要時可切換熱身、活動、恢復、收操或全部。' : '本次沒有可安全判讀的課程段別；以下僅顯示 Garmin 計圈，不會覆寫正式課表。'}</p>${lapFilters}<p class="session-lap-filter-note">${lapFilterNote}</p><div class="session-speed-legend" aria-label="速度熱度說明"><span class="easy">較慢</span><i></i><span class="steady">穩定</span><i></i><span class="fast">較快</span><b>以目前篩選分段的最快配速為基準</b></div><div class="session-lap-table">${visibleLaps.length ? `<div class="session-lap-head"><span class="col-segment">分段</span><span class="col-rhythm">速度</span><span class="col-distance">距離</span><span class="col-pace">配速</span><span class="col-cadence">步頻</span><span class="col-hr">心率</span></div>` : ''}<div class="session-lap-list">${lapRows}</div></div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '這筆資料保留為趨勢參考，不會改寫正式課表。'}</strong><p>${signalText}${confidence}</p></div></div></details><div class="session-report-history-wrap"><div class="session-report-history-label">最近訓練</div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div></div>
   </section>`;
 }
 

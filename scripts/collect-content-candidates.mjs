@@ -107,7 +107,16 @@ const sources = [
   },
   {
     name: "HK01 跑步",
-    url: "https://www.hk01.com/channel/跑步",
+    // The old channel landing page no longer exposes article links reliably.
+    // Keep it as a fallback, but lead with the maintained running-shoe tag.
+    url: "https://global.hk01.com/tag/14679",
+    entryUrls: [
+      "https://global.hk01.com/tag/14679",
+      "https://www.hk01.com/channel/跑步",
+    ],
+    allowUrlPatterns: [
+      /(?:global\.)?hk01\.com\/[^/?#]+\/\d+\//i,
+    ],
     type: "跑步裝備 / 跑步知識",
     priority: 3,
   },
@@ -378,13 +387,38 @@ function normalizeDateText(text) {
   return "";
 }
 
+function htmlAttribute(tag, attribute) {
+  const match = String(tag || "").match(new RegExp(`\\b${attribute}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
+  return match?.[1] || match?.[2] || match?.[3] || "";
+}
+
+function extractStructuredPublicationDate(html) {
+  const publishedMetaNames = new Set(["article:published_time", "pubdate", "datepublished"]);
+  for (const match of String(html || "").matchAll(/<meta\b[^>]*>/gi)) {
+    const tag = match[0];
+    const metaName = ["property", "name", "itemprop"]
+      .map((attribute) => htmlAttribute(tag, attribute).toLowerCase())
+      .find(Boolean);
+    if (!publishedMetaNames.has(metaName)) continue;
+    const date = normalizeDateText(htmlAttribute(tag, "content"));
+    if (date) return date;
+  }
+
+  for (const match of String(html || "").matchAll(/<time\b[^>]*>/gi)) {
+    const tag = match[0];
+    if (htmlAttribute(tag, "itemprop").toLowerCase() !== "datepublished") continue;
+    const date = normalizeDateText(htmlAttribute(tag, "datetime"));
+    if (date) return date;
+  }
+
+  return normalizeDateText(String(html || "").match(/"datePublished"\s*:\s*"([^"]+)"/i)?.[1] || "");
+}
+
 function extractDateText(html) {
+  const structuredDate = extractStructuredPublicationDate(html);
+  if (structuredDate) return structuredDate;
+
   const datePatterns = [
-    /<meta[^>]+(?:property|name|itemprop)=["'](?:article:published_time|article:modified_time|og:updated_time|pubdate|date|datePublished|dateModified)["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name|itemprop)=["'](?:article:published_time|article:modified_time|og:updated_time|pubdate|date|datePublished|dateModified)["'][^>]*>/i,
-    /<time[^>]+datetime=["']([^"']+)["'][^>]*>/i,
-    /"datePublished"\s*:\s*"([^"]+)"/i,
-    /"dateModified"\s*:\s*"([^"]+)"/i,
     /\b20\d{2}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日\b/i,
     /\b20\d{2}[\/.]\d{1,2}[\/.]\d{1,2}\b/i,
     /\b\d{1,2}\s+[A-Za-z]{3,9}\.?,?\s+20\d{2}\b/i,
@@ -822,6 +856,36 @@ function extractLinks(html, source) {
       runner_takeaway: "待代理人摘要",
       publish_status: "candidate",
     });
+  }
+
+  // HK01's tag pages are Next.js payloads: article URLs and titles are not
+  // rendered as normal anchors, so the generic extractor sees no entries.
+  if (source.name === "HK01 跑步") {
+    const payloadPattern = /\\"canonicalUrl\\":\\"(\/[^"\\/]+\/\d+\/[^"\\]+)\\"[\s\S]{0,700}?\\"title\\":\\"([^"\\]+)\\"/g;
+    for (const match of html.matchAll(payloadPattern)) {
+      const url = absoluteUrl(match[1], source.url);
+      const title = compact(match[2]);
+      if (!url || !title || isGenericTitle(title, source) || isRejectedTitle(title, source) || !isCrawlableArticleUrl(url, source)) {
+        continue;
+      }
+      const score = scoreTitle(title, source);
+      if (score <= source.priority || links.some((item) => item.url === url)) {
+        continue;
+      }
+      links.push({
+        checked_at: today,
+        source: source.name,
+        source_type: source.type,
+        title,
+        url,
+        category: classify(title),
+        score,
+        article_date: "",
+        suggested_for: "待判斷",
+        runner_takeaway: "待代理人摘要",
+        publish_status: "candidate",
+      });
+    }
   }
 
   return links;

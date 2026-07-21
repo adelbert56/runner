@@ -87,8 +87,7 @@ function parseDate(value) {
 
 function stableContentDate(item) {
   return normalizeIsoDate(item.article_date)
-    || normalizeIsoDate(item.first_seen_at)
-    || normalizeIsoDate(item.checked_at);
+    || normalizeIsoDate(item.first_seen_at);
 }
 
 function withinDays(value, windowDays) {
@@ -400,11 +399,16 @@ function toPublishedItem(item) {
   const type = inferType(item);
   const normalizedUrl = normalizeUrl(item.url);
   const title = String(item.title || "").trim();
+  const articleDate = normalizeIsoDate(item.article_date);
+  const firstSeenAt = normalizeIsoDate(item.first_seen_at);
   return {
     id: `${type}-${slugify(normalizedUrl || title)}`,
     type,
     title,
     date: parseDate(stableContentDate(item)),
+    date_source: articleDate ? "source" : "first_seen",
+    article_date: articleDate,
+    first_seen_at: firstSeenAt,
     source: item.source,
     category: type === "shoe" ? inferShoeCategory(title) : inferNewsCategory(title, item.description),
     summary: summarize(item, type),
@@ -422,11 +426,15 @@ function previousToPublishedItem(item) {
     description: item.summary || "",
   });
   const normalizedDate = normalizeIsoDate(item.date || item.published_at);
+  const firstSeenAt = normalizeIsoDate(item.first_seen_at) || normalizedDate;
   return {
     id: item.id || `${type}-${slugify(normalizeUrl(item.url) || item.title)}`,
     type,
     title: String(item.title || "").trim(),
     date: parseDate(normalizedDate),
+    date_source: item.date_source === "source" ? "source" : "first_seen",
+    article_date: normalizeIsoDate(item.article_date),
+    first_seen_at: firstSeenAt,
     source: item.source || "上一版上架內容",
     category: item.category || (type === "shoe" ? inferShoeCategory(item.title || "") : inferNewsCategory(item.title || "", item.summary)),
     summary: cleanSummary(item.summary) || summarize({
@@ -450,7 +458,9 @@ function mergeArchiveFields(item, archiveByUrl) {
     ...archived,
     ...item,
     article_date: articleDate,
-    first_seen_at: item.first_seen_at || archived.first_seen_at || item.checked_at || today,
+    // The working candidate list is rebuilt on every crawl. Keep the archive's
+    // first-seen value so an undated source cannot be rebadged as today's news.
+    first_seen_at: archived.first_seen_at || item.first_seen_at || item.checked_at || today,
     last_seen_at: item.last_seen_at || archived.last_seen_at || item.checked_at || today,
   };
 }

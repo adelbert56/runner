@@ -376,8 +376,14 @@
     "co_organizer": "南投縣議會、南投縣後備指揮部、南投縣警察局草屯分局、草屯鎮民代表會等",
     "fees": "42K 1300元、22K 1100元、10K 900元、5K 700元；42K/22K/10K 晶片押金各100元。",
     "quota": "42K 1000名、22K 1000名、10K 800名、5K 500名。",
+    "start_times": {
+      "42.195km": "06:10",
+      "22km": "06:10",
+      "10km": "06:20",
+      "5km": "06:20"
+    },
     "verified_at": "2026-05-15",
-    "verification_note": "全統活動頁顯示會場、主辦、費用與名額。"
+    "verification_note": "全統活動頁顯示會場、主辦、費用、名額與活動時序：42.195K／22K 06:10、10K／5K 06:20 起跑。"
   },
   {
     "race_name": "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽",
@@ -500,7 +506,29 @@
     "official_event_url": "https://www.ctrun.com.tw/Activity/?EventMain_ID=308",
     "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正。",
     "verified_at": "2026-06-23",
-    "verification_note": "使用者提供 CTRun 官方活動頁。"
+    "verification_note": "CTRun 官方活動時序：10K 06:30、5K 06:45 起跑；原始資料把 10K 09:00 頒獎時間誤認為起跑時間。",
+    "start_times": {
+      "10km": "06:30",
+      "5km": "06:45"
+    }
+  },
+  {
+    "race_name": "2026 通霄粉紅超跑馬拉松",
+    "race_date": "2026-12-13",
+    "distances": [
+      "42.195km",
+      "22.5km",
+      "12km",
+      "4.5km"
+    ],
+    "start_times": {
+      "42.195km": "06:30",
+      "22.5km": "06:40",
+      "12km": "06:50",
+      "4.5km": "07:00"
+    },
+    "verified_at": "2026-07-21",
+    "verification_note": "Lohas 官方頁活動資訊與時序表確認 42.195K／22.5K／12K／4.5K 的各組起跑時間。"
   },
   {
     "race_name": "2026 梨山水蜜桃路跑",

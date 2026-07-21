@@ -72,12 +72,13 @@ function parseXlsxCell(field, value) {
 }
 
 async function loadOverrideRows() {
+  const jsonRows = await loadJson(overrideJsonPath, []);
   if (await fileExists(overrideXlsxPath)) {
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.readFile(overrideXlsxPath);
     const ws = wb.getWorksheet("人工補充") ?? wb.worksheets[0];
     if (!ws) {
-      return [];
+      return jsonRows;
     }
     const rows = [];
     for (let rowNumber = 2; rowNumber <= ws.rowCount; rowNumber += 1) {
@@ -93,9 +94,17 @@ async function loadOverrideRows() {
         rows.push(entry);
       }
     }
-    return rows;
+    // JSON remains the versioned baseline; the workbook is the operator's
+    // editable overlay. This lets a checked-in parser/data correction land
+    // without overwriting an operator's non-empty Excel edits.
+    const merged = new Map(jsonRows.map((row) => [normalizedKeyFor(row), { ...row }]));
+    for (const row of rows) {
+      const key = normalizedKeyFor(row);
+      merged.set(key, { ...(merged.get(key) || {}), ...row });
+    }
+    return [...merged.values()];
   }
-  return loadJson(overrideJsonPath, []);
+  return jsonRows;
 }
 
 function keyFor(row) {

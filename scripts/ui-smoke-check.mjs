@@ -14,7 +14,7 @@ function sentenceKeys(text) {
     .filter(Boolean);
 }
 
-const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGarminSyncJs, trainerGarminCalibrationJs, trainerSafetyJs, trainerCoachEngineJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerActionsJs, trainerJs, trainerDataJs, trainerCss, garminPublisher, garminReviewBuilder, server] = await Promise.all([
+const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGarminSyncJs, trainerGarminCalibrationJs, trainerSafetyJs, trainerCoachEngineJs, trainerCopyJs, trainerPlanJs, trainerSyncConfigJs, trainerSyncJs, trainerRenderJs, trainerActionsJs, trainerJs, trainerDataJs, trainerCss, garminPublisher, garminReviewBuilder, server] = await Promise.all([
   readFile(resolve(root, "site/index.html"), "utf8"),
   readFile(resolve(root, "site/app.js"), "utf8"),
   readFile(resolve(root, "site/data/content.json"), "utf8"),
@@ -26,6 +26,8 @@ const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGa
   readFile(resolve(root, "site/trainer-coach-engine.js"), "utf8"),
   readFile(resolve(root, "site/trainer-copy.js"), "utf8"),
   readFile(resolve(root, "site/trainer-plan.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-sync-config.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-sync.js"), "utf8"),
   readFile(resolve(root, "site/trainer-render.js"), "utf8"),
   readFile(resolve(root, "site/trainer-actions.js"), "utf8"),
   readFile(resolve(root, "site/trainer.js"), "utf8"),
@@ -36,13 +38,14 @@ const [html, app, contentRaw, trainerHtml, trainerGarminAssignmentsJs, trainerGa
   readFile(resolve(root, "site/server.mjs"), "utf8"),
 ]);
 // trainer 頁面已拆成多檔（coach-engine/copy/plan/render/actions/core）；既有斷言以串接內容檢查，語意不變
-const trainer = `${trainerHtml}\n${trainerGarminAssignmentsJs}\n${trainerGarminSyncJs}\n${trainerGarminCalibrationJs}\n${trainerSafetyJs}\n${trainerCoachEngineJs}\n${trainerCopyJs}\n${trainerPlanJs}\n${trainerRenderJs}\n${trainerActionsJs}\n${trainerJs}\n${trainerDataJs}\n${trainerCss}`;
+const trainer = `${trainerHtml}\n${trainerGarminAssignmentsJs}\n${trainerGarminSyncJs}\n${trainerGarminCalibrationJs}\n${trainerSafetyJs}\n${trainerCoachEngineJs}\n${trainerCopyJs}\n${trainerPlanJs}\n${trainerSyncConfigJs}\n${trainerSyncJs}\n${trainerRenderJs}\n${trainerActionsJs}\n${trainerJs}\n${trainerDataJs}\n${trainerCss}`;
 assertCheck(/trainer-garmin-assignments\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-assignments.js") < trainerHtml.indexOf("trainer.js"), "trainer loads Garmin assignment rules before the core script");
 assertCheck(/trainer-coach-engine\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-coach-engine.js") < trainerHtml.indexOf("trainer.js"), "trainer loads the coach engine before the core script");
 assertCheck(/trainer-garmin-sync\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-sync.js") < trainerHtml.indexOf("trainer.js") && /GARMIN_ACTIVITY_SYNC_API/.test(trainerGarminSyncJs), "trainer loads local Garmin sync controls before the core script");
 assertCheck(/trainer-garmin-calibration\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-garmin-calibration.js") < trainerHtml.indexOf("trainer.js") && /function heatAdjustedPaceSec\(/.test(trainerGarminCalibrationJs), "trainer loads Garmin calibration guards before the core script");
 assertCheck(/trainer-safety\.js/.test(trainerHtml) && trainerHtml.indexOf("trainer-safety.js") < trainerHtml.indexOf("trainer.js"), "trainer loads the safety boundary before the core script");
 assertCheck(/trainer-data\.js/.test(trainerHtml) && /window\.TrainerData/.test(trainerDataJs) && /TrainerData\?\.exportData/.test(trainerJs), "trainer delegates backup actions to the data boundary while retaining existing controls");
+assertCheck(/trainer-sync-config\.js/.test(trainerHtml) && /trainer-sync\.js/.test(trainerHtml) && trainerHtml.indexOf('trainer-sync.js') < trainerHtml.indexOf('trainer-render.js') && /window\.TrainerSync/.test(trainerSyncJs) && /AES-GCM/.test(trainerSyncJs) && /function loginWithPassword\(\)/.test(trainerSyncJs) && /grant_type=password/.test(trainerSyncJs) && /grant_type=refresh_token/.test(trainerSyncJs) && /localStorage\.setItem\(SESSION_KEY/.test(trainerSyncJs) && /PRE_RESTORE_STORAGE_KEY/.test(trainerSyncJs) && /載入雲端版本（保留本機快照）/.test(trainerSyncJs) && !/service_role/i.test(trainerSyncConfigJs) && /TrainerSync\?\.onLocalSave/.test(trainerJs), "trainer ships encrypted account-scoped password sync without altering training logic");
 assertCheck(/const COACH_SIGNAL_POLICY/.test(trainerCoachEngineJs) && /minPassingSpm: 165/.test(trainerCoachEngineJs) && /function coachCadenceAssessment\(/.test(trainerCoachEngineJs) && /coachCadenceAssessment\(\)/.test(trainerPlanJs) && !/avgCadence < 168/.test(trainerPlanJs) && !/建議 ≥170/.test(trainerPlanJs), "cadence evidence, passing threshold, and plan reminder use one coach policy instead of competing rules");
 assertCheck(/function setupPlanToolbarPinning\(\)/.test(trainer) && /plan-toolbar-anchor/.test(trainer) && /classList\.add\('is-pinned'\)/.test(trainer) && /\.plan-toolbar\.is-pinned/.test(trainerCss), "trainer workspace toolbar stays pinned below the fixed site navigation while switching tabs");
 assertCheck(/function renderCoachAdviceNote\(note, \{ focusSummary = '', weeksRemaining = null \} = \{\}\)/.test(trainer) && /<section class="weekly-coach-insight"/.test(trainer) && /focusSummary && !decision\.coachNote/.test(trainer) && !/<section class="course-decision-note weekly-coach-insight"/.test(trainer) && /\.coach-insight-grid\s*\{[^}]*align-items:start/.test(trainerCss) && /\.coach-insight-card\s*\{[^}]*min-height:0/.test(trainerCss), "weekly coaching brief merges the weekly focus, owns its typography, and uses naturally sized cards");
@@ -133,6 +136,7 @@ assertCheck(/data-entry-id="\$\{reviewEscape\(entry\.id\)\}" onclick="recordRace
 assertCheck(/role="dialog" aria-modal="true" aria-labelledby="modal-title"/.test(trainerHtml) && /function modalFocusableElements\(/.test(trainer) && /event\.key === 'Escape'/.test(trainer), "trainer modal has dialog semantics, focus containment, and Escape close");
 assertCheck(/aria-controls="plan-tab-week"/.test(trainer) && /aria-controls="progress-panel-analysis"/.test(trainer) && /\['ArrowLeft', 'ArrowRight', 'Home', 'End'\]/.test(trainer), "trainer tabs expose linked panels and keyboard navigation");
 assertCheck(/function sessionIntensityLabel\(/.test(trainer) && /課程分段/.test(trainer) && /session-lap-list/.test(trainer), "latest training report presents Garmin lap summaries by workout segment");
+assertCheck(/const speedHeat =/.test(trainer) && /heat-\$\{speedHeat\}/.test(trainer) && /速度熱度說明/.test(trainer) && /session-lap-bar\.heat-fast/.test(trainerCss), "lap pace visualization differentiates slower, steady, and faster segments without changing course data");
 assertCheck(/function sessionLapLabel\(/.test(trainer) && /不應把那個原始欄位解讀成正式課表的「間歇」/.test(trainer) && /Garmin 計圈/.test(trainer), "unstructured Garmin laps stay neutral instead of being mislabeled as intervals");
 assertCheck(/class="session-report-verdict"/.test(trainer) && /正式課表對照/.test(trainer) && /下一步/.test(trainer) && /function summarizeSessionLaps\(/.test(trainer) && /function selectTrainingReportLapCategory\(/.test(trainer) && /progress-panel-analysis/.test(trainer) && /class="session-lap-filter/.test(trainer), "session report keeps lap filters interactive after analysis moved into the progress hub");
 assertCheck(/品質判讀只使用 Garmin 明確標記的主課/.test(trainer) && /不會拖慢主課成績/.test(trainer), "session report explicitly protects main-course metrics from warmup and cooldown dilution");

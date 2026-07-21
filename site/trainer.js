@@ -749,6 +749,7 @@ function saveData(data) {
     });
     Object.assign(data, normalized);
   }
+  window.TrainerSync?.onLocalSave?.(normalized);
   return normalized;
 }
 

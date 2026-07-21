@@ -1180,7 +1180,12 @@
     "verification_note": "全統活動頁顯示會場、主辦、費用與名額。",
     "source_platform": "CTRun、運動筆記",
     "is_official_direct": true,
-    "start_times": "挑戰組（10K） 起跑 06:20、健康組（5K） 起跑 06:20",
+    "start_times": {
+      "42.195km": "06:10",
+      "22km": "06:10",
+      "10km": "06:20",
+      "5km": "06:20"
+    },
     "first_seen_at": "2026-05-16",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
@@ -1596,7 +1601,10 @@
     "registration_opens_at": "2026-06-23",
     "co_organizer": "全統運動用品股份有限公司",
     "quota": "30人、30人、60人",
-    "start_times": "10公里 起跑 06:30、5公里 起跑 06:45、10公里 起跑 09:00"
+    "start_times": {
+      "10km": "06:30",
+      "5km": "06:45"
+    }
   },
   {
     "race_id": "96c6f753-a758-4842-b880-d532b8f2380d",
@@ -1843,7 +1851,7 @@
     "race_county": "苗栗縣",
     "distances": [
       "42.195km",
-      "23km",
+      "22.5km",
       "12km",
       "4.5km"
     ],
@@ -1860,9 +1868,14 @@
     "co_organizer": "苗栗縣通霄慢跑協會",
     "fees": "42.195K 1400元、23K 1200元、12K 1000元、4.5K 800元",
     "quota": "42.195K 1200人、23K 1900人、12K 1900人、4.5K 1000人",
-    "start_times": "疾疾如風組(42.195K) 起跑 06:30、乘風破浪組(22.5k) 起跑 06:40、一帆風順組(12K) 起跑 06:50、走馬看花組(4.5K) 起跑 07:00",
-    "verified_at": "2026-07-16",
-    "verification_note": "平台爬蟲自動查證：Lohas、運動筆記",
+    "start_times": {
+      "42.195km": "06:30",
+      "22.5km": "06:40",
+      "12km": "06:50",
+      "4.5km": "07:00"
+    },
+    "verified_at": "2026-07-21",
+    "verification_note": "Lohas 官方頁活動資訊與時序表確認 42.195K／22.5K／12K／4.5K 的各組起跑時間。",
     "source_platform": "Lohas、運動筆記",
     "is_official_direct": true,
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13079",
