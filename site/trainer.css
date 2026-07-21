@@ -504,6 +504,8 @@
     .plan-overview .progress-bar-fill { min-width: 5px; background: linear-gradient(90deg, #24724f, #5fae79); }
     .plan-overview .plan-metric-grid { margin-top:18px; padding-top:15px; border-top:1px solid rgba(31,42,36,.1); gap:0; }
     .plan-metric-grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; }
+    /* Garmin 進階觀測的指標數會隨同步資料增加；不要沿用固定四欄而把最後一張卡孤立到下一列。 */
+    .coach-signals .plan-metric-grid { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
     .plan-metric { background:var(--c-surface2); }
     .plan-overview .plan-metric { padding:0 16px; border:0; border-radius:0; background:transparent; }
     .plan-overview .plan-metric:first-child { padding-left:0; }
