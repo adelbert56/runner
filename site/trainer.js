@@ -932,7 +932,7 @@ function renderHeroPanel() {
             <h1 class="trainer-hero-title" id="trainer-hero-title">${hasPlan ? meta.label : '建立你的個人訓練計畫'}</h1>
             <p class="trainer-hero-planline">${hasPlan ? `第 ${currentWeek} / ${totalWeeks} 週 · ${reviewEscape(phaseText)}` : '從目標、可訓練日到每日課表，一次建立。'}</p>
           </div>
-          ${hasPlan ? `<div class="trainer-hero-progress" role="img" aria-label="計畫進度 ${Math.round((currentWeek / totalWeeks) * 100)}%"><svg viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="43"/><circle class="trainer-hero-progress-value" cx="56" cy="56" r="43" style="stroke-dasharray:270.18;stroke-dashoffset:${270.18 * (1 - currentWeek / totalWeeks)}"/></svg><strong>${Math.round((currentWeek / totalWeeks) * 100)}%</strong><span>計畫進度</span></div>` : ''}
+          ${hasPlan ? `<div class="trainer-hero-progress-group" role="img" aria-label="週期時程 ${Math.round((currentWeek / totalWeeks) * 100)}%"><div class="trainer-hero-progress"><svg viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="43"/><circle class="trainer-hero-progress-value" cx="56" cy="56" r="43" style="stroke-dasharray:270.18;stroke-dashoffset:${270.18 * (1 - currentWeek / totalWeeks)}"/></svg><strong>${Math.round((currentWeek / totalWeeks) * 100)}%</strong></div><span class="trainer-hero-progress-caption">週期時程</span></div>` : ''}
         </div>
         ${hasPlan ? '' : '<p class="trainer-hero-copy">設定目標、可訓練日與目前跑量，建立一份能每天照著執行的個人訓練計畫。</p>'}
         <div class="trainer-hero-stats">

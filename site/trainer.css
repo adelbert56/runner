@@ -107,7 +107,8 @@
     .trainer-hero-progress circle { fill:none; stroke:rgba(23,37,31,.10); stroke-width:7; }
     .trainer-hero-progress .trainer-hero-progress-value { stroke:var(--c-primary); stroke-linecap:round; transition:stroke-dashoffset .8s ease-out; }
     .trainer-hero-progress strong { font-size:25px; line-height:1; color:var(--c-text); font-weight:950; }
-    .trainer-hero-progress span { position:absolute; bottom:-18px; white-space:nowrap; color:var(--c-text-muted); font-size:12px; font-weight:800; }
+    .trainer-hero-progress-group { display:flex; flex:0 0 auto; flex-direction:column; align-items:center; gap:7px; }
+    .trainer-hero-progress-caption { color:var(--c-text-muted); font-size:11px; font-weight:800; line-height:1.2; white-space:nowrap; }
     .trainer-hero-copy {
       max-width: 720px;
       margin: 0;
@@ -1089,6 +1090,8 @@
       padding-left: 14px;
       border-left: 1px solid rgba(31, 42, 36, 0.1);
     }
+    .plan-toolbar-sync, .plan-toolbar-utilities { display:flex; align-items:center; gap:6px; min-width:0; }
+    .plan-toolbar-utilities { padding-left:6px; border-left:1px solid rgba(31,42,36,.1); }
     .garmin-activity-sync-control { display:flex; align-items:center; min-width:0; }
     .garmin-activity-sync-control span { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
     .plan-workspace-tools .btn {
@@ -1121,6 +1124,8 @@
       opacity: .65;
       box-shadow: none;
     }
+    .plan-toolbar-sync .training-sync-control { gap:6px; }
+    .plan-toolbar-sync [data-training-sync-status] { max-width:154px; padding:5px 8px; overflow:hidden; border:1px solid #dbe7de; border-radius:var(--radius-pill); background:#f7faf7; color:#60756a; font-size:10px; font-weight:800; line-height:1.2; text-overflow:ellipsis; white-space:nowrap; }
     /* Toolbar spacing is owned here; tab panels should start immediately after it. */
     .plan-toolbar + .container { padding-top: 0; }
     .progress-hub-intro { margin-bottom:10px; }
@@ -1563,6 +1568,24 @@
     .trainer-stat-sub { margin-top: 8px; font-size: 12px; }
     .hero-today-card::before { display:none; }
     .hero-today-card { border-color: #b5d39c; box-shadow: none; }
+    /* Hero: a single dashboard header rather than a loose title, ring, and card collection. */
+    .trainer-hero-main { padding:4px 0; }
+    .trainer-hero-title-row { align-items:flex-end; }
+    .trainer-hero-progress-group { margin:0 2px 0 0; padding:10px; border:1px solid #e1e9e2; border-radius:16px; background:rgba(255,255,255,.72); }
+    .trainer-hero-progress { width:104px; height:104px; flex-basis:104px; }
+    .trainer-hero-progress strong { font-size:23px; }
+    .trainer-hero-stats { gap:0; overflow:hidden; border:1px solid #e1e9e2; border-radius:16px; background:#fff; }
+    .trainer-stat { min-height:128px; padding:18px 20px; border:0; border-radius:0; box-shadow:none; }
+    .trainer-stat + .trainer-stat { border-left:1px solid #e4ebe5; }
+    .plan-toolbar { min-height:66px; padding:8px 10px; }
+    .plan-toolbar .tab { padding:10px 14px; }
+    .plan-workspace-tools { gap:10px; padding-left:16px; }
+    .plan-toolbar-sync { gap:8px; }
+    .plan-toolbar-utilities { gap:2px; padding-left:10px; }
+    .plan-workspace-tools .btn { min-height:38px; }
+    @media (max-width:900px) { .trainer-hero-progress-group { margin-bottom:0; } .plan-toolbar { align-items:flex-start; flex-wrap:wrap; } .plan-workspace-tools { width:100%; margin-left:0; padding:8px 0 0; border-top:1px solid #e4ebe5; border-left:0; } }
+    @media (max-width:720px) { .trainer-hero-progress { width:88px; height:88px; flex-basis:88px; } .trainer-hero-progress strong { font-size:20px; } }
+    @media (max-width:560px) { .trainer-hero-progress-group { gap:5px; padding:7px; } .trainer-hero-progress { width:82px; height:82px; flex-basis:82px; } .trainer-hero-progress strong { font-size:19px; } .plan-toolbar-sync [data-training-sync-status] { display:none; } .plan-toolbar-utilities .btn { padding-inline:9px; } }
 
     .weekly-metrics-bar { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(440px,.8fr); gap:26px; align-items:center; margin:0 0 16px; padding:20px 22px; border:1px solid #e1e9e2; border-radius:16px; background:#fff; box-shadow:0 5px 16px rgba(23,37,31,.035); }
     .weekly-metrics-intro .automation-brief-kicker { margin-bottom:5px; }

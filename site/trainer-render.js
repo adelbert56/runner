@@ -31,10 +31,14 @@ function renderPlanView() {
     <button id="plan-tab-button-progress" class="tab" role="tab" aria-controls="plan-tab-progress" aria-selected="false" tabindex="-1" onclick="switchPlanTab('progress')">進度與分析</button>
   </div>
   <div class="plan-workspace-tools" aria-label="訓練管理工具">
-    ${garminActivitySyncControl}
-    ${trainingSyncControl}
-    <button class="btn btn-secondary" onclick="openCycleManagement()">🗂 週期管理</button>
-    <button class="btn btn-secondary" onclick="editSetup()">⚙️ 修改設定</button>
+    <div class="plan-toolbar-sync">
+      ${garminActivitySyncControl}
+      ${trainingSyncControl}
+    </div>
+    <div class="plan-toolbar-utilities">
+      <button class="btn btn-secondary" onclick="openCycleManagement()">🗂 週期管理</button>
+      <button class="btn btn-secondary" onclick="editSetup()">⚙️ 修改設定</button>
+    </div>
   </div>
 </nav>
 <div id="plan-tab-week" class="container" role="tabpanel" aria-labelledby="plan-tab-button-week">
@@ -69,10 +73,14 @@ function setupPlanToolbarPinning() {
   if (!toolbar || !anchor) return;
   const controller = new AbortController();
   planToolbarPinController = controller;
-  const sync = () => {
+  const updatePinTop = () => {
     const headerBottom = document.querySelector('.site-header')?.getBoundingClientRect().bottom || 72;
     const pinTop = Math.ceil(headerBottom + 10);
     toolbar.style.setProperty('--plan-toolbar-pin-top', `${pinTop}px`);
+    return pinTop;
+  };
+  const sync = () => {
+    const pinTop = updatePinTop();
     const shouldPin = anchor.getBoundingClientRect().top <= pinTop;
     if (shouldPin === toolbar.classList.contains('is-pinned')) return;
     if (shouldPin) {
@@ -83,9 +91,13 @@ function setupPlanToolbarPinning() {
       anchor.style.height = '';
     }
   };
+  // 重新整理會先還原舊捲動位置；此時若立刻固定工具列，新的 Hero 會被覆蓋。
+  // 初始渲染一律維持文件流，下一次使用者捲動才接回置頂行為。
+  toolbar.classList.remove('is-pinned');
+  anchor.style.height = '';
+  updatePinTop();
   window.addEventListener('scroll', sync, { passive: true, signal: controller.signal });
-  window.addEventListener('resize', sync, { passive: true, signal: controller.signal });
-  sync();
+  window.addEventListener('resize', updatePinTop, { passive: true, signal: controller.signal });
 }
 
 function switchPlanTab(tab) {
