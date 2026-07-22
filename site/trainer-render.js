@@ -2096,6 +2096,197 @@ function resolveStepVisual(step) {
   return 'mobility';
 }
 
+function supportGuideFor(block) {
+  if (Number.isInteger(block?.guideCourseIndex)) {
+    return { kind: block.guideKind === 'cooldown' ? 'cooldown' : 'strength', courseIndex: block.guideCourseIndex };
+  }
+  if (block?.type === '恢復' && /活動度|收操/.test(block.title || '')) {
+    const drillNames = (block.drills || []).map((drill) => drill.name).join(' ');
+    return { kind: 'cooldown', courseIndex: /足底|小腿/.test(drillNames) ? 1 : 0 };
+  }
+  return null;
+}
+
+let supportDrillRunnerState = null;
+let supportDrillAudioContext = null;
+
+function supportDrillAudio() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  supportDrillAudioContext ||= new AudioContextClass();
+  return supportDrillAudioContext;
+}
+
+async function unlockSupportDrillAudio() {
+  const audio = supportDrillAudio();
+  if (!audio) return null;
+  try {
+    if (audio.state === 'suspended') await audio.resume();
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    gain.gain.setValueAtTime(0.0001, audio.currentTime);
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start();
+    oscillator.stop(audio.currentTime + 0.01);
+    return audio;
+  } catch {
+    return null;
+  }
+}
+
+function notifySupportDrillCountdown(secondsRemaining) {
+  const audio = supportDrillAudio();
+  if (!audio?.state || audio.state !== 'running') return;
+  const oscillator = audio.createOscillator();
+  const gain = audio.createGain();
+  const at = audio.currentTime;
+  oscillator.type = 'triangle';
+  oscillator.frequency.setValueAtTime(520 + (5 - secondsRemaining) * 45, at);
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.exponentialRampToValueAtTime(0.38, at + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
+  oscillator.connect(gain).connect(audio.destination);
+  oscillator.start(at);
+  oscillator.stop(at + 0.17);
+}
+
+function notifySupportDrillCompletion(isFinal = false, isTimerZero = false) {
+  const audio = supportDrillAudio();
+  if (audio?.state === 'running') {
+    const startAt = audio.currentTime;
+    const notes = isTimerZero ? (isFinal ? [880, 1100, 1320, 1500] : [800, 1040, 1240]) : (isFinal ? [700, 900] : [660]);
+    const peakGain = isTimerZero ? 0.52 : 0.28;
+    notes.forEach((frequency, index) => {
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+      const at = startAt + index * (isTimerZero ? 0.24 : 0.16);
+      oscillator.type = isTimerZero ? 'square' : 'triangle';
+      oscillator.frequency.setValueAtTime(frequency, at);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(peakGain, at + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + (isTimerZero ? 0.27 : 0.13));
+      oscillator.connect(gain).connect(audio.destination);
+      oscillator.start(at);
+      oscillator.stop(at + (isTimerZero ? 0.28 : 0.14));
+    });
+  }
+  navigator.vibrate?.(isTimerZero ? (isFinal ? [120, 70, 180, 70, 220] : [140, 60, 180]) : (isFinal ? [90, 60, 150] : 90));
+}
+
+function supportDrillPlan(dose) {
+  const value = String(dose || '').replace(/\s/g, '');
+  const sides = /\/邊|每邊|雙側/.test(value) ? 2 : 1;
+  const seconds = value.match(/(?:(\d+)[×x])?(\d+)秒/);
+  if (seconds) {
+    const trailingSets = value.match(/秒[×x](\d+)/);
+    return { mode: 'timer', target: Number(seconds[2]), sets: Number(seconds[1] || trailingSets?.[1] || 1), sides };
+  }
+  const minutes = value.match(/(?:(\d+)[×x])?(\d+)(?:[–-]\d+)?(?:分鐘|分)/);
+  if (minutes) {
+    const trailingSets = value.match(/(?:分鐘|分)[×x](\d+)/);
+    return { mode: 'timer', target: Number(minutes[2]) * 60, sets: Number(minutes[1] || trailingSets?.[1] || 1), sides };
+  }
+  const reps = value.match(/(\d+)[×x](\d+)/);
+  return { mode: 'reps', target: Number(reps?.[2] || 1), sets: Number(reps?.[1] || 1), sides };
+}
+
+function supportDrillRunnerPayload(drill) {
+  return encodeURIComponent(JSON.stringify({ name: String(drill?.name || '動作'), dose: String(drill?.dose || '') }));
+}
+
+function supportDrillPhaseLabel(state) {
+  const set = Math.floor(state.phase / state.plan.sides) + 1;
+  const side = state.plan.sides === 2 ? `・${state.phase % 2 === 0 ? '左側' : '右側'}` : '';
+  return `第 ${set} / ${state.plan.sets} 組${side}`;
+}
+
+function stopSupportDrillTimer() {
+  if (supportDrillRunnerState?.timerId) clearInterval(supportDrillRunnerState.timerId);
+  if (supportDrillRunnerState) supportDrillRunnerState.timerId = null;
+}
+
+function resetSupportDrillRunner() {
+  if (!supportDrillRunnerState) return;
+  stopSupportDrillTimer();
+  supportDrillRunnerState.phase = 0;
+  supportDrillRunnerState.value = supportDrillRunnerState.plan.mode === 'timer' ? supportDrillRunnerState.plan.target : 0;
+  supportDrillRunnerState.completed = false;
+  renderSupportDrillRunner();
+}
+
+function completeSupportDrillPhase(isTimerZero = false) {
+  if (!supportDrillRunnerState) return;
+  stopSupportDrillTimer();
+  supportDrillRunnerState.phase += 1;
+  if (supportDrillRunnerState.phase >= supportDrillRunnerState.plan.sets * supportDrillRunnerState.plan.sides) {
+    supportDrillRunnerState.completed = true;
+  } else {
+    supportDrillRunnerState.value = supportDrillRunnerState.plan.mode === 'timer' ? supportDrillRunnerState.plan.target : 0;
+  }
+  notifySupportDrillCompletion(supportDrillRunnerState.completed, isTimerZero);
+  renderSupportDrillRunner();
+}
+
+function adjustSupportDrillReps(delta) {
+  const state = supportDrillRunnerState;
+  if (!state || state.plan.mode !== 'reps' || state.completed) return;
+  state.value = Math.max(0, Math.min(state.plan.target, state.value + delta));
+  if (state.value === state.plan.target) completeSupportDrillPhase();
+  else renderSupportDrillRunner();
+}
+
+function toggleSupportDrillTimer() {
+  const state = supportDrillRunnerState;
+  if (!state || state.plan.mode !== 'timer' || state.completed) return;
+  if (state.timerId) {
+    stopSupportDrillTimer();
+    renderSupportDrillRunner();
+    return;
+  }
+  void unlockSupportDrillAudio();
+  state.timerId = setInterval(() => {
+    if (!supportDrillRunnerState || supportDrillRunnerState !== state) return;
+    state.value = Math.max(0, state.value - 1);
+    if (state.value === 0) completeSupportDrillPhase(true);
+    else {
+      if (state.value <= 5) notifySupportDrillCountdown(state.value);
+      renderSupportDrillRunner();
+    }
+  }, 1000);
+  if (state.value <= 5) notifySupportDrillCountdown(state.value);
+  renderSupportDrillRunner();
+}
+
+function renderSupportDrillRunner() {
+  const state = supportDrillRunnerState;
+  const el = document.getElementById('support-drill-runner');
+  if (!state || !el) return;
+  if (state.completed) {
+    el.innerHTML = `<div class="drill-runner-complete">✓ ${reviewEscape(state.name)} 已完成全部 ${state.plan.sets} 組${state.plan.sides === 2 ? '雙側' : ''}。</div>`;
+    return;
+  }
+  const isTimer = state.plan.mode === 'timer';
+  const display = isTimer
+    ? `${String(Math.floor(state.value / 60)).padStart(2, '0')}:${String(state.value % 60).padStart(2, '0')}`
+    : `${state.value} / ${state.plan.target} 下`;
+  el.innerHTML = `<div class="drill-runner-phase">${supportDrillPhaseLabel(state)}</div><div class="drill-runner-value">${display}</div>${isTimer
+    ? `<button class="btn ${state.timerId ? 'btn-secondary' : 'btn-primary'}" type="button" onclick="toggleSupportDrillTimer()">${state.timerId ? '暫停' : '開始倒數'}</button><button class="btn btn-secondary" type="button" onclick="completeSupportDrillPhase()">本組完成</button>`
+    : `<button class="btn btn-secondary" type="button" onclick="adjustSupportDrillReps(-1)" ${state.value === 0 ? 'disabled' : ''}>− 1 下</button><button class="btn btn-primary" type="button" onclick="adjustSupportDrillReps(1)">+ 1 下</button>`}`;
+}
+
+function openSupportDrillRunner(payload) {
+  const drill = JSON.parse(decodeURIComponent(payload));
+  const plan = supportDrillPlan(drill.dose);
+  stopSupportDrillTimer();
+  supportDrillRunnerState = { name: drill.name, dose: drill.dose, plan, phase: 0, value: plan.mode === 'timer' ? plan.target : 0, completed: false, timerId: null };
+  showModal(`${drill.name}｜${plan.mode === 'timer' ? '計時' : '計次'}`, `<div class="drill-runner" id="support-drill-runner" aria-live="polite"></div>`, [
+    { label: '測試提示音', action: () => { void unlockSupportDrillAudio().then(() => notifySupportDrillCompletion(false)); } },
+    { label: '重新開始', action: resetSupportDrillRunner },
+    { label: '關閉', primary: true, action: closeModal }
+  ], { className: 'drill-runner-modal' });
+  renderSupportDrillRunner();
+}
+
 function renderSupportCards(blocks) {
   return `<div class="support-grid">${(blocks || []).map(block => `
     <div class="support-card">
@@ -2107,7 +2298,7 @@ function renderSupportCards(blocks) {
         </div>
         ${(block.drills || []).length ? `<div class="support-drill-list">${block.drills.map(drill => `${drill.name}${drill.dose ? ` ${drill.dose}` : ''}`).join('・')}</div>` : ''}
         <div class="support-detail">${block.detail}</div>
-        ${Number.isInteger(block.guideCourseIndex) ? `<button class="btn btn-secondary" style="margin-top:10px;font-size:12px;padding:6px 10px" onclick="openGuideLibrary('strength', ${block.guideCourseIndex})">查看這套動作圖解</button>` : ''}
+        ${supportGuideFor(block) ? `<button class="btn btn-secondary" style="margin-top:10px;font-size:12px;padding:6px 10px" onclick="openGuideLibrary('${supportGuideFor(block).kind}', ${supportGuideFor(block).courseIndex})">${supportGuideFor(block).kind === 'cooldown' ? '查看本次收操圖解' : '查看這套動作圖解'}</button>` : ''}
       </div>
     </div>
   `).join('')}</div>`;
@@ -2124,7 +2315,9 @@ function guideVideoSearchUrl(item) {
 
 function renderGuideAction(item, index) {
   const label = String(item || '');
-  return `<li><span class="guide-action-index">${index + 1}</span><span class="guide-action-text">${label}</span><a class="guide-video-link" href="${guideVideoSearchUrl(label)}" target="_blank" rel="noopener noreferrer">▶ 影片</a></li>`;
+  const plan = supportDrillPlan(label);
+  const payload = supportDrillRunnerPayload({ name: label, dose: label });
+  return `<li><span class="guide-action-index">${index + 1}</span><span class="guide-action-text">${label}</span><span class="guide-action-controls"><button class="guide-execute-button" type="button" onclick="openSupportDrillRunner('${payload}')">${plan.mode === 'timer' ? '▶ 計時' : '＋ 計次'}</button><a class="guide-video-link" href="${guideVideoSearchUrl(label)}" target="_blank" rel="noopener noreferrer">影片</a></span></li>`;
 }
 
 function openGuideLibrary(kind, selectedCourseIndex = null) {
@@ -2876,6 +3069,7 @@ function showModal(title, bodyHTML, actions, options = {}) {
 }
 
 function closeModal() {
+  stopSupportDrillTimer();
   const modalEl = document.querySelector('#modal .modal');
   if (modalEl) modalEl.className = 'modal';
   const overlay = document.getElementById('modal');

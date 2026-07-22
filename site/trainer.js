@@ -972,10 +972,10 @@ function renderHeroPanel() {
     </div>`;
 }
 
-// 台中 7 日預報（open-meteo，免金鑰）；提供清晨／傍晚跑步時段，快取 90 分鐘
+// 台中市大雅區 7 日預報（open-meteo，免金鑰）；提供清晨／傍晚跑步時段，快取 90 分鐘
 let trainerWeather = null;
 async function loadTrainerWeather() {
-  const CACHE_KEY = 'trainer-weather-cache-v2';
+  const CACHE_KEY = 'trainer-weather-cache-v3';
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
     if (cached?.byDate && Date.now() - cached.at < 90 * 60 * 1000) {
@@ -984,7 +984,7 @@ async function loadTrainerWeather() {
     }
   } catch { /* 快取壞掉就直接重抓 */ }
   try {
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=24.1477&longitude=120.6736&daily=temperature_2m_max,precipitation_probability_max&hourly=precipitation_probability&timezone=Asia%2FTaipei&forecast_days=7');
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=24.2291408&longitude=120.64778&daily=temperature_2m_max,precipitation_probability_max&hourly=precipitation_probability&timezone=Asia%2FTaipei&forecast_days=7');
     if (!res.ok) return;
     const data = await res.json();
     const hourlyRain = data.hourly?.time?.reduce((map, time, index) => {

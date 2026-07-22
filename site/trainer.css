@@ -968,6 +968,12 @@
       margin: 8px 0 6px;
       font-weight: 700;
     }
+    .modal.drill-runner-modal { max-width: 420px; }
+    .drill-runner { display: grid; gap: 12px; text-align: center; }
+    .drill-runner-phase { color: var(--c-primary-hover); font-size: 13px; font-weight: 900; }
+    .drill-runner-value { color: var(--c-text); font-size: 48px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .drill-runner .btn { min-height: 48px; }
+    .drill-runner-complete { padding: 20px; border-radius: 12px; background: #eaf6ed; color: var(--c-primary-hover); font-size: 16px; font-weight: 900; line-height: 1.55; }
     .support-type,
     .support-dose {
       display: inline-flex;
@@ -1415,6 +1421,23 @@
       font-weight: 900;
       line-height: 1.45;
     }
+    .guide-action-controls { display: inline-flex; gap: 6px; align-items: center; }
+    .guide-execute-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid #24724f;
+      border-radius: var(--radius-md);
+      background: #24724f;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .guide-execute-button:hover { background: #155338; }
     .guide-video-link {
       display: inline-flex;
       align-items: center;

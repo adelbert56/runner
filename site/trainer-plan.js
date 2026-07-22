@@ -627,7 +627,9 @@ function buildSupportBlocks(kind, hasInjury, profile, weekNum = 1, daySeed = 0) 
               { icon: '🦵', visual: 'hip_flexor', name: '髖屈肌', dose: '40 秒×2' },
               { icon: '🍑', visual: 'glute_stretch', name: '臀肌伸展', dose: '40 秒×2' },
               { icon: '🦶', visual: 'calf_foot', name: '足底放鬆', dose: '60 秒' }
-            ]
+            ],
+        guideKind: 'cooldown',
+        guideCourseIndex: rotation === 2 ? 1 : 0
       }
     ] : [
       {
@@ -655,7 +657,9 @@ function buildSupportBlocks(kind, hasInjury, profile, weekNum = 1, daySeed = 0) 
               { icon: '🦵', visual: 'hip_flexor', name: '腿後側', dose: '40 秒×2' },
               { icon: '🍑', visual: 'glute_stretch', name: '臀部伸展', dose: '40 秒×2' },
               { icon: '🦶', visual: 'calf_foot', name: '小腿 / 足底', dose: '60 秒' }
-            ]
+            ],
+        guideKind: 'cooldown',
+        guideCourseIndex: rotation === 2 ? 1 : 0
       }
     ];
     return strengthVariants;
