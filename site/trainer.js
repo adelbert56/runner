@@ -7,7 +7,7 @@ const STORAGE_KEY = `runner-trainer:${getDeviceId()}:v1`;
 const PRE_RESTORE_STORAGE_KEY = `${STORAGE_KEY}:pre-restore`;
 const RUNNER_REGISTERED_RACES_SUFFIX = ':registered-races';
 const PLAN_SCHEMA_VERSION = 10;
-const GUIDE_ASSET_VERSION = 3;
+const GUIDE_ASSET_VERSION = 7;
 const GARMIN_WORKOUT_PAIRING_KEY = 'runner-garmin-workout-pairing-v1';
 const SKIP_REASON_LABELS = {
   work: '工作／行程',
@@ -1254,6 +1254,21 @@ const GUIDE_LIBRARY = {
       }
     ]
   },
+  'mark-drills': {
+    title: '完整馬克操圖解',
+    intro: '這是一套由慢到快的八步 Mach drills：先建立抬膝與落地路徑，再加入跳步、後側回收與快腿跑。每次只用無痛、可控制的幅度；動作跑掉就回到前一步。',
+    cover: {
+      src: 'assets/trainer-guides/mark-drills-cover.png',
+      alt: '馬克操跑姿進階封面圖'
+    },
+    courses: [{
+      title: '跑前｜完整 8 步馬克操',
+      src: 'assets/trainer-guides/mark-drills-course-flow.png',
+      alt: 'A、B、C 系列、直腿跑與快腿跑的八步完整馬克操圖解',
+      caption: '依序做完八步；每項約 20 秒或 10–20 公尺，走回起點再做下一項。訣竅：身體拉高、肩放鬆，腳掌落在重心下，像往後掃地。A 系列先穩節奏；B 系列伸小腿後要向下後拉；C 系列不必刻意踢高。動作品質下降或有疼痛就停止。',
+      items: ['A-March 20 秒', 'A-Skip 20 秒', 'B-March 20 秒', 'B-Skip 20 秒', 'C-March（後踢腿行進） 20 秒', 'C-Skip（後踢腿跳步） 20 秒', '直腿小跑 20 秒', '快腿跑 20 秒']
+    }]
+  },
   cooldown: {
     title: '收操伸展',
     intro: '課表會依當天負荷指定短版恢復或長跑回收版。收操只做到微拉感；疼痛、抽筋或隔天更緊時，下一次要下修。',
@@ -2177,7 +2192,15 @@ const GUIDE_ACTION_VIDEOS = {
   '羅馬尼亞硬舉': 'https://www.youtube.com/watch?v=5u_hQA-r4yk',
   '小腿提踵': 'https://www.youtube.com/watch?v=SVtg-1loH4c',
   '單腳站平衡': 'https://www.youtube.com/watch?v=fbVTXhp6snI',
-  '足底短足訓練': 'https://www.youtube.com/watch?v=m1lkcg8p-48'
+  '足底短足訓練': 'https://www.youtube.com/watch?v=m1lkcg8p-48',
+  'A-March': 'https://www.youtube.com/watch?v=gkf4699YjQA',
+  'A-Skip': 'https://www.youtube.com/watch?v=PKRiOwMh7b4',
+  'B-March': 'https://www.youtube.com/watch?v=4YGF-JQOVpQ',
+  'B-Skip': 'https://www.youtube.com/watch?v=GoRi3zBtKQ4',
+  'C-March（後踢腿行進）': 'https://www.youtube.com/watch?v=6_jFv9sHPjg',
+  'C-Skip（後踢腿跳步）': 'https://www.youtube.com/watch?v=w8YlLgd5YiI',
+  '直腿小跑': 'https://www.youtube.com/watch?v=pWphIaaaM5E',
+  '快腿跑': 'https://www.youtube.com/watch?v=_koAkJJVT7Y'
 };
 
 const RUN_COMPANION_PODCASTS = {

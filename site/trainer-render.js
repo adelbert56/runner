@@ -2037,6 +2037,7 @@ function renderWeekSection(plan) {
   <div class="guide-actions week-resource-actions">
     <span class="week-resource-label">訓練資源</span>
     <button class="guide-chip" onclick="openGuideLibrary('warmup')"><span class="guide-chip-icon"><img src="assets/trainer-guides/feature-warmup.png" alt=""></span><span><b>熱身指南</b><small>動態熱身教學</small></span></button>
+    <button class="guide-chip" onclick="openGuideLibrary('mark-drills')"><span class="guide-chip-icon"><img src="assets/trainer-guides/feature-mark-drills.png" alt=""></span><span><b>馬克操</b><small>跑姿與步頻練習</small></span></button>
     <button class="guide-chip" onclick="openGuideLibrary('cooldown')"><span class="guide-chip-icon"><img src="assets/trainer-guides/feature-cooldown.png" alt=""></span><span><b>收操恢復</b><small>伸展放鬆指引</small></span></button>
     <button class="guide-chip" onclick="openGuideLibrary('strength')"><span class="guide-chip-icon"><img src="assets/trainer-guides/feature-strength.png" alt=""></span><span><b>肌力補強</b><small>核心與下肢訓練</small></span></button>
     <button class="guide-chip" onclick="showHrZones()"><span class="guide-chip-icon"><img src="assets/trainer-guides/feature-heart-rate.png" alt=""></span><span><b>心率區間</b><small>各區間強度說明</small></span></button>
