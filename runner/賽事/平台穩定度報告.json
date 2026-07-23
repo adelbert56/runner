@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-21T10:41:29.375Z",
-  "basis_date": "2026-07-21",
+  "generated_at": "2026-07-23T10:57:32.880Z",
+  "basis_date": "2026-07-23",
   "items": [
     {
       "platform": "運動筆記",
@@ -110,7 +110,7 @@
       "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 VISOGE 夜跑派對 台中場",
         "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
