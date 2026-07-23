@@ -742,7 +742,12 @@ function loadData() {
 
 function saveData(data) {
   const normalized = normalizeData(data);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  } catch (error) {
+    console.warn('training data save failed', error);
+    showModal?.('儲存失敗', '<p style="margin:0;line-height:1.7">本機儲存空間可能已滿，或瀏覽器處於無痕模式。這筆變更暫時沒有存進裝置，建議先匯出備份。</p>', [{ label: '知道了', primary: true, action: closeModal }]);
+  }
   if (data && typeof data === 'object') {
     Object.keys(data).forEach((key) => {
       if (!(key in normalized)) delete data[key];
@@ -2291,12 +2296,6 @@ const ASSESSMENT_TYPE_LABEL = {
 // ============================================================
 // LIVE PACE CALIBRATION
 // ============================================================
-
-// ============================================================
-// EXPORTS
-// ============================================================
-let pendingTrainingImport = null;
-let pendingTrainingImportInfo = null;
 
 // ============================================================
 // INIT
