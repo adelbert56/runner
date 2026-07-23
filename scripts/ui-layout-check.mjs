@@ -298,6 +298,25 @@ async function assertTrainerReport(page, viewportName) {
   await page.evaluate((sample) => localStorage.setItem("runner-trainer-v1", JSON.stringify(sample)), trainerVisualSample);
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForSelector("#trainer-hero-shell", { timeout: 5000 });
+  const restDayForecast = await page.evaluate(() => {
+    eval(`trainerWeather = { "2026-07-24": { tmax: 30.8, rain: 50, morningRain: 20, eveningRain: 40 } }`);
+    appData.plan[0].days.push({
+      dateStr: "2026-07-24",
+      dow: 5,
+      type: "rest",
+      focus: "rest",
+      task: "休息＋居家肌力",
+      status: "upcoming",
+      steps: [],
+    });
+    renderPlanView();
+    showView("plan");
+    switchPlanTab("week");
+    return document.querySelector("#plan-tab-week .day-card.type-rest .wx-chip")?.textContent?.trim() || "";
+  });
+  if (!restDayForecast.includes("預報 31°C") || !restDayForecast.includes("清晨 20%")) {
+    throw new Error(`${viewportName}/trainer-rest-day-weather: forecast is missing from rest-day course card: ${restDayForecast}`);
+  }
   await page.evaluate((review) => {
     // This is a deterministic local visual fixture; it never writes to the product data files.
     eval(`coachReviewData = ${JSON.stringify(review)}`);

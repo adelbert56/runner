@@ -1012,7 +1012,7 @@ async function loadTrainerWeather() {
   } catch { /* 離線或 API 掛掉：不顯示天氣，不影響課表 */ }
 }
 
-function dayWeatherLine(day, { showForRest = false } = {}) {
+function dayWeatherLine(day, { showForRest = true } = {}) {
   const wx = trainerWeather?.[day.dateStr];
   if (!wx || wx.tmax === null) return '';
   if (day.type === 'rest' && !showForRest) return '';

@@ -2957,7 +2957,7 @@ function showRunCompanion(dateStr) {
 function renderDayCard(day, rationale = '', source = 'baseline') {
   const garminRun = getGarminRunForDate(day.dateStr);
   const isTodayCard = day.dateStr === todayStr();
-  if (day.type === 'rest') return `<div class="day-card type-rest ${isTodayCard ? 'today' : ''} ${day.status === 'missed' ? 'missed-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge badge-rest">休息</span><div class="day-card-task">${day.task || '主動恢復 / 完全休息'}</div>${renderSupportCards(day.supportBlocks)}${renderGarminRunResult(garminRun, true)}</div>`;
+  if (day.type === 'rest') return `<div class="day-card type-rest ${isTodayCard ? 'today' : ''} ${day.status === 'missed' ? 'missed-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge badge-rest">休息</span><div class="day-card-task">${day.task || '主動恢復 / 完全休息'}</div>${dayWeatherLine(day)}${renderSupportCards(day.supportBlocks)}${renderGarminRunResult(garminRun, true)}</div>`;
   const badgeClass = day.coachPlan ? 'badge-coach' : { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long' }[day.type] || 'badge-rest';
   const typeName = day.coachPlan ? '教練課表' : trainingTypeLabel(day.type, day.focus);
   const taskText = trainingTaskTitle(day);
