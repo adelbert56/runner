@@ -546,8 +546,9 @@
     .trend-tile { padding:12px 14px; border:1px solid rgba(31,42,36,.08); border-radius: var(--radius-md); background:var(--c-surface); }
     .trend-tile-label { display:block; font-size:11px; color:var(--c-text-muted); font-weight:800; }
     .trend-tile-value { display:block; margin-top:5px; font-size:16px; color:var(--c-text); font-weight:900; letter-spacing:-.01em; }
-    .analysis-chart-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:22px; align-items:start; }
+    .analysis-chart-grid { display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr); gap:18px; margin-top:22px; align-items:stretch; }
     .analysis-chart-card { padding:19px 20px; border:1px solid var(--c-border); border-radius: var(--radius-xl); background:var(--c-surface2); box-shadow:0 8px 18px rgba(31,42,36,.04); }
+    .analysis-volume-card { display:flex; flex-direction:column; }
     .analysis-chart-heading { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
     .analysis-chart-heading b, .analysis-chart-card > b { font-size:16px; font-weight:900; }
     .analysis-chart-heading p, .analysis-chart-card > p { font-size:13px; color:var(--c-text-muted); margin:5px 0 0; line-height:1.55; }
@@ -556,6 +557,40 @@
     .trend-bar-value { font-size:13px; font-weight:850; font-variant-numeric:tabular-nums; }
     .trend-bar-fill { width:100%; max-width:42px; min-height:5px; border-radius:8px 8px 3px 3px; background:linear-gradient(180deg,#5fae79,#24724f); }
     .trend-bar-week { font-size:11px; color:var(--c-text-muted); font-weight:750; }
+    .volume-trend-stack { display:grid; gap:12px; margin-top:16px; }
+    .volume-trend-section { padding:13px 14px 10px; border:1px solid rgba(31,42,36,.08); border-radius:var(--radius-lg); }
+    .volume-trend-section--weekly { background:linear-gradient(135deg,rgba(232,246,237,.78),rgba(255,253,248,.56)); }
+    .volume-trend-section--monthly { background:linear-gradient(135deg,rgba(237,241,250,.84),rgba(255,253,248,.56)); }
+    .volume-trend-subhead { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .volume-trend-subhead b { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:900; }
+    .volume-trend-subhead b i { width:8px; height:8px; border-radius:50%; background:#338a62; box-shadow:0 0 0 4px rgba(51,138,98,.12); }
+    .volume-trend-section--monthly .volume-trend-subhead b i { background:#657ca5; box-shadow:0 0 0 4px rgba(101,124,165,.14); }
+    .volume-trend-subhead span { padding:4px 8px; border-radius:var(--radius-pill); background:rgba(51,138,98,.1); color:var(--c-primary-hover); font-size:10px; font-weight:850; }
+    .volume-trend-section--monthly .volume-trend-subhead span { background:rgba(101,124,165,.12); color:#526987; }
+    .volume-trend-section .trend-bar-chart { height:132px; gap:7px; padding-top:10px; }
+    .volume-trend-section .trend-bar-col { min-width:20px; gap:5px; }
+    .volume-trend-section .trend-bar-value { font-size:11px; }
+    .volume-trend-section .trend-bar-fill { flex-shrink:0; max-width:34px; border-radius:7px 7px 3px 3px; }
+    .volume-trend-section .trend-bar-week { font-size:10px; }
+    .trend-bar-chart--weekly .trend-bar-fill { background:linear-gradient(180deg,#65bb84,#24724f); }
+    .trend-bar-chart--monthly .trend-bar-fill { background:linear-gradient(180deg,#8da3c4,#526987); }
+    .trend-bar-chart--monthly .trend-bar-value { color:#405778; }
+    .trend-bar-chart--weekly .trend-bar-col.is-highest .trend-bar-fill { background:linear-gradient(180deg,#82d5a0,#0f6744); box-shadow:0 5px 12px rgba(15,103,68,.2); }
+    .trend-bar-chart--monthly .trend-bar-col.is-highest .trend-bar-fill { background:linear-gradient(180deg,#aebfdf,#3f5d8b); box-shadow:0 5px 12px rgba(63,93,139,.2); }
+    .trend-bar-chart .trend-bar-col.is-lowest .trend-bar-fill { background:linear-gradient(180deg,#efbf72,#bd7129); box-shadow:0 4px 10px rgba(189,113,41,.16); }
+    .trend-bar-chart .trend-bar-col.is-highest .trend-bar-value { color:var(--c-primary-hover); }
+    .trend-bar-chart--monthly .trend-bar-col.is-highest .trend-bar-value { color:#38557f; }
+    .trend-bar-chart .trend-bar-col.is-lowest .trend-bar-value { color:#a45d1d; }
+    .volume-trend-insights { margin-top:auto; padding-top:16px; border-top:1px solid rgba(31,42,36,.1); }
+    .volume-insight-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .volume-insight-head b { font-size:13px; font-weight:900; }
+    .volume-insight-head span { color:var(--c-text-muted); font-size:10px; font-weight:800; }
+    .volume-insight-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-top:10px; }
+    .volume-insight { min-width:0; padding:9px 10px; border:1px solid rgba(31,42,36,.08); border-radius:var(--radius-md); background:rgba(255,253,248,.7); }
+    .volume-insight span, .volume-insight em { display:block; overflow:hidden; color:var(--c-text-muted); font-size:10px; font-style:normal; font-weight:800; text-overflow:ellipsis; white-space:nowrap; }
+    .volume-insight strong { display:block; margin-top:3px; color:var(--c-text); font-size:16px; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+    .volume-insight small { color:var(--c-text-muted); font-size:10px; font-weight:800; }
+    .volume-insight em { margin-top:2px; color:var(--c-primary-hover); }
     .pace-trend-badge { flex:0 0 auto; padding:5px 9px; border-radius: var(--radius-pill); background:#e7f2eb; color:var(--c-primary-hover); font-size:11px; font-weight:900; }
     .pace-trend-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:16px 0 12px; }
     .pace-trend-metric { background:rgba(255,253,248,.78); }
@@ -1510,6 +1545,7 @@
       .trend-monitor-divider { display:none; }
       .trend-card-updated { margin-left:0; }
       .analysis-chart-grid { grid-template-columns: 1fr; }
+      .volume-insight-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .pace-trend-summary, .pace-trend-activities { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .log-stats { grid-template-columns: 1fr; }
       .mode-brief-grid,

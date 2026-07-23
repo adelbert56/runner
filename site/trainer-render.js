@@ -818,10 +818,27 @@ function weeklyRunTrend(runs) {
   return [...groups.values()].sort((a, b) => a.week.localeCompare(b.week)).slice(-8).map((item) => ({ ...item, km: Math.round(item.km * 10) / 10 }));
 }
 
-function renderVolumeBars(trend) {
-  if (!trend.length) return '<p style="color:var(--c-text-muted);margin:0">尚無可用的週跑量資料。</p>';
+function monthlyRunTrend(runs) {
+  const groups = new Map();
+  runs.forEach((run) => {
+    const month = run.date.slice(0, 7);
+    const item = groups.get(month) || { month, km: 0, runs: 0 };
+    item.km += run.km;
+    item.runs += 1;
+    groups.set(month, item);
+  });
+  return [...groups.values()].sort((a, b) => a.month.localeCompare(b.month)).slice(-6).map((item) => ({ ...item, km: Math.round(item.km * 10) / 10 }));
+}
+
+function renderVolumeBars(trend, { periodKey = 'week', emptyText = '尚無可用的週跑量資料。', label = (period) => period.slice(5), chartClass = '', barMaxHeight = 150 } = {}) {
+  if (!trend.length) return `<p style="color:var(--c-text-muted);margin:0">${emptyText}</p>`;
   const max = Math.max(...trend.map((item) => item.km), 1);
-  return `<div class="trend-bar-chart">${trend.map((item) => `<div class="trend-bar-col"><b class="trend-bar-value">${item.km}</b><div class="trend-bar-fill" title="${reviewEscape(item.week)}：${item.km} km / ${item.runs} 次" style="height:${Math.max(5, (item.km / max) * 150)}px"></div><span class="trend-bar-week">${reviewEscape(item.week.slice(5))}</span></div>`).join('')}</div>`;
+  const min = Math.min(...trend.map((item) => item.km));
+  return `<div class="trend-bar-chart ${chartClass}">${trend.map((item) => {
+    const tone = item.km === max ? ' is-highest' : item.km === min ? ' is-lowest' : '';
+    const rank = item.km === max ? '（最高）' : item.km === min ? '（最低）' : '';
+    return `<div class="trend-bar-col${tone}"><b class="trend-bar-value">${item.km}</b><div class="trend-bar-fill" title="${reviewEscape(item[periodKey])}：${item.km} km / ${item.runs} 次${rank}" style="height:${Math.max(5, (item.km / max) * barMaxHeight)}px"></div><span class="trend-bar-week">${reviewEscape(label(item[periodKey]))}</span></div>`;
+  }).join('')}</div>`;
 }
 
 function isStructuredIntervalBlock(laps) {
@@ -1387,6 +1404,10 @@ function renderTrainingAnalysis() {
   // 預測、趨勢與單堂分析，避免同一狀態資料跨 tab 重複出現。
   if (!runs.length) return '<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>';
   const trend = weeklyRunTrend(runs);
+  const monthlyTrend = monthlyRunTrend(runs);
+  const latestMonth = monthlyTrend.at(-1);
+  const averageMonthlyKm = monthlyTrend.reduce((sum, item) => sum + item.km, 0) / monthlyTrend.length;
+  const peakMonth = monthlyTrend.reduce((peak, item) => item.km > peak.km ? item : peak, monthlyTrend[0]);
   const recent = runs.slice(-4);
   const averagePace = recent.filter((run) => run.paceSeconds).reduce((sum, run, _, list) => sum + run.paceSeconds / list.length, 0);
   const averageHr = recent.filter((run) => run.hr).reduce((sum, run, _, list) => sum + run.hr / list.length, 0);
@@ -1413,7 +1434,7 @@ function renderTrainingAnalysis() {
   return `${renderLatestTrainingReport(runs)}<div class="card trend-card"><div class="trend-card-head"><div class="trend-card-icon" aria-hidden="true">📈</div><div><h2 class="trend-card-title">長期訓練趨勢</h2><span class="trend-card-badge">Garmin 最近 ${runs.length} 筆</span></div><span class="trend-card-updated">📅 Garmin 資料匯至 <b>${analyticsDate}</b></span></div>
     <div class="trend-hero-row"><div class="trend-hero-item trend-hero-primary"><span class="trend-hero-label"><i aria-hidden="true">🛣️</i>近四週跑量</span><strong class="trend-hero-value">${lastFourKm.toFixed(1)}<small>km</small></strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">👟</i>近四週最長跑</span><strong class="trend-hero-value">${longestRun ? `${longestRun.toFixed(1)}<small>km</small>` : '—'}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">⏱️</i>最近四趟平均配速</span><strong class="trend-hero-value">${formatPaceSeconds(averagePace)}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">❤️</i>最近四趟平均心率</span><strong class="trend-hero-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div></div>
     <div class="trend-monitor"><div class="trend-monitor-top"><div class="trend-monitor-col">${rampNote || '<div class="trend-ramp trend-ramp-good"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>資料不足，暫無法評估增幅。</p></div></div>'}</div><div class="trend-monitor-divider"></div><div class="trend-monitor-col trend-advanced-head"><b>進階訓練指標</b><p>只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p></div></div><div class="trend-tile-grid"><div class="trend-tile"><span class="trend-tile-label">最近四趟平均步頻</span><strong class="trend-tile-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟累積爬升</span><strong class="trend-tile-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟平均負荷</span><strong class="trend-tile-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近 VO₂ Max</span><strong class="trend-tile-value">${latestVo2 || '—'}</strong></div></div></div>
-    <div class="analysis-chart-grid"><section class="analysis-chart-card"><b>週跑量趨勢</b><p>每週總公里數，包含額外跑步。</p>${renderVolumeBars(trend)}</section><section class="analysis-chart-card"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
+    <div class="analysis-chart-grid"><section class="analysis-chart-card analysis-volume-card"><div class="analysis-chart-heading"><div><b>跑量趨勢</b><p>依 Garmin 實跑加總，包含額外跑步。</p></div><span class="pace-trend-badge">距離</span></div><div class="volume-trend-stack"><section class="volume-trend-section volume-trend-section--weekly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>週跑量</b><span>短週期 · 最近 8 週</span></div>${renderVolumeBars(trend, { chartClass: 'trend-bar-chart--weekly', barMaxHeight: 86 })}</section><section class="volume-trend-section volume-trend-section--monthly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>月跑量</b><span>長週期 · 最近 6 個月份</span></div>${renderVolumeBars(monthlyTrend, { periodKey: 'month', emptyText: '尚無可用的月跑量資料。', label: (month) => month.slice(5), chartClass: 'trend-bar-chart--monthly', barMaxHeight: 86 })}</section></div><div class="volume-trend-insights"><div class="volume-insight-head"><b>跑量摘要</b><span>Garmin 實跑</span></div><div class="volume-insight-grid"><div class="volume-insight"><span>${reviewEscape(latestMonth.month)} 累積</span><strong>${latestMonth.km}<small> km</small></strong></div><div class="volume-insight"><span>本月跑步次數</span><strong>${latestMonth.runs}<small> 次</small></strong></div><div class="volume-insight"><span>近六個月平均</span><strong>${averageMonthlyKm.toFixed(1)}<small> km</small></strong></div><div class="volume-insight"><span>單月最高</span><strong>${peakMonth.km}<small> km</small></strong><em>${reviewEscape(peakMonth.month)}</em></div></div></div></section><section class="analysis-chart-card analysis-chart-card--pace"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
   </div>`;
 }
 
