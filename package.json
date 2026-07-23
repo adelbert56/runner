@@ -7,7 +7,6 @@
     "dev": "node site/server.mjs",
     "dev:training": "vite --config vite.training.config.ts",
     "build": "vite build --config vite.training.config.ts",
-    "site:sync:remote": "node scripts/sync-public-site-data.mjs",
     "site:status": "node scripts/site-data-status.mjs",
     "main:sync": "node scripts/sync-main-before-write.mjs",
     "site:publish": "node scripts/publish-live-site.mjs",
@@ -52,7 +51,6 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
-    "playwright-core": "^1.61.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.1.5"

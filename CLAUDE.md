@@ -108,7 +108,7 @@ site/index.html 不存在 → build-operational-dashboard.mjs 用 "" fallback
 - [x] 練跑計畫資料整合：D1 發布檔 laps 瘦身、D2 心率區間單一真相（`hrZones` 優先教練明訂區間）、D3 `runner/訓練/教練目標.json`（機器可讀 zones+periodization，build 覆蓋週報值）皆已做並驗證；D4 Garmin 4 檔合併經評估**否決**（是跨行程 handshake 非碎片化，合併會競態）。細節見 plan 檔。心率區間／週期日後改 `教練目標.json`。
 - [ ] Issue #35「Refresh race data failure」→ root cause 已修，需手動關閉
 - [ ] `workflow-run-monitor.yml` 已涵蓋主要 workflow 失敗通報，但未做更細的分類或升級策略
-- [ ] Python scrapers (`scrapers/`) 已寫但需確認是否真的在 CI 跑
+- [x] Python scrapers (`scrapers/`) 已確認在 `data-refresh.yml`（Run race scrapers / Enrich official platform details 步驟）跑
 
 ---
 
