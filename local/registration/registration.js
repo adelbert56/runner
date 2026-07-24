@@ -656,7 +656,10 @@ function setWorkspaceView(view, { scroll = false, syncHash = false } = {}) {
     panel.classList.toggle("workspace-view-active", active);
   });
   els.workspaceViewTabs?.querySelectorAll("[data-workspace-view]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.workspaceView === nextView);
+    const active = button.dataset.workspaceView === nextView;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
   });
   if (syncHash && VIEW_WORKSPACE_HASHES[nextView] && window.location.hash !== VIEW_WORKSPACE_HASHES[nextView]) {
     window.history.pushState(null, "", VIEW_WORKSPACE_HASHES[nextView]);
@@ -1483,7 +1486,16 @@ function avatarColor(name) {
   return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
 }
 
+function isPeopleFilterActive() {
+  return state.peopleFilters.gender !== "all"
+    || state.peopleFilters.size !== "all"
+    || state.peopleFilters.pending !== "all";
+}
+
 function renderPeopleList() {
+  if (els.peopleFilterReset) {
+    els.peopleFilterReset.hidden = !isPeopleFilterActive();
+  }
   state.selectedPersonIds.forEach((id) => {
     if (!state.people.some((person) => person.id === id)) {
       state.selectedPersonIds.delete(id);
@@ -1865,7 +1877,18 @@ async function bulkDeleteSelectedEntries() {
   await persistAndRender(`已刪除 ${ids.length} 筆報名紀錄`);
 }
 
+function isEntriesFilterActive() {
+  return Boolean(state.entryQuery)
+    || Boolean(state.entryFilterPersonId)
+    || state.entryFilterProgress !== "all"
+    || Boolean(state.entryFilterStatus)
+    || state.entryHistoryYear !== "all";
+}
+
 function renderEntriesList() {
+  if (els.entriesFilterReset) {
+    els.entriesFilterReset.hidden = !isEntriesFilterActive();
+  }
   state.selectedEntryIds.forEach((id) => {
     if (!state.entries.some((entry) => entry.id === id)) {
       state.selectedEntryIds.delete(id);
@@ -1906,7 +1929,10 @@ function renderEntriesList() {
     els.entriesList.innerHTML = `<div class="empty-state">${state.entries.length ? "查無符合的報名紀錄" : "尚未建立報名紀錄"}</div>`;
     renderPagination(els.entriesPagination, "entries", { total: 0 });
     [...els.entriesScopeTabs.querySelectorAll("[data-entry-scope]")].forEach((button) => {
-      button.classList.toggle("active", button.dataset.entryScope === state.entryScope);
+      const active = button.dataset.entryScope === state.entryScope;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+      button.tabIndex = active ? 0 : -1;
     });
     updateEntriesBulkToolbar();
     return;
@@ -3333,6 +3359,19 @@ function wireEvents() {
       setWorkspaceView(button.dataset.workspaceView || "overview", { scroll: true, syncHash: true });
     });
   });
+  els.workspaceViewTabs?.addEventListener("keydown", (event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    const tabs = [...els.workspaceViewTabs.querySelectorAll('[role="tab"]')];
+    const currentIndex = tabs.indexOf(document.activeElement);
+    if (currentIndex < 0) return;
+    event.preventDefault();
+    const nextIndex = event.key === 'Home' ? 0
+      : event.key === 'End' ? tabs.length - 1
+        : (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    const nextTab = tabs[nextIndex];
+    nextTab.focus();
+    setWorkspaceView(nextTab.dataset.workspaceView || 'overview', { scroll: false, syncHash: true });
+  });
   window.addEventListener("hashchange", () => {
     const view = workspaceViewFromHash();
     if (view) setWorkspaceView(view, { scroll: true });
@@ -3368,6 +3407,21 @@ function wireEvents() {
       state.entriesPage = 1;
       renderEntriesList();
     });
+  });
+  els.entriesScopeTabs.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    const tabs = [...els.entriesScopeTabs.querySelectorAll('[role="tab"]')];
+    const currentIndex = tabs.indexOf(document.activeElement);
+    if (currentIndex < 0) return;
+    event.preventDefault();
+    const nextIndex = event.key === "Home" ? 0
+      : event.key === "End" ? tabs.length - 1
+        : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    const nextTab = tabs[nextIndex];
+    nextTab.focus();
+    state.entryScope = nextTab.dataset.entryScope || "active";
+    state.entriesPage = 1;
+    renderEntriesList();
   });
   els.entriesSearch.addEventListener("input", debounce(() => {
     state.entryQuery = els.entriesSearch.value.trim().toLowerCase();

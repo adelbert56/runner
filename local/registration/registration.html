@@ -14,6 +14,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/site/assets/apple-touch-icon.png?v=20260630-registration-notify1">
     <link rel="stylesheet" href="/site/styles.css?v=20260701-registration-notify8">
     <link rel="stylesheet" href="./registration.css?v=20260718-avatar-center1">
+    <link rel="stylesheet" href="./registration-system.css?v=20260724-workspace-system1">
   </head>
   <body class="registration-page">
     <header class="site-header">
@@ -54,16 +55,16 @@
           <div class="hero-actions-heading">
             <span class="hero-actions-icon" aria-hidden="true">↺</span>
             <div>
-              <p class="hero-actions-label">資料工具</p>
+              <p class="hero-actions-label">備份與匯出</p>
               <p class="hero-actions-note">Excel 可批次修改團員與報名資料；JSON 保留給完整備份與還原。</p>
             </div>
           </div>
-          <button type="button" class="primary-action hero-data-action" id="export-batch-data"><span>匯出</span><small>Excel</small></button>
+          <button type="button" class="primary-action hero-data-action" id="export-data"><span>建立備份</span><small>JSON</small></button>
+          <button type="button" class="secondary-action hero-data-action" id="export-batch-data"><span>匯出</span><small>Excel</small></button>
           <label class="secondary-action file-action">
             <span>匯入</span><small>選擇 Excel 檔</small>
             <input id="import-batch-data" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx">
           </label>
-          <button type="button" class="primary-action hero-data-action" id="export-data"><span>建立備份</span><small>JSON</small></button>
           <label class="secondary-action file-action">
             <span>還原備份</span><small>選擇 JSON 檔</small>
             <input id="import-data" type="file" accept="application/json">
@@ -102,7 +103,7 @@
             </div>
           </section>
           <section class="sidebar-group">
-            <div class="sidebar-group-title">輸出工具</div>
+            <div class="sidebar-group-title">繳費確認輸出</div>
             <div class="sidebar-actions-grid">
               <button class="secondary-action" type="button" id="export-selected-race-payment-html">開啟繳費確認分頁</button>
               <button class="ghost-action" type="button" id="export-selected-race-payments">匯出繳費確認 CSV</button>
@@ -144,17 +145,17 @@
                   <small class="command-metric-caption">已帶入賽事庫</small>
                 </div>
               </div>
-              <div class="workspace-tabs" id="workspace-view-tabs" aria-label="報名工作區">
-                <button type="button" class="workspace-tab active" data-workspace-view="overview">待辦總覽</button>
-                <button type="button" class="workspace-tab" data-workspace-view="people">人員</button>
-                <button type="button" class="workspace-tab" data-workspace-view="entries">報名</button>
-                <button type="button" class="workspace-tab" data-workspace-view="notify">通知</button>
+              <div class="workspace-tabs" id="workspace-view-tabs" role="tablist" aria-label="報名工作區">
+                <button type="button" class="workspace-tab active" id="workspace-tab-overview" role="tab" aria-selected="true" aria-controls="workspace-overview" data-workspace-view="overview">待辦總覽</button>
+                <button type="button" class="workspace-tab" id="workspace-tab-people" role="tab" aria-selected="false" aria-controls="workspace-people" data-workspace-view="people">人員</button>
+                <button type="button" class="workspace-tab" id="workspace-tab-entries" role="tab" aria-selected="false" aria-controls="workspace-entries" data-workspace-view="entries">報名</button>
+                <button type="button" class="workspace-tab" id="workspace-tab-notify" role="tab" aria-selected="false" aria-controls="workspace-notify" data-workspace-view="notify">通知</button>
               </div>
             </section>
           </section>
 
           <section class="workspace-views">
-            <section class="workspace-view workspace-view-active" id="workspace-overview" data-workspace-panel="overview">
+            <section class="workspace-view workspace-view-active" id="workspace-overview" role="tabpanel" aria-labelledby="workspace-tab-overview" data-workspace-panel="overview">
               <div class="overview-grid overview-workspace-grid">
                 <article class="panel panel-block overview-context-panel">
                   <div class="panel-heading compact-heading">
@@ -197,7 +198,7 @@
               </div>
             </section>
 
-            <section class="workspace-view" id="workspace-people" data-workspace-panel="people" hidden>
+            <section class="workspace-view" id="workspace-people" role="tabpanel" aria-labelledby="workspace-tab-people" data-workspace-panel="people" hidden>
               <div class="split-layout">
                 <section class="panel panel-block sticky-panel">
                   <div class="panel-heading compact-heading">
@@ -324,7 +325,7 @@
               </div>
             </section>
 
-            <section class="workspace-view" id="workspace-entries" data-workspace-panel="entries" hidden>
+            <section class="workspace-view" id="workspace-entries" role="tabpanel" aria-labelledby="workspace-tab-entries" data-workspace-panel="entries" hidden>
               <div class="split-layout entries-layout">
                 <section class="panel panel-block sticky-panel">
                   <div class="panel-heading compact-heading">
@@ -492,10 +493,10 @@
                       <h2>報名紀錄</h2>
                     </div>
                   </div>
-                  <div class="list-tabs" id="entries-scope-tabs" aria-label="報名紀錄範圍">
-                    <button type="button" class="tab-button active" data-entry-scope="active">目前賽事</button>
-                    <button type="button" class="tab-button" data-entry-scope="history">歷史紀錄</button>
-                    <button type="button" class="tab-button" data-entry-scope="all">全部</button>
+                  <div class="list-tabs" id="entries-scope-tabs" role="tablist" aria-label="報名紀錄範圍">
+                    <button type="button" class="tab-button active" role="tab" id="entries-scope-tab-active" aria-selected="true" aria-controls="entries-list" tabindex="0" data-entry-scope="active">目前賽事</button>
+                    <button type="button" class="tab-button" role="tab" id="entries-scope-tab-history" aria-selected="false" aria-controls="entries-list" tabindex="-1" data-entry-scope="history">歷史紀錄</button>
+                    <button type="button" class="tab-button" role="tab" id="entries-scope-tab-all" aria-selected="false" aria-controls="entries-list" tabindex="-1" data-entry-scope="all">全部</button>
                   </div>
                   <div id="entries-history-summary" class="history-summary"></div>
                   <div class="list-toolbar entries-toolbar">
@@ -540,7 +541,7 @@
                     <button type="button" class="secondary-action danger-action" id="entries-bulk-delete">刪除已選</button>
                     <button type="button" class="ghost-action" id="entries-bulk-clear">清除選取</button>
                   </div>
-                  <div id="entries-list" class="list-shell">
+                  <div id="entries-list" class="list-shell" role="tabpanel" aria-labelledby="entries-scope-tab-active entries-scope-tab-history entries-scope-tab-all">
                     <div class="empty-state">尚未建立報名紀錄</div>
                   </div>
                   <div id="entries-pagination" class="list-pagination"></div>
@@ -548,7 +549,7 @@
               </div>
             </section>
 
-            <section class="workspace-view" id="workspace-notify" data-workspace-panel="notify" hidden>
+            <section class="workspace-view" id="workspace-notify" role="tabpanel" aria-labelledby="workspace-tab-notify" data-workspace-panel="notify" hidden>
               <div class="notify-layout">
                 <section class="panel panel-block sticky-panel notify-filter-panel">
                   <div class="notify-control-hero">

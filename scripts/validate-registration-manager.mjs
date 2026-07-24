@@ -67,6 +67,7 @@ const readme = await readFile(resolve(root, "README.md"), "utf8");
 const registrationHtml = await readFile(resolve(root, "local/registration/registration.html"), "utf8");
 const registrationJs = await readFile(resolve(root, "local/registration/registration.js"), "utf8");
 const registrationCss = await readFile(resolve(root, "local/registration/registration.css"), "utf8");
+const registrationSystemCss = await readFile(resolve(root, "local/registration/registration-system.css"), "utf8");
 
 assertCheck(
   entryDuplicateKey(baseEntry) === entryDuplicateKey(sameEntryDifferentSpacing),
@@ -308,6 +309,17 @@ assertCheck(
     registrationCss.includes("grid-template-areas") &&
     registrationCss.includes(".notify-race-picker"),
   "registration workspace layers optional form fields and keeps notification filters integrated horizontally"
+);
+assertCheck(
+  registrationHtml.includes('registration-system.css') &&
+    registrationHtml.includes('role="tablist"') &&
+    registrationHtml.includes('role="tab"') &&
+    registrationHtml.includes('role="tabpanel"') &&
+    registrationJs.includes("aria-selected") &&
+    registrationJs.includes("ArrowRight") &&
+    registrationSystemCss.includes("Registration workspace system") &&
+    registrationSystemCss.includes("--rm-primary"),
+  "registration workspace keeps the shared UI system and keyboard-accessible tab semantics"
 );
 
 const failed = checks.filter((check) => !check.ok);
