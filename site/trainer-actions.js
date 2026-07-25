@@ -683,7 +683,12 @@ function classifyEarlyFeedback(note, terrainEvidence = null) {
   const labels = [];
   if (noteSignalsSafetyConcern(text)) labels.push('症狀／疼痛');
   else if (/(緊繃|偏緊|僵硬|卡卡|痠)/.test(text)) labels.push('局部緊繃（未明示疼痛）');
-  if (/(上坡|爬升|丘陵|坡跑)/.test(text)) {
+  // Garmin 的爬升是實跑負荷，不必等待跑者剛好用「上坡」描述才納入判讀。
+  // 保留門檻以避免普通路線微起伏被誤當成坡訓。
+  const meaningfulTerrainLoad = terrainEvidence
+    && Number(terrainEvidence.elevationGainM) >= 80
+    && Number(terrainEvidence.elevationPerKm) >= 6;
+  if (/(上坡|爬升|丘陵|坡跑)/.test(text) || meaningfulTerrainLoad) {
     labels.push(terrainEvidence
       ? `坡度／爬升負荷（Garmin +${terrainEvidence.elevationGainM} m，${terrainEvidence.elevationPerKm} m/km）`
       : '回饋提到上坡（Garmin 未提供爬升資料）');
