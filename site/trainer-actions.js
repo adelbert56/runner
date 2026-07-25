@@ -620,7 +620,10 @@ function weeklyCheckinTiming() {
   const completedDates = new Set([...(appData.log || []).map((entry) => entry.date), ...days.filter((day) => day.status === 'done').map((day) => day.dateStr)]);
   const completed = days.filter((day) => completedDates.has(day.dateStr)).length;
   const lastCourseDate = days.map((day) => day.dateStr).filter(Boolean).sort().at(-1) || todayStr();
-  return { planned: days.length, completed, ready: todayStr() >= lastCourseDate };
+  // 週末到了不代表本週已結束；未完成的跑課不能自動觸發下一週處方。
+  const calendarReady = todayStr() >= lastCourseDate;
+  const completionReady = days.length > 0 && completed >= days.length;
+  return { planned: days.length, completed, calendarReady, ready: calendarReady && completionReady };
 }
 
 function submitCheckin() {
