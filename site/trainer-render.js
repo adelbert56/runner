@@ -1266,11 +1266,18 @@ function renderCoachDecisionWorkspace(plan = appData.plan || []) {
     decision.coachNote ? renderCoachNarrativeDetail('教練完整判讀', decision.coachNote) : '',
     decision.planningNote ? renderCoachNarrativeDetail('排課調整說明', decision.planningNote) : ''
   ].filter(Boolean).join('');
+  const earlyFeedback = [...(appData.checkins || [])]
+    .filter((item) => item.earlyTrigger && String(item.note || '').trim())
+    .sort((left, right) => Math.abs(left.weekNum - currentWeek) - Math.abs(right.weekNum - currentWeek) || right.weekNum - left.weekNum)[0];
+  const feedbackResponse = earlyFeedback?.coachFeedbackResponse
+    || (earlyFeedback ? '已讀取你的提前排課備註；它會與恢復檢核及 Garmin 紀錄一起作為本次安排依據。' : '');
+  const feedbackSection = earlyFeedback ? `<section class="coach-brief" aria-label="提前排課回饋"><div class="coach-brief-title">你的提前排課回饋</div><div class="coach-decision-detail-body"><p><b>你寫的：</b>${reviewEscape(earlyFeedback.note)}</p><p><b>教練回應：</b>${reviewEscape(feedbackResponse)}</p></div></section>` : '';
   return `<section class="coach-decision-workspace" aria-label="教練決策摘要">
     <div class="coach-decision-kicker">Coach decision · same course resolver</div>
     <div class="coach-decision-headline">${reviewEscape(verdict)}</div>
     <p class="coach-decision-copy">${reviewEscape(riskText)}</p>
     ${renderGarminDecisionSummary()}
+    ${feedbackSection}
     <div class="coach-decision-next"><span>${reviewEscape(decision.focusLabel)}</span><div><b>${reviewEscape(nextLabel)}</b><p>${reviewEscape(decision.next.resolved.rationale || '這堂課照正式課表執行。')}</p></div></div>
     ${rawCoachNotes ? `<section class="coach-brief" aria-labelledby="coach-brief-title"><div class="coach-brief-title" id="coach-brief-title">教練重點</div><div class="coach-decision-detail-body">${rawCoachNotes}</div></section>` : ''}
     <div class="training-status-actions coach-decision-actions"><button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看${upcomingCoachPrescription ? `第 ${displayWeek?.weekNum || currentWeek + 1} 週` : '本週'}正式課表</button></div>
