@@ -2340,12 +2340,13 @@ function init() {
     // 週跟「目前實際進行到第幾週」是兩件事，混在同一個變數裡，重新整理
     // 一次就會把提前排課、週評估等判斷全部帶去錯的週。
     const coachScheduleAligned = alignCoachScheduleDays();
+    const coachCourseNamesAligned = alignCoachCourseNames();
     const coachDeloadStructureAligned = alignCoachDeloadStructure();
     const recoveryTargetsAligned = alignRecoveryCourseTargets();
     renderPlanView();
     const restoredEarlyAdjustment = restorePendingEarlyCoachAdjustment();
     const restoredEarlySchedule = restorePendingEarlyCoachSchedule();
-    if (coachScheduleAligned || coachDeloadStructureAligned || recoveryTargetsAligned || restoredEarlyAdjustment || restoredEarlySchedule) renderPlanView();
+    if (coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || restoredEarlyAdjustment || restoredEarlySchedule) renderPlanView();
     if (ui.view === 'setup') {
       renderSetupView();
       showView('setup');
@@ -2469,12 +2470,13 @@ loadRegistrationRaceCheckpoints();
     coachReviewLoadState = 'ready';
     syncGarminRunsToPlan(data);
     const coachScheduleAligned = alignCoachScheduleDays();
+    const coachCourseNamesAligned = alignCoachCourseNames();
     const coachDeloadStructureAligned = alignCoachDeloadStructure();
     const recoveryTargetsAligned = alignRecoveryCourseTargets();
     const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
     // 校準與出發前調整都經單一 mutation 入口；背景觸發不跳 toast。
     const adaptation = runCoachAdaptation('coach-review-ready');
-    if ((coachScheduleAligned || coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    if ((coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }
 
