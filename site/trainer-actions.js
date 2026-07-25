@@ -439,7 +439,9 @@ function applyCoachPhaseScheduleForWeek(weekNum) {
   week.days = week.days.map((day) => {
     if (!runs.includes(day)) return day;
     const isLong = day === longDay;
-    const course = buildDayCard(day.dow, day.dateStr, isLong ? 'long' : 'easy', isLong ? longKm : eachKm, appData.profile, phase.phase === '降載', false, false, todayStr(), day.weekNum || weekNum, phase.phase, isLong ? 'long' : 'recovery', isLong ? '教練長跑' : '教練恢復跑');
+    // 週期性降載是「減少總量、保留跑步頻率」，不是把每一堂非長跑都降成 Z1 恢復跑。
+    // 只有安全規則明確接管（safetyOverride）時，才會把個別課改為 recovery。
+    const course = buildDayCard(day.dow, day.dateStr, isLong ? 'long' : 'easy', isLong ? longKm : eachKm, appData.profile, phase.phase === '降載', false, false, todayStr(), day.weekNum || weekNum, phase.phase, isLong ? 'long' : 'easy', isLong ? '教練長跑' : '教練輕鬆跑');
     course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: volume, longKm };
     return course;
   });
@@ -448,6 +450,27 @@ function applyCoachPhaseScheduleForWeek(weekNum) {
   reconcileCoachPrescriptionHistory(weekNum, phase.phase);
   saveData(appData);
   return true;
+}
+
+// 修正先前把週期性降載誤寫成三堂恢復跑的既有正式課表。
+// W4 沒有安全保護訊號時應保留 Z2 輕鬆跑；真正的安全覆寫不可被此修正蓋掉。
+function alignCoachDeloadStructure() {
+  const profile = appData?.profile || {};
+  const cutoff = todayStr();
+  let changed = false;
+  (appData.plan || []).forEach((week) => {
+    (week.days || []).forEach((day, index) => {
+      if (day.type !== 'easy' || day.focus !== 'recovery' || day.status === 'done' || !day.dateStr || day.dateStr < cutoff) return;
+      if (day.coachPlan?.source !== 'coach-periodization' || day.coachPlan?.phase !== '降載' || day.safetyOverride || day.recoveryProtection) return;
+      const replacement = buildDayCard(day.dow, day.dateStr, 'easy', day.km, profile, true, false, false, cutoff, day.weekNum || week.weekNum, week.phase || day.phaseName || '降載', 'easy', '教練輕鬆跑');
+      replacement.coachPlan = { ...day.coachPlan };
+      replacement.status = day.status;
+      week.days[index] = replacement;
+      changed = true;
+    });
+  });
+  if (changed) saveData(appData);
+  return changed;
 }
 
 // 已寫入本機的舊版恢復課，不能繼續留下「Z2 配速 + Z1 上限」這種互相矛盾的指令。

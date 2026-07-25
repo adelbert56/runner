@@ -771,9 +771,9 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
 
   const zones = hrZones(profile);
   card.hrTarget = type === 'easy'
-    ? (focus === 'recovery' ? recoveryRunInstruction(profile).hrTarget : `HR ≤${zones.easyMax}`)
+    ? (focus === 'recovery' ? recoveryRunInstruction(profile).hrTarget : `HR ≤${zones.easyMax}（${easyZoneLabel()}）`)
     : type === 'long'
-      ? `HR ≤${zones.easyMax}`
+      ? `HR ≤${zones.easyMax}（${easyZoneLabel()}）`
       : type === 'tempo'
         ? `HR ${zones.tempoLow}–${zones.tempoHigh}`
         : type === 'interval'
