@@ -2445,9 +2445,10 @@ loadRegistrationRaceCheckpoints();
     coachReviewData = data;
     coachReviewLoadState = 'ready';
     syncGarminRunsToPlan(data);
+    const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
     // 校準與出發前調整都經單一 mutation 入口；背景觸發不跳 toast。
     const adaptation = runCoachAdaptation('coach-review-ready');
-    if (adaptation.dailyAdvisory && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    if ((adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }
 

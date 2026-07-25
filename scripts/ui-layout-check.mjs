@@ -494,7 +494,8 @@ async function assertTrainerReport(page, viewportName) {
       document.getElementById("early-fatigue").value = "3";
       submitEarlyCoachPlanning();
       const hasQuality = nextWeek.days.some((day) => ["tempo", "interval"].includes(day.type));
-      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), nextWeekExists: Boolean(appData.plan[currentWeek]), adjustedTargetKm: nextWeek.targetKm, expectedTargetKm: Math.round(originalTargetKm * 0.85 * 10) / 10, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
+      const coachTargetKm = Number((String(coachReviewData.nextWeek.targetKm).match(/\d+(?:\.\d+)?/) || [])[0]);
+      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), nextWeekExists: Boolean(appData.plan[currentWeek]), adjustedTargetKm: nextWeek.targetKm, expectedTargetKm: Math.round(coachTargetKm * 0.85 * 10) / 10, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
     } finally {
       appData = previousData;
       currentWeek = previousWeek;
@@ -508,6 +509,54 @@ async function assertTrainerReport(page, viewportName) {
   });
   if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.adjustedTargetKm !== earlyPlanningSubmission.expectedTargetKm || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
     throw new Error(`${viewportName}/trainer-early-planning-submit: completed Garmin sessions did not complete the next-week scheduling flow ${JSON.stringify(earlyPlanningSubmission)}`);
+  }
+  const directCoachSchedule = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [1, 1, 0, 1, 0, 0, 2], injuries: ["none"] };
+      const trainDows = [0, 1, 3, 6];
+      appData.profile = profile;
+      appData.plan = [1, 2, 3, 4].map((weekNum) => ({
+        weekNum,
+        phase: "build",
+        phaseLabel: "建立期",
+        targetKm: 30,
+        days: buildWeekDays(profile, trainDows, 6, [0, 1, 3], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build")
+      }));
+      currentWeek = 3;
+      coachReviewData = {
+        nextWeek: {
+          weekStart: "2026-07-20",
+          targetKm: "32",
+          menu: [
+            { day: "週一", plan: "E 跑 7 km，守 Z2。" },
+            { day: "週二", plan: "E 跑 6.5 km＋ST 快步 5×20 秒。" },
+            { day: "週四", plan: "E 跑 6.5 km，守 Z2。" },
+            { day: "週日", plan: "長跑 12 km，全程 E 強度。" }
+          ]
+        }
+      };
+      const applied = applyCoachMenuScheduleForWeek(4, coachReviewData.nextWeek.menu, coachReviewData.nextWeek.targetKm);
+      const week4 = appData.plan[3];
+      return {
+        applied,
+        targetKm: week4.targetKm,
+        plannedKm: weekPlannedKm(week4),
+        week4Start: week4.days[0]?.dateStr,
+        courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, km: day.km, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
+        note: week4.planningNote
+      };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      coachReviewData = previousReview;
+      saveData(appData);
+    }
+  });
+  if (!directCoachSchedule.applied || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 32 || directCoachSchedule.plannedKm !== 32 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[0, 7], [1, 6.5], [3, 6.5], [6, 12]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-menu" && day.version === 2) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
+    throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the exact coach menu into week 4 ${JSON.stringify(directCoachSchedule)}`);
   }
   const recoveredEarlyPlanning = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
@@ -696,13 +745,6 @@ async function assertTrainerReport(page, viewportName) {
     const nextWeekDecision = progression(buildContext(), "weekly-checkin", { factor: 0.85, removeQuality: true, qualityMode: "keep" });
     const paces = paceResolver(buildContext(), "2026-07-20");
     const coachLocked = coachPrescriptionLocksWeek(coachWeek);
-    coachReviewData = { periodization: [{ phase: "長跑重建", start: "2026-07-13", weeks: 3, km: "28→34", focus: "長跑 10→14 km @E，無硬課；ST 快步練步頻。" }] };
-    const phaseSchedule = coachPhaseScheduleForWeek({ weekNum: 3, days: [
-      { dow: 0, dateStr: "2026-07-27", type: "easy", km: 5 },
-      { dow: 1, dateStr: "2026-07-28", type: "easy", km: 5 },
-      { dow: 3, dateStr: "2026-07-30", type: "easy", km: 5 },
-      { dow: 5, dateStr: "2026-08-01", type: "long", km: 7 },
-    ] });
     return {
       heatSafe: isCalibrationSafeRun({ date: "2026-07-15", km: 6, elevationGainM: 0, temperatureC: 35 }),
       protectedType: protectedDays[1]?.type,
@@ -712,12 +754,9 @@ async function assertTrainerReport(page, viewportName) {
       progressionSafety: nextWeekDecision?.removeQuality,
       paceSource: paces?.easy?.source,
       paceHrMax: paces?.hrZones?.max,
-      phaseTargetKm: phaseSchedule?.targetKm,
-      phaseLongKm: phaseSchedule?.days.find((day) => day.type === "long")?.km,
-      phaseCoachDays: phaseSchedule?.days.filter((day) => day.coachPlan).length,
     };
   });
-  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax || safeguards.phaseTargetKm !== 34 || safeguards.phaseLongKm !== 14 || safeguards.phaseCoachDays !== 4) {
+  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax) {
     throw new Error(`${viewportName}/trainer-safeguards: environmental, recovery, or coach-priority rule failed ${JSON.stringify(safeguards)}`);
   }
   const planningScenarios = await page.evaluate(() => {
