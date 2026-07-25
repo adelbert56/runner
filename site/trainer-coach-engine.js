@@ -336,8 +336,11 @@ function runCoachAdaptation(trigger, options = {}) {
     const progressionDecision = progression(ctx, trigger, options);
     if (progressionDecision) {
       result.decisions.push(progressionDecision);
-      adjustNextWeek(progressionDecision.factor, progressionDecision.removeQuality, progressionDecision.qualityMode);
-      result.nextWeekAdjustment = progressionDecision;
+      // 有待套用的正式週期處方時，週評估只提供限制條件，不能先寫一次課表再被處方覆寫。
+      if (!options.formalPrescriptionPending) {
+        adjustNextWeek(progressionDecision.factor, progressionDecision.removeQuality, progressionDecision.qualityMode);
+        result.nextWeekAdjustment = progressionDecision;
+      }
     }
   }
   return result;
