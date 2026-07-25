@@ -634,13 +634,35 @@ function noteSignalsSafetyConcern(note) {
   return /(疼痛|越跑越痛|刺痛|拉傷|跛行|步態.{0,4}(改|異常)|麻木|腫脹|頭暈|胸悶)/.test(text);
 }
 
-function classifyEarlyFeedback(note) {
+function coachTerrainEvidence(weekNum) {
+  const week = appData.plan?.[Number(weekNum) - 1];
+  const longDay = (week?.days || []).find((day) => day.type === 'long');
+  const weekDates = new Set((week?.days || []).map((day) => day.dateStr).filter(Boolean));
+  const runs = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+  const exactCandidates = longDay?.dateStr ? runs.filter((run) => run.date === longDay.dateStr) : [];
+  const weekCandidates = runs.filter((run) => weekDates.has(run.date));
+  const candidates = (exactCandidates.length ? exactCandidates : weekCandidates)
+    .sort((left, right) => longDay
+      ? Math.abs((Number(left.km) || 0) - (Number(longDay.km) || 0)) - Math.abs((Number(right.km) || 0) - (Number(longDay.km) || 0))
+      : (Number(right.elevationGainM) || 0) - (Number(left.elevationGainM) || 0));
+  const run = candidates[0];
+  if (!run || !Number.isFinite(Number(run.elevationGainM))) return null;
+  const elevationGainM = Math.round(Number(run.elevationGainM));
+  const km = Number(run.km) || 0;
+  return { date: run.date, elevationGainM, elevationPerKm: km > 0 ? Math.round((elevationGainM / km) * 10) / 10 : null };
+}
+
+function classifyEarlyFeedback(note, terrainEvidence = null) {
   const text = String(note || '').trim();
   if (!text) return [];
   const labels = [];
   if (noteSignalsSafetyConcern(text)) labels.push('症狀／疼痛');
   else if (/(緊繃|偏緊|僵硬|卡卡|痠)/.test(text)) labels.push('局部緊繃（未明示疼痛）');
-  if (/(上坡|爬升|丘陵|坡跑)/.test(text)) labels.push('坡度／爬升負荷');
+  if (/(上坡|爬升|丘陵|坡跑)/.test(text)) {
+    labels.push(terrainEvidence
+      ? `坡度／爬升負荷（Garmin +${terrainEvidence.elevationGainM} m，${terrainEvidence.elevationPerKm} m/km）`
+      : '回饋提到上坡（Garmin 未提供爬升資料）');
+  }
   if (/(後面.*沒力|後段.*沒力|後段掉速|撐不住|爆掉)/.test(text)) labels.push('長跑後段失力');
   if (/(有氧耐力|心肺耐力|心肺不足)/.test(text)) labels.push('有氧耐力疑慮');
   if (/(疲勞|疲憊|累|腿重|沉重|恢復慢|沒力|無力)/.test(text)) labels.push('疲勞或恢復感受');
@@ -661,11 +683,11 @@ function nextWeekCourseSummary(targetWeek) {
   return `第 ${week.weekNum} 週維持 ${week.targetKm} km：${easyText}＋${longText}。`;
 }
 
-function coachResponseToEarlyFeedback(note, decision, safetyConcern, { coachScheduleApplied = false, targetWeek = null } = {}) {
+function coachResponseToEarlyFeedback(note, decision, safetyConcern, { coachScheduleApplied = false, targetWeek = null, terrainEvidence = null } = {}) {
   if (!String(note || '').trim()) return '';
-  const signals = classifyEarlyFeedback(note);
+  const signals = classifyEarlyFeedback(note, terrainEvidence);
   const readback = signals.length ? `我讀到你提到：${signals.join('、')}。` : '我已讀到你的備註；其中沒有可安全自動判定的疼痛、疲勞、睡眠、高溫或時間訊號。';
-  const terrainLongRunIssue = signals.includes('坡度／爬升負荷') && (signals.includes('長跑後段失力') || signals.includes('有氧耐力疑慮'));
+  const terrainLongRunIssue = signals.some((signal) => signal.startsWith('坡度／爬升負荷')) && (signals.includes('長跑後段失力') || signals.includes('有氧耐力疑慮'));
   if (safetyConcern) return `${readback} 這被視為安全訊號，因此實際處置是下週先降量並取消品質課；症狀持續、加劇或影響步態時請停止跑步並尋求醫療或物理治療協助。`;
   if (terrainLongRunIssue) return `${readback} 這趟長跑含上坡，後段失力不能直接當成平路有氧能力退步；本次不據此加硬課。${nextWeekCourseSummary(targetWeek)} 下次長跑選平坦路線，前半程以心率與可對話感控制，不追配速；完成這週降載後，再用平路長跑的後段心率與主觀疲勞評估是否需要增加有氧耐力課。`;
   if (decision.result === '停止品質課') return `${readback} 本次恢復檢核未通過，實際處置是下週取消品質課並維持安全保護，待症狀與疲勞完全消退後再評估。`;
@@ -720,9 +742,10 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const adaptation = runCoachAdaptation('weekly-checkin', { ...decision, formalPrescriptionPending });
   const coachScheduleApplied = formalPrescriptionPending && applyCoachPhaseScheduleForWeek(currentWeek + 1);
   if (!decision.allowIntensity && (effectivePainConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
-  const feedbackSignals = earlyTrigger ? classifyEarlyFeedback(note) : [];
-  const coachFeedbackResponse = earlyTrigger ? coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1 }) : '';
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
+  const feedbackTerrainEvidence = earlyTrigger ? coachTerrainEvidence(currentWeek) : null;
+  const feedbackSignals = earlyTrigger ? classifyEarlyFeedback(note, feedbackTerrainEvidence) : [];
+  const coachFeedbackResponse = earlyTrigger ? coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1, terrainEvidence: feedbackTerrainEvidence }) : '';
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();

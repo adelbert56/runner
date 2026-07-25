@@ -656,12 +656,13 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
   const execution = remaining.filter((sentence) => /^(本週|下週|今天|仍|肌力|長跑|體感|課表)/.test(sentence));
   const evidence = remaining.filter((sentence) => !execution.includes(sentence));
   if (earlyFeedback) {
+    const terrainEvidence = earlyFeedback.feedbackTerrainEvidence || (typeof coachTerrainEvidence === 'function' ? coachTerrainEvidence(earlyFeedback.weekNum) : null);
     const signals = Array.isArray(earlyFeedback.feedbackSignals) && earlyFeedback.feedbackSignals.length
       ? earlyFeedback.feedbackSignals
-      : (typeof classifyEarlyFeedback === 'function' ? classifyEarlyFeedback(earlyFeedback.note) : []);
+      : (typeof classifyEarlyFeedback === 'function' ? classifyEarlyFeedback(earlyFeedback.note, terrainEvidence) : []);
     const signalText = signals.length ? signals.join('、') : '未偵測到可自動改課的安全或負荷訊號';
     const response = typeof coachResponseToEarlyFeedback === 'function'
-      ? coachResponseToEarlyFeedback(earlyFeedback.note, { result: earlyFeedback.result }, Boolean(earlyFeedback.feedbackSafetyConcern), { coachScheduleApplied: earlyFeedback.coachScheduleApplied === true, targetWeek: earlyFeedback.weekNum + 1 })
+      ? coachResponseToEarlyFeedback(earlyFeedback.note, { result: earlyFeedback.result }, Boolean(earlyFeedback.feedbackSafetyConcern), { coachScheduleApplied: earlyFeedback.coachScheduleApplied === true, targetWeek: earlyFeedback.weekNum + 1, terrainEvidence })
       : earlyFeedback.coachFeedbackResponse || '已讀取提前排課回饋。';
     conclusion.push(`已納入提前排課回饋；本次判定為「${earlyFeedback.result || '維持'}」。`);
     evidence.push(`跑者提前回饋：「${earlyFeedback.note}」；判讀為：${signalText}。`);
@@ -807,7 +808,7 @@ function garminActivityRecords() {
     qualityCadence: Number(run.qualityCadence) || null,
     maxHr: Number(run.maxHr) || null,
     cadence: Number(run.cadence) || null,
-    elevationGainM: Number(run.elevationGainM) || 0,
+    elevationGainM: Number.isFinite(Number(run.elevationGainM)) ? Number(run.elevationGainM) : null,
     temperatureC: Number(run.temperatureC) || null,
     aerobicTe: Number(run.aerobicTe) || null,
     anaerobicTe: Number(run.anaerobicTe) || null,
