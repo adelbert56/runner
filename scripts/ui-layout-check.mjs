@@ -590,7 +590,64 @@ async function assertTrainerReport(page, viewportName) {
   if (!directCoachSchedule.buildApplied || directCoachSchedule.buildTargetKm !== 25.5 || buildQualityCourses.length !== 1 || buildQualityCourses[0].qualityMode !== "reduce" || !buildQualityCourses[0].task.includes("原處方前 2/3") || !directCoachSchedule.buildCourses.every((day) => day.source === "coach-periodization")) {
     throw new Error(`${viewportName}/trainer-coach-build-constraints: a non-deload coach prescription did not keep one reduced quality course under Garmin constraints ${JSON.stringify(directCoachSchedule)}`);
   }
-  if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || !directCoachSchedule.coachBrief.includes("跑者提前回饋") || !directCoachSchedule.coachBrief.includes("腳感偏緊，但沒有疼痛") || !directCoachSchedule.coachBrief.includes("局部緊繃（未明示疼痛）") || !directCoachSchedule.coachBrief.includes("回饋的實際處置") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
+  const normalWeeklySchedule = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    const previousReview = cloneTrainingValue(coachReviewData);
+    const originalJump = window.jumpToPhaseWeek;
+    const originalTab = window.switchPlanTab;
+    const originalOutcome = window.showCheckinOutcome;
+    try {
+      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [0, 1, 1, 0, 1, 0, 2], injuries: ["none"] };
+      const trainDows = [1, 2, 4, 6];
+      appData.profile = profile;
+      appData.plan = [1, 2, 3, 4].map((weekNum) => ({
+        weekNum,
+        phase: "build",
+        phaseLabel: "建立期",
+        targetKm: 30,
+        days: buildWeekDays(profile, trainDows, 6, [1, 2, 4], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build")
+      }));
+      currentWeek = 3;
+      const completedWeek = appData.plan[2];
+      appData.log = completedWeek.days.filter((day) => day.type !== "rest").map((day) => ({ date: day.dateStr, km: day.km }));
+      appData.checkins = [];
+      coachReviewData = {
+        schedule: { trainingDows: [1, 2, 4, 6], longDow: 6 },
+        periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課。" }],
+        autopilot: { status: "ready", decision: "deload", label: "自動降量", volumeFactor: 0.85, qualityMode: "reduce" },
+        analyticsRuns: completedWeek.days.filter((day) => day.type !== "rest").map((day, index) => ({ activityId: `normal-${index}`, date: day.dateStr, km: day.km, elevationGainM: 120 }))
+      };
+      window.jumpToPhaseWeek = () => {};
+      window.switchPlanTab = () => {};
+      window.showCheckinOutcome = () => {};
+      completeWeeklyCheckin({ answers: [true, true, true, true, true], fatigue: 1, note: "長跑後段沒力", painConcern: false });
+      const checkin = appData.checkins.find((item) => item.weekNum === 3);
+      const nextWeek = appData.plan[3];
+      const brief = renderCoachAdviceNote("本週完成，進入下週處方。", { earlyFeedback: earlyFeedbackForCoachBrief(3) });
+      const result = {
+        coachScheduleApplied: checkin?.coachScheduleApplied === true,
+        noGenericRewrite: !checkin?.nextWeekAdjustmentApplied,
+        sourceAligned: nextWeek.days.filter((day) => day.type !== "rest").every((day) => day.coachPlan?.source === "coach-periodization"),
+        terrainRead: checkin?.feedbackTerrainEvidence?.elevationGainM === 120 && checkin?.coachFeedbackResponse?.includes("Garmin +120 m") && brief.includes("跑者回饋") && brief.includes("回饋的實際處置"),
+        nextTargetKm: nextWeek.targetKm
+      };
+      closeModal();
+      return result;
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      coachReviewData = previousReview;
+      window.jumpToPhaseWeek = originalJump;
+      window.switchPlanTab = originalTab;
+      window.showCheckinOutcome = originalOutcome;
+      saveData(appData);
+    }
+  });
+  if (!normalWeeklySchedule.coachScheduleApplied || !normalWeeklySchedule.noGenericRewrite || !normalWeeklySchedule.sourceAligned || !normalWeeklySchedule.terrainRead || normalWeeklySchedule.nextTargetKm !== 26) {
+    throw new Error(`${viewportName}/trainer-normal-weekly-prescription: Sunday and early coaching did not resolve to the same formal schedule ${JSON.stringify(normalWeeklySchedule)}`);
+  }
+  if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || !directCoachSchedule.coachBrief.includes("跑者回饋") || !directCoachSchedule.coachBrief.includes("腳感偏緊，但沒有疼痛") || !directCoachSchedule.coachBrief.includes("局部緊繃（未明示疼痛）") || !directCoachSchedule.coachBrief.includes("回饋的實際處置") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
     throw new Error(`${viewportName}/trainer-direct-coach-workspace: existing coach decision did not present the applied week 4 prescription ${directCoachSchedule.coachWorkspace}`);
   }
   if (!directCoachSchedule.historyReconciled || directCoachSchedule.history.filter((item) => item.changes.some((change) => change.includes("第 4 週"))).length !== 1 || !directCoachSchedule.timeline.includes("教練第 4 週處方已排入正式課表：降載") || /18\.7|18\.9|27\.2/.test(directCoachSchedule.timeline)) {

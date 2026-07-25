@@ -754,7 +754,8 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
     decision.allowIntensity = false;
     decision.note = `本週尚未結束（目前 ${timing.completed}/${timing.planned} 堂）；先保留恢復判讀，最後一堂完成後再評估是否推進。`;
   }
-  const garminDecision = earlyTrigger && coachReviewData?.autopilot?.status === 'ready' ? coachReviewData.autopilot : null;
+  // 提前排課與原本週末評估使用同一份 Garmin 判讀；觸發時間不能改變教練結論。
+  const garminDecision = coachReviewData?.autopilot?.status === 'ready' ? coachReviewData.autopilot : null;
   if (garminDecision?.decision === 'deload' && !effectivePainConcern && fatigue < 5 && answers[1]) {
     const garminFactor = Math.min(1, Math.max(0.75, Number(garminDecision.volumeFactor) || 1));
     decision.factor = Math.min(decision.factor, garminFactor);
@@ -765,16 +766,16 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   }
   if (earlyTrigger && garminDecision?.decision !== 'deload' && decision.allowIntensity) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
   if (earlyTrigger && garminDecision?.decision === 'deload' && !effectivePainConcern && fatigue < 5 && answers[1]) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；${decision.note}`;
-  // 週期處方只能在完成紀錄與恢復條件都完整時落地；否則由安全決策保留較低的負荷，
-  // 不能讓一般週期課表覆寫疼痛、睡眠或長跑恢復不足的保護調整。
-  const recoveryCleared = !effectivePainConcern && fatigue < 4 && answers[1] && answers[2] && answers[3];
-  const formalPrescriptionPending = earlyTrigger && earlyCompletionConfirmed && recoveryCleared;
+  // 提前排課與原本週末評估都寫入同一份週期處方；只有疼痛、重度疲勞或未通過
+  // 無痛檢核時才交給安全覆寫。疲勞／睡眠不足仍可由正式處方承接降量與取消品質課。
+  const checkinCompletionConfirmed = earlyTrigger ? earlyCompletionConfirmed : timing.ready;
+  const formalPrescriptionPending = checkinCompletionConfirmed && !effectivePainConcern && fatigue < 5 && answers[1];
   const adaptation = runCoachAdaptation('weekly-checkin', { ...decision, formalPrescriptionPending });
   const coachScheduleApplied = formalPrescriptionPending && applyCoachPhaseScheduleForWeek(currentWeek + 1, { constraints: decision });
   if (!decision.allowIntensity && (effectivePainConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
-  const feedbackTerrainEvidence = earlyTrigger ? coachTerrainEvidence(currentWeek) : null;
-  const feedbackSignals = earlyTrigger ? classifyEarlyFeedback(note, feedbackTerrainEvidence) : [];
-  const coachFeedbackResponse = earlyTrigger ? coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1, terrainEvidence: feedbackTerrainEvidence }) : '';
+  const feedbackTerrainEvidence = coachTerrainEvidence(currentWeek);
+  const feedbackSignals = classifyEarlyFeedback(note, feedbackTerrainEvidence);
+  const coachFeedbackResponse = coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1, terrainEvidence: feedbackTerrainEvidence });
   const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
