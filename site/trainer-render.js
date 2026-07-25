@@ -1746,6 +1746,14 @@ function renderCoachReviewPanel() {
     ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 自動判讀模式</b><br>雲端已同步實跑資料；跑量、負荷與同課型觀測會整合在本頁決策摘要。正式課表仍是唯一執行菜單。</div>`
     : '';
   const attention = trainingDataHealth(appData.plan || []).issues.length ? renderTrainingStatusCard(appData.plan || []) : '';
+  const earlyScheduledCoachWeek = (() => {
+    const week = upcomingPlanWeek;
+    const courses = (week?.days || []).filter((day) => day.type !== 'rest' && day.coachPlan?.source === 'coach-periodization');
+    if (!courses.length) return '';
+    const phase = courses[0].coachPlan?.phase || '教練處方';
+    const rows = courses.map((day) => `<li>${reviewEscape(DOW_NAMES[day.dow] || '')}｜${reviewEscape(trainingTaskTitle(day))}（${Number(day.km).toFixed(day.km % 1 ? 1 : 0)} km）</li>`).join('');
+    return `<section class="coach-summary" style="margin:0 0 14px"><div class="coach-summary-kicker">EARLY COACH SCHEDULE · 已執行</div><div class="coach-summary-title">第 ${week.weekNum} 週｜${reviewEscape(phase)}</div><p class="coach-summary-copy">已依第 ${week.weekNum - 1} 週完成紀錄提前排入正式課表；目標 ${reviewEscape(String(week.targetKm))} km。</p><ul class="coach-summary-list">${rows}</ul></section>`;
+  })();
   return `${attention}<div class="card coach-panel">
     <div class="coach-head">
       <div class="card-title" style="margin:0">🏃 教練建議</div>
@@ -1763,6 +1771,7 @@ function renderCoachReviewPanel() {
     </div>
     ${garminOnlyNotice}
     ${renderHistoryCoachContext()}
+    ${earlyScheduledCoachWeek}
     ${renderCoachDecisionWorkspace(appData.plan || [])}
     <section class="coach-evidence" aria-labelledby="coach-evidence-title">
       <div class="coach-evidence-head"><div><div class="coach-evidence-kicker">COACHING RECORD</div><h2 id="coach-evidence-title">判讀依據與調整歷程</h2><p>所有摘要預設展開；原始文字只在個別紀錄中保留。</p></div><span>已整合</span></div>
