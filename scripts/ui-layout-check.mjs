@@ -515,19 +515,20 @@ async function assertTrainerReport(page, viewportName) {
     const previousWeek = currentWeek;
     const previousReview = cloneTrainingValue(coachReviewData);
     try {
-      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [1, 1, 0, 1, 0, 0, 2], injuries: ["none"] };
-      const trainDows = [0, 1, 3, 6];
+      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [0, 1, 1, 0, 1, 0, 2], injuries: ["none"] };
+      const trainDows = [1, 2, 4, 6];
       appData.profile = profile;
       appData.plan = [1, 2, 3, 4].map((weekNum) => ({
         weekNum,
         phase: "build",
         phaseLabel: "建立期",
         targetKm: 30,
-        days: buildWeekDays(profile, trainDows, 6, [0, 1, 3], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build")
+        days: buildWeekDays(profile, trainDows, 6, [1, 2, 4], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build")
       }));
       currentWeek = 3;
       coachReviewData = {
         zones: { maxHr: 187, recoveryLabel: "Garmin Z1", easyLabel: "Garmin Z2", easyMax: 150, steady: "150–157", tempo: "159–166", interval: "168–178" },
+        schedule: { trainingDows: [1, 2, 4, 6], longDow: 6 },
         periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" }]
       };
       appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleApplied: true, earlyDecision: { factor: 0.85 } }];
@@ -568,7 +569,7 @@ async function assertTrainerReport(page, viewportName) {
     }
   });
   const deloadEasyCourses = directCoachSchedule.courses.filter((day) => day.focus === "easy");
-  if (!directCoachSchedule.applied || !directCoachSchedule.deloadStructureAligned || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[0, 5.3], [1, 5.3], [3, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || deloadEasyCourses.length !== 3 || !deloadEasyCourses.every((day) => day.pace.startsWith("配速 ") && day.hrTarget === "HR ≤150（Garmin Z2）" && !day.mainDetail?.includes("恢復跑")) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
+  if (!directCoachSchedule.applied || !directCoachSchedule.deloadStructureAligned || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[1, 5.3], [2, 5.3], [4, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || deloadEasyCourses.length !== 3 || !deloadEasyCourses.every((day) => day.pace.startsWith("配速 ") && day.hrTarget === "HR ≤150（Garmin Z2）" && !day.mainDetail?.includes("恢復跑")) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
     throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the aligned coach prescription into week 4 ${JSON.stringify(directCoachSchedule)}`);
   }
   if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {

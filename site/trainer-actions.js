@@ -425,31 +425,69 @@ function restorePendingEarlyCoachAdjustment() {
   return true;
 }
 
-function applyCoachPhaseScheduleForWeek(weekNum) {
+function coachScheduleContract() {
+  const source = coachReviewData?.schedule || {};
+  const trainingDows = Array.isArray(source.trainingDows) ? [...new Set(source.trainingDows.map(Number))].filter((dow) => dow >= 0 && dow <= 6).sort((left, right) => left - right) : [];
+  const longDow = Number(source.longDow);
+  if (trainingDows.length >= 2 && trainingDows.includes(longDow)) return { trainingDows, longDow };
+  const profile = appData?.profile || {};
+  const fallbackDows = (profile.dayState || []).map((state, dow) => state >= 1 ? dow : -1).filter((dow) => dow >= 0);
+  return { trainingDows: fallbackDows, longDow: profile.dayState?.indexOf(2) };
+}
+
+function coachScheduleDayState({ trainingDows, longDow }) {
+  return Array.from({ length: 7 }, (_, dow) => dow === longDow ? 2 : trainingDows.includes(dow) ? 1 : 0);
+}
+
+function applyCoachPhaseScheduleForWeek(weekNum, { record = true } = {}) {
   const week = appData.plan?.[weekNum - 1];
   const phase = coachPhaseForWeek(week);
   const volume = (String(phase?.km || '').match(/\d+(?:\.\d+)?/g) || []).map(Number)[0];
   const longKm = Number((String(phase?.focus || '').match(/長跑\s*(\d+(?:\.\d+)?)/) || [])[1]);
-  const runs = (week?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
-  const longDay = runs.find((day) => day.type === 'long') || runs.at(-1);
-  if (!phase || !Number.isFinite(volume) || !Number.isFinite(longKm) || !longDay || volume <= longKm) return false;
-  const eachKm = Math.round(((volume - longKm) / Math.max(1, runs.length - 1)) * 10) / 10;
+  const schedule = coachScheduleContract();
+  if (!phase || !Number.isFinite(volume) || !Number.isFinite(longKm) || !schedule.trainingDows.length || !schedule.trainingDows.includes(schedule.longDow) || volume <= longKm) return false;
+  const eachKm = Math.round(((volume - longKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
   const beforePlan = futurePlanSnapshot(weekNum);
+  appData.profile.dayState = coachScheduleDayState(schedule);
   week.targetKm = volume;
   week.days = week.days.map((day) => {
-    if (!runs.includes(day)) return day;
-    const isLong = day === longDay;
+    const actualDow = day.dateStr ? new Date(`${day.dateStr}T00:00:00`).getDay() : day.dow;
+    if (!schedule.trainingDows.includes(actualDow) || day.isMakeup || day.status === 'done') return { ...day, dow: actualDow };
+    const isLong = actualDow === schedule.longDow;
     // 週期性降載是「減少總量、保留跑步頻率」，不是把每一堂非長跑都降成 Z1 恢復跑。
     // 只有安全規則明確接管（safetyOverride）時，才會把個別課改為 recovery。
-    const course = buildDayCard(day.dow, day.dateStr, isLong ? 'long' : 'easy', isLong ? longKm : eachKm, appData.profile, phase.phase === '降載', false, false, todayStr(), day.weekNum || weekNum, phase.phase, isLong ? 'long' : 'easy', isLong ? '教練長跑' : '教練輕鬆跑');
+    const course = buildDayCard(actualDow, day.dateStr, isLong ? 'long' : 'easy', isLong ? longKm : eachKm, appData.profile, phase.phase === '降載', false, false, todayStr(), day.weekNum || weekNum, phase.phase, isLong ? 'long' : 'easy', isLong ? '教練長跑' : '教練輕鬆跑');
     course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: volume, longKm };
     return course;
   });
   week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方。`;
-  recordPlanChange(beforePlan, 'coach', `教練第 ${weekNum} 週處方已排入正式課表：${phase.phase}`);
-  reconcileCoachPrescriptionHistory(weekNum, phase.phase);
-  saveData(appData);
+  if (record) {
+    recordPlanChange(beforePlan, 'coach', `教練第 ${weekNum} 週處方已排入正式課表：${phase.phase}`);
+    reconcileCoachPrescriptionHistory(weekNum, phase.phase);
+    saveData(appData);
+  }
   return true;
+}
+
+function alignCoachScheduleDays() {
+  const schedule = coachScheduleContract();
+  if (!schedule.trainingDows.length || !schedule.trainingDows.includes(schedule.longDow)) return false;
+  const expectedState = coachScheduleDayState(schedule);
+  let changed = JSON.stringify(appData.profile?.dayState || []) !== JSON.stringify(expectedState);
+  (appData.plan || []).forEach((week) => {
+    const courses = (week.days || []).filter((day) => day.coachPlan?.source === 'coach-periodization' && day.dateStr >= todayStr() && day.status !== 'done');
+    const actualDows = courses.map((day) => new Date(`${day.dateStr}T00:00:00`).getDay()).sort((left, right) => left - right);
+    const storedDows = courses.map((day) => day.dow).sort((left, right) => left - right);
+    if (courses.length && (JSON.stringify(actualDows) !== JSON.stringify(schedule.trainingDows) || JSON.stringify(storedDows) !== JSON.stringify(schedule.trainingDows))) {
+      applyCoachPhaseScheduleForWeek(week.weekNum, { record: false });
+      changed = true;
+    }
+  });
+  if (changed) {
+    appData.profile.dayState = expectedState;
+    saveData(appData);
+  }
+  return changed;
 }
 
 // 修正先前把週期性降載誤寫成三堂恢復跑的既有正式課表。

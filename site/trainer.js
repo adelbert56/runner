@@ -2339,12 +2339,13 @@ function init() {
     // 用「上次瀏覽到哪一週」（ui.week，單純翻頁記憶）覆寫回去。翻頁看其他
     // 週跟「目前實際進行到第幾週」是兩件事，混在同一個變數裡，重新整理
     // 一次就會把提前排課、週評估等判斷全部帶去錯的週。
+    const coachScheduleAligned = alignCoachScheduleDays();
     const coachDeloadStructureAligned = alignCoachDeloadStructure();
     const recoveryTargetsAligned = alignRecoveryCourseTargets();
     renderPlanView();
     const restoredEarlyAdjustment = restorePendingEarlyCoachAdjustment();
     const restoredEarlySchedule = restorePendingEarlyCoachSchedule();
-    if (coachDeloadStructureAligned || recoveryTargetsAligned || restoredEarlyAdjustment || restoredEarlySchedule) renderPlanView();
+    if (coachScheduleAligned || coachDeloadStructureAligned || recoveryTargetsAligned || restoredEarlyAdjustment || restoredEarlySchedule) renderPlanView();
     if (ui.view === 'setup') {
       renderSetupView();
       showView('setup');
@@ -2467,12 +2468,13 @@ loadRegistrationRaceCheckpoints();
     coachReviewData = data;
     coachReviewLoadState = 'ready';
     syncGarminRunsToPlan(data);
+    const coachScheduleAligned = alignCoachScheduleDays();
     const coachDeloadStructureAligned = alignCoachDeloadStructure();
     const recoveryTargetsAligned = alignRecoveryCourseTargets();
     const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
     // 校準與出發前調整都經單一 mutation 入口；背景觸發不跳 toast。
     const adaptation = runCoachAdaptation('coach-review-ready');
-    if ((coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    if ((coachScheduleAligned || coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }
 
