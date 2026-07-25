@@ -895,6 +895,11 @@ async function assertTrainerReport(page, viewportName) {
       { ...buildContext(), today: "2026-07-20", weather: { "2026-07-20": { tmax: 35 } }, checkins: [] },
       coachWeek
     );
+    const raceCoachDay = resolveCourse(
+      { dow: 1, dateStr: "2026-07-20", type: "race", focus: "race", task: "半馬｜以賽代訓", raceReplacement: "race", steps: [] },
+      { ...buildContext(), today: "2026-07-20", weather: {}, checkins: [] },
+      coachWeek
+    );
     const nextWeekDecision = progression(buildContext(), "weekly-checkin", { factor: 0.85, removeQuality: true, qualityMode: "keep" });
     const paces = paceResolver(buildContext(), "2026-07-20");
     const coachLocked = coachPrescriptionLocksWeek(coachWeek);
@@ -906,12 +911,14 @@ async function assertTrainerReport(page, viewportName) {
       safetyOverride: Boolean(safetyDay.course.coachSafetyOverride),
       hotCoachSource: hotCoachDay.source,
       hotCoachType: hotCoachDay.course.type,
+      raceCoachSource: raceCoachDay.source,
+      raceCoachType: raceCoachDay.course.type,
       progressionSafety: nextWeekDecision?.removeQuality,
       paceSource: paces?.easy?.source,
       paceHrMax: paces?.hrZones?.max,
     };
   });
-  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || safeguards.hotCoachSource !== "daily-safety-guard" || safeguards.hotCoachType !== "easy" || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax) {
+  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || safeguards.hotCoachSource !== "daily-safety-guard" || safeguards.hotCoachType !== "easy" || safeguards.raceCoachSource !== "race-adjustment" || safeguards.raceCoachType !== "race" || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax) {
     throw new Error(`${viewportName}/trainer-safeguards: environmental, recovery, or coach-priority rule failed ${JSON.stringify(safeguards)}`);
   }
   const planningScenarios = await page.evaluate(() => {

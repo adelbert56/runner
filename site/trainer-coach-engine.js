@@ -199,6 +199,9 @@ function safetyGuard(day, ctx) {
 }
 
 function coachPrescription(day, ctx, week) {
+  // 已報名賽事、賽前減壓與賽後恢復是硬約束；教練週處方只能安排其餘訓練日，
+  // 不能把以賽代訓重新蓋成一般跑課。
+  if (day.raceReplacement) return null;
   const coachDays = coachDaysForWeek(week);
   const entry = coachDays.find((item) => item.scheduledDow === day.dow);
   if (!entry) return null;
