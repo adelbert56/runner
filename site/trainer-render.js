@@ -936,7 +936,16 @@ function sessionQualitySignals(run) {
 
 function plannedMainTargetKm(day) {
   if (!day) return null;
-  const mainStep = garminManualBuilderSteps(day).find((step) => step.title === '主課');
+  const structuredSteps = garminManualBuilderSteps(day);
+  const mainStep = structuredSteps.find((step) => step.title === '主課' || ['main', 'interval'].includes(step.kind));
+  const plannedMainStep = (day.steps || []).find((step) => step?.title === '主課');
+  const repeatMeters = [plannedMainStep?.dose, mainStep?.dose, mainStep?.detail, day.task].join(' ').match(/(\d+)\s*[×x]\s*(\d+(?:\.\d+)?)\s*m\b/i);
+  if (repeatMeters) return Math.round(Number(repeatMeters[1]) * Number(repeatMeters[2]) / 100) / 10;
+  const repeatedInterval = structuredSteps.find((step) => step.kind === 'repeat' && step.children?.some((child) => child.kind === 'interval'));
+  const intervalChild = repeatedInterval?.children?.find((child) => child.kind === 'interval');
+  if (intervalChild?.end?.type === 'distance' && repeatedInterval?.repetitions) {
+    return Math.round(Number(intervalChild.end.value) * Number(repeatedInterval.repetitions) / 100) / 10;
+  }
   const text = [mainStep?.dose, mainStep?.detail, day.task, day.detail, day.pace].filter(Boolean).join(' ');
   const match = text.match(/(?:E\s*跑|恢復跑|長跑|慢跑)\s*(\d+(?:\.\d+)?)\s*(?:km|公里)/i) || text.match(/(\d+(?:\.\d+)?)\s*(?:km|公里)/i);
   return match ? Number(match[1]) : garminMainDistanceKm(day);

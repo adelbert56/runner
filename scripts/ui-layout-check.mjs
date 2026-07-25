@@ -512,6 +512,14 @@ async function assertTrainerReport(page, viewportName) {
   if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.feedbackRecorded || !earlyPlanningSubmission.feedbackTerrainMeasured || !earlyPlanningSubmission.automaticTerrainDetected || !earlyPlanningSubmission.feedbackResponded || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.nextWeekAdjustmentApplied || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
     throw new Error(`${viewportName}/trainer-early-planning-submit: completed Garmin sessions did not complete the next-week scheduling flow ${JSON.stringify(earlyPlanningSubmission)}`);
   }
+  const intervalCompletionTarget = await page.evaluate(() => plannedMainTargetKm({
+    steps: [{ title: "主課", dose: "4×400m", detail: "組間 200m 慢跑恢復" }],
+    km: 6.4,
+    type: "interval"
+  }));
+  if (intervalCompletionTarget !== 1.6) {
+    throw new Error(`${viewportName}/trainer-interval-completion: Garmin completion must use interval fast-work distance, received ${intervalCompletionTarget}`);
+  }
   const directCoachSchedule = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;
