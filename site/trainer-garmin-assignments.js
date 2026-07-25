@@ -8,7 +8,12 @@ function automaticActivityAssignment(run) {
   if (currentDay?.isMakeup && currentDay.makeupOf) return { targetDate: currentDay.makeupOf, mode: 'makeup', source: 'auto', confidence: 'high' };
   const candidates = planDays.filter((day) => {
     const apart = Math.round((new Date(`${run.date}T00:00:00`) - new Date(`${day.dateStr}T00:00:00`)) / 86400000);
-    return day.type !== 'rest' && day.status === 'missed' && apart >= 1 && apart <= 3 && activityCompletesDay(day, { actualKm: run.km, source: 'garmin' });
+    return day.type !== 'rest' && day.status === 'missed' && apart >= 1 && apart <= 3 && activityCompletesDay(day, {
+      actualKm: run.km,
+      qualityEligible: Boolean(run.qualityEligible),
+      qualityKm: Number(run.qualityKm) || 0,
+      source: 'garmin'
+    });
   });
   if (candidates.length === 1) return { targetDate: candidates[0].dateStr, mode: 'makeup', source: 'auto', confidence: 'medium' };
   return { targetDate: '', mode: 'extra', source: 'auto', confidence: 'high' };

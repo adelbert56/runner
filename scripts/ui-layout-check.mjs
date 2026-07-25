@@ -520,6 +520,17 @@ async function assertTrainerReport(page, viewportName) {
   if (intervalCompletionTarget !== 1.6) {
     throw new Error(`${viewportName}/trainer-interval-completion: Garmin completion must use interval fast-work distance, received ${intervalCompletionTarget}`);
   }
+  const intervalCompletionCredit = await page.evaluate(() => {
+    const day = { type: "interval", km: 6.4, steps: [{ title: "主課", dose: "4×400m", detail: "組間 200m 慢跑恢復" }] };
+    return {
+      targetKm: plannedCompletionTargetKm(day),
+      partial: activityCompletesDay(day, { source: "garmin", actualKm: 6.4, qualityEligible: true, qualityKm: 0.8 }),
+      complete: activityCompletesDay(day, { source: "garmin", actualKm: 6.4, qualityEligible: true, qualityKm: 1.0 })
+    };
+  });
+  if (intervalCompletionCredit.targetKm !== 1.6 || intervalCompletionCredit.partial || !intervalCompletionCredit.complete) {
+    throw new Error(`${viewportName}/trainer-interval-credit: weekly completion must use the same quality-work target ${JSON.stringify(intervalCompletionCredit)}`);
+  }
   const directCoachSchedule = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;

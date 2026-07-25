@@ -256,11 +256,21 @@ function activityForDate(activityIndex, dateStr) {
   return activityIndex?.has?.(dateStr) ? { actualKm: Number.POSITIVE_INFINITY, source: 'legacy' } : null;
 }
 
+function plannedCompletionTargetKm(day) {
+  if (['tempo', 'interval'].includes(day?.type)) return plannedMainTargetKm(day) || Number(day.km) || 0;
+  return Number(day?.km) || 0;
+}
+
+function activityCompletionKm(day, activity) {
+  if (['tempo', 'interval'].includes(day?.type) && activity?.qualityEligible) return Number(activity.qualityKm) || 0;
+  return Number(activity?.actualKm) || 0;
+}
+
 function activityCompletesDay(day, activity) {
   if (!activity) return false;
   if (activity.source !== 'garmin') return true;
-  const minimumKm = Math.max(1, (Number(day.km) || 0) * (garminCompletionPercent() / 100));
-  return (Number(activity.actualKm) || 0) >= minimumKm;
+  const minimumKm = Math.max(1, plannedCompletionTargetKm(day) * (garminCompletionPercent() / 100));
+  return activityCompletionKm(day, activity) >= minimumKm;
 }
 
 function makeupCompletionCredits(planDays, activityIndex, today = todayStr()) {
@@ -293,6 +303,8 @@ function trainingCompletionSummary(plan = appData.plan || [], today = todayStr()
   const garminActivity = garminActivityRecords().map((run) => ({
     date: run.date,
     actualKm: Number(run.km) || 0,
+    qualityEligible: Boolean(run.qualityEligible),
+    qualityKm: Number(run.qualityKm) || 0,
     actualTimeMins: Math.round(paceToMinutes(run.pace) * (Number(run.km) || 0)),
     source: 'garmin'
   }));
@@ -517,8 +529,8 @@ function postRunVerdict(run, planned = plannedSessionFor(run)) {
   if (!planned || assignment?.mode === 'extra') {
     return { level: 'neutral', label: '額外跑步已保留', summary: '這趟已記入長期跑量，但不會被誤算為正式課程完成，也不會因此加量。', next: '下一堂仍照正式課表執行。' };
   }
-  const targetKm = plannedMainTargetKm(planned);
-  const actualKm = run.qualityEligible ? Number(run.qualityKm) || 0 : Number(run.km) || 0;
+  const targetKm = plannedCompletionTargetKm(planned);
+  const actualKm = activityCompletionKm(planned, { actualKm: run.km, qualityEligible: run.qualityEligible, qualityKm: run.qualityKm });
   const completionPct = targetKm ? Math.round((actualKm / targetKm) * 100) : null;
   if (completionPct !== null && completionPct < garminCompletionPercent()) {
     return { level: 'caution', label: '部分完成', summary: `主課完成 ${completionPct}%（${actualKm.toFixed(1)} / ${targetKm.toFixed(1)} km），我先保留原課表，缺口不會硬塞到明天。`, next: '先把身體養回來；想補跑的話，我只在安全的 3 天內幫你認列。' };
@@ -1830,7 +1842,12 @@ function earlyCoachPlanningEligibility() {
   const plannedSessions = (week.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
   if (!plannedSessions.length) return { eligible: false, reason: '本週沒有可提前結案的跑步課。' };
   const completedDates = new Set([...(appData.log || []).map((entry) => entry.date), ...plannedSessions.filter((day) => day.status === 'done').map((day) => day.dateStr)]);
-  const garminRunsByDate = new Map(garminActivityRecords().map((run) => [run.date, { actualKm: Number(run.km) || 0, source: 'garmin' }]));
+  const garminRunsByDate = new Map(garminActivityRecords().map((run) => [run.date, {
+    actualKm: Number(run.km) || 0,
+    qualityEligible: Boolean(run.qualityEligible),
+    qualityKm: Number(run.qualityKm) || 0,
+    source: 'garmin'
+  }]));
   const allPlanDays = (appData.plan || []).flatMap((planWeek) => planWeek.days || []);
   const makeupCredits = makeupCompletionCredits(allPlanDays, garminRunsByDate, todayStr());
   const pending = plannedSessions.filter((day) => !completedDates.has(day.dateStr) && !makeupCredits.has(day.dateStr) && !activityCompletesDay(day, garminRunsByDate.get(day.dateStr)));
