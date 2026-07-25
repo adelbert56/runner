@@ -495,7 +495,7 @@ async function assertTrainerReport(page, viewportName) {
       submitEarlyCoachPlanning();
       const hasQuality = nextWeek.days.some((day) => ["tempo", "interval"].includes(day.type));
       const coachTargetKm = Number((String(coachReviewData.nextWeek.targetKm).match(/\d+(?:\.\d+)?/) || [])[0]);
-      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), nextWeekExists: Boolean(appData.plan[currentWeek]), adjustedTargetKm: nextWeek.targetKm, expectedTargetKm: Math.round(coachTargetKm * 0.85 * 10) / 10, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
+      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), nextWeekExists: Boolean(appData.plan[currentWeek]), coachScheduleApplied: checkin?.coachScheduleApplied === true, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
     } finally {
       appData = previousData;
       currentWeek = previousWeek;
@@ -507,7 +507,7 @@ async function assertTrainerReport(page, viewportName) {
       closeModal();
     }
   });
-  if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.adjustedTargetKm !== earlyPlanningSubmission.expectedTargetKm || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
+  if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.nextWeekExists || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
     throw new Error(`${viewportName}/trainer-early-planning-submit: completed Garmin sessions did not complete the next-week scheduling flow ${JSON.stringify(earlyPlanningSubmission)}`);
   }
   const directCoachSchedule = await page.evaluate(() => {
@@ -527,20 +527,9 @@ async function assertTrainerReport(page, viewportName) {
       }));
       currentWeek = 3;
       coachReviewData = {
-        nextWeek: {
-          weekStart: "2026-07-20",
-          targetKm: "32",
-          menu: [
-            { day: "週一", plan: "E 跑 7 km，守 Z2。" },
-            { day: "週二", plan: "E 跑 6.5 km＋ST 快步 5×20 秒。" },
-            { day: "週四", plan: "E 跑 6.5 km，守 Z2。" },
-            { day: "週日", plan: "長跑 12 km，全程 E 強度。" }
-          ]
-        }
+        periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" }]
       };
-      // 模擬舊版已錯誤寫入「已套用」旗標、但第 4 週卡片仍是產生器課表：
-      // 重新開頁時必須看卡片實體，而不是相信這個旗標。
-      appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleSource: "coach-menu-v2", earlyDecision: { factor: 1 } }];
+      appData.checkins = [{ weekNum: 3, earlyTrigger: true, earlyDecision: { factor: 0.85 } }];
       const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
       return {
@@ -558,8 +547,8 @@ async function assertTrainerReport(page, viewportName) {
       saveData(appData);
     }
   });
-  if (!directCoachSchedule.applied || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 32 || directCoachSchedule.plannedKm !== 32 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[0, 7], [1, 6.5], [3, 6.5], [6, 12]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-menu" && day.version === 2) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
-    throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the exact coach menu into week 4 ${JSON.stringify(directCoachSchedule)}`);
+  if (!directCoachSchedule.applied || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[0, 5.3], [1, 5.3], [3, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
+    throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the aligned coach prescription into week 4 ${JSON.stringify(directCoachSchedule)}`);
   }
   const recoveredEarlyPlanning = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);

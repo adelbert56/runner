@@ -426,83 +426,37 @@ function restorePendingEarlyCoachAdjustment() {
   return true;
 }
 
-function replaceCoachDistance(value, sourceKm, nextKm) {
-  if (typeof value !== 'string' || !Number.isFinite(sourceKm)) return value;
-  const source = String(sourceKm).replace('.', '\\.');
-  return value.replace(new RegExp(`\\b${source}\\s*km\\b`, 'ig'), `${nextKm} km`);
-}
-
-function applyCoachMenuScheduleForWeek(weekNum, menu, fallbackTargetKm, volumeFactor = 1) {
+function applyCoachPhaseScheduleForWeek(weekNum) {
   const week = appData.plan?.[weekNum - 1];
-  const mappedMenu = coachMenuForCurrentSchedule(menu);
-  if (!week || !mappedMenu.length) return false;
-  const entriesByDow = new Map(mappedMenu.map((entry) => [entry.scheduledDow, entry]));
-  const sourceTargetKm = Number((String(fallbackTargetKm || '').match(/\d+(?:\.\d+)?/) || [])[0]);
+  const phase = coachPhaseForWeek(week);
+  const volume = (String(phase?.km || '').match(/\d+(?:\.\d+)?/g) || []).map(Number)[0];
+  const longKm = Number((String(phase?.focus || '').match(/長跑\s*(\d+(?:\.\d+)?)/) || [])[1]);
+  const runs = (week?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
+  const longDay = runs.find((day) => day.type === 'long') || runs.at(-1);
+  if (!phase || !Number.isFinite(volume) || !Number.isFinite(longKm) || !longDay || volume <= longKm) return false;
+  const eachKm = Math.round(((volume - longKm) / Math.max(1, runs.length - 1)) * 10) / 10;
   const beforePlan = futurePlanSnapshot(weekNum);
-  let applied = 0;
+  week.targetKm = volume;
   week.days = week.days.map((day) => {
-    const entry = entriesByDow.get(day.dow);
-    if (!entry) {
-      // 教練逐日菜單是正式課表的唯一來源；未列入的原本跑課改回休息，
-      // 不能留下產生器的舊課表，否則同一週會混到兩份處方。
-      return day.type === 'rest' ? day : buildRestDayCard(day.dow, day.dateStr, appData.profile, todayStr(), week.weekNum || weekNum);
-    }
-    const isLong = /長跑|long/i.test(String(entry.plan || ''));
-    const sourceKm = Number((String(entry.plan || '').match(/(\d+(?:\.\d+)?)\s*km/i) || [])[1]);
-    const km = Number.isFinite(sourceKm) ? Math.round(sourceKm * volumeFactor * 10) / 10 : day.km;
-    const suppliedSteps = Array.isArray(entry.steps) ? entry.steps : [];
-    const plan = replaceCoachDistance(String(entry.plan || ''), sourceKm, km);
-    const steps = suppliedSteps.length
-      ? suppliedSteps.map((step) => ({ ...step, dose: replaceCoachDistance(step.dose, sourceKm, km), detail: replaceCoachDistance(step.detail, sourceKm, km), isCoachMain: step.title === '主課' }))
-      : (day.steps || []).map((step) => step.title === '主課' ? { ...step, dose: '', detail: plan, isCoachMain: true } : step);
-    applied += 1;
-    return {
-      ...day,
-      type: isLong ? 'long' : 'easy',
-      focus: isLong ? 'long' : (/ST\s*快步/i.test(String(entry.plan || '')) ? 'strides' : 'aerobic'),
-      km,
-      task: coachPlanHeadline(plan),
-      pace: '',
-      hrTarget: '',
-      steps,
-      workoutStructure: coachWorkoutStructure(plan, day, steps),
-      workoutStructureConfidence: suppliedSteps.length ? 'coach' : coachStructureConfidence(plan),
-      coachPlan: { source: 'coach-menu', version: 2, originalWeekStart: coachReviewData?.nextWeek?.weekStart || '', appliedWeekStart: week.days?.[0]?.dateStr || '' }
-    };
+    if (!runs.includes(day)) return day;
+    const isLong = day === longDay;
+    const course = buildDayCard(day.dow, day.dateStr, isLong ? 'long' : 'easy', isLong ? longKm : eachKm, appData.profile, phase.phase === '降載', false, false, todayStr(), day.weekNum || weekNum, phase.phase, isLong ? 'long' : 'recovery', isLong ? '教練長跑' : '教練恢復跑');
+    course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: volume, longKm };
+    return course;
   });
-  if (!applied) return false;
-  week.targetKm = Number.isFinite(sourceTargetKm) ? Math.round(sourceTargetKm * volumeFactor * 10) / 10 : weekPlannedKm(week);
-  week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，將教練逐日處方直接排入第 ${weekNum} 週正式課表。`;
-  recordPlanChange(beforePlan, 'coach', `第 ${weekNum - 1} 週完成後，教練逐日處方已排入第 ${weekNum} 週`);
+  week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方。`;
+  recordPlanChange(beforePlan, 'coach', `教練第 ${weekNum} 週處方已排入正式課表：${phase.phase}`);
   saveData(appData);
   return true;
 }
 
-function hasAppliedCoachMenuSchedule(weekNum, menu) {
-  const week = appData.plan?.[weekNum - 1];
-  const mappedMenu = coachMenuForCurrentSchedule(menu);
-  if (!week || !mappedMenu.length) return false;
-  const coachDows = new Set(mappedMenu.map((entry) => entry.scheduledDow));
-  return (week.days || []).every((day) => {
-    if (!coachDows.has(day.dow)) return day.type === 'rest';
-    return day.coachPlan?.source === 'coach-menu' && day.coachPlan?.version === 2;
-  });
-}
-
 function restorePendingEarlyCoachSchedule() {
   const checkin = (appData.checkins || []).find((item) => item.weekNum === currentWeek && item.earlyTrigger);
-  const menu = coachReviewData?.nextWeek?.menu;
-  if (!checkin || !Array.isArray(menu) || !menu.length) return false;
-  if (checkin.coachScheduleSource === 'coach-menu-v2' && hasAppliedCoachMenuSchedule(checkin.weekNum + 1, menu)) return false;
-  const factor = Number(checkin.earlyDecision?.factor) || legacyEarlyCheckinDecision(checkin).factor;
-  if (!applyCoachMenuScheduleForWeek(checkin.weekNum + 1, menu, coachReviewData?.nextWeek?.targetKm, factor)) return false;
-  const current = (appData.checkins || []).find((item) => item.weekNum === checkin.weekNum);
-  if (current) {
-    current.coachScheduleApplied = true;
-    current.coachScheduleSource = 'coach-menu-v2';
-    current.coachScheduleAppliedAt = todayStr();
-    saveData(appData);
-  }
+  const nextWeek = appData.plan?.[currentWeek];
+  const applied = (nextWeek?.days || []).filter((day) => day.type !== 'rest').every((day) => day.coachPlan?.source === 'coach-periodization');
+  if (!checkin || applied || !applyCoachPhaseScheduleForWeek(checkin.weekNum + 1)) return false;
+  checkin.coachScheduleSource = 'coach-periodization';
+  saveData(appData);
   return true;
 }
 
@@ -575,9 +529,9 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   if (earlyTrigger && garminDecision?.decision !== 'deload' && decision.allowIntensity) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
   if (earlyTrigger && garminDecision?.decision === 'deload' && !painConcern && fatigue < 5 && answers[1]) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；${decision.note}`;
   const adaptation = runCoachAdaptation('weekly-checkin', decision);
-  const coachScheduleApplied = earlyTrigger && applyCoachMenuScheduleForWeek(currentWeek + 1, coachReviewData?.nextWeek?.menu, coachReviewData?.nextWeek?.targetKm, decision.factor);
+  const coachScheduleApplied = earlyTrigger && applyCoachPhaseScheduleForWeek(currentWeek + 1);
   if (!decision.allowIntensity && (painConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-menu-v2' : '' };
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();
