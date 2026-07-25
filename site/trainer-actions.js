@@ -450,6 +450,35 @@ function applyCoachPhaseScheduleForWeek(weekNum) {
   return true;
 }
 
+// 已寫入本機的舊版恢復課，不能繼續留下「Z2 配速 + Z1 上限」這種互相矛盾的指令。
+// 僅校正今天以後、尚未完成的恢復跑，歷史訓練紀錄不回寫。
+function alignRecoveryCourseTargets() {
+  const profile = appData?.profile || {};
+  const recovery = recoveryRunInstruction(profile);
+  const zones = hrZones(profile);
+  const cutoff = todayStr();
+  let changed = false;
+  (appData.plan || []).forEach((week) => {
+    (week.days || []).forEach((day) => {
+      if (day.type !== 'easy' || day.focus !== 'recovery' || day.status === 'done' || !day.dateStr || day.dateStr < cutoff) return;
+      const nextDetail = `今天是恢復跑：${recovery.detail}`;
+      const nextHeatNote = isHotSeasonDate(new Date(`${day.dateStr}T00:00:00`))
+        ? `高溫期：恢復跑守 ${recovery.hrTarget}，不守配速；超過 ${zones.recoveryMax} 就放慢，仍降不下來就走到 HR ≤${Math.max(0, zones.recoveryMax - 5)} 再跑。`
+        : day.heatNote;
+      const nextSteps = (day.steps || []).map((step) => step.title === '主課' ? { ...step, detail: nextDetail } : step);
+      if (day.pace !== recovery.pace || day.hrTarget !== recovery.hrTarget || day.heatNote !== nextHeatNote || JSON.stringify(day.steps) !== JSON.stringify(nextSteps)) {
+        day.pace = recovery.pace;
+        day.hrTarget = recovery.hrTarget;
+        day.heatNote = nextHeatNote;
+        day.steps = nextSteps;
+        changed = true;
+      }
+    });
+  });
+  if (changed) saveData(appData);
+  return changed;
+}
+
 // 一次提前週評估會先產生 Garmin／安全保護的中間結果，正式教練處方落地後，
 // 歷程只能保留該週最後採用的處方，不能把已被覆寫的過程當成四次排課。
 function reconcileCoachPrescriptionHistory(weekNum, phase) {

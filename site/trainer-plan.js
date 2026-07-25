@@ -339,6 +339,13 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
       variant.task = `${label || '補給演練跑'} ${km} km`;
       variant.steps[1].detail = `今天不是拚速度，而是邊跑邊練喝水、補給和穩定節奏，先把全馬需要的節奏建立起來。`;
     }
+    if (focus === 'recovery') {
+      const recovery = recoveryRunInstruction(profile);
+      variant.pace = recovery.pace;
+      variant.steps[1].detail = `今天是恢復跑：${recovery.detail}`;
+      variant.paceSource = 'recovery-hr';
+      return variant;
+    }
     variant.paceSource = easyAdaptive.source;
     return variant;
   }
@@ -764,7 +771,7 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
 
   const zones = hrZones(profile);
   card.hrTarget = type === 'easy'
-    ? (focus === 'recovery' ? `HR ≤${zones.recoveryMax}` : `HR ≤${zones.easyMax}`)
+    ? (focus === 'recovery' ? recoveryRunInstruction(profile).hrTarget : `HR ≤${zones.easyMax}`)
     : type === 'long'
       ? `HR ≤${zones.easyMax}`
       : type === 'tempo'
@@ -782,7 +789,9 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
   if (dateStr && isHotSeasonDate(new Date(`${dateStr}T00:00:00`)) && ['easy', 'long', 'tempo', 'interval'].includes(type)) {
     card.heatNote = type === 'tempo' || type === 'interval'
       ? '高溫期：以心率與體感為準，配速 +20–40 秒/km 屬正常；超出心率上限就降速或縮短快段。'
-      : `高溫期：守心率不守配速（+20–40 秒/km 屬正常）；HR 超過 ${zones.easyMax + 5} 就走 1 分鐘再跑，長課帶水。`;
+      : focus === 'recovery'
+        ? `高溫期：恢復跑守 ${recoveryRunInstruction(profile).hrTarget}，不守配速；超過 ${zones.recoveryMax} 就放慢，仍降不下來就走到 HR ≤${Math.max(0, zones.recoveryMax - 5)} 再跑。`
+        : `高溫期：守心率不守配速（+20–40 秒/km 屬正常）；HR 超過 ${zones.easyMax + 5} 就走 1 分鐘再跑，長課帶水。`;
   }
 
   if (isDeload && type !== 'rest') {

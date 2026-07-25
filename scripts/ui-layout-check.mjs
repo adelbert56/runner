@@ -527,11 +527,18 @@ async function assertTrainerReport(page, viewportName) {
       }));
       currentWeek = 3;
       coachReviewData = {
+        zones: { maxHr: 187, recoveryLabel: "Garmin Z1", easyMax: 150, steady: "150–157", tempo: "159–166", interval: "168–178" },
         periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" }]
       };
       appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleApplied: true, earlyDecision: { factor: 0.85 } }];
       const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
+      week4.days.filter((day) => day.focus === "recovery").forEach((day) => {
+        day.pace = "配速 8:17/km（Garmin Z2 校正）";
+        day.hrTarget = "HR ≤140";
+        day.steps = day.steps.map((step) => step.title === "主課" ? { ...step, detail: "舊版 Z2 配速恢復跑" } : step);
+      });
+      const recoveryCoursesAligned = alignRecoveryCourseTargets();
       appData.planChangeHistory.push(
         { date: "2026-07-25", source: "checkin", title: "Garmin 教練建議：下週降量並降階品質課", changes: ["第 4 週：21.8 → 18.7 km"] },
         { date: "2026-07-25", source: "coach", title: "教練下週處方已提前排入正式課表：長跑重建", changes: ["第 4 週：21.8 → 18.9 km"] },
@@ -545,7 +552,8 @@ async function assertTrainerReport(page, viewportName) {
         targetKm: week4.targetKm,
         plannedKm: weekPlannedKm(week4),
         week4Start: week4.days[0]?.dateStr,
-        courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, km: day.km, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
+        recoveryCoursesAligned,
+        courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, focus: day.focus, km: day.km, pace: day.pace, hrTarget: day.hrTarget, mainDetail: day.steps.find((step) => step.title === "主課")?.detail, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
         note: week4.planningNote,
         coachWorkspace,
         history: appData.planChangeHistory,
@@ -558,7 +566,8 @@ async function assertTrainerReport(page, viewportName) {
       saveData(appData);
     }
   });
-  if (!directCoachSchedule.applied || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[0, 5.3], [1, 5.3], [3, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
+  const recoveryCourses = directCoachSchedule.courses.filter((day) => day.focus === "recovery");
+  if (!directCoachSchedule.applied || !directCoachSchedule.recoveryCoursesAligned || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[0, 5.3], [1, 5.3], [3, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || recoveryCourses.length !== 3 || !recoveryCourses.every((day) => day.pace === "不設配速目標（心率主控）" && day.hrTarget === "HR ≤140（Garmin Z1）" && day.mainDetail?.includes("超過 140") && !day.pace.includes("Garmin Z2")) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
     throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the aligned coach prescription into week 4 ${JSON.stringify(directCoachSchedule)}`);
   }
   if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
