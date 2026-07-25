@@ -351,14 +351,17 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
   }
 
   if (type === 'tempo') {
-    const blockKm = Math.max(1, Math.round((km / 2.5) * 10) / 10);
+    // km 是整堂課的總里程；品質主課必須預留熱身與收操，不能把總里程又
+    // 全部寫成節奏段，否則實際週量與負荷都會被低估。
+    const qualityMainKm = Math.max(2, Math.round((km - 2) * 10) / 10);
+    const blockKm = Math.max(1, Math.round((qualityMainKm / 2) * 10) / 10);
     const variants = [
       {
         task: `${label || '節奏跑'} ${km} km`,
         pace: `配速 ${tempo}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '10 分', detail: `慢跑（${easy}/km）+ 動態伸展 + 2 趟短加速。` },
-          { icon: '🔥', title: '主課', dose: `${km} km`, detail: `連續節奏跑，配速 ${tempo}/km，維持穩定但可控制的吃力感。` },
+          { icon: '🔥', title: '主課', dose: `${qualityMainKm} km`, detail: `全課總計 ${km} km（含熱身收操）；連續節奏段 ${qualityMainKm} km，配速 ${tempo}/km，維持穩定但可控制的吃力感。` },
           { icon: '🧘', title: '收操', dose: '5–10 分', detail: '慢跑降速，收掉心率，再做靜態伸展。' }
         ]
       },
@@ -376,7 +379,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         pace: `由 ${easy}/km 收至 ${tempo}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '10 分', detail: '慢跑啟動 + 下肢動態伸展，讓步頻先順起來。' },
-          { icon: '🔥', title: '主課', dose: `${km} km`, detail: `前半先在輕鬆偏穩定節奏，後半逐步收快到 ${tempo}/km，練配速控制。` },
+          { icon: '🔥', title: '主課', dose: `${qualityMainKm} km`, detail: `全課總計 ${km} km（含熱身收操）；主課前半先在輕鬆偏穩定節奏，後半逐步收快到 ${tempo}/km，練配速控制。` },
           { icon: '🧘', title: '收操', dose: '5–8 分', detail: '慢跑降速，再做髖部與小腿伸展。' }
         ]
       },
@@ -385,7 +388,7 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         pace: `配速 ${tempo}/km`,
         steps: [
           { icon: '🚶', title: '熱身', dose: '10–12 分', detail: '慢跑啟動，加上 2 趟輕快加速，把步頻先喚醒。' },
-          { icon: '🔥', title: '主課', dose: `${Math.max(2, Math.round(km * 0.7 * 10) / 10)} km`, detail: `今天像真人教練帶的穩定主課：節奏要平、呼吸要穩，不用硬衝。` },
+          { icon: '🔥', title: '主課', dose: `${qualityMainKm} km`, detail: `全課總計 ${km} km（含熱身收操）；今天像真人教練帶的穩定主課：節奏要平、呼吸要穩，不用硬衝。` },
           { icon: '🧘', title: '收操', dose: '6–8 分', detail: '慢跑降速，再做小腿、臀部和腿後側伸展。' }
         ]
       },
@@ -426,9 +429,11 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
   }
 
   if (type === 'interval') {
-    const sets400 = Math.max(4, Math.min(8, Math.round(km / 0.4)));
-    const sets800 = Math.max(3, Math.min(6, Math.round(km / 0.8)));
-    const sets1k = Math.max(3, Math.min(5, Math.round(km)));
+    // 間歇組數也以扣除熱身／收操後的主課劑量計算；總里程不等於快段里程。
+    const qualityMainKm = Math.max(1.6, Math.round((km - 2.4) * 10) / 10);
+    const sets400 = Math.max(4, Math.min(8, Math.round(qualityMainKm / 0.4)));
+    const sets800 = Math.max(3, Math.min(6, Math.round(qualityMainKm / 0.8)));
+    const sets1k = Math.max(3, Math.min(5, Math.round(qualityMainKm)));
     const variants = [
       {
         task: `${label || '間歇跑'} ${sets400}×400m`,
