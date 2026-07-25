@@ -531,6 +531,30 @@ async function assertTrainerReport(page, viewportName) {
   if (intervalCompletionCredit.targetKm !== 1.6 || intervalCompletionCredit.partial || !intervalCompletionCredit.complete) {
     throw new Error(`${viewportName}/trainer-interval-credit: weekly completion must use the same quality-work target ${JSON.stringify(intervalCompletionCredit)}`);
   }
+  const intervalWeeklyGate = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    const previousReview = cloneTrainingValue(coachReviewData);
+    const day = { dateStr: "2026-07-20", dow: 1, type: "interval", km: 6.4, status: "planned", steps: [{ title: "主課", dose: "4×400m", detail: "組間 200m 慢跑恢復" }] };
+    try {
+      currentWeek = 1;
+      appData.plan = [{ weekNum: 1, days: [day] }];
+      appData.log = [];
+      coachReviewData = { analyticsRuns: [{ activityId: "partial-interval", date: day.dateStr, km: 6.4, pace: "5:30", qualityEligible: true, qualityKm: 0.8 }] };
+      const partial = weeklyCheckinTiming();
+      coachReviewData.analyticsRuns[0].qualityKm = 1.0;
+      const complete = weeklyCheckinTiming();
+      return { partialReady: partial.ready, partialCompleted: partial.completed, completeReady: complete.ready, completeCompleted: complete.completed };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      coachReviewData = previousReview;
+      saveData(appData);
+    }
+  });
+  if (intervalWeeklyGate.partialReady || intervalWeeklyGate.partialCompleted !== 0 || !intervalWeeklyGate.completeReady || intervalWeeklyGate.completeCompleted !== 1) {
+    throw new Error(`${viewportName}/trainer-interval-weekly-gate: weekly review did not enforce quality-work completion ${JSON.stringify(intervalWeeklyGate)}`);
+  }
   const directCoachSchedule = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;
