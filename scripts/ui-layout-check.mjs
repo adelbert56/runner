@@ -529,7 +529,7 @@ async function assertTrainerReport(page, viewportName) {
       coachReviewData = {
         periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" }]
       };
-      appData.checkins = [{ weekNum: 3, earlyTrigger: true, earlyDecision: { factor: 0.85 } }];
+      appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleApplied: true, earlyDecision: { factor: 0.85 } }];
       const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
       appData.planChangeHistory.push(
@@ -566,6 +566,47 @@ async function assertTrainerReport(page, viewportName) {
   }
   if (!directCoachSchedule.historyReconciled || directCoachSchedule.history.filter((item) => item.changes.some((change) => change.includes("第 4 週"))).length !== 1 || !directCoachSchedule.timeline.includes("教練第 4 週處方已排入正式課表：降載") || /18\.7|18\.9|27\.2/.test(directCoachSchedule.timeline)) {
     throw new Error(`${viewportName}/trainer-direct-coach-history: conflicting intermediate week 4 changes remained visible ${JSON.stringify(directCoachSchedule)}`);
+  }
+  const incompleteWeekCannotSchedule = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    const previousReview = cloneTrainingValue(coachReviewData);
+    const originalModal = window.showModal;
+    const originalClose = window.closeModal;
+    const originalJump = window.jumpToPhaseWeek;
+    const originalTab = window.switchPlanTab;
+    const originalOutcome = window.showCheckinOutcome;
+    try {
+      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [1, 1, 0, 1, 0, 0, 2], injuries: ["none"] };
+      const trainDows = [0, 1, 3, 6];
+      appData.profile = profile;
+      appData.plan = [1, 2, 3, 4, 5].map((weekNum) => ({ weekNum, phase: "build", phaseLabel: "建立期", targetKm: 30, days: buildWeekDays(profile, trainDows, 6, [0, 1, 3], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build") }));
+      appData.checkins = [];
+      appData.log = [];
+      currentWeek = 4;
+      coachReviewData = { periodization: [{ phase: "基礎強化", start: "2026-08-10", weeks: 4, km: "32→38", focus: "長跑 14–16 km。" }] };
+      window.showModal = () => {};
+      window.closeModal = () => {};
+      window.jumpToPhaseWeek = () => {};
+      window.switchPlanTab = () => {};
+      window.showCheckinOutcome = () => {};
+      const beforeWeek5 = cloneTrainingValue(appData.plan[4]);
+      completeWeeklyCheckin({ answers: [true, true, true, true, true], fatigue: 1, note: "", painConcern: false, earlyTrigger: true, plannedSessionCount: 4 });
+      return { unchanged: JSON.stringify(beforeWeek5) === JSON.stringify(appData.plan[4]), checkinWritten: appData.checkins.some((item) => item.weekNum === 4) };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      coachReviewData = previousReview;
+      window.showModal = originalModal;
+      window.closeModal = originalClose;
+      window.jumpToPhaseWeek = originalJump;
+      window.switchPlanTab = originalTab;
+      window.showCheckinOutcome = originalOutcome;
+      saveData(appData);
+    }
+  });
+  if (!incompleteWeekCannotSchedule.unchanged || incompleteWeekCannotSchedule.checkinWritten) {
+    throw new Error(`${viewportName}/trainer-incomplete-week-gate: an incomplete week was allowed to write week 5 ${JSON.stringify(incompleteWeekCannotSchedule)}`);
   }
   const recoveredEarlyPlanning = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
