@@ -509,6 +509,27 @@ async function assertTrainerReport(page, viewportName) {
   if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.adjustedTargetKm !== earlyPlanningSubmission.expectedTargetKm || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
     throw new Error(`${viewportName}/trainer-early-planning-submit: completed Garmin sessions did not complete the next-week scheduling flow ${JSON.stringify(earlyPlanningSubmission)}`);
   }
+  const recoveredEarlyPlanning = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    try {
+      currentWeek = 1;
+      const nextWeek = appData.plan[1];
+      const originalTargetKm = nextWeek.targetKm;
+      const hadQuality = nextWeek.days.some((day) => ["tempo", "interval"].includes(day.type));
+      appData.checkins = [{ weekNum: 1, earlyTrigger: true, provisional: true, result: "降載恢復", adjustment: "Garmin 已判定「自動降量」：下週跑量調整為 85%，品質課降階為原處方前 2/3。", safetyNote: "Garmin 已判定「自動降量」：下週跑量調整為 85%，品質課降階為原處方前 2/3。", date: todayStr() }];
+      appData.planChangeHistory = [];
+      const restored = restorePendingEarlyCoachAdjustment();
+      return { restored, applied: appData.checkins[0].nextWeekAdjustmentApplied === true, targetKm: nextWeek.targetKm, expectedTargetKm: Math.round(originalTargetKm * 0.85 * 10) / 10, qualityReduced: !hadQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce") };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      saveData(appData);
+    }
+  });
+  if (!recoveredEarlyPlanning.restored || !recoveredEarlyPlanning.applied || recoveredEarlyPlanning.targetKm !== recoveredEarlyPlanning.expectedTargetKm || !recoveredEarlyPlanning.qualityReduced) {
+    throw new Error(`${viewportName}/trainer-early-planning-recovery: stored early coaching record was not restored exactly once ${JSON.stringify(recoveredEarlyPlanning)}`);
+  }
   const manualEarlyPlanning = await page.evaluate(() => {
     const previousWeek = currentWeek;
     currentWeek = 1;

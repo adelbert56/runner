@@ -376,14 +376,14 @@ function renderCheckinSection() {
   </section>`;
 }
 
-function adjustNextWeek(factor, removeQuality, qualityMode = 'keep') {
-  const nextWeekPlan = appData.plan[currentWeek];
+function adjustNextWeek(factor, removeQuality, qualityMode = 'keep', weekNum = currentWeek) {
+  const nextWeekPlan = appData.plan[weekNum];
   if (!nextWeekPlan) return;
-  const beforePlan = futurePlanSnapshot();
+  const beforePlan = futurePlanSnapshot(weekNum + 1);
   nextWeekPlan.targetKm = Math.round(nextWeekPlan.targetKm * factor * 10) / 10;
   nextWeekPlan.days = nextWeekPlan.days.map(day => {
     if (removeQuality && ['tempo', 'interval'].includes(day.type)) {
-      const recovery = buildDayCard(day.dow, day.dateStr, 'easy', Math.round((day.km || 0) * factor * 10) / 10, appData.profile, false, false, !(appData.profile?.injuries || []).includes('none'), todayStr(), day.weekNum || currentWeek + 1, day.phaseName || nextWeekPlan.phase, 'recovery', '恢復跑');
+      const recovery = buildDayCard(day.dow, day.dateStr, 'easy', Math.round((day.km || 0) * factor * 10) / 10, appData.profile, false, false, !(appData.profile?.injuries || []).includes('none'), todayStr(), day.weekNum || weekNum + 1, day.phaseName || nextWeekPlan.phase, 'recovery', '恢復跑');
       recovery.safetyOverride = true;
       recovery.recoveryProtection = '週評估偵測到疼痛、疲勞或恢復不足，品質課已改為恢復跑。';
       return recovery;
@@ -397,6 +397,33 @@ function adjustNextWeek(factor, removeQuality, qualityMode = 'keep') {
   });
   recordPlanChange(beforePlan, 'checkin', removeQuality ? '週評估自動保護：下週降載並移除品質課' : qualityMode === 'reduce' ? 'Garmin 教練建議：下週降量並降階品質課' : '週評估已更新下週訓練量');
   saveData(appData);
+}
+
+function legacyEarlyCheckinDecision(checkin) {
+  const text = `${checkin.adjustment || ''} ${checkin.safetyNote || ''}`;
+  if (checkin.result === '停止品質課') return { factor: 0.7, removeQuality: true, qualityMode: 'keep' };
+  const percent = text.match(/調整為\s*(\d{2,3})%/);
+  const factor = percent ? Math.min(1.05, Math.max(0.7, Number(percent[1]) / 100)) : checkin.result === '降載恢復' ? 0.85 : checkin.result === '小幅推進' ? 1.05 : 1;
+  const qualityMode = /品質課降階|原處方前\s*2\/3/.test(text) ? 'reduce' : 'keep';
+  const removeQuality = checkin.result === '降載恢復' && qualityMode !== 'reduce';
+  return { factor, removeQuality, qualityMode };
+}
+
+function restorePendingEarlyCoachAdjustment() {
+  const checkin = (appData.checkins || []).find((item) => item.weekNum === currentWeek && item.earlyTrigger && !item.nextWeekAdjustmentApplied);
+  if (!checkin || !appData.plan?.[currentWeek]) return false;
+  const alreadyRecorded = (appData.planChangeHistory || []).some((item) => item.source === 'checkin' && item.date === checkin.date);
+  if (alreadyRecorded) {
+    checkin.nextWeekAdjustmentApplied = true;
+    saveData(appData);
+    return false;
+  }
+  const decision = checkin.earlyDecision || legacyEarlyCheckinDecision(checkin);
+  if (decision.factor === 1 && !decision.removeQuality && decision.qualityMode !== 'reduce') return false;
+  checkin.nextWeekAdjustmentApplied = true;
+  checkin.restoredEarlyAdjustmentAt = todayStr();
+  adjustNextWeek(decision.factor, decision.removeQuality, decision.qualityMode, checkin.weekNum);
+  return true;
 }
 
 function weeklyCheckinTiming() {
@@ -467,9 +494,9 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   }
   if (earlyTrigger && garminDecision?.decision !== 'deload' && decision.allowIntensity) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
   if (earlyTrigger && garminDecision?.decision === 'deload' && !painConcern && fatigue < 5 && answers[1]) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；${decision.note}`;
-  runCoachAdaptation('weekly-checkin', decision);
+  const adaptation = runCoachAdaptation('weekly-checkin', decision);
   if (!decision.allowIntensity && (painConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed };
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment) };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();
