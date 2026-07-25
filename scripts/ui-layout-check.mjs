@@ -519,7 +519,7 @@ async function assertTrainerReport(page, viewportName) {
       const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [0, 1, 1, 0, 1, 0, 2], injuries: ["none"] };
       const trainDows = [1, 2, 4, 6];
       appData.profile = profile;
-      appData.plan = [1, 2, 3, 4].map((weekNum) => ({
+      appData.plan = [1, 2, 3, 4, 5].map((weekNum) => ({
         weekNum,
         phase: "build",
         phaseLabel: "建立期",
@@ -530,12 +530,17 @@ async function assertTrainerReport(page, viewportName) {
       coachReviewData = {
         zones: { maxHr: 187, recoveryLabel: "Garmin Z1", easyLabel: "Garmin Z2", easyMax: 150, steady: "150–157", tempo: "159–166", interval: "168–178" },
         schedule: { trainingDows: [1, 2, 4, 6], longDow: 6 },
-        periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" }]
+        periodization: [
+          { phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" },
+          { phase: "基礎建量", start: "2026-08-03", weeks: 1, km: "30–32", focus: "長跑 12 km @E；恢復穩定後保留一堂品質課。" }
+        ]
       };
       appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleApplied: true, earlyDecision: { factor: 0.85 }, result: "維持", note: "腳感偏緊，但沒有疼痛" }];
       const adaptation = runCoachAdaptation("weekly-checkin", { factor: 0.85, removeQuality: false, qualityMode: "reduce", formalPrescriptionPending: true });
       const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
+      const buildApplied = applyCoachPhaseScheduleForWeek(5, { record: false, constraints: { factor: 0.85, removeQuality: false, qualityMode: "reduce" } });
+      const week5 = appData.plan[4];
       week4.days.filter((day) => day.focus === "easy").forEach((day) => {
         day.focus = "recovery";
         day.pace = "配速 8:17/km（Garmin Z2 校正）";
@@ -561,6 +566,9 @@ async function assertTrainerReport(page, viewportName) {
         deloadStructureAligned,
         courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, focus: day.focus, task: day.task, km: day.km, pace: day.pace, hrTarget: day.hrTarget, mainDetail: day.steps.find((step) => step.title === "主課")?.detail, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
         note: week4.planningNote,
+        buildApplied,
+        buildTargetKm: week5.targetKm,
+        buildCourses: week5.days.filter((day) => day.type !== "rest").map((day) => ({ type: day.type, focus: day.focus, km: day.km, task: day.task, qualityMode: day.coachPlan?.qualityMode, source: day.coachPlan?.source })),
         coachWorkspace,
         coachBrief,
         history: appData.planChangeHistory,
@@ -576,6 +584,10 @@ async function assertTrainerReport(page, viewportName) {
   const deloadEasyCourses = directCoachSchedule.courses.filter((day) => day.focus === "easy");
   if (!directCoachSchedule.applied || !directCoachSchedule.noIntermediateAdjustment || !directCoachSchedule.deloadStructureAligned || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[1, 5.3], [2, 5.3], [4, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || directCoachSchedule.courses.some((day) => day.task.includes("教練")) || deloadEasyCourses.length !== 3 || !deloadEasyCourses.every((day) => day.pace.startsWith("配速 ") && day.hrTarget === "HR ≤150（Garmin Z2）" && !day.mainDetail?.includes("恢復跑")) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
     throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the aligned coach prescription into week 4 ${JSON.stringify(directCoachSchedule)}`);
+  }
+  const buildQualityCourses = directCoachSchedule.buildCourses.filter((day) => ["tempo", "interval"].includes(day.type));
+  if (!directCoachSchedule.buildApplied || directCoachSchedule.buildTargetKm !== 25.5 || buildQualityCourses.length !== 1 || buildQualityCourses[0].qualityMode !== "reduce" || !buildQualityCourses[0].task.includes("原處方前 2/3") || !directCoachSchedule.buildCourses.every((day) => day.source === "coach-periodization")) {
+    throw new Error(`${viewportName}/trainer-coach-build-constraints: a non-deload coach prescription did not keep one reduced quality course under Garmin constraints ${JSON.stringify(directCoachSchedule)}`);
   }
   if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || !directCoachSchedule.coachBrief.includes("跑者提前回饋") || !directCoachSchedule.coachBrief.includes("腳感偏緊，但沒有疼痛") || !directCoachSchedule.coachBrief.includes("局部緊繃（未明示疼痛）") || !directCoachSchedule.coachBrief.includes("回饋的實際處置") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
     throw new Error(`${viewportName}/trainer-direct-coach-workspace: existing coach decision did not present the applied week 4 prescription ${directCoachSchedule.coachWorkspace}`);

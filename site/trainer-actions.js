@@ -441,28 +441,53 @@ function coachScheduleDayState({ trainingDows, longDow }) {
   return Array.from({ length: 7 }, (_, dow) => dow === longDow ? 2 : trainingDows.includes(dow) ? 1 : 0);
 }
 
-function applyCoachPhaseScheduleForWeek(weekNum, { record = true } = {}) {
+function coachPhaseIsDeload(phase) {
+  // 「恢復穩定後保留品質課」是建量週的條件，不是降載指令；只接受明確的
+  // 降載語意，避免把後續建量週誤寫成整週輕鬆跑。
+  return phase?.phase === '降載' || /減量|無硬課|恢復週|重建週/.test(`${phase?.phase || ''} ${phase?.focus || ''}`);
+}
+
+function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = {} } = {}) {
   const week = appData.plan?.[weekNum - 1];
   const phase = coachPhaseForWeek(week);
   const volume = (String(phase?.km || '').match(/\d+(?:\.\d+)?/g) || []).map(Number)[0];
   const longKm = Number((String(phase?.focus || '').match(/長跑\s*(\d+(?:\.\d+)?)/) || [])[1]);
   const schedule = coachScheduleContract();
   if (!phase || !Number.isFinite(volume) || !Number.isFinite(longKm) || !schedule.trainingDows.length || !schedule.trainingDows.includes(schedule.longDow) || volume <= longKm) return false;
-  const eachKm = Math.round(((volume - longKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
+  const phaseDeload = coachPhaseIsDeload(phase);
+  // Garmin／週評估是處方的限制條件，而非另一份課表：正式處方只寫一次，
+  // 但非降載週必須反映已確認的降量或品質降階。
+  const requestedFactor = Number(constraints.factor);
+  const volumeFactor = phaseDeload ? 1 : Math.min(1, Math.max(0.75, Number.isFinite(requestedFactor) ? requestedFactor : 1));
+  const effectiveVolume = Math.round(volume * volumeFactor * 10) / 10;
+  const effectiveLongKm = Math.round(longKm * volumeFactor * 10) / 10;
+  const deloadEachKm = Math.round(((effectiveVolume - effectiveLongKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
+  const removeQuality = Boolean(constraints.removeQuality);
+  const qualityMode = constraints.qualityMode === 'reduce' ? 'reduce' : 'keep';
+  const weekStart = new Date(`${week.days?.[0]?.dateStr || todayStr()}T00:00:00`);
+  const scheduleDows = schedule.trainingDows.filter((dow) => dow !== schedule.longDow);
+  const profile = appData.profile;
+  const isEarlyBeginner = profile?.fitnessLevel === 'beginner' && weekNum <= 4;
+  const sessionPattern = phaseDeload
+    ? scheduleDows.map(() => ({ type: 'easy', focus: 'easy', label: '輕鬆跑' }))
+    : buildWorkoutPattern(profile, schedule.trainingDows.length, weekNum, week.phase || 'build', removeQuality, false, isEarlyBeginner, weekStart, { allowQuality: !removeQuality });
+  let sessionIndex = 0;
   const beforePlan = futurePlanSnapshot(weekNum);
   appData.profile.dayState = coachScheduleDayState(schedule);
-  week.targetKm = volume;
+  week.targetKm = effectiveVolume;
   week.days = week.days.map((day) => {
     const actualDow = day.dateStr ? new Date(`${day.dateStr}T00:00:00`).getDay() : day.dow;
     if (!schedule.trainingDows.includes(actualDow) || day.isMakeup || day.status === 'done') return { ...day, dow: actualDow };
     const isLong = actualDow === schedule.longDow;
-    // 週期性降載是「減少總量、保留跑步頻率」，不是把每一堂非長跑都降成 Z1 恢復跑。
-    // 只有安全規則明確接管（safetyOverride）時，才會把個別課改為 recovery。
-    const course = buildDayCard(actualDow, day.dateStr, isLong ? 'long' : 'easy', isLong ? longKm : eachKm, appData.profile, phase.phase === '降載', false, false, todayStr(), day.weekNum || weekNum, phase.phase, isLong ? 'long' : 'easy', isLong ? '長跑' : '輕鬆跑');
-    course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: volume, longKm };
+    const session = isLong ? { type: 'long', focus: 'long', label: '長跑' } : (sessionPattern[sessionIndex++] || { type: 'easy', focus: 'aerobic', label: '穩定有氧' });
+    const courseKm = isLong ? effectiveLongKm : phaseDeload ? deloadEachKm : calcWorkoutKm(session.type, effectiveVolume, profile.goal, effectiveLongKm, session.focus);
+    const course = buildDayCard(actualDow, day.dateStr, session.type, courseKm, profile, phaseDeload || removeQuality, false, false, todayStr(), day.weekNum || weekNum, week.phase || 'build', session.focus, session.label);
+    if (qualityMode === 'reduce' && ['tempo', 'interval'].includes(course.type)) course.task = `${course.task}｜Garmin／週評估限制：主課只做原處方前 2/3，失控即改輕鬆跑。`;
+    course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: effectiveVolume, longKm: effectiveLongKm, volumeFactor, qualityMode, removeQuality };
     return course;
   });
-  week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方。`;
+  const constraintNote = volumeFactor < 1 ? `；已依 Garmin／週評估下修 ${Math.round((1 - volumeFactor) * 100)}%` : qualityMode === 'reduce' ? '；品質課已降階' : '';
+  week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方${constraintNote}。`;
   if (record) {
     recordPlanChange(beforePlan, 'coach', `教練第 ${weekNum} 週處方已排入正式課表：${phase.phase}`);
     reconcileCoachPrescriptionHistory(weekNum, phase.phase);
@@ -740,7 +765,7 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const recoveryCleared = !effectivePainConcern && fatigue < 4 && answers[1] && answers[2] && answers[3];
   const formalPrescriptionPending = earlyTrigger && earlyCompletionConfirmed && recoveryCleared;
   const adaptation = runCoachAdaptation('weekly-checkin', { ...decision, formalPrescriptionPending });
-  const coachScheduleApplied = formalPrescriptionPending && applyCoachPhaseScheduleForWeek(currentWeek + 1);
+  const coachScheduleApplied = formalPrescriptionPending && applyCoachPhaseScheduleForWeek(currentWeek + 1, { constraints: decision });
   if (!decision.allowIntensity && (effectivePainConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
   const feedbackTerrainEvidence = earlyTrigger ? coachTerrainEvidence(currentWeek) : null;
   const feedbackSignals = earlyTrigger ? classifyEarlyFeedback(note, feedbackTerrainEvidence) : [];
