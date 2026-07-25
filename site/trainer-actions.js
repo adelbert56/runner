@@ -634,12 +634,28 @@ function noteSignalsSafetyConcern(note) {
   return /(疼痛|越跑越痛|刺痛|拉傷|跛行|步態.{0,4}(改|異常)|麻木|腫脹|頭暈|胸悶)/.test(text);
 }
 
-function coachResponseToEarlyFeedback(note, decision, safetyConcern) {
+function classifyEarlyFeedback(note) {
+  const text = String(note || '').trim();
+  if (!text) return [];
+  const labels = [];
+  if (noteSignalsSafetyConcern(text)) labels.push('症狀／疼痛');
+  else if (/(緊繃|偏緊|僵硬|卡卡|痠)/.test(text)) labels.push('局部緊繃（未明示疼痛）');
+  if (/(疲勞|疲憊|累|腿重|沉重|恢復慢)/.test(text)) labels.push('疲勞或恢復感受');
+  if (/(睡不|失眠|睡眠|沒睡好)/.test(text)) labels.push('睡眠恢復');
+  if (/(高溫|炎熱|悶熱|很熱)/.test(text)) labels.push('高溫條件');
+  if (/(出差|加班|行程|無法|沒時間|週末)/.test(text)) labels.push('時間安排');
+  return [...new Set(labels)];
+}
+
+function coachResponseToEarlyFeedback(note, decision, safetyConcern, { coachScheduleApplied = false, targetWeek = null } = {}) {
   if (!String(note || '').trim()) return '';
-  if (safetyConcern) return '已讀取你的備註，並將其中的症狀視為安全訊號：下週先降量，取消品質課；症狀持續、加劇或影響步態時請停止跑步並尋求醫療或物理治療協助。';
-  if (decision.result === '降載恢復') return '已讀取你的備註，並連同恢復檢核與 Garmin 資料納入本次降載安排；下週先把恢復做好，不額外增加課表。';
-  if (decision.result === '停止品質課') return '已讀取你的備註，並以安全為優先：下週取消品質課，待症狀與疲勞完全消退後再評估。';
-  return '已讀取你的備註，並納入本次恢復判讀；正式課表依相同決策處理，不另外新增或覆寫課程。';
+  const signals = classifyEarlyFeedback(note);
+  const readback = signals.length ? `我讀到你提到：${signals.join('、')}。` : '我已讀到你的備註；其中沒有可安全自動判定的疼痛、疲勞、睡眠、高溫或時間訊號。';
+  if (safetyConcern) return `${readback} 這被視為安全訊號，因此實際處置是下週先降量並取消品質課；症狀持續、加劇或影響步態時請停止跑步並尋求醫療或物理治療協助。`;
+  if (decision.result === '停止品質課') return `${readback} 本次恢復檢核未通過，實際處置是下週取消品質課並維持安全保護，待症狀與疲勞完全消退後再評估。`;
+  if (decision.result === '降載恢復') return `${readback} 加上恢復檢核與 Garmin 資料，本次實際處置是下週降量，不額外增加課表。`;
+  if (coachScheduleApplied) return `${readback} 本次恢復條件通過，因此已套用第 ${targetWeek || '下'} 週正式教練處方；你的備註沒有觸發額外安全覆寫，所以不會另建一份不同課表。`;
+  return `${readback} 本次沒有觸發安全或跑量覆寫，因此正式課表維持原處方；這不是忽略，而是沒有足夠依據另改課。`;
 }
 
 function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigger = false, plannedSessionCount = 0, manualCompletionConfirmed = false }) {
@@ -688,8 +704,9 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const adaptation = runCoachAdaptation('weekly-checkin', { ...decision, formalPrescriptionPending });
   const coachScheduleApplied = formalPrescriptionPending && applyCoachPhaseScheduleForWeek(currentWeek + 1);
   if (!decision.allowIntensity && (effectivePainConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
-  const coachFeedbackResponse = earlyTrigger ? coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern) : '';
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
+  const feedbackSignals = earlyTrigger ? classifyEarlyFeedback(note) : [];
+  const coachFeedbackResponse = earlyTrigger ? coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1 }) : '';
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();

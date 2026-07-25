@@ -639,7 +639,13 @@ function renderCoachInsightHighlights(content) {
   return `${output}${reviewEscape(text.slice(cursor))}`;
 }
 
-function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null } = {}) {
+function earlyFeedbackForCoachBrief(weekNum = currentWeek) {
+  return [...(appData.checkins || [])]
+    .filter((item) => item.earlyTrigger && String(item.note || '').trim() && (item.weekNum === weekNum || item.weekNum === weekNum - 1))
+    .sort((left, right) => Math.abs(left.weekNum - weekNum) - Math.abs(right.weekNum - weekNum) || right.weekNum - left.weekNum)[0] || null;
+}
+
+function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null, earlyFeedback = null } = {}) {
   // 教練週報常以分號串接多個判讀；顯示時以完整語意片段分欄，避免整段擠進單一卡片。
   const sentences = String(note || '').split(/[；。]/).map((sentence) => sentence.trim()).filter(Boolean).map((sentence) => `${sentence}。`);
   if (!sentences.length) return '';
@@ -649,6 +655,18 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null 
   // 不重寫或改變判定內容。
   const execution = remaining.filter((sentence) => /^(本週|下週|今天|仍|肌力|長跑|體感|課表)/.test(sentence));
   const evidence = remaining.filter((sentence) => !execution.includes(sentence));
+  if (earlyFeedback) {
+    const signals = Array.isArray(earlyFeedback.feedbackSignals) && earlyFeedback.feedbackSignals.length
+      ? earlyFeedback.feedbackSignals
+      : (typeof classifyEarlyFeedback === 'function' ? classifyEarlyFeedback(earlyFeedback.note) : []);
+    const signalText = signals.length ? signals.join('、') : '未偵測到可自動改課的安全或負荷訊號';
+    const response = typeof coachResponseToEarlyFeedback === 'function'
+      ? coachResponseToEarlyFeedback(earlyFeedback.note, { result: earlyFeedback.result }, Boolean(earlyFeedback.feedbackSafetyConcern), { coachScheduleApplied: earlyFeedback.coachScheduleApplied === true, targetWeek: earlyFeedback.weekNum + 1 })
+      : earlyFeedback.coachFeedbackResponse || '已讀取提前排課回饋。';
+    conclusion.push(`已納入提前排課回饋；本次判定為「${earlyFeedback.result || '維持'}」。`);
+    evidence.push(`跑者提前回饋：「${earlyFeedback.note}」；判讀為：${signalText}。`);
+    execution.push(`回饋的實際處置：${response}`);
+  }
   const coachInsightCards = [
     { id: 'conclusion', title: '本週判定', subtitle: '先照這個方向執行', items: conclusion },
     { id: 'evidence', title: '判讀依據', subtitle: '哪些實跑訊號影響了安排', items: evidence },
@@ -673,7 +691,7 @@ function renderCourseDecisionPanel(plan = appData.plan || [], phaseRuleText = ''
   return `<section class="course-decision-panel" aria-label="課表決策總覽">
     ${focusSummary && !decision.coachNote ? `<div class="course-decision-context"><div class="course-focus-icon">🎯</div><div><b>本週執行重點</b><p>${reviewEscape(focusSummary)}</p></div><div class="course-focus-metric"><span>距離目標賽事</span><strong>${weeksRemaining}<small>週</small></strong></div></div>` : ''}
     ${decision.planningNote ? `<div class="course-decision-note"><div class="course-note-head"><b>本週排課調整</b><span>WEEKLY PLAN UPDATE</span></div><p>${reviewEscape(decision.planningNote)}</p></div>` : ''}
-    ${decision.coachNote ? renderCoachAdviceNote(decision.coachNote, { focusSummary, weeksRemaining }) : ''}
+    ${decision.coachNote || earlyFeedbackForCoachBrief(week?.weekNum) ? renderCoachAdviceNote(decision.coachNote || '提前排課回饋已完成判讀。', { focusSummary, weeksRemaining, earlyFeedback: earlyFeedbackForCoachBrief(week?.weekNum) }) : ''}
     ${overrides.some((item) => item.startsWith('教練處方')) ? '<div class="training-status-actions" style="margin-top:10px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'coach\')">查看教練完整依據</button></div>' : ''}
   </section>`;
 }
@@ -1266,18 +1284,11 @@ function renderCoachDecisionWorkspace(plan = appData.plan || []) {
     decision.coachNote ? renderCoachNarrativeDetail('教練完整判讀', decision.coachNote) : '',
     decision.planningNote ? renderCoachNarrativeDetail('排課調整說明', decision.planningNote) : ''
   ].filter(Boolean).join('');
-  const earlyFeedback = [...(appData.checkins || [])]
-    .filter((item) => item.earlyTrigger && String(item.note || '').trim())
-    .sort((left, right) => Math.abs(left.weekNum - currentWeek) - Math.abs(right.weekNum - currentWeek) || right.weekNum - left.weekNum)[0];
-  const feedbackResponse = earlyFeedback?.coachFeedbackResponse
-    || (earlyFeedback ? '已讀取你的提前排課備註；它會與恢復檢核及 Garmin 紀錄一起作為本次安排依據。' : '');
-  const feedbackSection = earlyFeedback ? `<section class="coach-brief" aria-label="提前排課回饋"><div class="coach-brief-title">你的提前排課回饋</div><div class="coach-decision-detail-body"><p><b>你寫的：</b>${reviewEscape(earlyFeedback.note)}</p><p><b>教練回應：</b>${reviewEscape(feedbackResponse)}</p></div></section>` : '';
   return `<section class="coach-decision-workspace" aria-label="教練決策摘要">
     <div class="coach-decision-kicker">Coach decision · same course resolver</div>
     <div class="coach-decision-headline">${reviewEscape(verdict)}</div>
     <p class="coach-decision-copy">${reviewEscape(riskText)}</p>
     ${renderGarminDecisionSummary()}
-    ${feedbackSection}
     <div class="coach-decision-next"><span>${reviewEscape(decision.focusLabel)}</span><div><b>${reviewEscape(nextLabel)}</b><p>${reviewEscape(decision.next.resolved.rationale || '這堂課照正式課表執行。')}</p></div></div>
     ${rawCoachNotes ? `<section class="coach-brief" aria-labelledby="coach-brief-title"><div class="coach-brief-title" id="coach-brief-title">教練重點</div><div class="coach-decision-detail-body">${rawCoachNotes}</div></section>` : ''}
     <div class="training-status-actions coach-decision-actions"><button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看${upcomingCoachPrescription ? `第 ${displayWeek?.weekNum || currentWeek + 1} 週` : '本週'}正式課表</button></div>

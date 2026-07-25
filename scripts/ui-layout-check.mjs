@@ -496,7 +496,7 @@ async function assertTrainerReport(page, viewportName) {
       submitEarlyCoachPlanning();
       const hasQuality = nextWeek.days.some((day) => ["tempo", "interval"].includes(day.type));
       const coachTargetKm = Number((String(coachReviewData.nextWeek.targetKm).match(/\d+(?:\.\d+)?/) || [])[0]);
-      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), feedbackRecorded: checkin?.note === "本週狀態穩定，週末只安排輕鬆恢復", feedbackResponded: typeof checkin?.coachFeedbackResponse === "string" && checkin.coachFeedbackResponse.includes("已讀取你的備註"), nextWeekExists: Boolean(appData.plan[currentWeek]), coachScheduleApplied: checkin?.coachScheduleApplied === true, nextWeekAdjustmentApplied: checkin?.nextWeekAdjustmentApplied === true, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
+      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), feedbackRecorded: checkin?.note === "本週狀態穩定，週末只安排輕鬆恢復", feedbackResponded: typeof checkin?.coachFeedbackResponse === "string" && checkin.coachFeedbackResponse.includes("我讀到你提到：時間安排"), nextWeekExists: Boolean(appData.plan[currentWeek]), coachScheduleApplied: checkin?.coachScheduleApplied === true, nextWeekAdjustmentApplied: checkin?.nextWeekAdjustmentApplied === true, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
     } finally {
       appData = previousData;
       currentWeek = previousWeek;
@@ -532,7 +532,7 @@ async function assertTrainerReport(page, viewportName) {
         schedule: { trainingDows: [1, 2, 4, 6], longDow: 6 },
         periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" }]
       };
-      appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleApplied: true, earlyDecision: { factor: 0.85 }, note: "腳感偏緊，但沒有疼痛", coachFeedbackResponse: "已讀取你的備註，並納入本次恢復判讀；正式課表依相同決策處理，不另外新增或覆寫課程。" }];
+      appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleApplied: true, earlyDecision: { factor: 0.85 }, result: "維持", note: "腳感偏緊，但沒有疼痛" }];
       const adaptation = runCoachAdaptation("weekly-checkin", { factor: 0.85, removeQuality: false, qualityMode: "reduce", formalPrescriptionPending: true });
       const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
@@ -550,6 +550,7 @@ async function assertTrainerReport(page, viewportName) {
       );
       const historyReconciled = restorePendingEarlyCoachSchedule();
       const coachWorkspace = renderCoachDecisionWorkspace(appData.plan);
+      const coachBrief = renderCoachAdviceNote("本週維持穩定執行。下週依正式處方安排。", { earlyFeedback: earlyFeedbackForCoachBrief(3) });
       return {
         applied,
         noIntermediateAdjustment: !adaptation.nextWeekAdjustment,
@@ -561,6 +562,7 @@ async function assertTrainerReport(page, viewportName) {
         courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, focus: day.focus, task: day.task, km: day.km, pace: day.pace, hrTarget: day.hrTarget, mainDetail: day.steps.find((step) => step.title === "主課")?.detail, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
         note: week4.planningNote,
         coachWorkspace,
+        coachBrief,
         history: appData.planChangeHistory,
         timeline: renderPlanChangeTimeline()
       };
@@ -575,7 +577,7 @@ async function assertTrainerReport(page, viewportName) {
   if (!directCoachSchedule.applied || !directCoachSchedule.noIntermediateAdjustment || !directCoachSchedule.deloadStructureAligned || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[1, 5.3], [2, 5.3], [4, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || directCoachSchedule.courses.some((day) => day.task.includes("教練")) || deloadEasyCourses.length !== 3 || !deloadEasyCourses.every((day) => day.pace.startsWith("配速 ") && day.hrTarget === "HR ≤150（Garmin Z2）" && !day.mainDetail?.includes("恢復跑")) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
     throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the aligned coach prescription into week 4 ${JSON.stringify(directCoachSchedule)}`);
   }
-  if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || !directCoachSchedule.coachWorkspace.includes("你的提前排課回饋") || !directCoachSchedule.coachWorkspace.includes("腳感偏緊，但沒有疼痛") || !directCoachSchedule.coachWorkspace.includes("教練回應") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
+  if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || !directCoachSchedule.coachBrief.includes("跑者提前回饋") || !directCoachSchedule.coachBrief.includes("腳感偏緊，但沒有疼痛") || !directCoachSchedule.coachBrief.includes("局部緊繃（未明示疼痛）") || !directCoachSchedule.coachBrief.includes("回饋的實際處置") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
     throw new Error(`${viewportName}/trainer-direct-coach-workspace: existing coach decision did not present the applied week 4 prescription ${directCoachSchedule.coachWorkspace}`);
   }
   if (!directCoachSchedule.historyReconciled || directCoachSchedule.history.filter((item) => item.changes.some((change) => change.includes("第 4 週"))).length !== 1 || !directCoachSchedule.timeline.includes("教練第 4 週處方已排入正式課表：降載") || /18\.7|18\.9|27\.2/.test(directCoachSchedule.timeline)) {
