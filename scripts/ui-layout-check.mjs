@@ -532,13 +532,15 @@ async function assertTrainerReport(page, viewportName) {
       appData.checkins = [{ weekNum: 3, earlyTrigger: true, earlyDecision: { factor: 0.85 } }];
       const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
+      const coachWorkspace = renderCoachDecisionWorkspace(appData.plan);
       return {
         applied,
         targetKm: week4.targetKm,
         plannedKm: weekPlannedKm(week4),
         week4Start: week4.days[0]?.dateStr,
         courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, km: day.km, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
-        note: week4.planningNote
+        note: week4.planningNote,
+        coachWorkspace
       };
     } finally {
       appData = previousData;
@@ -549,6 +551,9 @@ async function assertTrainerReport(page, viewportName) {
   });
   if (!directCoachSchedule.applied || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[0, 5.3], [1, 5.3], [3, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
     throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the aligned coach prescription into week 4 ${JSON.stringify(directCoachSchedule)}`);
+  }
+  if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
+    throw new Error(`${viewportName}/trainer-direct-coach-workspace: existing coach decision did not present the applied week 4 prescription ${directCoachSchedule.coachWorkspace}`);
   }
   const recoveredEarlyPlanning = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);

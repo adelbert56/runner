@@ -1238,18 +1238,28 @@ function renderCoachHistoryItem(item) {
 
 function renderCoachDecisionWorkspace(plan = appData.plan || []) {
   const context = buildContext();
-  const decision = resolveWeeklyDecision(context, plan[currentWeek - 1]);
+  const currentPlanWeek = plan[currentWeek - 1];
+  const upcomingPlanWeek = plan[currentWeek];
+  // 提前安排並不另建一份教練摘要：既有決策區塊直接切到已寫入的下週正式課表。
+  const upcomingCoachPrescription = (upcomingPlanWeek?.days || [])
+    .some((day) => day.type !== 'rest' && day.coachPlan?.source === 'coach-periodization');
+  const displayWeek = upcomingCoachPrescription ? upcomingPlanWeek : currentPlanWeek;
+  const decision = resolveWeeklyDecision(context, displayWeek);
   if (!decision?.next) return '';
   const source = decision.next.resolved.source;
   const focus = decision.next.resolved.course;
   const sourceSummary = Object.entries(decision.sourceCounts || {})
     .filter(([key, count]) => key !== 'baseline' && count)
     .map(([key, count]) => `${courseResolutionLabel(key)} ${count} 堂`);
-  const riskText = sourceSummary.length
+  const riskText = upcomingCoachPrescription
+    ? `已依第 ${currentPlanWeek?.weekNum || currentWeek} 週完成紀錄，將教練處方寫入第 ${displayWeek?.weekNum || currentWeek + 1} 週正式課表。`
+    : sourceSummary.length
     ? `本週決策已納入 ${sourceSummary.join('、')}。`
     : '目前沒有需要覆蓋正式課表的風險或教練處方。';
   const nextLabel = `${DOW_NAMES[decision.next.day.dow]} ${decision.next.day.dateStr?.slice(5) || ''}｜${trainingTaskTitle(focus)}`;
-  const verdict = source === 'baseline'
+  const verdict = upcomingCoachPrescription
+    ? '教練處方已套用'
+    : source === 'baseline'
     ? '照正式課表穩定執行'
     : `${courseResolutionLabel(source)}已套用`;
   const rawCoachNotes = [
@@ -1263,7 +1273,7 @@ function renderCoachDecisionWorkspace(plan = appData.plan || []) {
     ${renderGarminDecisionSummary()}
     <div class="coach-decision-next"><span>${reviewEscape(decision.focusLabel)}</span><div><b>${reviewEscape(nextLabel)}</b><p>${reviewEscape(decision.next.resolved.rationale || '這堂課照正式課表執行。')}</p></div></div>
     ${rawCoachNotes ? `<section class="coach-brief" aria-labelledby="coach-brief-title"><div class="coach-brief-title" id="coach-brief-title">教練重點</div><div class="coach-decision-detail-body">${rawCoachNotes}</div></section>` : ''}
-    <div class="training-status-actions coach-decision-actions"><button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看本週正式課表</button></div>
+    <div class="training-status-actions coach-decision-actions"><button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看${upcomingCoachPrescription ? `第 ${displayWeek?.weekNum || currentWeek + 1} 週` : '本週'}正式課表</button></div>
   </section>`;
 }
 
@@ -1746,14 +1756,6 @@ function renderCoachReviewPanel() {
     ? `<div style="margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--c-blue);border-radius:10px;background:var(--c-surface-alt);font-size:13px;line-height:1.6"><b>Garmin 自動判讀模式</b><br>雲端已同步實跑資料；跑量、負荷與同課型觀測會整合在本頁決策摘要。正式課表仍是唯一執行菜單。</div>`
     : '';
   const attention = trainingDataHealth(appData.plan || []).issues.length ? renderTrainingStatusCard(appData.plan || []) : '';
-  const earlyScheduledCoachWeek = (() => {
-    const week = upcomingPlanWeek;
-    const courses = (week?.days || []).filter((day) => day.type !== 'rest' && day.coachPlan?.source === 'coach-periodization');
-    if (!courses.length) return '';
-    const phase = courses[0].coachPlan?.phase || '教練處方';
-    const rows = courses.map((day) => `<li>${reviewEscape(DOW_NAMES[day.dow] || '')}｜${reviewEscape(trainingTaskTitle(day))}（${Number(day.km).toFixed(day.km % 1 ? 1 : 0)} km）</li>`).join('');
-    return `<section class="coach-summary" style="margin:0 0 14px"><div class="coach-summary-kicker">EARLY COACH SCHEDULE · 已執行</div><div class="coach-summary-title">第 ${week.weekNum} 週｜${reviewEscape(phase)}</div><p class="coach-summary-copy">已依第 ${week.weekNum - 1} 週完成紀錄提前排入正式課表；目標 ${reviewEscape(String(week.targetKm))} km。</p><ul class="coach-summary-list">${rows}</ul></section>`;
-  })();
   return `${attention}<div class="card coach-panel">
     <div class="coach-head">
       <div class="card-title" style="margin:0">🏃 教練建議</div>
@@ -1771,7 +1773,6 @@ function renderCoachReviewPanel() {
     </div>
     ${garminOnlyNotice}
     ${renderHistoryCoachContext()}
-    ${earlyScheduledCoachWeek}
     ${renderCoachDecisionWorkspace(appData.plan || [])}
     <section class="coach-evidence" aria-labelledby="coach-evidence-title">
       <div class="coach-evidence-head"><div><div class="coach-evidence-kicker">COACHING RECORD</div><h2 id="coach-evidence-title">判讀依據與調整歷程</h2><p>所有摘要預設展開；原始文字只在個別紀錄中保留。</p></div><span>已整合</span></div>
