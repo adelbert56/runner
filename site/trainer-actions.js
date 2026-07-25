@@ -446,15 +446,39 @@ function applyCoachPhaseScheduleForWeek(weekNum) {
   });
   week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方。`;
   recordPlanChange(beforePlan, 'coach', `教練第 ${weekNum} 週處方已排入正式課表：${phase.phase}`);
+  reconcileCoachPrescriptionHistory(weekNum, phase.phase);
   saveData(appData);
   return true;
+}
+
+// 一次提前週評估會先產生 Garmin／安全保護的中間結果，正式教練處方落地後，
+// 歷程只能保留該週最後採用的處方，不能把已被覆寫的過程當成四次排課。
+function reconcileCoachPrescriptionHistory(weekNum, phase) {
+  const weekLabel = `第 ${weekNum} 週`;
+  const title = `教練第 ${weekNum} 週處方已排入正式課表：${phase}`;
+  const history = normalizePlanChangeHistory(appData.planChangeHistory);
+  const affected = history.filter((item) => (item.changes || []).some((change) => String(change).includes(weekLabel)));
+  if (!affected.length) return false;
+  const canonical = affected.find((item) => item.source === 'coach' && item.title === title) || affected.at(-1);
+  const normalizedCanonical = { ...canonical, source: 'coach', title };
+  const nextHistory = history.filter((item) => !(item.changes || []).some((change) => String(change).includes(weekLabel)));
+  nextHistory.push(normalizedCanonical);
+  const changed = JSON.stringify(history) !== JSON.stringify(nextHistory);
+  if (changed) appData.planChangeHistory = normalizePlanChangeHistory(nextHistory);
+  return changed;
 }
 
 function restorePendingEarlyCoachSchedule() {
   const checkin = (appData.checkins || []).find((item) => item.weekNum === currentWeek && item.earlyTrigger);
   const nextWeek = appData.plan?.[currentWeek];
   const applied = (nextWeek?.days || []).filter((day) => day.type !== 'rest').every((day) => day.coachPlan?.source === 'coach-periodization');
-  if (!checkin || applied || !applyCoachPhaseScheduleForWeek(checkin.weekNum + 1)) return false;
+  if (!checkin) return false;
+  if (applied) {
+    const changed = reconcileCoachPrescriptionHistory(checkin.weekNum + 1, nextWeek.days.find((day) => day.coachPlan?.source === 'coach-periodization')?.coachPlan?.phase || '教練處方');
+    if (changed) saveData(appData);
+    return changed;
+  }
+  if (!applyCoachPhaseScheduleForWeek(checkin.weekNum + 1)) return false;
   checkin.coachScheduleSource = 'coach-periodization';
   saveData(appData);
   return true;

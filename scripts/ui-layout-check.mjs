@@ -532,15 +532,24 @@ async function assertTrainerReport(page, viewportName) {
       appData.checkins = [{ weekNum: 3, earlyTrigger: true, earlyDecision: { factor: 0.85 } }];
       const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
+      appData.planChangeHistory.push(
+        { date: "2026-07-25", source: "checkin", title: "Garmin 教練建議：下週降量並降階品質課", changes: ["第 4 週：21.8 → 18.7 km"] },
+        { date: "2026-07-25", source: "coach", title: "教練下週處方已提前排入正式課表：長跑重建", changes: ["第 4 週：21.8 → 18.9 km"] },
+        { date: "2026-07-25", source: "coach", title: "第 3 週完成後，教練處方已排入第 4 週", changes: ["第 4 週：21.8 → 27.2 km"] }
+      );
+      const historyReconciled = restorePendingEarlyCoachSchedule();
       const coachWorkspace = renderCoachDecisionWorkspace(appData.plan);
       return {
         applied,
+        historyReconciled,
         targetKm: week4.targetKm,
         plannedKm: weekPlannedKm(week4),
         week4Start: week4.days[0]?.dateStr,
         courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, km: day.km, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
         note: week4.planningNote,
-        coachWorkspace
+        coachWorkspace,
+        history: appData.planChangeHistory,
+        timeline: renderPlanChangeTimeline()
       };
     } finally {
       appData = previousData;
@@ -554,6 +563,9 @@ async function assertTrainerReport(page, viewportName) {
   }
   if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
     throw new Error(`${viewportName}/trainer-direct-coach-workspace: existing coach decision did not present the applied week 4 prescription ${directCoachSchedule.coachWorkspace}`);
+  }
+  if (!directCoachSchedule.historyReconciled || directCoachSchedule.history.filter((item) => item.changes.some((change) => change.includes("第 4 週"))).length !== 1 || !directCoachSchedule.timeline.includes("教練第 4 週處方已排入正式課表：降載") || /18\.7|18\.9|27\.2/.test(directCoachSchedule.timeline)) {
+    throw new Error(`${viewportName}/trainer-direct-coach-history: conflicting intermediate week 4 changes remained visible ${JSON.stringify(directCoachSchedule)}`);
   }
   const recoveredEarlyPlanning = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
