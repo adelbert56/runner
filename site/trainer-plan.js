@@ -74,7 +74,11 @@ function coachPlanningReadiness(profile) {
   const availableRuns = (profile.dayState || []).filter((state) => state >= 1).length;
   const recentTrend = weeklyRunTrend(coachRunRecords()).slice(-2);
   const completeRecent = recentTrend.filter((week) => week.week !== weekStartLabel(todayStr()) && Number(week.km) > 0);
-  const recentKm = completeRecent.length ? completeRecent.reduce((sum, week) => sum + Number(week.km), 0) / completeRecent.length : 0;
+  // 單一跑步或不完整的一週不代表目前可承受跑量；至少要有兩個已結束週
+  // 才用 Garmin 趨勢下修使用者設定，避免過期／零星資料把整個週期壓到不合理低量。
+  const recentKm = completeRecent.length >= 2
+    ? completeRecent.reduce((sum, week) => sum + Number(week.km), 0) / completeRecent.length
+    : 0;
   const configuredKm = Number(profile.weeklyKm) || 10;
   // 若近期實跑顯著低於設定，先以實跑能力為起點，避免重新排課瞬間跳量。
   const startKm = recentKm ? Math.min(configuredKm, Math.max(8, Math.round(recentKm * 1.05 * 10) / 10)) : configuredKm;

@@ -555,6 +555,53 @@ async function assertTrainerReport(page, viewportName) {
   if (intervalWeeklyGate.partialReady || intervalWeeklyGate.partialCompleted !== 0 || !intervalWeeklyGate.completeReady || intervalWeeklyGate.completeCompleted !== 1) {
     throw new Error(`${viewportName}/trainer-interval-weekly-gate: weekly review did not enforce quality-work completion ${JSON.stringify(intervalWeeklyGate)}`);
   }
+  const coachingPrinciples = await page.evaluate(() => {
+    const profile = {
+      generatedAt: "2026-07-06",
+      targetDate: "2026-12-06",
+      targetTime: "02:00:00",
+      racePaceSec: 340,
+      easyPaceSec: 500,
+      weeklyKm: 28,
+      maxLongRunMins: 150,
+      goal: "half",
+      fitnessLevel: "intermediate",
+      dayState: [0, 1, 1, 0, 1, 0, 2],
+      injuries: ["none"]
+    };
+    const plan = buildPlan(profile);
+    const runningDows = [1, 2, 4, 6];
+    const summaries = plan.map((week) => {
+      const running = week.days.filter((day) => day.type !== "rest");
+      const quality = running.filter((day) => ["tempo", "interval"].includes(day.type));
+      const long = running.filter((day) => day.type === "long");
+      return {
+        weekNum: week.weekNum,
+        isDeload: Boolean(week.isDeload),
+        dows: running.map((day) => day.dow).sort((a, b) => a - b),
+        longDows: long.map((day) => day.dow),
+        qualityDows: quality.map((day) => day.dow),
+        plannedKm: weekPlannedKm(week),
+        courses: running.map((day) => [day.dow, day.type, day.km])
+      };
+    });
+    return {
+      weeks: summaries.length,
+      fixedDays: summaries.every((week) => JSON.stringify(week.dows) === JSON.stringify(runningDows)),
+      saturdayLong: summaries.every((week) => JSON.stringify(week.longDows) === JSON.stringify([6])),
+      deloadNoQuality: summaries.filter((week) => week.isDeload).every((week) => week.qualityDows.length === 0),
+      oneQualityMax: summaries.every((week) => week.qualityDows.length <= 1),
+      qualitySpacing: summaries.every((week) => week.qualityDows.every((dow) => Math.abs(dow - 6) >= 2)),
+      deloadVolume: summaries.filter((week) => week.isDeload).every((week) => {
+        const prior = summaries[week.weekNum - 2];
+        return !prior || week.plannedKm < prior.plannedKm;
+      }),
+      summaries
+    };
+  });
+  if (coachingPrinciples.weeks < 8 || !coachingPrinciples.fixedDays || !coachingPrinciples.saturdayLong || !coachingPrinciples.deloadNoQuality || !coachingPrinciples.oneQualityMax || !coachingPrinciples.qualitySpacing || !coachingPrinciples.deloadVolume) {
+    throw new Error(`${viewportName}/trainer-coaching-principles: cycle violated fixed-day, load, or spacing rules ${JSON.stringify(coachingPrinciples)}`);
+  }
   const directCoachSchedule = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;
