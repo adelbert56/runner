@@ -890,6 +890,11 @@ async function assertTrainerReport(page, viewportName) {
     const coachWeek = { days: [{ dateStr: "2026-07-20", dow: 1 }] };
     coachReviewData = { nextWeek: { weekStart: "2026-07-20", menu: [{ plan: "節奏跑 6 km" }] } };
     const safetyDay = resolveCourse({ dow: 1, dateStr: "2026-07-20", type: "easy", task: "恢復跑", safetyOverride: true }, buildContext(), coachWeek);
+    const hotCoachDay = resolveCourse(
+      { dow: 1, dateStr: "2026-07-20", type: "tempo", km: 6, task: "節奏跑 6 km", steps: [] },
+      { ...buildContext(), today: "2026-07-20", weather: { "2026-07-20": { tmax: 35 } }, checkins: [] },
+      coachWeek
+    );
     const nextWeekDecision = progression(buildContext(), "weekly-checkin", { factor: 0.85, removeQuality: true, qualityMode: "keep" });
     const paces = paceResolver(buildContext(), "2026-07-20");
     const coachLocked = coachPrescriptionLocksWeek(coachWeek);
@@ -899,12 +904,14 @@ async function assertTrainerReport(page, viewportName) {
       protection: protectedDays[1]?.recoveryProtection,
       coachLocked,
       safetyOverride: Boolean(safetyDay.course.coachSafetyOverride),
+      hotCoachSource: hotCoachDay.source,
+      hotCoachType: hotCoachDay.course.type,
       progressionSafety: nextWeekDecision?.removeQuality,
       paceSource: paces?.easy?.source,
       paceHrMax: paces?.hrZones?.max,
     };
   });
-  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax) {
+  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || safeguards.hotCoachSource !== "daily-safety-guard" || safeguards.hotCoachType !== "easy" || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax) {
     throw new Error(`${viewportName}/trainer-safeguards: environmental, recovery, or coach-priority rule failed ${JSON.stringify(safeguards)}`);
   }
   const planningScenarios = await page.evaluate(() => {

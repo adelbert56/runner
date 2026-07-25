@@ -169,6 +169,32 @@ function safetyGuard(day, ctx) {
       source: 'safety-override'
     };
   }
+  // 正式教練處方不是安全豁免：高溫、近期疲勞或相鄰高強度的當日訊號只覆蓋
+  // 今天尚未完成的高強度課，且不回寫整週課表，明天會重新以最新資料判讀。
+  const isTodayHardSession = day.dateStr === ctx.today && ['tempo', 'interval', 'long'].includes(day.type)
+    && day.status !== 'done' && !day.raceReplacement && !day.isMakeup;
+  const dailyTriggers = isTodayHardSession && typeof dailyAdvisoryTriggers === 'function'
+    ? dailyAdvisoryTriggers(day, ctx)
+    : [];
+  if (dailyTriggers.length) {
+    const easyKm = Math.max(3, Math.round((Number(day.km) || 5) * (day.type === 'long' ? 0.6 : 0.7) * 10) / 10);
+    return {
+      type: 'replace',
+      course: {
+        ...day,
+        type: 'easy',
+        focus: 'recovery',
+        km: easyKm,
+        task: `輕鬆跑 ${easyKm} km｜出發前調整：${dailyTriggers.join('、')}`,
+        pace: '很輕鬆、可完整對話；狀況不佳就再縮短或改休息',
+        hrTarget: '',
+        steps: [],
+        advisoryAdjusted: true
+      },
+      rationale: `出發前調整：${dailyTriggers.join('、')}；今天已降階為恢復安排。`,
+      source: 'daily-safety-guard'
+    };
+  }
   return null;
 }
 
@@ -220,6 +246,7 @@ function courseResolutionLabel(source) {
   return {
     'safety-hold': '安全保護',
     'safety-override': '恢復保護',
+    'daily-safety-guard': '出發前安全調整',
     'coach-prescription': '教練處方',
     'daily-adjust': '出發前調整',
     'race-adjustment': '賽事調整',
