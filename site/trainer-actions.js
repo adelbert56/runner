@@ -640,18 +640,34 @@ function classifyEarlyFeedback(note) {
   const labels = [];
   if (noteSignalsSafetyConcern(text)) labels.push('症狀／疼痛');
   else if (/(緊繃|偏緊|僵硬|卡卡|痠)/.test(text)) labels.push('局部緊繃（未明示疼痛）');
-  if (/(疲勞|疲憊|累|腿重|沉重|恢復慢)/.test(text)) labels.push('疲勞或恢復感受');
+  if (/(上坡|爬升|丘陵|坡跑)/.test(text)) labels.push('坡度／爬升負荷');
+  if (/(後面.*沒力|後段.*沒力|後段掉速|撐不住|爆掉)/.test(text)) labels.push('長跑後段失力');
+  if (/(有氧耐力|心肺耐力|心肺不足)/.test(text)) labels.push('有氧耐力疑慮');
+  if (/(疲勞|疲憊|累|腿重|沉重|恢復慢|沒力|無力)/.test(text)) labels.push('疲勞或恢復感受');
   if (/(睡不|失眠|睡眠|沒睡好)/.test(text)) labels.push('睡眠恢復');
   if (/(高溫|炎熱|悶熱|很熱)/.test(text)) labels.push('高溫條件');
   if (/(出差|加班|行程|無法|沒時間|週末)/.test(text)) labels.push('時間安排');
   return [...new Set(labels)];
 }
 
+function nextWeekCourseSummary(targetWeek) {
+  const week = appData.plan?.[Number(targetWeek) - 1];
+  if (!week) return '下週先依正式課表執行。';
+  const runs = (week.days || []).filter((day) => day.type !== 'rest');
+  const longRun = runs.find((day) => day.type === 'long');
+  const easyRuns = runs.filter((day) => day.type !== 'long');
+  const easyText = easyRuns.length ? `${easyRuns.length} 堂輕鬆跑` : '恢復安排';
+  const longText = longRun ? `長跑 ${longRun.km} km（${longRun.hrTarget || '以心率控制'}）` : '不安排長跑';
+  return `第 ${week.weekNum} 週維持 ${week.targetKm} km：${easyText}＋${longText}。`;
+}
+
 function coachResponseToEarlyFeedback(note, decision, safetyConcern, { coachScheduleApplied = false, targetWeek = null } = {}) {
   if (!String(note || '').trim()) return '';
   const signals = classifyEarlyFeedback(note);
   const readback = signals.length ? `我讀到你提到：${signals.join('、')}。` : '我已讀到你的備註；其中沒有可安全自動判定的疼痛、疲勞、睡眠、高溫或時間訊號。';
+  const terrainLongRunIssue = signals.includes('坡度／爬升負荷') && (signals.includes('長跑後段失力') || signals.includes('有氧耐力疑慮'));
   if (safetyConcern) return `${readback} 這被視為安全訊號，因此實際處置是下週先降量並取消品質課；症狀持續、加劇或影響步態時請停止跑步並尋求醫療或物理治療協助。`;
+  if (terrainLongRunIssue) return `${readback} 這趟長跑含上坡，後段失力不能直接當成平路有氧能力退步；本次不據此加硬課。${nextWeekCourseSummary(targetWeek)} 下次長跑選平坦路線，前半程以心率與可對話感控制，不追配速；完成這週降載後，再用平路長跑的後段心率與主觀疲勞評估是否需要增加有氧耐力課。`;
   if (decision.result === '停止品質課') return `${readback} 本次恢復檢核未通過，實際處置是下週取消品質課並維持安全保護，待症狀與疲勞完全消退後再評估。`;
   if (decision.result === '降載恢復') return `${readback} 加上恢復檢核與 Garmin 資料，本次實際處置是下週降量，不額外增加課表。`;
   if (coachScheduleApplied) return `${readback} 本次恢復條件通過，因此已套用第 ${targetWeek || '下'} 週正式教練處方；你的備註沒有觸發額外安全覆寫，所以不會另建一份不同課表。`;

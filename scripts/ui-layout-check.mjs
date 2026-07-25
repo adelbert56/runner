@@ -486,7 +486,7 @@ async function assertTrainerReport(page, viewportName) {
       openEarlyCoachPlanning();
       CHECKIN_QUESTIONS.slice(1).forEach((_, index) => { document.getElementById(`early-check-${index + 1}`).checked = true; });
       document.getElementById("early-fatigue").value = "3";
-      document.getElementById("early-note").value = "本週狀態穩定，週末只安排輕鬆恢復";
+      document.getElementById("early-note").value = "本次長跑有加入上坡跑，所以比較辛苦，有氧耐力還不夠需要多練，跑到後面都沒力了";
       submitEarlyCoachPlanning();
       const checkin = appData.checkins.find((item) => item.weekNum === currentWeek);
       if (checkin) checkin.provisional = false;
@@ -496,7 +496,7 @@ async function assertTrainerReport(page, viewportName) {
       submitEarlyCoachPlanning();
       const hasQuality = nextWeek.days.some((day) => ["tempo", "interval"].includes(day.type));
       const coachTargetKm = Number((String(coachReviewData.nextWeek.targetKm).match(/\d+(?:\.\d+)?/) || [])[0]);
-      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), feedbackRecorded: checkin?.note === "本週狀態穩定，週末只安排輕鬆恢復", feedbackResponded: typeof checkin?.coachFeedbackResponse === "string" && checkin.coachFeedbackResponse.includes("我讀到你提到：時間安排"), nextWeekExists: Boolean(appData.plan[currentWeek]), coachScheduleApplied: checkin?.coachScheduleApplied === true, nextWeekAdjustmentApplied: checkin?.nextWeekAdjustmentApplied === true, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
+      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), feedbackRecorded: checkin?.note === "本次長跑有加入上坡跑，所以比較辛苦，有氧耐力還不夠需要多練，跑到後面都沒力了", feedbackResponded: typeof checkin?.coachFeedbackResponse === "string" && checkin.coachFeedbackResponse.includes("坡度／爬升負荷") && checkin.coachFeedbackResponse.includes("長跑後段失力") && checkin.coachFeedbackResponse.includes("平坦路線"), nextWeekExists: Boolean(appData.plan[currentWeek]), coachScheduleApplied: checkin?.coachScheduleApplied === true, nextWeekAdjustmentApplied: checkin?.nextWeekAdjustmentApplied === true, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
     } finally {
       appData = previousData;
       currentWeek = previousWeek;
