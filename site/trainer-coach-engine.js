@@ -198,6 +198,59 @@ function coachPrescription(day, ctx, week) {
   };
 }
 
+function coachPhaseScheduleForWeek(week, volumeFactor = 1) {
+  const phase = coachPhaseForWeek(week);
+  const focus = String(phase?.focus || '');
+  if (!phase || phase.phase !== '長跑重建' || !/長跑\s*\d+\s*(?:→|-)\s*\d+\s*km/i.test(focus) || !/無硬課/.test(focus)) return null;
+  const start = weekStartLabel(week?.days?.[0]?.dateStr || '');
+  const phaseStart = weekStartLabel(phase.start || '');
+  const phaseWeeks = Math.max(1, Number(phase.weeks) || 1);
+  const weekOffset = Math.max(0, Math.min(phaseWeeks - 1, Math.round((new Date(`${start}T00:00:00`) - new Date(`${phaseStart}T00:00:00`)) / 604800000)));
+  const progression = phaseWeeks === 1 ? 1 : weekOffset / (phaseWeeks - 1);
+  const [volumeStart, volumeEnd] = (String(phase.km || '').match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  const [longStart, longEnd] = (focus.match(/長跑\s*(\d+(?:\.\d+)?)\s*(?:→|-)\s*(\d+(?:\.\d+)?)\s*km/i) || []).slice(1).map(Number);
+  if (![volumeStart, volumeEnd, longStart, longEnd].every(Number.isFinite)) return null;
+  const targetKm = Math.round((volumeStart + (volumeEnd - volumeStart) * progression) * volumeFactor * 10) / 10;
+  const longKm = Math.round((longStart + (longEnd - longStart) * progression) * volumeFactor * 10) / 10;
+  const runningDays = (week.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
+  const longDay = runningDays.find((day) => day.type === 'long') || runningDays.at(-1);
+  if (!runningDays.length || !longDay || targetKm <= longKm) return null;
+  const remaining = Math.round((targetKm - longKm) * 10) / 10;
+  const otherDays = runningDays.filter((day) => day !== longDay);
+  const eachKm = Math.round((remaining / Math.max(1, otherDays.length)) * 10) / 10;
+  return {
+    phase,
+    targetKm,
+    days: (week.days || []).map((day) => {
+      if (!runningDays.includes(day)) return day;
+      const isLong = day === longDay;
+      const isStrideDay = !isLong && day === otherDays[0];
+      const km = isLong ? longKm : eachKm;
+      const task = isLong
+        ? `教練長跑 ${km} km｜全程 E 強度，心率優先`
+        : isStrideDay
+          ? `教練輕鬆跑 ${km} km＋ST 快步 4–6 趟`
+          : `教練輕鬆跑 ${km} km｜全程 E 強度`;
+      const course = buildDayCard(day.dow, day.dateStr, isLong ? 'long' : 'easy', km, appData.profile, false, false, false, todayStr(), day.weekNum || week.weekNum, phase.phase, isStrideDay ? 'strides' : (isLong ? 'long' : 'aerobic'), task);
+      course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm, longKm };
+      return course;
+    })
+  };
+}
+
+function applyCoachPhaseScheduleForWeek(weekNum, volumeFactor = 1) {
+  const week = appData.plan?.[weekNum - 1];
+  const schedule = coachPhaseScheduleForWeek(week, volumeFactor);
+  if (!schedule) return false;
+  const beforePlan = futurePlanSnapshot(weekNum);
+  week.targetKm = schedule.targetKm;
+  week.days = schedule.days;
+  week.planningNote = `教練「${schedule.phase.phase}」處方已套用：${schedule.phase.focus}`;
+  recordPlanChange(beforePlan, 'coach', `教練處方已提前套用：${schedule.phase.phase}`);
+  saveData(appData);
+  return true;
+}
+
 function courseRationale(day, ctx) {
   if (day.recoveryProtection) return `安全保護：${day.recoveryProtection}`;
   const advisory = ctx.lastDailyAdvisory?.date === day.dateStr ? ctx.lastDailyAdvisory : null;

@@ -2320,7 +2320,9 @@ function init() {
     // 週跟「目前實際進行到第幾週」是兩件事，混在同一個變數裡，重新整理
     // 一次就會把提前排課、週評估等判斷全部帶去錯的週。
     renderPlanView();
-    if (restorePendingEarlyCoachAdjustment()) renderPlanView();
+    const restoredEarlyAdjustment = restorePendingEarlyCoachAdjustment();
+    const restoredEarlySchedule = restorePendingEarlyCoachSchedule();
+    if (restoredEarlyAdjustment || restoredEarlySchedule) renderPlanView();
     if (ui.view === 'setup') {
       renderSetupView();
       showView('setup');

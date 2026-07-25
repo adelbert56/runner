@@ -695,18 +695,29 @@ async function assertTrainerReport(page, viewportName) {
     const safetyDay = resolveCourse({ dow: 1, dateStr: "2026-07-20", type: "easy", task: "恢復跑", safetyOverride: true }, buildContext(), coachWeek);
     const nextWeekDecision = progression(buildContext(), "weekly-checkin", { factor: 0.85, removeQuality: true, qualityMode: "keep" });
     const paces = paceResolver(buildContext(), "2026-07-20");
+    const coachLocked = coachPrescriptionLocksWeek(coachWeek);
+    coachReviewData = { periodization: [{ phase: "長跑重建", start: "2026-07-13", weeks: 3, km: "28→34", focus: "長跑 10→14 km @E，無硬課；ST 快步練步頻。" }] };
+    const phaseSchedule = coachPhaseScheduleForWeek({ weekNum: 3, days: [
+      { dow: 0, dateStr: "2026-07-27", type: "easy", km: 5 },
+      { dow: 1, dateStr: "2026-07-28", type: "easy", km: 5 },
+      { dow: 3, dateStr: "2026-07-30", type: "easy", km: 5 },
+      { dow: 5, dateStr: "2026-08-01", type: "long", km: 7 },
+    ] });
     return {
       heatSafe: isCalibrationSafeRun({ date: "2026-07-15", km: 6, elevationGainM: 0, temperatureC: 35 }),
       protectedType: protectedDays[1]?.type,
       protection: protectedDays[1]?.recoveryProtection,
-      coachLocked: coachPrescriptionLocksWeek(coachWeek),
+      coachLocked,
       safetyOverride: Boolean(safetyDay.course.coachSafetyOverride),
       progressionSafety: nextWeekDecision?.removeQuality,
       paceSource: paces?.easy?.source,
       paceHrMax: paces?.hrZones?.max,
+      phaseTargetKm: phaseSchedule?.targetKm,
+      phaseLongKm: phaseSchedule?.days.find((day) => day.type === "long")?.km,
+      phaseCoachDays: phaseSchedule?.days.filter((day) => day.coachPlan).length,
     };
   });
-  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax) {
+  if (safeguards.heatSafe || safeguards.protectedType !== "easy" || !safeguards.protection || !safeguards.coachLocked || !safeguards.safetyOverride || !safeguards.progressionSafety || !safeguards.paceSource || !safeguards.paceHrMax || safeguards.phaseTargetKm !== 34 || safeguards.phaseLongKm !== 14 || safeguards.phaseCoachDays !== 4) {
     throw new Error(`${viewportName}/trainer-safeguards: environmental, recovery, or coach-priority rule failed ${JSON.stringify(safeguards)}`);
   }
   const planningScenarios = await page.evaluate(() => {

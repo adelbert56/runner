@@ -426,6 +426,21 @@ function restorePendingEarlyCoachAdjustment() {
   return true;
 }
 
+function restorePendingEarlyCoachSchedule() {
+  const checkin = (appData.checkins || []).find((item) => item.weekNum === currentWeek && item.earlyTrigger && !item.coachScheduleApplied);
+  if (!checkin) return false;
+  const factor = Number(checkin.earlyDecision?.factor) || legacyEarlyCheckinDecision(checkin).factor;
+  const applied = applyCoachPhaseScheduleForWeek(checkin.weekNum + 1, factor);
+  if (!applied) return false;
+  const current = (appData.checkins || []).find((item) => item.weekNum === checkin.weekNum);
+  if (current) {
+    current.coachScheduleApplied = true;
+    current.coachScheduleAppliedAt = todayStr();
+    saveData(appData);
+  }
+  return true;
+}
+
 function weeklyCheckinTiming() {
   const days = (appData.plan?.[currentWeek - 1]?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
   const completedDates = new Set([...(appData.log || []).map((entry) => entry.date), ...days.filter((day) => day.status === 'done').map((day) => day.dateStr)]);
@@ -495,8 +510,9 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   if (earlyTrigger && garminDecision?.decision !== 'deload' && decision.allowIntensity) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；已依恢復檢核提前安排下一週，休息與居家肌力不列入跑步完成門檻。`;
   if (earlyTrigger && garminDecision?.decision === 'deload' && !painConcern && fatigue < 5 && answers[1]) decision.note = `${manualCompletionConfirmed ? '已手動確認' : '已自動核對'}本週 ${plannedSessionCount} 堂排定跑步課完成；${decision.note}`;
   const adaptation = runCoachAdaptation('weekly-checkin', decision);
+  const coachScheduleApplied = earlyTrigger && applyCoachPhaseScheduleForWeek(currentWeek + 1, decision.factor);
   if (!decision.allowIntensity && (painConcern || fatigue >= 5 || !answers[1])) activateSafetyHold(decision, fatigue);
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment) };
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();
