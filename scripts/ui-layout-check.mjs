@@ -538,7 +538,10 @@ async function assertTrainerReport(page, viewportName) {
           ]
         }
       };
-      const applied = applyCoachMenuScheduleForWeek(4, coachReviewData.nextWeek.menu, coachReviewData.nextWeek.targetKm);
+      // 模擬舊版已錯誤寫入「已套用」旗標、但第 4 週卡片仍是產生器課表：
+      // 重新開頁時必須看卡片實體，而不是相信這個旗標。
+      appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleSource: "coach-menu-v2", earlyDecision: { factor: 1 } }];
+      const applied = restorePendingEarlyCoachSchedule();
       const week4 = appData.plan[3];
       return {
         applied,

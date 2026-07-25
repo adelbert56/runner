@@ -478,10 +478,22 @@ function applyCoachMenuScheduleForWeek(weekNum, menu, fallbackTargetKm, volumeFa
   return true;
 }
 
+function hasAppliedCoachMenuSchedule(weekNum, menu) {
+  const week = appData.plan?.[weekNum - 1];
+  const mappedMenu = coachMenuForCurrentSchedule(menu);
+  if (!week || !mappedMenu.length) return false;
+  const coachDows = new Set(mappedMenu.map((entry) => entry.scheduledDow));
+  return (week.days || []).every((day) => {
+    if (!coachDows.has(day.dow)) return day.type === 'rest';
+    return day.coachPlan?.source === 'coach-menu' && day.coachPlan?.version === 2;
+  });
+}
+
 function restorePendingEarlyCoachSchedule() {
-  const checkin = (appData.checkins || []).find((item) => item.weekNum === currentWeek && item.earlyTrigger && item.coachScheduleSource !== 'coach-menu-v2');
+  const checkin = (appData.checkins || []).find((item) => item.weekNum === currentWeek && item.earlyTrigger);
   const menu = coachReviewData?.nextWeek?.menu;
   if (!checkin || !Array.isArray(menu) || !menu.length) return false;
+  if (checkin.coachScheduleSource === 'coach-menu-v2' && hasAppliedCoachMenuSchedule(checkin.weekNum + 1, menu)) return false;
   const factor = Number(checkin.earlyDecision?.factor) || legacyEarlyCheckinDecision(checkin).factor;
   if (!applyCoachMenuScheduleForWeek(checkin.weekNum + 1, menu, coachReviewData?.nextWeek?.targetKm, factor)) return false;
   const current = (appData.checkins || []).find((item) => item.weekNum === checkin.weekNum);
