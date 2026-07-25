@@ -617,8 +617,11 @@ function restorePendingEarlyCoachSchedule() {
 
 function weeklyCheckinTiming() {
   const days = (appData.plan?.[currentWeek - 1]?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
-  const completedDates = new Set([...(appData.log || []).map((entry) => entry.date), ...days.filter((day) => day.status === 'done').map((day) => day.dateStr)]);
-  const completed = days.filter((day) => completedDates.has(day.dateStr)).length;
+  // 週評估必須和 Garmin 課後判讀、提前排課共用完成度；不能只因同步
+  // 日誌已有一筆整趟跑量，就跳過品質主課的實際完成門檻。
+  const summary = trainingCompletionSummary([appData.plan?.[currentWeek - 1]]);
+  const completedDates = new Set(summary.completedDays.map((day) => day.dateStr));
+  const completed = days.filter((day) => day.status === 'done' || completedDates.has(day.dateStr)).length;
   const lastCourseDate = days.map((day) => day.dateStr).filter(Boolean).sort().at(-1) || todayStr();
   // 週末到了不代表本週已結束；未完成的跑課不能自動觸發下一週處方。
   const calendarReady = todayStr() >= lastCourseDate;
