@@ -608,6 +608,18 @@ async function assertTrainerReport(page, viewportName) {
   if (!incompleteWeekCannotSchedule.unchanged || incompleteWeekCannotSchedule.checkinWritten) {
     throw new Error(`${viewportName}/trainer-incomplete-week-gate: an incomplete week was allowed to write week 5 ${JSON.stringify(incompleteWeekCannotSchedule)}`);
   }
+  const deloadAssessmentHint = await page.evaluate(() => {
+    const previousWeek = currentWeek;
+    try {
+      currentWeek = 4;
+      return getAssessmentCycleHint(appData.plan);
+    } finally {
+      currentWeek = previousWeek;
+    }
+  });
+  if (deloadAssessmentHint) {
+    throw new Error(`${viewportName}/trainer-deload-assessment-hint: a deload week advertised an unscheduled assessment ${deloadAssessmentHint}`);
+  }
   const recoveredEarlyPlanning = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;

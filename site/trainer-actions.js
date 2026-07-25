@@ -86,12 +86,11 @@ function applyAssessmentToPlan(index = 0) {
 }
 
 function getAssessmentCycleHint(plan) {
-  const nextWeek = plan[currentWeek];
-  const phaseShift = nextWeek && nextWeek.phase !== plan[currentWeek - 1]?.phase;
-  if (currentWeek > 1 && (currentWeek % 4 === 0 || phaseShift)) {
-    return '本週建議新增一筆檢測紀錄，像是 20 分鐘測驗、5K 或 10K，讓我幫你重算後面的配速。';
-  }
-  return '';
+  // 檢測提示必須由正式課表中的檢測課觸發；不能只因第 4 週或階段切換，
+  // 就在降載週暗示一堂實際不存在、也不該硬塞進去的品質課。
+  const scheduledAssessment = (plan[currentWeek - 1]?.days || []).find((day) => day.type === 'assessment' || day.assessmentType);
+  if (!scheduledAssessment) return '';
+  return `本週已安排${trainingTaskTitle(scheduledAssessment)}檢測；完成後可用結果更新後續配速。`;
 }
 
 function hasTwoConsecutiveLowCheckins() {
