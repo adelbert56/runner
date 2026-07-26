@@ -1011,6 +1011,67 @@ async function assertTrainerReport(page, viewportName) {
   if (!coachWeekCalibrationLock.skipped && (!coachWeekCalibrationLock.plannedBefore || coachWeekCalibrationLock.coachPrescribed !== coachWeekCalibrationLock.planned || coachWeekCalibrationLock.forcedDeload)) {
     throw new Error(`${viewportName}/trainer-coach-week-lock: Garmin calibration overwrote an early-scheduled coach week ${JSON.stringify(coachWeekCalibrationLock)}`);
   }
+  const evidenceVoice = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      currentWeek = 1;
+      appData.plan = [{
+        weekNum: 1,
+        targetKm: 30,
+        days: [
+          { dateStr: "2026-07-20", dow: 1, type: "easy", km: 6 },
+          { dateStr: "2026-07-23", dow: 4, type: "easy", km: 6 },
+          { dateStr: "2026-07-26", dow: 0, type: "long", km: 12 }
+        ]
+      }];
+      coachReviewData = {
+        analyticsRuns: [
+          { activityId: 7001, date: "2026-07-14", km: 6, pace: "8:30", hr: 138 },
+          { activityId: 7002, date: "2026-07-16", km: 6, pace: "8:30", hr: 140 },
+          { activityId: 7003, date: "2026-07-20", km: 6, pace: "8:10", hr: 139 },
+          { activityId: 7004, date: "2026-07-23", km: 7, pace: "8:10", hr: 138 },
+          { activityId: 7005, date: "2026-07-26", km: 11, pace: "8:12", hr: 141 }
+        ]
+      };
+      const summary = runnerEvidenceSummary(1);
+      const reply = coachResponseToEarlyFeedback("本週狀況不錯，沒有疼痛", { result: "小幅推進" }, false, { coachScheduleApplied: true, targetWeek: 2, evidenceWeek: 1 });
+      const emptyDataSummary = (() => {
+        coachReviewData = { analyticsRuns: [] };
+        return runnerEvidenceSummary(1);
+      })();
+      return { summary, reply, emptyDataSummary };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      coachReviewData = previousReview;
+      saveData(appData);
+    }
+  });
+  if (!/本週實跑 24 km／3 次/.test(evidenceVoice.summary)
+    || !/前一週 12 km／2 次（\+12 km）/.test(evidenceVoice.summary)
+    || !/8:30 → 8:1\d\/km（快 \d+ 秒）/.test(evidenceVoice.summary)
+    || !evidenceVoice.reply.includes("對照你的實跑紀錄：")
+    || evidenceVoice.emptyDataSummary !== "") {
+    throw new Error(`${viewportName}/trainer-coach-voice: coaching reply did not quote real mileage and same-effort pace ${JSON.stringify(evidenceVoice)}`);
+  }
+  const snapshotDedupe = await page.evaluate(() => {
+    const previousHistory = cloneTrainingValue(appData.garminAnalysisHistory);
+    try {
+      appData.garminAnalysisHistory = [];
+      recordGarminAnalysisSnapshot("sig-day-1", ["本週 Garmin 實績已分析，未達需調整課表的門檻"]);
+      recordGarminAnalysisSnapshot("sig-day-2", ["本週 Garmin 實績已分析，未達需調整課表的門檻"]);
+      recordGarminAnalysisSnapshot("sig-day-3", ["輕鬆跑(Z2)配速提升 → 8:05/km"]);
+      return (appData.garminAnalysisHistory || []).map((item) => item.summary);
+    } finally {
+      appData.garminAnalysisHistory = previousHistory;
+      saveData(appData);
+    }
+  });
+  if (snapshotDedupe.length !== 2 || snapshotDedupe[1] !== "輕鬆跑(Z2)配速提升 → 8:05/km") {
+    throw new Error(`${viewportName}/trainer-analysis-dedupe: unchanged Garmin verdicts were repeated in the coaching history ${JSON.stringify(snapshotDedupe)}`);
+  }
   const loadDecision = await page.evaluate(() => garminLoadDecision([
     { trainingLoad: 50, aerobicTe: 2.8, anaerobicTe: 0.5 },
     { trainingLoad: 55, aerobicTe: 3.0, anaerobicTe: 0.7 },

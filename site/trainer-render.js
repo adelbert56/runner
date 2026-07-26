@@ -667,6 +667,10 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
   // 不重寫或改變判定內容。
   const execution = remaining.filter((sentence) => /^(本週|下週|今天|仍|肌力|長跑|體感|課表)/.test(sentence));
   const evidence = remaining.filter((sentence) => !execution.includes(sentence));
+  // 判讀依據要看得到真正的實跑數字，否則跑者只會看到一段結論式評語，
+  // 無從判斷教練是不是真的讀了這週的紀錄。
+  const runnerEvidence = typeof runnerEvidenceSummary === 'function' ? runnerEvidenceSummary() : '';
+  if (runnerEvidence) evidence.unshift(`實跑紀錄：${runnerEvidence}。`);
   if (earlyFeedback) {
     const terrainEvidence = earlyFeedback.feedbackTerrainEvidence || (typeof coachTerrainEvidence === 'function' ? coachTerrainEvidence(earlyFeedback.weekNum) : null);
     const signals = Array.isArray(earlyFeedback.feedbackSignals) && earlyFeedback.feedbackSignals.length
@@ -674,7 +678,7 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
       : (typeof classifyEarlyFeedback === 'function' ? classifyEarlyFeedback(earlyFeedback.note, terrainEvidence) : []);
     const signalText = signals.length ? signals.join('、') : '未偵測到可自動改課的安全或負荷訊號';
     const response = earlyFeedback.coachFeedbackResponse || (typeof coachResponseToEarlyFeedback === 'function'
-      ? coachResponseToEarlyFeedback(earlyFeedback.note, { result: earlyFeedback.result }, Boolean(earlyFeedback.feedbackSafetyConcern), { coachScheduleApplied: earlyFeedback.coachScheduleApplied === true, targetWeek: earlyFeedback.weekNum + 1, terrainEvidence })
+      ? coachResponseToEarlyFeedback(earlyFeedback.note, { result: earlyFeedback.result }, Boolean(earlyFeedback.feedbackSafetyConcern), { coachScheduleApplied: earlyFeedback.coachScheduleApplied === true, targetWeek: earlyFeedback.weekNum + 1, terrainEvidence, evidenceWeek: earlyFeedback.weekNum })
       : '已讀取本週回饋。');
     conclusion.push(`已納入跑者回饋；本次判定為「${earlyFeedback.result || '維持'}」。`);
     evidence.push(`跑者回饋：「${earlyFeedback.note}」；判讀為：${signalText}。`);
@@ -3034,13 +3038,15 @@ function renderDayCard(day, rationale = '', source = 'baseline') {
   const garminRun = getGarminRunForDate(day.dateStr);
   const isTodayCard = day.dateStr === todayStr();
   if (day.type === 'rest') return `<div class="day-card type-rest ${isTodayCard ? 'today' : ''} ${day.status === 'missed' ? 'missed-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge badge-rest">休息</span><div class="day-card-task">${day.task || '主動恢復 / 完全休息'}</div>${dayWeatherLine(day)}${renderSupportCards(day.supportBlocks)}${renderGarminRunResult(garminRun, true)}</div>`;
-  const badgeClass = day.coachPlan ? 'badge-coach' : { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long' }[day.type] || 'badge-rest';
-  const typeName = day.coachPlan ? '教練課表' : trainingTypeLabel(day.type, day.focus);
+  const coachBadge = coachPlanBadge(day);
+  const handwrittenCoachPlan = isHandwrittenCoachPlan(day);
+  const badgeClass = coachBadge ? 'badge-coach' : { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long' }[day.type] || 'badge-rest';
+  const typeName = coachBadge ? `${coachBadge.label}｜${trainingTypeLabel(day.type, day.focus)}` : trainingTypeLabel(day.type, day.focus);
   const taskText = trainingTaskTitle(day);
-  const [taskTitle, taskIntent] = day.coachPlan ? taskText.split(/\s*[｜|]\s*/, 2) : [taskText, ''];
+  const [taskTitle, taskIntent] = handwrittenCoachPlan ? taskText.split(/\s*[｜|]\s*/, 2) : [taskText, ''];
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
   const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? '<div style="color:var(--c-text-muted);font-size:13px">尚未到日期，無法先記錄</div>' : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
-  return `<div class="day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}">${day.coachPlan ? '📌 ' : ''}${typeName}</span><div class="day-card-task ${day.coachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}${day.coachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}<div class="day-card-pace">${[day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>${dayWeatherLine(day)}${renderStepCards(attachCourseGuides(day.steps, day.type))}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button></div>${actionsHTML}</div>`;
+  return `<div class="day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}">${coachBadge ? coachBadge.emoji : ''}${typeName}</span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}<div class="day-card-pace">${[day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>${dayWeatherLine(day)}${renderStepCards(attachCourseGuides(day.steps, day.type))}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button></div>${actionsHTML}</div>`;
 }
 
 /* drawer implementation removed; daily details remain in the original day card. */

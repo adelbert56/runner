@@ -9,10 +9,32 @@ function trainingTypeLabel(type, focus = '') {
     : TRAINING_TYPE_LABELS[type] || '訓練';
 }
 
+// day.coachPlan 同時承載三種來源：真人手寫菜單（true）、提前排課寫入的週期
+// 處方，以及 Garmin 自動降階。全部顯示成同一個「教練課表」badge，跑者就分不出
+// 哪一堂是教練親手寫的、哪一堂是系統照週期算的。
+function coachPlanSource(day) {
+  const plan = day?.coachPlan;
+  if (!plan) return '';
+  return plan === true ? 'coach-menu' : (plan.source || 'coach-menu');
+}
+
+function isHandwrittenCoachPlan(day) {
+  return coachPlanSource(day) === 'coach-menu';
+}
+
+function coachPlanBadge(day) {
+  return {
+    'coach-menu': { emoji: '📌 ', label: '教練課表' },
+    'coach-periodization': { emoji: '🗓 ', label: '週期處方' },
+    'garmin-autopilot': { emoji: '⚙ ', label: '自動降階' }
+  }[coachPlanSource(day)] || null;
+}
+
 function trainingTaskTitle(day) {
   const title = String(day?.task || '').replace(/\bNaN(?:\.\d+)?\s*(?:km|公里)\b/gi, '').replace(/\s{2,}/g, ' ').trim();
   const typeLabel = trainingTypeLabel(day?.type, day?.focus);
-  if (!title || day?.coachPlan) return title || typeLabel;
+  // 只有真人手寫菜單維持原文；週期處方是課表產生器寫的，仍要正規化課型名稱。
+  if (!title || isHandwrittenCoachPlan(day)) return title || typeLabel;
   if (day.type === 'easy') {
     return title
       .replace(/^E\s*跑/i, typeLabel)

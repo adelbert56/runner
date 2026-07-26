@@ -1125,7 +1125,7 @@ function renderHeroTodayCard() {
   return `
     <div class="trainer-side-card hero-today-card">
       <div class="trainer-side-kicker">Today · ${DOW_NAMES[day.dow]} ${day.dateStr.slice(5)}</div>
-      <div class="trainer-side-title"><span class="workout-badge ${day.coachPlan ? 'badge-coach' : (badgeClass[day.type] || 'badge-rest')}">${day.coachPlan ? '📌 教練課表' : (typeName[day.type] || '訓練')}</span> ${reviewEscape(trainingTaskTitle(day))}</div>
+      <div class="trainer-side-title"><span class="workout-badge ${coachPlanBadge(day) ? 'badge-coach' : (badgeClass[day.type] || 'badge-rest')}">${coachPlanBadge(day) ? `${coachPlanBadge(day).emoji}${coachPlanBadge(day).label}` : (typeName[day.type] || '訓練')}</span> ${reviewEscape(trainingTaskTitle(day))}</div>
       ${detail ? `<div class="trainer-side-copy">${detail}</div>` : ''}
       ${dayWeatherLine(day, { showForRest: true })}
       ${stepStrip}

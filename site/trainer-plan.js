@@ -1005,8 +1005,13 @@ function garminLoadDecision(runs = []) {
 
 function recordGarminAnalysisSnapshot(signature, reasons) {
   const history = Array.isArray(appData.garminAnalysisHistory) ? appData.garminAnalysisHistory : [];
-  if (history.some((item) => item?.signature === signature)) return;
-  history.push({ date: todayStr(), signature, summary: reasons.join('；') });
+  const summary = reasons.join('；');
+  if (!summary) return;
+  // 校準每天都會重跑一次，signature 含當天日期所以永遠是新的；只比對 signature
+  // 會讓教練面板堆出一整排一字不差的判讀。結論沒變就不留新快照——真人教練
+  // 不會每天把同一句話再講一遍。
+  if (history.some((item) => item?.signature === signature) || history.at(-1)?.summary === summary) return;
+  history.push({ date: todayStr(), signature, summary });
   appData.garminAnalysisHistory = history.slice(-20);
 }
 

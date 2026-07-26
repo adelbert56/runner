@@ -719,10 +719,59 @@ function nextWeekCourseSummary(targetWeek) {
   return `第 ${week.weekNum} 週維持 ${week.targetKm} km：${easyText}＋${longText}。`;
 }
 
-function coachResponseToEarlyFeedback(note, decision, safetyConcern, { coachScheduleApplied = false, targetWeek = null, terrainEvidence = null } = {}) {
+// 同一個心率上限下的配速中位數才能拿來比「有沒有變強」：配速變快但心率同步升高
+// 不算進步，所以只取 Z2 上限以內的跑步，並沿用既有的高溫配速修正。
+function sameEffortEasyPaceShift(thisWeekRuns, priorWeekRuns) {
+  if (typeof hrZones !== 'function' || !appData.profile) return '';
+  const easyMax = Number(hrZones(appData.profile)?.easyMax) || 0;
+  if (!easyMax) return '';
+  const medianPace = (runs) => {
+    const paces = runs
+      .filter((run) => Number(run.hr) > 0 && Number(run.hr) <= easyMax && Number(run.paceSeconds) > 0)
+      .map((run) => (typeof heatAdjustedPaceSec === 'function' ? heatAdjustedPaceSec(run) : Number(run.paceSeconds)))
+      .sort((left, right) => left - right);
+    return paces.length ? paces[Math.floor(paces.length / 2)] : 0;
+  };
+  const current = medianPace(thisWeekRuns);
+  if (!current) return '';
+  const prior = medianPace(priorWeekRuns);
+  if (!prior) return `同心率（HR ≤ ${easyMax}）輕鬆跑中位配速 ${secToPace(current)}/km`;
+  const delta = Math.round(prior - current);
+  const trend = Math.abs(delta) < 3 ? '持平' : delta > 0 ? `快 ${delta} 秒` : `慢 ${-delta} 秒`;
+  return `同心率（HR ≤ ${easyMax}）輕鬆跑中位配速 ${secToPace(prior)} → ${secToPace(current)}/km（${trend}）`;
+}
+
+// 真人教練是拿數字講話的：回應要引用跑者這一週實際跑了什麼、跟前一週差多少，
+// 而不是只丟結論。資料不足就回空字串，絕不編造沒發生的數字。
+function runnerEvidenceSummary(weekNum = currentWeek) {
+  const runs = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+  const week = appData.plan?.[Number(weekNum) - 1];
+  const dates = (week?.days || []).map((day) => day.dateStr).filter(Boolean).sort();
+  if (!runs.length || !dates.length) return '';
+  const shiftDate = (dateStr, days) => new Date(new Date(`${dateStr}T00:00:00`).getTime() + days * 86400000).toISOString().slice(0, 10);
+  const inRange = (from, to) => runs.filter((run) => run.date >= from && run.date <= to);
+  const thisWeekRuns = inRange(dates[0], dates.at(-1));
+  const priorWeekRuns = inRange(shiftDate(dates[0], -7), shiftDate(dates[0], -1));
+  if (!thisWeekRuns.length) return '';
+  const sumKm = (items) => Math.round(items.reduce((total, run) => total + (Number(run.km) || 0), 0) * 10) / 10;
+  const thisKm = sumKm(thisWeekRuns);
+  const parts = [`本週實跑 ${thisKm} km／${thisWeekRuns.length} 次`];
+  if (priorWeekRuns.length) {
+    const priorKm = sumKm(priorWeekRuns);
+    const delta = Math.round((thisKm - priorKm) * 10) / 10;
+    parts.push(`前一週 ${priorKm} km／${priorWeekRuns.length} 次（${delta >= 0 ? '+' : ''}${delta} km）`);
+  }
+  const paceShift = sameEffortEasyPaceShift(thisWeekRuns, priorWeekRuns);
+  if (paceShift) parts.push(paceShift);
+  return parts.join('；');
+}
+
+function coachResponseToEarlyFeedback(note, decision, safetyConcern, { coachScheduleApplied = false, targetWeek = null, terrainEvidence = null, evidenceWeek = currentWeek } = {}) {
   if (!String(note || '').trim()) return '';
   const signals = classifyEarlyFeedback(note, terrainEvidence);
-  const readback = signals.length ? `我讀到你提到：${signals.join('、')}。` : '我已讀到你的備註；其中沒有可安全自動判定的疼痛、疲勞、睡眠、高溫或時間訊號。';
+  const evidence = runnerEvidenceSummary(evidenceWeek);
+  const readbackBase = signals.length ? `我讀到你提到：${signals.join('、')}。` : '我已讀到你的備註；其中沒有可安全自動判定的疼痛、疲勞、睡眠、高溫或時間訊號。';
+  const readback = evidence ? `${readbackBase} 對照你的實跑紀錄：${evidence}。` : readbackBase;
   const terrainLongRunIssue = signals.some((signal) => signal.startsWith('坡度／爬升負荷')) && (signals.includes('長跑後段失力') || signals.includes('有氧耐力疑慮'));
   if (safetyConcern) return `${readback} 這被視為安全訊號，因此實際處置是下週先降量並取消品質課；症狀持續、加劇或影響步態時請停止跑步並尋求醫療或物理治療協助。`;
   if (terrainLongRunIssue) return `${readback} 這趟長跑含上坡，後段失力不能直接當成平路有氧能力退步；本次不據此加硬課。${nextWeekCourseSummary(targetWeek)} 下次長跑選平坦路線，前半程以心率與可對話感控制，不追配速；完成這週降載後，再用平路長跑的後段心率與主觀疲勞評估是否需要增加有氧耐力課。`;
