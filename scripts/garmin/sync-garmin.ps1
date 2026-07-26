@@ -1,6 +1,8 @@
 param(
     [ValidateRange(1, 3650)]
     [int]$Days = 90,
+    [ValidateRange(0, 90)]
+    [int]$RecoveryDays = 21,
     [switch]$SkipPublish
 )
 
@@ -24,7 +26,7 @@ function Write-SyncStatus([string]$Status, [string]$Message) {
 try {
     Set-Location -LiteralPath $repoRoot
     $env:UV_CACHE_DIR = Join-Path $env:TEMP "runner-uv-cache"
-    & uv run python $fetchScript --days $Days --non-interactive
+    & uv run python $fetchScript --days $Days --recovery-days $RecoveryDays --non-interactive
     $fetchExitCode = $LASTEXITCODE
     if ($fetchExitCode -eq 3) {
         throw "Garmin token is unavailable or expired. Run 'uv run python scripts/garmin/fetch_garmin.py' once and complete sign-in, then the scheduled sync will resume."

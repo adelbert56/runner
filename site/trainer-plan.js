@@ -974,7 +974,9 @@ function parsePhaseVolume(km) {
 
 function formatPhaseVolume(values, separator) {
   const rounded = values.map((value) => Math.round(value));
-  return separator && rounded.length > 1 ? rounded.slice(0, 2).join(separator) : String(rounded[0]);
+  // 起訖被夾到同一個數字時就不要再寫成「28–28」，那看起來像壞掉的區間。
+  if (!separator || rounded.length < 2 || rounded[0] === rounded[1]) return String(rounded.at(-1));
+  return rounded.slice(0, 2).join(separator);
 }
 
 function phaseLongRunKm(focus) {
@@ -1012,49 +1014,40 @@ function adaptCoachPeriodization(phases) {
   if (!baseline) return phases;
   const today = todayStr();
   const rule = GOAL_RULES[appData?.profile?.goal] || GOAL_RULES.half;
-  const plannedPeak = Math.max(...phases.map((phase) => parsePhaseVolume(phase.km)?.peak || 0));
-  if (!plannedPeak) return phases;
-  // 恢復訊號或主觀體感亮紅燈時，只還原基準、不往上長：這時候照原表加量，等於
-  // 把「跑者跟不上」誤讀成「跑者可以加更多」。
+  // 用「目前階段的計畫水準」和實跑基準比，得到一個落差比，再把這個比例平移到
+  // 所有未來階段。逐階段各自重算會複利：起點稍高就一路頂到天花板，連降載都
+  // 被抬起來，教練原本設計的節奏（低點、尖峰位置）就消失了。
+  const currentPhase = [...phases].reverse().find((phase) => phase.start <= today);
+  const currentPlanned = parsePhaseVolume(currentPhase?.km)?.values.at(-1);
+  if (!currentPlanned) return phases;
+  // 恢復訊號或主觀體感亮紅燈時只能下修、不能上調：這時候照實跑往上帶，等於
+  // 把「跑者硬撐出來的里程」誤讀成「跑者可以再加更多」。
   const recoveryStrained = typeof recoverySignalStatus === 'function' ? recoverySignalStatus()?.strained : false;
   const effortStrained = typeof recentEasyRunStrain === 'function' ? recentEasyRunStrain()?.overreaching : false;
   const growthAllowed = !recoveryStrained && !effortStrained;
-  const ceiling = Math.min(plannedPeak * ADAPTIVE_PERIODIZATION.maxPeakOverrun, rule.maxWeeklyKm);
-  const floor = plannedPeak * ADAPTIVE_PERIODIZATION.minOfPlanned;
-  let carried = baseline.median;
+  const rawRatio = baseline.median / currentPlanned;
+  const growthCeiling = growthAllowed ? ADAPTIVE_PERIODIZATION.maxPeakOverrun : 1;
+  const ratio = Math.min(growthCeiling, Math.max(ADAPTIVE_PERIODIZATION.minOfPlanned, rawRatio));
+  // 差距在 3% 以內就不要動課表：那是量測噪音，不是趨勢。
+  if (Math.abs(ratio - 1) < 0.03) return phases;
+  const shiftLabel = `${ratio > 1 ? '上調' : '下修'} ${Math.abs(Math.round((ratio - 1) * 100))}%`;
   return phases.map((phase) => {
     const parsed = parsePhaseVolume(phase.km);
-    // 過去與進行中的階段是既成事實；賽前減量與比賽週由教練決定，不重算。
-    // 過去階段不重算，也不能用它的「計畫值」當後續基準——那就是原本的問題：
-    // 課表寫 34 km 但實際只跑 21 km 時，後面每一階段都是從沒發生過的數字往上疊。
+    // 過去與進行中的階段是既成事實；賽前減量與比賽週由教練依賽事決定，不平移。
     if (!parsed || phase.start <= today || /減量|比賽|taper/i.test(`${phase.phase} ${phase.focus || ''}`)) return phase;
-    const weeks = Math.max(1, Number(phase.weeks) || 1);
-    const isDeload = coachPhaseIsDeload(phase);
-    const plannedStart = parsed.values[0];
-    const plannedEnd = parsed.values.at(-1);
-    // 保留教練原本的形狀：這個階段本來要長多少百分比，就照同樣的百分比長。
-    const plannedGrowth = plannedStart > 0 ? plannedEnd / plannedStart : 1;
-    const cappedGrowth = Math.min(plannedGrowth, (1 + ADAPTIVE_PERIODIZATION.maxWeeklyGrowth) ** weeks);
-    const start = isDeload ? carried * 0.8 : carried;
-    const end = isDeload ? start : (growthAllowed ? start * cappedGrowth : start);
-    // 下限用「這個階段自己的計畫值」的七成，不是全計畫尖峰的七成——用尖峰當
-    // 下限會把降載週墊回建量週的高度，降載就不是降載了。
-    const phaseFloor = isDeload ? 0 : Math.min(floor, plannedEnd * ADAPTIVE_PERIODIZATION.minOfPlanned);
-    const clamp = (value) => Math.min(ceiling, Math.max(phaseFloor, value));
-    const nextValues = parsed.values.length > 1 ? [clamp(start), clamp(end)] : [clamp(end)];
-    carried = nextValues.at(-1);
-    // 長跑跟著週量等比縮放，再夾一次「不得超過週量 40%」——週量下修時長跑也要
-    // 下修，否則單日負荷佔比會被動變高，那是最容易受傷的組合。
-    const volumeFactor = plannedEnd > 0 ? carried / plannedEnd : 1;
+    const nextValues = parsed.values.map((value) => Math.min(rule.maxWeeklyKm, value * ratio));
+    const weeklyKm = nextValues.at(-1);
+    // 長跑同比平移，再夾一次「不得超過週量 40%」——週量下修時長跑也要跟著下修，
+    // 否則單日負荷佔比會被動變高，那是最容易受傷的組合。
     const plannedLongKm = phaseLongRunKm(phase.focus);
     const longRunFactor = plannedLongKm > 0
-      ? Math.min(volumeFactor, (carried * ADAPTIVE_PERIODIZATION.maxLongRunShare) / plannedLongKm)
-      : volumeFactor;
+      ? Math.min(ratio, (weeklyKm * ADAPTIVE_PERIODIZATION.maxLongRunShare) / plannedLongKm)
+      : ratio;
     const adapted = {
       ...phase,
       km: formatPhaseVolume(nextValues, parsed.separator),
       focus: rewritePhaseLongRun(phase.focus, longRunFactor),
-      adaptiveNote: `依最近 ${baseline.weeks} 週實跑中位 ${baseline.median} km 重算（教練原訂 ${phase.km} km）${growthAllowed ? '' : '；恢復訊號未達標，本階段不加量'}`
+      adaptiveNote: `最近 ${baseline.weeks} 週實跑中位 ${baseline.median} km，對照目前階段計畫 ${currentPlanned} km，整份後續課表${shiftLabel}（教練原訂 ${phase.km} km）${growthAllowed ? '' : '；恢復訊號未達標，只還原基準不加量'}`
     };
     return adapted.km === String(phase.km) && adapted.focus === phase.focus ? phase : adapted;
   });
