@@ -689,6 +689,12 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
   // 無從判斷教練是不是真的讀了這週的紀錄。
   const runnerEvidence = typeof runnerEvidenceSummary === 'function' ? runnerEvidenceSummary() : '';
   if (runnerEvidence) evidence.unshift(`實跑紀錄：${runnerEvidence}。`);
+  // 逐週判讀如果彼此不相干，跑者就只能一直看當下這一格。把過去相近條件下的
+  // 判定與後續結果放進依據，教練才有「我記得你上次怎麼樣」的連續性。
+  const recalled = typeof buildEvidenceSnapshot === 'function' && typeof recallSimilarWeeks === 'function'
+    ? recallSimilarWeeks(buildEvidenceSnapshot())
+    : [];
+  recalled.forEach((line) => evidence.push(`過去相近狀況：${line}。`));
   if (earlyFeedback) {
     const terrainEvidence = earlyFeedback.feedbackTerrainEvidence || (typeof coachTerrainEvidence === 'function' ? coachTerrainEvidence(earlyFeedback.weekNum) : null);
     const signals = Array.isArray(earlyFeedback.feedbackSignals) && earlyFeedback.feedbackSignals.length

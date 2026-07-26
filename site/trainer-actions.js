@@ -798,7 +798,7 @@ function recoverySignalStatus(days = 7) {
   const rows = Array.isArray(coachReviewData?.recovery) ? coachReviewData.recovery : [];
   if (!rows.length) return null;
   const today = todayStr();
-  const from = new Date(new Date(`${today}T00:00:00`).getTime() - days * 86400000).toISOString().slice(0, 10);
+  const from = addDaysToDateStr(today, -days);
   const recent = rows.filter((row) => row.date > from && row.date <= today);
   if (!recent.length) return null;
   const average = (field) => {
@@ -825,7 +825,7 @@ function recoverySignalStatus(days = 7) {
 function recentEasyRunStrain(days = 14) {
   const feedback = appData.runFeedback || {};
   const today = todayStr();
-  const from = new Date(new Date(`${today}T00:00:00`).getTime() - days * 86400000).toISOString().slice(0, 10);
+  const from = addDaysToDateStr(today, -days);
   const easyDates = new Set((appData.plan || [])
     .flatMap((week) => week.days || [])
     .filter((day) => ['easy', 'long'].includes(day.type) && day.dateStr >= from && day.dateStr <= today)
@@ -879,6 +879,58 @@ function showCoachPlanPreview(weekNum = currentWeek + 1) {
   ]);
 }
 
+// 每次判定都留下當下的客觀條件，否則每一週都是獨立事件：教練永遠無法說
+// 「上次你在一樣的狀況下，我這樣安排，後來結果是這樣」。這是把逐週判讀變成
+// 可回顧因果鏈的最小結構——不另開資料表，直接掛在該週的評估紀錄上。
+function buildEvidenceSnapshot(weekNum = currentWeek) {
+  const week = appData.plan?.[Number(weekNum) - 1];
+  const dates = (week?.days || []).map((day) => day.dateStr).filter(Boolean).sort();
+  const runs = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+  if (!dates.length) return null;
+  const sumKm = (from, to) => Math.round(runs.filter((run) => run.date >= from && run.date <= to)
+    .reduce((total, run) => total + (Number(run.km) || 0), 0) * 10) / 10;
+  const strain = recentEasyRunStrain();
+  const recovery = recoverySignalStatus();
+  const snapshot = {
+    weekStart: dates[0],
+    weeklyKm: sumKm(dates[0], dates.at(-1)),
+    priorWeeklyKm: sumKm(addDaysToDateStr(dates[0], -7), addDaysToDateStr(dates[0], -1)),
+    avgRpe: strain?.avgRpe || null,
+    sleepHours: recovery?.sleepHours || null,
+    hrvOvernight: recovery?.hrvOvernight || null,
+    hrvWeekly: recovery?.hrvWeekly || null,
+    bodyBatteryHigh: recovery?.bodyBatteryHigh || null,
+    recoveryStrained: Boolean(recovery?.strained),
+    effortStrained: Boolean(strain?.overreaching)
+  };
+  return snapshot.weeklyKm > 0 || snapshot.avgRpe || snapshot.sleepHours ? snapshot : null;
+}
+
+// 相近條件＝跑量差 15% 以內，且恢復訊號的紅綠燈一致。條件不像就不要硬扯，
+// 拿不相干的過去比較只會讓判讀失去可信度。
+function recallSimilarWeeks(snapshot, limit = 1) {
+  if (!snapshot?.weeklyKm) return [];
+  const trend = Array.isArray(coachReviewData?.trend) ? coachReviewData.trend : [];
+  const kmForWeekStart = (weekStart) => Number(trend.find((entry) => entry.week === weekStart)?.km) || null;
+  return (appData.checkins || [])
+    .filter((item) => item.weekNum !== currentWeek && item.evidenceSnapshot?.weeklyKm > 0)
+    .filter((item) => {
+      const past = item.evidenceSnapshot;
+      const gap = Math.abs(past.weeklyKm - snapshot.weeklyKm) / snapshot.weeklyKm;
+      return gap <= 0.15 && past.recoveryStrained === snapshot.recoveryStrained && past.effortStrained === snapshot.effortStrained;
+    })
+    .sort((left, right) => right.weekNum - left.weekNum)
+    .slice(0, limit)
+    .map((item) => {
+      const past = item.evidenceSnapshot;
+      const followingKm = kmForWeekStart(addDaysToDateStr(past.weekStart, 7));
+      const outcome = followingKm
+        ? `下一週實際完成 ${followingKm} km`
+        : '下一週的實跑資料還沒回來';
+      return `第 ${item.weekNum} 週在相近條件（跑量 ${past.weeklyKm} km${past.avgRpe ? `、RPE ${past.avgRpe}` : ''}${past.sleepHours ? `、睡眠 ${past.sleepHours} 小時` : ''}）判定為「${item.result}」，${outcome}`;
+    });
+}
+
 // 真人教練是拿數字講話的：回應要引用跑者這一週實際跑了什麼、跟前一週差多少，
 // 而不是只丟結論。資料不足就回空字串，絕不編造沒發生的數字。
 function runnerEvidenceSummary(weekNum = currentWeek) {
@@ -886,10 +938,9 @@ function runnerEvidenceSummary(weekNum = currentWeek) {
   const week = appData.plan?.[Number(weekNum) - 1];
   const dates = (week?.days || []).map((day) => day.dateStr).filter(Boolean).sort();
   if (!runs.length || !dates.length) return '';
-  const shiftDate = (dateStr, days) => new Date(new Date(`${dateStr}T00:00:00`).getTime() + days * 86400000).toISOString().slice(0, 10);
   const inRange = (from, to) => runs.filter((run) => run.date >= from && run.date <= to);
   const thisWeekRuns = inRange(dates[0], dates.at(-1));
-  const priorWeekRuns = inRange(shiftDate(dates[0], -7), shiftDate(dates[0], -1));
+  const priorWeekRuns = inRange(addDaysToDateStr(dates[0], -7), addDaysToDateStr(dates[0], -1));
   if (!thisWeekRuns.length) return '';
   const sumKm = (items) => Math.round(items.reduce((total, run) => total + (Number(run.km) || 0), 0) * 10) / 10;
   const thisKm = sumKm(thisWeekRuns);
@@ -982,7 +1033,7 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const feedbackTerrainEvidence = coachTerrainEvidence(currentWeek);
   const feedbackSignals = classifyEarlyFeedback(note, feedbackTerrainEvidence);
   const coachFeedbackResponse = coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1, terrainEvidence: feedbackTerrainEvidence });
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, rejectedOption: decision.alternative || '', safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, rejectedOption: decision.alternative || '', evidenceSnapshot: buildEvidenceSnapshot(), safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();

@@ -1088,11 +1088,62 @@ async function assertTrainerReport(page, viewportName) {
   if (!previewAndRestart.planUntouched || !previewAndRestart.storageUntouched || previewAndRestart.clearedCheckin) {
     throw new Error(`${viewportName}/trainer-preview-restart: a read-only preview or a re-plan touched stored data ${JSON.stringify(previewAndRestart)}`);
   }
+  const coachMemory = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      const today = todayStr();
+      const shift = (days) => addDaysToDateStr(today, days);
+      currentWeek = 3;
+      appData.plan = [1, 2, 3].map((weekNum) => ({
+        weekNum,
+        days: [0, 1, 2].map((offset) => ({ dateStr: shift(-((3 - weekNum) * 7) - offset), dow: offset, type: "easy", km: 6 }))
+      }));
+      appData.runFeedback = {};
+      coachReviewData = {
+        analyticsRuns: [
+          { activityId: 1, date: shift(-1), km: 10, pace: "8:00", hr: 140 },
+          { activityId: 2, date: shift(-2), km: 10, pace: "8:00", hr: 140 },
+          { activityId: 3, date: shift(-8), km: 9, pace: "8:00", hr: 141 }
+        ],
+        trend: [{ week: shift(-14), km: 20, runs: 3 }, { week: shift(-7), km: 26, runs: 3 }]
+      };
+      const snapshot = buildEvidenceSnapshot(3);
+      appData.checkins = [{
+        weekNum: 1,
+        result: "小幅推進",
+        evidenceSnapshot: { weekStart: shift(-14), weeklyKm: snapshot.weeklyKm * 1.05, avgRpe: 5, sleepHours: 7.2, recoveryStrained: false, effortStrained: false }
+      }, {
+        weekNum: 2,
+        result: "降載恢復",
+        evidenceSnapshot: { weekStart: shift(-7), weeklyKm: snapshot.weeklyKm * 3, recoveryStrained: true, effortStrained: false }
+      }];
+      const recalled = recallSimilarWeeks(snapshot);
+      return {
+        snapshotKm: snapshot.weeklyKm,
+        recalledCount: recalled.length,
+        recalledText: recalled[0] || "",
+        ignoresMismatched: !(recalled[0] || "").includes("降載恢復"),
+        emptyWhenNoHistory: (() => { appData.checkins = []; return recallSimilarWeeks(snapshot).length; })()
+      };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      coachReviewData = previousReview;
+      saveData(appData);
+    }
+  });
+  if (!coachMemory.snapshotKm || coachMemory.recalledCount !== 1 || !coachMemory.ignoresMismatched
+    || !coachMemory.recalledText.includes("小幅推進") || !coachMemory.recalledText.includes("下一週實際完成 26 km")
+    || coachMemory.emptyWhenNoHistory !== 0) {
+    throw new Error(`${viewportName}/trainer-coach-memory: past weeks were not recalled under comparable conditions ${JSON.stringify(coachMemory)}`);
+  }
   const adaptivePeriodization = await page.evaluate(() => {
     const previousReview = cloneTrainingValue(coachReviewData);
     try {
       const today = todayStr();
-      const shift = (days) => new Date(new Date(`${today}T00:00:00`).getTime() + days * 86400000).toISOString().slice(0, 10);
+      const shift = (days) => addDaysToDateStr(today, days);
       const phases = [
         { phase: "長跑重建", start: shift(-28), weeks: 3, km: "28→34", focus: "長跑 10→14 km @E，無硬課。" },
         { phase: "基礎強化", start: shift(14), weeks: 4, km: "32→38", focus: "長跑 14→16 km 尾段加 M 段。" },
@@ -1132,7 +1183,7 @@ async function assertTrainerReport(page, viewportName) {
     const previousReview = cloneTrainingValue(coachReviewData);
     try {
       const today = todayStr();
-      const shift = (days) => new Date(new Date(`${today}T00:00:00`).getTime() - days * 86400000).toISOString().slice(0, 10);
+      const shift = (days) => addDaysToDateStr(today, -days);
       const rested = [1, 2, 3].map((offset) => ({ date: shift(offset), sleepHours: 7.6, hrvOvernight: 62, hrvWeekly: 60, bodyBatteryHigh: 82, restingHr: 48 }));
       const strained = [1, 2, 3].map((offset) => ({ date: shift(offset), sleepHours: 5.4, hrvOvernight: 41, hrvWeekly: 58, bodyBatteryHigh: 44, restingHr: 55 }));
       const answers = [true, true, true, true];
@@ -1180,7 +1231,7 @@ async function assertTrainerReport(page, viewportName) {
     const previousPlan = cloneTrainingValue(appData.plan);
     try {
       const today = todayStr();
-      const shift = (days) => new Date(new Date(`${today}T00:00:00`).getTime() + days * 86400000).toISOString().slice(0, 10);
+      const shift = (days) => addDaysToDateStr(today, days);
       appData.plan = [{ weekNum: 1, days: [1, 3, 5].map((offset) => ({ dateStr: shift(-offset), dow: offset, type: "easy", km: 6, status: "done" })) }];
       appData.runFeedback = {};
       const rejectsEmpty = saveRunFeedback(shift(-1), { rpe: "", note: "" });
