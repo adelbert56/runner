@@ -835,7 +835,10 @@ function rebuildStoredPlan(data) {
   preservedProfile.planVersion = PLAN_SCHEMA_VERSION;
   // buildPlan() 產生全新的 day 物件，賽事整合（raceReplacement）標記只存在舊 plan 的 day 上，
   // 先抓出來，重建完再依日期貼回去，避免每次觸發完整重建都把「以賽代訓」洗掉、重新通知
-  const preservedRaceDays = (data.plan || []).flatMap((week) => week.days || []).filter((day) => day.raceReplacementBase);
+  // 受保護的日子由同一份 gate 認定（已完成、過去、補跑、賽事替代、恢復保護），
+  // 不再各自維護一份清單；重建只換掉真正可以重排的課。
+  const preservedRaceDays = (data.plan || []).flatMap((week) => week.days || [])
+    .filter((day) => day.raceReplacementBase || (typeof canMutatePlanDay === 'function' && !canMutatePlanDay(day, 'calibration')));
   const freshPlan = buildPlan(preservedProfile);
   // 只有「還沒跑過」的週才可以整週換成全新產生的內容：只要任何一天已經有
   // done/missed 紀錄，代表跑者已經在這週留下真實歷史，即使觸發重建的是
@@ -844,11 +847,16 @@ function rebuildStoredPlan(data) {
   const oldPlan = Array.isArray(data.plan) ? data.plan : [];
   const mergedPlan = freshPlan.map((freshWeek, index) => {
     const oldWeek = oldPlan[index];
-    const oldTouched = oldWeek?.weekNum === freshWeek.weekNum
+    const sameTimeline = oldWeek?.weekNum === freshWeek.weekNum
       && Array.isArray(oldWeek.days) && oldWeek.days.length === freshWeek.days.length
-      && oldWeek.days.every((day, dayIndex) => day?.dateStr === freshWeek.days[dayIndex]?.dateStr)
-      && oldWeek.days.some((day) => day.status === 'done' || day.status === 'missed');
-    return oldTouched ? oldWeek : freshWeek;
+      && oldWeek.days.every((day, dayIndex) => day?.dateStr === freshWeek.days[dayIndex]?.dateStr);
+    const oldTouched = sameTimeline && oldWeek.days.some((day) => day.status === 'done' || day.status === 'missed');
+    // 已排定但還沒開始跑的教練處方週同樣不能被重建洗掉：跑者已經做過恢復檢核、
+    // 教練也已經寫入決定，只是這週還沒到。真正壞掉的週仍然修（跑量算式異常時
+    // 才允許整週重來），否則修別週的形狀會順手把下一週的處方換成預設課表。
+    const coachPlannedWeek = sameTimeline && typeof weekHasCoachPeriodization === 'function'
+      && weekHasCoachPeriodization(oldWeek) && !weekHasMalformedVolume(oldWeek);
+    return oldTouched || coachPlannedWeek ? oldWeek : freshWeek;
   });
   const rebuiltData = applyStoredMakeupRecords(applyStoredDayStatuses({
     ...data,

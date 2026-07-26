@@ -1028,6 +1028,36 @@ async function assertTrainerReport(page, viewportName) {
   if (duplicateCopy.focusHeadings > 1 || duplicateCopy.repeatedParagraphs.length) {
     throw new Error(`${viewportName}/trainer-duplicate-copy: the plan view printed the same coaching copy twice ${JSON.stringify(duplicateCopy)}`);
   }
+  const rebuildProtection = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    try {
+      const source = cloneTrainingValue(appData);
+      const futureIndex = source.plan.findIndex((week) => (week.days || []).every((day) => !day.dateStr || day.dateStr > todayStr()));
+      if (futureIndex < 0) return { skipped: true };
+      const coachWeek = source.plan[futureIndex];
+      coachWeek.days = (coachWeek.days || []).map((day) => (day.type === "rest" ? day : {
+        ...day,
+        status: "planned",
+        task: "教練指定課程",
+        coachPlan: { source: "coach-periodization", phase: "長跑重建", targetKm: coachWeek.targetKm }
+      }));
+      const doneIndex = source.plan.findIndex((week) => (week.days || []).some((day) => day.status === "done"));
+      const rebuilt = rebuildStoredPlan(source);
+      const rebuiltWeek = rebuilt.plan[futureIndex];
+      const planned = (rebuiltWeek?.days || []).filter((day) => day.type !== "rest");
+      return {
+        planned: planned.length,
+        coachPrescribed: planned.filter((day) => day.coachPlan?.source === "coach-periodization").length,
+        keptDoneWeek: doneIndex < 0 || (rebuilt.plan[doneIndex]?.days || []).some((day) => day.status === "done")
+      };
+    } finally {
+      appData = previousData;
+      saveData(appData);
+    }
+  });
+  if (!rebuildProtection.skipped && (!rebuildProtection.planned || rebuildProtection.coachPrescribed !== rebuildProtection.planned || !rebuildProtection.keptDoneWeek)) {
+    throw new Error(`${viewportName}/trainer-rebuild-protection: a plan repair replaced an already scheduled coach week ${JSON.stringify(rebuildProtection)}`);
+  }
   const previewAndRestart = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;
