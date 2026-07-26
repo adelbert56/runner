@@ -949,6 +949,45 @@ function buildPlan(profile) {
 // ============================================================
 // 爬升明顯的跑步，同樣心率下配速本來就會變慢，不是體能退步——
 // 拿這種跑步去跟平地配速比較會誤判，校準前先濾掉。
+// ============================================================
+// 課表變更的單一權威
+// ============================================================
+// 「誰可以改哪一週、哪一天」原本散在滾動校準、課表對齊、提前排課、出發前調整
+// 各自的 if 條件裡，實際勝負靠 init／render 的呼叫順序決定——改一處就可能讓另一
+// 處把課表洗掉（2026-07-26 的提前排課被校準覆蓋就是這樣來的）。所有寫入端一律
+// 先問這裡，規則只有這一份。
+//
+// 來源優先序（高→低）：safety > race > coach > calibration / align / advisory
+function planDayLockReason(day, source, today = todayStr()) {
+  if (!day) return '沒有可變更的課程';
+  if (source === 'safety') return '';
+  if (day.status === 'done') return '課程已完成';
+  if (day.dateStr && day.dateStr < today) return '過去的課表不再回寫';
+  if (day.isMakeup) return '補跑安排由完成紀錄決定';
+  if ((day.raceReplacement || day.raceReplacementBase) && source !== 'race') return '已報名賽事與賽前後安排是硬約束';
+  if (day.status === 'missed' && source !== 'coach') return '課程已標記跳過';
+  if ((day.safetyOverride || day.recoveryProtection) && source !== 'coach') return '恢復保護中';
+  return '';
+}
+
+function canMutatePlanDay(day, source, today = todayStr()) {
+  return !planDayLockReason(day, source, today);
+}
+
+// 回傳鎖定代碼而非句子：呼叫端要能分辨「過去週」與「教練處方週」，因為後者
+// 仍要以處方管線承接降量，前者則是完全不動。
+function planWeekLockCode(week, source) {
+  if (!week) return 'missing-week';
+  if (source === 'safety' || source === 'coach') return '';
+  if (source === 'calibration' && Number(week.weekNum) <= currentWeek) return 'past-week';
+  if (coachPrescriptionLocksWeek(week)) return 'coach-prescription';
+  return '';
+}
+
+function canMutatePlanWeek(week, source) {
+  return !planWeekLockCode(week, source);
+}
+
 // 提前排課寫入的是教練週期處方，沒有週報手動菜單（nextWeek.menu）。只認菜單的話，
 // 滾動校準會把已排定的教練週整個重建掉，跑者隔天一開啟就看到非教練版課表。
 function weekHasCoachPeriodization(week) {
@@ -1220,8 +1259,9 @@ function autoRecalibratePlan() {
   const otherDows = trainDows.filter((d) => d !== longDow);
   let coachLockedWeeks = 0;
   plan.forEach((week) => {
-    if (week.weekNum <= currentWeek) return;
-    if (coachPrescriptionLocksWeek(week)) {
+    const weekLock = planWeekLockCode(week, 'calibration');
+    if (weekLock === 'past-week' || weekLock === 'missing-week') return;
+    if (weekLock) {
       coachLockedWeeks += 1;
       // 教練週期處方週不重建課表；降量／品質降階改由同一份處方承接，
       // 這樣重新整理不會把提前排定的下一週洗回一般課表產生器的版本。
@@ -1232,8 +1272,8 @@ function autoRecalibratePlan() {
     }
     const newTarget = Math.min(Math.round(week.targetKm * volumeFactor * 10) / 10, rule.maxWeeklyKm);
     week.targetKm = newTarget;
-    // 保留已套用的賽事整合（raceReplacement）與完成狀態，避免每次校準都把「以賽代訓」洗掉、重新觸發通知
-    const preserved = week.days.filter((day) => day.raceReplacementBase || day.status === 'done' || day.status === 'missed' || day.isMakeup);
+    // 保留賽事整合、完成狀態與恢復保護；哪些天不能被校準覆蓋一律由 gate 決定。
+    const preserved = week.days.filter((day) => !canMutatePlanDay(day, 'calibration', today));
     const newDays = buildWeekDays(profile, trainDows, longDow, otherDows, newTarget, week.isDeload, week.isTaper, hasInjury, week.weekNum, startDate, week.phase);
     newDays.forEach((day) => {
       const old = preserved.find((item) => item.dateStr === day.dateStr);

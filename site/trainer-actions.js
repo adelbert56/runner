@@ -477,7 +477,7 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
   week.targetKm = effectiveVolume;
   week.days = week.days.map((day) => {
     const actualDow = day.dateStr ? new Date(`${day.dateStr}T00:00:00`).getDay() : day.dow;
-    if (!schedule.trainingDows.includes(actualDow) || day.isMakeup || day.status === 'done') return { ...day, dow: actualDow };
+    if (!schedule.trainingDows.includes(actualDow) || !canMutatePlanDay(day, 'coach')) return { ...day, dow: actualDow };
     const isLong = actualDow === schedule.longDow;
     const session = isLong ? { type: 'long', focus: 'long', label: '長跑' } : (sessionPattern[sessionIndex++] || { type: 'easy', focus: 'aerobic', label: '穩定有氧' });
     const courseKm = isLong ? effectiveLongKm : phaseDeload ? deloadEachKm : calcWorkoutKm(session.type, effectiveVolume, profile.goal, effectiveLongKm, session.focus);
@@ -502,7 +502,7 @@ function alignCoachScheduleDays() {
   const expectedState = coachScheduleDayState(schedule);
   let changed = JSON.stringify(appData.profile?.dayState || []) !== JSON.stringify(expectedState);
   (appData.plan || []).forEach((week) => {
-    const courses = (week.days || []).filter((day) => day.coachPlan?.source === 'coach-periodization' && day.dateStr >= todayStr() && day.status !== 'done');
+    const courses = (week.days || []).filter((day) => day.coachPlan?.source === 'coach-periodization' && canMutatePlanDay(day, 'align'));
     const actualDows = courses.map((day) => new Date(`${day.dateStr}T00:00:00`).getDay()).sort((left, right) => left - right);
     const storedDows = courses.map((day) => day.dow).sort((left, right) => left - right);
     if (courses.length && (JSON.stringify(actualDows) !== JSON.stringify(schedule.trainingDows) || JSON.stringify(storedDows) !== JSON.stringify(schedule.trainingDows))) {
@@ -520,7 +520,7 @@ function alignCoachScheduleDays() {
 function alignCoachCourseNames() {
   let changed = false;
   (appData.plan || []).forEach((week) => (week.days || []).forEach((day) => {
-    if (day.coachPlan?.source !== 'coach-periodization' || day.status === 'done' || !day.dateStr || day.dateStr < todayStr()) return;
+    if (day.coachPlan?.source !== 'coach-periodization' || !day.dateStr || !canMutatePlanDay(day, 'align')) return;
     const nextTask = String(day.task || '').replace(/^教練輕鬆跑/, '輕鬆跑').replace(/^教練長跑/, '長跑');
     if (nextTask !== day.task) {
       day.task = nextTask;
@@ -539,8 +539,8 @@ function alignCoachDeloadStructure() {
   let changed = false;
   (appData.plan || []).forEach((week) => {
     (week.days || []).forEach((day, index) => {
-      if (day.type !== 'easy' || day.focus !== 'recovery' || day.status === 'done' || !day.dateStr || day.dateStr < cutoff) return;
-      if (day.coachPlan?.source !== 'coach-periodization' || day.coachPlan?.phase !== '降載' || day.safetyOverride || day.recoveryProtection) return;
+      if (day.type !== 'easy' || day.focus !== 'recovery' || !day.dateStr || !canMutatePlanDay(day, 'align', cutoff)) return;
+      if (day.coachPlan?.source !== 'coach-periodization' || day.coachPlan?.phase !== '降載') return;
       const replacement = buildDayCard(day.dow, day.dateStr, 'easy', day.km, profile, true, false, false, cutoff, day.weekNum || week.weekNum, week.phase || day.phaseName || '降載', 'easy', '輕鬆跑');
       replacement.coachPlan = { ...day.coachPlan };
       replacement.status = day.status;
@@ -562,7 +562,7 @@ function alignRecoveryCourseTargets() {
   let changed = false;
   (appData.plan || []).forEach((week) => {
     (week.days || []).forEach((day) => {
-      if (day.type !== 'easy' || day.focus !== 'recovery' || day.status === 'done' || !day.dateStr || day.dateStr < cutoff) return;
+      if (day.type !== 'easy' || day.focus !== 'recovery' || !day.dateStr || !canMutatePlanDay(day, 'align', cutoff)) return;
       const nextDetail = `今天是恢復跑：${recovery.detail}`;
       const nextHeatNote = isHotSeasonDate(new Date(`${day.dateStr}T00:00:00`))
         ? `高溫期：恢復跑守 ${recovery.hrTarget}，不守配速；超過 ${zones.recoveryMax} 就放慢，仍降不下來就走到 HR ≤${Math.max(0, zones.recoveryMax - 5)} 再跑。`

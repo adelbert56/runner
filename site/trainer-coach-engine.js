@@ -260,9 +260,11 @@ function courseResolutionLabel(source) {
 // 持久調整的 adapter 只描述「是否需要調整」與依據；實際寫入仍由既有函式處理，
 // 讓校準、移課、變更紀錄與 saveData 的成熟行為保持不變。
 function dailyAdjust(day, ctx) {
+  // 可否改動一律問單一 gate；這裡只保留出發前調整自己的條件（今天、硬課）。
   const isProtectable = day && day.dateStr === ctx.today && ['tempo', 'interval', 'long'].includes(day.type)
-    && day.status !== 'done' && !day.raceReplacement && !day.isMakeup
-    && !coachPrescriptionLocksWeek(ctx.plan.find((week) => (week.days || []).includes(day)));
+    && canMutatePlanDay(day, 'advisory', ctx.today);
+  const owningWeek = isProtectable ? ctx.plan.find((week) => (week.days || []).includes(day)) : null;
+  if (isProtectable && owningWeek && !canMutatePlanWeek(owningWeek, 'advisory')) return null;
   if (!isProtectable) return null;
   const triggers = dailyAdvisoryTriggers(day, ctx);
   if (!triggers.length) return null;

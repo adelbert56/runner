@@ -1011,6 +1011,31 @@ async function assertTrainerReport(page, viewportName) {
   if (!coachWeekCalibrationLock.skipped && (!coachWeekCalibrationLock.plannedBefore || coachWeekCalibrationLock.coachPrescribed !== coachWeekCalibrationLock.planned || coachWeekCalibrationLock.forcedDeload)) {
     throw new Error(`${viewportName}/trainer-coach-week-lock: Garmin calibration overwrote an early-scheduled coach week ${JSON.stringify(coachWeekCalibrationLock)}`);
   }
+  const mutationGate = await page.evaluate(() => {
+    const today = "2026-07-20";
+    const day = (extra) => ({ dateStr: "2026-07-24", dow: 5, type: "easy", km: 6, ...extra });
+    return {
+      doneBlocksCoach: canMutatePlanDay(day({ status: "done" }), "coach", today),
+      doneAllowsSafety: canMutatePlanDay(day({ status: "done" }), "safety", today),
+      pastBlocksAlign: canMutatePlanDay(day({ dateStr: "2026-07-18" }), "align", today),
+      makeupBlocksCalibration: canMutatePlanDay(day({ isMakeup: true }), "calibration", today),
+      raceBlocksCalibration: canMutatePlanDay(day({ raceReplacement: "race" }), "calibration", today),
+      raceAllowsRace: canMutatePlanDay(day({ raceReplacement: "race" }), "race", today),
+      recoveryBlocksAlign: canMutatePlanDay(day({ recoveryProtection: "本週評估已降階" }), "align", today),
+      recoveryAllowsCoach: canMutatePlanDay(day({ recoveryProtection: "本週評估已降階" }), "coach", today),
+      plainAllowsCalibration: canMutatePlanDay(day(), "calibration", today),
+      pastWeekCode: planWeekLockCode({ weekNum: Math.max(1, currentWeek - 1), days: [] }, "calibration"),
+      coachWeekBlocksCalibration: planWeekLockCode({ weekNum: currentWeek + 5, days: [{ dateStr: "2026-09-01", type: "easy", coachPlan: { source: "coach-periodization" } }] }, "calibration"),
+      coachWeekAllowsCoach: planWeekLockCode({ weekNum: currentWeek + 5, days: [{ dateStr: "2026-09-01", type: "easy", coachPlan: { source: "coach-periodization" } }] }, "coach")
+    };
+  });
+  if (mutationGate.doneBlocksCoach || !mutationGate.doneAllowsSafety || mutationGate.pastBlocksAlign
+    || mutationGate.makeupBlocksCalibration || mutationGate.raceBlocksCalibration || !mutationGate.raceAllowsRace
+    || mutationGate.recoveryBlocksAlign || !mutationGate.recoveryAllowsCoach || !mutationGate.plainAllowsCalibration
+    || mutationGate.pastWeekCode !== "past-week" || mutationGate.coachWeekBlocksCalibration !== "coach-prescription"
+    || mutationGate.coachWeekAllowsCoach !== "") {
+    throw new Error(`${viewportName}/trainer-mutation-gate: plan write permissions did not follow one source precedence ${JSON.stringify(mutationGate)}`);
+  }
   const evidenceVoice = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;
