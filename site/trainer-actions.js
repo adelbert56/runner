@@ -809,6 +809,46 @@ function recentEasyRunStrain(days = 14) {
   return { days, samples: scores.length, avgRpe, overreaching: avgRpe >= 7 };
 }
 
+// 提前排課排完就定了，週中身體變差也沒有入口改。撤掉本週評估等於回到排課前，
+// 下一步的重排會用同一條處方管線覆寫尚未完成的課，不動已完成與補跑。
+function restartWeeklyPlanning() {
+  appData.checkins = (appData.checkins || []).filter((item) => item.weekNum !== currentWeek);
+  saveData(appData);
+  closeModal();
+  const eligibility = earlyCoachPlanningEligibility();
+  openEarlyCoachPlanning(!eligibility.eligible);
+}
+
+// 唯讀預覽：套用處方、抄下結果、再把課表還原。record:false 不寫 localStorage，
+// 所以跑者可以先看下一週長什麼樣，再決定要不要真的排進去。
+function previewCoachPhaseSchedule(weekNum) {
+  const index = Number(weekNum) - 1;
+  const week = appData.plan?.[index];
+  if (!week) return null;
+  const weekSnapshot = cloneTrainingValue(week);
+  const dayStateSnapshot = cloneTrainingValue(appData.profile?.dayState);
+  const applied = applyCoachPhaseScheduleForWeek(weekNum, { record: false });
+  const preview = applied ? cloneTrainingValue(appData.plan[index]) : null;
+  appData.plan[index] = weekSnapshot;
+  if (appData.profile && dayStateSnapshot) appData.profile.dayState = dayStateSnapshot;
+  return preview;
+}
+
+function showCoachPlanPreview(weekNum = currentWeek + 1) {
+  const preview = previewCoachPhaseSchedule(weekNum);
+  if (!preview) {
+    showModal('目前無法預覽', '<p style="margin:0;line-height:1.7">教練週期資料還沒到位，或這一輪沒有下一週可安排。</p>', [{ label: '返回', primary: true, action: closeModal }]);
+    return;
+  }
+  const rows = (preview.days || []).filter((day) => day.type !== 'rest').map((day) => `<li class="checkin-safety" style="display:block">
+    <b>${reviewEscape(day.dateStr)}｜${reviewEscape(trainingTaskTitle(day))}</b>
+    <div class="coach-fineprint">${reviewEscape([day.pace, day.hrTarget].filter(Boolean).join(' · ') || '以心率控制')}</div></li>`).join('');
+  showModal(`第 ${weekNum} 週預覽`, `<p style="margin:0 0 12px;line-height:1.65">這是<b>預覽，尚未寫入課表</b>；總量 ${preview.targetKm} km。要真的排定，回上一步完成恢復檢核。</p><ul style="list-style:none;margin:0;padding:0;display:grid;gap:8px">${rows}</ul>`, [
+    { label: '回去排定', primary: true, action: () => openEarlyCoachPlanning() },
+    { label: '關閉', action: closeModal }
+  ]);
+}
+
 // 真人教練是拿數字講話的：回應要引用跑者這一週實際跑了什麼、跟前一週差多少，
 // 而不是只丟結論。資料不足就回空字串，絕不編造沒發生的數字。
 function runnerEvidenceSummary(weekNum = currentWeek) {
@@ -855,8 +895,9 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const existing = (appData.checkins || []).find((item) => item.weekNum === currentWeek);
   if (existing && !existing.provisional) {
     closeModal();
-    showModal('下週已安排', `<p style="margin:0;line-height:1.7">第 ${currentWeek} 週已完成正式評估；為避免重複套用跑量調整，下週課表維持目前已安排的版本。</p>`, [
+    showModal('下週已安排', `<p style="margin:0;line-height:1.7">第 ${currentWeek} 週已完成正式評估；為避免重複套用跑量調整，下週課表維持目前已安排的版本。</p><p style="margin:10px 0 0;line-height:1.7">如果排定之後身體狀況改變了，可以撤掉這次評估重新判讀；已完成的課與補跑不會被動到。</p>`, [
       { label: '查看下週課表', primary: true, action: () => { closeModal(); jumpToPhaseWeek(currentWeek + 1); switchPlanTab('week'); } },
+      { label: '重新評估並重排下週', action: restartWeeklyPlanning },
       { label: '留在本週', action: closeModal }
     ]);
     return;

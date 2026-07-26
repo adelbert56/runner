@@ -1028,6 +1028,36 @@ async function assertTrainerReport(page, viewportName) {
   if (duplicateCopy.focusHeadings > 1 || duplicateCopy.repeatedParagraphs.length) {
     throw new Error(`${viewportName}/trainer-duplicate-copy: the plan view printed the same coaching copy twice ${JSON.stringify(duplicateCopy)}`);
   }
+  const previewAndRestart = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    try {
+      const targetIndex = currentWeek;
+      const before = JSON.stringify(appData.plan?.[targetIndex] || null);
+      const preview = previewCoachPhaseSchedule(currentWeek + 1);
+      const after = JSON.stringify(appData.plan?.[targetIndex] || null);
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      const storedWeek = JSON.stringify(stored?.plan?.[targetIndex] || null);
+      appData.checkins = [{ weekNum: currentWeek, result: "維持", earlyTrigger: true }];
+      saveData(appData);
+      restartWeeklyPlanning();
+      const clearedCheckin = (appData.checkins || []).some((item) => item.weekNum === currentWeek);
+      closeModal();
+      return {
+        previewedDays: (preview?.days || []).length,
+        planUntouched: before === after,
+        storageUntouched: before === storedWeek,
+        clearedCheckin
+      };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      saveData(appData);
+    }
+  });
+  if (!previewAndRestart.planUntouched || !previewAndRestart.storageUntouched || previewAndRestart.clearedCheckin) {
+    throw new Error(`${viewportName}/trainer-preview-restart: a read-only preview or a re-plan touched stored data ${JSON.stringify(previewAndRestart)}`);
+  }
   const rejectedOptionVoice = await page.evaluate(() => {
     const answers = [true, true, true, true];
     const stable = checkinSafetyDecision({ answers, fatigue: 2, painConcern: false });
