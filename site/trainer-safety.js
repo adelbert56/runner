@@ -55,6 +55,12 @@ function checkinSafetyDecision({ answers, fatigue, painConcern }) {
     const blocked = [fatigue >= 4 ? `疲勞自評 ${fatigue}/5` : '', !sleptWell ? '睡眠未達標' : '', !recoveredFromLongRun ? '長跑恢復未完成' : ''].filter(Boolean).join('、');
     return { result: '降載恢復', factor: 0.85, removeQuality: true, allowIntensity: false, note: '恢復條件尚未達標；下週降量 15% 並取消品質課，先把睡眠與恢復補回來。', alternative: `本來可以維持原跑量並保留品質課，但${blocked}，先補恢復比硬吃課表划算。` };
   }
+  // 自評過關但手錶的恢復訊號連兩項示警時，同樣不推進：跑者常低估累積疲勞，
+  // 睡眠與 HRV 是他自己也看不到的那一半。
+  const recovery = typeof recoverySignalStatus === 'function' ? recoverySignalStatus() : null;
+  if (recovery?.strained) {
+    return { result: '維持', factor: 1, removeQuality: false, allowIntensity: false, note: `恢復自評過關，但手錶訊號顯示：${recovery.concerns.join('、')}；下週維持跑量，先把恢復補回來。`, alternative: '本來符合小幅推進 +5% 的條件，但睡眠／HRV／body battery 有兩項以上低於你自己的近期基準，這時候加量是拿恢復去換里程。' };
+  }
   // 客觀資料同意加量、主觀體感卻已經很吃力時，不推進。真人教練不會只看錶。
   if (easyStrain?.overreaching) {
     return { result: '維持', factor: 1, removeQuality: false, allowIntensity: false, note: `恢復自評過關，但近 ${easyStrain.days} 天輕鬆跑平均 RPE ${easyStrain.avgRpe}／10 偏高；下週維持跑量，先把輕鬆跑真的跑輕鬆。`, alternative: '本來符合小幅推進 +5% 的條件，但輕鬆跑的主觀吃力度已經超過輕鬆跑該有的範圍，加量只會把疲勞往前堆。' };

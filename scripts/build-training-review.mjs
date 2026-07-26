@@ -498,6 +498,27 @@ function warnMenuWithoutSteps(review) {
   return note;
 }
 
+// 發布檔只帶前端判讀真的會用到的欄位，且限制天數：這是加密後公開發佈的檔案，
+// 每日生理資料沒必要整份上網。
+function buildRecoverySignals(rows, days = 28) {
+  if (!Array.isArray(rows)) return [];
+  return rows
+    .filter((row) => row && /^\d{4}-\d{2}-\d{2}$/.test(row.date))
+    .slice(-days)
+    .map((row) => ({
+      date: row.date,
+      sleepHours: Number(row.sleep_hours) || null,
+      sleepScore: Number(row.sleep_score) || null,
+      hrvOvernight: Number(row.hrv_overnight_avg) || null,
+      hrvWeekly: Number(row.hrv_weekly_avg) || null,
+      hrvStatus: typeof row.hrv_status === "string" ? row.hrv_status : null,
+      restingHr: Number(row.resting_hr) || null,
+      bodyBatteryLow: Number(row.body_battery_low) || null,
+      bodyBatteryHigh: Number(row.body_battery_high) || null
+    }))
+    .filter((row) => Object.entries(row).some(([key, value]) => key !== "date" && value !== null));
+}
+
 async function buildPublishedReview(plaintext) {
   let review = plaintext ? preserveCoachWorkoutSteps(JSON.parse(plaintext)) : null;
   const missingStepsNote = warnMenuWithoutSteps(review);
@@ -514,6 +535,8 @@ async function buildPublishedReview(plaintext) {
     review.analyticsRuns = slimAnalyticsLaps(analyticsRuns);
     // 手錶估的乳酸閾值心率：前端訓練區間優先用它，比 %maxHr 推算準
     review.lactateThresholdHr = Number(activityFeed.lactateThreshold?.heartRate) || null;
+    // 睡眠／HRV／body battery：恢復判讀原本只能靠跑者每週自評，客觀那一半是空的。
+    review.recovery = buildRecoverySignals(activityFeed.recovery);
     review.autopilot = autopilot;
   } catch {
     review = review || buildGarminOnlyReview([], null);
@@ -521,6 +544,7 @@ async function buildPublishedReview(plaintext) {
     review.analyticsUpdatedAt = null;
     review.analyticsStatus = "missing";
     review.lactateThresholdHr = null;
+    review.recovery = [];
     review.autopilot = buildGarminAutopilot([], null);
     // Garmin 實跑讀不到時 refreshReviewFromGarmin 不會跑，missingStepsNote 就沒機會
     // 併進 coachNote——這裡補上，避免這條警告只在沒有 Garmin 資料的那次靜靜消失。

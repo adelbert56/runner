@@ -1088,6 +1088,38 @@ async function assertTrainerReport(page, viewportName) {
   if (!previewAndRestart.planUntouched || !previewAndRestart.storageUntouched || previewAndRestart.clearedCheckin) {
     throw new Error(`${viewportName}/trainer-preview-restart: a read-only preview or a re-plan touched stored data ${JSON.stringify(previewAndRestart)}`);
   }
+  const recoverySignals = await page.evaluate(() => {
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      const today = todayStr();
+      const shift = (days) => new Date(new Date(`${today}T00:00:00`).getTime() - days * 86400000).toISOString().slice(0, 10);
+      const rested = [1, 2, 3].map((offset) => ({ date: shift(offset), sleepHours: 7.6, hrvOvernight: 62, hrvWeekly: 60, bodyBatteryHigh: 82, restingHr: 48 }));
+      const strained = [1, 2, 3].map((offset) => ({ date: shift(offset), sleepHours: 5.4, hrvOvernight: 41, hrvWeekly: 58, bodyBatteryHigh: 44, restingHr: 55 }));
+      const answers = [true, true, true, true];
+      coachReviewData = { recovery: rested };
+      const restedStatus = recoverySignalStatus();
+      const restedDecision = checkinSafetyDecision({ answers, fatigue: 2, painConcern: false });
+      coachReviewData = { recovery: strained };
+      const strainedStatus = recoverySignalStatus();
+      const strainedDecision = checkinSafetyDecision({ answers, fatigue: 2, painConcern: false });
+      coachReviewData = { recovery: [] };
+      const noData = recoverySignalStatus();
+      return {
+        restedStrained: restedStatus?.strained,
+        restedResult: restedDecision.result,
+        strainedConcerns: strainedStatus?.concerns?.length || 0,
+        strainedResult: strainedDecision.result,
+        strainedNote: strainedDecision.note,
+        noData
+      };
+    } finally {
+      coachReviewData = previousReview;
+    }
+  });
+  if (recoverySignals.restedStrained || recoverySignals.strainedConcerns < 2 || recoverySignals.strainedResult !== "維持"
+    || !recoverySignals.strainedNote.includes("手錶訊號") || recoverySignals.noData !== null) {
+    throw new Error(`${viewportName}/trainer-recovery-signals: watch recovery data did not gate a progression ${JSON.stringify(recoverySignals)}`);
+  }
   const rejectedOptionVoice = await page.evaluate(() => {
     const answers = [true, true, true, true];
     const stable = checkinSafetyDecision({ answers, fatigue: 2, painConcern: false });

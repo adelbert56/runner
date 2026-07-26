@@ -790,6 +790,35 @@ function saveRunFeedback(dateStr, { rpe, note }) {
   return true;
 }
 
+// 睡眠、HRV、body battery 是「這個人現在恢復得如何」的客觀那一半。原本恢復判斷
+// 全靠跑者每週勾三題自評，客觀資料只有訓練負荷（＝你做了多少），沒有承受度。
+// 只跟自己的近期基準比，不用跨使用者的絕對門檻。
+function recoverySignalStatus(days = 7) {
+  const rows = Array.isArray(coachReviewData?.recovery) ? coachReviewData.recovery : [];
+  if (!rows.length) return null;
+  const today = todayStr();
+  const from = new Date(new Date(`${today}T00:00:00`).getTime() - days * 86400000).toISOString().slice(0, 10);
+  const recent = rows.filter((row) => row.date > from && row.date <= today);
+  if (!recent.length) return null;
+  const average = (field) => {
+    const values = recent.map((row) => Number(row[field])).filter((value) => Number.isFinite(value) && value > 0);
+    return values.length ? Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10 : null;
+  };
+  const sleepHours = average('sleepHours');
+  const bodyBatteryHigh = average('bodyBatteryHigh');
+  const restingHr = average('restingHr');
+  const hrvOvernight = average('hrvOvernight');
+  const hrvWeekly = recent.map((row) => Number(row.hrvWeekly)).filter((value) => Number.isFinite(value) && value > 0).at(-1) || null;
+  const latestStatus = recent.map((row) => row.hrvStatus).filter(Boolean).at(-1) || null;
+  const concerns = [];
+  // HRV 低於自己的週基準 10% 以上才算訊號，避免單晚波動就喊疲勞。
+  if (hrvOvernight && hrvWeekly && hrvOvernight < hrvWeekly * 0.9) concerns.push(`HRV ${hrvOvernight} 低於自己的週基準 ${hrvWeekly}`);
+  if (latestStatus && /unbalanced|low|poor/i.test(latestStatus)) concerns.push(`Garmin HRV 狀態為 ${latestStatus}`);
+  if (sleepHours && sleepHours < 6.5) concerns.push(`近 ${days} 天平均睡眠 ${sleepHours} 小時`);
+  if (bodyBatteryHigh && bodyBatteryHigh < 60) concerns.push(`body battery 每日高點平均只到 ${bodyBatteryHigh}`);
+  return { days, samples: recent.length, sleepHours, bodyBatteryHigh, restingHr, hrvOvernight, hrvWeekly, hrvStatus: latestStatus, concerns, strained: concerns.length >= 2 };
+}
+
 // 主觀吃力度只在「輕鬆跑」上才有明確的判讀意義：輕鬆跑跑成吃力，就是恢復
 // 沒跟上或配速太快，客觀負荷資料不一定看得出來。品質課本來就該吃力，不納入。
 function recentEasyRunStrain(days = 14) {
@@ -873,6 +902,16 @@ function runnerEvidenceSummary(weekNum = currentWeek) {
   if (paceShift) parts.push(paceShift);
   const strain = recentEasyRunStrain();
   if (strain) parts.push(`近 ${strain.days} 天輕鬆跑主觀 RPE 平均 ${strain.avgRpe}／10（${strain.samples} 筆）`);
+  const recovery = recoverySignalStatus();
+  if (recovery) {
+    const facts = [
+      recovery.sleepHours ? `睡眠 ${recovery.sleepHours} 小時` : '',
+      recovery.hrvOvernight ? `HRV ${recovery.hrvOvernight}${recovery.hrvWeekly ? `／週基準 ${recovery.hrvWeekly}` : ''}` : '',
+      recovery.bodyBatteryHigh ? `body battery 高點 ${recovery.bodyBatteryHigh}` : '',
+      recovery.restingHr ? `靜止心率 ${recovery.restingHr}` : ''
+    ].filter(Boolean);
+    if (facts.length) parts.push(`近 ${recovery.days} 天恢復訊號：${facts.join('、')}`);
+  }
   return parts.join('；');
 }
 

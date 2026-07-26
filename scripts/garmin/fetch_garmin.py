@@ -276,11 +276,105 @@ def load_existing() -> dict[int, dict]:
         return {}
 
 
+def load_existing_recovery() -> dict[str, dict]:
+    if not OUTPUT_PATH.exists():
+        return {}
+    try:
+        data = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+        return {r["date"]: r for r in data.get("recovery", []) if r.get("date")}
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return {}
+
+
+def _first_number(payload: object, *keys: str) -> float | None:
+    """Garmin 的每日摘要欄位名在不同帳號/韌體之間會漂移，取第一個有值的鍵。"""
+    if not isinstance(payload, dict):
+        return None
+    for key in keys:
+        value = payload.get(key)
+        if isinstance(value, (int, float)) and value > 0:
+            return float(value)
+    return None
+
+
+def fetch_recovery_day(client: "Garmin", day: date) -> dict | None:
+    """一天份的恢復訊號。任何一個端點失敗都不能讓整趟同步失敗——
+    這些是輔助判讀，不是課表的必要條件。"""
+    cdate = day.isoformat()
+    record: dict = {"date": cdate}
+
+    try:
+        sleep = client.get_sleep_data(cdate) or {}
+        daily = sleep.get("dailySleepDTO") or {}
+        seconds = _first_number(daily, "sleepTimeSeconds")
+        if seconds:
+            record["sleep_hours"] = round(seconds / 3600, 2)
+        scores = daily.get("sleepScores") or {}
+        overall = scores.get("overall") if isinstance(scores, dict) else None
+        score = _first_number(overall if isinstance(overall, dict) else {}, "value")
+        if score:
+            record["sleep_score"] = int(score)
+    except Exception as exc:
+        print(f"警告：無法讀取 {cdate} 的睡眠資料（{exc}）", file=sys.stderr)
+
+    try:
+        hrv = client.get_hrv_data(cdate) or {}
+        summary = hrv.get("hrvSummary") or {}
+        weekly = _first_number(summary, "weeklyAvg")
+        overnight = _first_number(summary, "lastNightAvg")
+        if weekly:
+            record["hrv_weekly_avg"] = int(weekly)
+        if overnight:
+            record["hrv_overnight_avg"] = int(overnight)
+        status = summary.get("status")
+        if isinstance(status, str) and status:
+            record["hrv_status"] = status
+    except Exception as exc:
+        print(f"警告：無法讀取 {cdate} 的 HRV 資料（{exc}）", file=sys.stderr)
+
+    try:
+        stats = client.get_stats(cdate) or {}
+        resting = _first_number(stats, "restingHeartRate")
+        if resting:
+            record["resting_hr"] = int(resting)
+        battery_low = _first_number(stats, "bodyBatteryLowestValue")
+        battery_high = _first_number(stats, "bodyBatteryHighestValue")
+        if battery_low:
+            record["body_battery_low"] = int(battery_low)
+        if battery_high:
+            record["body_battery_high"] = int(battery_high)
+        stress = _first_number(stats, "averageStressLevel")
+        if stress:
+            record["avg_stress"] = int(stress)
+    except Exception as exc:
+        print(f"警告：無法讀取 {cdate} 的每日摘要（{exc}）", file=sys.stderr)
+
+    return record if len(record) > 1 else None
+
+
+def fetch_recovery(client: "Garmin", days: int, existing: dict[str, dict]) -> list[dict]:
+    """只補抓還沒有的日子。每天一組 API 呼叫，回溯太長會讓同步變得很慢，
+    而恢復訊號本來就只有近期的有判讀價值。"""
+    today = date.today()
+    collected = dict(existing)
+    for offset in range(days):
+        day = today - timedelta(days=offset)
+        cdate = day.isoformat()
+        # 當天的資料可能還沒完整（睡眠要等隔天才結算），所以今天永遠重抓一次。
+        if cdate in collected and offset > 0:
+            continue
+        record = fetch_recovery_day(client, day)
+        if record:
+            collected[cdate] = record
+    return [collected[key] for key in sorted(collected)][-180:]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="抓取 Garmin 跑步紀錄")
     parser.add_argument("--days", type=int, default=90, help="回溯天數（預設 90）")
     parser.add_argument("--non-interactive", action="store_true", help="排程模式：token 失效時直接失敗，不開啟帳密提示")
     parser.add_argument("--refresh-segments", action="store_true", help="重新抓取範圍內既有活動的課程分段")
+    parser.add_argument("--recovery-days", type=int, default=21, help="回溯幾天的睡眠／HRV／body battery（預設 21，設 0 關閉）")
     args = parser.parse_args()
 
     try:
@@ -357,6 +451,14 @@ def main() -> int:
                 r["self_evaluation"] = previous["self_evaluation"]
         merged[r["activityId"]] = r
 
+    recovery: list[dict] = []
+    if args.recovery_days > 0:
+        print(f"抓取最近 {args.recovery_days} 天的睡眠／HRV／body battery…")
+        recovery = fetch_recovery(client, args.recovery_days, load_existing_recovery())
+        print(f"恢復訊號 {len(recovery)} 天")
+    else:
+        recovery = [load_existing_recovery()[key] for key in sorted(load_existing_recovery())]
+
     records = sorted(merged.values(), key=lambda r: r["startTime"] or "")
     structured_count = sum(1 for record in records if record.get("main_segment"))
     print(f"取得 {len(activities)} 筆活動，其中跑步 {len(runs)} 筆；已保存可辨識主課 {structured_count} 筆")
@@ -368,6 +470,7 @@ def main() -> int:
                 "count": len(records),
                 "lactateThreshold": lactate_threshold,
                 "activities": records,
+                "recovery": recovery,
             },
             ensure_ascii=False,
             indent=2,
