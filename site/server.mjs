@@ -20,6 +20,7 @@ const garminPairingPath = resolve(join(root, "runner", "訓練", "garmin-workout
 const garminPublishScript = resolve(join(root, "scripts", "garmin", "publish_training_plan.py"));
 const garminActivitySyncStatusPath = resolve(join(root, "runner", "訓練", "garmin-sync-status.json"));
 const garminActivitySyncScript = resolve(join(root, "scripts", "garmin", "sync-garmin.ps1"));
+const coachProfileSnapshotPath = resolve(join(root, "runner", "訓練", "coach-profile.json"));
 const preferredPowerShellPath = process.env.RUNNER_PWSH_PATH || "C:\\Program Files\\PowerShell\\7\\pwsh.exe";
 const powerShellExecutable = process.platform === "win32" && existsSync(preferredPowerShellPath)
   ? preferredPowerShellPath
@@ -120,6 +121,33 @@ function isLocalRegistrationRequest(req) {
   } catch {
     return false;
   }
+}
+
+function coachProfileSnapshot(payload, registrationData) {
+  const profile = payload?.profile;
+  if (!profile || typeof profile !== "object") throw new Error("缺少訓練設定，未寫入教練快照。");
+  const numberInRange = (value, min, max) => Number.isFinite(Number(value)) && Number(value) >= min && Number(value) <= max ? Number(value) : null;
+  const text = (value, max = 80) => typeof value === "string" && value.length <= max ? value : "";
+  const targetDate = /^\d{4}-\d{2}-\d{2}$/.test(String(profile.targetDate || "")) ? profile.targetDate : "";
+  const targetYear = targetDate.slice(0, 4);
+  const checkpointRaces = (registrationData?.entries || [])
+    .filter((entry) => entry?.personId && entry.personId === profile.registrationPersonId)
+    .filter((entry) => String(entry.raceDate || entry.date || "").startsWith(`${targetYear}-10-`))
+    .map((entry) => ({ date: String(entry.raceDate || entry.date).slice(0, 10), name: text(entry.raceName || entry.name, 160), distance: text(entry.distance, 40), registered: entry.isRegistered !== false }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    source: "trainer-local-settings",
+    profile: {
+      goal: text(profile.goal, 32), targetDate, targetTime: text(profile.targetTime, 16),
+      heightCm: numberInRange(profile.heightCm, 120, 220), weightKg: numberInRange(profile.weightKg, 30, 150),
+      maxHr: numberInRange(profile.maxHr, 120, 230), weeklyKm: numberInRange(profile.weeklyKm, 0, 200),
+      trainingDows: Array.isArray(profile.dayState) ? profile.dayState.filter((day) => Number.isInteger(day) && day >= 0 && day <= 6) : [],
+      longRunDay: numberInRange(profile.longRunDay, 0, 6),
+    },
+    octoberRaceCheckpoints: checkpointRaces,
+  };
 }
 
 function isAllowedGarminSyncRequest(req) {
@@ -409,6 +437,42 @@ const server = createServer(async (req, res) => {
   if (decoded === "/api/registration-data" && !isLocalRegistrationRequest(req)) {
     res.writeHead(403, { "content-type": "text/plain; charset=utf-8" });
     res.end("Registration data is only available from this local server.");
+    return;
+  }
+
+  if (decoded === "/api/coach-profile-snapshot") {
+    sendGarminCors(res, origin);
+    if (req.method === "OPTIONS") {
+      res.writeHead(isAllowedGarminSyncRequest(req) ? 204 : 403);
+      res.end();
+      return;
+    }
+    const localRequest = isLocalRegistrationRequest(req);
+    const publicRequest = isPublicGarminSyncRequest(req);
+    if (!localRequest && !publicRequest) {
+      sendJson(res, 403, { error: "forbidden", message: "教練設定快照僅能由本機或已配對的公開 Runner 寫入。" });
+      return;
+    }
+    if (publicRequest) {
+      const pairing = await readOrCreateGarminPairing();
+      if (!hasValidGarminPairing(req, pairing)) {
+        sendJson(res, 401, { error: "pairing-required", message: "請先完成本機 Garmin 配對，再同步教練設定。" });
+        return;
+      }
+    }
+    if (req.method !== "POST") {
+      sendJson(res, 405, { error: "method-not-allowed" });
+      return;
+    }
+    try {
+      const payload = JSON.parse(await readRequestBody(req, 32 * 1024) || "{}");
+      const snapshot = coachProfileSnapshot(payload, await readRegistrationData());
+      await mkdir(resolve(join(root, "runner", "訓練")), { recursive: true });
+      await writeFile(coachProfileSnapshotPath, JSON.stringify(snapshot, null, 2) + "\n", "utf8");
+      sendJson(res, 200, { ok: true, updatedAt: snapshot.updatedAt, checkpoints: snapshot.octoberRaceCheckpoints.length });
+    } catch (error) {
+      sendJson(res, 400, { error: "invalid-coach-profile", message: error instanceof Error ? error.message : "教練設定快照無效。" });
+    }
     return;
   }
 

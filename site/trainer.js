@@ -759,6 +759,29 @@ function loadData() {
   }
 }
 
+function syncCoachProfileSnapshot(data) {
+  // 個人身高、體重、目標時間與已選的十月檢查賽原本只存在瀏覽器；教練排程
+  // 看不到它們，才會持續用過期的 Markdown 檔。快照只寫進本機 gitignored 檔案；
+  // 公開頁須使用既有 Garmin 配對碼，才可將資料傳到本機 Runner。
+  if (!data?.profile) return;
+  const isLocalRunner = location.port === '4173' && ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+  const isPublicRunner = location.origin === 'https://adelbert56.github.io';
+  if (!isLocalRunner && !isPublicRunner) return;
+  const endpoint = isLocalRunner
+    ? '/api/coach-profile-snapshot'
+    : 'http://127.0.0.1:4173/api/coach-profile-snapshot';
+  const pairingHeaders = typeof garminSyncHeaders === 'function' ? garminSyncHeaders() : {};
+  fetch(endpoint, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...pairingHeaders },
+    body: JSON.stringify({ profile: data.profile })
+  }).then((response) => {
+    if (!response.ok && response.status !== 401) {
+      console.warn('coach profile snapshot sync failed', response.status);
+    }
+  }).catch((error) => console.warn('coach profile snapshot sync failed', error));
+}
+
 function saveData(data) {
   const normalized = normalizeData(data);
   try {
@@ -774,6 +797,7 @@ function saveData(data) {
     Object.assign(data, normalized);
   }
   window.TrainerSync?.onLocalSave?.(normalized);
+  syncCoachProfileSnapshot(normalized);
   return normalized;
 }
 
@@ -2386,6 +2410,7 @@ function init() {
     showView('setup');
   }
   applyRacePrefill();
+  syncCoachProfileSnapshot(appData);
   window.scrollPageTop = () => {
     const el = document.scrollingElement || document.documentElement;
     const start = el.scrollTop;

@@ -498,6 +498,49 @@ function warnMenuWithoutSteps(review) {
   return note;
 }
 
+function plannedDistanceKm(steps) {
+  if (!Array.isArray(steps)) return 0;
+  return steps.reduce((sum, step) => {
+    if (!step || typeof step !== "object") return sum;
+    const repeats = step.kind === "repeat" ? Math.max(1, Number(step.repetitions) || 1) : 1;
+    const ownKm = step.end?.type === "distance" ? Math.max(0, Number(step.end.value) || 0) / 1000 : 0;
+    return sum + ownKm + plannedDistanceKm(step.children) * repeats;
+  }, 0);
+}
+
+function targetKmBounds(value) {
+  const matches = String(value || "").match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+  if (!matches.length) return null;
+  return { min: matches[0], max: matches[1] ?? matches[0] };
+}
+
+// 正式週報的總跑量必須包含熱身、主課與收操；過去只把 main distance 相加，
+// 會使標示為降載的週實際多出數公里。時間型 ST 的距離無法精確相加，保留
+// 0.6 km 容差，但仍要求每一天明確聲明 totalKm。
+function assertPublishableCoachReview(plaintext) {
+  const review = JSON.parse(plaintext);
+  if (review?.reviewMode !== "final") {
+    throw new Error(`Training review is ${review?.reviewMode || "unclassified"}; only final reviews may be published.`);
+  }
+  const menu = Array.isArray(review?.nextWeek?.menu) ? review.nextWeek.menu : [];
+  if (!menu.length) return;
+  const missingTotal = menu.filter((entry) => !Number.isFinite(Number(entry?.totalKm)) || Number(entry.totalKm) <= 0);
+  if (missingTotal.length) {
+    throw new Error(`Coach menu is missing totalKm for: ${missingTotal.map((entry) => entry.day || "?").join(", ")}.`);
+  }
+  const prescribedKm = menu.reduce((sum, entry) => sum + Number(entry.totalKm), 0);
+  const bounds = targetKmBounds(review?.nextWeek?.targetKm);
+  if (bounds && (prescribedKm < bounds.min - 0.5 || prescribedKm > bounds.max + 0.5)) {
+    throw new Error(`Coach menu total ${prescribedKm.toFixed(1)} km is outside target ${review.nextWeek.targetKm}.`);
+  }
+  menu.forEach((entry) => {
+    const stepKm = plannedDistanceKm(entry.steps);
+    if (stepKm > Number(entry.totalKm) + 0.01 || Number(entry.totalKm) - stepKm > 0.6) {
+      throw new Error(`Coach menu distance mismatch on ${entry.day || "?"}: totalKm=${entry.totalKm}, structured=${stepKm.toFixed(1)}.`);
+    }
+  });
+}
+
 // 發布檔只帶前端判讀真的會用到的欄位，且限制天數：這是加密後公開發佈的檔案，
 // 每日生理資料沒必要整份上網。
 function buildRecoverySignals(rows, days = 28) {
@@ -552,13 +595,18 @@ async function buildPublishedReview(plaintext) {
       review.nextWeek.coachNote = [review.nextWeek.coachNote, missingStepsNote].filter(Boolean).join(' ');
     }
   }
-  // 教練目標.json 為單一真相：存在且結構有效時，覆蓋 zones/periodization。
+  // 教練目標.json 為單一真相：存在且結構有效時，覆蓋教練維護的
+  // zones/periodization 與能力快照。這讓 Markdown 教練檔同步出的最新
+  // 配速、步頻判讀不會在加密發布時悄悄退回週報的舊敘事。
   // 找不到或格式不符則沿用 週報.json 既有值（向後相容，不會清空）。
   try {
     const coachGoal = JSON.parse(await readFile(COACH_GOAL_SOURCE, "utf8"));
     if (review && coachGoal && typeof coachGoal === "object") {
       if (coachGoal.zones && typeof coachGoal.zones === "object") review.zones = coachGoal.zones;
       if (Array.isArray(coachGoal.periodization) && coachGoal.periodization.length) review.periodization = coachGoal.periodization;
+      if (coachGoal.goal && typeof coachGoal.goal === "object") review.goal = coachGoal.goal;
+      if (coachGoal.paceGuidance && typeof coachGoal.paceGuidance === "object") review.paceGuidance = coachGoal.paceGuidance;
+      if (coachGoal.currentMetrics && typeof coachGoal.currentMetrics === "object") review.currentMetrics = coachGoal.currentMetrics;
     }
   } catch { /* 沒有 教練目標.json 就沿用週報值 */ }
   return JSON.stringify(review);
@@ -605,6 +653,15 @@ async function main() {
       }
       console.warn(`No local coach review found at ${SOURCE}; publishing Garmin-only training data by explicit opt-in.`);
     }
+  }
+
+  try {
+    assertPublishableCoachReview(plaintext);
+  } catch (error) {
+    const message = `⚠️ training-review publish blocked: ${error instanceof Error ? error.message : "invalid coach review"}`;
+    console.error(message);
+    await appendJobSummary(message);
+    process.exit(1);
   }
 
   const payload = await encrypt(await buildPublishedReview(plaintext), passphrase);
