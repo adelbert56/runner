@@ -830,9 +830,15 @@ function recentEasyRunStrain(days = 14) {
     .flatMap((week) => week.days || [])
     .filter((day) => ['easy', 'long'].includes(day.type) && day.dateStr >= from && day.dateStr <= today)
     .map((day) => day.dateStr));
+  // Garmin 手錶跑完就會問一次課後自評（selfEvaluation），跟手動輸入是同一份
+  // RPE 量表；沒有手動記錄時才退回手錶那筆，避免同一天重複計入兩次。
+  const watchRpeByDate = new Map((typeof coachRunRecords === 'function' ? coachRunRecords() : [])
+    .filter((run) => easyDates.has(run.date) && Number(run.selfEvaluation?.rpe) > 0)
+    .map((run) => [run.date, Number(run.selfEvaluation.rpe)]));
   const scores = [
     ...Object.entries(feedback).filter(([date]) => easyDates.has(date)).map(([, item]) => Number(item.rpe) || 0),
-    ...(appData.log || []).filter((entry) => easyDates.has(entry.date) && !feedback[entry.date]).map((entry) => Number(entry.rpe) || 0)
+    ...(appData.log || []).filter((entry) => easyDates.has(entry.date) && !feedback[entry.date]).map((entry) => Number(entry.rpe) || 0),
+    ...[...watchRpeByDate.entries()].filter(([date]) => !feedback[date] && !(appData.log || []).some((entry) => entry.date === date && entry.rpe)).map(([, rpe]) => rpe)
   ].filter((rpe) => rpe > 0);
   if (scores.length < 3) return null;
   const avgRpe = Math.round((scores.reduce((sum, rpe) => sum + rpe, 0) / scores.length) * 10) / 10;

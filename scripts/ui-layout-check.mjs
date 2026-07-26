@@ -1179,6 +1179,40 @@ async function assertTrainerReport(page, viewportName) {
     || !adaptivePeriodization.longRunShareOk || !adaptivePeriodization.noteMentionsBaseline || !adaptivePeriodization.tooLittleDataUntouched) {
     throw new Error(`${viewportName}/trainer-adaptive-periodization: the cycle did not follow real mileage inside its safety caps ${JSON.stringify(adaptivePeriodization)}`);
   }
+  const watchRpe = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousPlan = cloneTrainingValue(appData.plan);
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      const today = todayStr();
+      const shift = (days) => addDaysToDateStr(today, -days);
+      appData.plan = [{ weekNum: 1, days: [1, 3, 5].map((offset) => ({ dateStr: shift(offset), dow: offset, type: "easy", km: 6, status: "done" })) }];
+      appData.runFeedback = {};
+      appData.log = [];
+      coachReviewData = {
+        analyticsRuns: [1, 3, 5].map((offset) => ({ activityId: offset, date: shift(offset), km: 6, pace: "8:00", hr: 140, selfEvaluation: { rpe: 8, feel: 3 } }))
+      };
+      const strainFromWatch = recentEasyRunStrain();
+      const badge = renderRunFeedbackAction(appData.plan[0].days[0], getGarminRunForDate(shift(1)));
+      // 手動記錄要贏過手錶：跑者填了 3，就不該被手錶的 8 蓋過去。
+      saveRunFeedback(shift(1), { rpe: 3, note: "" });
+      const strainWithManualOverride = recentEasyRunStrain();
+      return {
+        watchSamples: strainFromWatch?.samples,
+        watchAvgRpe: strainFromWatch?.avgRpe,
+        badgeShowsWatch: badge.includes("8") && badge.includes("手錶"),
+        manualLowersAverage: strainWithManualOverride?.avgRpe < strainFromWatch?.avgRpe
+      };
+    } finally {
+      appData = previousData;
+      appData.plan = previousPlan;
+      coachReviewData = previousReview;
+      saveData(appData);
+    }
+  });
+  if (watchRpe.watchSamples !== 3 || watchRpe.watchAvgRpe !== 8 || !watchRpe.badgeShowsWatch || !watchRpe.manualLowersAverage) {
+    throw new Error(`${viewportName}/trainer-watch-rpe: the watch's own post-run RPE was not read into strain judgement ${JSON.stringify(watchRpe)}`);
+  }
   const recoverySignals = await page.evaluate(() => {
     const previousReview = cloneTrainingValue(coachReviewData);
     try {

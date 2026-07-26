@@ -3075,8 +3075,11 @@ function renderRunFeedbackAction(day, garminRun) {
   const completed = day.status === 'done' || Boolean(garminRun);
   if (!completed || typeof runFeedbackFor !== 'function') return '';
   const feedback = runFeedbackFor(day.dateStr);
-  return feedback?.rpe
-    ? `<button class="btn btn-secondary" onclick="openRunFeedback('${day.dateStr}')">🙂 體感 RPE ${feedback.rpe}</button>`
+  // 手動記錄優先；沒有時顯示手錶課後自評，跑者不用為已經按過的東西再填一次。
+  const watchRpe = Number(garminRun?.selfEvaluation?.rpe) || 0;
+  const rpe = feedback?.rpe || watchRpe;
+  return rpe
+    ? `<button class="btn btn-secondary" onclick="openRunFeedback('${day.dateStr}')">🙂 體感 RPE ${rpe}${!feedback?.rpe && watchRpe ? '（手錶）' : ''}</button>`
     : `<button class="btn btn-secondary" onclick="openRunFeedback('${day.dateStr}')">🙂 記錄今天體感</button>`;
 }
 
