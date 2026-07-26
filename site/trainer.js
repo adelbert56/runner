@@ -2473,9 +2473,11 @@ loadRegistrationRaceCheckpoints();
     const coachCourseNamesAligned = alignCoachCourseNames();
     const coachDeloadStructureAligned = alignCoachDeloadStructure();
     const recoveryTargetsAligned = alignRecoveryCourseTargets();
-    const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
     // 校準與出發前調整都經單一 mutation 入口；背景觸發不跳 toast。
     const adaptation = runCoachAdaptation('coach-review-ready');
+    // 還原必須排在校準之後：先還原再校準的話，已提前排定的教練週會被同一輪
+    // 的自動校準覆蓋，跑者隔天看到的又是非教練版課表。
+    const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
     if ((coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }

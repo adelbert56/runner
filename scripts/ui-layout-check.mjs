@@ -961,6 +961,56 @@ async function assertTrainerReport(page, viewportName) {
   if (!(recalibration.first?.easyDelta < 0) || recalibration.calibratedEasyPace >= 480 || recalibration.repeated !== null || !recalibration.analysisSnapshots.length || !recalibration.analysisSnapshots.at(-1)?.summary) {
     throw new Error(`${viewportName}/trainer-recalibration: stable safe Garmin runs did not produce one bounded future pace calibration ${JSON.stringify(recalibration)}`);
   }
+  const coachWeekCalibrationLock = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      const currentPlanIndex = appData.plan.findIndex((week) => (week.days || []).some((day) => day.dateStr === todayStr()));
+      if (currentPlanIndex >= 0) currentWeek = currentPlanIndex + 1;
+      const upcoming = appData.plan?.[currentWeek];
+      if (!upcoming) return { skipped: true };
+      upcoming.isDeload = false;
+      upcoming.days = (upcoming.days || []).map((day) => (day.type === "rest" ? day : {
+        ...day,
+        status: "planned",
+        coachPlan: { source: "coach-periodization", phase: "長跑重建", targetKm: upcoming.targetKm }
+      }));
+      const plannedBefore = upcoming.days.filter((day) => day.type !== "rest").length;
+      appData.recalibratedFor = null;
+      coachReviewData = {
+        updatedAt: "2026-07-16",
+        analyticsUpdatedAt: "2026-07-16",
+        autopilot: { status: "ready", decision: "deload", volumeFactor: 0.85, qualityMode: "reduce" },
+        analyticsRuns: [
+          { activityId: 9101, date: "2026-07-11", km: 6, pace: "7:05", hr: 145, trainingLoad: 50, aerobicTe: 2.8, anaerobicTe: 0.5 },
+          { activityId: 9102, date: "2026-07-12", km: 6, pace: "7:00", hr: 146, trainingLoad: 55, aerobicTe: 3.0, anaerobicTe: 0.7 },
+          { activityId: 9103, date: "2026-07-13", km: 6, pace: "7:02", hr: 144, trainingLoad: 52, aerobicTe: 2.9, anaerobicTe: 0.6 },
+          { activityId: 9104, date: "2026-07-14", km: 8, pace: "6:40", hr: 152, trainingLoad: 85, aerobicTe: 4.2, anaerobicTe: 2.7 },
+          { activityId: 9105, date: "2026-07-15", km: 8, pace: "6:38", hr: 153, trainingLoad: 90, aerobicTe: 4.1, anaerobicTe: 2.8 },
+          { activityId: 9106, date: "2026-07-16", km: 8, pace: "6:42", hr: 151, trainingLoad: 88, aerobicTe: 4.3, anaerobicTe: 2.6 }
+        ]
+      };
+      const summary = autoRecalibratePlan();
+      const after = appData.plan?.[currentWeek];
+      const planned = (after?.days || []).filter((day) => day.type !== "rest");
+      return {
+        calibrated: Boolean(summary),
+        forcedDeload: Boolean(summary?.forcedDeload),
+        plannedBefore,
+        planned: planned.length,
+        coachPrescribed: planned.filter((day) => day.coachPlan?.source === "coach-periodization").length
+      };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+      coachReviewData = previousReview;
+      saveData(appData);
+    }
+  });
+  if (!coachWeekCalibrationLock.skipped && (!coachWeekCalibrationLock.plannedBefore || coachWeekCalibrationLock.coachPrescribed !== coachWeekCalibrationLock.planned || coachWeekCalibrationLock.forcedDeload)) {
+    throw new Error(`${viewportName}/trainer-coach-week-lock: Garmin calibration overwrote an early-scheduled coach week ${JSON.stringify(coachWeekCalibrationLock)}`);
+  }
   const loadDecision = await page.evaluate(() => garminLoadDecision([
     { trainingLoad: 50, aerobicTe: 2.8, anaerobicTe: 0.5 },
     { trainingLoad: 55, aerobicTe: 3.0, anaerobicTe: 0.7 },

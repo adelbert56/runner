@@ -949,8 +949,21 @@ function buildPlan(profile) {
 // ============================================================
 // 爬升明顯的跑步，同樣心率下配速本來就會變慢，不是體能退步——
 // 拿這種跑步去跟平地配速比較會誤判，校準前先濾掉。
+// 提前排課寫入的是教練週期處方，沒有週報手動菜單（nextWeek.menu）。只認菜單的話，
+// 滾動校準會把已排定的教練週整個重建掉，跑者隔天一開啟就看到非教練版課表。
+function weekHasCoachPeriodization(week) {
+  return (week?.days || []).some((day) => day?.coachPlan?.source === 'coach-periodization');
+}
+
 function coachPrescriptionLocksWeek(week) {
-  return coachWeekMatches(week) && coachDaysForWeek(week).length > 0;
+  return (coachWeekMatches(week) && coachDaysForWeek(week).length > 0) || weekHasCoachPeriodization(week);
+}
+
+// 降載仍要生效，但必須走教練處方管線當成限制條件，不能退回一般課表產生器。
+function garminCalibrationConstraints(factor) {
+  const autopilot = coachReviewData?.autopilot?.status === 'ready' ? coachReviewData.autopilot : null;
+  const qualityMode = autopilot?.decision === 'deload' ? (autopilot.qualityMode || 'keep') : 'keep';
+  return { factor, qualityMode: qualityMode === 'skip' ? 'keep' : qualityMode, removeQuality: qualityMode === 'skip' };
 }
 
 // Garmin 的訓練負荷沒有跨使用者可共用的絕對門檻，因此只和自己的近期基準比較。
@@ -1044,7 +1057,7 @@ function autoRecalibratePlan() {
   // 已經偵測到跑量拉升過快也不會提前休息。用 autopilot 的 ramp 判斷提前插一週恢復。
   const nextWeek = plan.find((w) => w.weekNum === currentWeek + 1);
   let forcedDeload = false;
-  if (nextWeek && !nextWeek.isTaper && !nextWeek.isDeload && coachReviewData.autopilot?.decision === 'deload') {
+  if (nextWeek && !nextWeek.isTaper && !nextWeek.isDeload && !coachPrescriptionLocksWeek(nextWeek) && coachReviewData.autopilot?.decision === 'deload') {
     nextWeek.isDeload = true;
     nextWeek.targetKm = Math.round(nextWeek.targetKm * 0.8 * 10) / 10;
     forcedDeload = true;
@@ -1205,6 +1218,11 @@ function autoRecalibratePlan() {
     if (week.weekNum <= currentWeek) return;
     if (coachPrescriptionLocksWeek(week)) {
       coachLockedWeeks += 1;
+      // 教練週期處方週不重建課表；降量／品質降階改由同一份處方承接，
+      // 這樣重新整理不會把提前排定的下一週洗回一般課表產生器的版本。
+      if (weekHasCoachPeriodization(week) && volumeFactor !== 1 && typeof applyCoachPhaseScheduleForWeek === 'function') {
+        applyCoachPhaseScheduleForWeek(week.weekNum, { record: false, constraints: garminCalibrationConstraints(volumeFactor) });
+      }
       return;
     }
     const newTarget = Math.min(Math.round(week.targetKm * volumeFactor * 10) / 10, rule.maxWeeklyKm);
