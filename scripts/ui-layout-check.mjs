@@ -1011,6 +1011,70 @@ async function assertTrainerReport(page, viewportName) {
   if (!coachWeekCalibrationLock.skipped && (!coachWeekCalibrationLock.plannedBefore || coachWeekCalibrationLock.coachPrescribed !== coachWeekCalibrationLock.planned || coachWeekCalibrationLock.forcedDeload)) {
     throw new Error(`${viewportName}/trainer-coach-week-lock: Garmin calibration overwrote an early-scheduled coach week ${JSON.stringify(coachWeekCalibrationLock)}`);
   }
+  const duplicateCopy = await page.evaluate(() => {
+    const host = document.getElementById("plan-tab-week");
+    const text = host?.textContent || "";
+    const headingCount = (label) => text.split(label).length - 1;
+    const paragraphs = [...(host?.querySelectorAll("p") || [])]
+      .map((node) => node.textContent.replace(/\s+/g, "").trim())
+      .filter((value) => value.length >= 24);
+    const seen = new Map();
+    paragraphs.forEach((value) => seen.set(value, (seen.get(value) || 0) + 1));
+    return {
+      focusHeadings: headingCount("本週執行重點"),
+      repeatedParagraphs: [...seen.entries()].filter(([, count]) => count > 1).map(([value, count]) => `${value.slice(0, 30)}×${count}`)
+    };
+  });
+  if (duplicateCopy.focusHeadings > 1 || duplicateCopy.repeatedParagraphs.length) {
+    throw new Error(`${viewportName}/trainer-duplicate-copy: the plan view printed the same coaching copy twice ${JSON.stringify(duplicateCopy)}`);
+  }
+  const rejectedOptionVoice = await page.evaluate(() => {
+    const answers = [true, true, true, true];
+    const stable = checkinSafetyDecision({ answers, fatigue: 2, painConcern: false });
+    const sore = checkinSafetyDecision({ answers, fatigue: 4, painConcern: false });
+    const hurt = checkinSafetyDecision({ answers: [true, false, true, true], fatigue: 2, painConcern: true });
+    return {
+      stable: stable.alternative || "",
+      sore: sore.alternative || "",
+      hurt: hurt.alternative || "",
+      soreQuotesSignal: (sore.alternative || "").includes("疲勞自評 4/5")
+    };
+  });
+  if (!rejectedOptionVoice.stable || !rejectedOptionVoice.sore || !rejectedOptionVoice.hurt || !rejectedOptionVoice.soreQuotesSignal) {
+    throw new Error(`${viewportName}/trainer-rejected-option: weekly verdicts did not say which option was turned down ${JSON.stringify(rejectedOptionVoice)}`);
+  }
+  const runFeel = await page.evaluate(() => {
+    const previousFeedback = cloneTrainingValue(appData.runFeedback);
+    const previousPlan = cloneTrainingValue(appData.plan);
+    try {
+      const today = todayStr();
+      const shift = (days) => new Date(new Date(`${today}T00:00:00`).getTime() + days * 86400000).toISOString().slice(0, 10);
+      appData.plan = [{ weekNum: 1, days: [1, 3, 5].map((offset) => ({ dateStr: shift(-offset), dow: offset, type: "easy", km: 6, status: "done" })) }];
+      appData.runFeedback = {};
+      const rejectsEmpty = saveRunFeedback(shift(-1), { rpe: "", note: "" });
+      const clampsOutOfRange = saveRunFeedback(shift(-9), { rpe: 42, note: "腿很重" });
+      [1, 3, 5].forEach((offset) => saveRunFeedback(shift(-offset), { rpe: 8, note: "" }));
+      const strain = recentEasyRunStrain();
+      const decision = checkinSafetyDecision({ answers: [true, true, true, true], fatigue: 2, painConcern: false });
+      return {
+        rejectsEmpty,
+        clampedRpe: appData.runFeedback[shift(-9)]?.rpe,
+        clampedNote: appData.runFeedback[shift(-9)]?.note,
+        clampsOutOfRange,
+        strain,
+        result: decision.result,
+        alternative: decision.alternative || ""
+      };
+    } finally {
+      appData.runFeedback = previousFeedback;
+      appData.plan = previousPlan;
+      saveData(appData);
+    }
+  });
+  if (runFeel.rejectsEmpty || !runFeel.clampsOutOfRange || runFeel.clampedRpe !== 0 || runFeel.clampedNote !== "腿很重" || runFeel.strain?.samples !== 3 || runFeel.strain?.avgRpe !== 8
+    || !runFeel.strain?.overreaching || runFeel.result !== "維持" || !runFeel.alternative.includes("小幅推進")) {
+    throw new Error(`${viewportName}/trainer-run-feel: subjective effort was not captured or did not hold back a progression ${JSON.stringify(runFeel)}`);
+  }
   const mutationGate = await page.evaluate(() => {
     const today = "2026-07-20";
     const day = (extra) => ({ dateStr: "2026-07-24", dow: 5, type: "easy", km: 6, ...extra });

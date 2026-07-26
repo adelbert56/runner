@@ -599,8 +599,13 @@ function reconcileCoachPrescriptionHistory(weekNum, phase) {
 }
 
 function restorePendingEarlyCoachSchedule() {
-  const checkin = (appData.checkins || []).find((item) => item.weekNum === currentWeek && item.earlyTrigger);
-  const nextWeek = appData.plan?.[currentWeek];
+  // 出國或忙到整週沒開網站的話，currentWeek 已經往前跑了；只認當週的話那份
+  // 已確認的提前排課就再也回不來。改為認「目標週還沒過去」的最後一次決策。
+  const checkin = [...(appData.checkins || [])]
+    .filter((item) => item.earlyTrigger && Number(item.weekNum) + 1 >= currentWeek)
+    .sort((left, right) => left.weekNum - right.weekNum)
+    .at(-1);
+  const nextWeek = checkin ? appData.plan?.[Number(checkin.weekNum)] : null;
   const applied = (nextWeek?.days || []).filter((day) => day.type !== 'rest').every((day) => day.coachPlan?.source === 'coach-periodization');
   // 只復原已通過完成／恢復檢核的既有決策；不能因重新整理把未結案週的下一週寫出來。
   if (!checkin || checkin.coachScheduleApplied !== true) return false;
@@ -741,6 +746,69 @@ function sameEffortEasyPaceShift(thisWeekRuns, priorWeekRuns) {
   return `同心率（HR ≤ ${easyMax}）輕鬆跑中位配速 ${secToPace(prior)} → ${secToPace(current)}/km（${trend}）`;
 }
 
+function runFeedbackFor(dateStr) {
+  return appData.runFeedback?.[dateStr] || null;
+}
+
+function openRunFeedback(dateStr) {
+  const existing = runFeedbackFor(dateStr) || { rpe: 0, note: '' };
+  const options = [
+    [3, '3｜輕鬆，可以一路對話'],
+    [4, '4｜舒適，稍微有感'],
+    [5, '5｜穩定'],
+    [6, '6｜穩定但需要專心'],
+    [7, '7｜吃力，話講不完整'],
+    [8, '8｜很吃力'],
+    [9, '9｜接近全力']
+  ].map(([value, label]) => `<option value="${value}" ${existing.rpe === value ? 'selected' : ''}>${label}</option>`).join('');
+  showModal('今天跑起來的感覺', `<p style="margin:0 0 12px;line-height:1.65">Garmin 記得你跑了多快、心率多少，但記不得你跑起來累不累。這一欄會影響下一次要不要加量。</p>
+    <div class="form-group"><label class="form-label" for="feel-rpe">主觀吃力度 RPE</label><select class="form-input" id="feel-rpe"><option value="">請選擇</option>${options}</select><div class="field-help">輕鬆跑正常落在 3–5；連續幾次到 7 以上代表恢復沒跟上。</div></div>
+    <div class="form-group"><label class="form-label" for="feel-note">一句話補充（選填）</label><input class="form-input" id="feel-note" type="text" maxlength="240" value="${reviewEscape(existing.note)}" placeholder="例：前段很順，最後 2 km 腿開始重"></div>`, [
+    {
+      label: '儲存',
+      primary: true,
+      action: () => {
+        const saved = saveRunFeedback(dateStr, { rpe: document.getElementById('feel-rpe')?.value, note: document.getElementById('feel-note')?.value });
+        closeModal();
+        if (saved) renderPlanView();
+      }
+    },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+function saveRunFeedback(dateStr, { rpe, note }) {
+  const parsedRpe = Math.round(Number(rpe));
+  const entry = {
+    rpe: Number.isFinite(parsedRpe) && parsedRpe >= 1 && parsedRpe <= 10 ? parsedRpe : 0,
+    note: String(note || '').trim().slice(0, 240),
+    savedAt: todayStr()
+  };
+  if (!entry.rpe && !entry.note) return false;
+  appData.runFeedback = { ...(appData.runFeedback || {}), [dateStr]: entry };
+  saveData(appData);
+  return true;
+}
+
+// 主觀吃力度只在「輕鬆跑」上才有明確的判讀意義：輕鬆跑跑成吃力，就是恢復
+// 沒跟上或配速太快，客觀負荷資料不一定看得出來。品質課本來就該吃力，不納入。
+function recentEasyRunStrain(days = 14) {
+  const feedback = appData.runFeedback || {};
+  const today = todayStr();
+  const from = new Date(new Date(`${today}T00:00:00`).getTime() - days * 86400000).toISOString().slice(0, 10);
+  const easyDates = new Set((appData.plan || [])
+    .flatMap((week) => week.days || [])
+    .filter((day) => ['easy', 'long'].includes(day.type) && day.dateStr >= from && day.dateStr <= today)
+    .map((day) => day.dateStr));
+  const scores = [
+    ...Object.entries(feedback).filter(([date]) => easyDates.has(date)).map(([, item]) => Number(item.rpe) || 0),
+    ...(appData.log || []).filter((entry) => easyDates.has(entry.date) && !feedback[entry.date]).map((entry) => Number(entry.rpe) || 0)
+  ].filter((rpe) => rpe > 0);
+  if (scores.length < 3) return null;
+  const avgRpe = Math.round((scores.reduce((sum, rpe) => sum + rpe, 0) / scores.length) * 10) / 10;
+  return { days, samples: scores.length, avgRpe, overreaching: avgRpe >= 7 };
+}
+
 // 真人教練是拿數字講話的：回應要引用跑者這一週實際跑了什麼、跟前一週差多少，
 // 而不是只丟結論。資料不足就回空字串，絕不編造沒發生的數字。
 function runnerEvidenceSummary(weekNum = currentWeek) {
@@ -763,6 +831,8 @@ function runnerEvidenceSummary(weekNum = currentWeek) {
   }
   const paceShift = sameEffortEasyPaceShift(thisWeekRuns, priorWeekRuns);
   if (paceShift) parts.push(paceShift);
+  const strain = recentEasyRunStrain();
+  if (strain) parts.push(`近 ${strain.days} 天輕鬆跑主觀 RPE 平均 ${strain.avgRpe}／10（${strain.samples} 筆）`);
   return parts.join('；');
 }
 
@@ -831,7 +901,7 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const feedbackTerrainEvidence = coachTerrainEvidence(currentWeek);
   const feedbackSignals = classifyEarlyFeedback(note, feedbackTerrainEvidence);
   const coachFeedbackResponse = coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1, terrainEvidence: feedbackTerrainEvidence });
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, rejectedOption: decision.alternative || '', safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();

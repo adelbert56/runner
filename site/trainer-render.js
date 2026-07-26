@@ -3,7 +3,25 @@
 // Extracted from trainer.js (2026-07-19 refactor). Classic script; all
 // top-level functions stay global. Loaded before trainer.js so init() can call them.
 
+// 版面去重：同一段教練文案在一次渲染裡只印一次。教練判讀會同時流進週檢視的
+// 執行重點、教練週報與判讀依據，任何一處各自複製都會讓跑者上下滑到兩份一模
+// 一樣的文字，既佔版面又看不出哪一份才是最新的。
+let claimedCoachCopy = new Set();
+
+function resetCoachCopyClaims() {
+  claimedCoachCopy = new Set();
+}
+
+function claimCoachCopy(text) {
+  const key = String(text || '').replace(/\s+/g, '');
+  if (!key) return false;
+  if (claimedCoachCopy.has(key)) return false;
+  claimedCoachCopy.add(key);
+  return true;
+}
+
 function renderPlanView() {
+  resetCoachCopyClaims();
   const el = document.getElementById('view-plan');
   const profile = appData.profile;
   const plan = appData.plan || [];
@@ -682,7 +700,10 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
       : '已讀取本週回饋。');
     conclusion.push(`已納入跑者回饋；本次判定為「${earlyFeedback.result || '維持'}」。`);
     evidence.push(`跑者回饋：「${earlyFeedback.note}」；判讀為：${signalText}。`);
-    execution.push(`回饋的實際處置：${response}`);
+    // 訊號判讀已經在「判讀依據」列過，處置欄不再重述一次覆誦句。
+    const responseBody = String(response).replace(/^(我讀到你提到：[^。]*。|我已讀到你的備註[^。]*。)\s*/, '');
+    if (earlyFeedback.rejectedOption) evidence.push(`沒有採用的選項：${earlyFeedback.rejectedOption}`);
+    execution.push(`回饋的實際處置：${responseBody}`);
   }
   const coachInsightCards = [
     { id: 'conclusion', title: '本週判定', subtitle: '先照這個方向執行', items: conclusion },
@@ -691,6 +712,7 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
   ];
   const renderCard = (card) => `<article class="coach-insight-card coach-insight-card--${card.id}"><div class="coach-insight-card__header"><span class="coach-insight-card__icon" aria-hidden="true">${coachInsightIcon(card.id)}</span><div><h3 class="coach-insight-card__title">${card.title}</h3><p class="coach-insight-card__subtitle">${card.subtitle}</p></div></div><ul class="coach-insight-list">${(card.items.length ? card.items : ['目前沒有需要特別處理的訊號。']).map((item) => `<li class="coach-insight-list__item"><span class="coach-insight-list__bullet" aria-hidden="true"></span><p>${renderCoachInsightHighlights(item)}</p></li>`).join('')}</ul></article>`;
   const briefing = focusSummary || '把教練判讀整理成一份可快速採取行動的週報；完整紀錄仍保留在下方，方便你需要時追溯。';
+  claimCoachCopy(briefing);
   const status = Number.isFinite(weeksRemaining) ? `距離目標 ${weeksRemaining} 週` : '本週行動指南';
   return `<section class="weekly-coach-insight" aria-labelledby="weekly-coach-insight-title"><div class="coach-insight-heading"><div><p class="coach-insight-eyebrow">COACHING BRIEF</p><h2 id="weekly-coach-insight-title" class="coach-insight-title">本週執行重點</h2><p class="coach-insight-description">${reviewEscape(briefing)}</p></div><span class="coach-insight-status">${status}</span></div><div class="coach-insight-grid">${coachInsightCards.map(renderCard).join('')}</div></section>`;
 }
@@ -705,8 +727,11 @@ function renderCourseDecisionPanel(plan = appData.plan || [], phaseRuleText = ''
   const sourceOrder = ['safety-hold', 'safety-override', 'daily-adjust', 'race-adjustment', 'coach-prescription', 'baseline'];
   const overrides = sourceOrder.filter((source) => source !== 'baseline' && decision.sourceCounts[source])
     .map((source) => `${courseResolutionLabel(source)} ${decision.sourceCounts[source]} 堂`);
+  // 教練週報一旦要出現，本週執行重點就由它負責；否則同一段焦點文字會上下各印一次。
+  const showsCoachBrief = Boolean(decision.coachNote || earlyFeedbackForCoachBrief(week?.weekNum));
+  const showsFocusContext = Boolean(focusSummary) && !showsCoachBrief && claimCoachCopy(focusSummary);
   return `<section class="course-decision-panel" aria-label="課表決策總覽">
-    ${focusSummary && !decision.coachNote ? `<div class="course-decision-context"><div class="course-focus-icon">🎯</div><div><b>本週執行重點</b><p>${reviewEscape(focusSummary)}</p></div><div class="course-focus-metric"><span>距離目標賽事</span><strong>${weeksRemaining}<small>週</small></strong></div></div>` : ''}
+    ${showsFocusContext ? `<div class="course-decision-context"><div class="course-focus-icon">🎯</div><div><b>本週執行重點</b><p>${reviewEscape(focusSummary)}</p></div><div class="course-focus-metric"><span>距離目標賽事</span><strong>${weeksRemaining}<small>週</small></strong></div></div>` : ''}
     ${decision.planningNote ? `<div class="course-decision-note"><div class="course-note-head"><b>本週排課調整</b><span>WEEKLY PLAN UPDATE</span></div><p>${reviewEscape(decision.planningNote)}</p></div>` : ''}
     ${decision.coachNote || earlyFeedbackForCoachBrief(week?.weekNum) ? renderCoachAdviceNote(decision.coachNote || '本週回饋已完成判讀。', { focusSummary, weeksRemaining, earlyFeedback: earlyFeedbackForCoachBrief(week?.weekNum) }) : ''}
     ${overrides.some((item) => item.startsWith('教練處方')) ? '<div class="training-status-actions" style="margin-top:10px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'coach\')">查看教練完整依據</button></div>' : ''}
@@ -3034,6 +3059,17 @@ function showRunCompanion(dateStr) {
   ]);
 }
 
+// Garmin 自動同步的跑者不會走手動補登，主觀吃力度因此永遠是空的。
+// 只有已完成（同步或補登）的跑課才問，避免變成又一個待辦提示。
+function renderRunFeedbackAction(day, garminRun) {
+  const completed = day.status === 'done' || Boolean(garminRun);
+  if (!completed || typeof runFeedbackFor !== 'function') return '';
+  const feedback = runFeedbackFor(day.dateStr);
+  return feedback?.rpe
+    ? `<button class="btn btn-secondary" onclick="openRunFeedback('${day.dateStr}')">🙂 體感 RPE ${feedback.rpe}</button>`
+    : `<button class="btn btn-secondary" onclick="openRunFeedback('${day.dateStr}')">🙂 記錄今天體感</button>`;
+}
+
 function renderDayCard(day, rationale = '', source = 'baseline') {
   const garminRun = getGarminRunForDate(day.dateStr);
   const isTodayCard = day.dateStr === todayStr();
@@ -3046,7 +3082,7 @@ function renderDayCard(day, rationale = '', source = 'baseline') {
   const [taskTitle, taskIntent] = handwrittenCoachPlan ? taskText.split(/\s*[｜|]\s*/, 2) : [taskText, ''];
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
   const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? '<div style="color:var(--c-text-muted);font-size:13px">尚未到日期，無法先記錄</div>' : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
-  return `<div class="day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}">${coachBadge ? coachBadge.emoji : ''}${typeName}</span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}<div class="day-card-pace">${[day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>${dayWeatherLine(day)}${renderStepCards(attachCourseGuides(day.steps, day.type))}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button></div>${actionsHTML}</div>`;
+  return `<div class="day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}">${coachBadge ? coachBadge.emoji : ''}${typeName}</span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}<div class="day-card-pace">${[day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>${dayWeatherLine(day)}${renderStepCards(attachCourseGuides(day.steps, day.type))}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}</div>${actionsHTML}</div>`;
 }
 
 /* drawer implementation removed; daily details remain in the original day card. */

@@ -42,7 +42,7 @@ function addLocalRegistrationLink() {
 addLocalRegistrationLink();
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, lastBackupAt: null, safetyHold: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, lastBackupAt: null, safetyHold: null };
 }
 
 function getDeviceId() {
@@ -693,6 +693,24 @@ function applyStoredMakeupRecords(data) {
   return data;
 }
 
+// Garmin 自動同步的跑者永遠不會走手動補登，RPE 因此一筆都不會留下。
+// 課後體感另外存一份，讓「客觀負荷」以外還有主觀依據可以判讀。
+function normalizeRunFeedback(value) {
+  if (!value || typeof value !== 'object') return {};
+  const entries = Object.entries(value)
+    .filter(([date, item]) => /^\d{4}-\d{2}-\d{2}$/.test(date) && item && typeof item === 'object')
+    .map(([date, item]) => {
+      const rpe = Math.round(Number(item.rpe));
+      return [date, {
+        rpe: Number.isFinite(rpe) && rpe >= 1 && rpe <= 10 ? rpe : 0,
+        note: String(item.note || '').slice(0, 240),
+        savedAt: String(item.savedAt || '')
+      }];
+    })
+    .filter(([, item]) => item.rpe > 0 || item.note);
+  return Object.fromEntries(entries);
+}
+
 function normalizeData(data) {
   const base = createEmptyData();
   const normalized = {
@@ -708,6 +726,7 @@ function normalizeData(data) {
     skipReasons: normalizeSkipReasons(data?.skipReasons),
     makeupRecords: normalizeMakeupRecords(data?.makeupRecords),
     activityAssignments: normalizeActivityAssignments(data?.activityAssignments),
+    runFeedback: normalizeRunFeedback(data?.runFeedback),
     safetyHold: normalizeSafetyHold(data?.safetyHold),
     planChangeHistory: normalizePlanChangeHistory(data?.planChangeHistory),
     trainingEvents: normalizeTrainingEvents(data?.trainingEvents),
