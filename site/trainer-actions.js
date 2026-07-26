@@ -487,7 +487,8 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
     return course;
   });
   const constraintNote = volumeFactor < 1 ? `；已依 Garmin／週評估下修 ${Math.round((1 - volumeFactor) * 100)}%` : qualityMode === 'reduce' ? '；品質課已降階' : '';
-  week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方${constraintNote}。`;
+  const adaptiveNote = phase.adaptiveNote ? `；${phase.adaptiveNote}` : '';
+  week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方${constraintNote}${adaptiveNote}。`;
   if (record) {
     recordPlanChange(beforePlan, 'coach', `教練第 ${weekNum} 週處方已排入正式課表：${phase.phase}`);
     reconcileCoachPrescriptionHistory(weekNum, phase.phase);

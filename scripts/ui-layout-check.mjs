@@ -1088,6 +1088,46 @@ async function assertTrainerReport(page, viewportName) {
   if (!previewAndRestart.planUntouched || !previewAndRestart.storageUntouched || previewAndRestart.clearedCheckin) {
     throw new Error(`${viewportName}/trainer-preview-restart: a read-only preview or a re-plan touched stored data ${JSON.stringify(previewAndRestart)}`);
   }
+  const adaptivePeriodization = await page.evaluate(() => {
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      const today = todayStr();
+      const shift = (days) => new Date(new Date(`${today}T00:00:00`).getTime() + days * 86400000).toISOString().slice(0, 10);
+      const phases = [
+        { phase: "長跑重建", start: shift(-28), weeks: 3, km: "28→34", focus: "長跑 10→14 km @E，無硬課。" },
+        { phase: "基礎強化", start: shift(14), weeks: 4, km: "32→38", focus: "長跑 14→16 km 尾段加 M 段。" },
+        { phase: "降載", start: shift(42), weeks: 1, km: "30", focus: "恢復週。" },
+        { phase: "減量+比賽", start: shift(56), weeks: 2, km: "24→18", focus: "長跑 12 km；賽前收量。" }
+      ];
+      const trend = (weekly) => weekly.map((km, index) => ({ week: shift(-((weekly.length - index) * 7)), km, runs: 4 }));
+      coachReviewData = { periodization: phases, trend: trend([20, 21, 20, 22]) };
+      const behind = adaptCoachPeriodization(phases);
+      coachReviewData = { periodization: phases, trend: trend([40, 41, 42, 41]) };
+      const ahead = adaptCoachPeriodization(phases);
+      coachReviewData = { periodization: phases, trend: trend([30, 31]) };
+      const tooLittleData = adaptCoachPeriodization(phases);
+      const volumeOf = (list, index) => Number((String(list[index].km).match(/\d+(?:\.\d+)?/g) || []).at(-1));
+      const longOf = (list, index) => Number((String(list[index].focus).match(/長跑\s*\d+(?:\.\d+)?(?:\s*[→–-]\s*(\d+(?:\.\d+)?))?/) || [])[1] || (String(list[index].focus).match(/長跑\s*(\d+(?:\.\d+)?)/) || [])[1]);
+      return {
+        pastUntouched: behind[0].km === "28→34",
+        taperUntouched: behind[3].km === "24→18" && ahead[3].km === "24→18",
+        behindScaledDown: volumeOf(behind, 1) < 38,
+        behindLongScaledDown: longOf(behind, 1) < 16,
+        aheadCappedAtPeak: volumeOf(ahead, 1) <= 38 * 1.1,
+        deloadBelowBuild: volumeOf(behind, 2) < volumeOf(behind, 1),
+        longRunShareOk: longOf(behind, 1) <= volumeOf(behind, 1) * 0.4,
+        noteMentionsBaseline: String(behind[1].adaptiveNote || "").includes("實跑中位"),
+        tooLittleDataUntouched: tooLittleData === phases
+      };
+    } finally {
+      coachReviewData = previousReview;
+    }
+  });
+  if (!adaptivePeriodization.pastUntouched || !adaptivePeriodization.taperUntouched || !adaptivePeriodization.behindScaledDown
+    || !adaptivePeriodization.behindLongScaledDown || !adaptivePeriodization.aheadCappedAtPeak || !adaptivePeriodization.deloadBelowBuild
+    || !adaptivePeriodization.longRunShareOk || !adaptivePeriodization.noteMentionsBaseline || !adaptivePeriodization.tooLittleDataUntouched) {
+    throw new Error(`${viewportName}/trainer-adaptive-periodization: the cycle did not follow real mileage inside its safety caps ${JSON.stringify(adaptivePeriodization)}`);
+  }
   const recoverySignals = await page.evaluate(() => {
     const previousReview = cloneTrainingValue(coachReviewData);
     try {

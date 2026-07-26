@@ -1558,8 +1558,11 @@ function coachGoalGapNote(compact = false) {
     : `<p style="margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--c-text-muted)">ℹ️ ${body}</p>`;
 }
 
+// 週期只有這一個讀取入口，自適應就掛在這裡：時間軸、提前排課、處方寫入全部
+// 共用同一份數字，不會出現「畫面顯示一套、實際排課另一套」。
 function coachPeriodization() {
-  return Array.isArray(coachReviewData?.periodization) ? coachReviewData.periodization : [];
+  const raw = Array.isArray(coachReviewData?.periodization) ? coachReviewData.periodization : [];
+  return typeof adaptCoachPeriodization === 'function' ? adaptCoachPeriodization(raw) : raw;
 }
 
 function coachPhaseForDate(dateStr) {
