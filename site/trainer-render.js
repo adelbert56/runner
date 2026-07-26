@@ -669,6 +669,37 @@ function renderCoachInsightHighlights(content) {
   return `${output}${reviewEscape(text.slice(cursor))}`;
 }
 
+function splitCoachInsightItems(items) {
+  return (items || []).flatMap((item) => String(item || '')
+    .replace(/；/g, '。')
+    .split(/。/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => `${part.replace(/[。；]+$/, '')}。`));
+}
+
+function coachEvidenceMetricLabel(text, index) {
+  if (/^本週實跑/.test(text)) return '本週完成';
+  if (/^前一週/.test(text)) return '週比變化';
+  if (/同心率|輕鬆跑.*配速/.test(text)) return '有氧效率';
+  if (/RPE/.test(text)) return '主觀感受';
+  if (/恢復訊號|睡眠|HRV|body battery|靜止心率/.test(text)) return '恢復狀態';
+  return `觀測 ${index + 1}`;
+}
+
+function renderCoachEvidenceMetrics(summary) {
+  const metrics = String(summary || '').split(/[；。]/).map((item) => item.trim()).filter(Boolean).slice(0, 5);
+  if (!metrics.length) return '';
+  return `<dl class="coach-evidence-metrics">${metrics.map((metric, index) => `<div class="coach-evidence-metric"><dt>${coachEvidenceMetricLabel(metric, index)}</dt><dd>${renderCoachInsightHighlights(metric)}</dd></div>`).join('')}</dl>`;
+}
+
+function coachActionSteps(response) {
+  return String(response || '').split(/[。；]/).map((item) => item.trim()).filter(Boolean)
+    .filter((item) => /^(本次|第\s*\d+\s*週|下次|完成這週|再用)/.test(item))
+    .slice(0, 3)
+    .map((item) => `${item}。`);
+}
+
 function earlyFeedbackForCoachBrief(weekNum = currentWeek) {
   return [...(appData.checkins || [])]
     .filter((item) => String(item.note || '').trim() && (item.weekNum === weekNum || item.weekNum === weekNum - 1))
@@ -683,12 +714,21 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
   const remaining = sentences.slice(1);
   // 週報原始資料仍是一段完整教練敘述；顯示層只依可辨識的執行語句分組，
   // 不重寫或改變判定內容。
-  const execution = remaining.filter((sentence) => /^(本週|下週|今天|仍|肌力|長跑|體感|課表)/.test(sentence));
-  const evidence = remaining.filter((sentence) => !execution.includes(sentence));
+  const earlyTerrainEvidence = earlyFeedback ? (earlyFeedback.feedbackTerrainEvidence || (typeof coachTerrainEvidence === 'function' ? coachTerrainEvidence(earlyFeedback.weekNum) : null)) : null;
+  const earlyResponse = earlyFeedback
+    ? String(earlyFeedback.coachFeedbackResponse || (typeof coachResponseToEarlyFeedback === 'function'
+      ? coachResponseToEarlyFeedback(earlyFeedback.note, { result: earlyFeedback.result }, Boolean(earlyFeedback.feedbackSafetyConcern), { coachScheduleApplied: earlyFeedback.coachScheduleApplied === true, targetWeek: earlyFeedback.weekNum + 1, terrainEvidence: earlyTerrainEvidence, evidenceWeek: earlyFeedback.weekNum })
+      : '')).replace(/^(我讀到你提到：[^。]*。|我已讀到你的備註[^。]*。)\s*/, '')
+    : '';
+  const actionSignatures = new Set(coachActionSteps(earlyResponse).map((item) => item.replace(/[。；\s]/g, '')));
+  const responseAlreadyInNote = earlyFeedback ? remaining.filter((sentence) => /^回饋的實際處置/.test(sentence)) : [];
+  const filteredRemaining = remaining.filter((sentence) => !responseAlreadyInNote.includes(sentence) && !actionSignatures.has(sentence.replace(/[。；\s]/g, '')));
+  const execution = filteredRemaining.filter((sentence) => /^(本週|下週|今天|仍|肌力|長跑|體感|課表)/.test(sentence));
+  const evidence = filteredRemaining.filter((sentence) => !execution.includes(sentence));
   // 判讀依據要看得到真正的實跑數字，否則跑者只會看到一段結論式評語，
   // 無從判斷教練是不是真的讀了這週的紀錄。
   const runnerEvidence = typeof runnerEvidenceSummary === 'function' ? runnerEvidenceSummary() : '';
-  if (runnerEvidence) evidence.unshift(`實跑紀錄：${runnerEvidence}。`);
+  const evidenceMetrics = renderCoachEvidenceMetrics(runnerEvidence);
   // 逐週判讀如果彼此不相干，跑者就只能一直看當下這一格。把過去相近條件下的
   // 判定與後續結果放進依據，教練才有「我記得你上次怎麼樣」的連續性。
   const recalled = typeof buildEvidenceSnapshot === 'function' && typeof recallSimilarWeeks === 'function'
@@ -696,27 +736,27 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
     : [];
   recalled.forEach((line) => evidence.push(`過去相近狀況：${line}。`));
   if (earlyFeedback) {
-    const terrainEvidence = earlyFeedback.feedbackTerrainEvidence || (typeof coachTerrainEvidence === 'function' ? coachTerrainEvidence(earlyFeedback.weekNum) : null);
+    const terrainEvidence = earlyTerrainEvidence;
     const signals = Array.isArray(earlyFeedback.feedbackSignals) && earlyFeedback.feedbackSignals.length
       ? earlyFeedback.feedbackSignals
       : (typeof classifyEarlyFeedback === 'function' ? classifyEarlyFeedback(earlyFeedback.note, terrainEvidence) : []);
     const signalText = signals.length ? signals.join('、') : '未偵測到可自動改課的安全或負荷訊號';
-    const response = earlyFeedback.coachFeedbackResponse || (typeof coachResponseToEarlyFeedback === 'function'
-      ? coachResponseToEarlyFeedback(earlyFeedback.note, { result: earlyFeedback.result }, Boolean(earlyFeedback.feedbackSafetyConcern), { coachScheduleApplied: earlyFeedback.coachScheduleApplied === true, targetWeek: earlyFeedback.weekNum + 1, terrainEvidence, evidenceWeek: earlyFeedback.weekNum })
-      : '已讀取本週回饋。');
     conclusion.push(`已納入跑者回饋；本次判定為「${earlyFeedback.result || '維持'}」。`);
-    evidence.push(`跑者回饋：「${earlyFeedback.note}」；判讀為：${signalText}。`);
-    // 訊號判讀已經在「判讀依據」列過，處置欄不再重述一次覆誦句。
-    const responseBody = String(response).replace(/^(我讀到你提到：[^。]*。|我已讀到你的備註[^。]*。)\s*/, '');
+    evidence.push(`跑者回饋重點：${signals.length ? signals.join('、') : '已讀取，未偵測到可自動改課的安全或負荷訊號'}。`);
+    // 原始回饋完整保留在歷史紀錄；摘要卡只留可驗證的訊號，避免把跑者原話與
+    // 教練處置重複塞進兩張卡片。
     if (earlyFeedback.rejectedOption) evidence.push(`沒有採用的選項：${earlyFeedback.rejectedOption}`);
-    execution.push(`回饋的實際處置：${responseBody}`);
+    execution.push(...coachActionSteps(earlyResponse));
   }
   const coachInsightCards = [
     { id: 'conclusion', title: '本週判定', subtitle: '先照這個方向執行', items: conclusion },
     { id: 'evidence', title: '判讀依據', subtitle: '哪些實跑訊號影響了安排', items: evidence },
     { id: 'execution', title: '接下來這樣做', subtitle: '把注意力放在可執行的事', items: execution }
   ];
-  const renderCard = (card) => `<article class="coach-insight-card coach-insight-card--${card.id}"><div class="coach-insight-card__header"><span class="coach-insight-card__icon" aria-hidden="true">${coachInsightIcon(card.id)}</span><div><h3 class="coach-insight-card__title">${card.title}</h3><p class="coach-insight-card__subtitle">${card.subtitle}</p></div></div><ul class="coach-insight-list">${(card.items.length ? card.items : ['目前沒有需要特別處理的訊號。']).map((item) => `<li class="coach-insight-list__item"><span class="coach-insight-list__bullet" aria-hidden="true"></span><p>${renderCoachInsightHighlights(item)}</p></li>`).join('')}</ul></article>`;
+  const renderCard = (card) => {
+    const items = splitCoachInsightItems(card.items.length ? card.items : ['目前沒有需要特別處理的訊號。']);
+    return `<article class="coach-insight-card coach-insight-card--${card.id}"><div class="coach-insight-card__header"><span class="coach-insight-card__icon" aria-hidden="true">${coachInsightIcon(card.id)}</span><div><h3 class="coach-insight-card__title">${card.title}</h3><p class="coach-insight-card__subtitle">${card.subtitle}</p></div></div>${card.id === 'evidence' ? evidenceMetrics : ''}<ul class="coach-insight-list coach-insight-list--${card.id}">${items.map((item, index) => `<li class="coach-insight-list__item"><span class="coach-insight-list__bullet" aria-hidden="true">${card.id === 'execution' ? index + 1 : ''}</span><p>${renderCoachInsightHighlights(item)}</p></li>`).join('')}</ul></article>`;
+  };
   const briefing = focusSummary || '把教練判讀整理成一份可快速採取行動的週報；完整紀錄仍保留在下方，方便你需要時追溯。';
   claimCoachCopy(briefing);
   const status = Number.isFinite(weeksRemaining) ? `距離目標 ${weeksRemaining} 週` : '本週行動指南';

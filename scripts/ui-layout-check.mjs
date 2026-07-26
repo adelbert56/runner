@@ -719,7 +719,7 @@ async function assertTrainerReport(page, viewportName) {
         coachScheduleApplied: checkin?.coachScheduleApplied === true,
         noGenericRewrite: !checkin?.nextWeekAdjustmentApplied,
         sourceAligned: nextWeek.days.filter((day) => day.type !== "rest").every((day) => day.coachPlan?.source === "coach-periodization"),
-        terrainRead: checkin?.feedbackTerrainEvidence?.elevationGainM === 120 && checkin?.coachFeedbackResponse?.includes("Garmin +120 m") && brief.includes("跑者回饋") && brief.includes("回饋的實際處置"),
+        terrainRead: checkin?.feedbackTerrainEvidence?.elevationGainM === 120 && checkin?.coachFeedbackResponse?.includes("Garmin +120 m") && brief.includes("跑者回饋重點") && brief.includes("接下來這樣做") && !brief.includes("回饋的實際處置"),
         nextTargetKm: nextWeek.targetKm
       };
       closeModal();
@@ -737,7 +737,7 @@ async function assertTrainerReport(page, viewportName) {
   if (!normalWeeklySchedule.coachScheduleApplied || !normalWeeklySchedule.noGenericRewrite || !normalWeeklySchedule.sourceAligned || !normalWeeklySchedule.terrainRead || normalWeeklySchedule.nextTargetKm !== 26) {
     throw new Error(`${viewportName}/trainer-normal-weekly-prescription: Sunday and early coaching did not resolve to the same formal schedule ${JSON.stringify(normalWeeklySchedule)}`);
   }
-  if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || !directCoachSchedule.coachBrief.includes("跑者回饋") || !directCoachSchedule.coachBrief.includes("腳感偏緊，但沒有疼痛") || !directCoachSchedule.coachBrief.includes("局部緊繃（未明示疼痛）") || !directCoachSchedule.coachBrief.includes("回饋的實際處置") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
+  if (!directCoachSchedule.coachWorkspace.includes("教練處方已套用") || !directCoachSchedule.coachWorkspace.includes("第 3 週完成紀錄") || !directCoachSchedule.coachWorkspace.includes("第 4 週正式課表") || !directCoachSchedule.coachWorkspace.includes("降載") || !directCoachSchedule.coachBrief.includes("跑者回饋重點") || !directCoachSchedule.coachBrief.includes("局部緊繃（未明示疼痛）") || !directCoachSchedule.coachBrief.includes("接下來這樣做") || directCoachSchedule.coachBrief.includes("回饋的實際處置") || directCoachSchedule.coachWorkspace.includes("EARLY COACH SCHEDULE")) {
     throw new Error(`${viewportName}/trainer-direct-coach-workspace: existing coach decision did not present the applied week 4 prescription ${directCoachSchedule.coachWorkspace}`);
   }
   if (!directCoachSchedule.historyReconciled || directCoachSchedule.history.filter((item) => item.changes.some((change) => change.includes("第 4 週"))).length !== 1 || !directCoachSchedule.timeline.includes("教練第 4 週處方已排入正式課表：降載") || /18\.7|18\.9|27\.2/.test(directCoachSchedule.timeline)) {
@@ -1035,12 +1035,18 @@ async function assertTrainerReport(page, viewportName) {
       const futureIndex = source.plan.findIndex((week) => (week.days || []).every((day) => !day.dateStr || day.dateStr > todayStr()));
       if (futureIndex < 0) return { skipped: true };
       const coachWeek = source.plan[futureIndex];
+      let handWritten = false;
       coachWeek.days = (coachWeek.days || []).map((day) => (day.type === "rest" ? day : {
         ...day,
         status: "planned",
-        task: "教練指定課程",
-        coachPlan: { source: "coach-periodization", phase: "長跑重建", targetKm: coachWeek.targetKm }
+        task: handWritten ? "教練週期處方" : "教練手寫課程",
+        coachPlan: handWritten
+          ? { source: "coach-periodization", phase: "長跑重建", targetKm: coachWeek.targetKm }
+          : (handWritten = true, true)
       }));
+      source.coachPlanArchive = snapshotStoredCoachWeeks(source);
+      // 模擬舊版重建已先把當前課表洗成通用課：必須能由封存的真人教練週復原。
+      source.plan[futureIndex].days = source.plan[futureIndex].days.map((day) => (day.type === "rest" ? day : { ...day, task: "通用恢復跑", coachPlan: null }));
       const doneIndex = source.plan.findIndex((week) => (week.days || []).some((day) => day.status === "done"));
       const rebuilt = rebuildStoredPlan(source);
       const rebuiltWeek = rebuilt.plan[futureIndex];
@@ -1048,6 +1054,7 @@ async function assertTrainerReport(page, viewportName) {
       return {
         planned: planned.length,
         coachPrescribed: planned.filter((day) => day.coachPlan?.source === "coach-periodization").length,
+        handwrittenCoach: planned.filter((day) => day.coachPlan === true).length,
         keptDoneWeek: doneIndex < 0 || (rebuilt.plan[doneIndex]?.days || []).some((day) => day.status === "done")
       };
     } finally {
@@ -1055,7 +1062,7 @@ async function assertTrainerReport(page, viewportName) {
       saveData(appData);
     }
   });
-  if (!rebuildProtection.skipped && (!rebuildProtection.planned || rebuildProtection.coachPrescribed !== rebuildProtection.planned || !rebuildProtection.keptDoneWeek)) {
+  if (!rebuildProtection.skipped && (!rebuildProtection.planned || rebuildProtection.coachPrescribed + rebuildProtection.handwrittenCoach !== rebuildProtection.planned || !rebuildProtection.handwrittenCoach || !rebuildProtection.keptDoneWeek)) {
     throw new Error(`${viewportName}/trainer-rebuild-protection: a plan repair replaced an already scheduled coach week ${JSON.stringify(rebuildProtection)}`);
   }
   const previewAndRestart = await page.evaluate(() => {

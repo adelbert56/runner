@@ -47,3 +47,4 @@ The local registration manager is a compact operational workspace: users should 
 | Date | Change | Screens | Deprecated pattern |
 | --- | --- | --- | --- |
 | 2026-07-24 | Registration workspace system | Overview, people, entries, notifications, data tools | Screen-specific card shadows, competing hero treatment, repeated breakpoint overrides |
+| 2026-07-26 | Coach brief evidence hierarchy: compact metric strip, short evidence rows, numbered actions | Trainer coaching brief | Long mixed-metric paragraphs inside equal-weight cards |

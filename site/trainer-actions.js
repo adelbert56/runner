@@ -447,6 +447,53 @@ function coachPhaseIsDeload(phase) {
   return phase?.phase === '降載' || /減量|無硬課|恢復週|重建週/.test(`${phase?.phase || ''} ${phase?.focus || ''}`);
 }
 
+// 原始的本機教練標記已被舊版通用重建覆蓋時，週報仍保有分期、可訓練日與
+// 檢測結論。這裡只重建已結束的「長跑重建」歷史週，並在卡片明示重建來源；
+// 不把它偽裝成已找回的原始逐字菜單，也絕不改動未來課表。
+function restoreHistoricalCoachPlansFromReview() {
+  const phases = Array.isArray(coachReviewData?.periodization) ? coachReviewData.periodization : [];
+  const phase = phases.find((item) => item?.phase === '長跑重建' && item?.start && Number(item?.weeks) >= 1);
+  const historyText = (coachReviewData?.history || []).map((item) => String(item?.summary || '')).join('\n');
+  if (!phase || !/W1/.test(historyText) || !appData?.plan?.length) return false;
+  const targets = (String(phase.km || '').match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  const longTargets = (String(phase.focus || '').match(/長跑\s*(\d+(?:\.\d+)?)\s*→\s*(\d+(?:\.\d+)?)/) || []).slice(1).map(Number);
+  if (targets.length < 2 || longTargets.length < 2) return false;
+  const schedule = coachScheduleContract();
+  if (schedule.trainingDows.length < 2 || !schedule.trainingDows.includes(schedule.longDow)) return false;
+  const start = new Date(`${phase.start}T00:00:00`);
+  const phaseWeeks = Math.min(Number(phase.weeks), 3);
+  let changed = false;
+  for (let index = 0; index < phaseWeeks; index += 1) {
+    const date = new Date(start);
+    date.setDate(date.getDate() + index * 7);
+    const weekStart = localDateStr(date);
+    const week = appData.plan.find((item) => (item.days || []).some((day) => day.dateStr === weekStart));
+    if (!week || weekHasStoredCoachPlan(week) || (week.days || []).some((day) => day.type !== 'rest' && day.dateStr >= todayStr())) continue;
+    const targetKm = Math.round((targets[0] + ((targets[1] - targets[0]) * index) / phaseWeeks) * 10) / 10;
+    const longKm = Math.round((longTargets[0] + ((longTargets[1] - longTargets[0]) * index) / phaseWeeks) * 10) / 10;
+    const easyKm = Math.round(((targetKm - longKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
+    week.targetKm = targetKm;
+    week.days = week.days.map((day) => {
+      if (!schedule.trainingDows.includes(day.dow)) return day;
+      const isLong = day.dow === schedule.longDow;
+      const km = isLong ? longKm : easyKm;
+      const focus = isLong ? 'long' : 'easy';
+      const label = isLong ? '長跑' : '輕鬆跑';
+      const course = buildDayCard(day.dow, day.dateStr, isLong ? 'long' : 'easy', km, appData.profile, false, false, false, todayStr(), week.weekNum, week.phase || 'build', focus, label);
+      course.status = day.status;
+      course.coachPlan = { source: 'coach-reconstruction', phase: phase.phase, targetKm, longKm, evidence: '週期表＋週檢測紀錄重建' };
+      course.task = isLong
+        ? `長跑 ${km} km｜歷史教練重建（E／Z2）`
+        : `輕鬆跑 ${km} km${day.dow === schedule.trainingDows.filter((dow) => dow !== schedule.longDow).at(-1) ? '＋ST 快步 5×20 秒' : ''}｜歷史教練重建`;
+      return course;
+    });
+    week.planningNote = `歷史教練重建：依「${phase.phase}」週期表與週檢測紀錄還原；非原始逐字菜單。`;
+    changed = true;
+  }
+  if (changed) saveData(appData);
+  return changed;
+}
+
 function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = {} } = {}) {
   const week = appData.plan?.[weekNum - 1];
   const phase = coachPhaseForWeek(week);
@@ -1384,6 +1431,12 @@ function rebuildWeeksFrom(startWeekNum, count) {
     const weekIdx = startWeekNum - 1 + wi;
     if (weekIdx >= appData.plan.length) break;
     const week = appData.plan[weekIdx];
+    const archivedWeek = typeof archivedCoachWeek === 'function' ? archivedCoachWeek(appData, week.weekNum) : null;
+    if (typeof weekHasStoredCoachPlan === 'function' && weekHasStoredCoachPlan(week)) continue;
+    if (archivedWeek && typeof sameWeekTimeline === 'function' && sameWeekTimeline(archivedWeek, week)) {
+      appData.plan[weekIdx] = archivedWeek;
+      continue;
+    }
     const preserved = week.days.filter(day => day.status === 'done' || day.status === 'missed' || day.isMakeup || day.raceReplacementBase);
     const newDays = buildWeekDays(profile, trainDows, longDow, otherDows, week.targetKm, week.isDeload, week.isTaper, hasInjury, week.weekNum, startDate, week.phase);
     newDays.forEach(day => {

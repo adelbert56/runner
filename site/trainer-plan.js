@@ -1098,8 +1098,15 @@ function weekHasCoachPeriodization(week) {
   return (week?.days || []).some((day) => day?.coachPlan?.source === 'coach-periodization');
 }
 
+// `coachPlan: true` 是早期真人手寫教練課表的持久標記；之後才新增
+// `coach-periodization` 與 `garmin-autopilot` 物件來源。三者都是已寫入的
+// 決策，不能在計畫重建時被當成一般課表洗掉。
+function weekHasStoredCoachPlan(week) {
+  return (week?.days || []).some((day) => Boolean(day?.coachPlan));
+}
+
 function coachPrescriptionLocksWeek(week) {
-  return (coachWeekMatches(week) && coachDaysForWeek(week).length > 0) || weekHasCoachPeriodization(week);
+  return (coachWeekMatches(week) && coachDaysForWeek(week).length > 0) || weekHasStoredCoachPlan(week);
 }
 
 // 降載仍要生效，但必須走教練處方管線當成限制條件，不能退回一般課表產生器。

@@ -26,6 +26,7 @@ function coachPlanBadge(day) {
   return {
     'coach-menu': { emoji: '📌 ', label: '教練課表' },
     'coach-periodization': { emoji: '🗓 ', label: '週期處方' },
+    'coach-reconstruction': { emoji: '🧾 ', label: '歷史教練重建' },
     'garmin-autopilot': { emoji: '⚙ ', label: '自動降階' }
   }[coachPlanSource(day)] || null;
 }

@@ -1759,17 +1759,26 @@
     .coach-insight-card { display:flex; flex-direction:column; min-width:0; min-height:0; padding:18px; border:1px solid #dfe7e2; border-radius:16px; background:rgba(255,255,255,.76); overflow:hidden; }
     .coach-insight-card--conclusion { border-color:#afd3bd; background:linear-gradient(145deg,#eaf6ee,#f8fcf8); box-shadow:inset 0 0 0 1px rgba(255,255,255,.54); }
     .coach-insight-card--execution { background:#fafcfb; }
-    .coach-insight-card__header { display:flex; align-items:flex-start; gap:9px; margin-bottom:14px; }
+    .coach-insight-card__header { display:flex; align-items:flex-start; gap:9px; margin-bottom:14px; padding-bottom:13px; border-bottom:1px solid rgba(93,118,105,.14); }
     .coach-insight-card__icon { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; flex:0 0 28px; border-radius:8px; background:rgba(6,95,70,.08); color:#065f46; }
     .coach-insight-card--evidence .coach-insight-card__icon { color:#527064; background:#edf3ef; }
     .coach-insight-card--execution .coach-insight-card__icon { color:#4c6f46; background:#f0f4eb; }
     .coach-insight-card__icon svg { width:16px; height:16px; }
     .coach-insight-card__title { margin:0; color:#173c31; font-size:15px; font-weight:700; line-height:1.4; }
     .coach-insight-card__subtitle { margin:2px 0 0; color:#6c8075; font-size:11px; font-weight:600; line-height:1.45; }
-    .coach-insight-list { display:flex; flex-direction:column; gap:12px; margin:0; padding:0; list-style:none; }
-    .coach-insight-list__item { display:grid; grid-template-columns:6px minmax(0,1fr); gap:10px; align-items:start; }
-    .coach-insight-list__bullet { width:5px; height:5px; margin-top:9px; border-radius:50%; background:#4c8a70; }
-    .coach-insight-list__item p { margin:0; color:#294339; font-size:13px; font-weight:500; line-height:1.72; overflow-wrap:anywhere; }
+    .coach-evidence-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:0 0 14px; }
+    .coach-evidence-metric { min-width:0; padding:9px 10px; border:1px solid #e4ece6; border-radius:10px; background:#f8fbf8; }
+    .coach-evidence-metric dt { margin:0 0 3px; color:#71847a; font-size:10px; font-weight:800; letter-spacing:.05em; line-height:1.3; }
+    .coach-evidence-metric dd { margin:0; color:#294339; font-size:12px; font-weight:650; line-height:1.5; overflow-wrap:anywhere; }
+    .coach-insight-list { display:flex; flex-direction:column; gap:9px; margin:0; padding:0; list-style:none; }
+    .coach-insight-list__item { display:grid; grid-template-columns:8px minmax(0,1fr); gap:9px; align-items:start; }
+    .coach-insight-list__bullet { display:inline-flex; align-items:center; justify-content:center; width:5px; height:5px; margin-top:8px; border-radius:50%; background:#4c8a70; color:#fff; font-size:10px; font-weight:800; line-height:1; }
+    .coach-insight-list__item p { margin:0; color:#40584d; font-size:13px; font-weight:500; line-height:1.64; overflow-wrap:anywhere; }
+    .coach-insight-list--evidence .coach-insight-list__item { grid-template-columns:minmax(0,1fr); padding-left:10px; border-left:2px solid #dce8df; }
+    .coach-insight-list--evidence .coach-insight-list__bullet { display:none; }
+    .coach-insight-list--execution { counter-reset:coach-action; gap:10px; }
+    .coach-insight-list--execution .coach-insight-list__item { grid-template-columns:22px minmax(0,1fr); }
+    .coach-insight-list--execution .coach-insight-list__bullet { width:22px; height:22px; margin-top:0; border-radius:7px; background:#eaf3e9; color:#4c6f46; }
     .coach-insight-highlight { color:#065f46; font-weight:700; white-space:nowrap; }
     .training-sync-control { display:inline-flex; align-items:center; gap:8px; min-width:0; }
     .training-sync-control [data-training-sync-status] { max-width:180px; color:var(--c-text-muted); font-size:11px; font-weight:700; line-height:1.35; }
@@ -1783,6 +1792,8 @@
       .coach-insight-status { margin-top:12px; }
       .coach-insight-title { font-size:21px; }
       .coach-insight-card { padding:18px 16px; }
+      .coach-evidence-metrics { gap:7px; }
+      .coach-evidence-metric { padding:8px 9px; }
       .coach-insight-list__item p { font-size:14px; line-height:1.7; }
       .training-sync-control { width:100%; }
       .training-sync-control [data-training-sync-status] { max-width:none; }

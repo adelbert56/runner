@@ -42,7 +42,37 @@ function addLocalRegistrationLink() {
 addLocalRegistrationLink();
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, lastBackupAt: null, safetyHold: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, lastBackupAt: null, safetyHold: null };
+}
+
+function normalizeCoachPlanArchive(value) {
+  const weeks = value?.weeks && typeof value.weeks === 'object' ? value.weeks : {};
+  const normalized = {};
+  Object.entries(weeks).forEach(([weekNum, week]) => {
+    if (!/^\d+$/.test(String(weekNum)) || !week || !Array.isArray(week.days)) return;
+    normalized[String(weekNum)] = cloneTrainingValue(week);
+  });
+  return { version: 1, weeks: normalized };
+}
+
+function snapshotStoredCoachWeeks(data) {
+  const archive = normalizeCoachPlanArchive(data?.coachPlanArchive);
+  (data?.plan || []).forEach((week) => {
+    if (typeof weekHasStoredCoachPlan !== 'function' || !weekHasStoredCoachPlan(week) || !Number.isInteger(Number(week.weekNum))) return;
+    archive.weeks[String(week.weekNum)] = cloneTrainingValue(week);
+  });
+  return archive;
+}
+
+function archivedCoachWeek(data, weekNum) {
+  const week = data?.coachPlanArchive?.weeks?.[String(weekNum)];
+  return week && Array.isArray(week.days) ? cloneTrainingValue(week) : null;
+}
+
+function sameWeekTimeline(left, right) {
+  return left?.weekNum === right?.weekNum
+    && Array.isArray(left.days) && left.days.length === right.days?.length
+    && left.days.every((day, index) => day?.dateStr === right.days[index]?.dateStr);
 }
 
 function getDeviceId() {
@@ -732,7 +762,8 @@ function normalizeData(data) {
     trainingEvents: normalizeTrainingEvents(data?.trainingEvents),
     cycleHistory: normalizeCycleHistory(data?.cycleHistory),
     nextCycleDraft: data?.nextCycleDraft && typeof data.nextCycleDraft === 'object' ? cloneTrainingValue(data.nextCycleDraft) : null,
-    nextCycleCoachContext: data?.nextCycleCoachContext && typeof data.nextCycleCoachContext === 'object' ? cloneTrainingValue(data.nextCycleCoachContext) : null
+    nextCycleCoachContext: data?.nextCycleCoachContext && typeof data.nextCycleCoachContext === 'object' ? cloneTrainingValue(data.nextCycleCoachContext) : null,
+    coachPlanArchive: normalizeCoachPlanArchive(data?.coachPlanArchive)
   };
   normalized.dayStatuses = {
     ...collectLegacyDayStatuses(normalized),
@@ -784,6 +815,7 @@ function syncCoachProfileSnapshot(data) {
 
 function saveData(data) {
   const normalized = normalizeData(data);
+  normalized.coachPlanArchive = snapshotStoredCoachWeeks(normalized);
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
   } catch (error) {
@@ -871,16 +903,14 @@ function rebuildStoredPlan(data) {
   const oldPlan = Array.isArray(data.plan) ? data.plan : [];
   const mergedPlan = freshPlan.map((freshWeek, index) => {
     const oldWeek = oldPlan[index];
-    const sameTimeline = oldWeek?.weekNum === freshWeek.weekNum
-      && Array.isArray(oldWeek.days) && oldWeek.days.length === freshWeek.days.length
-      && oldWeek.days.every((day, dayIndex) => day?.dateStr === freshWeek.days[dayIndex]?.dateStr);
+    const sameTimeline = sameWeekTimeline(oldWeek, freshWeek);
     const oldTouched = sameTimeline && oldWeek.days.some((day) => day.status === 'done' || day.status === 'missed');
-    // 已排定但還沒開始跑的教練處方週同樣不能被重建洗掉：跑者已經做過恢復檢核、
-    // 教練也已經寫入決定，只是這週還沒到。真正壞掉的週仍然修（跑量算式異常時
-    // 才允許整週重來），否則修別週的形狀會順手把下一週的處方換成預設課表。
-    const coachPlannedWeek = sameTimeline && typeof weekHasCoachPeriodization === 'function'
-      && weekHasCoachPeriodization(oldWeek) && !weekHasMalformedVolume(oldWeek);
-    return oldTouched || coachPlannedWeek ? oldWeek : freshWeek;
+    const archivedWeek = archivedCoachWeek(data, freshWeek.weekNum);
+    // 不只週期處方，早期真人教練課表（coachPlan: true）與安全降階也都是
+    // 已確認的決策。重建只能換通用課表；若目前週已遺失標記，優先用封存副本復原。
+    const storedCoachWeek = sameTimeline && weekHasStoredCoachPlan?.(oldWeek);
+    const archivedCoachPlan = sameWeekTimeline(archivedWeek, freshWeek);
+    return archivedCoachPlan ? archivedWeek : oldTouched || storedCoachWeek ? oldWeek : freshWeek;
   });
   const rebuiltData = applyStoredMakeupRecords(applyStoredDayStatuses({
     ...data,
@@ -2520,6 +2550,7 @@ loadRegistrationRaceCheckpoints();
   function render(data) {
     coachReviewData = data;
     coachReviewLoadState = 'ready';
+    const historicalCoachPlansRestored = restoreHistoricalCoachPlansFromReview();
     syncGarminRunsToPlan(data);
     const coachScheduleAligned = alignCoachScheduleDays();
     const coachCourseNamesAligned = alignCoachCourseNames();
@@ -2530,7 +2561,7 @@ loadRegistrationRaceCheckpoints();
     // 還原必須排在校準之後：先還原再校準的話，已提前排定的教練週會被同一輪
     // 的自動校準覆蓋，跑者隔天看到的又是非教練版課表。
     const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
-    if ((coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    if ((historicalCoachPlansRestored || coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }
 
