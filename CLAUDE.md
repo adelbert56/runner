@@ -101,12 +101,14 @@ site/index.html 不存在 → build-operational-dashboard.mjs 用 "" fallback
 | `trainer-actions.js` | ~1238 | 課程動作、週評估、配速校準、調適、log、備份、週期管理、匯出 |
 | `trainer.js` | ~2455 | 資料模型（normalizeData/loadData/saveData）、常數表、setup、pace/zone utils、init、事件接線 |
 
-改動注意：函式名皆全域、被 59 個 inline `onclick` 引用，**不可改名**；載入順序改動要同步更新 `trainer.html`、`package.json` check、`ui-smoke-check.mjs` 串接清單、`?v=` 快取參數。詳見 `docs/superpowers/plans/2026-07-19-trainer-refactor.md`（含未執行的資料整合待確認清單 D1–D4）。
+改動注意：函式名皆全域、被 59 個 inline `onclick` 引用，**不可改名**；載入順序改動要同步更新 `trainer.html`、`package.json` check、`ui-smoke-check.mjs` 串接清單、`?v=` 快取參數。
+
+**課表寫入的單一權威（2026-07-26 起）**：任何要改 `week.days` 的程式碼，一律先問 `trainer-plan.js` 的 `canMutatePlanDay(day, source, today)` / `canMutatePlanWeek(week, source)`，不要自己寫 `status === 'done'`、`dateStr < today` 這類條件。來源優先序 `safety > race > coach > calibration／align／advisory`。歷史教訓：規則散落時，勝負由 init／render 的呼叫順序決定，提前排好的教練週隔天會被 Garmin 滾動校準整週重建。同理，教練文案要進畫面前用 `trainer-render.js` 的 `claimCoachCopy()` 佔位，避免同一段字上下印兩次。詳見 `docs/superpowers/plans/2026-07-19-trainer-refactor.md`（含未執行的資料整合待確認清單 D1–D4）。
 
 ## 未完成事項
 
 - [x] 練跑計畫資料整合：D1 發布檔 laps 瘦身、D2 心率區間單一真相（`hrZones` 優先教練明訂區間）、D3 `runner/訓練/教練目標.json`（機器可讀 zones+periodization，build 覆蓋週報值）皆已做並驗證；D4 Garmin 4 檔合併經評估**否決**（是跨行程 handshake 非碎片化，合併會競態）。細節見 plan 檔。心率區間／週期日後改 `教練目標.json`。
-- [ ] Issue #35「Refresh race data failure」→ root cause 已修，需手動關閉
+- [x] Issue #35「Refresh race data failure」root cause 已修，Issue 已於 2026-05-30 關閉
 - [ ] `workflow-run-monitor.yml` 已涵蓋主要 workflow 失敗通報，但未做更細的分類或升級策略
 - [x] Python scrapers (`scrapers/`) 已確認在 `data-refresh.yml`（Run race scrapers / Enrich official platform details 步驟）跑
 
