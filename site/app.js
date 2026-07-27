@@ -545,17 +545,21 @@ function saveContentFavorites() {
 
 function validContentLimit(value) {
   const normalized = String(value || "").trim();
-  return ["10", "25", "50"].includes(normalized) ? normalized : "25";
+  return ["10", "25", "50", "60"].includes(normalized) ? normalized : "";
+}
+
+function defaultContentLimit() {
+  return window.matchMedia?.("(max-width: 680px)").matches ? "10" : "25";
 }
 
 function loadContentSettings() {
   try {
     const stored = JSON.parse(localStorage.getItem(CONTENT_SETTINGS_KEY) || "{}");
-    state.shoeLimit = validContentLimit(stored.shoeLimit);
-    state.newsLimit = validContentLimit(stored.newsLimit);
+    state.shoeLimit = validContentLimit(stored.shoeLimit) || defaultContentLimit();
+    state.newsLimit = validContentLimit(stored.newsLimit) || defaultContentLimit();
   } catch {
-    state.shoeLimit = "10";
-    state.newsLimit = "25";
+    state.shoeLimit = defaultContentLimit();
+    state.newsLimit = defaultContentLimit();
   }
   if (els.shoeLimit) {
     els.shoeLimit.value = state.shoeLimit;
@@ -2090,29 +2094,34 @@ function renderAutomationHealth(data = { workflows: [] }) {
 
   const workflows = Array.isArray(data.workflows) ? data.workflows : [];
   const generated = data.generated_at ? `更新 ${escapeHtml(data.generated_at)}` : "等待排程回報";
+  const workflowCount = workflows.length;
   els.automationHealth.innerHTML = `
     <div class="automation-health-heading">
       <div>
-        <p class="eyebrow">自動化狀態</p>
-        <h3>排程巡檢</h3>
+        <p class="eyebrow">資料更新狀態</p>
+        <h3>賽事與內容持續整理中</h3>
       </div>
       <span>${generated}</span>
     </div>
-    <div class="automation-health-grid">
-      ${
-        workflows
-          .map(
-            (workflow) => `
-              <article class="automation-health-card">
-                <strong>${escapeHtml(workflow.name || "未命名排程")}</strong>
-                <span>${escapeHtml(workflow.schedule || "未設定時間")}</span>
-                <p>${escapeHtml(workflow.purpose || "等待補充說明")}</p>
-              </article>
-            `,
-          )
-          .join("") || `<div class="empty-state">目前沒有排程資料。</div>`
-      }
-    </div>
+    <p class="automation-health-summary">本頁資料由 ${escapeHtml(workflowCount || "多個")} 個背景更新流程維護；遇到報名資訊變動，仍請以主辦單位公告為準。</p>
+    <details class="automation-health-details">
+      <summary>查看背景更新項目</summary>
+      <div class="automation-health-grid">
+        ${
+          workflows
+            .map(
+              (workflow) => `
+                <article class="automation-health-card">
+                  <strong>${escapeHtml(workflow.name || "未命名排程")}</strong>
+                  <span>${escapeHtml(workflow.schedule || "未設定時間")}</span>
+                  <p>${escapeHtml(workflow.purpose || "等待補充說明")}</p>
+                </article>
+              `,
+            )
+            .join("") || `<div class="empty-state">目前沒有排程資料。</div>`
+        }
+      </div>
+    </details>
   `;
 }
 
@@ -3787,7 +3796,7 @@ function updateContentFavoriteButtons() {
 
 function applyContentLimit(containerSelector, itemSelector, limitValue, favoritesOnly = false, type = "", page = 1, category = "all") {
   const cards = [...document.querySelectorAll(`${containerSelector} ${itemSelector}`)];
-  const limit = Number(limitValue) || 10;
+  const limit = Number(limitValue) || Number(defaultContentLimit());
   const eligible = cards.filter((card) => {
     const categoryMatch = category === "all" || card.dataset.category === category;
     const favoriteMatch = !favoritesOnly || isContentFavorite(type, card);

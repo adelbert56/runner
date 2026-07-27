@@ -84,6 +84,12 @@ function itemIssues(item, index, seenUrls) {
   if (item.type === "shoe" && /prime day|sale|deal|discount|training plan|return-to-running|sports bras?|Shokz|Garmin|running gear|balance board|playlist|watch|襪|socks?|hyrox|綜合訓練鞋|旗艦店|開幕|store opening|flagship/i.test(`${item.title} ${summary}`)) {
     issues.push({ severity: "high", label, issue: "跑鞋卡混入特價文、訓練計畫或配件內容" });
   }
+  if (item.type === "news" && /籃球|籃球鞋|basketball|NBA|夏季聯賽|summer league|足球|足球鞋|網球|網球鞋|簽名鞋|signature shoe|Air Force|Jordan|Dunk|Air Max|Sabrina|Book\s*\d|GELBURST|Hali\s*\d|Anthony Edwards|男裝週|fashion week|休閒鞋|lifestyle|sportstyle/i.test(`${item.title} ${summary} ${item.category}`)) {
+    issues.push({ severity: "high", label, issue: "新聞卡混入非跑步內容" });
+  }
+  if (item.type === "news" && /跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點/.test(summary)) {
+    issues.push({ severity: "high", label, issue: "新聞卡仍使用泛用摘要" });
+  }
 
   return issues;
 }

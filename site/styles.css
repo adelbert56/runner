@@ -732,6 +732,30 @@ h1 {
   white-space: nowrap;
 }
 
+.automation-health-summary {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 780;
+  line-height: 1.6;
+}
+
+.automation-health-details {
+  border-top: 1px solid rgba(31, 42, 36, 0.1);
+}
+
+.automation-health-details summary {
+  padding-top: 14px;
+  color: var(--green-dark);
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.automation-health-details .automation-health-grid {
+  margin-top: 12px;
+}
+
 .automation-health-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2564,7 +2588,7 @@ h3 {
 
 .limit-segment {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   min-height: 42px;
   padding: 4px;
   border: 1px solid rgba(31, 42, 36, 0.13);
@@ -3115,6 +3139,88 @@ h3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin-top: 14px;
+}
+
+.academy-playbooks {
+  max-width: var(--content-max);
+  margin: 14px auto 0;
+  padding: 22px;
+  border: 1px solid rgba(21, 83, 56, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.86);
+}
+
+.academy-playbooks-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+.academy-playbooks-heading h3 {
+  margin: 6px 0 0;
+  font-size: 1.35rem;
+}
+
+.academy-playbooks-heading > p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1.6;
+}
+
+.academy-playbook-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.academy-playbook-grid article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 280px;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.academy-playbook-grid span {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #e4f0e8;
+  color: var(--green-dark);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.academy-playbook-grid h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.04rem;
+  line-height: 1.4;
+}
+
+.academy-playbook-grid ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 720;
+  line-height: 1.55;
+}
+
+.academy-playbook-grid .sub-link {
+  align-self: end;
+  margin-top: auto;
 }
 
 .academy-grid article,
@@ -4550,6 +4656,7 @@ h3 {
   .shoe-release-list,
   .review-grid,
   .academy-library,
+  .academy-playbook-grid,
   .plan-hero,
   .plan-hero dl,
   .profile-summary,
@@ -4759,6 +4866,7 @@ h3 {
   .academy-hero,
   .academy-grid,
   .academy-library,
+  .academy-playbook-grid,
   .academy-panels,
   .plan-hero,
   .plan-hero dl {
@@ -4774,6 +4882,16 @@ h3 {
 }
 
 @media (max-width: 680px) {
+  .academy-playbooks {
+    padding: 16px;
+  }
+
+  .academy-playbooks-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
   html {
     scroll-padding-top: 76px;
   }
@@ -5005,6 +5123,7 @@ h3 {
   .academy-shoe-guide .feature-copy,
   .academy-grid,
   .academy-library,
+  .academy-playbook-grid,
   .academy-panels,
   .profile-summary,
   .plan-hero,

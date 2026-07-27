@@ -13,8 +13,8 @@ const ARCHIVE_RETENTION_DAYS = 183;
 const PUBLISH_WINDOW_DAYS = 92;
 
 const LIMITS = {
-  shoe: 40,
-  news: 40,
+  shoe: 60,
+  news: 60,
 };
 
 const MIN_PUBLISHED = {
@@ -43,6 +43,8 @@ const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|
 const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
 const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
 const SHOE_EXCLUSION_SIGNAL = /prime day|sale|deal|discount|優惠|特價|training plan|return-to-running|mindset|Parkinson|sports bras?|Shokz|Garmin|gear on amazon|running gear|balance board|playlist|watch|襪|socks?|hyrox|綜合訓練鞋|旗艦店|開幕|store opening|flagship|IKEA|肉丸|便利商店|7-Eleven|Lawson|MondaySleepingClub|聯名系列|慵懶風格|快閃店|跑站|好水跑站|高爾夫球|PB 訓練營|訓練營/i;
+const NEWS_EXCLUSION_SIGNAL = /籃球|籃球鞋|籃球球鞋|簽名球鞋|basketball|NBA|夏季聯賽|summer league|足球|足球鞋|網球|網球鞋|簽名鞋|signature shoe|Air Force|Jordan|Dunk|Air Max|Sabrina|Book\s*\d|GELBURST|Hali\s*\d|Anthony Edwards|Donovan Mitchell|男裝週|fashion week|休閒鞋|lifestyle|sportstyle/i;
+const GENERIC_NEWS_SUMMARY = "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。";
 const SHOE_GUIDE_SIGNAL = /best|top|guide|awards|preview|for men|for women|for beginners|flat feet|most cushioned|our top picks/i;
 const SHOE_MODEL_FOCUS_SIGNAL = /review|上市|登場|推出|發表|實測|首試|開箱|評測|同級對比|\bv\d+\b|\b\d{1,2}\b|elite|nitro|pegasus|glycerin|ghost|kayano|nimbus|cumulus|mach|rebel|metaspeed|deviate|wave rider|triumph|paramount|escalante|azura|ellipse|cascadia|cloudmonster|cloudsurfer|vomero/i;
 const SHOE_REVIEW_SIGNAL = /review|實測|首試|開箱|評測|tested|vs\.?|outperforms|verdict/i;
@@ -321,6 +323,9 @@ function summarize(item, type) {
     return `這雙鞋目前以「${category}」定位收錄。${shoeUse}`;
   }
 
+  const sourceSummary = cleanSummary(item.description);
+  if (sourceSummary) return sourceSummary;
+
   const titleSummary = summarizeNewsTitle(title, newsCategory);
   if (titleSummary) return titleSummary;
 
@@ -333,7 +338,7 @@ function summarize(item, type) {
   if (/補給|飲食|碳水|蛋白|能量膠/i.test(title)) {
     return "補給文章可用於長跑與比賽前演練。不要比賽當天第一次嘗試新補給，避免腸胃或配速失控。";
   }
-  return "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。";
+  return "";
 }
 
 function summarizeShoeTitle(title) {
@@ -605,6 +610,16 @@ function isExcludedShoeContent(item) {
   return item.type === "shoe" && SHOE_EXCLUSION_SIGNAL.test(`${item.title || ""} ${item.summary || ""} ${item.category || ""}`);
 }
 
+function isEligiblePublishedContent(item) {
+  const text = `${item.title || ""} ${item.summary || ""} ${item.category || ""}`;
+  if (isExcludedShoeContent(item)) return false;
+  if (item.type !== "news") return true;
+  return Boolean(String(item.summary || "").trim())
+    && item.summary !== GENERIC_NEWS_SUMMARY
+    && !NEWS_EXCLUSION_SIGNAL.test(text)
+    && RUNNING_CONTEXT_SIGNAL.test(text);
+}
+
 function mergePublishedRecords(previous, current) {
   if (!previous) {
     return { ...current };
@@ -653,11 +668,11 @@ async function main() {
     .map((item) => mergeArchiveFields(item, archiveByUrl))
     .filter((item) => withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map(toPublishedItem)
-    .filter((item) => !isExcludedShoeContent(item));
+    .filter(isEligiblePublishedContent);
   const previousInventory = (Array.isArray(previousContent.items) ? previousContent.items : [])
     .filter((item) => withinDays(item.date || item.published_at, PUBLISH_WINDOW_DAYS))
     .map(previousToPublishedItem)
-    .filter((item) => !isExcludedShoeContent(item));
+    .filter(isEligiblePublishedContent);
   const archiveInventory = archiveItems
     .filter((item) => withinRetention(item, ARCHIVE_RETENTION_DAYS) && withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map((item) => ({ ...item, source_origin: "archive" }))
@@ -666,7 +681,7 @@ async function main() {
       ...item,
       score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 1),
     }))
-    .filter((item) => !isExcludedShoeContent(item));
+    .filter(isEligiblePublishedContent);
   const editorialInventory = editorial
     .filter((item) => withinDays(stableContentDate(item), PUBLISH_WINDOW_DAYS))
     .map(toPublishedItem)
@@ -674,7 +689,7 @@ async function main() {
       ...item,
       score: Math.max(MIN_SCORE[item.type], Number(item.score || MIN_SCORE[item.type]) - 2),
     }))
-    .filter((item) => !isExcludedShoeContent(item));
+    .filter(isEligiblePublishedContent);
   const inventory = dedupePublishedRecords([...normalized, ...archiveInventory, ...previousInventory, ...editorialInventory]);
   const published = [
     ...fillWithInventory(inventory, inventory, "shoe"),

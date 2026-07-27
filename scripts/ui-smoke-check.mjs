@@ -71,6 +71,8 @@ assertCheck(/source_url/.test(app) && /我要留言/.test(app), "message cloud l
 assertCheck(items.length >= 10, `published content count is usable (${items.length})`);
 assertCheck(shoeCount >= 10, `published shoe count reaches target (${shoeCount})`);
 assertCheck(newsCount >= 10, `published news count reaches target (${newsCount})`);
+assertCheck(shoeCount >= 60 && newsCount >= 60, `published lists can fill the 60-item option (shoe ${shoeCount}, news ${newsCount})`);
+assertCheck(/data-content-limit="shoe" data-limit-value="60"/.test(html) && /data-content-limit="news" data-limit-value="60"/.test(html) && /\["10", "25", "50", "60"\]/.test(app), "content controls expose a 60-item limit");
 assertCheck(longSummaries.length === 0, `content summaries stay concise (${longSummaries.length} over limit)`);
 assertCheck(duplicateSummaries.length === 0, `content summaries do not repeat sentences (${duplicateSummaries.length} repeated)`);
 assertCheck(/function trainingCompletionSummary\(/.test(trainer), "trainer uses one completion summary for progress and adherence");
