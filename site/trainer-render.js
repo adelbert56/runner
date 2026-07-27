@@ -1564,7 +1564,9 @@ function renderTrainingAnalysis() {
   const averageCadence = recent.filter((run) => run.cadence).reduce((sum, run, _, list) => sum + run.cadence / list.length, 0);
   const elevation = recent.reduce((sum, run) => sum + (run.elevationGainM || 0), 0);
   const averageLoad = recent.filter((run) => run.trainingLoad).reduce((sum, run, _, list) => sum + run.trainingLoad / list.length, 0);
-  const latestVo2 = [...runs].reverse().find((run) => run.vo2max)?.vo2max;
+  const latestVo2Run = [...runs].reverse().find((run) => run.vo2max);
+  const latestVo2 = latestVo2Run?.vo2max;
+  const latestVo2Label = latestVo2Run?.date ? `活動回傳 VO₂ Max · ${latestVo2Run.date.slice(5).replace('-', '/')}` : '活動回傳 VO₂ Max';
   const longestRun = runs.filter((run) => run.date >= addDaysToDateStr(todayStr(), -27)).reduce((max, run) => Math.max(max, Number(run.km) || 0), 0);
   const rampNote = (() => {
     const info = weeklyRampInfo(trend);
@@ -1582,7 +1584,7 @@ function renderTrainingAnalysis() {
   const analyticsDate = reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt);
   return `${renderLatestTrainingReport(runs)}<div class="card trend-card"><div class="trend-card-head"><div class="trend-card-icon" aria-hidden="true">📈</div><div><h2 class="trend-card-title">長期訓練趨勢</h2><span class="trend-card-badge">Garmin 最近 ${runs.length} 筆</span></div><span class="trend-card-updated">📅 Garmin 資料匯至 <b>${analyticsDate}</b></span></div>
     <div class="trend-hero-row"><div class="trend-hero-item trend-hero-primary"><span class="trend-hero-label"><i aria-hidden="true">🛣️</i>近四週跑量</span><strong class="trend-hero-value">${lastFourKm.toFixed(1)}<small>km</small></strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">👟</i>近四週最長跑</span><strong class="trend-hero-value">${longestRun ? `${longestRun.toFixed(1)}<small>km</small>` : '—'}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">⏱️</i>最近四趟平均配速</span><strong class="trend-hero-value">${formatPaceSeconds(averagePace)}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">❤️</i>最近四趟平均心率</span><strong class="trend-hero-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div></div>
-    <div class="trend-monitor"><div class="trend-monitor-top"><div class="trend-monitor-col">${rampNote || '<div class="trend-ramp trend-ramp-good"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>資料不足，暫無法評估增幅。</p></div></div>'}</div><div class="trend-monitor-divider"></div><div class="trend-monitor-col trend-advanced-head"><b>進階訓練指標</b><p>只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p></div></div><div class="trend-tile-grid"><div class="trend-tile"><span class="trend-tile-label">最近四趟平均步頻</span><strong class="trend-tile-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟累積爬升</span><strong class="trend-tile-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟平均負荷</span><strong class="trend-tile-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近 VO₂ Max</span><strong class="trend-tile-value">${latestVo2 || '—'}</strong></div></div></div>
+    <div class="trend-monitor"><div class="trend-monitor-top"><div class="trend-monitor-col">${rampNote || '<div class="trend-ramp trend-ramp-good"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>資料不足，暫無法評估增幅。</p></div></div>'}</div><div class="trend-monitor-divider"></div><div class="trend-monitor-col trend-advanced-head"><b>進階訓練指標</b><p>只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p></div></div><div class="trend-tile-grid"><div class="trend-tile"><span class="trend-tile-label">最近四趟平均步頻</span><strong class="trend-tile-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟累積爬升</span><strong class="trend-tile-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟平均負荷</span><strong class="trend-tile-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">${latestVo2Label}</span><strong class="trend-tile-value">${latestVo2 || '—'}</strong></div></div></div>
     <div class="analysis-chart-grid"><section class="analysis-chart-card analysis-volume-card"><div class="analysis-chart-heading"><div><b>跑量趨勢</b><p>依 Garmin 實跑加總，包含額外跑步。</p></div><span class="pace-trend-badge">距離</span></div><div class="volume-trend-stack"><section class="volume-trend-section volume-trend-section--weekly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>週跑量</b><span>短週期 · 最近 8 週</span></div>${renderVolumeBars(trend, { chartClass: 'trend-bar-chart--weekly', barMaxHeight: 86 })}</section><section class="volume-trend-section volume-trend-section--monthly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>月跑量</b><span>長週期 · 最近 6 個月份</span></div>${renderVolumeBars(monthlyTrend, { periodKey: 'month', emptyText: '尚無可用的月跑量資料。', label: (month) => month.slice(5), chartClass: 'trend-bar-chart--monthly', barMaxHeight: 86 })}</section></div><div class="volume-trend-insights"><div class="volume-insight-head"><b>跑量摘要</b><span>Garmin 實跑</span></div><div class="volume-insight-grid"><div class="volume-insight"><span>${reviewEscape(latestMonth.month)} 累積</span><strong>${latestMonth.km}<small> km</small></strong></div><div class="volume-insight"><span>本月跑步次數</span><strong>${latestMonth.runs}<small> 次</small></strong></div><div class="volume-insight"><span>近六個月平均</span><strong>${averageMonthlyKm.toFixed(1)}<small> km</small></strong></div><div class="volume-insight"><span>單月最高</span><strong>${peakMonth.km}<small> km</small></strong><em>${reviewEscape(peakMonth.month)}</em></div></div></div></section><section class="analysis-chart-card analysis-chart-card--pace"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
   </div>`;
 }
@@ -1747,7 +1749,8 @@ function renderCoachDataSignals() {
   const load = average('trainingLoad');
   const aerobicTe = average('aerobicTe');
   const anaerobicTe = average('anaerobicTe');
-  const latestVo2 = [...recent].reverse().find((run) => run.vo2max)?.vo2max;
+  const latestVo2Run = [...recent].reverse().find((run) => run.vo2max);
+  const latestVo2 = latestVo2Run?.vo2max;
   const cadenceAssessment = typeof coachCadenceAssessment === 'function' ? coachCadenceAssessment(recent) : null;
   const cadence = cadenceAssessment?.evidenceRuns?.length ? cadenceAssessment.displayed : null;
   const metrics = [
@@ -1755,7 +1758,7 @@ function renderCoachDataSignals() {
     load && ['平均訓練負荷', String(Math.round(load))],
     aerobicTe && ['有氧訓練效果', aerobicTe.toFixed(1)],
     anaerobicTe && ['無氧訓練效果', anaerobicTe.toFixed(1)],
-    latestVo2 && ['最近 VO₂ Max', String(latestVo2)]
+    latestVo2 && [`活動回傳 VO₂ Max${latestVo2Run?.date ? ` · ${latestVo2Run.date.slice(5).replace('-', '/')}` : ''}`, String(latestVo2)]
   ].filter(Boolean);
   if (!metrics.length) return '';
   return `<div class="coach-signals">
@@ -3205,6 +3208,21 @@ function renderDaySessionSummary(day, primaryGarminRun) {
   return `<div class="day-session-summary"><span>今日雙練</span><b>${totalKm ? `合計 ${totalKm.toFixed(1)} km · ` : ''}${complete}/2 已完成</b></div>`;
 }
 
+function dayCardIntent(day) {
+  if (day.type === 'long') return '耐力與長距離適應';
+  if (day.type === 'tempo') return '乳酸閾值與持續輸出';
+  if (day.type === 'interval') return '速度耐力與跑姿效率';
+  return {
+    recovery: '恢復與循環',
+    aerobic: '有氧耐力',
+    prelong: '長跑前喚醒',
+    strides: '步頻與動作協調',
+    progression: '漸進控制',
+    fueling: '補給與耐力適應',
+    marathon: '專項耐力'
+  }[day.focus] || '基礎耐力';
+}
+
 function renderDayCard(day, rationale = '', source = 'baseline') {
   const extraSessions = day.extraSessions || [];
   const garminRun = getGarminRunForDate(day.dateStr, extraSessions.map((session) => session.garminActivityId).filter(Boolean));
@@ -3216,10 +3234,15 @@ function renderDayCard(day, rationale = '', source = 'baseline') {
   const typeName = coachBadge ? `${coachBadge.label}｜${trainingTypeLabel(day.type, day.focus)}` : trainingTypeLabel(day.type, day.focus);
   const taskText = trainingTaskTitle(day);
   const [taskTitle, taskIntent] = handwrittenCoachPlan ? taskText.split(/\s*[｜|]\s*/, 2) : [taskText, ''];
+  const prescription = [
+    day.km ? `<span><b>${reviewEscape(day.km)} km</b></span>` : '',
+    day.hrTarget ? `<span>${reviewEscape(day.hrTarget)}</span>` : '',
+    day.pace ? `<span>${reviewEscape(day.pace)}</span>` : ''
+  ].filter(Boolean).join('');
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
   const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? '<div style="color:var(--c-text-muted);font-size:13px">尚未到日期，無法先記錄</div>' : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
   const extraHTML = extraSessions.map((session) => renderExtraSession(day, session)).join('');
-  return `<div class="day-card schedule-day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}">${coachBadge ? coachBadge.emoji : ''}${typeName}</span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}<div class="day-card-pace">${[day.km ? `${day.km} km` : '', day.pace, day.hrTarget].filter(Boolean).join(' · ')}</div>${dayWeatherLine(day)}<details class="day-workout-details" open><summary>主課內容（可收合）</summary>${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}${renderStepCards(attachCourseGuides(day.steps, day.type))}</details>${extraHTML}${renderDaySessionSummary(day, garminRun)}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}</div>${actionsHTML}${!extraSessions.length ? `<button class="add-extra-session" onclick="openAddExtraSession('${day.dateStr}')">＋ 加入第二堂</button>` : ''}</div>`;
+  return `<div class="day-card schedule-day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}"><b>${coachBadge ? coachBadge.emoji : ''}${typeName}</b><small>${dayCardIntent(day)}</small></span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}<div class="day-card-prescription" aria-label="今日處方">${prescription}</div>${dayWeatherLine(day)}<details class="day-workout-details" open><summary>主課內容（可收合）</summary>${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}${renderStepCards(attachCourseGuides(day.steps, day.type))}</details>${extraHTML}${renderDaySessionSummary(day, garminRun)}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}</div>${actionsHTML}${!extraSessions.length ? `<button class="add-extra-session" onclick="openAddExtraSession('${day.dateStr}')">＋ 加入第二堂</button>` : ''}</div>`;
 }
 
 /* drawer implementation removed; daily details remain in the original day card. */

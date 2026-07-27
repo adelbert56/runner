@@ -1697,9 +1697,13 @@
     .schedule-day-card.day-card.today { border:2px solid var(--c-primary); border-left-width:4px; padding:12px 11px; background:#fbfefb; }
     .schedule-day-card .day-card-header { margin-bottom:7px; }
     .schedule-day-card .day-card-date { font-size:11px; font-weight:850; }
-    .schedule-day-card .workout-badge { margin-bottom:8px; padding:3px 7px; font-size:10px; }
+    .schedule-day-card .workout-badge { display:inline-flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px; margin-bottom:8px; padding:3px 7px; font-size:10px; }
+    .schedule-day-card .workout-badge b { font:inherit; }
+    .schedule-day-card .workout-badge small { color:inherit; font-size:9px; font-weight:750; opacity:.76; }
     .schedule-day-card .day-card-task { min-height:42px; margin-bottom:3px; font-size:13px; line-height:1.45; }
-    .schedule-day-card .day-card-pace { min-height:32px; margin-bottom:8px; font-size:11px; line-height:1.45; }
+    .day-card-prescription { display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px; color:#4f675b; font-size:10px; font-weight:750; line-height:1.35; }
+    .day-card-prescription span { padding:3px 5px; border:1px solid #e1eae4; border-radius:6px; background:#f8fbf8; }
+    .day-card-prescription b { color:var(--c-primary-hover); font-size:11px; font-weight:900; }
     .schedule-day-card .wx-chip { margin:7px 0; font-size:10px; }
     .day-workout-details { margin-top:8px; border-top:1px solid #edf1ee; }
     .day-workout-details summary { padding:9px 0 2px; color:var(--c-primary-hover); font-size:11px; font-weight:800; cursor:pointer; }
