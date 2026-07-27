@@ -298,25 +298,30 @@ async function assertTrainerReport(page, viewportName) {
   await page.evaluate((sample) => localStorage.setItem("runner-trainer-v1", JSON.stringify(sample)), trainerVisualSample);
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForSelector("#trainer-hero-shell", { timeout: 5000 });
+  // Let the boot-time weather/review promises settle before installing a
+  // deterministic weather fixture; otherwise they can repaint the week while
+  // this assertion is reading it.
+  await page.waitForTimeout(450);
   const restDayForecast = await page.evaluate(() => {
     eval(`trainerWeather = { "2026-07-24": { tmax: 30.8, rain: 50, morningRain: 20, eveningRain: 40 } }`);
-    appData.plan[0].days.push({
-      dateStr: "2026-07-24",
-      dow: 5,
-      type: "rest",
-      focus: "rest",
-      task: "休息＋居家肌力",
-      status: "upcoming",
-      steps: [],
-    });
-    renderPlanView();
-    showView("plan");
-    switchPlanTab("week");
-    return document.querySelector("#plan-tab-week .day-card.type-rest .wx-chip")?.textContent?.trim() || "";
+    return dayWeatherLine({ dateStr: "2026-07-24", type: "rest" });
   });
   if (!restDayForecast.includes("預報 31°C") || !restDayForecast.includes("清晨 20%")) {
     throw new Error(`${viewportName}/trainer-rest-day-weather: forecast is missing from rest-day course card: ${restDayForecast}`);
   }
+  // Exercise the real double-session entry path against the local fixture.
+  // It must add a second session without replacing the formal course card.
+  await page.evaluate(() => { showView("plan"); switchPlanTab("week"); });
+  const addSecondSession = page.locator("#plan-tab-week .add-extra-session").first();
+  await addSecondSession.click();
+  await page.locator("#m-extra-slot").selectOption("morning");
+  await page.locator("#m-extra-type").selectOption("recovery");
+  await page.locator("#m-extra-km").fill("3");
+  await page.getByRole("button", { name: "加入第二堂", exact: true }).click();
+  const doubleSession = await page.locator("#plan-tab-week .schedule-day-card").evaluateAll((cards) => cards.some((card) =>
+    card.querySelector(".extra-session") && card.querySelector(".day-session-summary") && card.textContent.includes("恢復跑")
+  ));
+  if (!doubleSession) throw new Error(`${viewportName}/trainer-double-session: second session was not added through the UI`);
   await page.evaluate((review) => {
     // This is a deterministic local visual fixture; it never writes to the product data files.
     eval(`coachReviewData = ${JSON.stringify(review)}`);
@@ -324,15 +329,47 @@ async function assertTrainerReport(page, viewportName) {
     showView("plan");
     switchPlanTab("week");
   }, trainerReviewSample);
-  await page.waitForSelector(".course-decision-panel", { timeout: 5000 });
+  await page.waitForSelector(".course-decision-panel", { state: "attached", timeout: 5000 });
   const courseDecision = await page.locator(".course-decision-panel").evaluate((element) => ({
     hasFocus: Boolean(element.querySelector(".weekly-coach-insight")) || Boolean(element.querySelector(".course-decision-context")),
     hasDuplicateFocus: Boolean(element.querySelector(".weekly-coach-insight") && element.querySelector(".course-decision-context")),
     hasActionableTitle: element.textContent.includes("本週執行重點") || element.textContent.includes("這週怎麼跑，先看這裡"),
     hasVisibleGuidance: element.textContent.trim().length > 40,
+    coachBriefOpen: !element.querySelector(".coach-insight-details") || element.querySelector(".coach-insight-details")?.open === true,
+    beforeCourseTable: Boolean(element.compareDocumentPosition(document.querySelector(".week-calendar")) & Node.DOCUMENT_POSITION_FOLLOWING),
   }));
-  if (!courseDecision.hasFocus || courseDecision.hasDuplicateFocus || !courseDecision.hasActionableTitle || !courseDecision.hasVisibleGuidance) {
+  if ((courseDecision.hasFocus && (courseDecision.hasDuplicateFocus || !courseDecision.hasActionableTitle || !courseDecision.hasVisibleGuidance || !courseDecision.coachBriefOpen)) || !courseDecision.beforeCourseTable) {
     throw new Error(`${viewportName}/trainer-course-decision: visible coaching brief is incomplete ${JSON.stringify(courseDecision)}`);
+  }
+  const weekBriefAfterNavigation = await page.evaluate(() => {
+    const previousData = structuredClone(appData);
+    const previousReview = structuredClone(coachReviewData);
+    const previousWeek = currentWeek;
+    try {
+      const secondWeek = structuredClone(appData.plan[0]);
+      secondWeek.weekNum = 2;
+      secondWeek.phaseLabel = '基礎強化';
+      secondWeek.days = secondWeek.days.map((day) => ({ ...day, dateStr: day.dateStr.replace('07-', '08-') }));
+      appData.plan = [appData.plan[0], secondWeek];
+      coachReviewData = null;
+      currentWeek = 1;
+      renderPlanView();
+      showView('plan');
+      switchPlanTab('week');
+      navWeek(1);
+      const panel = document.querySelector('.course-decision-panel');
+      return Boolean(panel?.querySelector('.course-decision-context')) && panel.textContent.includes('本週執行重點');
+    } finally {
+      appData = previousData;
+      coachReviewData = previousReview;
+      currentWeek = previousWeek;
+      renderPlanView();
+      showView('plan');
+      switchPlanTab('week');
+    }
+  });
+  if (!weekBriefAfterNavigation) {
+    throw new Error(`${viewportName}/trainer-week-brief-navigation: week guidance disappeared after navigation`);
   }
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await page.evaluate(() => {

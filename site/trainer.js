@@ -6,7 +6,7 @@ const DEVICE_KEY = 'runner-trainer:device-id';
 const STORAGE_KEY = `runner-trainer:${getDeviceId()}:v1`;
 const PRE_RESTORE_STORAGE_KEY = `${STORAGE_KEY}:pre-restore`;
 const RUNNER_REGISTERED_RACES_SUFFIX = ':registered-races';
-const PLAN_SCHEMA_VERSION = 10;
+const PLAN_SCHEMA_VERSION = 11;
 const GUIDE_ASSET_VERSION = 7;
 const GARMIN_WORKOUT_PAIRING_KEY = 'runner-garmin-workout-pairing-v1';
 const SKIP_REASON_LABELS = {
@@ -24,6 +24,8 @@ const TRAINING_TYPE_LABELS = Object.freeze({
   tempo: '節奏跑',
   interval: '間歇',
   long: '長跑',
+  strength: '肌力補強',
+  mobility: '活動度／伸展',
   race: '以賽代訓',
   rest: '休息'
 });
@@ -43,6 +45,35 @@ addLocalRegistrationLink();
 
 function createEmptyData() {
   return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, lastBackupAt: null, safetyHold: null };
+}
+
+// A formal day remains the single coaching prescription.  A second workout is
+// deliberately stored beside it, rather than replacing it, so existing plans,
+// Garmin history, and MAIN-work analysis stay backwards compatible.
+function normalizeExtraSessions(plan) {
+  if (!Array.isArray(plan)) return [];
+  return plan.map((week) => ({
+    ...week,
+    days: Array.isArray(week?.days) ? week.days.map((day) => {
+      if (!Array.isArray(day?.extraSessions)) return day;
+      const date = day.dateStr || 'unscheduled';
+      return {
+        ...day,
+        extraSessions: day.extraSessions.filter((session) => session && typeof session === 'object').map((session, index) => ({
+          id: String(session.id || `${date}:extra:${index + 1}`),
+          slot: session.slot === 'morning' ? 'morning' : 'evening',
+          type: ['recovery', 'easy', 'strength', 'mobility'].includes(session.type) ? session.type : 'recovery',
+          title: String(session.title || ''),
+          km: Math.max(0, Number(session.km) || 0),
+          duration: Math.max(0, Number(session.duration) || 0),
+          target: String(session.target || ''),
+          status: ['done', 'missed'].includes(session.status) ? session.status : 'upcoming',
+          garminActivityId: session.garminActivityId ? String(session.garminActivityId) : '',
+          createdAt: session.createdAt || ''
+        }))
+      };
+    }) : []
+  }));
 }
 
 function normalizeCoachPlanArchive(value) {
@@ -747,7 +778,7 @@ function normalizeData(data) {
     ...base,
     ...(data || {}),
     profile: data?.profile || null,
-    plan: Array.isArray(data?.plan) ? data.plan : [],
+    plan: normalizeExtraSessions(Array.isArray(data?.plan) ? data.plan : []),
     log: Array.isArray(data?.log) ? data.log : [],
     checkins: normalizeTrainingCheckins(data?.checkins),
     assessments: Array.isArray(data?.assessments) ? data.assessments : [],

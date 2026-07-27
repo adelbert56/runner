@@ -112,7 +112,13 @@ function shouldShowAdaptationPrompt(scenario) {
   return true;
 }
 
-function markDone(dateStr, type, plannedKm) {
+function findExtraSession(dateStr, sessionId) {
+  const day = (appData.plan || []).flatMap((week) => week.days || []).find((item) => item.dateStr === dateStr);
+  const session = day?.extraSessions?.find((item) => item.id === sessionId);
+  return { day, session };
+}
+
+function markDone(dateStr, type, plannedKm, extraSessionId = '') {
   const prescribedPaceSec = getPrescribedPaceSec(dateStr, type);
   const suggestedMins = estimateDurationMinsFromPace(prescribedPaceSec, plannedKm);
   showModal(
@@ -132,9 +138,15 @@ function markDone(dateStr, type, plannedKm) {
           const mins = parseInt(document.getElementById('m-time').value, 10) || 0;
           const rpe = parseInt(document.getElementById('m-rpe').value, 10) || 0;
           const notes = document.getElementById('m-notes').value;
-          saveLogEntry({ date: dateStr, type, plannedKm, actualKm: km, actualTimeMins: mins, rpe, notes, prescribedPaceSec });
-          recordTrainingEvent('completed', { date: dateStr, detail: `${km} km · RPE ${rpe || '—'}` });
-          markDayStatus(dateStr, 'done');
+          saveLogEntry({ date: dateStr, type, plannedKm, actualKm: km, actualTimeMins: mins, rpe, notes, prescribedPaceSec, sessionId: extraSessionId || undefined });
+          recordTrainingEvent('completed', { date: dateStr, detail: `${extraSessionId ? '第二堂 · ' : ''}${km} km · RPE ${rpe || '—'}` });
+          if (extraSessionId) {
+            const { session } = findExtraSession(dateStr, extraSessionId);
+            if (session) session.status = 'done';
+            saveData(appData);
+          } else {
+            markDayStatus(dateStr, 'done');
+          }
           autoPaceCalibration();
           closeModal();
           renderPlanView();
@@ -158,6 +170,56 @@ function markDone(dateStr, type, plannedKm) {
     const nextMins = estimateDurationMinsFromPace(prescribedPaceSec, nextKm);
     timeInput.value = nextMins > 0 ? String(nextMins) : '';
   });
+}
+
+function openAddExtraSession(dateStr) {
+  const { day } = findExtraSession(dateStr, '');
+  if (!day || day.type === 'rest') return;
+  if ((day.extraSessions || []).length >= 1) {
+    showModal('已安排雙練', '<p style="margin:0;line-height:1.7">一天最多安排一堂額外課程。第二堂預設只開放恢復與補強，避免和正式主課堆疊成雙重高強度。</p>', [{ label: '知道了', primary: true, action: closeModal }]);
+    return;
+  }
+  showModal('加入第二堂訓練', `<p class="field-help" style="margin-top:0">正式課表仍是今天唯一主課；第二堂只用於天候調整後的恢復跑、走跑或肌力補強。</p>
+    <div class="form-group"><label class="form-label" for="m-extra-slot">時段</label><select class="form-input" id="m-extra-slot"><option value="morning">早上</option><option value="evening">晚上</option></select></div>
+    <div class="form-group"><label class="form-label" for="m-extra-type">內容</label><select class="form-input" id="m-extra-type"><option value="recovery">恢復跑</option><option value="easy">輕鬆跑／走跑</option><option value="strength">肌力補強</option><option value="mobility">活動度／伸展</option></select></div>
+    <div class="form-group"><label class="form-label" for="m-extra-km">距離（km，可留空）</label><input class="form-input" id="m-extra-km" type="number" min="0" step="0.1" value="3"></div>
+    <div class="form-group"><label class="form-label" for="m-extra-duration">時間（分鐘）</label><input class="form-input" id="m-extra-duration" type="number" min="0" step="5" value="25"></div>
+    <div class="form-group"><label class="form-label" for="m-extra-note">執行提示</label><input class="form-input" id="m-extra-note" type="text" value="舒適可對話；若不適則停止"></div>`, [
+    { label: '加入第二堂', primary: true, action: () => {
+      const type = document.getElementById('m-extra-type')?.value || 'recovery';
+      const slot = document.getElementById('m-extra-slot')?.value || 'morning';
+      const labels = { recovery: '恢復跑', easy: '輕鬆跑／走跑', strength: '肌力補強', mobility: '活動度／伸展' };
+      day.extraSessions = [...(day.extraSessions || []), {
+        id: `${dateStr}:extra:${Date.now()}`,
+        slot, type, title: labels[type],
+        km: Math.max(0, Number(document.getElementById('m-extra-km')?.value) || 0),
+        duration: Math.max(0, Number(document.getElementById('m-extra-duration')?.value) || 0),
+        target: document.getElementById('m-extra-note')?.value?.trim() || '',
+        status: 'upcoming', createdAt: new Date().toISOString()
+      }];
+      recordTrainingEvent('extra_session_added', { date: dateStr, detail: `${slot === 'morning' ? '早上' : '晚上'} · ${labels[type]}` });
+      saveData(appData); closeModal(); renderPlanView(); showView('plan');
+    } },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+function markExtraSessionMissed(dateStr, sessionId) {
+  const { session } = findExtraSession(dateStr, sessionId);
+  if (!session) return;
+  showModal('跳過第二堂？', '<p style="margin:0;line-height:1.7">這只會標示第二堂未完成，不會改動今天正式主課或安排補跑。</p>', [
+    { label: '確認跳過', primary: true, action: () => { session.status = 'missed'; recordTrainingEvent('extra_session_skipped', { date: dateStr, detail: session.title || '第二堂' }); saveData(appData); closeModal(); renderPlanView(); } },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+function removeExtraSession(dateStr, sessionId) {
+  const { day, session } = findExtraSession(dateStr, sessionId);
+  if (!day || !session) return;
+  showModal('移除第二堂？', '<p style="margin:0;line-height:1.7">這會移除額外安排與其畫面對應，但不會刪除 Garmin 原始紀錄或已寫入的訓練日誌。</p>', [
+    { label: '移除', primary: true, action: () => { day.extraSessions = (day.extraSessions || []).filter((item) => item.id !== sessionId); saveData(appData); closeModal(); renderPlanView(); } },
+    { label: '保留', action: closeModal }
+  ]);
 }
 
 function futureMakeupCandidates(sourceDate) {

@@ -33,6 +33,29 @@ function setActivityAssignment(activityId, targetDate, mode = 'same-day') {
   refreshCoachReviewPanels();
 }
 
+function openExtraSessionGarminAssignment(dateStr, sessionId) {
+  const { session } = findExtraSession(dateStr, sessionId);
+  if (!session) return;
+  const runs = garminActivityRecords().filter((run) => run.date === dateStr);
+  if (!runs.length) {
+    showModal('尚無可對應的 Garmin 紀錄', '<p style="margin:0;line-height:1.7">同步到同一天的 Garmin 活動後，才可把它指定給這堂額外訓練。這不會改動正式主課的 Garmin 對應。</p>', [{ label: '知道了', primary: true, action: closeModal }]);
+    return;
+  }
+  const options = runs.map((run) => `<option value="${reviewEscape(String(run.activityId))}" ${String(run.activityId) === String(session.garminActivityId || '') ? 'selected' : ''}>${reviewEscape(run.name || '跑步')} · ${Number(run.km || 0).toFixed(1)} km · ${reviewEscape(run.pace || '配速未提供')}</option>`).join('');
+  showModal('對應第二堂 Garmin 紀錄', `<p class="field-help" style="margin-top:0">選擇同一天的實跑。指定後，這筆活動只會認列給第二堂，不會覆寫正式主課。</p><div class="form-group"><label class="form-label" for="m-extra-garmin">Garmin 活動</label><select class="form-input" id="m-extra-garmin">${options}</select></div>`, [
+    { label: '儲存對應', primary: true, action: () => {
+      const activityId = document.getElementById('m-extra-garmin')?.value;
+      if (!activityId) return;
+      session.garminActivityId = String(activityId);
+      session.status = 'done';
+      appData.activityAssignments = normalizeActivityAssignments(appData.activityAssignments);
+      appData.activityAssignments[String(activityId)] = { targetDate: dateStr, targetSessionId: sessionId, mode: 'same-day', source: 'runner', updatedAt: new Date().toISOString() };
+      saveData(appData); closeModal(); renderPlanView(); refreshCoachReviewPanels();
+    } },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
 function openActivityAssignment(activityId) {
   const run = garminActivityRecords().find((item) => String(item.activityId) === String(activityId));
   if (!run) return;

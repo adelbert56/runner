@@ -205,8 +205,9 @@ function coachPrescription(day, ctx, week) {
   const coachDays = coachDaysForWeek(week);
   const entry = coachDays.find((item) => item.scheduledDow === day.dow);
   if (!entry) return null;
-  const headline = coachPlanHeadline(entry.plan);
-  const mainInstruction = coachPlanMainInstruction(entry.plan);
+  const scheduledKm = Number(day.km) || 0;
+  const headline = coachPlanHeadline(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${scheduledKm} km`);
+  const mainInstruction = coachPlanMainInstruction(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${scheduledKm} km`);
   const steps = (day.steps || []).map((step) => step.title === '主課'
     ? { ...step, dose: '', detail: mainInstruction, isCoachMain: true }
     : step);

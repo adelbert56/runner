@@ -48,3 +48,5 @@ The local registration manager is a compact operational workspace: users should 
 | --- | --- | --- | --- |
 | 2026-07-24 | Registration workspace system | Overview, people, entries, notifications, data tools | Screen-specific card shadows, competing hero treatment, repeated breakpoint overrides |
 | 2026-07-26 | Coach brief evidence hierarchy: compact metric strip, short evidence rows, numbered actions | Trainer coaching brief | Long mixed-metric paragraphs inside equal-weight cards |
+| 2026-07-27 | Weekly workspace system: shared surfaces, spacing, typography and responsive rules for week header, resources, coaching and open day cards | Trainer weekly plan | Layered overrides, rainbow resource cards and form-like coaching panels |
+| 2026-07-27 | Coach brief keeps weekly focus and any schedule adjustment in one direct summary, without repeating source labels already stated by the header | Trainer weekly plan | Side-by-side plan-update card and repeated source labels that fragmented one coaching message |
