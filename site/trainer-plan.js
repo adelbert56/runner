@@ -771,6 +771,102 @@ function attachCourseGuides(steps, type) {
   });
 }
 
+// Garmin 匯入不能只靠畫面文案反推。排課時即把主課拆成可執行的步驟，
+// 特別是間歇／巡航／法特雷克的重複組，避免「4×400m」被誤當作單一主課。
+function buildGarminWorkoutStructure(type, steps, km, target = '') {
+  const sourceSteps = Array.isArray(steps) ? steps : [];
+  const byTitle = (title) => sourceSteps.find((step) => step?.title === title) || {};
+  const warmup = byTitle('熱身');
+  const main = byTitle('主課');
+  const cooldown = byTitle('收操');
+  const minutes = (text, fallback) => {
+    const match = String(text || '').match(/(\d+(?:\.\d+)?)\s*分/);
+    return Math.max(60, Math.round(Number(match?.[1] || fallback) * 60));
+  };
+  const distance = (value, fallbackKm = 0) => {
+    const match = String(value || '').match(/(\d+(?:\.\d+)?)\s*(?:km|公里)/i);
+    const kmValue = Number(match?.[1] || fallbackKm);
+    return Math.max(100, Math.round(kmValue * 1000));
+  };
+  const timed = (kind, title, text, fallbackMinutes, stepTarget = '') => ({
+    kind, title,
+    end: { type: 'time', value: minutes(text, fallbackMinutes), label: `${Math.round(minutes(text, fallbackMinutes) / 60)} 分` },
+    target: stepTarget,
+    detail: text || ''
+  });
+  const distanceStep = (kind, title, meters, detail, stepTarget = '') => ({
+    kind, title,
+    end: { type: 'distance', value: meters, label: `${(meters / 1000).toFixed(meters % 1000 ? 1 : 0)} km` },
+    target: stepTarget,
+    detail: detail || ''
+  });
+  const structure = [
+    timed('warmup', '熱身', warmup.dose || warmup.detail, type === 'interval' ? 15 : 8)
+  ];
+  const mainDose = String(main.dose || '');
+  const mainDetail = String(main.detail || '');
+  const repeatMeters = mainDose.match(/(\d+)\s*[×xX]\s*(\d+(?:\.\d+)?)\s*m\b/i);
+  const repeatKm = mainDose.match(/(\d+)\s*[×xX]\s*(\d+(?:\.\d+)?)\s*(?:km|公里)/i);
+  const recoveryMinutes = mainDetail.match(/(?:組間|趟間|慢跑|恢復)[^。；;]*?(\d+(?:\.\d+)?)\s*分/);
+  const recoverySeconds = mainDetail.match(/(?:組間|趟間|慢跑|恢復)[^。；;]*?(\d+)\s*秒/);
+  const recoveryValue = recoverySeconds ? Number(recoverySeconds[1]) : Math.round(Number(recoveryMinutes?.[1] || 1.5) * 60);
+  const repeat = (title, repetitions, intervalEnd, intervalTitle, recoveryEnd, detail, intervalTarget = target) => {
+    structure.push({
+      kind: 'repeat', title, repetitions,
+      end: { type: 'reps', value: repetitions, label: `${repetitions} 組` },
+      detail,
+      children: [
+        { kind: 'interval', title: intervalTitle, end: intervalEnd, target: intervalTarget, detail },
+        { kind: 'recovery', title: '慢跑恢復', end: recoveryEnd, target: '', detail: '放慢並恢復呼吸，再開始下一組。' }
+      ]
+    });
+  };
+
+  if (type === 'interval' && repeatMeters) {
+    const repetitions = Number(repeatMeters[1]);
+    const meters = Number(repeatMeters[2]);
+    repeat('間歇重複組', repetitions,
+      { type: 'distance', value: meters, label: `${meters} m` }, '快段',
+      { type: 'time', value: recoveryValue, label: `${recoveryValue} 秒` }, mainDetail);
+  } else if (type === 'tempo' && repeatKm) {
+    const repetitions = Number(repeatKm[1]);
+    const meters = Math.round(Number(repeatKm[2]) * 1000);
+    repeat('節奏重複組', repetitions,
+      { type: 'distance', value: meters, label: `${Number(repeatKm[2])} km` }, '節奏段',
+      { type: 'time', value: recoveryValue, label: `${Math.round(recoveryValue / 60)} 分` }, mainDetail);
+  } else if (/(?:坡道|趟)/.test(mainDose) && /秒/.test(mainDose)) {
+    const hill = mainDose.match(/(\d+)(?:[–-]\d+)?\s*趟\s*(\d+)(?:[–-]\d+)?\s*秒/);
+    const repetitions = Number(hill?.[1] || 6);
+    const seconds = Number(hill?.[2] || 60);
+    repeat('坡道重複組', repetitions,
+      { type: 'time', value: seconds, label: `${seconds} 秒` }, '上坡快段',
+      { type: 'time', value: 90, label: '90 秒' }, mainDetail, 'RPE 7–8');
+  } else if (/快跑\s*\d+\s*分\s*\+\s*慢跑\s*\d+\s*分/.test(mainDetail)
+    || /\d+\s*分快\s*\/\s*\d+\s*分慢/.test(mainDose)) {
+    const fartlek = mainDetail.match(/快跑\s*(\d+)\s*分\s*\+\s*慢跑\s*(\d+)\s*分/)
+      || mainDose.match(/(\d+)\s*分快\s*\/\s*(\d+)\s*分慢/);
+    const repetitions = Number(mainDose.match(/(\d+)(?:[–-]\d+)?\s*(?:段|組)/)?.[1] || 3);
+    const fastSeconds = Number(fartlek?.[1] || 3) * 60;
+    const slowSeconds = Number(fartlek?.[2] || 2) * 60;
+    repeat('變速重複組', repetitions,
+      { type: 'time', value: fastSeconds, label: `${fastSeconds / 60} 分` }, '快段',
+      { type: 'time', value: slowSeconds, label: `${slowSeconds / 60} 分` }, mainDetail);
+  } else {
+    const mainKm = Number(mainDose.match(/(\d+(?:\.\d+)?)\s*(?:km|公里)/i)?.[1] || km);
+    structure.push(distanceStep('main', '主課', distance(`${mainKm} km`, km), mainDetail, target));
+    const strides = mainDose.match(/(\d+)\s*[×xX]\s*(\d+)\s*m\b/i);
+    if (strides) {
+      const repetitions = Number(strides[1]);
+      const meters = Number(strides[2]);
+      repeat('加速跑重複組', repetitions,
+        { type: 'distance', value: meters, label: `${meters} m` }, '加速跑',
+        { type: 'time', value: 45, label: '45 秒' }, mainDetail, target);
+    }
+  }
+  structure.push(timed('cooldown', '收操', cooldown.dose || cooldown.detail, type === 'interval' ? 10 : 6));
+  return structure;
+}
+
 function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInjury, today, weekNum = 1, phaseName = 'build', focus = '', label = '') {
   const card = { dow, dateStr, type, km, isToday: dateStr === today, status: 'upcoming', isDeload, weekNum, phaseName, focus, label };
   const content = buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, isTaper, focus, label);
@@ -788,6 +884,7 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
         : type === 'interval'
           ? `HR ${zones.intervalLow}–${zones.intervalHigh}`
           : '';
+  card.workoutStructure = buildGarminWorkoutStructure(type, card.steps, km, [card.pace, card.hrTarget].filter(Boolean).join(' · '));
   if (hasInjury && ['tempo', 'interval'].includes(type)) {
     card.injuryNote = '傷處（左腳等）當天有任何不穩或異樣 → 本課改輕鬆跑，當週退回上一級跑量。';
   } else if (hasInjury && type === 'long') {

@@ -154,7 +154,7 @@ function coachPlanHeadline(planText) {
 
   const purposeMatch = text.match(/(?:目的|重點)\s*[：:]\s*([^。；;]+)/);
   const purpose = purposeMatch?.[1]?.trim();
-  const direction = /(?:^|\s)E\s*跑|輕鬆跑|有氧/.test(text)
+  const direction = /(?:^|[\s＋+：:])E\s*(?:跑|主課)|輕鬆跑|有氧/.test(text)
     ? TRAINING_TYPE_LABELS.easy
     : /(?:^|\s)T\s*跑|節奏跑|閾值/.test(text)
       ? TRAINING_TYPE_LABELS.tempo

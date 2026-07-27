@@ -2588,6 +2588,12 @@ function workoutEndFromText(text, fallbackKm = 0) {
 function workoutStructureForDay(day) {
   // 休息日的 steps 是居家肌力清單，不是跑步課結構；防止被誤解析成「5 km 主課」
   if (day?.type === 'rest') return [];
+  // 正式課表的熱身／收操一律維持時間步驟：可原地做動態活動，不應要求
+  // 累積距離。這也讓舊版已保存課表不會沿用過去的熱身公里數。
+  if (!day?.coachPlan && typeof buildGarminWorkoutStructure === 'function' && ['easy', 'long', 'tempo', 'interval'].includes(day?.type)) {
+    return buildGarminWorkoutStructure(day.type, day.steps, Number(day.km) || 5, [day.pace, day.hrTarget].filter(Boolean).join(' · '));
+  }
+  // 教練手寫課表與賽事處方才保留其明確 supplied structure，不自行改寫。
   if (Array.isArray(day?.workoutStructure) && day.workoutStructure.length) return day.workoutStructure;
   const courseSteps = attachCourseGuides(day?.steps || [], day?.type);
   return courseSteps.map((step, index) => {
@@ -2622,6 +2628,18 @@ function coachStructureConfidence(planText) {
   return /(?:E\s*跑|長跑|慢跑|節奏跑|間歇)\s*\d+(?:\.\d+)?\s*(?:km|公里)/i.test(text) ? 'inferred' : 'note-only';
 }
 
+// 教練菜單常把「0.8 km 熱身＋主課＋0.7 km 收操」寫成同一句。
+// 網頁已有獨立熱身／收操卡，Garmin 也應以時間控制這兩段；主課文字只保留
+// 實際跑步與快段，避免原地熱身被錯當成必須累積的距離。
+function coachPlanMainInstruction(planText) {
+  let text = String(planText || '').trim();
+  text = text.replace(/^總\s*\d+(?:\.\d+)?\s*(?:km|公里)\s*(?:[（(].*?[）)])?\s*[:：]\s*/i, '');
+  text = text.replace(/^\d+(?:\.\d+)?\s*(?:km|公里)\s*(?:暖|熱)身\s*[+＋]?\s*/i, '');
+  text = text.replace(/\s*[+＋]\s*\d+(?:\.\d+)?\s*(?:km|公里)\s*收操/g, '');
+  text = text.replace(/\s*[+＋]\s*肌力\s*[A-ZＡ-Ｚ]/gi, '');
+  return text.replace(/\s*[+＋]\s*/g, '＋').replace(/＋{2,}/g, '＋').replace(/^＋|＋$/g, '').trim() || '依教練指示完成主課。';
+}
+
 function coachWorkoutStructure(planText, day, suppliedSteps = []) {
   const explicit = normalizeCoachWorkoutSteps(suppliedSteps);
   if (explicit.length) return explicit;
@@ -2632,14 +2650,17 @@ function coachWorkoutStructure(planText, day, suppliedSteps = []) {
   const warmupMatch = text.match(/(?:前|熱身)\s*(\d+(?:\.\d+)?)\s*(?:km|公里)[^。；;]*熱身/i);
   const warmupKm = warmupMatch ? Number(warmupMatch[1]) : 0;
   const cooldownMatch = text.match(/(?:收操|收)\s*(\d+)\s*分(?:鐘)?/i);
+  const cooldownKmMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:km|公里)\s*收操/i);
+  const cooldownKm = cooldownKmMatch ? Number(cooldownKmMatch[1]) : 0;
+  const mainKm = Math.max(0.1, totalKm - warmupKm - cooldownKm);
   const structure = [];
-  if (warmupKm > 0) structure.push({ order: 1, kind: 'warmup', title: '熱身', end: workoutEndFromText(`${warmupKm} km`), target: '', detail: `前 ${warmupKm} km 放鬆熱身。` });
-  structure.push({ order: structure.length + 1, kind: /間歇|快段/.test(text) ? 'interval' : 'main', title: /間歇|快段/.test(text) ? '主課快段' : '主課', end: workoutEndFromText(`${Math.max(0.1, totalKm - warmupKm)} km`), target: [text.match(/\d{1,2}:\d{2}\s*[–-]?\s*\d{1,2}:\d{2}/)?.[0], text.match(/HR\s*[≤<] ?\d+/i)?.[0]].filter(Boolean).join(' · '), detail: text });
+  structure.push({ order: 1, kind: 'warmup', title: '熱身', end: workoutEndFromText('8 分'), target: '', detail: '動態活動與原地啟動，完成後再開始主跑。' });
+  structure.push({ order: structure.length + 1, kind: /間歇|快段/.test(text) ? 'interval' : 'main', title: /間歇|快段/.test(text) ? '主課快段' : '主課', end: workoutEndFromText(`${mainKm} km`), target: [text.match(/\d{1,2}:\d{2}\s*[–-]?\s*\d{1,2}:\d{2}/)?.[0], text.match(/HR\s*[≤<] ?\d+/i)?.[0]].filter(Boolean).join(' · '), detail: coachPlanMainInstruction(text) });
   const strides = text.match(/(?:ST\s*快步|加速跑)\s*(\d+)\s*[×xX]\s*(\d+)\s*秒/i);
   const recoveryMatch = text.match(/(?:組間|之間|恢復)[^。；;]*?(\d+)\s*秒/i);
   const recoverySeconds = recoveryMatch ? Number(recoveryMatch[1]) : 45;
   if (strides) structure.push({ order: structure.length + 1, kind: 'repeat', title: '加速跑組', repetitions: Number(strides[1]), children: [{ kind: 'interval', title: '快步', end: { type: 'time', value: Number(strides[2]), label: `${strides[2]} 秒` } }, { kind: 'recovery', title: '恢復', end: { type: 'time', value: recoverySeconds, label: `${recoverySeconds} 秒` } }], end: { type: 'reps', value: Number(strides[1]), label: `${strides[1]} 組` }, target: '', detail: `每趟之間走或慢跑 ${recoverySeconds} 秒恢復。` });
-  if (cooldownMatch) structure.push({ order: structure.length + 1, kind: 'cooldown', title: '收操', end: workoutEndFromText(`${cooldownMatch[1]} 分`), target: '', detail: '放慢、走跑並恢復呼吸。' });
+  structure.push({ order: structure.length + 1, kind: 'cooldown', title: '收操', end: workoutEndFromText(`${cooldownMatch?.[1] || 6} 分`), target: '', detail: '放慢、走跑並恢復呼吸。' });
   return structure;
 }
 
