@@ -469,16 +469,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-08-02",
-      "updated_at": "2026-07-28T11:01:43.551Z",
+      "updated_at": "2026-07-28T23:54:05.983Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "彰化縣",
-      "summary": "彰化縣縣市預報，多雲，24-29°C，降雨機率 64%，最大風速 8 km/h",
-      "weather_code": 3,
-      "temperature_min_c": 24.4,
-      "temperature_max_c": 28.8,
-      "precipitation_probability_max": 64,
-      "wind_speed_max_kmh": 8.1
+      "summary": "彰化縣縣市預報，雷雨，24-30°C，降雨機率 65%，最大風速 9 km/h",
+      "weather_code": 95,
+      "temperature_min_c": 24.2,
+      "temperature_max_c": 30.4,
+      "precipitation_probability_max": 65,
+      "wind_speed_max_kmh": 9
     }
   },
   {
