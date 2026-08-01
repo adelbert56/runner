@@ -110,11 +110,11 @@ const trainerReviewSample = {
     laps: [
       { index: 1, intensity: "WARMUP", distance_km: 0.26, duration_min: 2.95, pace_per_km: "11:43" },
       { index: 2, intensity: "MAIN", distance_km: 1, duration_min: 7.4, pace_per_km: "7:24" },
-      { index: 3, intensity: "MAIN", distance_km: 1, duration_min: 7.98, pace_per_km: "7:59" },
-      { index: 4, intensity: "MAIN", distance_km: 1, duration_min: 7.88, pace_per_km: "7:53" },
-      { index: 5, intensity: "MAIN", distance_km: 1, duration_min: 7.75, pace_per_km: "7:45" },
-      { index: 6, intensity: "MAIN", distance_km: 1, duration_min: 7.67, pace_per_km: "7:40" },
-      { index: 7, intensity: "MAIN", distance_km: 1, duration_min: 8.43, pace_per_km: "8:26" },
+      { index: 3, intensity: "MAIN", distance_km: 1, duration_min: 7.98, pace_per_km: "7:59", avg_cadence: 160, avg_hr: 150 },
+      { index: 4, intensity: "MAIN", distance_km: 1, duration_min: 7.88, pace_per_km: "7:53", avg_cadence: 160, avg_hr: 150 },
+      { index: 5, intensity: "MAIN", distance_km: 1, duration_min: 7.75, pace_per_km: "7:45", avg_cadence: 160, avg_hr: 150 },
+      { index: 6, intensity: "MAIN", distance_km: 1, duration_min: 7.67, pace_per_km: "7:40", avg_cadence: 160, avg_hr: 150 },
+      { index: 7, intensity: "MAIN", distance_km: 1, duration_min: 8.43, pace_per_km: "8:26", avg_cadence: 160, avg_hr: 150 },
       { index: 8, intensity: "ACTIVE", distance_km: 0.05, duration_min: 0.35, pace_per_km: "6:59" },
       { index: 9, intensity: "RECOVERY", distance_km: 0.08, duration_min: 0.76, pace_per_km: "9:30" },
       { index: 10, intensity: "ACTIVE", distance_km: 0.06, duration_min: 0.35, pace_per_km: "5:58" },
@@ -920,10 +920,11 @@ async function assertTrainerReport(page, viewportName) {
     filterLabels: [...element.querySelectorAll(".session-lap-filter")].map((button) => button.textContent.trim()),
     lapHeader: element.querySelector(".session-lap-head .col-segment")?.textContent.trim(),
     mainLapLabels: [...element.querySelectorAll(".session-lap-list .col-segment")].map((label) => label.textContent.trim()),
+    lapTotal: element.querySelector(".session-lap-total")?.textContent.replace(/\s+/g, " ").trim(),
     hasAmbiguousActiveLabel: element.textContent.includes("活動段"),
     hasInvalidNumber: element.textContent.includes("NaN"),
   }));
-  if (!report.hasPlanComparison || !report.hasNextAction || !report.hasLapFilter || !/^主課\s+6$/.test(report.activeFilterText || "") || report.visibleLapCount !== 6 || report.lapHeader !== "公里段" || report.mainLapLabels[0] !== "0–1K" || report.mainLapLabels.at(-1) !== "5–6K" || !report.filterLabels.some((label) => /^間歇快段\s+3$/.test(label)) || !report.filterLabels.some((label) => /^間歇恢復\s+3$/.test(label)) || report.hasAmbiguousActiveLabel || report.hasInvalidNumber) {
+  if (!report.hasPlanComparison || !report.hasNextAction || !report.hasLapFilter || !/^主課\s+6$/.test(report.activeFilterText || "") || report.visibleLapCount !== 6 || report.lapHeader !== "公里段" || report.mainLapLabels[0] !== "0–1K" || report.mainLapLabels.at(-1) !== "5–6K" || !/主課合計 總距離 6\.00 km 平均配速 7:51\/km 平均步頻 160 spm 平均心率 HR 150/.test(report.lapTotal || "") || !report.filterLabels.some((label) => /^間歇快段\s+3$/.test(label)) || !report.filterLabels.some((label) => /^間歇恢復\s+3$/.test(label)) || report.hasAmbiguousActiveLabel || report.hasInvalidNumber) {
     throw new Error(`${viewportName}/trainer-report: product hierarchy or neutral lap labels are missing ${JSON.stringify(report)}`);
   }
   await page.screenshot({

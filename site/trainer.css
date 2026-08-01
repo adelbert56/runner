@@ -657,6 +657,11 @@
     .session-lap-list { display:flex; flex-direction:column; }
     .session-lap { padding-block:10px; font-size:12px; font-variant-numeric:tabular-nums; border-top:1px solid rgba(31,42,36,.06); transition:background .15s; }
     .session-lap-list .session-lap:first-child { border-top:none; }
+    .session-lap-total { display:flex; align-items:center; gap:16px; padding:12px 14px; border-top:1px solid rgba(31,42,36,.11); background:var(--c-surface2); color:var(--c-text-muted); font-size:11px; }
+    .session-lap-total > strong { flex:0 0 auto; color:var(--c-text); font-size:12px; font-weight:900; }
+    .session-lap-total-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); flex:1; gap:12px; }
+    .session-lap-total-metrics span { white-space:nowrap; }
+    .session-lap-total-metrics b { color:var(--c-text); font-weight:900; }
     .session-lap:hover { background:#fbfcfa; }
     .session-lap.main { background:linear-gradient(90deg,rgba(36,114,79,.05),transparent 60%); }
     .col-segment { text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1477,6 +1482,8 @@
       .session-lap { font-size:11px; padding-block:8px; }
       .session-lap-head { padding-block:7px; font-size:9px; }
       .session-lap .col-cadence, .session-lap .col-hr, .session-lap-head .col-cadence, .session-lap-head .col-hr { display:none; }
+      .session-lap-total { display:block; padding:12px 10px; }
+      .session-lap-total-metrics { grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:8px; }
       .session-speed-legend b { display:none; }
     }
     @media (max-width: 720px) {
