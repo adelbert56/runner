@@ -650,7 +650,7 @@
     .session-breakdown-card { min-width:0; padding:18px 19px; border:1px solid rgba(31,42,36,.09); border-radius: var(--radius-xl); background:var(--c-surface); box-shadow:0 10px 22px rgba(31,42,36,.05); }
     .session-breakdown-title { margin:0; font-size:15px; font-weight:900; }
     .session-breakdown-copy { margin:4px 0 12px; color:var(--c-text-muted); font-size:12px; line-height:1.55; }
-    .session-lap-table { --seg-cols: 58px minmax(140px,1fr) 62px 62px 62px 68px; --seg-gap: 10px; --seg-pad-inline: 14px; border:1px solid rgba(31,42,36,.08); border-radius: var(--radius-l); background:#fff; overflow:hidden; }
+    .session-lap-table { --seg-cols: 86px minmax(140px,1fr) 62px 62px 62px 68px; --seg-gap: 10px; --seg-pad-inline: 14px; border:1px solid rgba(31,42,36,.08); border-radius: var(--radius-l); background:#fff; overflow:hidden; }
     .session-lap-head, .session-lap { display:grid; grid-template-columns: var(--seg-cols); column-gap: var(--seg-gap); align-items:center; padding-inline: var(--seg-pad-inline); min-width:0; }
     .session-lap-head > *, .session-lap > * { min-width:0; }
     .session-lap-head { padding-block:9px; background:#f4f7f3; color:var(--c-text-muted); font-size:10px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
@@ -1473,9 +1473,10 @@
       .session-report-head { display:block; }
       .session-report-status { display:inline-block; margin-top:10px; }
       .session-report-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
-      .session-lap-table { --seg-cols: 44px minmax(45px,1fr) 40px 46px 42px 48px; --seg-gap: 5px; --seg-pad-inline: 10px; }
+      .session-lap-table { --seg-cols: 62px minmax(45px,1fr) 40px 46px; --seg-gap: 5px; --seg-pad-inline: 10px; }
       .session-lap { font-size:11px; padding-block:8px; }
       .session-lap-head { padding-block:7px; font-size:9px; }
+      .session-lap .col-cadence, .session-lap .col-hr, .session-lap-head .col-cadence, .session-lap-head .col-hr { display:none; }
       .session-speed-legend b { display:none; }
     }
     @media (max-width: 720px) {

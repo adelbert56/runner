@@ -114,6 +114,17 @@ function sessionLapLabel(lap, index, hasStructuredMain, isIntervalBlock = false)
   return hasStructuredMain ? sessionIntensityLabel(lap?.intensity, index, isIntervalBlock) : `計圈 ${index}`;
 }
 
+function formatLapDistanceKm(distanceKm) {
+  const rounded = Math.round(Math.max(0, Number(distanceKm) || 0) * 100) / 100;
+  return String(rounded).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+}
+
+function sessionLapDistanceRangeLabel(laps, index) {
+  const startKm = laps.slice(0, index).reduce((sum, lap) => sum + (Number(lap?.distance_km) || 0), 0);
+  const endKm = startKm + (Number(laps[index]?.distance_km) || 0);
+  return `${formatLapDistanceKm(startKm)}–${formatLapDistanceKm(endKm)}K`;
+}
+
 function sessionIntensityClass(intensity) {
   const value = String(intensity || '').toUpperCase();
   if (['MAIN', 'ACTIVE', 'INTERVAL'].includes(value)) return 'main';

@@ -918,10 +918,12 @@ async function assertTrainerReport(page, viewportName) {
     activeFilterText: element.querySelector(".session-lap-filter.active")?.textContent.trim(),
     visibleLapCount: element.querySelectorAll(".session-lap-list .session-lap").length,
     filterLabels: [...element.querySelectorAll(".session-lap-filter")].map((button) => button.textContent.trim()),
+    lapHeader: element.querySelector(".session-lap-head .col-segment")?.textContent.trim(),
+    mainLapLabels: [...element.querySelectorAll(".session-lap-list .col-segment")].map((label) => label.textContent.trim()),
     hasAmbiguousActiveLabel: element.textContent.includes("活動段"),
     hasInvalidNumber: element.textContent.includes("NaN"),
   }));
-  if (!report.hasPlanComparison || !report.hasNextAction || !report.hasLapFilter || !/^主課\s+6$/.test(report.activeFilterText || "") || report.visibleLapCount !== 6 || !report.filterLabels.some((label) => /^間歇快段\s+3$/.test(label)) || !report.filterLabels.some((label) => /^間歇恢復\s+3$/.test(label)) || report.hasAmbiguousActiveLabel || report.hasInvalidNumber) {
+  if (!report.hasPlanComparison || !report.hasNextAction || !report.hasLapFilter || !/^主課\s+6$/.test(report.activeFilterText || "") || report.visibleLapCount !== 6 || report.lapHeader !== "公里段" || report.mainLapLabels[0] !== "0–1K" || report.mainLapLabels.at(-1) !== "5–6K" || !report.filterLabels.some((label) => /^間歇快段\s+3$/.test(label)) || !report.filterLabels.some((label) => /^間歇恢復\s+3$/.test(label)) || report.hasAmbiguousActiveLabel || report.hasInvalidNumber) {
     throw new Error(`${viewportName}/trainer-report: product hierarchy or neutral lap labels are missing ${JSON.stringify(report)}`);
   }
   await page.screenshot({
