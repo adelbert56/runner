@@ -2668,18 +2668,38 @@ function workoutStructureForDay(day) {
   });
 }
 
-function normalizeCoachWorkoutSteps(steps) {
+function normalizeCoachWorkoutSteps(steps, day) {
   if (!Array.isArray(steps)) return [];
+  const courseDay = day || {};
+  // 舊版手寫處方曾把 0.8 km 熱身／0.7 km 收操直接放進 Garmin 結構，
+  // 使主跑距離被錯誤預扣。熱身與收操可以原地完成，固定轉成時間步驟；
+  // 若是這種舊格式的輕鬆／長跑，day.km 才是實際主跑目標。
+  const hasDistanceBasedPrep = steps.some((step) => ['warmup', 'cooldown'].includes(step?.kind) && step?.end?.type === 'distance');
+  const prepEnd = (step, fallbackMinutes) => {
+    const minutes = String(step?.detail || step?.end?.label || '').match(/(\d+(?:\.\d+)?)\s*分/);
+    const value = Math.round(Number(minutes?.[1] || fallbackMinutes) * 60);
+    return { type: 'time', value, label: `${value / 60} 分` };
+  };
   return steps.filter((step) => step && ['warmup', 'main', 'interval', 'recovery', 'cooldown', 'repeat'].includes(step.kind) && step.end)
-    .slice(0, 12).map((step, index) => ({
-      order: index + 1,
-      kind: step.kind,
-      title: String(step.title || '').slice(0, 60) || ({ warmup: '熱身', main: '主課', interval: '快段', recovery: '恢復', cooldown: '收操', repeat: '重複組' }[step.kind]),
-      end: { type: ['distance', 'time', 'reps', 'open'].includes(step.end.type) ? step.end.type : 'open', value: Math.max(0, Number(step.end.value) || 0), label: String(step.end.label || '').slice(0, 40) || '依體感' },
-      target: String(step.target || '').slice(0, 120), detail: String(step.detail || '').slice(0, 240),
-      repetitions: Math.max(0, Number(step.repetitions) || 0),
-      children: normalizeCoachWorkoutSteps(step.children)
-    }));
+    .slice(0, 12).map((step, index) => {
+      const kind = step.kind;
+      const isPrep = ['warmup', 'cooldown'].includes(kind);
+      const isLegacyEasyOrLongMain = hasDistanceBasedPrep && kind === 'main' && ['easy', 'long'].includes(courseDay.type) && Number(courseDay.km) > 0;
+      const end = isPrep
+        ? prepEnd(step, kind === 'warmup' ? 8 : 6)
+        : isLegacyEasyOrLongMain
+          ? { type: 'distance', value: Math.round(Number(courseDay.km) * 1000), label: `${Number(courseDay.km)} km` }
+          : { type: ['distance', 'time', 'reps', 'open'].includes(step.end.type) ? step.end.type : 'open', value: Math.max(0, Number(step.end.value) || 0), label: String(step.end.label || '').slice(0, 40) || '依體感' };
+      return {
+        order: index + 1,
+        kind,
+        title: String(step.title || '').slice(0, 60) || ({ warmup: '熱身', main: '主課', interval: '快段', recovery: '恢復', cooldown: '收操', repeat: '重複組' }[kind]),
+        end,
+        target: String(step.target || '').slice(0, 120), detail: String(step.detail || '').slice(0, 240),
+        repetitions: Math.max(0, Number(step.repetitions) || 0),
+        children: normalizeCoachWorkoutSteps(step.children)
+      };
+    });
 }
 
 function coachStructureConfidence(planText) {
@@ -2700,7 +2720,7 @@ function coachPlanMainInstruction(planText) {
 }
 
 function coachWorkoutStructure(planText, day, suppliedSteps = []) {
-  const explicit = normalizeCoachWorkoutSteps(suppliedSteps);
+  const explicit = normalizeCoachWorkoutSteps(suppliedSteps, day);
   if (explicit.length) return explicit;
   if (coachStructureConfidence(planText) === 'note-only') return [];
   const text = String(planText || '');

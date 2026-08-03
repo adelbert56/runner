@@ -198,6 +198,11 @@ function safetyGuard(day, ctx) {
   return null;
 }
 
+function coachPrescribedKm(day, entry) {
+  const prescribedKm = Number(entry?.totalKm);
+  return Number.isFinite(prescribedKm) && prescribedKm > 0 ? prescribedKm : (Number(day?.km) || 0);
+}
+
 function coachPrescription(day, ctx, week) {
   // 已報名賽事、賽前減壓與賽後恢復是硬約束；教練週處方只能安排其餘訓練日，
   // 不能把以賽代訓重新蓋成一般跑課。
@@ -205,7 +210,10 @@ function coachPrescription(day, ctx, week) {
   const coachDays = coachDaysForWeek(week);
   const entry = coachDays.find((item) => item.scheduledDow === day.dow);
   if (!entry) return null;
-  const scheduledKm = Number(day.km) || 0;
+  // 已確認的教練菜單擁有距離真相；不能讓週期產生器殘留的 day.km
+  // 覆蓋它，否則同一張卡會同時出現 13 與 14 km。
+  const scheduledKm = coachPrescribedKm(day, entry);
+  const prescribedDay = scheduledKm > 0 ? { ...day, km: scheduledKm } : day;
   const headline = coachPlanHeadline(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${scheduledKm} km`);
   const mainInstruction = coachPlanMainInstruction(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${scheduledKm} km`);
   const steps = (day.steps || []).map((step) => step.title === '主課'
@@ -215,12 +223,12 @@ function coachPrescription(day, ctx, week) {
   return {
     type: 'replace',
     course: {
-      ...day,
+      ...prescribedDay,
       task: headline,
       pace: '',
       hrTarget: '',
       steps,
-      workoutStructure: coachWorkoutStructure(entry.plan, day, suppliedSteps),
+      workoutStructure: coachWorkoutStructure(entry.plan, prescribedDay, suppliedSteps),
       workoutStructureConfidence: suppliedSteps.length ? 'coach' : coachStructureConfidence(entry.plan),
       coachPlan: true
     },

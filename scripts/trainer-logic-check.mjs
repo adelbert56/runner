@@ -31,11 +31,12 @@ function extractFunction(source, name) {
   throw new Error(`unbalanced braces for function ${name}`);
 }
 
-const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs] = await Promise.all([
+const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerCoachEngineJs] = await Promise.all([
   readFile(resolve(root, "site/trainer.js"), "utf8"),
   readFile(resolve(root, "site/trainer-copy.js"), "utf8"),
   readFile(resolve(root, "site/trainer-plan.js"), "utf8"),
   readFile(resolve(root, "site/trainer-render.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-coach-engine.js"), "utf8"),
 ]);
 
 const sandbox = { TRAINING_TYPE_LABELS: { easy: "輕鬆跑", tempo: "節奏跑", interval: "間歇跑", long: "長跑" } };
@@ -59,8 +60,13 @@ const { buildGarminWorkoutStructure } = structureSandbox;
 
 const coachCopySandbox = {};
 vm.createContext(coachCopySandbox);
-vm.runInContext(extractFunction(trainerRenderJs, "coachPlanMainInstruction"), coachCopySandbox);
-const { coachPlanMainInstruction } = coachCopySandbox;
+vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), extractFunction(trainerRenderJs, "normalizeCoachWorkoutSteps")].join("\n\n"), coachCopySandbox);
+const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbox;
+
+const coachEngineSandbox = {};
+vm.createContext(coachEngineSandbox);
+vm.runInContext(extractFunction(trainerCoachEngineJs, "coachPrescribedKm"), coachEngineSandbox);
+const { coachPrescribedKm } = coachEngineSandbox;
 
 // secToPace
 assertEqual(secToPace(330), "5:30", "secToPace formats whole minutes:seconds");
@@ -115,6 +121,16 @@ assertEqual(fartlekStructure[1]?.children?.[0]?.end?.value, 180, "fartlek fast s
 assertEqual(fartlekStructure[1]?.children?.[1]?.end?.value, 120, "fartlek recovery segments use Garmin time steps");
 assertEqual(coachPlanMainInstruction('總 5.5 km（含 ST）：0.8 km 熱身＋E 主課約 3.6 km＋ST 快步 4×20 秒＋0.7 km 收操＋肌力 B。'), 'E 主課約 3.6 km＋ST 快步 4×20 秒。', "coach main-card copy excludes warmup and cooldown distance");
 assertEqual(coachPlanHeadline('總 5.5 km（含 ST）：0.8 km 熱身＋E 主課約 3.6 km＋ST 快步 4×20 秒。'), '輕鬆跑', "coach heading keeps the easy-run title when the prescription uses E main-work notation");
+const repairedLegacyCoachStructure = normalizeCoachWorkoutSteps([
+  { kind: 'warmup', title: '熱身', end: { type: 'distance', value: 800, label: '0.8 km' } },
+  { kind: 'main', title: '主課', end: { type: 'distance', value: 4500, label: '4.5 km' } },
+  { kind: 'cooldown', title: '收操', end: { type: 'distance', value: 700, label: '0.7 km' } },
+], { type: 'easy', km: 5.5 });
+assertEqual(repairedLegacyCoachStructure[0]?.end?.type, 'time', "legacy coach warmup becomes a time step instead of a distance requirement");
+assertEqual(repairedLegacyCoachStructure[1]?.end?.value, 5500, "legacy easy-run main distance remains the planned 5.5 km");
+assertEqual(repairedLegacyCoachStructure[2]?.end?.type, 'time', "legacy coach cooldown becomes a time step instead of a distance requirement");
+assertEqual(coachPrescribedKm({ km: 14 }, { totalKm: 13 }), 13, "confirmed coach totalKm overrides the generator's stale day distance");
+assertEqual(coachPrescribedKm({ km: 14 }, {}), 14, "coach distance falls back to the generated day only when no confirmed total exists");
 
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);
