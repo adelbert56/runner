@@ -10,9 +10,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-08-01",
+      "next_check_date": "2026-08-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 213 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 208 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -31,7 +31,7 @@
     }
   },
   {
-    "race_id": "ae950f0a-2995-4ae4-b7af-6d20fb12950a",
+    "race_id": "517a0614-bb77-4049-b7e1-f2c23f942e58",
     "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
     "race_date": "2027-03-28",
     "race_county": "臺中市",
@@ -39,11 +39,11 @@
     "is_official_direct": false,
     "priority_score": 14,
     "tracking": {
-      "status": "wait_future",
-      "status_label": "未來再查",
-      "next_check_date": "2026-09-28",
-      "cadence": "future",
-      "reason": "距離賽事 241 天，先排到賽前約 180 天再追。"
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-08-15",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 236 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -74,7 +74,7 @@
       "status_label": "未來再查",
       "next_check_date": "2027-06-07",
       "cadence": "future",
-      "reason": "距離賽事 493 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 488 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       "official_registration_link",
@@ -93,7 +93,7 @@
     }
   },
   {
-    "race_id": "0ac399b9-bda3-4ec5-9bbf-3cf14cc6b50c",
+    "race_id": "a061279e-c547-4415-9b3b-591488986300",
     "race_name": "2026 國聚慵懶跑者聚樂部",
     "race_date": "2026-11-15",
     "race_county": "臺中市",
@@ -103,9 +103,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "weekly",
-      "reason": "距離賽事 108 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 103 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       "registration_opens_at",
@@ -133,9 +133,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-08-01",
+      "next_check_date": "2026-08-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 136 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 131 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "registration_opens_at",
@@ -192,7 +192,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：開報時間、報名截止時間。除非要補歷史資料，優先度較低。"
     },
@@ -217,11 +217,11 @@
     "is_official_direct": false,
     "priority_score": 5,
     "tracking": {
-      "status": "wait_until_open_window",
-      "status_label": "等待開報當天",
-      "next_check_date": "2026-07-30",
-      "cadence": "on_open_date",
-      "reason": "已知開報日 2026-07-30，尚有 1 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-08-04",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結。"
     },
     "missing": [
       "official_registration_link"
@@ -245,9 +245,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "weekly",
-      "reason": "距離賽事 100 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 95 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       "registration_opens_at",
@@ -272,7 +272,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：各距離開跑時間、費用、名額。"
     },
@@ -300,7 +300,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：各距離開跑時間、費用。保留供歷史資料補齊。"
     },
@@ -327,7 +327,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：各距離開跑時間、費用。"
     },
@@ -354,7 +354,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：各距離開跑時間。保留供歷史資料補齊。"
     },
@@ -380,7 +380,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：各距離開跑時間。保留供歷史資料補齊。"
     },
@@ -406,7 +406,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -432,7 +432,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -458,7 +458,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -482,11 +482,11 @@
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
-      "status": "monitor_weekly",
-      "status_label": "每週追蹤",
-      "next_check_date": "2026-07-30",
-      "cadence": "biweekly",
-      "reason": "開報日已過，仍缺：費用。"
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-08-04",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：費用。保留供歷史資料補齊。"
     },
     "missing": [
       "fees"
@@ -510,7 +510,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-07-30",
+      "next_check_date": "2026-08-04",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -535,10 +535,10 @@
     "priority_score": 1,
     "tracking": {
       "status": "wait_until_open_window",
-      "status_label": "等待接近開報",
-      "next_check_date": "2026-08-02",
-      "cadence": "weekly_near_open",
-      "reason": "已知開報日 2026-08-16，開報前 14 天再開始追蹤。"
+      "status_label": "等待開報當天",
+      "next_check_date": "2026-08-16",
+      "cadence": "on_open_date",
+      "reason": "已知開報日 2026-08-16，尚有 13 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
     },
     "missing": [
       "quota"
@@ -549,30 +549,6 @@
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13069&subtitle=2027%E5%8D%97%E6%8A%95%E7%B8%A3%E4%BB%81%E6%84%9B%E9%84%89%E5%8E%9F%E4%BD%8F%E6%B0%91%E4%B8%89%E9%90%B5%E6%8C%91%E6%88%B0%E8%B3%BD",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13069",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2027%E5%8D%97%E6%8A%95%E7%B8%A3%E4%BB%81%E6%84%9B%E9%84%89%E5%8E%9F%E4%BD%8F%E6%B0%91%E4%B8%89%E9%90%B5%E6%8C%91%E6%88%B0%E8%B3%BD"
-    }
-  },
-  {
-    "race_id": "b2b5756c-ca1a-4350-955e-c511e7c4cfa2",
-    "race_name": "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
-    "race_date": "2026-08-02",
-    "race_county": "彰化縣",
-    "source_platform": "iRunner、運動筆記",
-    "is_official_direct": true,
-    "priority_score": 0,
-    "tracking": {
-      "status": "pre_race_recheck",
-      "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-07-30",
-      "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 3 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
-    },
-    "missing": [],
-    "current_links": {
-      "registration_link": "https://irunner.biji.co/RunForDAD2026/signup",
-      "official_event_url": "https://irunner.biji.co/RunForDAD2026",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12978&subtitle=2026+Run+For+Dad+%E7%88%B8%E8%B6%A3%E8%BF%B7%E4%BD%A0%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%81%8B%E5%8B%95i%E8%87%BA%E7%81%A32.0",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12978",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20Run%20For%20Dad%20%E7%88%B8%E8%B6%A3%E8%BF%B7%E4%BD%A0%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%81%8B%E5%8B%95i%E8%87%BA%E7%81%A32.0"
     }
   }
 ]
