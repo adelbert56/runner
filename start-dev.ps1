@@ -45,55 +45,6 @@ function Invoke-OptionalStep {
     }
 }
 
-function Test-PublicDataDirty {
-    $paths = @(
-        "site/data/announcements.json",
-        "site/data/automation-health.json",
-        "site/data/content.json",
-        "site/data/message-cloud.json",
-        "site/data/races.json",
-        "site/data/runner-quips.json"
-    )
-    $status = & git status --porcelain -- $paths 2>$null
-    if ($LASTEXITCODE -ne 0) {
-        return $false
-    }
-    return -not [string]::IsNullOrWhiteSpace(($status -join "`n"))
-}
-
-function Test-PublicDataMatchesOriginMain {
-    $paths = @(
-        "site/data/announcements.json",
-        "site/data/automation-health.json",
-        "site/data/content.json",
-        "site/data/message-cloud.json",
-        "site/data/races.json",
-        "site/data/runner-quips.json"
-    )
-
-    foreach ($path in $paths) {
-        $localPath = Join-Path $root $path
-        if (-not (Test-Path -LiteralPath $localPath)) {
-            return $false
-        }
-
-        # Compare blob hashes: string comparison of `git show` output loses
-        # the trailing newline (PowerShell splits output into lines), which
-        # made this check fail even when the files were identical.
-        $remoteHash = & git rev-parse "origin/main:$path" 2>$null
-        if ($LASTEXITCODE -ne 0) {
-            return $false
-        }
-
-        $localHash = & git hash-object -- $localPath 2>$null
-        if ($LASTEXITCODE -ne 0 -or $localHash -ne $remoteHash) {
-            return $false
-        }
-    }
-
-    return $true
-}
-
 function Test-CleanGitTree {
     $status = & git status --short 2>$null
     if ($LASTEXITCODE -ne 0) {
@@ -123,17 +74,9 @@ if (Get-Command git -ErrorAction SilentlyContinue) {
             Write-Warning "Working tree is not clean; skipping full git pull, but public site data will still sync from origin/main."
         }
 
-        # Never overwrite an unpublished site-data edit. When no local data is
-        # dirty, site-sync is the authoritative refresh path and must run
-        # before comparing with origin/main (it also refreshes the remote ref).
-        if (Test-PublicDataDirty) {
-            Write-Warning "Local site/data/*.json has uncommitted changes; skipping remote refresh and starting with the current local files."
-        } else {
-            Invoke-OptionalStep -Label "site-sync" -Command @("npm", "run", "site:sync:remote")
-            if (-not (Test-PublicDataMatchesOriginMain)) {
-                Write-Warning "Public site data could not be refreshed from origin/main; starting with the current local files."
-            }
-        }
+        # The synchronizer keeps genuinely unpublished/newer local data, but
+        # safely replaces stale generated data from origin/main after backing it up.
+        Invoke-OptionalStep -Label "site-sync" -Command @("npm", "run", "site:sync:remote")
     }
 } else {
     Write-Warning "git is not available; skipping public site data sync."

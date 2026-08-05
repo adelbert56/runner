@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { todayInTaipei } from "./lib/time.mjs";
+import { normalizeContentUrl } from "./lib/content-url.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const candidatesPath = resolve(root, "runner/內容/候選內容.json");
@@ -52,14 +53,7 @@ const SHOE_LAUNCH_SIGNAL = /上市|登場|推出|發表|正式開賣|首發|rele
 const SHOE_LISTICLE_SIGNAL = /these \d+|the \d+ best|best .*running shoes|running shoes for|our favorite new running shoes|shoe awards|shoe preview|top picks/i;
 
 function normalizeUrl(url) {
-  try {
-    const parsed = new URL(url);
-    parsed.hash = "";
-    parsed.search = "";
-    return parsed.toString().replace(/\/$/, "");
-  } catch {
-    return String(url || "").replace(/[?#].*$/, "").replace(/\/$/, "");
-  }
+  return normalizeContentUrl(url);
 }
 
 function slugify(value) {
