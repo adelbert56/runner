@@ -1769,13 +1769,19 @@ function renderRaceCard(race) {
   const startTimes = formatStartTimes(race, "");
   const weather = weatherSummaryForRace(race);
   const organizer = race.organizer || race.host || race.organizer_name || "";
+  const coOrganizer = race.co_organizer || race.coorganizer || "";
+  const fees = race.fees || race.registration_fee || "";
+  const quota = race.quota || race.registration_quota || "";
   const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
   const disappeared = Boolean(race.disappeared_at);
   const factItems = [
     venue ? { label: "地點", value: venue, action: mapLink ? { href: mapLink, label: "導航" } : null } : null,
     startTimes ? { label: "開跑", value: startTimes } : null,
+    fees ? { label: "費用", value: fees } : null,
+    quota ? { label: "名額", value: quota } : null,
     weather ? { label: "天氣", value: weather } : null,
     organizer ? { label: "主辦", value: organizer } : null,
+    coOrganizer ? { label: "協辦", value: coOrganizer } : null,
   ].filter(Boolean);
   const sourcePlatform = race.source_platform || race.source || "";
   const trustItems = [
@@ -1822,25 +1828,8 @@ function renderRaceCard(race) {
         ${datesNeedCheck ? `<p class="race-data-warning">報名起訖日期邏輯待查證</p>` : ""}
         ${disappeared ? `<p class="race-data-warning race-disappeared-warning">⚠ 此賽事近期從資料來源消失，請自行確認是否仍舉辦</p>` : ""}
         <div class="race-insight">${escapeHtml(decision)}</div>
-        ${
-          factItems.length || trustItems.length
-            ? `<details class="race-detail-panel">
-                <summary>賽事資訊</summary>
-                <div class="race-trust-line" aria-label="資料可信度">
-                  ${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}
-                </div>
-                ${
-                  factItems.length
-                    ? `
-                <dl>
-                  ${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : escapeHtml(item.value)}</dd></div>`).join("")}
-                </dl>
-                    `
-                    : ""
-                }
-              </details>`
-            : ""
-        }
+        ${trustItems.length ? `<div class="race-trust-line" aria-label="資料可信度">${trustItems.map(([label, type]) => `<span class="trust-pill ${escapeHtml(type)}">${escapeHtml(label)}</span>`).join("")}</div>` : ""}
+        ${factItems.length ? `<details class="race-fact-details"><summary>查看地點、開跑、費用與名額</summary><dl class="race-fact-grid" aria-label="賽事完整資訊">${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt>${escapeHtml(item.label)}${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : escapeHtml(item.value)}</dd></div>`).join("")}</dl></details>` : ""}
       </div>
       <div class="race-actions">
         <div class="primary-action-row">
@@ -3673,6 +3662,7 @@ function contentArticleHtml(item) {
   const sourceText = item.source ? `${item.source} 來源` : "閱讀來源";
   const sourceOrigin = item.source_origin || "candidate";
   const originLabel = contentOriginLabel(sourceOrigin, item.published_at, item.date, item.date_source);
+  const decisionLabel = type === "shoe" ? "跑鞋定位" : "給跑者的重點";
   return `
     <article ${attr} data-auto-content="true" data-content-id="${escapeHtml(item.id || item.url || item.title)}" data-date="${escapeHtml(item.date || TODAY)}" data-published-at="${escapeHtml(item.published_at || item.date || TODAY)}" data-category="${escapeHtml(category)}" data-title="${escapeHtml(item.title)}" data-source-origin="${escapeHtml(sourceOrigin)}" data-source-date="${escapeHtml(item.date || item.published_at || TODAY)}">
       <time datetime="${escapeHtml(item.date || TODAY)}">${escapeHtml(formatContentDate(item.date))}</time>
@@ -3681,7 +3671,7 @@ function contentArticleHtml(item) {
         <span class="content-origin-tag" data-origin="${escapeHtml(sourceOrigin)}">${escapeHtml(originLabel)}</span>
       </div>
       <h3>${escapeHtml(item.title)}</h3>
-      <p>${escapeHtml(item.summary)}</p>
+      <p class="content-decision"><span>${decisionLabel}</span>${escapeHtml(item.summary)}</p>
       <a class="sub-link" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(sourceText)}</a>
     </article>
   `;

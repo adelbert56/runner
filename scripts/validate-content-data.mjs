@@ -13,6 +13,8 @@ const MIN_COUNTS = {
   shoe: 10,
   news: 10,
 };
+const NON_RUNNING_NEWS_SIGNAL = /籃球|籃球鞋|basketball|NBA|夏季聯賽|summer league|足球|足球鞋|網球|網球鞋|簽名鞋|signature shoe|Air Force|Jordan|Dunk|Air Max|Sabrina|Book\s*\d|GELBURST|Hali\s*\d|Anthony Edwards|Donovan Mitchell|Giannis|Freak\s*\d|LeBron|KD\s*\d|Foamposite|G\.T\.\s*Cut|S\.T\.\s*Charge|D\.O\.N\.?\s*Issue|男裝週|fashion week|休閒鞋|lifestyle|sportstyle/i;
+const RUNNING_NEWS_CONTEXT_SIGNAL = /跑步|路跑|慢跑|馬拉松|半馬|越野跑|越野賽|跑者|跑鞋|running|runner|marathon|trail running/i;
 
 function hasText(value) {
   return value !== undefined && value !== null && String(value).trim() !== "";
@@ -78,8 +80,11 @@ function itemIssues(item, index, seenUrls) {
   if (item.type === "shoe" && /prime day|sale|deal|discount|training plan|return-to-running|sports bras?|Shokz|Garmin|running gear|balance board|playlist|watch|襪|socks?|hyrox|綜合訓練鞋|旗艦店|開幕|store opening|flagship/i.test(`${item.title} ${summary}`)) {
     issues.push({ severity: "high", label, issue: "跑鞋卡混入特價文、訓練計畫或配件內容" });
   }
-  if (item.type === "news" && /籃球|籃球鞋|basketball|NBA|夏季聯賽|summer league|足球|足球鞋|網球|網球鞋|簽名鞋|signature shoe|Air Force|Jordan|Dunk|Air Max|Sabrina|Book\s*\d|GELBURST|Hali\s*\d|Anthony Edwards|男裝週|fashion week|休閒鞋|lifestyle|sportstyle/i.test(`${item.title} ${summary} ${item.category}`)) {
+  if (item.type === "news" && NON_RUNNING_NEWS_SIGNAL.test(`${item.title} ${summary} ${item.category}`)) {
     issues.push({ severity: "high", label, issue: "新聞卡混入非跑步內容" });
+  }
+  if (item.type === "news" && !RUNNING_NEWS_CONTEXT_SIGNAL.test(`${item.title} ${summary} ${item.category}`)) {
+    issues.push({ severity: "high", label, issue: "新聞卡缺少跑步脈絡" });
   }
   if (item.type === "news" && /跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點/.test(summary)) {
     issues.push({ severity: "high", label, issue: "新聞卡仍使用泛用摘要" });

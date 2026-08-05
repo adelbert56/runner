@@ -41,10 +41,11 @@ const ENGLISH_SOURCE_PATTERNS = [/Runner's World/i, /runnersworld\.com/i, /Tom's
 const SHOE_ONLY_SIGNAL = /跑鞋|慢跑鞋|訓練鞋|競速鞋|碳板|厚底|緩震|支撐|越野跑鞋|trail shoe|daily trainer|super trainer|racing shoe|running shoe|marathon shoe|tempo shoe|shoe review|鞋評|開箱|實著|中底|大底|鞋面|回彈|穩定型|shoe awards|shoe preview|best running shoes/i;
 const RUNNING_CONTEXT_SIGNAL = /跑步|跑鞋|路跑|慢跑|馬拉松|半馬|訓練|daily trainer|marathon|running|runner|tempo|recovery|trail/i;
 const SHOE_BRAND_MODEL_SIGNAL = /ASICS|Nike|NIKE|Brooks|BROOKS|PUMA|HOKA|Mizuno|New Balance|Saucony|SALOMON|On Running|On Cloud|Altra|adidas|Diadora|Mount To Coast|Tracksmith|R\.A\.D|Cloudmonster|Cloudsurfer|Cloudboom|Vomero|Pegasus|Structure Plus|Glycerin|Ghost|Glycerin Flex|Kayano|Nimbus|Cumulus|Superblast|Sonicblast|Mach|Mach X|Rebel|FuelCell Rebel|Triumph|Endorphin|Wave Rider|Adios Pro|Metaspeed|Deviate|Velocity Nitro|Fast-R|Neo Vista|Phantasm|Cascadia|Ride 19|Paramount Max|Escalante|Azura|Ellipse|Experience Flow|Hyperboost|Atomo Star|\bUFO\b|\bC1\b/i;
-const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋/i;
+const NON_RUNNING_SHOE_SIGNAL = /Air Force|Jordan|Dunk|籃球鞋|籃球|足球鞋|足球|網球鞋|網球|簽名鞋|signature shoe|lifestyle|sportstyle|拖鞋|涼鞋|mule|方頭|Square Toe|滑板|板鞋|Giannis|Freak\s*\d|LeBron|KD\s*\d|Foamposite|G\.T\.\s*Cut|S\.T\.\s*Charge|D\.O\.N\.?\s*Issue/i;
 const ACCESSORY_SIGNAL = /手錶|腕錶|watch|garmin|耳機|headphones?|earbuds?|sunglasses?|glasses|襪|socks?|補給包|hydration pack|music|playlist|sale|deal|discount|prime day/i;
 const SHOE_EXCLUSION_SIGNAL = /prime day|sale|deal|discount|優惠|特價|training plan|return-to-running|mindset|Parkinson|sports bras?|Shokz|Garmin|gear on amazon|running gear|balance board|playlist|watch|襪|socks?|hyrox|綜合訓練鞋|旗艦店|開幕|store opening|flagship|IKEA|肉丸|便利商店|7-Eleven|Lawson|MondaySleepingClub|聯名系列|慵懶風格|快閃店|跑站|好水跑站|高爾夫球|PB 訓練營|訓練營/i;
-const NEWS_EXCLUSION_SIGNAL = /籃球|籃球鞋|籃球球鞋|簽名球鞋|basketball|NBA|夏季聯賽|summer league|足球|足球鞋|網球|網球鞋|簽名鞋|signature shoe|Air Force|Jordan|Dunk|Air Max|Sabrina|Book\s*\d|GELBURST|Hali\s*\d|Anthony Edwards|Donovan Mitchell|男裝週|fashion week|休閒鞋|lifestyle|sportstyle/i;
+const NEWS_EXCLUSION_SIGNAL = /籃球|籃球鞋|籃球球鞋|簽名球鞋|basketball|NBA|夏季聯賽|summer league|足球|足球鞋|網球|網球鞋|簽名鞋|signature shoe|Air Force|Jordan|Dunk|Air Max|Sabrina|Book\s*\d|GELBURST|Hali\s*\d|Anthony Edwards|Donovan Mitchell|Giannis|Freak\s*\d|LeBron|KD\s*\d|Foamposite|G\.T\.\s*Cut|S\.T\.\s*Charge|D\.O\.N\.?\s*Issue|男裝週|fashion week|休閒鞋|lifestyle|sportstyle/i;
+const RUNNING_NEWS_CONTEXT_SIGNAL = /跑步|路跑|慢跑|馬拉松|半馬|越野跑|越野賽|跑者|跑鞋|running|runner|marathon|trail running/i;
 const GENERIC_NEWS_SUMMARY = "跑步新聞已收錄，保留對訓練、裝備或賽事決策有幫助的重點，方便跑者快速判斷是否需要深入閱讀。";
 const SHOE_GUIDE_SIGNAL = /best|top|guide|awards|preview|for men|for women|for beginners|flat feet|most cushioned|our top picks/i;
 const SHOE_MODEL_FOCUS_SIGNAL = /review|上市|登場|推出|發表|實測|首試|開箱|評測|同級對比|\bv\d+\b|\b\d{1,2}\b|elite|nitro|pegasus|glycerin|ghost|kayano|nimbus|cumulus|mach|rebel|metaspeed|deviate|wave rider|triumph|paramount|escalante|azura|ellipse|cascadia|cloudmonster|cloudsurfer|vomero/i;
@@ -611,7 +612,7 @@ function isEligiblePublishedContent(item) {
   return Boolean(String(item.summary || "").trim())
     && item.summary !== GENERIC_NEWS_SUMMARY
     && !NEWS_EXCLUSION_SIGNAL.test(text)
-    && RUNNING_CONTEXT_SIGNAL.test(text);
+    && RUNNING_NEWS_CONTEXT_SIGNAL.test(text);
 }
 
 function mergePublishedRecords(previous, current) {

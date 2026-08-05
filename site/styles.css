@@ -2209,47 +2209,53 @@ h3 {
   color: #9b3f19;
 }
 
-.race-detail-panel {
+.race-fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: 8px 12px;
   margin-top: 8px;
-  padding-top: 2px;
+  margin-bottom: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.78rem;
 }
 
-.race-detail-panel summary {
+.race-fact-details {
+  margin-top: 8px;
+}
+
+.race-fact-details summary {
   width: fit-content;
   cursor: pointer;
   color: #52645b;
+  font-size: 0.78rem;
   font-weight: 900;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
-.race-detail-panel dl {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
-  gap: 6px;
-  margin: 7px 0 0;
+.race-fact-details[open] summary {
+  color: var(--green-dark);
 }
 
-.race-detail-panel div {
+.race-fact-grid div {
   min-width: 0;
-  padding: 7px 8px;
-  border: 1px solid rgba(36, 114, 79, 0.12);
-  border-radius: 8px;
-  background: #f5faf6;
+  padding: 8px 0;
+  border-top: 1px solid rgba(36, 114, 79, 0.12);
 }
 
-.race-detail-panel .fact-start-times {
+.race-fact-grid .fact-start-times {
+  grid-column: span 2;
   min-width: 0;
 }
 
-.race-detail-panel dt,
-.race-detail-panel dd {
+.race-fact-grid dt,
+.race-fact-grid dd {
   margin: 0;
 }
 
-.race-detail-panel dt {
+.race-fact-grid dt {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -2259,7 +2265,7 @@ h3 {
   font-weight: 950;
 }
 
-.race-detail-panel dd {
+.race-fact-grid dd {
   margin-top: 2px;
   overflow-wrap: anywhere;
   font-weight: 850;
@@ -2973,6 +2979,21 @@ h3 {
   line-height: 1.7;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 6;
+}
+
+.shoe-release-list .content-decision,
+.news-list .content-decision {
+  display: block;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.content-decision span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .shoe-release-list .sub-link,
@@ -4816,6 +4837,10 @@ h3 {
     padding-top: 0;
   }
 
+  .race-fact-grid .fact-start-times {
+    grid-column: auto;
+  }
+
   .primary-action-row {
     grid-template-columns: minmax(0, 1fr) 44px;
   }
@@ -4964,6 +4989,16 @@ h3 {
 
   .brand span {
     font-size: 0.95rem;
+  }
+
+  @media (max-width: 560px) {
+    .brand > span:last-child {
+      display: none;
+    }
+
+    .main-nav {
+      padding-right: 4px;
+    }
   }
 
   .shoe-release-list p,
@@ -5572,7 +5607,7 @@ h3 {
     font-size: 0.92rem;
   }
 
-  .race-detail-panel dl {
+  .race-fact-grid {
     grid-template-columns: 1fr;
   }
 
