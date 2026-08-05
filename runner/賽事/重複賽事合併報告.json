@@ -1,6 +1,21 @@
 {
-  "generated_at": "2026-08-04T09:10:40.201Z",
-  "source_count": 58,
+  "generated_at": "2026-08-05T05:10:55.327Z",
+  "source_count": 60,
   "output_count": 58,
-  "merges": []
+  "merges": [
+    {
+      "kept_race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
+      "merged_race_id": "a061279e-c547-4415-9b3b-591488986300",
+      "identity_tokens": [
+        "ctrun-event:308"
+      ]
+    },
+    {
+      "kept_race_id": "1b12335a-cf11-4ca1-92c7-6e04f4258cd8",
+      "merged_race_id": "1b12335a-cf11-4ca1-92c7-6e04f4258cd8",
+      "identity_tokens": [
+        "biji-competition:13079"
+      ]
+    }
+  ]
 }
