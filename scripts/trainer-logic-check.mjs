@@ -65,8 +65,8 @@ const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbo
 
 const coachEngineSandbox = {};
 vm.createContext(coachEngineSandbox);
-vm.runInContext(extractFunction(trainerCoachEngineJs, "coachPrescribedKm"), coachEngineSandbox);
-const { coachPrescribedKm } = coachEngineSandbox;
+vm.runInContext([extractFunction(trainerCoachEngineJs, "coachPrescribedKm"), extractFunction(trainerCoachEngineJs, "coachPrescribedMainKm")].join("\n\n"), coachEngineSandbox);
+const { coachPrescribedKm, coachPrescribedMainKm } = coachEngineSandbox;
 
 // secToPace
 assertEqual(secToPace(330), "5:30", "secToPace formats whole minutes:seconds");
@@ -131,6 +131,8 @@ assertEqual(repairedLegacyCoachStructure[1]?.end?.value, 5500, "legacy easy-run 
 assertEqual(repairedLegacyCoachStructure[2]?.end?.type, 'time', "legacy coach cooldown becomes a time step instead of a distance requirement");
 assertEqual(coachPrescribedKm({ km: 14 }, { totalKm: 13 }), 13, "confirmed coach totalKm overrides the generator's stale day distance");
 assertEqual(coachPrescribedKm({ km: 14 }, {}), 14, "coach distance falls back to the generated day only when no confirmed total exists");
+assertEqual(coachPrescribedMainKm({ km: 7 }, { totalKm: 6.5, steps: [{ kind: 'main', end: { type: 'distance', value: 4600 } }, { kind: 'repeat', title: 'ST 快步組', detail: '每趟快步' }] }), 4.6, "stride sessions keep their explicit main-run distance instead of adding strides on top of total mileage");
+assertEqual(coachPrescribedMainKm({ km: 14 }, { totalKm: 13, steps: [{ kind: 'main', end: { type: 'distance', value: 11500 } }] }), 13, "long-run total remains the main-run target when warmup and cooldown are time-based");
 
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);

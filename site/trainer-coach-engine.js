@@ -203,6 +203,18 @@ function coachPrescribedKm(day, entry) {
   return Number.isFinite(prescribedKm) && prescribedKm > 0 ? prescribedKm : (Number(day?.km) || 0);
 }
 
+function coachPrescribedMainKm(day, entry) {
+  const steps = Array.isArray(entry?.steps) ? entry.steps : [];
+  const main = steps.find((step) => step?.kind === 'main' && step?.end?.type === 'distance');
+  const hasStrides = steps.some((step) => step?.kind === 'repeat' && /(?:ST\s*快步|加速跑|快步)/i.test(`${step.title || ''} ${step.detail || ''}`));
+  const explicitMainKm = Number(main?.end?.value) / 1000;
+  // 「總 6.5 km（含 ST）」中的總量含加速跑；主跑仍以明確的 4.6 km 為準，
+  // 不可把 6.5 km 再加上 ST。沒有額外快步時，總量就是主跑目標。
+  return hasStrides && Number.isFinite(explicitMainKm) && explicitMainKm > 0
+    ? explicitMainKm
+    : coachPrescribedKm(day, entry);
+}
+
 function coachPrescription(day, ctx, week) {
   // 已報名賽事、賽前減壓與賽後恢復是硬約束；教練週處方只能安排其餘訓練日，
   // 不能把以賽代訓重新蓋成一般跑課。
@@ -213,9 +225,10 @@ function coachPrescription(day, ctx, week) {
   // 已確認的教練菜單擁有距離真相；不能讓週期產生器殘留的 day.km
   // 覆蓋它，否則同一張卡會同時出現 13 與 14 km。
   const scheduledKm = coachPrescribedKm(day, entry);
-  const prescribedDay = scheduledKm > 0 ? { ...day, km: scheduledKm } : day;
-  const headline = coachPlanHeadline(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${scheduledKm} km`);
-  const mainInstruction = coachPlanMainInstruction(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${scheduledKm} km`);
+  const mainKm = coachPrescribedMainKm(day, entry);
+  const prescribedDay = scheduledKm > 0 ? { ...day, km: scheduledKm, coachMainKm: mainKm } : day;
+  const headline = coachPlanHeadline(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);
+  const mainInstruction = coachPlanMainInstruction(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);
   const steps = (day.steps || []).map((step) => step.title === '主課'
     ? { ...step, dose: '', detail: mainInstruction, isCoachMain: true }
     : step);

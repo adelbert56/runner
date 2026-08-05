@@ -2673,7 +2673,7 @@ function normalizeCoachWorkoutSteps(steps, day) {
   const courseDay = day || {};
   // 舊版手寫處方曾把 0.8 km 熱身／0.7 km 收操直接放進 Garmin 結構，
   // 使主跑距離被錯誤預扣。熱身與收操可以原地完成，固定轉成時間步驟；
-  // 若是這種舊格式的輕鬆／長跑，day.km 才是實際主跑目標。
+  // 若是這種舊格式的輕鬆／長跑，coachMainKm（或 day.km）才是實際主跑目標。
   const hasDistanceBasedPrep = steps.some((step) => ['warmup', 'cooldown'].includes(step?.kind) && step?.end?.type === 'distance');
   const prepEnd = (step, fallbackMinutes) => {
     const minutes = String(step?.detail || step?.end?.label || '').match(/(\d+(?:\.\d+)?)\s*分/);
@@ -2684,11 +2684,12 @@ function normalizeCoachWorkoutSteps(steps, day) {
     .slice(0, 12).map((step, index) => {
       const kind = step.kind;
       const isPrep = ['warmup', 'cooldown'].includes(kind);
-      const isLegacyEasyOrLongMain = hasDistanceBasedPrep && kind === 'main' && ['easy', 'long'].includes(courseDay.type) && Number(courseDay.km) > 0;
+      const mainTargetKm = Number(courseDay.coachMainKm) || Number(courseDay.km);
+      const isLegacyEasyOrLongMain = hasDistanceBasedPrep && kind === 'main' && ['easy', 'long'].includes(courseDay.type) && mainTargetKm > 0;
       const end = isPrep
         ? prepEnd(step, kind === 'warmup' ? 8 : 6)
         : isLegacyEasyOrLongMain
-          ? { type: 'distance', value: Math.round(Number(courseDay.km) * 1000), label: `${Number(courseDay.km)} km` }
+          ? { type: 'distance', value: Math.round(mainTargetKm * 1000), label: `${mainTargetKm} km` }
           : { type: ['distance', 'time', 'reps', 'open'].includes(step.end.type) ? step.end.type : 'open', value: Math.max(0, Number(step.end.value) || 0), label: String(step.end.label || '').slice(0, 40) || '依體感' };
       return {
         order: index + 1,

@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { todayInTaipei } from "./lib/time.mjs";
+import { compactRaces, strongIdentityTokens } from "./lib/race-dedupe.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const source = resolve(root, "runner/賽事/賽事資料庫.json");
@@ -82,7 +83,12 @@ try {
   // first run or target doesn't exist yet
 }
 
-const normalized = races.map((race) => ({
+const { races: uniqueRaces, merges } = compactRaces(races);
+if (merges.length) {
+  console.warn(`Suppressed ${merges.length} strong-identity duplicate race(s) from site output.`);
+}
+
+const normalized = uniqueRaces.map((race) => ({
   ...race,
   first_seen_at: firstSeenDate(race),
   is_official_direct: isOfficialDirect(race),
@@ -92,10 +98,12 @@ await writeFile(source, `${JSON.stringify(normalized, null, 2)}\n`, "utf-8");
 
 // Disappearance detection: only run when new data looks plausible (guards against total scraper failure)
 const newKeySet = new Set(normalized.map(raceKey));
+const newIdentityTokenSet = new Set(normalized.flatMap(strongIdentityTokens));
 const disappeared = normalized.length >= 3
   ? previousRaces
       .filter((r) => {
         if (newKeySet.has(raceKey(r))) return false;
+        if (strongIdentityTokens(r).some((token) => newIdentityTokenSet.has(token))) return false;
         return String(r.race_date || "").slice(0, 10) >= today;
       })
       .map((r) => r.disappeared_at ? r : { ...r, disappeared_at: today })

@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { todayInTaipei } from "./lib/time.mjs";
+import { normalizeContentUrl } from "./lib/content-url.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const contentPath = resolve(root, "site/data/content.json");
@@ -18,14 +19,7 @@ function hasText(value) {
 }
 
 function normalizeUrl(url) {
-  try {
-    const parsed = new URL(url);
-    parsed.hash = "";
-    parsed.search = "";
-    return parsed.toString().replace(/\/$/, "");
-  } catch {
-    return "";
-  }
+  return normalizeContentUrl(url);
 }
 
 function sentenceKeys(text) {
