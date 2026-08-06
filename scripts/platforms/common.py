@@ -171,6 +171,46 @@ def extract_registration_dates(text: str, race_date: str) -> tuple[str, str]:
     return period_open or opens_at, period_deadline or deadline
 
 
+LEGAL_BOILERPLATE_PATTERN = re.compile(
+    r"個人資料保護法|個資法|隱私權政策|蒐集個人資料|告知下列事項"
+)
+
+DISCLAIMER_CLAUSE_PATTERN = re.compile(
+    r"責任外的理由|不可抗力|颱風天災|恕無法退回|恕不退費|概不負責|如遇天災"
+    r"|要求.{0,6}賠償|不得.{0,6}求償|營業項目|活動行銷、活動企劃"
+    r"|損害賠償|意外險|保險公司|收據或發票"
+)
+
+# A whole value that is just a "see official announcement" placeholder,
+# not an actual organizer/co-organizer name.
+PLACEHOLDER_VALUE_PATTERN = re.compile(
+    r"^公告為主|^以.{0,6}公告為準|^依.{0,6}公告為準|^另行公告"
+)
+
+# Text lines that read as a continuation of a prior sentence (a scraper
+# picked up the tail of an unrelated paragraph rather than a fresh org
+# list) rarely start with these connective characters.
+FRAGMENT_LEADING_CHARS = ("及", "並", "而", "但", "唯", "、", "，", ",", ")", "）")
+
+
+def _is_dangling_fragment(text: str) -> bool:
+    return bool(text) and text[0] in FRAGMENT_LEADING_CHARS
+
+
+def _strip_disclaimer_clauses(candidate: str) -> str:
+    """Drop refund/liability/marketing-copy clauses that scrapers sometimes
+    concatenate onto the same line as a genuine org list (segments are
+    joined with ；/; on the source page)."""
+    segments = re.split(r"[；;]", candidate)
+    kept = [
+        segment for segment in segments
+        if segment.strip()
+        and not DISCLAIMER_CLAUSE_PATTERN.search(segment)
+        and not _is_dangling_fragment(segment.strip())
+    ]
+    return "；".join(segment.strip() for segment in kept)
+
+
 def find_label_value(lines: list[str], labels: tuple[str, ...]) -> str:
     stop_words = (
         "活動日期", "活動時間", "活動地點", "報名時間", "報名日期", "報名費用",
@@ -182,14 +222,44 @@ def find_label_value(lines: list[str], labels: tuple[str, ...]) -> str:
         for label in labels:
             if label not in normalized_line:
                 continue
+            # Once a label matches this line, commit to it: don't fall
+            # through to a shorter alias label (e.g. "主辦" after
+            # "主辦單位") on the SAME line just because this attempt found
+            # nothing valid — that would re-slice the same heading text
+            # and return a meaningless leftover fragment like "單位".
             inline = re.sub(rf"^.*?{re.escape(label)}\s*[：: ]*", "", normalized_line).strip()
             if inline and inline != normalized_line:
-                return inline
+                if (
+                    LEGAL_BOILERPLATE_PATTERN.search(inline)
+                    or _is_dangling_fragment(inline)
+                    or PLACEHOLDER_VALUE_PATTERN.search(inline)
+                ):
+                    break
+                inline = _strip_disclaimer_clauses(inline)
+                if inline:
+                    return inline
+                break
             for candidate in lines[index + 1:index + 5]:
-                if any(stop in candidate for stop in stop_words) and candidate not in labels:
+                # Check stop words against the disclaimer-stripped text, not
+                # the raw line — a stop word like "贊助單位" can appear deep
+                # inside a liability paragraph that's concatenated onto a
+                # genuine org list on the same line, and that shouldn't
+                # cancel the whole candidate.
+                stop_check_text = _strip_disclaimer_clauses(candidate) if candidate else candidate
+                if any(stop in stop_check_text for stop in stop_words) and candidate not in labels:
                     break
                 if candidate and candidate not in labels:
-                    return candidate
+                    if (
+                        LEGAL_BOILERPLATE_PATTERN.search(candidate)
+                        or _is_dangling_fragment(candidate)
+                        or PLACEHOLDER_VALUE_PATTERN.search(candidate)
+                    ):
+                        continue
+                    candidate = _strip_disclaimer_clauses(candidate)
+                    if candidate:
+                        return candidate
+                    continue
+            break
     return ""
 
 
@@ -212,17 +282,37 @@ def collect_between(lines: list[str], start_labels: tuple[str, ...], stop_labels
 
 
 def extract_money_values(text: str) -> list[str]:
-    explicit = re.findall(r"(?:NT\$|NTD|\$)\s*\d{2,5}(?:,\d{3})?|\d{2,5}(?:,\d{3})?\s*元", text, flags=re.IGNORECASE)
+    # Comma-thousand branch must come first so finditer consumes the whole
+    # number (e.g. "1,000元"); otherwise the plain \d{2,5} branch would only
+    # catch the "000元" tail after the comma breaks the digit run.
+    explicit = re.findall(
+        r"(?:NT\$|NTD|\$)\s*\d{1,3}(?:,\d{3})+|(?:NT\$|NTD|\$)\s*\d{2,5}"
+        r"|\d{1,3}(?:,\d{3})+\s*元|\d{2,5}\s*元",
+        text,
+        flags=re.IGNORECASE,
+    )
     if explicit:
         return list(dict.fromkeys(compact_text(value) for value in explicit if compact_text(value)))
     if "費用" not in text and "報名費" not in text:
         return []
-    fallback = re.findall(r"\b\d{2,5}(?:,\d{3})?\b", text)
+    fallback = re.findall(r"\b\d{1,3}(?:,\d{3})+\b|\b\d{2,5}\b", text)
     return list(dict.fromkeys(value for value in fallback if len(value.replace(",", "")) >= 3))
 
 
 def extract_quota_values(text: str) -> list[str]:
-    return list(dict.fromkeys(re.findall(r"\d{2,6}\s?人", text)))
+    # Match thousands-comma numbers first (e.g. "6,000人") so finditer
+    # consumes the whole number; otherwise the plain \d{2,6} branch below
+    # would only catch the "000人" tail after the comma breaks the digit run.
+    pattern = re.compile(r"(前)?\d{1,3}(?:,\d{3})+\s?人|(前)?\d{2,6}\s?人")
+    values = []
+    for match in pattern.finditer(text):
+        # "前500人" ("first 500 registrants get X") is an early-bird gift
+        # threshold, not the event's total capacity — the two read
+        # identically as "<number>人" without this check.
+        if match.group(1) or match.group(2):
+            continue
+        values.append(match.group(0))
+    return list(dict.fromkeys(values))
 
 
 def first_fee_text(text: str) -> str:
@@ -610,7 +700,7 @@ def generic_extract(html: str, race: dict, source_url: str = "") -> dict:
     opens_at, deadline = extract_registration_dates(text, race.get("race_date", ""))
     cancel_notice = cancellation_notice(lines)
     fee_block = " ".join(collect_between(lines, ("報名費用", "費用"), ("晶片押金", "開放名額", "限制名額", "名額", "活動資訊", "競賽獎勵", "報名資訊")))
-    quota_block = " ".join(collect_between(lines, ("開放名額", "限制名額", "名額"), ("報名資格", "活動資訊", "報名費用", "費用", "活動路線")))
+    quota_block = " ".join(collect_between(lines, ("開放名額", "限制名額", "名額"), ("報名資格", "活動資訊", "報名費用", "費用", "活動路線", "物資郵寄", "物資")))
     return {
         "registration_link": extract_registration_link(html, race.get("official_event_url", "") or race.get("registration_link", "") or race.get("detail_url", "")),
         "registration_opens_at": opens_at,

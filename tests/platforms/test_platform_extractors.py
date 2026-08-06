@@ -4,7 +4,12 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from platforms import baoming, focusline, lohas
-from platforms.common import extract_start_times
+from platforms.common import (
+    extract_money_values,
+    extract_quota_values,
+    extract_start_times,
+    find_label_value,
+)
 
 
 def test_focusline_extract_uses_api_payload(monkeypatch):
@@ -154,3 +159,57 @@ def test_baoming_extract_prefers_structured_sections():
     assert details["co_organizer"] == "國立臺灣體育運動大學 運動賽會中心"
     assert details["quota"] == "依報名項目上限"
     assert details["fees"] == "21KM接力組 2400元、21KM個人半馬組 600元"
+
+
+def test_find_label_value_rejects_privacy_boilerplate():
+    lines = ["協辦單位", "蒐集個人資料，依據個人資料保護法第八條第一項規定，謹向您告知下列事項，敬請詳閱"]
+    assert find_label_value(lines, ("協辦單位", "協辦")) == ""
+
+
+def test_find_label_value_strips_disclaimer_clause_joined_by_semicolon():
+    lines = [
+        "協辦單位",
+        "責任外的理由如颱風天災，而大會中止比賽時參加費用恕無法退回。；前立委高建智、南投縣警察局",
+    ]
+    assert find_label_value(lines, ("協辦單位", "協辦")) == "前立委高建智、南投縣警察局"
+
+
+def test_find_label_value_rejects_dangling_fragment():
+    lines = ["協辦單位", "及贊助單位等要求任何形式之賠償。"]
+    assert find_label_value(lines, ("協辦單位", "協辦")) == ""
+
+
+def test_find_label_value_rejects_announcement_placeholder():
+    lines = ["主辦單位", "公告為主。"]
+    assert find_label_value(lines, ("主辦單位", "主辦")) == ""
+
+
+def test_find_label_value_keeps_org_list_before_liability_clause():
+    lines = [
+        "協辦單位",
+        "展通虹策略整合行銷股份有限公司、展逸國際企業股份有限公司；、贊助單位等與活動相關之單位及人員)僅於公共意外責任險承保範圍內負損害賠償責任",
+    ]
+    assert find_label_value(lines, ("協辦單位", "協辦")) == (
+        "展通虹策略整合行銷股份有限公司、展逸國際企業股份有限公司"
+    )
+
+
+def test_extract_quota_values_handles_comma_thousands():
+    assert extract_quota_values("人數限額：6,000人") == ["6,000人"]
+
+
+def test_extract_quota_values_ignores_unrelated_headcount_table():
+    text = "限制名額 580人 物資郵寄處理費用：10人、15人、20人"
+    # collect_between (not tested directly here) is responsible for excluding
+    # the unrelated table; this only pins down the number-matching regex.
+    assert extract_quota_values(text) == ["580人", "10人", "15人", "20人"]
+
+
+def test_extract_quota_values_ignores_early_bird_promo_threshold():
+    text = "報名不分組別前500人報名並繳費完成加送浴巾乙條"
+    assert extract_quota_values(text) == []
+
+
+def test_extract_money_values_handles_comma_thousands():
+    assert extract_money_values("報名費用：1,000元") == ["1,000元"]
+    assert extract_money_values("報名費用：$1,600/組") == ["$1,600"]
