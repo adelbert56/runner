@@ -1,1 +1,25 @@
-[]
+[
+  {
+    "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
+    "race_name": "2026 公勝盃公益路跑",
+    "race_date": "2026-10-04",
+    "race_county": "臺中市",
+    "distances": [
+      "10km",
+      "3.5km",
+      "健走尋寶組"
+    ],
+    "start_times": "活力組（10K） 起跑 07:00、健走尋寶組（3.5K） 起跑 07:10",
+    "registration_link": "https://www.ctrun.com.tw/Activity?EventMain_ID=339&Register=true&ActionStr=Create&Team=false",
+    "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=339&Register=true&ActionStr=Create&Team=false",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13042&subtitle=2026%E5%85%AC%E5%8B%9D%E7%9B%83%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：10K、3.5K、健走尋寶組；起跑列：活力組（10K）、健走尋寶組（3.5K）"
+      }
+    ]
+  }
+]
