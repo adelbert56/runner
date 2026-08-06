@@ -1769,7 +1769,8 @@ function renderRaceCard(race) {
   const startTimes = formatStartTimes(race, "");
   const weather = weatherSummaryForRace(race);
   const organizer = race.organizer || race.host || race.organizer_name || "";
-  const coOrganizer = race.co_organizer || race.coorganizer || "";
+  const coOrganizerRaw = race.co_organizer || race.coorganizer || "";
+  const coOrganizer = /個人資料保護法|隱私權政策|個資法/.test(coOrganizerRaw) ? "" : coOrganizerRaw;
   const fees = race.fees || race.registration_fee || "";
   const quota = race.quota || race.registration_quota || "";
   const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
