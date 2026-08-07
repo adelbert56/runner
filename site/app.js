@@ -1902,7 +1902,7 @@ function renderRaceCard(race) {
                 aria-pressed="${favorite ? "true" : "false"}"
                 aria-label="${favorite ? "取消收藏" : "加入收藏"}"
                 title="${favorite ? "取消收藏" : "加入收藏"}"
-              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
+              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span><span class="favorite-label">${favorite ? "已收藏" : "收藏"}</span></button>
             </div>
         <button
           class="registration-toggle race-registered ${registered ? "active" : ""}"

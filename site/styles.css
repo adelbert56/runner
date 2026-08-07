@@ -1799,6 +1799,44 @@ h3 {
   align-content: start;
 }
 
+.race-header-action .register-link,
+.race-header-action .registration-toggle,
+.race-header-action .calendar-button,
+.race-header-action .race-favorite {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: none;
+  color: var(--green-dark);
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.race-header-action .register-link:hover,
+.race-header-action .registration-toggle:hover,
+.race-header-action .calendar-button:hover,
+.race-header-action .race-favorite:hover {
+  border-color: rgba(21, 83, 56, 0.32);
+  background: #f4faf5;
+  box-shadow: none;
+  transform: none;
+}
+
+.race-header-action .registration-toggle.active,
+.race-header-action .race-favorite.active {
+  border-color: rgba(21, 83, 56, 0.42);
+  background: #e4f2e8;
+  color: var(--green-dark);
+  box-shadow: none;
+}
+
+.race-header-action .race-favorite.active {
+  border-color: #e0ad56;
+  background: #fff8dc;
+  color: #6d4c00;
+}
+
 .race-header-action {
   display: flex;
   flex-direction: column;
@@ -1915,8 +1953,11 @@ h3 {
 .race-favorite {
   position: static;
   z-index: 1;
-  width: 44px;
+  width: auto;
+  min-width: 96px;
   min-height: 46px;
+  gap: 6px;
+  padding: 0 12px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 8px 18px rgba(31, 42, 36, 0.06);
 }
@@ -2487,9 +2528,14 @@ h3 {
 
 .secondary-action-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px;
+  grid-template-columns: minmax(0, 1fr) minmax(96px, max-content);
   gap: 8px;
   align-items: stretch;
+}
+
+.race-favorite .favorite-label {
+  font-size: 0.82rem;
+  font-weight: 900;
 }
 
 .race-card .button {
@@ -5731,6 +5777,11 @@ h3 {
     z-index: 2;
     width: 40px;
     min-height: 40px;
+    padding: 0;
+  }
+
+  .race-favorite .favorite-label {
+    display: none;
   }
 
   .race-main {
