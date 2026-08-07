@@ -1689,12 +1689,10 @@ h3 {
   gap: 14px;
 }
 
+
 .race-card {
   position: relative;
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr) minmax(260px, 300px);
-  gap: 18px;
-  align-items: stretch;
+  display: block;
   min-height: 154px;
   padding: 18px 24px;
   border: var(--card-border);
@@ -1742,8 +1740,7 @@ h3 {
 .date-block {
   display: grid;
   place-items: center;
-  align-self: center;
-  min-height: 112px;
+  min-height: 100%;
   border-radius: 8px;
   background:
     linear-gradient(180deg, #eff7f1, #e8f1ea);
@@ -1774,12 +1771,43 @@ h3 {
 }
 
 .race-main {
-  align-self: center;
   min-width: 0;
+}
+
+.race-header-row {
+  display: grid;
+  grid-template-columns: minmax(330px, 1.08fr) minmax(380px, 1.12fr) minmax(270px, 300px);
+  gap: 32px;
+  align-items: start;
+}
+
+.race-identity,
+.race-hero-facts,
+.race-header-action {
+  min-width: 0;
+}
+
+.race-header-action .train-button {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.race-header-action .race-actions {
+  width: 100%;
+  margin-top: 12px;
+  flex: 0 0 auto;
+  align-content: start;
+}
+
+.race-header-action {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
 }
 
 .race-title-row {
   display: block;
+  min-width: 0;
   margin-bottom: 4px;
 }
 
@@ -1902,8 +1930,12 @@ h3 {
 }
 
 .calendar-button {
+  display: inline-flex;
   width: 100%;
   min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2000,10 +2032,17 @@ h3 {
   font-weight: 900;
 }
 
+.ico {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
 .race-summary-line span {
   display: inline-flex;
   min-height: 24px;
   align-items: center;
+  gap: 5px;
   max-width: 100%;
 }
 
@@ -2134,6 +2173,68 @@ h3 {
   color: #7f1d1d;
 }
 
+.race-mid-band {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.race-hero-facts {
+  display: grid;
+  grid-template-columns: 164px minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.race-venue-box {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  padding: 0;
+  background: transparent;
+}
+
+.race-venue-box--empty {
+  background: none;
+  padding: 0;
+}
+
+.race-venue-box dl {
+  margin: 0;
+}
+
+.race-venue-box dt {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.race-venue-box dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  color: #26362e;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.race-venue-box .fact-action {
+  margin-top: 8px;
+}
+
+.fact-bullet-list {
+  margin: 0;
+  padding-left: 1.1em;
+  list-style: disc;
+}
+
+.fact-bullet-list li + li {
+  margin-top: 2px;
+}
+
 .pill {
   display: inline-flex;
   min-height: 24px;
@@ -2175,21 +2276,23 @@ h3 {
 
 .race-trust-line {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+  flex-wrap: nowrap;
+  gap: 4px;
   margin-top: 7px;
 }
 
 .trust-pill {
   display: inline-flex;
-  min-height: 23px;
+  min-height: 22px;
   align-items: center;
-  padding: 3px 8px;
+  gap: 4px;
+  padding: 2px 6px;
   border: 1px solid rgba(21, 83, 56, 0.12);
   border-radius: 999px;
   background: #f4faf5;
   color: #4f6258;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
+  white-space: nowrap;
   font-weight: 900;
 }
 
@@ -2211,18 +2314,20 @@ h3 {
 
 .race-fact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
-  gap: 12px 16px;
-  margin-top: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 0;
   margin-bottom: 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--line);
+  padding: 0;
+  border-top: 0;
   color: var(--muted);
   font-size: 0.78rem;
 }
 
 .race-fact-details {
-  margin-top: 8px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
 }
 
 .race-fact-details summary {
@@ -2238,6 +2343,10 @@ h3 {
 .race-fact-details[open] summary {
   color: var(--green-dark);
 }
+
+.fact-summary-close { display: none; }
+.race-fact-details[open] .fact-summary-open { display: none; }
+.race-fact-details[open] .fact-summary-close { display: inline; }
 
 .race-fact-grid div {
   min-width: 0;
@@ -2265,6 +2374,12 @@ h3 {
   font-size: 0.66rem;
   font-weight: 950;
   letter-spacing: 0.04em;
+}
+
+.fact-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .race-fact-grid dd {
@@ -2317,6 +2432,7 @@ h3 {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
+  gap: 4px;
   min-height: 22px;
   padding: 2px 8px;
   border: 1px solid rgba(21, 83, 56, 0.18);
@@ -2339,14 +2455,39 @@ h3 {
   min-width: 0;
   align-self: start;
   align-content: start;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(116px, max-content);
   gap: 8px;
 }
 
-.primary-action-row {
-  display: grid;
+.race-mid-band .race-actions {
+  width: min(100%, 336px);
+}
+
+.race-actions > .register-link {
+  order: 1;
+  grid-column: auto;
+}
+
+.race-actions > .registration-toggle {
+  order: 2;
+  grid-column: auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.race-actions > .secondary-action-row {
+  order: 3;
   grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1fr) minmax(122px, max-content) 44px;
+}
+
+.race-actions > .detail-actions {
+  order: 4;
+  grid-column: 1 / -1;
+}
+
+.secondary-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
   gap: 8px;
   align-items: stretch;
 }
@@ -2361,22 +2502,22 @@ h3 {
   min-height: 44px;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   padding: 9px 12px;
+  border: 1px solid rgba(19, 83, 56, 0.18);
   border-radius: 8px;
-  background: var(--green-dark);
-  color: white;
+  background: var(--surface);
+  color: var(--green-dark);
   font-size: 0.88rem;
   font-weight: 900;
   line-height: 1.15;
   text-align: center;
-  box-shadow: 0 8px 16px rgba(21, 83, 56, 0.14);
   transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
 
 .register-link.fallback {
-  border: 1px solid rgba(19, 83, 56, 0.18);
-  background: #eef5ef;
-  color: var(--green-dark);
+  border-color: rgba(19, 83, 56, 0.14);
+  background: #f5f2e6;
 }
 
 .register-link.disabled {
@@ -2385,35 +2526,36 @@ h3 {
   cursor: not-allowed;
 }
 
-.secondary-actions {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
-  gap: 6px;
-}
-
 .train-button {
+  display: inline-flex;
   width: 100%;
-  min-height: 40px;
-  padding: 8px 10px;
-  border: 1px solid rgba(19, 83, 56, 0.18);
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border: 0;
   border-radius: 8px;
-  background: #fff7d4;
-  color: #31513e;
-  font-size: 0.84rem;
+  background: var(--green-dark);
+  color: white;
+  font-size: 0.88rem;
   font-weight: 900;
+  box-shadow: 0 8px 16px rgba(21, 83, 56, 0.14);
   cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
 
 .train-button:disabled {
   background: #ece7dc;
   color: var(--muted);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
 .detail-actions {
   display: flex;
   grid-column: 1 / -1;
-  min-height: 20px;
+  min-height: 32px;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -2421,7 +2563,9 @@ h3 {
 }
 
 .sub-link {
-  color: var(--muted);
+  color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
   font-size: 0.78rem;
   font-weight: 900;
   text-decoration: underline;
@@ -4819,7 +4963,6 @@ h3 {
 
   .race-main,
   .race-actions,
-  .secondary-actions,
   .register-link,
   .calendar-button,
   .train-button,
@@ -4837,17 +4980,27 @@ h3 {
     overflow-wrap: anywhere;
   }
 
-  .race-actions {
-    grid-column: auto;
-    padding-top: 0;
+  .race-header-row {
+    grid-template-columns: minmax(0, 1fr) minmax(252px, 0.9fr);
+  }
+
+  .race-header-action {
+    grid-column: 1 / -1;
+    justify-self: end;
+    width: min(100%, 252px);
+  }
+
+  .race-hero-facts {
+    grid-template-columns: minmax(100px, 130px) minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .race-mid-band .race-actions {
+    width: min(100%, 360px);
   }
 
   .race-fact-grid .fact-start-times {
     grid-column: auto;
-  }
-
-  .primary-action-row {
-    grid-template-columns: minmax(0, 1fr) 44px;
   }
 
   .main-nav,
@@ -5065,6 +5218,29 @@ h3 {
     gap: 8px;
     min-height: 150px;
     padding: 12px;
+  }
+
+
+  .race-header-row,
+  .race-hero-facts {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .race-header-action {
+    grid-column: auto;
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .race-mid-band {
+    justify-content: stretch;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .race-mid-band .race-actions {
+    width: 100%;
   }
 
   .message-cloud::before {
@@ -5568,7 +5744,7 @@ h3 {
   }
 
   .date-block div {
-    padding-right: 50px;
+    padding-right: 0;
   }
 
   .date-block strong {
@@ -5651,7 +5827,7 @@ h3 {
     overflow: hidden;
   }
 
-  .primary-action-row {
+  .secondary-action-row {
     display: grid;
     grid-template-columns: 1fr;
   }
