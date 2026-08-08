@@ -206,11 +206,12 @@ function coachPrescribedKm(day, entry) {
 function coachPrescribedMainKm(day, entry) {
   const steps = Array.isArray(entry?.steps) ? entry.steps : [];
   const main = steps.find((step) => step?.kind === 'main' && step?.end?.type === 'distance');
-  const hasStrides = steps.some((step) => step?.kind === 'repeat' && /(?:ST\s*快步|加速跑|快步)/i.test(`${step.title || ''} ${step.detail || ''}`));
+  const hasRepeatedWork = steps.some((step) => step?.kind === 'repeat');
   const explicitMainKm = Number(main?.end?.value) / 1000;
-  // 「總 6.5 km（含 ST）」中的總量含加速跑；主跑仍以明確的 4.6 km 為準，
-  // 不可把 6.5 km 再加上 ST。沒有額外快步時，總量就是主跑目標。
-  return hasStrides && Number.isFinite(explicitMainKm) && explicitMainKm > 0
+  // 重複快段的距離或時間都屬於整堂總量的一部分；若另有明確 E 主課，
+  // 不能再把 totalKm 當成那一段的結束距離，否則 Garmin 會在重複組之外
+  // 多加一整段總里程。
+  return hasRepeatedWork && Number.isFinite(explicitMainKm) && explicitMainKm > 0
     ? explicitMainKm
     : coachPrescribedKm(day, entry);
 }

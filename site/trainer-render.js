@@ -2713,9 +2713,11 @@ function coachStructureConfidence(planText) {
 // 實際跑步與快段，避免原地熱身被錯當成必須累積的距離。
 function coachPlanMainInstruction(planText) {
   let text = String(planText || '').trim();
-  text = text.replace(/^總\s*\d+(?:\.\d+)?\s*(?:km|公里)\s*(?:[（(].*?[）)])?\s*[:：]\s*/i, '');
-  text = text.replace(/^\d+(?:\.\d+)?\s*(?:km|公里)\s*(?:暖|熱)身\s*[+＋]?\s*/i, '');
-  text = text.replace(/\s*[+＋]\s*\d+(?:\.\d+)?\s*(?:km|公里)\s*收操/g, '');
+  // 熱身與收操已由獨立卡片呈現；主課摘要只保留真正的跑步刺激，
+  // 避免「8 分鐘熱身／6 分鐘收操」在同一張課程卡重複出現。
+  text = text.replace(/^總\s*(?:約)?\s*\d+(?:\.\d+)?\s*(?:km|公里)\s*(?:[（(].*?[）)])?\s*[:：]\s*/i, '');
+  text = text.replace(/^(?:\d+(?:\.\d+)?\s*(?:km|公里)|\d+(?:\.\d+)?\s*分(?:鐘)?)\s*(?:暖|熱)身\s*[+＋]?\s*/i, '');
+  text = text.replace(/\s*[+＋]\s*(?:\d+(?:\.\d+)?\s*(?:km|公里)|\d+(?:\.\d+)?\s*分(?:鐘)?)\s*收操/g, '');
   text = text.replace(/\s*[+＋]\s*肌力\s*[A-ZＡ-Ｚ]/gi, '');
   return text.replace(/\s*[+＋]\s*/g, '＋').replace(/＋{2,}/g, '＋').replace(/^＋|＋$/g, '').trim() || '依教練指示完成主課。';
 }
@@ -3047,7 +3049,7 @@ async function syncWeekToGarmin(weekNumber = currentWeek) {
         try {
           const status = await waitForGarminSync();
           const rows = (status.results || []).map((item) => {
-            const action = item.action === 'created' ? '已建立' : item.action === 'replaced' ? '已替換舊課表' : '沿用既有課表';
+            const action = item.action === 'created' ? '已建立' : item.action === 'recreated' ? '已重建遺失的行事曆項目' : item.action === 'replaced' ? '已替換舊課表' : '沿用既有課表';
             return `<li>${reviewEscape(item.date)}｜${reviewEscape(item.name)}（${action}）</li>`;
           }).join('');
           if (status.status === 'ok') saveGarminSyncManifest(preview);

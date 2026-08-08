@@ -28,24 +28,37 @@ const PBKDF2_ITERATIONS = 310000;
 const COACH_STEP_KINDS = new Set(["warmup", "main", "interval", "recovery", "cooldown", "repeat"]);
 const COACH_END_TYPES = new Set(["distance", "time", "reps", "open"]);
 
-function normalizeCoachSteps(steps) {
+function normalizeCoachSteps(steps, totalKm = 0) {
   if (!Array.isArray(steps)) return [];
+  const hasDistanceBasedPrep = steps.some((step) => ["warmup", "cooldown"].includes(step?.kind) && step?.end?.type === "distance");
+  const hasRepeatedWork = steps.some((step) => step?.kind === "repeat");
   return steps.filter((step) => step && COACH_STEP_KINDS.has(step.kind) && step.end && COACH_END_TYPES.has(step.end.type))
-    .slice(0, 12).map((step) => ({
+    .slice(0, 12).map((step) => {
+      const isPrep = ["warmup", "cooldown"].includes(step.kind);
+      const isLegacyMain = hasDistanceBasedPrep && !hasRepeatedWork && step.kind === "main" && Number(totalKm) > 0;
+      const fallbackMinutes = step.kind === "warmup" ? 8 : 6;
+      const minutes = String(step.detail || step.end?.label || "").match(/(\d+(?:\.\d+)?)\s*分/);
+      const end = isPrep
+        ? { type: "time", value: Math.round(Number(minutes?.[1] || fallbackMinutes) * 60), label: `${Number(minutes?.[1] || fallbackMinutes)} 分` }
+        : isLegacyMain
+          ? { type: "distance", value: Math.round(Number(totalKm) * 1000), label: `${Number(totalKm)} km` }
+          : { type: step.end.type, value: Math.max(0, Number(step.end.value) || 0), label: String(step.end.label || "").slice(0, 40) };
+      return {
       kind: step.kind,
       title: String(step.title || "").slice(0, 60),
-      end: { type: step.end.type, value: Math.max(0, Number(step.end.value) || 0), label: String(step.end.label || "").slice(0, 40) },
+      end,
       target: String(step.target || "").slice(0, 120),
       detail: String(step.detail || "").slice(0, 240),
       repetitions: Math.max(0, Number(step.repetitions) || 0),
       children: normalizeCoachSteps(step.children),
-    }));
+    };
+  });
 }
 
 function preserveCoachWorkoutSteps(review) {
   const menu = review?.nextWeek?.menu;
   if (!Array.isArray(menu)) return review;
-  return { ...review, nextWeek: { ...review.nextWeek, menu: menu.map((entry) => ({ ...entry, steps: normalizeCoachSteps(entry?.steps) })) } };
+  return { ...review, nextWeek: { ...review.nextWeek, menu: menu.map((entry) => ({ ...entry, steps: normalizeCoachSteps(entry?.steps, entry?.totalKm) })) } };
 }
 
 function weekStart(dateText) {
@@ -534,9 +547,20 @@ function assertPublishableCoachReview(plaintext) {
     throw new Error(`Coach menu total ${prescribedKm.toFixed(1)} km is outside target ${review.nextWeek.targetKm}.`);
   }
   menu.forEach((entry) => {
+    const steps = Array.isArray(entry.steps) ? entry.steps : [];
+    const hasTimedRepeat = steps.some((step) => step?.kind === "repeat" && (step.children || []).some((child) => child?.end?.type === "time"));
     const stepKm = plannedDistanceKm(entry.steps);
-    if (stepKm > Number(entry.totalKm) + 0.01 || Number(entry.totalKm) - stepKm > 0.6) {
+    if (stepKm > Number(entry.totalKm) + 0.01 || (!hasTimedRepeat && Number(entry.totalKm) - stepKm > 0.6)) {
       throw new Error(`Coach menu distance mismatch on ${entry.day || "?"}: totalKm=${entry.totalKm}, structured=${stepKm.toFixed(1)}.`);
+    }
+    const distancePrep = steps.find((step) => ["warmup", "cooldown"].includes(step?.kind) && step?.end?.type === "distance");
+    if (distancePrep) {
+      throw new Error(`Coach menu uses distance-based ${distancePrep.kind} on ${entry.day || "?"}; warmup and cooldown must be time-based.`);
+    }
+    const repeatIndex = steps.findIndex((step) => step?.kind === "repeat" && (step.children || []).some((child) => child?.end?.type === "time"));
+    const mainIndex = steps.findIndex((step) => step?.kind === "main" && step?.end?.type === "distance");
+    if (repeatIndex >= 0 && mainIndex >= 0 && mainIndex < repeatIndex) {
+      throw new Error(`Coach menu puts a distance main course before timed repeats on ${entry.day || "?"}; this would add the full distance after the interval work in Garmin.`);
     }
   });
 }
@@ -656,6 +680,7 @@ async function main() {
   }
 
   try {
+    plaintext = JSON.stringify(preserveCoachWorkoutSteps(JSON.parse(plaintext)));
     assertPublishableCoachReview(plaintext);
   } catch (error) {
     const message = `⚠️ training-review publish blocked: ${error instanceof Error ? error.message : "invalid coach review"}`;

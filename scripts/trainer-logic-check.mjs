@@ -120,6 +120,7 @@ const fartlekStructure = buildGarminWorkoutStructure("interval", [
 assertEqual(fartlekStructure[1]?.children?.[0]?.end?.value, 180, "fartlek fast segments use Garmin time steps");
 assertEqual(fartlekStructure[1]?.children?.[1]?.end?.value, 120, "fartlek recovery segments use Garmin time steps");
 assertEqual(coachPlanMainInstruction('總 5.5 km（含 ST）：0.8 km 熱身＋E 主課約 3.6 km＋ST 快步 4×20 秒＋0.7 km 收操＋肌力 B。'), 'E 主課約 3.6 km＋ST 快步 4×20 秒。', "coach main-card copy excludes warmup and cooldown distance");
+assertEqual(coachPlanMainInstruction('總約 8.0 km：8 分鐘熱身＋6×（2 分 T 體感／2 分 E 慢跑）＋E 補足 4.0 km＋6 分鐘收操；前夜睡眠 <6 小時則改全程 E 8 km。'), '6×（2 分 T 體感／2 分 E 慢跑）＋E 補足 4.0 km；前夜睡眠 <6 小時則改全程 E 8 km。', "coach main-card copy excludes duplicate timed warmup and cooldown");
 assertEqual(coachPlanHeadline('總 5.5 km（含 ST）：0.8 km 熱身＋E 主課約 3.6 km＋ST 快步 4×20 秒。'), '輕鬆跑', "coach heading keeps the easy-run title when the prescription uses E main-work notation");
 const repairedLegacyCoachStructure = normalizeCoachWorkoutSteps([
   { kind: 'warmup', title: '熱身', end: { type: 'distance', value: 800, label: '0.8 km' } },
@@ -132,6 +133,7 @@ assertEqual(repairedLegacyCoachStructure[2]?.end?.type, 'time', "legacy coach co
 assertEqual(coachPrescribedKm({ km: 14 }, { totalKm: 13 }), 13, "confirmed coach totalKm overrides the generator's stale day distance");
 assertEqual(coachPrescribedKm({ km: 14 }, {}), 14, "coach distance falls back to the generated day only when no confirmed total exists");
 assertEqual(coachPrescribedMainKm({ km: 7 }, { totalKm: 6.5, steps: [{ kind: 'main', end: { type: 'distance', value: 4600 } }, { kind: 'repeat', title: 'ST 快步組', detail: '每趟快步' }] }), 4.6, "stride sessions keep their explicit main-run distance instead of adding strides on top of total mileage");
+assertEqual(coachPrescribedMainKm({ km: 8 }, { totalKm: 8, steps: [{ kind: 'repeat', title: 'T 體感組', children: [{ kind: 'interval', end: { type: 'time', value: 120 } }] }, { kind: 'main', end: { type: 'distance', value: 4000 } }] }), 4, "timed quality repeats keep their explicit Z2 completion distance instead of adding the total session distance");
 assertEqual(coachPrescribedMainKm({ km: 14 }, { totalKm: 13, steps: [{ kind: 'main', end: { type: 'distance', value: 11500 } }] }), 13, "long-run total remains the main-run target when warmup and cooldown are time-based");
 
 checks.forEach((check) => {

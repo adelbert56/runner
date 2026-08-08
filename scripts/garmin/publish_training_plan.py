@@ -284,21 +284,24 @@ def main() -> int:
             if existing_item and existing_item.get("workoutId") and args.replace_existing:
                 current_id = int(existing_item["workoutId"])
                 scheduled_id = scheduled.get((require_date(item["date"]), current_id))
-                if not scheduled_id:
-                    raise RuntimeError(f"Could not find the scheduled Runner workout for {name}; nothing was deleted")
                 replacement_id = workout_id(api.upload_running_workout(workout_for(item)))
                 api.schedule_workout(replacement_id, require_date(item["date"]))
-                api.unschedule_workout(scheduled_id)
+                # Garmin may retain a same-named workout in the library after its calendar
+                # entry was manually removed or superseded. It is then safe to rebuild the
+                # calendar entry; only unschedule when this exact old workout is present.
+                if scheduled_id:
+                    api.unschedule_workout(scheduled_id)
                 api.delete_workout(current_id)
                 current_id = replacement_id
-                action = "replaced"
+                action = "replaced" if scheduled_id else "recreated"
             elif existing_item and existing_item.get("workoutId"):
                 current_id = int(existing_item["workoutId"])
                 action = "reused"
             else:
                 current_id = workout_id(api.upload_running_workout(workout_for(item)))
                 action = "created"
-            api.schedule_workout(current_id, require_date(item["date"]))
+            if action != "replaced" and action != "recreated":
+                api.schedule_workout(current_id, require_date(item["date"]))
             results.append({"name": name, "date": item["date"], "workoutId": current_id, "action": action})
 
         write_status("ok", f"已同步 {len(results)} 堂課到 Garmin 行事曆", total=len(results), results=results)
