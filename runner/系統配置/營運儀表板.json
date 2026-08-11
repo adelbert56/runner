@@ -1,27 +1,27 @@
 {
-  "generated_at": "2026-08-11T01:53:06.882Z",
+  "generated_at": "2026-08-11T10:30:41.899Z",
   "basis_date": "2026-08-11",
   "races": {
-    "total": 59,
-    "follow_up_count": 20,
-    "complete_count": 39,
-    "complete_rate": "66%",
-    "launch_blocking_gap_count": 4,
+    "total": 60,
+    "follow_up_count": 19,
+    "complete_count": 41,
+    "complete_rate": "68%",
+    "launch_blocking_gap_count": 5,
     "launch_ready_count": 55,
-    "launch_ready_rate": "93%",
-    "official_direct_count": 53,
+    "launch_ready_rate": "92%",
+    "official_direct_count": 54,
     "official_direct_rate": "90%",
-    "verified_count": 59,
+    "verified_count": 60,
     "verified_rate": "100%",
     "opened_gap_count": 1,
     "date_anomaly_count": 0,
-    "due_now_count": 2,
+    "due_now_count": 3,
     "monthly_tracking_count": 3,
     "state_counts": {
       "歷史": 8,
       "停辦": 2,
       "已截止": 19,
-      "報名中": 23,
+      "報名中": 24,
       "報名時間未定": 4,
       "尚未開報": 2,
       "待確認": 1
@@ -270,7 +270,7 @@
         "total": 9,
         "official_direct": 9,
         "verified": 9,
-        "missing": 1,
+        "missing": 0,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 0,
@@ -279,10 +279,10 @@
           "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
           "2026 東城盃合歡山越野馬拉松"
         ],
-        "complete_rate": "89%",
+        "complete_rate": "100%",
         "official_direct_rate": "100%",
         "verified_rate": "100%",
-        "score": 96,
+        "score": 100,
         "status": "穩定"
       },
       {
@@ -306,6 +306,26 @@
         "status": "穩定"
       },
       {
+        "platform": "Focusline",
+        "total": 9,
+        "official_direct": 9,
+        "verified": 9,
+        "missing": 6,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 2,
+        "sample_races": [
+          "夏日馬拉松 - 南投埔里場",
+          "2026 梨山水蜜桃路跑",
+          "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站"
+        ],
+        "complete_rate": "33%",
+        "official_direct_rate": "100%",
+        "verified_rate": "100%",
+        "score": 77,
+        "status": "可用需觀察"
+      },
+      {
         "platform": "bao-ming",
         "total": 8,
         "official_direct": 8,
@@ -324,26 +344,6 @@
         "verified_rate": "100%",
         "score": 87,
         "status": "穩定"
-      },
-      {
-        "platform": "Focusline",
-        "total": 8,
-        "official_direct": 8,
-        "verified": 8,
-        "missing": 6,
-        "opened_gap": 0,
-        "date_anomaly": 0,
-        "due_now": 1,
-        "sample_races": [
-          "夏日馬拉松 - 南投埔里場",
-          "2026 梨山水蜜桃路跑",
-          "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站"
-        ],
-        "complete_rate": "25%",
-        "official_direct_rate": "100%",
-        "verified_rate": "100%",
-        "score": 74,
-        "status": "可用需觀察"
       },
       {
         "platform": "CTRun",
