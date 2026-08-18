@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T10:27:53.573Z",
+  "generated_at": "2026-08-18T14:52:34.477Z",
   "basis_date": "2026-08-18",
   "races": {
     "total": 64,
@@ -248,10 +248,10 @@
     "items": [
       {
         "platform": "運動筆記",
-        "total": 12,
+        "total": 13,
         "official_direct": 8,
-        "verified": 12,
-        "missing": 6,
+        "verified": 13,
+        "missing": 7,
         "opened_gap": 1,
         "date_anomaly": 0,
         "due_now": 2,
@@ -260,10 +260,10 @@
           "TOYOTA RUN 台中 視障專場",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
         ],
-        "complete_rate": "50%",
-        "official_direct_rate": "67%",
+        "complete_rate": "46%",
+        "official_direct_rate": "62%",
         "verified_rate": "100%",
-        "score": 74,
+        "score": 72,
         "status": "可用需觀察"
       },
       {
@@ -287,26 +287,6 @@
         "status": "穩定"
       },
       {
-        "platform": "Lohas",
-        "total": 10,
-        "official_direct": 8,
-        "verified": 10,
-        "missing": 2,
-        "opened_gap": 0,
-        "date_anomaly": 0,
-        "due_now": 0,
-        "sample_races": [
-          "2026中興新村半程馬拉松-披興戴月的想你",
-          "2026年FUN電多巴胺路跑嘉年華",
-          "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
-        ],
-        "complete_rate": "80%",
-        "official_direct_rate": "80%",
-        "verified_rate": "100%",
-        "score": 88,
-        "status": "穩定"
-      },
-      {
         "platform": "Focusline",
         "total": 10,
         "official_direct": 10,
@@ -325,6 +305,26 @@
         "verified_rate": "100%",
         "score": 76,
         "status": "可用需觀察"
+      },
+      {
+        "platform": "Lohas",
+        "total": 9,
+        "official_direct": 8,
+        "verified": 9,
+        "missing": 1,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "2026中興新村半程馬拉松-披興戴月的想你",
+          "2026年FUN電多巴胺路跑嘉年華",
+          "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
+        ],
+        "complete_rate": "89%",
+        "official_direct_rate": "89%",
+        "verified_rate": "100%",
+        "score": 93,
+        "status": "穩定"
       },
       {
         "platform": "bao-ming",

@@ -78,14 +78,14 @@
     }
   },
   {
-    "race_id": "9bc95e67-984b-43a4-893c-0c733aaa5347",
+    "race_id": "eff19bb5-6722-4b62-976d-16bc501aaaa4",
     "race_name": "2027 高美濕地馬拉松",
     "race_date": "2027-03-14",
     "race_county": "臺中市",
     "registration_opens_at": "",
     "registration_deadline": "",
     "registration_status": "報名時間未定",
-    "source_platform": "Lohas、運動筆記",
+    "source_platform": "運動筆記",
     "is_official_direct": false,
     "priority_score": 14,
     "tracking": {
@@ -135,7 +135,7 @@
     ],
     "current_links": {
       "registration_link": "",
-      "official_event_url": "https://lohasnet.tw/#/event",
+      "official_event_url": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13143",
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13143&subtitle=2027+%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13143",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2027%20%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE"
