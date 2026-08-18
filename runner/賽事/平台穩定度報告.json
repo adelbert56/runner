@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-13T11:01:17.468Z",
-  "basis_date": "2026-08-13",
+  "generated_at": "2026-08-18T10:27:53.573Z",
+  "basis_date": "2026-08-18",
   "items": [
     {
       "platform": "運動筆記",
@@ -10,7 +10,7 @@
       "missing": 6,
       "opened_gap": 1,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 2,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
         "TOYOTA RUN 台中 視障專場",
@@ -24,30 +24,30 @@
     },
     {
       "platform": "iRunner",
-      "total": 9,
-      "official_direct": 9,
-      "verified": 9,
-      "missing": 0,
+      "total": 11,
+      "official_direct": 11,
+      "verified": 11,
+      "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 0,
+      "due_now": 1,
       "sample_races": [
         "2026 專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
         "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
         "2026 東城盃合歡山越野馬拉松"
       ],
-      "complete_rate": "100%",
+      "complete_rate": "91%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 100,
+      "score": 97,
       "status": "穩定"
     },
     {
       "platform": "Lohas",
-      "total": 9,
+      "total": 10,
       "official_direct": 8,
-      "verified": 9,
-      "missing": 1,
+      "verified": 10,
+      "missing": 2,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 0,
@@ -56,30 +56,30 @@
         "2026年FUN電多巴胺路跑嘉年華",
         "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
       ],
-      "complete_rate": "89%",
-      "official_direct_rate": "89%",
+      "complete_rate": "80%",
+      "official_direct_rate": "80%",
       "verified_rate": "100%",
-      "score": 93,
+      "score": 88,
       "status": "穩定"
     },
     {
       "platform": "Focusline",
-      "total": 9,
-      "official_direct": 9,
-      "verified": 9,
-      "missing": 6,
+      "total": 10,
+      "official_direct": 10,
+      "verified": 10,
+      "missing": 7,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 4,
       "sample_races": [
         "夏日馬拉松 - 南投埔里場",
         "2026 梨山水蜜桃路跑",
         "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站"
       ],
-      "complete_rate": "33%",
+      "complete_rate": "30%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 77,
+      "score": 76,
       "status": "可用需觀察"
     },
     {
@@ -90,7 +90,7 @@
       "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 0,
+      "due_now": 1,
       "sample_races": [
         "2026 BOBDOG RUN(台中場)",
         "2026 松鶴越野",

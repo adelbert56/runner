@@ -13,9 +13,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-08-15",
+      "next_check_date": "2026-09-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 199 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 194 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -78,7 +78,85 @@
     }
   },
   {
-    "race_id": "c5b75677-3c86-4dab-b97b-c5a93838ea74",
+    "race_id": "9bc95e67-984b-43a4-893c-0c733aaa5347",
+    "race_name": "2027 高美濕地馬拉松",
+    "race_date": "2027-03-14",
+    "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
+    "source_platform": "Lohas、運動筆記",
+    "is_official_direct": false,
+    "priority_score": 14,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-09-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 208 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://lohasnet.tw/#/event",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13143&subtitle=2027+%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13143",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%20%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE"
+    },
+    "suggested_override": {
+      "race_name": "2027 高美濕地馬拉松",
+      "race_date": "2027-03-14",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "bc3cb414-9fbf-4e6f-963c-adb18236c30a",
     "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
     "race_date": "2027-03-28",
     "race_county": "臺中市",
@@ -91,9 +169,9 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-08-15",
+      "next_check_date": "2026-09-01",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 227 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 222 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       {
@@ -171,7 +249,7 @@
       "status_label": "未來再查",
       "next_check_date": "2026-10-18",
       "cadence": "future",
-      "reason": "距離賽事 247 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 242 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       {
@@ -249,7 +327,7 @@
       "status_label": "未來再查",
       "next_check_date": "2027-06-07",
       "cadence": "future",
-      "reason": "距離賽事 479 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 474 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       {
@@ -312,6 +390,78 @@
     }
   },
   {
+    "race_id": "a269ca58-a9c6-4522-8194-433a9c639d8b",
+    "race_name": "2026 國際女孩日水水運動節",
+    "race_date": "2026-10-11",
+    "race_county": "彰化縣",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "報名時間未定",
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 9,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-08-18",
+      "cadence": "weekly",
+      "reason": "距離賽事 54 天且開報日未知，應每週追蹤報名頁是否釋出。"
+    },
+    "missing": [
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "https://irunner.biji.co/internationalgirlsfestival",
+      "official_event_url": "https://irunner.biji.co/internationalgirlsfestival",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13149&subtitle=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13149",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80"
+    },
+    "suggested_override": {
+      "race_name": "2026 國際女孩日水水運動節",
+      "race_date": "2026-10-11",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
     "race_id": "2480553b-d633-48a0-8b65-3da5adeed5db",
     "race_name": "2026 濁水溪紫金馬拉松-花城竹山站",
     "race_date": "2026-12-13",
@@ -323,11 +473,11 @@
     "is_official_direct": true,
     "priority_score": 9,
     "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-08-15",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 122 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-08-18",
+      "cadence": "weekly",
+      "reason": "距離賽事 117 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -399,7 +549,7 @@
       "status_label": "等待開報當天",
       "next_check_date": "2026-08-24",
       "cadence": "on_open_date",
-      "reason": "已知開報日 2026-08-24，尚有 12 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+      "reason": "已知開報日 2026-08-24，尚有 7 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
     },
     "missing": [
       {
@@ -463,7 +613,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：開報時間、報名截止時間。除非要補歷史資料，優先度較低。"
     },
@@ -517,7 +667,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結。"
     },
@@ -565,9 +715,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "weekly",
-      "reason": "距離賽事 86 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 81 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       {
@@ -619,7 +769,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：各距離開跑時間、費用、名額。"
     },
@@ -666,6 +816,66 @@
     }
   },
   {
+    "race_id": "a1f481bc-35d7-4b29-822a-4db3cf8ef84d",
+    "race_name": "2026 鄉鎮之美公益馬拉松—臺中后里場",
+    "race_date": "2026-12-26",
+    "race_county": "臺中市",
+    "registration_opens_at": "2026-08-06",
+    "registration_deadline": "2026-12-05",
+    "registration_status": "報名中",
+    "source_platform": "Focusline",
+    "is_official_direct": true,
+    "priority_score": 3,
+    "tracking": {
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-08-18",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、費用、名額。"
+    },
+    "missing": [
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "https://www.focusline.com.tw/261226IA",
+      "official_event_url": "https://www.focusline.com.tw/261226IA",
+      "detail_url": "https://www.focusline.com.tw/261226IA",
+      "source_registration_link": "",
+      "facebook_search_url": ""
+    },
+    "suggested_override": {
+      "race_name": "2026 鄉鎮之美公益馬拉松—臺中后里場",
+      "race_date": "2026-12-26",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
     "race_id": "05ba6ee1-ec97-495b-bb09-b1987340be7a",
     "race_name": "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站",
     "race_date": "2026-09-19",
@@ -679,7 +889,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：各距離開跑時間、費用。保留供歷史資料補齊。"
     },
@@ -733,7 +943,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：各距離開跑時間、費用。"
     },
@@ -787,9 +997,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 10 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：各距離開跑時間。"
+      "reason": "距離賽事 5 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：各距離開跑時間。"
     },
     "missing": [
       {
@@ -835,7 +1045,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：各距離開跑時間。保留供歷史資料補齊。"
     },
@@ -883,7 +1093,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -924,16 +1134,16 @@
     "race_county": "臺中市",
     "registration_opens_at": "2026-06-22",
     "registration_deadline": "2026-08-14",
-    "registration_status": "報名中",
+    "registration_status": "已截止",
     "source_platform": "CTRun、運動筆記",
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
-      "status": "monitor_weekly",
-      "status_label": "每週追蹤",
-      "next_check_date": "2026-08-13",
-      "cadence": "biweekly",
-      "reason": "開報日已過，仍缺：名額。"
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-08-18",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：名額。保留供歷史資料補齊。"
     },
     "missing": [
       {
@@ -979,7 +1189,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -1027,7 +1237,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-08-13",
+      "next_check_date": "2026-08-18",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -1068,16 +1278,16 @@
     "race_county": "南投縣",
     "registration_opens_at": "2026-08-17",
     "registration_deadline": "2026-11-30",
-    "registration_status": "尚未開報",
+    "registration_status": "報名中",
     "source_platform": "Focusline、運動筆記",
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
-      "status": "wait_until_open_window",
-      "status_label": "等待開報當天",
-      "next_check_date": "2026-08-16",
-      "cadence": "on_open_date",
-      "reason": "已知開報日 2026-08-16，尚有 4 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+      "status": "due_now",
+      "status_label": "現在該重爬",
+      "next_check_date": "2026-08-18",
+      "cadence": "every_3_days",
+      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：名額。"
     },
     "missing": [
       {
