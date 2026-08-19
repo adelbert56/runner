@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-19T08:30:49.152Z",
+  "generated_at": "2026-08-19T09:06:12.692Z",
   "items": [
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114434-subtitle-e3-80-90-e8-a9-95-e",
@@ -342,7 +342,7 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-08-e5-ae-98-e6-96-b9-e6-96-b0-e8-81-9e-e5-bc-b5-e5-87-8c-e8-b5-ab",
+      "id": "news-kenlu-net-2026-08-puma-rollcat-official-images",
       "type": "news",
       "title": "官方新聞 / 張凌赫全套同款開賣 PUMA 薄底鞋家族新款 Rollcat 登場",
       "date": "2026-08-19",
@@ -352,7 +352,7 @@
       "source": "KENLU",
       "category": "跑鞋裝備",
       "summary": "張凌赫全套同款台灣 8/20 開賣！PUMA 經典薄底鞋家族迎來全新鞋款 Rollcat，攜手 PUMA 大中華區品牌代言人張凌赫率先演繹，近期隨著新劇《這一秒過火》話題持續升溫，張凌赫戲裡戲外的高人氣魅力也備受關注。",
-      "url": "https://kenlu.net/2026/08/%e5%ae%98%e6%96%b9%e6%96%b0%e8%81%9e-%e5%bc%b5%e5%87%8c%e8%b5%ab%e5%85%a8%e5%a5%97%e5%90%8c%e6%ac%be%e9%96%8b%e8%b3%a3-puma-%e8%96%84%e5%ba%95%e9%9e%8b%e5%ae%b6%e6%97%8f%e6%96%b0%e6%ac%be-rollcat/",
+      "url": "https://kenlu.net/2026/08/puma-rollcat-official-images/",
       "score": 13,
       "source_origin": "candidate",
       "published_at": "2026-08-19",
@@ -724,7 +724,7 @@
     {
       "id": "news-www-don1don-com-archives-240955-e9-81-8b-e7-99-bc-e5-b1-80-e8-b5-b0-e8-b7-91-e9-",
       "type": "news",
-      "title": "運發局走跑高雄3.0抽獎...",
+      "title": "運發局走跑高雄3.0抽獎之夜熱...",
       "date": "2026-08-19",
       "date_source": "first_seen",
       "article_date": "",
@@ -1222,26 +1222,6 @@
       ]
     },
     {
-      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114517-subtitle-e3-80-90-e7-b7-a8-e",
-      "type": "shoe",
-      "title": "【編輯開箱】PARAMOUNT MAX、HURRICANE 26 怎麼選？Saucony 穩定保護家族一次看懂",
-      "date": "2026-08-18",
-      "date_source": "source",
-      "article_date": "2026-08-18",
-      "first_seen_at": "2026-08-19",
-      "source": "運動筆記",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114517&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91PARAMOUNT%20MAX%E3%80%81HURRICANE%2026%20%E6%80%8E%E9%BA%BC%E9%81%B8%EF%BC%9F%E7%B4%A2%E5%BA%B7%E5%B0%BC%E7%A9%A9%E5%AE%9A%E4%BF%9D%E8%AD%B7%E5%AE%B6%E6%97%8F%E4%B8%80%E6%AC%A1%E7%9C%8B%E6%87%82&label=all",
-      "score": 28,
-      "source_origin": "candidate",
-      "published_at": "2026-08-19",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
-      ]
-    },
-    {
       "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114533-subtitle-e3-80-90-e5-93-81-e",
       "type": "shoe",
       "title": "【品牌動態】ASICS攜手blacktoes 推出全新聯名！以摺紙工藝延續「安靜跑步」靜謐哲學",
@@ -1479,6 +1459,26 @@
       "publish_status": "published",
       "source_aliases": [
         "Bounce"
+      ]
+    },
+    {
+      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114517-subtitle-e3-80-90-e7-b7-a8-e",
+      "type": "shoe",
+      "title": "【編輯開箱】PARAMOUNT MAX、HURRICANE 26 怎麼選？Saucony 穩定保護家族一次看懂",
+      "date": "2026-08-18",
+      "date_source": "source",
+      "article_date": "2026-08-18",
+      "first_seen_at": "2026-08-19",
+      "source": "運動筆記",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114517&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91PARAMOUNT%20MAX%E3%80%81HURRICANE%2026%20%E6%80%8E%E9%BA%BC%E9%81%B8%EF%BC%9F%E7%B4%A2%E5%BA%B7%E5%B0%BC%E7%A9%A9%E5%AE%9A%E4%BF%9D%E8%AD%B7%E5%AE%B6%E6%97%8F%E4%B8%80%E6%AC%A1%E7%9C%8B%E6%87%82&label=all",
+      "score": 27,
+      "source_origin": "archive",
+      "published_at": "2026-08-19",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
       ]
     },
     {
