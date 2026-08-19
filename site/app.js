@@ -1489,12 +1489,29 @@ function normalizeStartDistanceLabel(value) {
   return canonicalDistanceLabel(label);
 }
 
+function displayStartGroupLabel(value) {
+  const label = normalizeStartDistanceLabel(value);
+  const match = label.match(/^(.+?)（\s*(\d+(?:\.\d+)?)\s*K\s*）$/i);
+  if (!match) {
+    return label;
+  }
+
+  const group = match[1].trim();
+  const publishedKm = Number(match[2]);
+  const standardGroup = [
+    [/全(?:程)?馬|馬拉松組/u, 42.195],
+    [/半(?:程)?馬/u, 21.0975],
+  ].find(([pattern]) => pattern.test(group));
+  // 全馬／半馬是跑者已熟悉的標準語意；只有官方距離偏離標準組別時才補回數字。
+  return standardGroup && Math.abs(publishedKm - standardGroup[1]) <= 0.25 ? group : label;
+}
+
 function startTimeText(item) {
   if (typeof item === "string") {
     const parsed = parseStartTimeText(item);
     return [parsed.distance, parsed.time].filter(Boolean).join(" ");
   }
-  return [normalizeStartDistanceLabel(item.distance), item.time].filter(Boolean).join(" ");
+  return [displayStartGroupLabel(item.distance), item.time].filter(Boolean).join(" ");
 }
 
 function formatStartTimes(race, fallback = "官方尚未提供各距離開跑時間") {
@@ -1509,7 +1526,7 @@ function renderStartTimes(race) {
   }
   const rows = items.map((item) => {
     const parsed = typeof item === "string" ? parseStartTimeText(item) : item;
-    const distance = normalizeStartDistanceLabel(parsed.distance) || "賽事";
+    const distance = displayStartGroupLabel(parsed.distance) || "賽事";
     const time = parsed.time || "待確認";
     return `<li><span class="start-distance">${escapeHtml(distance)}</span><span class="start-time">${escapeHtml(time)}</span></li>`;
   });
@@ -1526,23 +1543,170 @@ function renderStartTimes(race) {
   return `<ul class="start-time-list">${rows.join("")}${note}</ul>`;
 }
 
-function renderFactBulletList(value) {
-  const items = value
+function compactStandardRaceDistance(value) {
+  return String(value || "").replace(/(\d+(?:\.\d+)?)\s*(?:km|k)\b/gi, (match, rawDistance) => {
+    const distance = Number(rawDistance);
+    if (Math.abs(distance - 42.195) <= 0.25) return "全馬";
+    if (Math.abs(distance - 21.0975) <= 0.25) return "半馬";
+    return `${rawDistance}K`;
+  });
+}
+
+function normalizedFactBulletItems(value, label = "") {
+  const rawItems = String(value || "")
     .split(/[、；]/)
     .map((part) => part.trim())
     .filter(Boolean);
+  const items = [];
+  const seen = new Set();
+  let chipDeposit = "";
+
+  rawItems.forEach((rawItem) => {
+    let item = compactStandardRaceDistance(rawItem);
+    if (label === "費用") {
+      const depositMatch = item.match(/^晶片押金\s*(?:各\s*)?([\d,]+)\s*元$/);
+      if (depositMatch) {
+        chipDeposit = depositMatch[1];
+        item = `晶片押金各${chipDeposit}元`;
+      } else if (chipDeposit && new RegExp(`^${chipDeposit.replace(/,/g, "[,]?")}\\s*元$`).test(item)) {
+        return;
+      }
+    }
+    const key = item.replace(/\s+/g, "");
+    if (key && !seen.has(key)) {
+      seen.add(key);
+      items.push(item);
+    }
+  });
+  return items;
+}
+
+function renderFactBulletList(value, label) {
+  const items = normalizedFactBulletItems(value, label);
   if (items.length <= 1) {
-    return escapeHtml(value);
+    return escapeHtml(items[0] || value || "");
   }
   return `<ul class="fact-bullet-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
+function feeMatrixItems(value) {
+  const normalized = normalizedFactBulletItems(value, "費用");
+  const matrixItems = [];
+  const remainder = [];
+
+  String(value || "").split(/[；;]/u).map((item) => item.trim()).filter(Boolean).forEach((segment) => {
+    const sharedPriceMatch = segment.match(/^(.+?)\s*各\s*((?:NT\$?|\$)?[\d,]+(?:[-~～][\d,]+)?元)[。.]?$/iu);
+    if (sharedPriceMatch && !isFeeNote(segment)) {
+      sharedPriceMatch[1].split(/[、，,]/u).map((group) => group.trim()).filter(Boolean).forEach((group) => {
+        matrixItems.push(`${group} ${sharedPriceMatch[2]}`);
+      });
+      return;
+    }
+    const schemeMatch = segment.match(/^(.+?)[：:]\s*(.+)$/u);
+    if (!schemeMatch) {
+      remainder.push(segment);
+      return;
+    }
+    const [, scheme, amountsText] = schemeMatch;
+    const amounts = amountsText.split("、").map((item) => item.trim()).filter(Boolean).map((item) => {
+      const match = item.match(/^(.+?)\s+((?:NT\$?|\$)?[\d,]+元)$/iu);
+      return match ? { group: match[1], amount: match[2] } : null;
+    });
+    if (amounts.length < 2 || amounts.some((item) => !item)) {
+      remainder.push(segment);
+      return;
+    }
+    amounts.forEach(({ group, amount }) => matrixItems.push(`${group}（${scheme}）${amount}`));
+  });
+
+  return matrixItems.length ? [...matrixItems, ...normalizedFactBulletItems(remainder.join("；"), "費用")] : normalized;
+}
+
+function renderFactDataTable(headers, rows, notes = []) {
+  const head = headers.map((header) => `<th scope="col">${escapeHtml(header)}</th>`).join("");
+  const body = rows.map((row) => `<tr><th scope="row">${escapeHtml(row[0])}</th>${row.slice(1).map((cell) => `<td>${escapeHtml(cell || "—")}</td>`).join("")}</tr>`).join("");
+  const note = notes.length ? `<p class="fee-matrix-note">${escapeHtml(notes.join("、"))}</p>` : "";
+  return `<div class="fee-matrix-wrap"><table class="fee-matrix"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>${note}</div>`;
+}
+
+function isFeeNote(item) {
+  return /晶片|押金|行政處理費|運費|接駁|備註|另收|另有調整/u.test(item);
+}
+
+function renderFees(value) {
+  const items = feeMatrixItems(value);
+  const ratePattern = /^(.+?)（(.+?)）\s*([^\s]+元)[。.]?$/;
+  const simpleRatePattern = /^(.+?)(?:\s*)((?:NT\$?|\$)?[\d,]+(?:[-~～][\d,]+)?元)[。.]?$/iu;
+  const rates = new Map();
+  const channels = [];
+  const simpleRates = [];
+  const notes = [];
+
+  items.forEach((item) => {
+    const match = item.match(ratePattern);
+    if (!match) {
+      const simpleMatch = item.match(simpleRatePattern);
+      if (simpleMatch && !isFeeNote(item)) {
+        simpleRates.push([simpleMatch[1].trim(), simpleMatch[2]]);
+      } else {
+        notes.push(item);
+      }
+      return;
+    }
+    const [, group, channel, amount] = match;
+    if (!rates.has(group)) rates.set(group, {});
+    rates.get(group)[channel] = amount;
+    if (!channels.includes(channel)) channels.push(channel);
+  });
+
+  if (rates.size >= 2 && channels.length >= 2) {
+    const headers = channels.map((channel) => ({
+      "友善共融／陪跑": "友善",
+    }[channel] || channel));
+    const rows = [...rates.entries()].map(([group, amounts]) => [group, ...channels.map((channel) => amounts[channel] || "—")]);
+    return renderFactDataTable(["組別", ...headers], rows, notes);
+  }
+  if (simpleRates.length >= 2) {
+    return renderFactDataTable(["組別", "費用"], simpleRates, notes);
+  }
+  return renderFactBulletList(value, "費用");
+}
+
+function renderQuota(value) {
+  const notes = [];
+  const rows = [];
+  String(value || "").split(/[；;]/u).map((item) => item.trim()).filter(Boolean).forEach((segment) => {
+    const totalMatch = segment.match(/^(總名額\s*[\d,]+\s*(?:人|名))\s*[：:]\s*(.+)$/u);
+    if (totalMatch) {
+      notes.push(totalMatch[1].replace(/\s+/g, ""));
+      segment = totalMatch[2];
+    }
+    const eachMatch = segment.match(/^(.+?)\s*各\s*([\d,]+)\s*(人|名)[。.]?$/u);
+    if (eachMatch) {
+      eachMatch[1].split(/[、，,]/u).map((group) => group.trim()).filter(Boolean).forEach((group) => rows.push([group, `${eachMatch[2]}${eachMatch[3]}`]));
+      return;
+    }
+    segment.split(/[、，]/u).map((item) => item.trim()).filter(Boolean).forEach((item) => {
+      const match = item.match(/^(.+?)([\d,]+)\s*(人|名)(.*)$/u);
+      if (!match) {
+        notes.push(item);
+        return;
+      }
+      rows.push([match[1].trim(), `${match[2]}${match[3]}${String(match[4] || "").replace(/[。.]+$/u, "")}`]);
+    });
+  });
+  return rows.length >= 2 ? renderFactDataTable(["組別", "名額"], rows, notes) : renderFactBulletList(value, "名額");
 }
 
 function factClassFor(label) {
   const classMap = {
     地點: "fact-venue",
     開跑: "fact-start-times",
+    費用: "fact-fees",
+    名額: "fact-capacity",
     天氣: "fact-weather",
     主辦: "fact-organizer",
+    協辦: "fact-coorganizer",
   };
   return classMap[label] || "fact-generic";
 }
@@ -1916,7 +2080,7 @@ function renderRaceCard(race) {
           </div>
           </div>
         </div>
-        ${factItems.length ? `<details class="race-fact-details"><summary><span class="fact-summary-open">查看組別開跑時間、費用與名額</span><span class="fact-summary-close">收合賽事資訊</span></summary><dl class="race-fact-grid" aria-label="賽事完整資訊">${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt><span class="fact-label">${icon(FACT_ICONS[item.label] || "info")}${escapeHtml(item.label)}</span>${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : item.label === "費用" ? renderFactBulletList(item.value) : escapeHtml(item.value)}</dd></div>`).join("")}</dl></details>` : ""}
+        ${factItems.length ? `<details class="race-fact-details"><summary><span class="fact-summary-open">查看組別開跑時間、費用與名額</span><span class="fact-summary-close">收合賽事資訊</span></summary><dl class="race-fact-grid" aria-label="賽事完整資訊">${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt><span class="fact-label">${icon(FACT_ICONS[item.label] || "info")}${escapeHtml(item.label)}</span>${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : item.label === "費用" ? renderFees(item.value) : item.label === "名額" ? renderQuota(item.value) : escapeHtml(item.value)}</dd></div>`).join("")}</dl></details>` : ""}
       </div>
     </article>
   `;

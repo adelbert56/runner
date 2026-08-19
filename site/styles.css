@@ -2235,6 +2235,53 @@ h3 {
   margin-top: 2px;
 }
 
+.fee-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.fee-matrix-wrap {
+  overflow-x: auto;
+}
+
+.fee-matrix th,
+.fee-matrix td {
+  padding: 4px 3px;
+  border-bottom: 1px solid rgba(36, 114, 79, 0.12);
+  white-space: nowrap;
+}
+
+.fee-matrix thead th {
+  color: var(--muted);
+  font-weight: 750;
+  text-align: right;
+}
+
+.fee-matrix th:first-child,
+.fee-matrix tbody th {
+  text-align: left;
+}
+
+.fee-matrix td {
+  color: var(--ink);
+  font-weight: 850;
+  text-align: right;
+}
+
+.fee-matrix tbody tr:last-child th,
+.fee-matrix tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.fee-matrix-note {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
 .pill {
   display: inline-flex;
   min-height: 24px;
@@ -2314,7 +2361,8 @@ h3 {
 
 .race-fact-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
   gap: 12px;
   margin-top: 0;
   margin-bottom: 0;
@@ -2350,6 +2398,7 @@ h3 {
 
 .race-fact-grid div {
   min-width: 0;
+  align-self: start;
   padding: 12px 16px;
   border-top: none;
   border-radius: var(--radius-sm);
@@ -2358,6 +2407,7 @@ h3 {
 
 .race-fact-grid .fact-start-times {
   min-width: 0;
+  grid-column: span 2;
 }
 
 .race-fact-grid dt,
@@ -2392,18 +2442,21 @@ h3 {
 
 .start-time-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: 8px 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
   margin: 8px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .start-time-list li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 8px;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(31, 42, 36, 0.1);
   line-height: 1.25;
 }
 
@@ -2411,7 +2464,7 @@ h3 {
   min-width: 0;
   color: var(--muted);
   font-weight: 850;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
 }
 
 .start-time {
@@ -2422,6 +2475,8 @@ h3 {
 }
 
 .start-time-note {
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr !important;
   color: var(--muted);
   font-size: 0.92em;
   font-weight: 600;
@@ -5003,6 +5058,10 @@ h3 {
     grid-column: auto;
   }
 
+  .race-fact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .main-nav,
   .segmented,
   .month-list,
@@ -5789,6 +5848,10 @@ h3 {
   }
 
   .race-fact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .start-time-list {
     grid-template-columns: 1fr;
   }
 
