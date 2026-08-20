@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-18T14:52:34.477Z",
-  "basis_date": "2026-08-18",
+  "generated_at": "2026-08-20T10:38:05.303Z",
+  "basis_date": "2026-08-20",
   "items": [
     {
       "platform": "運動筆記",
@@ -47,7 +47,7 @@
       "total": 10,
       "official_direct": 10,
       "verified": 10,
-      "missing": 7,
+      "missing": 6,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 4,
@@ -56,37 +56,17 @@
         "2026 梨山水蜜桃路跑",
         "7th CRUFU RUN 夸父追日跨夜接力賽-西臺灣站"
       ],
-      "complete_rate": "30%",
+      "complete_rate": "40%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 76,
+      "score": 79,
       "status": "可用需觀察"
     },
     {
-      "platform": "Lohas",
-      "total": 9,
-      "official_direct": 8,
-      "verified": 9,
-      "missing": 1,
-      "opened_gap": 0,
-      "date_anomaly": 0,
-      "due_now": 0,
-      "sample_races": [
-        "2026中興新村半程馬拉松-披興戴月的想你",
-        "2026年FUN電多巴胺路跑嘉年華",
-        "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
-      ],
-      "complete_rate": "89%",
-      "official_direct_rate": "89%",
-      "verified_rate": "100%",
-      "score": 93,
-      "status": "穩定"
-    },
-    {
       "platform": "bao-ming",
-      "total": 8,
-      "official_direct": 8,
-      "verified": 8,
+      "total": 9,
+      "official_direct": 9,
+      "verified": 9,
       "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
@@ -96,10 +76,30 @@
         "2026 松鶴越野",
         "115 年運動i臺灣2.0計畫-北屯區路跑樂活嘉年華"
       ],
-      "complete_rate": "63%",
+      "complete_rate": "67%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 87,
+      "score": 88,
+      "status": "穩定"
+    },
+    {
+      "platform": "Lohas",
+      "total": 8,
+      "official_direct": 8,
+      "verified": 8,
+      "missing": 0,
+      "opened_gap": 0,
+      "date_anomaly": 0,
+      "due_now": 0,
+      "sample_races": [
+        "2026中興新村半程馬拉松-披興戴月的想你",
+        "2026年FUN電多巴胺路跑嘉年華",
+        "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
+      ],
+      "complete_rate": "100%",
+      "official_direct_rate": "100%",
+      "verified_rate": "100%",
+      "score": 100,
       "status": "穩定"
     },
     {
@@ -107,7 +107,7 @@
       "total": 7,
       "official_direct": 7,
       "verified": 7,
-      "missing": 1,
+      "missing": 2,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 0,
@@ -116,10 +116,10 @@
         "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
         "2026 山城星光馬拉松"
       ],
-      "complete_rate": "86%",
+      "complete_rate": "71%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 95,
+      "score": 90,
       "status": "穩定"
     },
     {
