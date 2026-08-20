@@ -78,7 +78,85 @@
     }
   },
   {
-    "race_id": "7e69f7fd-9539-4ae9-9fae-66dde058dd2b",
+    "race_id": "1d9b71f9-8a0d-464e-95b0-a357d6557ff6",
+    "race_name": "2027 高美濕地馬拉松",
+    "race_date": "2027-03-14",
+    "race_county": "臺中市",
+    "registration_opens_at": "",
+    "registration_deadline": "",
+    "registration_status": "未知",
+    "source_platform": "Lohas",
+    "is_official_direct": false,
+    "priority_score": 14,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-09-01",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 206 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      {
+        "key": "official_registration_link",
+        "label": "官方報名連結",
+        "severity": "high",
+        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
+      },
+      {
+        "key": "registration_opens_at",
+        "label": "開報時間",
+        "severity": "medium",
+        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "registration_deadline",
+        "label": "報名截止時間",
+        "severity": "medium",
+        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
+      },
+      {
+        "key": "start_times",
+        "label": "各距離開跑時間",
+        "severity": "low",
+        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
+      },
+      {
+        "key": "fees",
+        "label": "費用",
+        "severity": "low",
+        "hint": "補 fees，可用字串或分組物件。"
+      },
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://lohasnet.tw/#/event",
+      "detail_url": "https://lohasnet.tw/#/event",
+      "source_registration_link": "",
+      "facebook_search_url": ""
+    },
+    "suggested_override": {
+      "race_name": "2027 高美濕地馬拉松",
+      "race_date": "2027-03-14",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "46d446d9-177d-4bf1-a2dc-949bb72cbbb5",
     "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
     "race_date": "2027-03-28",
     "race_county": "臺中市",
@@ -299,78 +377,6 @@
     "suggested_override": {
       "race_name": "2027臺中城市半程馬拉松",
       "race_date": "2027-12-05",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
-    "race_id": "a269ca58-a9c6-4522-8194-433a9c639d8b",
-    "race_name": "2026 國際女孩日水水運動節",
-    "race_date": "2026-10-11",
-    "race_county": "彰化縣",
-    "registration_opens_at": "",
-    "registration_deadline": "",
-    "registration_status": "報名時間未定",
-    "source_platform": "iRunner、運動筆記",
-    "is_official_direct": true,
-    "priority_score": 9,
-    "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-08-20",
-      "cadence": "weekly",
-      "reason": "距離賽事 52 天且開報日未知，應每週追蹤報名頁是否釋出。"
-    },
-    "missing": [
-      {
-        "key": "registration_opens_at",
-        "label": "開報時間",
-        "severity": "medium",
-        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "registration_deadline",
-        "label": "報名截止時間",
-        "severity": "medium",
-        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "start_times",
-        "label": "各距離開跑時間",
-        "severity": "low",
-        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
-      },
-      {
-        "key": "fees",
-        "label": "費用",
-        "severity": "low",
-        "hint": "補 fees，可用字串或分組物件。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "https://irunner.biji.co/internationalgirlsfestival",
-      "official_event_url": "https://irunner.biji.co/internationalgirlsfestival",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13149&subtitle=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13149",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80"
-    },
-    "suggested_override": {
-      "race_name": "2026 國際女孩日水水運動節",
-      "race_date": "2026-10-11",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",
@@ -971,6 +977,54 @@
     "suggested_override": {
       "race_name": "2026 公勝盃公益路跑",
       "race_date": "2026-10-04",
+      "registration_link": "",
+      "official_event_url": "",
+      "registration_opens_at": "",
+      "registration_deadline": "",
+      "venue": "",
+      "organizer": "",
+      "fees": "",
+      "quota": "",
+      "verified_at": "",
+      "verification_note": ""
+    }
+  },
+  {
+    "race_id": "a269ca58-a9c6-4522-8194-433a9c639d8b",
+    "race_name": "2026 國際女孩日水水運動節",
+    "race_date": "2026-10-11",
+    "race_county": "彰化縣",
+    "registration_opens_at": "2026-08-21",
+    "registration_deadline": "2026-09-10",
+    "registration_status": "尚未開報",
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 1,
+    "tracking": {
+      "status": "wait_until_open_window",
+      "status_label": "等待開報當天",
+      "next_check_date": "2026-08-20",
+      "cadence": "on_open_date",
+      "reason": "已知開報日 2026-08-20，尚有 1 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+    },
+    "missing": [
+      {
+        "key": "quota",
+        "label": "名額",
+        "severity": "low",
+        "hint": "補 quota 或 participant_limit。"
+      }
+    ],
+    "current_links": {
+      "registration_link": "https://irunner.biji.co/internationalgirlsfestival",
+      "official_event_url": "https://irunner.biji.co/internationalgirlsfestival",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13149&subtitle=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13149",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80"
+    },
+    "suggested_override": {
+      "race_name": "2026 國際女孩日水水運動節",
+      "race_date": "2026-10-11",
       "registration_link": "",
       "official_event_url": "",
       "registration_opens_at": "",

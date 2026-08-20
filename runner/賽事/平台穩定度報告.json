@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-20T10:38:05.303Z",
+  "generated_at": "2026-08-20T11:56:17.448Z",
   "basis_date": "2026-08-20",
   "items": [
     {
@@ -30,7 +30,7 @@
       "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
         "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
@@ -63,6 +63,26 @@
       "status": "可用需觀察"
     },
     {
+      "platform": "Lohas",
+      "total": 9,
+      "official_direct": 8,
+      "verified": 9,
+      "missing": 1,
+      "opened_gap": 0,
+      "date_anomaly": 0,
+      "due_now": 0,
+      "sample_races": [
+        "2026中興新村半程馬拉松-披興戴月的想你",
+        "2026年FUN電多巴胺路跑嘉年華",
+        "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
+      ],
+      "complete_rate": "89%",
+      "official_direct_rate": "89%",
+      "verified_rate": "100%",
+      "score": 93,
+      "status": "穩定"
+    },
+    {
       "platform": "bao-ming",
       "total": 9,
       "official_direct": 9,
@@ -80,26 +100,6 @@
       "official_direct_rate": "100%",
       "verified_rate": "100%",
       "score": 88,
-      "status": "穩定"
-    },
-    {
-      "platform": "Lohas",
-      "total": 8,
-      "official_direct": 8,
-      "verified": 8,
-      "missing": 0,
-      "opened_gap": 0,
-      "date_anomaly": 0,
-      "due_now": 0,
-      "sample_races": [
-        "2026中興新村半程馬拉松-披興戴月的想你",
-        "2026年FUN電多巴胺路跑嘉年華",
-        "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
-      ],
-      "complete_rate": "100%",
-      "official_direct_rate": "100%",
-      "verified_rate": "100%",
-      "score": 100,
       "status": "穩定"
     },
     {
