@@ -1636,7 +1636,7 @@ function isFeeNote(item) {
 function renderFees(value) {
   const items = feeMatrixItems(value);
   const ratePattern = /^(.+?)（(.+?)）\s*([^\s]+元)[。.]?$/;
-  const simpleRatePattern = /^(.+?)(?:\s*)((?:NT\$?|\$)?[\d,]+(?:[-~～][\d,]+)?元)[。.]?$/iu;
+  const simpleRatePattern = /^(.+?)(?<![\d,])\s*((?:NT\$?|\$)?[\d,]+(?:[-~～][\d,]+)?元)[。.]?$/iu;
   const rates = new Map();
   const channels = [];
   const simpleRates = [];
@@ -1687,7 +1687,7 @@ function renderQuota(value) {
       return;
     }
     segment.split(/[、，]/u).map((item) => item.trim()).filter(Boolean).forEach((item) => {
-      const match = item.match(/^(.+?)([\d,]+)\s*(人|名)(.*)$/u);
+      const match = item.match(/^(.+?)(?<![\d,])([\d,]+)\s*(人|名)(.*)$/u);
       if (!match) {
         notes.push(item);
         return;
@@ -1758,7 +1758,8 @@ function buildCalendarDetails(race) {
   const registrationTarget = getRegistrationTarget(race);
   const distances = (race.distances || []).join(" / ");
   const venue = venueForRace(race);
-  const organizer = race.organizer || race.host || race.organizer_name || "";
+  const organizerRaw = race.organizer || race.host || race.organizer_name || "";
+  const organizer = /同意|責任|危險性|免責|隱私政策|活動規程|個人資料保護法|隱私權政策|個資法/.test(organizerRaw) ? "" : organizerRaw;
   const fees = race.fees || race.fee || race.registration_fee || "";
   const quota = race.quota || race.participant_limit || "";
   const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
@@ -1971,9 +1972,11 @@ function renderRaceCard(race) {
   const mapLink = mapQueryForRace(race, venue);
   const startTimes = formatStartTimes(race, "");
   const weather = weatherSummaryForRace(race);
-  const organizer = race.organizer || race.host || race.organizer_name || "";
+  const disclaimerText = /同意|責任|危險性|免責|隱私政策|活動規程|個人資料保護法|隱私權政策|個資法/;
+  const organizerRaw = race.organizer || race.host || race.organizer_name || "";
+  const organizer = disclaimerText.test(organizerRaw) ? "" : organizerRaw;
   const coOrganizerRaw = race.co_organizer || race.coorganizer || "";
-  const coOrganizer = /個人資料保護法|隱私權政策|個資法/.test(coOrganizerRaw) ? "" : coOrganizerRaw;
+  const coOrganizer = disclaimerText.test(coOrganizerRaw) ? "" : coOrganizerRaw;
   const fees = race.fees || race.registration_fee || "";
   const quota = race.quota || race.registration_quota || "";
   const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
