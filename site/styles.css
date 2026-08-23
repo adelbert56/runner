@@ -2378,6 +2378,13 @@ h3 {
   border-top: 1px solid var(--line);
 }
 
+/* .race-fact-grid 的 display:grid 是直接設在元素上，蓋掉瀏覽器對「收合的
+   details 子內容」預設的 display:none，導致組別／費用／名額／天氣區塊
+   不管有沒有展開都整段渲染出來，卡片因此被撐得很高。收合時要真的隱藏。 */
+.race-fact-details:not([open]) > .race-fact-grid {
+  display: none;
+}
+
 .race-fact-details summary {
   width: fit-content;
   cursor: pointer;
@@ -5851,6 +5858,25 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  /* 手機寬度卡片內容多（賽事資訊、多顆操作按鈕），24px/20px 的收合分隔線間距
+     在桌機看不出來，在手機卻是純粹浪費的高度，縮小一半。 */
+  .race-fact-details {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .race-header-row {
+    gap: 8px;
+  }
+
+  .race-summary-line,
+  .race-distance,
+  .race-schedule,
+  .race-insight,
+  .race-trust-line {
+    margin-top: 4px;
+  }
+
   .start-time-list {
     grid-template-columns: 1fr;
   }
@@ -5890,9 +5916,11 @@ h3 {
     overflow: hidden;
   }
 
+  /* 桌機版把行事曆按鈕跟收藏小方塊排在同一列（1fr + 44px）；這裡曾經蓋成單欄，
+     讓收藏鍵獨佔一整列的高度，手機版反而比桌機版更浪費垂直空間。維持同一列。 */
   .secondary-action-row {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 44px;
   }
 
   .register-link {
