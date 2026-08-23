@@ -503,20 +503,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "http://www.taipeimarathon.org.tw/contest.aspx",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-08-20T15:06:56.279925+00:00",
-    "weather_forecast": {
-      "forecast_for": "2026-08-23",
-      "updated_at": "2026-08-20T15:10:59.257Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "臺中市",
-      "summary": "臺中市縣市預報，雷雨，23-26°C，降雨機率 98%，最大風速 12 km/h",
-      "weather_code": 95,
-      "temperature_min_c": 23.4,
-      "temperature_max_c": 25.5,
-      "precipitation_probability_max": 98,
-      "wind_speed_max_kmh": 12
-    }
+    "scraped_at": "2026-08-20T15:06:56.279925+00:00"
   },
   {
     "race_id": "26d9ac4c-867c-4c1a-a205-998921803da0",
@@ -555,7 +542,20 @@
     "first_seen_at": "2026-05-26",
     "scraped_at": "2026-08-20T15:06:56.279938+00:00",
     "cancellation_notice": "",
-    "cancellation_notice_url": ""
+    "cancellation_notice_url": "",
+    "weather_forecast": {
+      "forecast_for": "2026-08-30",
+      "updated_at": "2026-08-23T23:40:19.030Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "臺中市",
+      "summary": "臺中市縣市預報，降雨，25-27°C，降雨機率 95%，最大風速 6 km/h",
+      "weather_code": 80,
+      "temperature_min_c": 24.9,
+      "temperature_max_c": 27.4,
+      "precipitation_probability_max": 95,
+      "wind_speed_max_kmh": 5.8
+    }
   },
   {
     "race_id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
