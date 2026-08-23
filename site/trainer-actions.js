@@ -35,7 +35,7 @@ function saveAssessmentEntry(entry) {
 }
 
 function estimatePacesFromAssessment(assessment) {
-  const goalDist = GOAL_DIST[appData.profile?.goal] || 10;
+  const goalDist = goalDistanceKm(appData.profile);
   let racePaceSec = 0;
   if (assessment.type === 'test_20min') {
     if (!assessment.distanceKm) return null;
@@ -52,8 +52,7 @@ function estimatePacesFromAssessment(assessment) {
   if (!racePaceSec || !Number.isFinite(racePaceSec)) return null;
   return {
     racePaceSec,
-    tempoPaceSec: racePaceSec + 12,
-    intervalPaceSec: Math.max(racePaceSec - 10, 180),
+    ...deriveQualityPaces(racePaceSec),
     easyPaceSec: Math.max(racePaceSec + 75, racePaceSec * 1.12),
     targetTime: secToTime(Math.round(racePaceSec * goalDist))
   };
@@ -1452,18 +1451,16 @@ function upgradeIntensity() {
   }
   const nextWeek = appData.plan[currentWeek];
   if (!nextWeek) return;
-  appData.profile.racePaceSec = Math.max(appData.profile.racePaceSec - 5, 150);
-  appData.profile.tempoPaceSec = appData.profile.racePaceSec + 12;
-  appData.profile.intervalPaceSec = Math.max(appData.profile.racePaceSec - 10, 180);
+  appData.profile.racePaceSec = Math.round(appData.profile.racePaceSec * 0.987);
+  Object.assign(appData.profile, deriveQualityPaces(appData.profile.racePaceSec));
   rebuildWeeksFrom(currentWeek + 1, 4);
   saveData(appData);
 }
 
 function adjustTargetPace(deltaSecPerKm) {
   appData.profile.racePaceSec += deltaSecPerKm;
-  appData.profile.tempoPaceSec = appData.profile.racePaceSec + 12;
-  appData.profile.intervalPaceSec = Math.max(appData.profile.racePaceSec - 10, 180);
-  const dist = GOAL_DIST[appData.profile.goal];
+  Object.assign(appData.profile, deriveQualityPaces(appData.profile.racePaceSec));
+  const dist = goalDistanceKm(appData.profile);
   appData.profile.targetTime = secToTime(Math.round(appData.profile.racePaceSec * dist));
   rebuildWeeksFrom(currentWeek + 1, appData.plan.length - currentWeek);
   saveData(appData);
@@ -1513,11 +1510,12 @@ function promptGoalDowngrade() {
         primary: true,
         action: () => {
           appData.profile.goal = downgradeGoal;
+          if (downgradeGoal !== '5k10k') appData.profile.raceDistanceKm = null;
+          else if (!appData.profile.raceDistanceKm) appData.profile.raceDistanceKm = 10;
           const timeSec = timeToSec(appData.profile.targetTime);
-          const dist = GOAL_DIST[downgradeGoal];
+          const dist = goalDistanceKm(appData.profile);
           appData.profile.racePaceSec = timeSec / dist;
-          appData.profile.tempoPaceSec = appData.profile.racePaceSec + 12;
-          appData.profile.intervalPaceSec = Math.max(appData.profile.racePaceSec - 10, 180);
+          Object.assign(appData.profile, deriveQualityPaces(appData.profile.racePaceSec));
           rebuildWeeksFrom(currentWeek + 1, appData.plan.length - currentWeek);
           saveData(appData);
           closeModal();

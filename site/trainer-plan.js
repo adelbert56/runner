@@ -99,7 +99,9 @@ function calcLongRunKm(targetKm, numTrain, maxMins, easyPaceSec, isTaper, goal) 
   if (easyPaceSec > 0) {
     km = Math.min(km, (maxMins * 60) / easyPaceSec);
   }
-  km = Math.min(km, rule.longRunCapKm);
+  // 固定天花板只防呆一般跑者；高週量跑者（例如全馬菁英）的長跑本來就該跟著
+  // 這一週的目標跑量走，不能被砍回這個對他們來說偏低的絕對值。
+  km = Math.min(km, Math.max(rule.longRunCapKm, targetKm * share * 1.15));
   if (isTaper) km *= 0.7;
   return Math.round(km * 10) / 10;
 }
@@ -132,7 +134,11 @@ function calcWorkoutKm(type, targetKm, goal, longKm, focus = '') {
             : 1;
   const baseKm = targetKm * share * focusFactor;
   const capped = longKm ? Math.min(baseKm, Math.max(longKm - 2, longKm * 0.78)) : baseKm;
-  return Math.max(Math.round(capped * 10) / 10, type === 'interval' ? 4 : 5);
+  // 4／5km 是為了這個 app 原本鎖定的週跑量（30km 級距）設的最低單堂里程；
+  // 真正的 couch-to-5K 初學者週跑量可能才 10-15km，硬套這個下限會讓單堂
+  // 課吃掉他整週大半跑量。改成不超過週跑量 35% 的相對下限，一般跑者不受影響。
+  const minKm = Math.min(type === 'interval' ? 4 : 5, targetKm * 0.35);
+  return Math.max(Math.round(capped * 10) / 10, Math.round(minKm * 10) / 10);
 }
 
 function canUseIntervalBySeason(weekStart) {
@@ -989,7 +995,7 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
 function buildPlan(profile) {
   const totalWeeks = calcWeeks(profile.targetDate, profile.generatedAt);
   const phases = buildPhases(profile.goal, totalWeeks);
-  const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
+  const rule = goalRules(profile);
   const plan = [];
   const hasInjury = !(profile.injuries || ['none']).includes('none');
   // Anchor every generated week to the same saved plan date. Using a fresh
@@ -1114,7 +1120,7 @@ function adaptCoachPeriodization(phases) {
   const baseline = adaptiveVolumeBaseline();
   if (!baseline) return phases;
   const today = todayStr();
-  const rule = GOAL_RULES[appData?.profile?.goal] || GOAL_RULES.half;
+  const rule = goalRules(appData?.profile);
   // 用「目前階段的計畫水準」和實跑基準比，得到一個落差比，再把這個比例平移到
   // 所有未來階段。逐階段各自重算會複利：起點稍高就一路頂到天花板，連降載都
   // 被抬起來，教練原本設計的節奏（低點、尖峰位置）就消失了。
@@ -1284,7 +1290,7 @@ function autoRecalibratePlan() {
   const profile = appData.profile;
   const plan = appData.plan;
   const beforePlan = futurePlanSnapshot();
-  const rule = GOAL_RULES[profile.goal] || GOAL_RULES.half;
+  const rule = goalRules(profile);
 
   // 1. 跑量校準：最近完整週實跑 vs 課表目標
   const trend = Array.isArray(coachReviewData.trend) ? coachReviewData.trend.slice(-3) : [];
@@ -1335,7 +1341,9 @@ function autoRecalibratePlan() {
       else if (diff < -15) tempoDelta = Math.min(Math.round(-diff / 2), 15); // 穩定偏慢 → 上修
       if (tempoDelta) {
         profile.tempoPaceSec += tempoDelta;
-        profile.intervalPaceSec = Math.max(profile.tempoPaceSec - 22, 180);
+        // interval/tempo 維持跟 deriveQualityPaces 一致的比例關係（0.975/1.03），
+        // 不用固定 22 秒間隔加 180 秒地板——那對配速差很多的跑者會失真。
+        profile.intervalPaceSec = Math.round(profile.tempoPaceSec * (0.975 / 1.03));
         reasons.push(`節奏跑配速${tempoDelta < 0 ? '提升' : '放鬆'} → ${secToPace(profile.tempoPaceSec)}/km`);
       }
     }
@@ -1429,13 +1437,12 @@ function autoRecalibratePlan() {
         .filter((run) => run.date === raceDay.dateStr && Number(run.km) >= 5 && run.paceSeconds > 0)
         .sort((a, b) => Number(b.km) - Number(a.km))[0];
       if (raceRun) {
-        const goalDist = GOAL_DIST[profile.goal] || 10;
+        const goalDist = goalDistanceKm(profile);
         const impliedRacePace = raceRun.paceSeconds * Math.pow(goalDist / Number(raceRun.km), 0.07);
         const diff = profile.racePaceSec - impliedRacePace; // 正值＝實賽比目前基準快
         if (diff > 5) {
           profile.racePaceSec = Math.round(impliedRacePace);
-          profile.tempoPaceSec = profile.racePaceSec + 12;
-          profile.intervalPaceSec = Math.max(profile.racePaceSec - 10, 180);
+          Object.assign(profile, deriveQualityPaces(profile.racePaceSec));
           raceCalibrated = true;
           // 賽果是比訓練中位數更強的訊號：同一輪若步驟 2 已調過節奏配速，以賽果為準，
           // 撤掉中間值的歷程訊息避免前後矛盾。
@@ -1514,7 +1521,7 @@ function autoRecalibratePlan() {
 // 持續校準過的「目前體能」估值，不需要另外重新建模。
 function fitnessProjection(profile = appData.profile) {
   if (!profile || !profile.racePaceSec) return null;
-  const goalDist = GOAL_DIST[profile.goal] || 10;
+  const goalDist = goalDistanceKm(profile);
   const predictedFinishSec = Math.round(profile.racePaceSec * goalDist);
   const predictedPace = profile.racePaceSec;
   let trendNote = '';
@@ -1594,7 +1601,7 @@ function goalCycleProposal(profile = appData.profile) {
       suggestion: '建議每週維持目前跑量的 70–80%，保留一堂輕鬆長跑，確認實際比賽結果或設定下一個目標後再重新規劃課表。'
     };
   }
-  const goalDist = GOAL_DIST[profile.goal] || 10;
+  const goalDist = goalDistanceKm(profile);
   const goalLabel = GOAL_NAME[profile.goal] || '目標賽事';
   const impliedRacePaceSec = raceRun.paceSeconds * Math.pow(goalDist / Number(raceRun.km), 0.07);
   const targetFinishSec = Math.round((profile.racePaceSec || impliedRacePaceSec) * goalDist);
@@ -1607,7 +1614,7 @@ function goalCycleProposal(profile = appData.profile) {
     const completion = trainingCompletionSummary();
     if (completion.adherence < 80) causes.push(`訓練完成率僅 ${completion.adherence}%，訓練量未完全落實`);
     if (isHotSeasonDate(new Date(`${raceDayUsed}T00:00:00`))) causes.push('比賽日落在夏季高溫月份，體感配速容易被氣溫拖慢');
-    const longRunThreshold = (GOAL_RULES[profile.goal] || GOAL_RULES.half).longRunCapKm * 0.6;
+    const longRunThreshold = goalRules(profile).longRunCapKm * 0.6;
     const longRunCount = runs.filter((run) => Number(run.km) >= longRunThreshold).length;
     if (longRunCount < 4) causes.push(`長跑訓練次數偏少（僅 ${longRunCount} 次達長跑距離門檻），耐力儲備可能不足`);
     return { mode: 'review', verdict, title: '檢討循環', summary, causes: causes.slice(0, 3), suggestion: '先檢討本輪訓練，抓出主要落差原因，再重新排定下一輪課表。' };
@@ -1655,6 +1662,7 @@ function generateAndShowPlan() {
   const hasExistingPlan = Boolean(appData.plan && appData.plan.length > 0);
   const profile = {
     goal: formState.goal,
+    raceDistanceKm: formState.goal === '5k10k' ? (formState.raceDistanceKm || 10) : null,
     targetDate: document.getElementById('f-date').value,
     targetTime: document.getElementById('f-target-time').value,
     dayState: [...formState.dayState],
@@ -1682,11 +1690,10 @@ function generateAndShowPlan() {
     ]);
     return;
   }
-  const dist = GOAL_DIST[profile.goal];
+  const dist = goalDistanceKm(profile);
   const timeSec = targetTimeToSec(profile.targetTime, dist);
   profile.racePaceSec = timeSec / dist;
-  profile.tempoPaceSec = profile.racePaceSec + 12;
-  profile.intervalPaceSec = Math.max(profile.racePaceSec - 10, 180);
+  Object.assign(profile, deriveQualityPaces(profile.racePaceSec));
   profile.easyPaceSec = timeToSec(profile.easyPace);
   profile.fitnessLevel = fitnessLevel(profile);
   profile.planVersion = PLAN_SCHEMA_VERSION;

@@ -1692,7 +1692,7 @@ function coachGoalGapNote(compact = false) {
   if (!mySec || !coachSec) return '';
   const diffMin = Math.round((coachSec - mySec) / 60);
   if (Math.abs(diffMin) < 6) return '';
-  const dist = GOAL_DIST[appData.profile.goal] || 21.0975;
+  const dist = goalDistanceKm(appData.profile);
   const paceGapSec = Math.round((coachSec - mySec) / dist);
   if (diffMin > 0) {
     const body = `你的訓練設定目標 <b>${reviewEscape(myTime)}</b> 比教練評估（${reviewEscape(coachTarget)}）快 ${diffMin} 分鐘（每公里快約 ${paceGapSec} 秒）。課表配速是照 ${reviewEscape(myTime)} 生成的，恐超出目前能力，練了容易受傷或爆掉。建議到「⚙️ 修改設定」把目標時間改成教練評估值，或先照教練當週課表執行。`;

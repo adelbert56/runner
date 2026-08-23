@@ -194,8 +194,8 @@ function coachRaceDirective(dateStr) {
 // 賽日包：配速策略 + 補給 + 賽前檢查，填進「以賽代訓」卡片的 steps。
 // raceKm 與課表目標距離不同時用 Riegel 公式微調配速；profile/weather 缺資料時仍需能安全回傳。
 function raceDayPackageSteps(profile, raceKm, dateStr) {
-  const km = Number(raceKm) > 0 ? Number(raceKm) : (GOAL_DIST[profile?.goal] || 10);
-  const goalDist = GOAL_DIST[profile?.goal] || km;
+  const km = Number(raceKm) > 0 ? Number(raceKm) : goalDistanceKm(profile);
+  const goalDist = profile?.goal ? goalDistanceKm(profile) : km;
   const baseRacePaceSec = Number(profile?.racePaceSec) || 0;
   const adjustedPaceSec = baseRacePaceSec > 0 && goalDist > 0
     ? baseRacePaceSec * Math.pow(km / goalDist, 0.07)
@@ -348,7 +348,7 @@ function applyRegisteredSundayRaceReplacements(races) {
       raceDay.task = `${raceName}｜以賽代訓${directive?.role ? `｜${directive.role}` : ''}`;
       raceDay.pace = directive?.summary || '依賽程距離與當日狀態執行；不另外補長跑';
       raceDay.hrTarget = '';
-      raceDay.steps = raceDayPackageSteps(appData.profile, raceMaxKm(race) || GOAL_DIST[appData.profile?.goal] || 10, dateStr);
+      raceDay.steps = raceDayPackageSteps(appData.profile, raceMaxKm(race) || goalDistanceKm(appData.profile), dateStr);
       changed = true;
     }
 
@@ -369,7 +369,7 @@ function applyRegisteredSundayRaceReplacements(races) {
   // 賽後恢復：比賽後 N 天內不排品質課與長跑（N 依賽事距離）。
   // 只改今天（含）之後的課；已發生的日子凍結。已是 rest 或其他賽事替換日則跳過。
   raceByDate.forEach((race, dateStr) => {
-    const raceKm = raceMaxKm(race) || GOAL_DIST[appData.profile?.goal] || 10;
+    const raceKm = raceMaxKm(race) || goalDistanceKm(appData.profile);
     const recoveryCount = postRaceRecoveryDayCount(raceKm);
     const raceName = race?.race_name || '已報名賽事';
     const fullRestDays = raceKm >= 30 ? 2 : 1;
@@ -1542,6 +1542,14 @@ function renderSetupView() {
         ${goalCards}
       </div>
       <div id="goal-brief">${renderGoalBrief(formState.goal || 'half')}</div>
+      <div id="goal-distance-picker" class="form-group" style="display:${formState.goal === '5k10k' ? 'block' : 'none'};margin-top:10px">
+        <div class="form-label">這次目標完賽時間是幾公里？</div>
+        <div class="pill-group" role="radiogroup" aria-label="選擇實際比賽距離">
+          <button type="button" class="pill${(formState.raceDistanceKm || 10) === 5 ? ' selected' : ''}" data-race-distance="5" onclick="setGoalRaceDistance(5)">5K</button>
+          <button type="button" class="pill${(formState.raceDistanceKm || 10) === 10 ? ' selected' : ''}" data-race-distance="10" onclick="setGoalRaceDistance(10)">10K</button>
+        </div>
+        <div class="field-help">配速表是照這個實際距離換算的；選錯距離，算出來的配速會差到兩倍。</div>
+      </div>
     </div>
 
     <!-- 2. Target Date -->
@@ -1687,11 +1695,33 @@ function renderSetupView() {
 // ============================================================
 let formState = {
   goal: null,
+  raceDistanceKm: 10,
   dayState: [0, 0, 0, 0, 0, 0, 0],
   injuries: ['none']
 };
 
 const GOAL_DIST = { '5k10k': 10, half: 21.0975, full: 42.195, rehab: 10 };
+// '5k10k' 是同一套入門課表共用兩種實際比賽距離；只有 raceDistanceKm 知道
+// 使用者這次真的是報 5K 還是 10K，配速換算一律要走這裡，不能直接查表當 10K。
+function goalDistanceKm(profile) {
+  return Number(profile?.raceDistanceKm) || GOAL_DIST[profile?.goal] || 10;
+}
+function runnerBmi(profile) {
+  const h = Number(profile?.heightCm) || 0;
+  const w = Number(profile?.weightKg) || 0;
+  return h > 0 && w > 0 ? w / Math.pow(h / 100, 2) : 0;
+}
+// 節奏／間歇配速過去用固定秒數微調（+12／-10 秒），對這個 app 原本鎖定的配速範圍
+// 沒問題，但對速度差很多的跑者就會失真：固定秒數對菁英（配速 &lt;3:00/km）幾乎沒
+// 差異化，對很快的跑者反而被 180 秒地板錯誤拉慢。改用比例微調，兩端都合理。
+function deriveQualityPaces(racePaceSec) {
+  const race = Number(racePaceSec) || 0;
+  if (!(race > 0)) return { tempoPaceSec: 0, intervalPaceSec: 0 };
+  return {
+    tempoPaceSec: Math.round(race * 1.03),
+    intervalPaceSec: Math.round(race * 0.975)
+  };
+}
 const MIN_WEEKS = { '5k10k': 8, half: 12, full: 16, rehab: 8 };
 const GOAL_NAME = { '5k10k': '入門 5K/10K', half: '半馬 21K', full: '全馬 42K', rehab: '傷後重建' };
 const GOAL_META = {
@@ -1742,6 +1772,17 @@ const GOAL_RULES = {
   full: { weeklyGrowth: 0.08, taperWeeks: 3, maxWeeklyKm: 70, longRunShare: 0.35, longRunCapKm: 32, qualityAfterWeeks: 3 },
   rehab: { weeklyGrowth: 0.05, taperWeeks: 1, maxWeeklyKm: 28, longRunShare: 0.25, longRunCapKm: 12, qualityAfterWeeks: 99 }
 };
+// GOAL_RULES 的 maxWeeklyKm／longRunCapKm 是為了一般跑者防呆設的固定天花板；
+// 高階跑者（例如全馬週跑量本來就 120-160km 的菁英）現在的跑量會被這個天花板
+// 直接砍回去。改成跟 profile.weeklyKm（跑者自己回報的現況）比對，兩者取大，
+// 一般跑者不受影響，高階跑者的天花板才會跟著他的實際程度走。
+function goalRules(profile) {
+  const base = GOAL_RULES[profile?.goal] || GOAL_RULES.half;
+  const statedWeeklyKm = Number(profile?.weeklyKm) || 0;
+  const maxWeeklyKm = Math.max(base.maxWeeklyKm, statedWeeklyKm * 1.3);
+  const longRunCapKm = Math.max(base.longRunCapKm, maxWeeklyKm * base.longRunShare * 1.15);
+  return { ...base, maxWeeklyKm, longRunCapKm };
+}
 const DOW_NAMES = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
 const CHECKIN_QUESTIONS = [
   '本週所有訓練都完成了',
@@ -1790,7 +1831,7 @@ function trainingProfileValidationErrors(profile) {
   const targetDate = new Date(`${profile.targetDate || ''}T00:00:00`);
   const weeklyKm = Number(profile.weeklyKm);
   const easyPaceSec = timeToSec(profile.easyPace);
-  const goalDistance = GOAL_DIST[profile.goal];
+  const goalDistance = GOAL_DIST[profile.goal] ? goalDistanceKm(profile) : 0;
   const racePaceSec = goalDistance ? targetTimeToSec(profile.targetTime, goalDistance) / goalDistance : 0;
 
   if (!goalDistance) errors.push('請選擇訓練模式。');
@@ -1977,8 +2018,17 @@ function adaptiveEasyPaceSec(profile, date) {
       source = 'garmin';
     }
   } catch (err) { /* 教練資料未解鎖時退回設定值 */ }
-  const seasonAdjust = date ? (isHotSeasonDate(date) ? 20 : -15) : 0;
-  return { sec: Math.max(baseSec + seasonAdjust, 240), source };
+  // 體重基期較高的跑者，同樣核心體溫上升下散熱效率較差，高溫季節的降速幅度
+  // 該略放大，不能讓身高體重欄位只是顯示用的裝飾。BMI ≥27（過重）才加成，
+  // 避免對一般體態跑者過度懲罰。
+  const bmi = runnerBmi(profile);
+  const heatLoadFactor = bmi >= 27 ? 1.25 : 1;
+  const isHot = date ? isHotSeasonDate(date) : false;
+  const seasonAdjust = date ? (isHot ? Math.round(20 * heatLoadFactor) : -15) : 0;
+  // 240 秒（4:00/km）地板是為了這個 app 原本鎖定的配速範圍設的，對易配速本來就比
+  // 這快的菁英跑者會被錯誤拉慢；改成不超過原始配速 10% 的相對地板才能兩端都適用。
+  const floorSec = Math.min(240, baseSec * 0.9);
+  return { sec: Math.max(baseSec + seasonAdjust, floorSec), source };
 }
 
 // Hero 配速格：心率是教練的主控指令，配速永遠由最近同心率實跑推算。
@@ -2033,13 +2083,12 @@ function adjustPaceByRecentResult(profile) {
   if (derivedEasyPaceSec > profile.easyPaceSec) {
     profile.easyPaceSec = derivedEasyPaceSec;
   }
-  const goalDist = GOAL_DIST[profile.goal] || 10;
+  const goalDist = goalDistanceKm(profile);
   const ratio = goalDist / dist;
   const impliedRacePaceSec = recentPaceSec * Math.pow(ratio, 0.07);
   if (impliedRacePaceSec < profile.racePaceSec) {
     profile.racePaceSec = impliedRacePaceSec;
-    profile.tempoPaceSec = profile.racePaceSec + 12;
-    profile.intervalPaceSec = Math.max(profile.racePaceSec - 10, 180);
+    Object.assign(profile, deriveQualityPaces(profile.racePaceSec));
   }
 }
 
@@ -2054,10 +2103,20 @@ function initGoalPicker() {
       formState.goal = card.dataset.goal;
       const brief = document.getElementById('goal-brief');
       if (brief) brief.innerHTML = renderGoalBrief(formState.goal);
+      const picker = document.getElementById('goal-distance-picker');
+      if (picker) picker.style.display = formState.goal === '5k10k' ? 'block' : 'none';
       updateGenButton();
       updateLiveCalc();
     });
   });
+}
+
+function setGoalRaceDistance(km) {
+  formState.raceDistanceKm = km;
+  document.querySelectorAll('#goal-distance-picker .pill').forEach((btn) => {
+    btn.classList.toggle('selected', Number(btn.dataset.raceDistance) === km);
+  });
+  updateLiveCalc();
 }
 
 function syncDayButtons() {
@@ -2170,7 +2229,7 @@ function updateLiveCalc() {
     }
   }
 
-  const dist = goal ? GOAL_DIST[goal] : 10;
+  const dist = goal ? goalDistanceKm({ goal, raceDistanceKm: formState.raceDistanceKm }) : 10;
   const timeSec = targetTimeToSec(timeVal, dist);
   let racePaceSec = 0;
   if (timeSec > 0 && dist > 0) {
@@ -2178,9 +2237,10 @@ function updateLiveCalc() {
     // 兩段式輸入被判讀為 H:MM 時，直接在配速格回饋系統的理解，使用者才不會誤會
     const reinterpreted = timeSec !== timeToSec(timeVal);
     const readAs = reinterpreted ? `（讀作 ${Math.floor(timeSec / 3600)} 小時 ${Math.round((timeSec % 3600) / 60)} 分）` : '';
+    const qualityPaces = deriveQualityPaces(racePaceSec);
     setCalcCell('calc-race-pace', `${secToPace(racePaceSec)}/km${readAs}`, 'good');
-    setCalcCell('calc-tempo', `${secToPace(racePaceSec + 12)}/km`, 'good');
-    setCalcCell('calc-interval', `${secToPace(Math.max(racePaceSec - 10, 180))}/km`, 'good');
+    setCalcCell('calc-tempo', `${secToPace(qualityPaces.tempoPaceSec)}/km`, 'good');
+    setCalcCell('calc-interval', `${secToPace(qualityPaces.intervalPaceSec)}/km`, 'good');
   } else {
     ['calc-race-pace', 'calc-tempo', 'calc-interval'].forEach(id => setCalcCell(id, '—'));
   }
@@ -2202,10 +2262,8 @@ function updateLiveCalc() {
     setCalcCell('calc-difficulty', '—');
   }
 
-  const h = parseFloat(document.getElementById('f-height')?.value) || 0;
-  const w = parseFloat(document.getElementById('f-weight')?.value) || 0;
-  if (h > 0 && w > 0) {
-    const bmi = w / Math.pow(h / 100, 2);
+  const bmi = runnerBmi({ heightCm: document.getElementById('f-height')?.value, weightKg: document.getElementById('f-weight')?.value });
+  if (bmi > 0) {
     setCalcCell('calc-bmi', bmi.toFixed(1), bmi >= 18.5 && bmi < 25 ? 'good' : 'warn');
   } else {
     setCalcCell('calc-bmi', '—');
@@ -2252,6 +2310,7 @@ function updateGenButton() {
 function prefillSetupForm(profile) {
   formState = {
     goal: profile.goal || null,
+    raceDistanceKm: profile.raceDistanceKm || 10,
     dayState: Array.isArray(profile.dayState) && profile.dayState.length === 7 ? [...profile.dayState] : [0, 0, 0, 0, 0, 0, 0],
     injuries: Array.isArray(profile.injuries) && profile.injuries.length ? [...profile.injuries] : ['none']
   };
@@ -2259,6 +2318,11 @@ function prefillSetupForm(profile) {
     document.querySelector(`.goal-card[data-goal="${profile.goal}"]`)?.classList.add('selected');
     const brief = document.getElementById('goal-brief');
     if (brief) brief.innerHTML = renderGoalBrief(profile.goal);
+    const picker = document.getElementById('goal-distance-picker');
+    if (picker) {
+      picker.style.display = profile.goal === '5k10k' ? 'block' : 'none';
+      picker.querySelectorAll('.pill').forEach((btn) => btn.classList.toggle('selected', Number(btn.dataset.raceDistance) === formState.raceDistanceKm));
+    }
   }
   if (profile.targetDate) document.getElementById('f-date').value = profile.targetDate;
   if (profile.targetTime) document.getElementById('f-target-time').value = profile.targetTime;
