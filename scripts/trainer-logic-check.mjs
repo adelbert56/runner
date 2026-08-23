@@ -15,6 +15,16 @@ function assertEqual(actual, expected, message) {
   checks.push({ ok, message: ok ? message : `${message} (got ${JSON.stringify(actual)}, expected ${JSON.stringify(expected)})` });
 }
 
+function assertThrows(callback, message) {
+  let thrown = false;
+  try {
+    callback();
+  } catch {
+    thrown = true;
+  }
+  checks.push({ ok: thrown, message: thrown ? message : `${message} (did not throw)` });
+}
+
 function extractFunction(source, name) {
   const marker = `function ${name}(`;
   const start = source.indexOf(marker);
@@ -31,12 +41,13 @@ function extractFunction(source, name) {
   throw new Error(`unbalanced braces for function ${name}`);
 }
 
-const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerCoachEngineJs] = await Promise.all([
+const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerCoachEngineJs, trainingReviewBuilder] = await Promise.all([
   readFile(resolve(root, "site/trainer.js"), "utf8"),
   readFile(resolve(root, "site/trainer-copy.js"), "utf8"),
   readFile(resolve(root, "site/trainer-plan.js"), "utf8"),
   readFile(resolve(root, "site/trainer-render.js"), "utf8"),
   readFile(resolve(root, "site/trainer-coach-engine.js"), "utf8"),
+  readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
 ]);
 
 const sandbox = { TRAINING_TYPE_LABELS: { easy: "輕鬆跑", tempo: "節奏跑", interval: "間歇跑", long: "長跑" } };
@@ -67,6 +78,15 @@ const coachEngineSandbox = {};
 vm.createContext(coachEngineSandbox);
 vm.runInContext([extractFunction(trainerCoachEngineJs, "coachPrescribedKm"), extractFunction(trainerCoachEngineJs, "coachPrescribedMainKm")].join("\n\n"), coachEngineSandbox);
 const { coachPrescribedKm, coachPrescribedMainKm } = coachEngineSandbox;
+
+const reviewValidationSandbox = {};
+vm.createContext(reviewValidationSandbox);
+vm.runInContext([
+  extractFunction(trainingReviewBuilder, "plannedDistanceKm"),
+  extractFunction(trainingReviewBuilder, "targetKmBounds"),
+  extractFunction(trainingReviewBuilder, "assertPublishableCoachReview"),
+].join("\n\n"), reviewValidationSandbox);
+const { assertPublishableCoachReview } = reviewValidationSandbox;
 
 // secToPace
 assertEqual(secToPace(330), "5:30", "secToPace formats whole minutes:seconds");
@@ -135,6 +155,19 @@ assertEqual(coachPrescribedKm({ km: 14 }, {}), 14, "coach distance falls back to
 assertEqual(coachPrescribedMainKm({ km: 7 }, { totalKm: 6.5, steps: [{ kind: 'main', end: { type: 'distance', value: 4600 } }, { kind: 'repeat', title: 'ST 快步組', detail: '每趟快步' }] }), 4.6, "stride sessions keep their explicit main-run distance instead of adding strides on top of total mileage");
 assertEqual(coachPrescribedMainKm({ km: 8 }, { totalKm: 8, steps: [{ kind: 'repeat', title: 'T 體感組', children: [{ kind: 'interval', end: { type: 'time', value: 120 } }] }, { kind: 'main', end: { type: 'distance', value: 4000 } }] }), 4, "timed quality repeats keep their explicit Z2 completion distance instead of adding the total session distance");
 assertEqual(coachPrescribedMainKm({ km: 14 }, { totalKm: 13, steps: [{ kind: 'main', end: { type: 'distance', value: 11500 } }] }), 13, "long-run total remains the main-run target when warmup and cooldown are time-based");
+assertThrows(() => assertPublishableCoachReview(JSON.stringify({
+  reviewMode: 'final',
+  nextWeek: {
+    targetKm: '8',
+    menu: [{
+      day: '二', totalKm: 8,
+      steps: [
+        { kind: 'main', end: { type: 'time', value: 1200 }, title: '20 分節奏' },
+        { kind: 'main', end: { type: 'distance', value: 8000, label: '補至手錶總量 8 km' }, title: 'E 跑補量' },
+      ],
+    }],
+  },
+})), "cumulative total cannot be published as a second Garmin distance step");
 
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);

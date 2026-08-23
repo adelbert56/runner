@@ -549,13 +549,24 @@ function assertPublishableCoachReview(plaintext) {
   menu.forEach((entry) => {
     const steps = Array.isArray(entry.steps) ? entry.steps : [];
     const hasTimedRepeat = steps.some((step) => step?.kind === "repeat" && (step.children || []).some((child) => child?.end?.type === "time"));
+    const hasTimedPrimaryWork = steps.some((step) => ["main", "interval"].includes(step?.kind) && step?.end?.type === "time");
     const stepKm = plannedDistanceKm(entry.steps);
-    if (stepKm > Number(entry.totalKm) + 0.01 || (!hasTimedRepeat && Number(entry.totalKm) - stepKm > 0.6)) {
+    if (stepKm > Number(entry.totalKm) + 0.01 || (!hasTimedRepeat && !hasTimedPrimaryWork && Number(entry.totalKm) - stepKm > 0.6)) {
       throw new Error(`Coach menu distance mismatch on ${entry.day || "?"}: totalKm=${entry.totalKm}, structured=${stepKm.toFixed(1)}.`);
     }
     const distancePrep = steps.find((step) => ["warmup", "cooldown"].includes(step?.kind) && step?.end?.type === "distance");
     if (distancePrep) {
       throw new Error(`Coach menu uses distance-based ${distancePrep.kind} on ${entry.day || "?"}; warmup and cooldown must be time-based.`);
+    }
+    const completionIndex = steps.findIndex((step) => step?.kind === "main" && step?.end?.type === "distance"
+      && /補\s*(?:至|足).{0,16}(?:手錶\s*)?總(?:距離|量|里程)?|(?:手錶\s*)?總(?:距離|量|里程).{0,16}補/.test([
+        step?.title,
+        step?.end?.label,
+        step?.detail,
+      ].filter(Boolean).join(" ")));
+    const hasPriorRunWork = completionIndex > 0 && steps.slice(0, completionIndex).some((step) => ["main", "interval", "repeat"].includes(step?.kind));
+    if (hasPriorRunWork) {
+      throw new Error(`Coach menu uses a cumulative total as a second Garmin distance step on ${entry.day || "?"}; prescribe only the remaining distance instead.`);
     }
     const repeatIndex = steps.findIndex((step) => step?.kind === "repeat" && (step.children || []).some((child) => child?.end?.type === "time"));
     const mainIndex = steps.findIndex((step) => step?.kind === "main" && step?.end?.type === "distance");
