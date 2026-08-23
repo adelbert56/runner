@@ -644,7 +644,19 @@ async function assertTrainerReport(page, viewportName) {
     const previousWeek = currentWeek;
     const previousReview = cloneTrainingValue(coachReviewData);
     try {
-      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [0, 1, 1, 0, 1, 0, 2], injuries: ["none"] };
+      // Anchored to the real clock instead of a fixed calendar literal: canMutatePlanDay's
+      // day-level "past schedule cannot be rewritten" guard uses the actual wall-clock today,
+      // so a hardcoded past anchor eventually drifts behind it and silently blocks every
+      // coach-periodization rewrite this test depends on.
+      const anchor = new Date(`${todayStr()}T00:00:00`);
+      const week1Monday = new Date(anchor);
+      week1Monday.setDate(anchor.getDate() - ((anchor.getDay() + 6) % 7));
+      const mondayOfWeek = (n) => {
+        const d = new Date(week1Monday);
+        d.setDate(week1Monday.getDate() + (n - 1) * 7);
+        return localDateStr(d);
+      };
+      const profile = { ...appData.profile, generatedAt: todayStr(), dayState: [0, 1, 1, 0, 1, 0, 2], injuries: ["none"] };
       const trainDows = [1, 2, 4, 6];
       appData.profile = profile;
       appData.plan = [1, 2, 3, 4, 5].map((weekNum) => ({
@@ -652,15 +664,15 @@ async function assertTrainerReport(page, viewportName) {
         phase: "build",
         phaseLabel: "建立期",
         targetKm: 30,
-        days: buildWeekDays(profile, trainDows, 6, [1, 2, 4], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build")
+        days: buildWeekDays(profile, trainDows, 6, [1, 2, 4], 30, false, false, false, weekNum, anchor, "build")
       }));
       currentWeek = 3;
       coachReviewData = {
         zones: { maxHr: 187, recoveryLabel: "Garmin Z1", easyLabel: "Garmin Z2", easyMax: 150, steady: "150–157", tempo: "159–166", interval: "168–178" },
         schedule: { trainingDows: [1, 2, 4, 6], longDow: 6 },
         periodization: [
-          { phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" },
-          { phase: "基礎建量", start: "2026-08-03", weeks: 1, km: "30–32", focus: "長跑 12 km @E；恢復穩定後保留一堂品質課。" }
+          { phase: "降載", start: mondayOfWeek(4), weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課；確認左腳、疲勞歸零。" },
+          { phase: "基礎建量", start: mondayOfWeek(5), weeks: 1, km: "30–32", focus: "長跑 12 km @E；恢復穩定後保留一堂品質課。" }
         ]
       };
       appData.checkins = [{ weekNum: 3, earlyTrigger: true, coachScheduleApplied: true, earlyDecision: { factor: 0.85 }, result: "維持", note: "腳感偏緊，但沒有疼痛" }];
@@ -691,6 +703,7 @@ async function assertTrainerReport(page, viewportName) {
         targetKm: week4.targetKm,
         plannedKm: weekPlannedKm(week4),
         week4Start: week4.days[0]?.dateStr,
+        week4StartExpected: mondayOfWeek(4),
         deloadStructureAligned,
         courses: week4.days.filter((day) => day.type !== "rest").map((day) => ({ dow: day.dow, focus: day.focus, task: day.task, km: day.km, pace: day.pace, hrTarget: day.hrTarget, mainDetail: day.steps.find((step) => step.title === "主課")?.detail, source: day.coachPlan?.source, version: day.coachPlan?.version })).sort((left, right) => left.dow - right.dow),
         note: week4.planningNote,
@@ -710,7 +723,7 @@ async function assertTrainerReport(page, viewportName) {
     }
   });
   const deloadEasyCourses = directCoachSchedule.courses.filter((day) => day.focus === "easy");
-  if (!directCoachSchedule.applied || !directCoachSchedule.noIntermediateAdjustment || !directCoachSchedule.deloadStructureAligned || directCoachSchedule.week4Start !== "2026-07-27" || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[1, 5.3], [2, 5.3], [4, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || directCoachSchedule.courses.some((day) => day.task.includes("教練")) || deloadEasyCourses.length !== 3 || !deloadEasyCourses.every((day) => day.pace.startsWith("配速 ") && day.hrTarget === "HR ≤150（Garmin Z2）" && !day.mainDetail?.includes("恢復跑")) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
+  if (!directCoachSchedule.applied || !directCoachSchedule.noIntermediateAdjustment || !directCoachSchedule.deloadStructureAligned || directCoachSchedule.week4Start !== directCoachSchedule.week4StartExpected || directCoachSchedule.targetKm !== 26 || directCoachSchedule.plannedKm !== 25.9 || JSON.stringify(directCoachSchedule.courses.map((day) => [day.dow, day.km])) !== JSON.stringify([[1, 5.3], [2, 5.3], [4, 5.3], [6, 10]]) || !directCoachSchedule.courses.every((day) => day.source === "coach-periodization") || directCoachSchedule.courses.some((day) => day.task.includes("教練")) || deloadEasyCourses.length !== 3 || !deloadEasyCourses.every((day) => day.pace.startsWith("配速 ") && day.hrTarget === "HR ≤150（Garmin Z2）" && !day.mainDetail?.includes("恢復跑")) || !directCoachSchedule.note.includes("第 3 週") || !directCoachSchedule.note.includes("第 4 週")) {
     throw new Error(`${viewportName}/trainer-direct-coach-schedule: week 3 completion did not write the aligned coach prescription into week 4 ${JSON.stringify(directCoachSchedule)}`);
   }
   const buildQualityCourses = directCoachSchedule.buildCourses.filter((day) => ["tempo", "interval"].includes(day.type));
@@ -725,23 +738,41 @@ async function assertTrainerReport(page, viewportName) {
     const originalTab = window.switchPlanTab;
     const originalOutcome = window.showCheckinOutcome;
     try {
-      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [0, 1, 1, 0, 1, 0, 2], injuries: ["none"] };
+      // Week 3 (currentWeek, being checked in) must finish on or before today so
+      // weeklyCheckinTiming() reports calendarReady; week 4 must start on or after
+      // today so canMutatePlanDay('coach') allows the periodization rewrite. Since
+      // both can't hold from a single contiguous anchor on every possible run date,
+      // build the "already run" weeks and the "still to schedule" week from two
+      // independently-anchored Monday starts instead of one shared calendar.
+      const today = new Date(`${todayStr()}T00:00:00`);
+      const upcomingMonday = new Date(today);
+      upcomingMonday.setDate(today.getDate() + ((8 - today.getDay()) % 7));
+      const todayMonday = new Date(today);
+      todayMonday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+      const historyMonday = new Date(todayMonday);
+      historyMonday.setDate(todayMonday.getDate() - 21);
+      const buildWeekAt = (weekNum, mondayDate) => buildWeekDays(profile, trainDows, 6, [1, 2, 4], 30, false, false, false, 1, mondayDate, "build").map((day) => ({ ...day, weekNum }));
+      const mondayOfWeek = (n) => {
+        const d = new Date(upcomingMonday);
+        d.setDate(upcomingMonday.getDate() + (n - 4) * 7);
+        return localDateStr(d);
+      };
+      const profile = { ...appData.profile, generatedAt: localDateStr(historyMonday), dayState: [0, 1, 1, 0, 1, 0, 2], injuries: ["none"] };
       const trainDows = [1, 2, 4, 6];
       appData.profile = profile;
-      appData.plan = [1, 2, 3, 4].map((weekNum) => ({
-        weekNum,
-        phase: "build",
-        phaseLabel: "建立期",
-        targetKm: 30,
-        days: buildWeekDays(profile, trainDows, 6, [1, 2, 4], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build")
-      }));
+      appData.plan = [1, 2, 3].map((weekNum) => {
+        const monday = new Date(historyMonday);
+        monday.setDate(historyMonday.getDate() + (weekNum - 1) * 7);
+        return { weekNum, phase: "build", phaseLabel: "建立期", targetKm: 30, days: buildWeekAt(weekNum, monday) };
+      });
+      appData.plan.push({ weekNum: 4, phase: "build", phaseLabel: "建立期", targetKm: 30, days: buildWeekAt(4, upcomingMonday) });
       currentWeek = 3;
       const completedWeek = appData.plan[2];
       appData.log = completedWeek.days.filter((day) => day.type !== "rest").map((day) => ({ date: day.dateStr, km: day.km }));
       appData.checkins = [];
       coachReviewData = {
         schedule: { trainingDows: [1, 2, 4, 6], longDow: 6 },
-        periodization: [{ phase: "降載", start: "2026-07-27", weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課。" }],
+        periodization: [{ phase: "降載", start: mondayOfWeek(4), weeks: 1, km: "26–28", focus: "長跑 10–11 km @E，無硬課。" }],
         autopilot: { status: "ready", decision: "deload", label: "自動降量", volumeFactor: 0.85, qualityMode: "reduce" },
         analyticsRuns: completedWeek.days.filter((day) => day.type !== "rest").map((day, index) => ({ activityId: `normal-${index}`, date: day.dateStr, km: day.km, elevationGainM: 120 }))
       };
@@ -790,14 +821,17 @@ async function assertTrainerReport(page, viewportName) {
     const originalTab = window.switchPlanTab;
     const originalOutcome = window.showCheckinOutcome;
     try {
-      const profile = { ...appData.profile, generatedAt: "2026-07-06", dayState: [1, 1, 0, 1, 0, 0, 2], injuries: ["none"] };
+      const anchor = new Date(`${todayStr()}T00:00:00`);
+      const profile = { ...appData.profile, generatedAt: todayStr(), dayState: [1, 1, 0, 1, 0, 0, 2], injuries: ["none"] };
       const trainDows = [0, 1, 3, 6];
       appData.profile = profile;
-      appData.plan = [1, 2, 3, 4, 5].map((weekNum) => ({ weekNum, phase: "build", phaseLabel: "建立期", targetKm: 30, days: buildWeekDays(profile, trainDows, 6, [0, 1, 3], 30, false, false, false, weekNum, new Date("2026-07-06T00:00:00"), "build") }));
+      appData.plan = [1, 2, 3, 4, 5].map((weekNum) => ({ weekNum, phase: "build", phaseLabel: "建立期", targetKm: 30, days: buildWeekDays(profile, trainDows, 6, [0, 1, 3], 30, false, false, false, weekNum, anchor, "build") }));
       appData.checkins = [];
       appData.log = [];
       currentWeek = 4;
-      coachReviewData = { periodization: [{ phase: "基礎強化", start: "2026-08-10", weeks: 4, km: "32→38", focus: "長跑 14–16 km。" }] };
+      const week5PhaseStart = new Date(anchor);
+      week5PhaseStart.setDate(anchor.getDate() + 35);
+      coachReviewData = { periodization: [{ phase: "基礎強化", start: localDateStr(week5PhaseStart), weeks: 4, km: "32→38", focus: "長跑 14–16 km。" }] };
       window.showModal = () => {};
       window.closeModal = () => {};
       window.jumpToPhaseWeek = () => {};

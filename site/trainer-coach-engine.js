@@ -228,16 +228,18 @@ function coachPrescription(day, ctx, week) {
   const scheduledKm = coachPrescribedKm(day, entry);
   const mainKm = coachPrescribedMainKm(day, entry);
   const prescribedDay = scheduledKm > 0 ? { ...day, km: scheduledKm, coachMainKm: mainKm } : day;
+  const suppliedSteps = Array.isArray(entry.steps) ? entry.steps : [];
+  const prescribedType = typeof coachPlanTrainingType === 'function' ? coachPlanTrainingType(entry.plan) : prescribedDay.type;
   const headline = coachPlanHeadline(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);
   const mainInstruction = coachPlanMainInstruction(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);
   const steps = (day.steps || []).map((step) => step.title === '主課'
     ? { ...step, dose: '', detail: mainInstruction, isCoachMain: true }
     : step);
-  const suppliedSteps = Array.isArray(entry.steps) ? entry.steps : [];
   return {
     type: 'replace',
     course: {
       ...prescribedDay,
+      type: prescribedType,
       task: headline,
       pace: '',
       hrTarget: '',

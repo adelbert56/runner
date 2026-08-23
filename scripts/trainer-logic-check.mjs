@@ -41,12 +41,13 @@ function extractFunction(source, name) {
   throw new Error(`unbalanced braces for function ${name}`);
 }
 
-const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerCoachEngineJs, trainingReviewBuilder] = await Promise.all([
+const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerCoachEngineJs, trainerSafetyJs, trainingReviewBuilder] = await Promise.all([
   readFile(resolve(root, "site/trainer.js"), "utf8"),
   readFile(resolve(root, "site/trainer-copy.js"), "utf8"),
   readFile(resolve(root, "site/trainer-plan.js"), "utf8"),
   readFile(resolve(root, "site/trainer-render.js"), "utf8"),
   readFile(resolve(root, "site/trainer-coach-engine.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-safety.js"), "utf8"),
   readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
 ]);
 
@@ -55,6 +56,7 @@ vm.createContext(sandbox);
 vm.runInContext(
   [
     extractFunction(trainerCopyJs, "secToPace"),
+    extractFunction(trainerCopyJs, "coachPlanTrainingType"),
     extractFunction(trainerCopyJs, "coachPlanHeadline"),
     extractFunction(trainerJs, "timeToSec"),
     extractFunction(trainerJs, "targetTimeToSec"),
@@ -62,7 +64,7 @@ vm.runInContext(
   ].join("\n\n"),
   sandbox
 );
-const { secToPace, coachPlanHeadline, timeToSec, targetTimeToSec, isValidClockInput } = sandbox;
+const { secToPace, coachPlanTrainingType, coachPlanHeadline, timeToSec, targetTimeToSec, isValidClockInput } = sandbox;
 
 const structureSandbox = {};
 vm.createContext(structureSandbox);
@@ -73,6 +75,11 @@ const coachCopySandbox = {};
 vm.createContext(coachCopySandbox);
 vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), extractFunction(trainerRenderJs, "normalizeCoachWorkoutSteps")].join("\n\n"), coachCopySandbox);
 const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbox;
+
+const weekFlagSandbox = {};
+vm.createContext(weekFlagSandbox);
+vm.runInContext(extractFunction(trainerRenderJs, "effectiveWeekIsDeload"), weekFlagSandbox);
+const { effectiveWeekIsDeload } = weekFlagSandbox;
 
 const coachEngineSandbox = {};
 vm.createContext(coachEngineSandbox);
@@ -87,6 +94,11 @@ vm.runInContext([
   extractFunction(trainingReviewBuilder, "assertPublishableCoachReview"),
 ].join("\n\n"), reviewValidationSandbox);
 const { assertPublishableCoachReview } = reviewValidationSandbox;
+
+const promotionSandbox = {};
+vm.createContext(promotionSandbox);
+vm.runInContext(extractFunction(trainerSafetyJs, "coachPromotionGate"), promotionSandbox);
+const { coachPromotionGate } = promotionSandbox;
 
 // secToPace
 assertEqual(secToPace(330), "5:30", "secToPace formats whole minutes:seconds");
@@ -142,6 +154,8 @@ assertEqual(fartlekStructure[1]?.children?.[1]?.end?.value, 120, "fartlek recove
 assertEqual(coachPlanMainInstruction('總 5.5 km（含 ST）：0.8 km 熱身＋E 主課約 3.6 km＋ST 快步 4×20 秒＋0.7 km 收操＋肌力 B。'), 'E 主課約 3.6 km＋ST 快步 4×20 秒。', "coach main-card copy excludes warmup and cooldown distance");
 assertEqual(coachPlanMainInstruction('總約 8.0 km：8 分鐘熱身＋6×（2 分 T 體感／2 分 E 慢跑）＋E 補足 4.0 km＋6 分鐘收操；前夜睡眠 <6 小時則改全程 E 8 km。'), '6×（2 分 T 體感／2 分 E 慢跑）＋E 補足 4.0 km；前夜睡眠 <6 小時則改全程 E 8 km。', "coach main-card copy excludes duplicate timed warmup and cooldown");
 assertEqual(coachPlanHeadline('總 5.5 km（含 ST）：0.8 km 熱身＋E 主課約 3.6 km＋ST 快步 4×20 秒。'), '輕鬆跑', "coach heading keeps the easy-run title when the prescription uses E main-work notation");
+assertEqual(coachPlanTrainingType('跑步總量約 8 km：20 分連續節奏（約 3 km）＋E 跑 5 km（HR≤150）。'), 'tempo', "a tempo test remains tempo when E mileage follows it");
+assertEqual(coachPlanHeadline('跑步總量約 8 km：20 分連續節奏（約 3 km）＋E 跑 5 km（HR≤150）。'), '節奏跑', "coach heading labels the quality workout instead of its E completion mileage");
 const repairedLegacyCoachStructure = normalizeCoachWorkoutSteps([
   { kind: 'warmup', title: '熱身', end: { type: 'distance', value: 800, label: '0.8 km' } },
   { kind: 'main', title: '主課', end: { type: 'distance', value: 4500, label: '4.5 km' } },
@@ -155,6 +169,9 @@ assertEqual(coachPrescribedKm({ km: 14 }, {}), 14, "coach distance falls back to
 assertEqual(coachPrescribedMainKm({ km: 7 }, { totalKm: 6.5, steps: [{ kind: 'main', end: { type: 'distance', value: 4600 } }, { kind: 'repeat', title: 'ST 快步組', detail: '每趟快步' }] }), 4.6, "stride sessions keep their explicit main-run distance instead of adding strides on top of total mileage");
 assertEqual(coachPrescribedMainKm({ km: 8 }, { totalKm: 8, steps: [{ kind: 'repeat', title: 'T 體感組', children: [{ kind: 'interval', end: { type: 'time', value: 120 } }] }, { kind: 'main', end: { type: 'distance', value: 4000 } }] }), 4, "timed quality repeats keep their explicit Z2 completion distance instead of adding the total session distance");
 assertEqual(coachPrescribedMainKm({ km: 14 }, { totalKm: 13, steps: [{ kind: 'main', end: { type: 'distance', value: 11500 } }] }), 13, "long-run total remains the main-run target when warmup and cooldown are time-based");
+assertEqual(effectiveWeekIsDeload({ isDeload: true }, { phase: "基礎強化", focus: "品質課" }), false, "formal base phase overrides the generator's stale deload flag");
+assertEqual(effectiveWeekIsDeload({ isDeload: false }, { phase: "降載", focus: "吸收訓練" }), true, "formal deload phase overrides the generator's non-deload flag");
+assertEqual(effectiveWeekIsDeload({ isDeload: true }, null), true, "legacy plans retain their generated deload flag without a formal phase");
 assertThrows(() => assertPublishableCoachReview(JSON.stringify({
   reviewMode: 'final',
   nextWeek: {
@@ -168,6 +185,10 @@ assertThrows(() => assertPublishableCoachReview(JSON.stringify({
     }],
   },
 })), "cumulative total cannot be published as a second Garmin distance step");
+
+assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, rpe: 7 }).status, 'pass', "structured quality evidence with controlled RPE passes the progression gate");
+assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: false, rpe: 6 }).status, 'conditional', "missing structured Garmin main evidence cannot advance long runs or intervals");
+assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, nextDayPain: true, rpe: 6 }).status, 'blocked', "next-day pain blocks quality progression regardless of pace result");
 
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);

@@ -77,3 +77,23 @@ function checkinSafetyDecision({ answers, fatigue, painConcern }) {
     : '本來可以小幅推進 +5%，但完成度與恢復自評沒有同時達標，加量的依據不足。';
   return { result: '維持', factor: 1, removeQuality: false, allowIntensity: false, note, alternative };
 }
+
+// 品質課不是「有完成」就自動升級。這個閘門只回答一件事：這次輸出與恢復證據，
+// 是否足以讓下一階段增加長跑或進入 I 課。資料不足也不是綠燈，避免日曆把跑者
+// 推進到能力尚未證明的刺激。
+function coachPromotionGate(evidence) {
+  evidence = evidence || {};
+  const qualityPlanned = Boolean(evidence.qualityPlanned);
+  if (!qualityPlanned) return { status: 'not-applicable', label: '本週無品質檢測', reasons: [] };
+  const reasons = [];
+  if (!evidence.qualityCompleted) reasons.push('品質課未完成');
+  if (!evidence.structuredEvidence) reasons.push('Garmin 未辨識到主課段，無法判讀節奏與心率');
+  if (evidence.painConcern || evidence.nextDayPain) reasons.push('左腳疼痛、步態改變或隔天症狀未消退');
+  if (Number(evidence.rpe) >= 8) reasons.push(`主課 RPE ${evidence.rpe}/10 過高`);
+  if (evidence.paceCapBreached) reasons.push('主課快過處方的最快護欄');
+  if (evidence.hrCapBreached) reasons.push('主課超過心率上限');
+  if (Number(evidence.hrDrift) >= 8) reasons.push(`主課後半心率漂移 +${Math.round(Number(evidence.hrDrift))} bpm`);
+  if (evidence.painConcern || evidence.nextDayPain) return { status: 'blocked', label: '不通過', reasons };
+  if (reasons.length) return { status: 'conditional', label: '條件通過', reasons };
+  return { status: 'pass', label: '通過', reasons: ['主課有結構化紀錄，未見配速／心率護欄違規，且恢復自評正常'] };
+}

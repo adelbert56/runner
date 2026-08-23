@@ -642,6 +642,8 @@ async function buildPublishedReview(plaintext) {
       if (coachGoal.goal && typeof coachGoal.goal === "object") review.goal = coachGoal.goal;
       if (coachGoal.paceGuidance && typeof coachGoal.paceGuidance === "object") review.paceGuidance = coachGoal.paceGuidance;
       if (coachGoal.currentMetrics && typeof coachGoal.currentMetrics === "object") review.currentMetrics = coachGoal.currentMetrics;
+      if (coachGoal.coachRules && typeof coachGoal.coachRules === "object") review.coachRules = coachGoal.coachRules;
+      if (Array.isArray(coachGoal.raceDirectives)) review.raceDirectives = coachGoal.raceDirectives;
     }
   } catch { /* 沒有 教練目標.json 就沿用週報值 */ }
   return JSON.stringify(review);

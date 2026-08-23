@@ -158,6 +158,16 @@ function paceToMinutes(pace) {
   return Number(match[1]) + Number(match[2]) / 60;
 }
 
+// 一堂課可在品質段後接 E 跑補量；課型必須由最高強度的主課決定，不能因文字
+// 後段出現「E 跑」就把節奏檢測誤標成輕鬆跑。
+function coachPlanTrainingType(planText) {
+  const text = String(planText || '').trim();
+  if (/(?:^|\s)I\s*跑|間歇|快段/.test(text)) return 'interval';
+  if (/(?:^|\s)T\s*跑|節奏|閾值/.test(text)) return 'tempo';
+  if (/長跑|耐力跑/.test(text)) return 'long';
+  return 'easy';
+}
+
 // 教練筆記完整處方只留在主課；卡片開頭只呈現方向與目的，避免重複。
 function coachPlanHeadline(planText) {
   const text = String(planText || '').trim();
@@ -165,15 +175,7 @@ function coachPlanHeadline(planText) {
 
   const purposeMatch = text.match(/(?:目的|重點)\s*[：:]\s*([^。；;]+)/);
   const purpose = purposeMatch?.[1]?.trim();
-  const direction = /(?:^|[\s＋+：:])E\s*(?:跑|主課)|輕鬆跑|有氧/.test(text)
-    ? TRAINING_TYPE_LABELS.easy
-    : /(?:^|\s)T\s*跑|節奏跑|閾值/.test(text)
-      ? TRAINING_TYPE_LABELS.tempo
-      : /(?:^|\s)I\s*跑|間歇|快段/.test(text)
-        ? TRAINING_TYPE_LABELS.interval
-        : /長跑|耐力跑/.test(text)
-          ? TRAINING_TYPE_LABELS.long
-          : '今日訓練';
+  const direction = TRAINING_TYPE_LABELS[coachPlanTrainingType(text)] || '今日訓練';
   return purpose ? `${direction}｜${purpose}` : direction;
 }
 

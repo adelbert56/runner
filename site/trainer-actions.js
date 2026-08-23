@@ -531,6 +531,10 @@ function restoreHistoricalCoachPlansFromReview() {
     const weekStart = localDateStr(date);
     const week = appData.plan.find((item) => (item.days || []).some((day) => day.dateStr === weekStart));
     if (!week || weekHasStoredCoachPlan(week) || (week.days || []).some((day) => day.type !== 'rest' && day.dateStr >= todayStr())) continue;
+    // 歷史週本來有課程就是真實歷程，不可因載入新的週報而用概略週期資料重建。
+    // 只有整週跑課欄位確實遺失時，才允許這條舊資料救援路徑補回。
+    const hasExistingHistoricalCourse = (week.days || []).some((day) => day.type !== 'rest' && (day.task || day.km || (day.steps || []).length));
+    if (hasExistingHistoricalCourse) continue;
     const targetKm = Math.round((targets[0] + ((targets[1] - targets[0]) * index) / phaseWeeks) * 10) / 10;
     const longKm = Math.round((longTargets[0] + ((longTargets[1] - longTargets[0]) * index) / phaseWeeks) * 10) / 10;
     const easyKm = Math.round(((targetKm - longKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
@@ -568,11 +572,18 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
   // 但非降載週必須反映已確認的降量或品質降階。
   const requestedFactor = Number(constraints.factor);
   const volumeFactor = phaseDeload ? 1 : Math.min(1, Math.max(0.75, Number.isFinite(requestedFactor) ? requestedFactor : 1));
-  const effectiveVolume = Math.round(volume * volumeFactor * 10) / 10;
-  const effectiveLongKm = Math.round(longKm * volumeFactor * 10) / 10;
+  const priorWeek = appData.plan?.[weekNum - 2];
+  const priorTargetKm = Number(priorWeek?.targetKm) || 0;
+  const priorLongKm = Math.max(0, ...(priorWeek?.days || []).filter((day) => day.type === 'long').map((day) => Number(day.km) || 0));
+  const holdProgression = Boolean(constraints.holdProgression);
+  // 「條件通過／不通過」是正式的升級煞車：即使下一個日曆 phase 寫了更高
+  // 的里程，也不得讓總量或長跑自動越過上一週已排定的量。
+  const effectiveVolume = Math.round(Math.min(volume * volumeFactor, holdProgression && priorTargetKm > 0 ? priorTargetKm : Infinity) * 10) / 10;
+  const effectiveLongKm = Math.round(Math.min(longKm * volumeFactor, holdProgression && priorLongKm > 0 ? priorLongKm : Infinity) * 10) / 10;
   const deloadEachKm = Math.round(((effectiveVolume - effectiveLongKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
   const removeQuality = Boolean(constraints.removeQuality);
   const qualityMode = constraints.qualityMode === 'reduce' ? 'reduce' : 'keep';
+  const suppressIntervals = Boolean(constraints.suppressIntervals || holdProgression);
   const weekStart = new Date(`${week.days?.[0]?.dateStr || todayStr()}T00:00:00`);
   const scheduleDows = schedule.trainingDows.filter((dow) => dow !== schedule.longDow);
   const profile = appData.profile;
@@ -583,19 +594,29 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
   let sessionIndex = 0;
   const beforePlan = futurePlanSnapshot(weekNum);
   appData.profile.dayState = coachScheduleDayState(schedule);
-  week.targetKm = effectiveVolume;
-  week.days = week.days.map((day) => {
+  let mutatedAny = false;
+  const nextDays = week.days.map((day) => {
     const actualDow = day.dateStr ? new Date(`${day.dateStr}T00:00:00`).getDay() : day.dow;
     if (!schedule.trainingDows.includes(actualDow) || !canMutatePlanDay(day, 'coach')) return { ...day, dow: actualDow };
     const isLong = actualDow === schedule.longDow;
-    const session = isLong ? { type: 'long', focus: 'long', label: '長跑' } : (sessionPattern[sessionIndex++] || { type: 'easy', focus: 'aerobic', label: '穩定有氧' });
+    const scheduledSession = isLong ? { type: 'long', focus: 'long', label: '長跑' } : (sessionPattern[sessionIndex++] || { type: 'easy', focus: 'aerobic', label: '穩定有氧' });
+    // 未通過升級閘門時，受控節奏跑仍可作為重新檢測，但不允許 I 課偷渡進來。
+    const session = suppressIntervals && scheduledSession.type === 'interval'
+      ? { type: 'tempo', focus: 'tempo', label: '受控節奏重測' }
+      : scheduledSession;
     const courseKm = isLong ? effectiveLongKm : phaseDeload ? deloadEachKm : calcWorkoutKm(session.type, effectiveVolume, profile.goal, effectiveLongKm, session.focus);
     const course = buildDayCard(actualDow, day.dateStr, session.type, courseKm, profile, phaseDeload || removeQuality, false, false, todayStr(), day.weekNum || weekNum, week.phase || 'build', session.focus, session.label);
     if (qualityMode === 'reduce' && ['tempo', 'interval'].includes(course.type)) course.task = `${course.task}｜Garmin／週評估限制：主課只做原處方前 2/3，失控即改輕鬆跑。`;
-    course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: effectiveVolume, longKm: effectiveLongKm, volumeFactor, qualityMode, removeQuality };
+    course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: effectiveVolume, longKm: effectiveLongKm, volumeFactor, qualityMode, removeQuality, holdProgression, suppressIntervals };
+    mutatedAny = true;
     return course;
   });
-  const constraintNote = volumeFactor < 1 ? `；已依 Garmin／週評估下修 ${Math.round((1 - volumeFactor) * 100)}%` : qualityMode === 'reduce' ? '；品質課已降階' : '';
+  // 每一天都被鎖擋（例如整週已過去）時，不能假裝處方已套用：targetKm／note／
+  // 歷程都不該只改一半，寧可整次不動，讓呼叫端如實得知「這次沒有任何一天被改」。
+  if (!mutatedAny) return false;
+  week.days = nextDays;
+  week.targetKm = effectiveVolume;
+  const constraintNote = volumeFactor < 1 ? `；已依 Garmin／週評估下修 ${Math.round((1 - volumeFactor) * 100)}%` : qualityMode === 'reduce' ? '；品質課已降階' : holdProgression ? '；品質檢測未完全放行，總量與長跑不增加且不排 I 課' : '';
   const adaptiveNote = phase.adaptiveNote ? `；${phase.adaptiveNote}` : '';
   week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方${constraintNote}${adaptiveNote}。`;
   if (record) {
@@ -724,7 +745,7 @@ function restorePendingEarlyCoachSchedule() {
     if (changed) saveData(appData);
     return changed;
   }
-  if (!applyCoachPhaseScheduleForWeek(checkin.weekNum + 1)) return false;
+  if (!applyCoachPhaseScheduleForWeek(checkin.weekNum + 1, { constraints: checkin.earlyDecision || {} })) return false;
   checkin.coachScheduleSource = 'coach-periodization';
   saveData(appData);
   return true;
@@ -1097,6 +1118,84 @@ function coachResponseToEarlyFeedback(note, decision, safetyConcern, { coachSche
   return `${readback} 本次沒有觸發安全或跑量覆寫，因此正式課表維持原處方；這不是忽略，而是沒有足夠依據另改課。`;
 }
 
+function coachPaceGuardSeconds(text) {
+  const match = String(text || '').match(/最快不得快於\s*(\d{1,2}:\d{2})/);
+  return match && typeof paceToSeconds === 'function' ? paceToSeconds(match[1]) : null;
+}
+
+function coachHrGuard(text) {
+  const match = String(text || '').match(/HR\s*[≤<]\s*(\d{2,3})/i);
+  return match ? Number(match[1]) : null;
+}
+
+// 將 Garmin 結構化主課、課後 RPE 與週檢核收斂成可稽核的升級證據。未結構化
+// 的全程紀錄仍會計入跑量，但不能當成放行 I 課或拉長長跑的證明。
+function weeklyCoachPromotionEvidence(weekNum, { painConcern = false } = {}) {
+  const week = appData.plan?.[Number(weekNum) - 1];
+  const qualityDays = (week?.days || []).filter((day) => ['tempo', 'interval'].includes(day.type));
+  if (!qualityDays.length) return { qualityPlanned: false };
+  const coachDays = typeof coachDaysForWeek === 'function' ? coachDaysForWeek(week) : [];
+  const runs = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+  const byDate = new Map(runs.map((run) => [run.date, run]));
+  const details = qualityDays.map((day) => {
+    const run = byDate.get(day.dateStr);
+    const feedback = runFeedbackFor(day.dateStr);
+    const prescribed = coachDays.find((item) => item?.scheduledDow === day.dow) || {};
+    const planText = [day.task, prescribed.plan, ...(day.steps || []), ...(prescribed.steps || [])]
+      .map((step) => typeof step === 'string' ? step : `${step?.title || ''} ${step?.detail || ''}`).join(' ');
+    const guardPace = coachPaceGuardSeconds(planText);
+    const guardHr = coachHrGuard(planText);
+    const lapPaces = (run?.laps || []).filter((lap) => ['MAIN', 'INTERVAL'].includes(String(lap?.intensity || '').toUpperCase()))
+      .map((lap) => paceToSeconds(lap.pace_per_km)).filter(Boolean);
+    const fastest = lapPaces.length ? Math.min(...lapPaces) : paceToSeconds(run?.qualityPace || '');
+    const peakHr = Math.max(Number(run?.qualityMaxHr) || 0, Number(run?.maxHr) || 0);
+    const signals = typeof sessionQualitySignals === 'function' && run ? sessionQualitySignals(run) : null;
+    return {
+      completed: Boolean(run) || day.status === 'done',
+      structured: Boolean(run?.qualityEligible),
+      rpe: Number(feedback?.rpe) || Number(run?.selfEvaluation?.rpe) || 0,
+      paceCapBreached: Boolean(guardPace && fastest && fastest < guardPace),
+      hrCapBreached: Boolean(guardHr && peakHr && peakHr > guardHr),
+      hrDrift: Number(signals?.hrDelta) || 0,
+      note: String(feedback?.note || '')
+    };
+  });
+  const notes = details.map((item) => item.note).join(' ');
+  const nextDayPain = /(?:左腳|腳痛|疼痛|步態|頭暈|噁心)/.test(notes);
+  return {
+    qualityPlanned: true,
+    qualityCompleted: details.every((item) => item.completed),
+    structuredEvidence: details.every((item) => item.structured),
+    painConcern: Boolean(painConcern),
+    nextDayPain,
+    rpe: Math.max(0, ...details.map((item) => item.rpe)),
+    paceCapBreached: details.some((item) => item.paceCapBreached),
+    hrCapBreached: details.some((item) => item.hrCapBreached),
+    hrDrift: Math.max(0, ...details.map((item) => item.hrDrift))
+  };
+}
+
+function applyCoachPromotionGate(decision, gate) {
+  if (!gate || gate.status === 'not-applicable' || ['停止品質課', '降載恢復'].includes(decision.result)) return decision;
+  decision.promotionGate = gate;
+  if (gate.status === 'pass') return decision;
+  decision.allowIntensity = false;
+  decision.holdProgression = true;
+  decision.suppressIntervals = true;
+  decision.factor = Math.min(1, Number(decision.factor) || 1);
+  if (gate.status === 'blocked') {
+    decision.result = '不通過｜保護恢復';
+    decision.removeQuality = true;
+    decision.factor = Math.min(0.85, decision.factor);
+    decision.note = `品質檢測不通過：${gate.reasons.join('、')}。下週降量、取消品質課；不得進 I 課或增加長跑。`;
+  } else {
+    decision.result = '條件通過｜不升級';
+    decision.note = `品質檢測條件通過：${gate.reasons.join('、')}。下週維持或下修，禁止進 I 課與增加長跑；下一次以受控節奏課重新取得放行證據。`;
+  }
+  decision.alternative = '本來可依週次推進，但品質課的結果與隔天反應不足以支持更高刺激；先保留可恢復的訓練。';
+  return decision;
+}
+
 function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigger = false, plannedSessionCount = 0, manualCompletionConfirmed = false }) {
   const existing = (appData.checkins || []).find((item) => item.weekNum === currentWeek);
   if (existing && !existing.provisional) {
@@ -1120,6 +1219,8 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const score = answers.filter(Boolean).length;
   const timing = weeklyCheckinTiming();
   const decision = checkinSafetyDecision({ answers, fatigue, painConcern: effectivePainConcern });
+  const promotionGate = coachPromotionGate(weeklyCoachPromotionEvidence(currentWeek, { painConcern: effectivePainConcern }));
+  applyCoachPromotionGate(decision, promotionGate);
   if (!timing.ready && decision.allowIntensity && !earlyTrigger) {
     decision.result = '維持';
     decision.factor = 1;
@@ -1148,7 +1249,7 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const feedbackTerrainEvidence = coachTerrainEvidence(currentWeek);
   const feedbackSignals = classifyEarlyFeedback(note, feedbackTerrainEvidence);
   const coachFeedbackResponse = coachResponseToEarlyFeedback(note, decision, feedbackSafetyConcern, { coachScheduleApplied, targetWeek: currentWeek + 1, terrainEvidence: feedbackTerrainEvidence });
-  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, rejectedOption: decision.alternative || '', evidenceSnapshot: buildEvidenceSnapshot(), safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep' } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
+  const checkin = { weekNum: currentWeek, score, result: decision.result, adjustment: decision.note, rejectedOption: decision.alternative || '', evidenceSnapshot: buildEvidenceSnapshot(), safetyNote: decision.note, allowIntensity: decision.allowIntensity, painConcern: effectivePainConcern, promotionGate, feedbackSafetyConcern, feedbackTerrainEvidence, feedbackSignals, coachFeedbackResponse, date: todayStr(), fatigue, note, provisional: !timing.ready, earlyTrigger, manualCompletionConfirmed, earlyDecision: earlyTrigger ? { factor: decision.factor, removeQuality: decision.removeQuality, qualityMode: decision.qualityMode || 'keep', holdProgression: Boolean(decision.holdProgression), suppressIntervals: Boolean(decision.suppressIntervals) } : null, nextWeekAdjustmentApplied: Boolean(adaptation?.nextWeekAdjustment), coachScheduleApplied, coachScheduleSource: coachScheduleApplied ? 'coach-periodization' : '' };
   appData.checkins = normalizeTrainingCheckins([...(appData.checkins || []).filter((item) => item.weekNum !== currentWeek), checkin]);
   saveData(appData);
   assessProgress();

@@ -280,12 +280,33 @@ def main() -> int:
         results: list[dict[str, Any]] = []
         for item in workouts:
             name = str(item["name"])
+            scheduled_date = require_date(item["date"])
             existing_item = existing.get(name)
-            if existing_item and existing_item.get("workoutId") and args.replace_existing:
-                current_id = int(existing_item["workoutId"])
-                scheduled_id = scheduled.get((require_date(item["date"]), current_id))
+            # A corrected workout title (for example, 「輕鬆跑」→「節奏跑」) is still
+            # the same Runner calendar prescription.  Name-only matching would create a
+            # second workout on the same date.  Restrict replacement to Runner's exact
+            # date prefix and a calendar entry so unrelated library workouts are untouched.
+            date_prefix = f"Runner｜{scheduled_date}｜"
+            scheduled_runner_items = [
+                (int(candidate["workoutId"]), scheduled[(scheduled_date, int(candidate["workoutId"]))])
+                for candidate_name, candidate in existing.items()
+                if candidate_name.startswith(date_prefix)
+                and candidate.get("workoutId")
+                and (scheduled_date, int(candidate["workoutId"])) in scheduled
+            ] if args.replace_existing else []
+            if scheduled_runner_items:
                 replacement_id = workout_id(api.upload_running_workout(workout_for(item)))
-                api.schedule_workout(replacement_id, require_date(item["date"]))
+                api.schedule_workout(replacement_id, scheduled_date)
+                for old_workout_id, old_calendar_id in scheduled_runner_items:
+                    api.unschedule_workout(old_calendar_id)
+                    api.delete_workout(old_workout_id)
+                current_id = replacement_id
+                action = "replaced"
+            elif existing_item and existing_item.get("workoutId") and args.replace_existing:
+                current_id = int(existing_item["workoutId"])
+                scheduled_id = scheduled.get((scheduled_date, current_id))
+                replacement_id = workout_id(api.upload_running_workout(workout_for(item)))
+                api.schedule_workout(replacement_id, scheduled_date)
                 # Garmin may retain a same-named workout in the library after its calendar
                 # entry was manually removed or superseded. It is then safe to rebuild the
                 # calendar entry; only unschedule when this exact old workout is present.
@@ -301,7 +322,7 @@ def main() -> int:
                 current_id = workout_id(api.upload_running_workout(workout_for(item)))
                 action = "created"
             if action != "replaced" and action != "recreated":
-                api.schedule_workout(current_id, require_date(item["date"]))
+                api.schedule_workout(current_id, scheduled_date)
             results.append({"name": name, "date": item["date"], "workoutId": current_id, "action": action})
 
         write_status("ok", f"已同步 {len(results)} 堂課到 Garmin 行事曆", total=len(results), results=results)

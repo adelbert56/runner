@@ -183,6 +183,14 @@ function raceMaxKm(race) {
   return max;
 }
 
+// 十月的連續賽事各有不同任務；沒有明確角色時，跑者很容易把每一場都跑成
+// A 賽，反而犧牲後面的半馬專項。指令來自加密的教練真相源，找不到時保留既有
+// 保守的以賽代訓預設值。
+function coachRaceDirective(dateStr) {
+  const directives = Array.isArray(coachReviewData?.raceDirectives) ? coachReviewData.raceDirectives : [];
+  return directives.find((item) => item?.date === dateStr) || null;
+}
+
 // 賽日包：配速策略 + 補給 + 賽前檢查，填進「以賽代訓」卡片的 steps。
 // raceKm 與課表目標距離不同時用 Riegel 公式微調配速；profile/weather 缺資料時仍需能安全回傳。
 function raceDayPackageSteps(profile, raceKm, dateStr) {
@@ -192,25 +200,27 @@ function raceDayPackageSteps(profile, raceKm, dateStr) {
   const adjustedPaceSec = baseRacePaceSec > 0 && goalDist > 0
     ? baseRacePaceSec * Math.pow(km / goalDist, 0.07)
     : baseRacePaceSec;
-  const racePace = secToPace(adjustedPaceSec);
-  const startPace = adjustedPaceSec > 0 ? secToPace(adjustedPaceSec + 12) : '—';
+  const directive = coachRaceDirective(dateStr);
+  const racePace = directive?.paceTarget || secToPace(adjustedPaceSec);
+  const startPace = directive?.startPace || (adjustedPaceSec > 0 ? secToPace(adjustedPaceSec + 12) : '—');
+  const roleTitle = directive?.role ? `｜${directive.role}` : '';
 
   const paceSteps = [
     {
       icon: '🚦', title: '配速策略・前 5K', dose: '5 km',
-      detail: adjustedPaceSec > 0
+      detail: directive?.startInstruction || (adjustedPaceSec > 0
         ? `以 ${startPace}/km 起跑（比目標配速慢 10–15 秒），先把身體開順，不搶快。`
-        : '先用輕鬆節奏起跑，觀察身體狀況，不搶快。'
+        : '先用輕鬆節奏起跑，觀察身體狀況，不搶快。')
     },
     {
       icon: '🎯', title: '配速策略・中段穩定', dose: `${Math.max(0, Math.round((km - 5) * 10) / 10)} km 左右`,
-      detail: adjustedPaceSec > 0
+      detail: directive?.mainInstruction || (adjustedPaceSec > 0
         ? `穩定守住目標配速 ${racePace}/km，靠節奏而非硬撐維持。`
-        : '找到能撐到終點的穩定節奏，靠體感控制強度。'
+        : '找到能撐到終點的穩定節奏，靠體感控制強度。')
     },
     {
       icon: '🏁', title: '配速策略・最後收尾', dose: '依當天狀況',
-      detail: '體感許可就逐步收快衝線；若後段明顯疲勞，維持節奏、不硬撐，避免抽筋或受傷。'
+      detail: directive?.finishInstruction || '體感許可就逐步收快衝線；若後段明顯疲勞，維持節奏、不硬撐，避免抽筋或受傷。'
     }
   ];
 
@@ -238,7 +248,9 @@ function raceDayPackageSteps(profile, raceKm, dateStr) {
     { icon: '⏰', title: '賽前檢查・抵達時間', dose: '起跑前 60–90 分', detail: '提早抵達會場，預留熱身、上廁所與寄物時間，避免臨場匆忙。' }
   ];
 
-  return [...paceSteps, ...fuelSteps, ...checklistSteps];
+  return directive?.role
+    ? [{ icon: '🎯', title: `本場任務${roleTitle}`, dose: directive.role, detail: directive.summary || '依本場角色執行，不把每一場都跑成全力賽。' }, ...paceSteps, ...fuelSteps, ...checklistSteps]
+    : [...paceSteps, ...fuelSteps, ...checklistSteps];
 }
 
 // 賽後恢復窗天數：窗內不排品質課與長跑（前 1–2 天全休、其餘只排短恢復跑）。
@@ -332,8 +344,9 @@ function applyRegisteredSundayRaceReplacements(races) {
       raceDay.type = 'race';
       raceDay.km = 0;
       raceDay.focus = 'race';
-      raceDay.task = `${raceName}｜以賽代訓`;
-      raceDay.pace = '依賽程距離與當日狀態執行；不另外補長跑';
+      const directive = coachRaceDirective(dateStr);
+      raceDay.task = `${raceName}｜以賽代訓${directive?.role ? `｜${directive.role}` : ''}`;
+      raceDay.pace = directive?.summary || '依賽程距離與當日狀態執行；不另外補長跑';
       raceDay.hrTarget = '';
       raceDay.steps = raceDayPackageSteps(appData.profile, raceMaxKm(race) || GOAL_DIST[appData.profile?.goal] || 10, dateStr);
       changed = true;

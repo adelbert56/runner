@@ -782,11 +782,64 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
   return `<details class="coach-insight-details" open><summary><span><small>COACHING BRIEF</small><b>本週執行重點</b></span><span class="coach-insight-status">${status}</span></summary><section class="weekly-coach-insight" aria-label="教練判讀與執行依據"><div class="coach-insight-overview"><div class="coach-insight-summary"><p class="coach-insight-description">${reviewEscape(integratedBriefing)}</p></div></div><div class="coach-insight-grid">${coachInsightCards.map(renderCard).join('')}</div></section></details>`;
 }
 
+function historicalWeekCheckin(weekNum) {
+  return [...(appData.checkins || [])]
+    .filter((item) => Number(item?.weekNum) === Number(weekNum))
+    .sort((left, right) => String(right?.date || '').localeCompare(String(left?.date || '')))[0] || null;
+}
+
+function renderHistoricalCourseDecisionPanel(week) {
+  const checkin = historicalWeekCheckin(week?.weekNum);
+  const snapshot = checkin?.evidenceSnapshot || null;
+  const completion = trainingCompletionSummary([week]);
+  const scheduledDays = (week?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
+  const completedDays = completion.completedDays.filter((day) => scheduledDays.some((scheduled) => scheduled.dateStr === day.dateStr));
+  const actualKm = Math.round(completion.allActivity.reduce((sum, activity) => sum + (Number(activity.actualKm) || 0), 0) * 10) / 10;
+  const recordedKm = actualKm || Number(snapshot?.weeklyKm) || 0;
+  const result = checkin?.result ? `當週評估為「${checkin.result}」。` : '未留下週評估；保留已排定的正式課程與完成狀態。';
+  const completionText = scheduledDays.length ? `已完成 ${completedDays.length}/${scheduledDays.length} 堂正式跑課。` : '';
+  const cards = [
+    {
+      id: 'conclusion',
+      title: '當週判定',
+      subtitle: '完成後留下的結論',
+      items: [result, checkin?.adjustment || checkin?.safetyNote || '沒有額外的週調整紀錄。']
+    },
+    {
+      id: 'evidence',
+      title: '當週實跑依據',
+      subtitle: '只讀取該週已留存資料',
+      items: [
+        recordedKm ? `當週實跑 ${recordedKm} km。` : `當週課表目標 ${weekPlannedKm(week)} km；沒有留存實跑距離。`,
+        scheduledDays.length ? `正式跑課完成 ${completedDays.length}/${scheduledDays.length} 堂。` : '',
+        snapshot?.priorWeeklyKm ? `前一週實跑 ${snapshot.priorWeeklyKm} km。` : '',
+        snapshot?.avgRpe ? `當週平均 RPE ${snapshot.avgRpe}/10。` : '',
+        snapshot?.sleepHours ? `當週平均睡眠 ${snapshot.sleepHours} 小時。` : ''
+      ].filter(Boolean)
+    },
+    {
+      id: 'execution',
+      title: '當時安排與備註',
+      subtitle: '保留回顧，不改寫舊課表',
+      items: [
+        checkin?.note ? `跑者週記：${checkin.note}` : '當週沒有留下跑者週記。',
+        checkin?.coachFeedbackResponse ? `當時教練處置：${checkin.coachFeedbackResponse}` : ''
+      ].filter(Boolean)
+    }
+  ];
+  const renderCard = (card) => `<article class="coach-insight-card coach-insight-card--${card.id}"><div class="coach-insight-card__header"><span class="coach-insight-card__icon" aria-hidden="true">${coachInsightIcon(card.id)}</span><div><h3 class="coach-insight-card__title">${card.title}</h3><p class="coach-insight-card__subtitle">${card.subtitle}</p></div></div><ul class="coach-insight-list coach-insight-list--${card.id}">${splitCoachInsightItems(card.items).map((item, index) => `<li class="coach-insight-list__item"><span class="coach-insight-list__bullet" aria-hidden="true">${card.id === 'execution' ? index + 1 : ''}</span><p>${renderCoachInsightHighlights(item)}</p></li>`).join('')}</ul></article>`;
+  return `<section class="course-decision-panel course-decision-panel--history" aria-label="歷史週課程摘要"><details class="coach-insight-details" open><summary><span><small>HISTORICAL REVIEW</small><b>第 ${week?.weekNum || currentWeek} 週課程回顧</b></span><span class="coach-insight-status">已凍結</span></summary><section class="weekly-coach-insight" aria-label="歷史週判定與完成紀錄"><div class="coach-insight-overview"><div class="coach-insight-summary"><p class="coach-insight-description">${reviewEscape(`這是第 ${week?.weekNum || currentWeek} 週當時留下的正式課程、實跑與評估紀錄；不套用目前恢復判讀、下一週處方或倒數目標。${completionText}`)}</p></div></div><div class="coach-insight-grid">${cards.map(renderCard).join('')}</div></section></details></section>`;
+}
+
 function renderCourseDecisionPanel(plan = appData.plan || [], phaseRuleText = '') {
-  const context = buildContext();
-  const decision = resolveWeeklyDecision(context, plan[currentWeek - 1]);
-  if (!decision?.rows.length) return '';
   const week = plan[currentWeek - 1];
+  if (!week) return '';
+  // 歷史週只能使用該週留下的課程與評估快照；即時恢復、近期 RPE、下週處方
+  // 都是「現在」的資料，放在舊週會讓同一份教練判讀看似被套用到所有歷史週。
+  if (currentWeek < todayWeekNum()) return renderHistoricalCourseDecisionPanel(week);
+  const context = buildContext();
+  const decision = resolveWeeklyDecision(context, week);
+  if (!decision?.rows.length) return '';
   const weeksRemaining = Math.max(0, plan.length - (week?.weekNum || currentWeek) + 1);
   const focusSummary = String(phaseRuleText || '').replace(/\s*距離目標日還有\s*\d+\s*週。?\s*$/, '');
   const sourceOrder = ['safety-hold', 'safety-override', 'daily-adjust', 'race-adjustment', 'coach-prescription', 'baseline'];
@@ -913,6 +966,7 @@ function garminActivityRecords() {
     paceSeconds: paceToSeconds(run.qualityPace || run.pace),
     hr: Number(run.hr) || null,
     qualityHr: Number(run.qualityHr) || null,
+    qualityMaxHr: Number(run.qualityMaxHr) || null,
     qualityCadence: Number(run.qualityCadence) || null,
     maxHr: Number(run.maxHr) || null,
     cadence: Number(run.cadence) || null,
@@ -1154,7 +1208,7 @@ function renderLatestTrainingReport(runs) {
     ? `顯示全部 ${laps.length} 段 Garmin 分段。`
     : `顯示${selectedGroup?.label || '所選類別'} ${visibleLaps.length} 段；可切換其他類別，不會重複堆疊摘要。`;
   const lapTotalLabel = selectedLapCategory === 'ALL' ? '全部分段合計' : `${selectedGroup?.label || '所選分段'}合計`;
-  const lapTotal = visibleLaps.length ? `<div class="session-lap-total" aria-label="${reviewEscape(lapTotalLabel)}"><strong>${reviewEscape(lapTotalLabel)}</strong><div class="session-lap-total-metrics"><span>總距離 <b>${visibleLapMetrics.totalDistanceKm.toFixed(2)} km</b></span><span>平均配速 <b>${visibleLapMetrics.averagePace}</b></span><span>平均步頻 <b>${visibleLapMetrics.averageCadence ? `${visibleLapMetrics.averageCadence} spm` : '—'}</b></span><span>平均心率 <b>${visibleLapMetrics.averageHr ? `HR ${visibleLapMetrics.averageHr}` : '—'}</b></span></div></div>` : '';
+  const lapTotal = visibleLaps.length ? `<div class="session-lap-total" aria-label="${reviewEscape(lapTotalLabel)}"><strong>${reviewEscape(lapTotalLabel)}</strong> <div class="session-lap-total-metrics"><span>總距離 <b>${visibleLapMetrics.totalDistanceKm.toFixed(2)} km</b></span> <span>平均配速 <b>${visibleLapMetrics.averagePace}</b></span> <span>平均步頻 <b>${visibleLapMetrics.averageCadence ? `${visibleLapMetrics.averageCadence} spm` : '—'}</b></span> <span>平均心率 <b>${visibleLapMetrics.averageHr ? `HR ${visibleLapMetrics.averageHr}` : '—'}</b></span></div></div>` : '';
   const autopilot = coachReviewData?.autopilot?.metrics || {};
   const comparisonLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[autopilot.comparisonFamily] || '主課';
   const confidence = mainScope
@@ -2206,14 +2260,32 @@ function coachDaysForWeek(week) {
   return coachNextWeek ? coachMenuForCurrentSchedule(coachNextWeek.menu) : [];
 }
 
+// 通用產生器每四週會帶 isDeload；正式教練週期一旦存在，必須以它為準。
+// 否則像 W8 基礎強化這種有品質課與正常跑量的週，會被錯貼成「減量週」。
+function effectiveWeekIsDeload(week, coachPhase) {
+  if (coachPhase?.phase) {
+    return coachPhase.phase === '降載';
+  }
+  return Boolean(week?.isDeload);
+}
+
 function renderWeekSection(plan) {
   const week = plan[currentWeek - 1];
   if (!week) return '<p>找不到訓練週資料</p>';
-  const deloadBadge = week.isDeload ? '<span class="week-flag-badge is-deload">減量週</span>' : '';
+  const coachPhase = typeof coachPhaseForWeek === 'function' ? coachPhaseForWeek(week) : null;
+  const isDeload = effectiveWeekIsDeload(week, coachPhase);
+  const deloadBadge = isDeload ? '<span class="week-flag-badge is-deload">減量週</span>' : '';
   const taperBadge = week.isTaper ? '<span class="week-flag-badge is-taper">賽前減量</span>' : '';
   const phaseRuleText = getPhaseRuleText(week, appData.profile, plan.length);
-  const coachPhase = typeof coachPhaseForWeek === 'function' ? coachPhaseForWeek(week) : null;
-  const weekHeroCopy = coachPhase?.focus || (week.isTaper ? '收斂疲勞，讓雙腿在比賽前保持新鮮。' : week.isDeload ? '降低訓練負荷，讓身體吸收前一階段成果。' : '穩定完成本週課表，把訓練累積成下一階段的能力。');
+  const isHistoricalWeek = currentWeek < todayWeekNum();
+  const isCurrentWeek = currentWeek === todayWeekNum();
+  // 週期階段的 focus 可能提到下一週的檢測或後續規則；不能把它當成
+  // 歷史週／進行中週的處方摘要，否則使用者會誤以為舊資料被後續課表改寫。
+  const weekHeroCopy = isHistoricalWeek
+    ? '歷史週：顯示該週當時已儲存的課程與完成紀錄；現行教練調整不會回寫。'
+    : isCurrentWeek && !coachWeekMatches(week)
+      ? '本週依已排定的正式課程執行；下一週的教練檢測會在對應週次才顯示。'
+      : coachPhase?.focus || (week.isTaper ? '收斂疲勞，讓雙腿在比賽前保持新鮮。' : isDeload ? '降低訓練負荷，讓身體吸收前一階段成果。' : '穩定完成本週課表，把訓練累積成下一階段的能力。');
   const effectiveTarget = effectiveWeekVolumeTarget(week);
   const context = buildContext();
   const dayCards = week.days.map((day) => {
