@@ -70,7 +70,10 @@ def target_from_spec(spec: Any) -> tuple[dict[str, Any], float | None, float | N
     if isinstance(spec, dict) and spec.get("kind") == "speed":
         lower, upper = float(spec.get("minMps") or 0), float(spec.get("maxMps") or 0)
         if lower > 0 and upper >= lower:
-            return ({"workoutTargetTypeId": TargetType.SPEED_ZONE, "workoutTargetTypeKey": "speed.zone", "displayOrder": TargetType.SPEED_ZONE}, lower, upper)
+            # Garmin stores both speed and pace targets as m/s under the hood;
+            # PACE_ZONE only changes which unit Garmin Connect/the watch renders
+            # (min/km) instead of SPEED_ZONE's km/h — coach paces read as pace here.
+            return ({"workoutTargetTypeId": TargetType.PACE_ZONE, "workoutTargetTypeKey": "pace.zone", "displayOrder": TargetType.PACE_ZONE}, lower, upper)
     if isinstance(spec, dict) and spec.get("kind") == "heart_rate":
         lower, upper = float(spec.get("min") or 0), float(spec.get("max") or 0)
         if lower > 0 and upper >= lower:

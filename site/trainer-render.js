@@ -2645,7 +2645,10 @@ function getPhaseRuleText(week, profile, totalWeeks) {
   const coachPhase = coachPhaseForWeek(week);
   if (coachPhase) {
     const hot = weekStart ? isHotSeasonDate(weekStart) : false;
-    const taperNote = week.isTaper ? ' 本週已進入賽前收量。' : week.isDeload ? ' 本週為恢復週，總量下修。' : '';
+    // 教練週期一旦覆蓋這週的日期，收量／降載文案就必須以正式 phase 名稱判讀，
+    // 不能沿用課表產生器自己內部推算的 week.isTaper／isDeload——那組旗標不知道
+    // 外部教練週期表，會把「基礎強化出口檢測週」誤標成恢復週。
+    const taperNote = /減量.*比賽|賽前/.test(coachPhase.phase || '') ? ' 本週已進入賽前收量。' : coachPhaseIsDeload(coachPhase) ? ' 本週為恢復週，總量下修。' : '';
     return `🧭 教練週期：目前屬「${coachPhase.phase}」${coachPhase.km ? `（週跑量 ${coachPhase.km} km）` : ''}。${coachPhase.focus || ''}${taperNote}${hot ? ' 夏季高溫：課表以心率為準，配速放慢屬正常。' : ''} 距離目標日還有 ${totalWeeks - week.weekNum + 1} 週。`;
   }
   const phaseGuides = {
