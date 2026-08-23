@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>變體 C・全週次摺疊清單</title>
+<link rel="stylesheet" href="../../../../site/styles.css">
+<link rel="stylesheet" href="../../../../site/trainer.css">
+<style>
+  body { background: var(--c-bg); padding: 32px; max-width: 720px; margin: 0 auto; }
+  .variant-label { font-size: 12px; font-weight: 800; color: var(--c-primary-hover); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .week-accordion { border:1px solid rgba(31,42,36,.09); border-radius:14px; overflow:hidden; margin-top:12px; }
+  .week-accordion-row { border-bottom:1px solid rgba(31,42,36,.08); }
+  .week-accordion-row:last-child { border-bottom:0; }
+  .week-accordion-row summary { list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px; font-size:13px; font-weight:800; color:var(--c-text); }
+  .week-accordion-row summary::-webkit-details-marker { display:none; }
+  .week-accordion-row summary::after { content:'▾'; color:var(--c-text-muted); font-size:11px; transition:transform .15s; }
+  .week-accordion-row[open] summary::after { transform:rotate(180deg); }
+  .week-accordion-status { font-size:11px; font-weight:800; padding:3px 9px; border-radius:999px; background:#edf5ef; color:#486256; }
+  .week-accordion-status.is-empty { background:#f2f2ef; color:#8a8f88; }
+  .week-accordion-status.is-current { background:var(--c-tint-green); color:var(--c-primary-hover); }
+  .week-accordion-body { padding:0 14px 14px; }
+  .week-index-empty { padding:12px; border-radius: var(--radius-md); background: var(--c-surface2); color: var(--c-text-muted); font-size:13px; line-height:1.6; }
+</style>
+</head>
+<body>
+  <div class="variant-label">變體 C — 全週次摺疊清單（沿用 details/summary 慣例，類似 coach-history）</div>
+
+  <div class="card coach-panel">
+    <div class="coach-head">
+      <div class="card-title" style="margin:0">🏃 教練建議</div>
+      <span class="coach-pill">Garmin 資料截至 08/22 20:00</span>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="coach-history-head" style="margin-bottom:4px"><span>逐週教練決定</span><span>WEEK INDEX</span></div>
+
+      <div class="week-accordion">
+        <details class="week-accordion-row">
+          <summary>第 1 週 <span class="week-accordion-status is-empty">無記錄</span></summary>
+          <div class="week-accordion-body"><div class="week-index-empty">第 1 週沒有留下教練筆記或排課變更。</div></div>
+        </details>
+        <details class="week-accordion-row" open>
+          <summary>第 2 週 <span class="week-accordion-status">2 則筆記</span></summary>
+          <div class="week-accordion-body">
+            <ul class="coach-history-list">
+              <li class="coach-history-item">
+                <time>08-13</time>
+                <div>
+                  <div class="coach-history-points"><span class="is-handled">已處理</span><span>賽前檢測配速偏快，已下修節奏跑目標</span></div>
+                  <details class="coach-raw-note"><summary>查看原始分析</summary><p>本週 Z2 心率偏高但配速正常，判讀為熱適應影響，維持既定課表，節奏跑配速下修 5 秒/km 觀察。</p></details>
+                </div>
+              </li>
+              <li class="coach-history-item">
+                <time>08-11</time>
+                <div><div class="coach-history-points"><span>長跑後恢復良好，維持原排課</span></div></div>
+              </li>
+            </ul>
+            <div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">
+              <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px">查看第 2 週課表回顧</button>
+            </div>
+          </div>
+        </details>
+        <details class="week-accordion-row">
+          <summary>第 3 週 <span class="week-accordion-status">1 則排課變更</span></summary>
+          <div class="week-accordion-body">
+            <ul class="coach-history-list">
+              <li class="coach-history-item"><time>08-18</time><div><div class="coach-history-points"><span>雨天將長跑順延一天</span></div></div></li>
+            </ul>
+          </div>
+        </details>
+        <details class="week-accordion-row">
+          <summary>第 4 週 <span class="week-accordion-status is-empty">無記錄</span></summary>
+          <div class="week-accordion-body"><div class="week-index-empty">第 4 週沒有留下教練筆記或排課變更。</div></div>
+        </details>
+        <details class="week-accordion-row">
+          <summary>第 5 週 <span class="week-accordion-status is-current">本週</span></summary>
+          <div class="week-accordion-body"><div class="week-index-empty">本週進行中，尚未產生教練回顧紀錄。</div></div>
+        </details>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

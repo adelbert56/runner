@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>變體 B・週次橫向捲動 chips</title>
+<link rel="stylesheet" href="../../../../site/styles.css">
+<link rel="stylesheet" href="../../../../site/trainer.css">
+<style>
+  body { background: var(--c-bg); padding: 32px; max-width: 720px; margin: 0 auto; }
+  .variant-label { font-size: 12px; font-weight: 800; color: var(--c-primary-hover); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .week-chip-row { display:flex; gap:6px; overflow-x:auto; padding:4px 2px 10px; margin-bottom:10px; -webkit-overflow-scrolling:touch; }
+  .week-chip { flex:0 0 auto; min-height:40px; padding:8px 13px; border-radius: var(--radius); border:1px solid var(--c-border); background:var(--c-surface2); color:var(--c-text-muted); font:inherit; font-size:12.5px; font-weight:800; white-space:nowrap; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; line-height:1.2; }
+  .week-chip small { font-size:10px; font-weight:700; opacity:.8; }
+  .week-chip.is-active { border-color: var(--c-primary); background: var(--c-tint-green); color: var(--c-primary-hover); }
+  .week-chip.is-empty { opacity:.55; }
+  .week-chip.is-current { box-shadow: inset 0 0 0 1px var(--c-primary); }
+  .week-index-empty { padding:16px 14px; border-radius: var(--radius-md); background: var(--c-surface2); color: var(--c-text-muted); font-size:13px; line-height:1.6; text-align:center; }
+</style>
+</head>
+<body>
+  <div class="variant-label">變體 B — 週次橫向 chips（沿用 phase-tab／progress-hub-tabs 互動語彙）</div>
+
+  <div class="card coach-panel">
+    <div class="coach-head">
+      <div class="card-title" style="margin:0">🏃 教練建議</div>
+      <span class="coach-pill">Garmin 資料截至 08/22 20:00</span>
+    </div>
+
+    <div class="coach-history" style="margin-top:16px">
+      <div class="coach-history-head">
+        <span>逐週教練決定</span><span>WEEK INDEX</span>
+      </div>
+
+      <div class="week-chip-row" role="tablist" aria-label="切換週次">
+        <button class="week-chip is-empty">第1週<small>無記錄</small></button>
+        <button class="week-chip is-active">第2週<small>2則</small></button>
+        <button class="week-chip">第3週<small>1則</small></button>
+        <button class="week-chip is-empty">第4週<small>無記錄</small></button>
+        <button class="week-chip is-current">第5週<small>本週</small></button>
+        <button class="week-chip is-empty">第6週<small>未開始</small></button>
+      </div>
+
+      <ul class="coach-history-list">
+        <li class="coach-history-item">
+          <time>08-13</time>
+          <div>
+            <div class="coach-history-points"><span class="is-handled">已處理</span><span>賽前檢測配速偏快，已下修節奏跑目標</span></div>
+            <details class="coach-raw-note"><summary>查看原始分析</summary><p>本週 Z2 心率偏高但配速正常，判讀為熱適應影響，維持既定課表，節奏跑配速下修 5 秒/km 觀察。</p></details>
+          </div>
+        </li>
+      </ul>
+
+      <div class="training-status-actions" style="margin-top:12px;justify-content:flex-start">
+        <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px">查看第 2 週課表回顧</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card coach-panel" style="margin-top:16px">
+    <div class="card-title" style="margin:0 0 10px;font-size:15px">chip 選到「無記錄」週的畫面</div>
+    <div class="week-index-empty">第 1 週沒有留下教練筆記或排課變更。</div>
+  </div>
+</body>
+</html>

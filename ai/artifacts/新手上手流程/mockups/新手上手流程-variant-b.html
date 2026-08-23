@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>變體 B・三重點歡迎卡</title>
+<link rel="stylesheet" href="../../../../site/styles.css">
+<link rel="stylesheet" href="../../../../site/trainer.css">
+<style>
+  body { background: var(--c-bg); padding: 32px; max-width: 820px; margin: 0 auto; }
+  .variant-label { font-size: 12px; font-weight: 800; color: var(--c-primary-hover); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .welcome-card { border:2px solid var(--c-primary); border-radius: var(--radius-lg); padding:22px; margin-bottom:20px; background: linear-gradient(135deg,#f0f9f2,#fffdf8 62%); }
+  .welcome-title { font-size:20px; font-weight:900; color:var(--c-text); margin-bottom:6px; }
+  .welcome-copy { font-size:14px; color:var(--c-text-muted); line-height:1.65; margin-bottom:16px; }
+  .welcome-points { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+  .welcome-point { background:rgba(255,255,255,.72); border:1px solid rgba(31,42,36,.08); border-radius: var(--radius-md); padding:14px; }
+  .welcome-point .pt-icon { font-size:20px; margin-bottom:6px; }
+  .welcome-point .pt-title { font-size:13px; font-weight:800; color:var(--c-text); margin-bottom:4px; }
+  .welcome-point .pt-desc { font-size:12px; color:var(--c-text-muted); line-height:1.55; }
+  .welcome-actions { display:flex; gap:10px; align-items:center; }
+  .welcome-skip { font-size:12px; color:var(--c-text-muted); background:none; border:0; cursor:pointer; text-decoration:underline; }
+  @media (max-width:640px){ .welcome-points{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+  <div class="variant-label">變體 B — 三重點歡迎卡（獨立於設定表單卡片之上，較有存在感）</div>
+
+  <div class="welcome-card" aria-label="首次使用說明">
+    <div class="welcome-title">歡迎使用練跑計畫</div>
+    <p class="welcome-copy">依你的目標、可訓練日與目前狀況，自動生成能放進手機的訓練手冊；之後每次同步 Garmin 實跑，課表會自動調整。</p>
+    <div class="welcome-points">
+      <div class="welcome-point"><div class="pt-icon">🎯</div><div class="pt-title">先設定目標</div><div class="pt-desc">選訓練模式、比賽日與可訓練日，1 分鐘完成。</div></div>
+      <div class="welcome-point"><div class="pt-icon">📅</div><div class="pt-title">自動排課</div><div class="pt-desc">節奏、長跑、恢復自動分流，不用自己排。</div></div>
+      <div class="welcome-point"><div class="pt-icon">🏃</div><div class="pt-title">跟著調整</div><div class="pt-desc">同步 Garmin 後，配速與強度會依實跑校正。</div></div>
+    </div>
+    <div class="welcome-actions">
+      <button class="btn btn-primary" style="padding:10px 18px">開始設定 ↓</button>
+      <button class="welcome-skip">我已經用過，略過說明</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 訓練手冊設定</div>
+    <p style="font-size:15px;line-height:1.7;color:var(--c-text-muted);margin-bottom:24px">這個功能不是只吐出課表，而是依你的目標、可訓練日、目前跑量與恢復條件，生成一份可放進手機的個人訓練手冊。所有資料只存在您的裝置上。</p>
+    <div class="form-group">
+      <div class="form-label">訓練模式</div>
+      <div class="goal-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div class="goal-card selected"><div class="goal-icon">🏅</div><div class="goal-name">半馬 21K</div><div class="goal-desc">長跑、節奏跑、恢復三者平衡 · 建議至少 12 週</div></div>
+        <div class="goal-card"><div class="goal-icon">🏃</div><div class="goal-name">入門 5K / 10K</div><div class="goal-desc">建立規律、先把跑步變成習慣 · 建議至少 8 週</div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

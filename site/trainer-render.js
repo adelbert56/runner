@@ -61,6 +61,7 @@ function renderPlanView() {
 </nav>
 <div id="plan-tab-week" class="container" role="tabpanel" aria-labelledby="plan-tab-button-week">
   ${renderSafetyHoldCard()}
+  ${renderRunnerOnboardingCard()}
   ${renderWeekOverviewCard(profile, plan)}
   ${renderRaceWeekCard(profile)}
   ${renderPhaseTabs(plan)}
@@ -881,6 +882,77 @@ function renderPlanChangeTimeline() {
   const items = dedupePlanChangeItems(appData.planChangeHistory || []).slice(0, 4);
   if (!items.length) return '<div class="automation-timeline"><div class="automation-timeline-title">課表變更紀錄</div><p style="margin:7px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">還沒有任何自動調整。等 Garmin 校準、週評估保護或套用檢測之後，我會把前後的差異留在這裡給你看。</p></div>';
   return `<div class="automation-timeline"><div class="automation-timeline-title">課表變更紀錄</div><div class="automation-timeline-list">${items.map((item) => `<div class="automation-timeline-item"><time>${reviewEscape(item.date)}</time><div><b>${reviewEscape(item.title)}</b><br>${planChangeSummary(item.changes)}</div></div>`).join('')}</div></div>`;
+}
+
+// 逐週教練決定索引：把「本週有 2 則筆記、上週沒動靜」這種每週決策攤開成
+// 可選的週次清單，而不是只能靠日期去對照最近 8 則筆記／4 次排課變更。
+let coachWeekIndexSelectedWeek = null;
+
+function coachWeekIndexEntries(plan = appData.plan || []) {
+  const notes = [...(coachReviewData?.history || []), ...(appData.garminAnalysisHistory || [])]
+    .filter((item) => item?.summary && item?.date);
+  const changes = dedupePlanChangeItems(appData.planChangeHistory || []);
+  return plan.map((week) => {
+    const dates = (week.days || []).map((day) => day.dateStr).filter(Boolean);
+    const start = dates[0] || '';
+    const end = dates[dates.length - 1] || start;
+    return {
+      weekNum: week.weekNum,
+      notes: start ? notes.filter((item) => item.date >= start && item.date <= end) : [],
+      changes: start ? changes.filter((item) => item.date >= start && item.date <= end) : []
+    };
+  });
+}
+
+function renderCoachWeekIndex(plan = appData.plan || []) {
+  const entries = coachWeekIndexEntries(plan);
+  if (!entries.length || !entries.some((entry) => entry.notes.length || entry.changes.length)) return '';
+  const todayWeek = todayWeekNum();
+  const selected = entries.some((entry) => entry.weekNum === coachWeekIndexSelectedWeek) ? coachWeekIndexSelectedWeek : todayWeek;
+  const options = entries.map((entry) => {
+    const count = entry.notes.length + entry.changes.length;
+    const label = entry.weekNum === todayWeek
+      ? `第 ${entry.weekNum} 週（本週${count ? `・${count} 則` : ''}）`
+      : `第 ${entry.weekNum} 週・${count ? `${count} 則` : '無記錄'}`;
+    return `<option value="${entry.weekNum}" ${entry.weekNum === selected ? 'selected' : ''}>${reviewEscape(label)}</option>`;
+  }).join('');
+  return `<section class="coach-history" aria-label="逐週教練決定">
+    <div class="week-index-head">
+      <div><div class="coach-history-head" style="margin:0"><b>逐週教練決定</b><span>WEEK INDEX</span></div></div>
+      <select class="week-index-select" aria-label="選擇週次" onchange="setCoachWeekIndexSelection(this.value)">${options}</select>
+    </div>
+    <div id="coach-week-index-body">${renderCoachWeekIndexBody(entries.find((entry) => entry.weekNum === selected), todayWeek)}</div>
+  </section>`;
+}
+
+function renderCoachWeekIndexBody(entry, todayWeek = todayWeekNum()) {
+  if (!entry) return '';
+  const items = [
+    ...entry.notes.map(renderCoachHistoryItem),
+    ...entry.changes.map((change) => `<li class="coach-history-item"><time>${reviewEscape(change.date)}</time><div><div class="coach-history-points"><span>${reviewEscape(change.title)}</span></div></div></li>`)
+  ].join('');
+  const jumpBtn = entry.weekNum < todayWeek
+    ? `<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="week-index-jump" type="button" onclick="jumpToWeekCoachReview(${entry.weekNum})">查看第 ${entry.weekNum} 週課表回顧 →</button></div>`
+    : '';
+  if (!items) {
+    const emptyCopy = entry.weekNum === todayWeek ? '本週進行中，尚未產生教練回顧紀錄。' : `第 ${entry.weekNum} 週沒有留下教練筆記或排課變更。`;
+    return `<div class="week-index-empty">${emptyCopy}</div>${jumpBtn}`;
+  }
+  return `<ul>${items}</ul>${jumpBtn}`;
+}
+
+function setCoachWeekIndexSelection(value) {
+  coachWeekIndexSelectedWeek = Number(value);
+  const host = document.getElementById('coach-week-index-body');
+  if (!host) return;
+  const entries = coachWeekIndexEntries(appData.plan || []);
+  host.innerHTML = renderCoachWeekIndexBody(entries.find((entry) => entry.weekNum === coachWeekIndexSelectedWeek), todayWeekNum());
+}
+
+function jumpToWeekCoachReview(weekNum) {
+  jumpToPhaseWeek(weekNum);
+  switchPlanTab('week');
+  document.getElementById('plan-tab-week')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function showWeekPlanFromStatus() {
@@ -2000,8 +2072,12 @@ function renderCoachReviewPanel() {
       <div class="coach-evidence-body">${reviewNotice}
         <div class="coach-evidence-group">${renderPlanChangeTimeline()}</div>
         ${(() => {
-          // 課表變更紀錄只列「有改動」的最後 4 筆；跑者要回顧「每一週教練當時判定
-          // 什麼」（含維持不變的週），需要逐週決策索引，不只是變更差異。
+          const weekIndex = renderCoachWeekIndex(appData.plan || []);
+          return weekIndex ? `<div class="coach-evidence-group">${weekIndex}</div>` : '';
+        })()}
+        ${(() => {
+          // 課表變更紀錄只列「有改動」的最後 4 筆；上面的逐週索引補了「每一週教練當時判定
+          // 什麼」（含維持不變的週）；這裡繼續只看週評估歷史。
           const history = renderCheckinHistory();
           return history ? `<div class="coach-evidence-group">${history}</div>` : '';
         })()}
@@ -2238,28 +2314,6 @@ function renderRunnerOnboardingCard() {
   return `<section class="runner-guide-card" aria-label="新手三步上手">
     <div class="runner-guide-head"><div><div class="runner-guide-kicker">Start here</div><div class="runner-guide-title">先做好這三步，課表才會越來越準</div><p class="runner-guide-copy">不需要每天填一堆數字；先把執行、回報與恢復做成習慣。</p></div><button class="btn btn-secondary" style="padding:6px 10px;font-size:12px" onclick="dismissRunnerOnboarding()">暫時隱藏</button></div>
     <ul class="runner-guide-list">${items.map((item) => `<li class="${item.done ? '' : 'pending'}">${item.text}</li>`).join('')}</ul>
-  </section>`;
-}
-
-function renderDailyExecutionCard(week) {
-  const today = findTodayPlanDay()?.day;
-  const currentCheckin = (appData.checkins || []).find((item) => item.weekNum === currentWeek);
-  const upcoming = (week?.days || []).find((day) => day.dateStr > todayStr() && day.type !== 'rest');
-  const currentDay = today || upcoming;
-  const typeLabel = currentDay ? trainingTypeLabel(currentDay.type, currentDay.focus) : '恢復';
-  const isToday = Boolean(today);
-  const task = currentDay ? trainingTaskTitle(currentDay) : '本週先完成恢復與週評估';
-  const copy = currentCheckin
-    ? '本週評估已完成。照今天卡片執行即可；有疼痛或步態異常時，直接停止品質課。'
-    : isToday
-      ? '跑完先讀取 Garmin 實跑；未同步時才用「手動補登」。若不舒服，選「跳過」並留下原因，我會把這筆記著，帶進下週的判斷。'
-      : upcoming
-        ? `下一堂是 ${upcoming.dateStr.slice(5)} 的${typeLabel}；今天以恢復、補水與睡眠為主。`
-        : '本週課表接近結束，做完週評估後再看下週方向。';
-  return `<section class="runner-guide-card" aria-label="今日下一步">
-    <div class="runner-guide-kicker">Daily focus</div><div class="runner-guide-title">${isToday ? '今天的下一步' : '接下來的下一步'}：${reviewEscape(task)}</div>
-    <p class="runner-guide-copy">${reviewEscape(copy)}</p>
-    <div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-primary" onclick="goToToday()">${isToday ? '查看今天課表' : '查看本週課表'}</button>${currentCheckin ? '' : '<button class="btn btn-secondary" onclick="openWeeklyCheckin()">完成週評估</button>'}</div>
   </section>`;
 }
 

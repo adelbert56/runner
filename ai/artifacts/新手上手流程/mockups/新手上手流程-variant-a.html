@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>變體 A・輕量說明橫幅</title>
+<link rel="stylesheet" href="../../../../site/styles.css">
+<link rel="stylesheet" href="../../../../site/trainer.css">
+<style>
+  body { background: var(--c-bg); padding: 32px; max-width: 820px; margin: 0 auto; }
+  .variant-label { font-size: 12px; font-weight: 800; color: var(--c-primary-hover); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+  <div class="variant-label">變體 A — 輕量說明橫幅（沿用 runner-guide-card，一鍵略過，不擋表單）</div>
+
+  <div class="card" style="margin-top:8px">
+    <div class="card-title">📋 訓練手冊設定</div>
+    <p style="font-size:15px;line-height:1.7;color:var(--c-text-muted);margin-bottom:24px">這個功能不是只吐出課表，而是依你的目標、可訓練日、目前跑量與恢復條件，生成一份可放進手機的個人訓練手冊。所有資料只存在您的裝置上。</p>
+
+    <section class="runner-guide-card" aria-label="首次使用說明">
+      <div class="runner-guide-head">
+        <div>
+          <div class="runner-guide-kicker">Getting started</div>
+          <div class="runner-guide-title">這套系統怎麼運作？</div>
+          <p class="runner-guide-copy">填完下面的表單，我會依你的目標與可訓練日排出第一份課表；之後每次同步 Garmin 實跑，課表會自動微調配速與強度——你只要照卡片執行就好。</p>
+        </div>
+        <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;white-space:nowrap">略過說明</button>
+      </div>
+    </section>
+
+    <div class="form-group">
+      <div class="form-label">訓練模式</div>
+      <div class="goal-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div class="goal-card selected"><div class="goal-icon">🏅</div><div class="goal-name">半馬 21K</div><div class="goal-desc">長跑、節奏跑、恢復三者平衡 · 建議至少 12 週</div></div>
+        <div class="goal-card"><div class="goal-icon">🏃</div><div class="goal-name">入門 5K / 10K</div><div class="goal-desc">建立規律、先把跑步變成習慣 · 建議至少 8 週</div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

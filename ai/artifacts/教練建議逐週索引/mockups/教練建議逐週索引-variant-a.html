@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>變體 A・下拉週次選單</title>
+<link rel="stylesheet" href="../../../../site/styles.css">
+<link rel="stylesheet" href="../../../../site/trainer.css">
+<style>
+  body { background: var(--c-bg); padding: 32px; max-width: 720px; margin: 0 auto; }
+  .variant-label { font-size: 12px; font-weight: 800; color: var(--c-primary-hover); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .week-index-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .week-index-select { min-width:180px; height:40px; padding:0 34px 0 12px; border:1px solid var(--c-border); border-radius: var(--radius-md); background:rgba(255,253,248,.92); color:var(--c-text); font:inherit; font-size:13px; font-weight:800; cursor:pointer; }
+  .week-index-empty { padding:16px 14px; border-radius: var(--radius-md); background: var(--c-surface2); color: var(--c-text-muted); font-size:13px; line-height:1.6; text-align:center; }
+  .week-index-jump { font-size:12px; font-weight:800; color:var(--c-primary-hover); background:none; border:0; cursor:pointer; padding:6px 4px; }
+</style>
+</head>
+<body>
+  <div class="variant-label">變體 A — 下拉週次選單（沿用既有 checkin-week-switcher select 樣式）</div>
+
+  <div class="card coach-panel">
+    <div class="coach-head">
+      <div class="card-title" style="margin:0">🏃 教練建議</div>
+      <span class="coach-pill">Garmin 資料截至 08/22 20:00</span>
+    </div>
+
+    <div class="coach-decision-workspace" aria-label="教練決策摘要" style="margin-top:14px">
+      <div class="coach-decision-kicker">Coach decision · same course resolver</div>
+      <div class="coach-decision-headline">照正式課表穩定執行</div>
+      <p class="coach-decision-copy">本週決策已納入 Garmin 自動判讀 3 堂。</p>
+    </div>
+
+    <div class="coach-history" style="margin-top:18px">
+      <div class="week-index-head">
+        <div>
+          <div class="runner-guide-kicker">Week index</div>
+          <div style="font-size:15px;font-weight:800;color:var(--c-text)">逐週教練決定</div>
+        </div>
+        <select class="week-index-select" id="week-index-select">
+          <option value="">選擇週次…</option>
+          <option value="1">第 1 週・無記錄</option>
+          <option value="2" selected>第 2 週・2 則筆記</option>
+          <option value="3">第 3 週・1 則排課變更</option>
+          <option value="4">第 4 週・無記錄</option>
+          <option value="5">第 5 週（本週）</option>
+        </select>
+      </div>
+
+      <ul class="coach-history-list" style="margin-top:12px">
+        <li class="coach-history-item">
+          <time>08-13</time>
+          <div>
+            <div class="coach-history-points"><span class="is-handled">已處理</span><span>賽前檢測配速偏快，已下修節奏跑目標</span></div>
+            <details class="coach-raw-note"><summary>查看原始分析</summary><p>本週 Z2 心率偏高但配速正常，判讀為熱適應影響，維持既定課表，節奏跑配速下修 5 秒/km 觀察。</p></details>
+          </div>
+        </li>
+        <li class="coach-history-item">
+          <time>08-11</time>
+          <div>
+            <div class="coach-history-points"><span>長跑後恢復良好，維持原排課</span></div>
+            <details class="coach-raw-note"><summary>查看原始分析</summary><p>週六長跑後次日晨脈正常，無需插入額外恢復日。</p></details>
+          </div>
+        </li>
+      </ul>
+
+      <div class="training-status-actions" style="margin-top:12px;justify-content:flex-start">
+        <button class="week-index-jump">查看第 2 週課表回顧 →</button>
+      </div>
+    </div>
+
+    <div class="coach-history" style="margin-top:14px">
+      <div class="week-index-head">
+        <div style="font-size:13px;color:var(--c-text-muted)">切到第 1 週（下拉選單示意空狀態）</div>
+      </div>
+      <div class="week-index-empty">當週沒有留下教練筆記或排課變更。</div>
+    </div>
+  </div>
+</body>
+</html>

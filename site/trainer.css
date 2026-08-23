@@ -711,6 +711,12 @@
     .checkin-submit { width:100%; margin-top:14px; min-height:44px; box-shadow:0 8px 16px rgba(36,114,79,.15); }
     @media (max-width:620px) { .checkin-head { align-items:flex-start; flex-direction:column; } .checkin-week-switcher { width:100%; } .checkin-week-switcher select { flex:1; } .checkin-body { padding:16px; } }
 
+    .week-index-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+    .week-index-select { min-width:150px; height:36px; padding:0 30px 0 10px; border:1px solid var(--c-border); border-radius: var(--radius-md); background:rgba(255,253,248,.92); color:var(--c-text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .week-index-empty { padding:12px 14px; border-radius: var(--radius-md); background: var(--c-surface2); color: var(--c-text-muted); font-size:13px; line-height:1.6; }
+    .week-index-jump { font-size:12px; font-weight:800; color:var(--c-primary-hover); background:none; border:0; cursor:pointer; padding:6px 4px; }
+    @media (max-width:620px) { .week-index-head { flex-direction:column; align-items:flex-start; } .week-index-select { width:100%; } }
+
     /* === Plan overview === */
     .plan-alignment-note { display:flex; align-items:center; gap:7px; margin:0 0 8px; color:var(--c-text-muted); font-size:12px; font-weight:750; }
     .phase-tabs { display:flex; gap:8px; overflow-x:auto; padding:2px 1px 8px; margin-bottom:20px; scrollbar-width:thin; }

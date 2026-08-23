@@ -44,7 +44,7 @@ function addLocalRegistrationLink() {
 addLocalRegistrationLink();
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, lastBackupAt: null, safetyHold: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, lastBackupAt: null, safetyHold: null, onboardingIntroSeenAt: null };
 }
 
 // A formal day remains the single coaching prescription.  A second workout is
@@ -1511,6 +1511,25 @@ const GUIDE_LIBRARY = {
 // ============================================================
 // SETUP VIEW
 // ============================================================
+function dismissSetupOnboardingIntro() {
+  appData.onboardingIntroSeenAt = new Date().toISOString();
+  saveData(appData);
+  document.getElementById('setup-onboarding-intro')?.remove();
+}
+
+function renderSetupOnboardingIntro() {
+  return `<section class="runner-guide-card" id="setup-onboarding-intro" aria-label="首次使用說明">
+    <div class="runner-guide-head">
+      <div>
+        <div class="runner-guide-kicker">Getting started</div>
+        <div class="runner-guide-title">這套系統怎麼運作？</div>
+        <p class="runner-guide-copy">填完下面的表單，我會依你的目標與可訓練日排出第一份課表；之後每次同步 Garmin 實跑，課表會自動微調配速與強度——你只要照卡片執行就好。</p>
+      </div>
+      <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;white-space:nowrap" type="button" onclick="dismissSetupOnboardingIntro()">略過說明</button>
+    </div>
+  </section>`;
+}
+
 function renderSetupView() {
   renderHeroPanel();
   const el = document.getElementById('view-setup');
@@ -1532,6 +1551,7 @@ function renderSetupView() {
   <div class="card" style="margin-top:24px">
     <div class="card-title">📋 訓練手冊設定</div>
     <p style="font-size:15px;line-height:1.7;color:var(--c-text-muted);margin-bottom:24px">這個功能不是只吐出課表，而是依你的目標、可訓練日、目前跑量與恢復條件，生成一份可放進手機的個人訓練手冊。所有資料只存在您的裝置上。</p>
+    ${!hasExistingPlan && !appData.onboardingIntroSeenAt ? renderSetupOnboardingIntro() : ''}
     ${hasExistingPlan ? `<div style="background:#f3efe5;border-radius:10px;padding:12px 14px;font-size:14px;color:var(--c-text-muted);margin-bottom:20px">你目前已經有一份訓練計畫。改完設定後按「更新訓練手冊」，若只是想回去看原計畫，可直接按「返回目前計畫」。</div>` : ''}
     ${nextCycleNote}
 
@@ -1593,6 +1613,7 @@ function renderSetupView() {
         <option value="120">120 分鐘</option>
         <option value="150">150+ 分鐘</option>
       </select>
+      <div class="field-help">照你目前單次能安全跑最久的時間選，不是目標時間。課表的長跑會逐週往上加，但不會超過這個上限；選太保守只是長跑進度變慢，選太高才會有硬撐受傷的風險。</div>
     </div>
 
     <!-- 6. Current Weekly Km -->

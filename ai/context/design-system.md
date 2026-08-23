@@ -67,6 +67,8 @@
 | 賽事事實列 | 已建立 | 完整／缺欄位隱藏／手機單欄 | muted、green-dark、line | `site/app.js`、`site/styles.css` | 本次驗證 | 賽事與內容資訊密度優化 |
 | 內容決策摘要 | 已建立 | 跑鞋／新聞 | green-dark、muted、line | `site/app.js`、`site/styles.css` | 本次驗證 | 賽事與內容資訊密度優化 |
 | Nav | 已存在 | 預設/hover/focus/窄螢幕橫向捲動 | muted、green-dark、surface | `site/styles.css` | 實際頁面 | 既有 |
+| 逐週索引下拉（week-index-*） | 已建立 | 有記錄／無記錄／本週進行中／歷史週可跳轉／手機單欄 | `--radius-md`、`--c-primary-hover`、`--c-surface2`、`--c-border` | `site/trainer.css`、`site/trainer-render.js` | 本次驗證 | 教練建議逐週索引 |
+| 首次上手橫幅（沿用 runner-guide-card） | 已存在（本次重新啟用＋新增進站前用法） | 顯示／略過後不再顯示 | `--radius-lg`、`--c-primary`、`--c-tint-green` | `site/trainer.css`、`site/trainer.js`、`site/trainer-render.js` | 本次驗證 | 新手上手流程 |
 
 （「來源階段」記錄這個元件是 S4 初建，還是後續某個功能 Epic 補做並回登的。）
 
@@ -75,3 +77,5 @@
 | 介面／使用者端 | 選定版型 | Mockup 決策紀錄 | 人工核准 |
 |---|---|---|---|
 | 公開賽事與內容列表 | 完整事實卡 A | `ai/artifacts/賽事與內容資訊密度優化/mockup-decision-賽事與內容頁.md` | Squall／2026-08-05 |
+| 教練建議 tab 逐週索引 | 變體 A（下拉選單） | `ai/artifacts/教練建議逐週索引/mockup-decision-教練建議逐週索引.md` | Squall／2026-08-23 |
+| 訓練手冊設定首次說明 | 變體 A（輕量橫幅） | `ai/artifacts/新手上手流程/mockup-decision-新手上手流程.md` | Squall／2026-08-23 |
