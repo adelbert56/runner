@@ -375,12 +375,20 @@ function editSkipReason(dateStr) {
 // ============================================================
 // WEEKLY CHECK-IN
 // ============================================================
+// 疲勞／疼痛的燈號分級只能有一套定義；trend 圖跟 history 列表各自複製一份
+// 門檻的話，之後改標準只改到一邊，兩處顏色會悄悄對不起來。
+function checkinTone(item) {
+  if (item.painConcern || item.result === '停止品質課') return 'danger';
+  if (item.fatigue >= 4 || item.result === '降載恢復') return 'caution';
+  return 'good';
+}
+
 function renderCheckinTrend() {
   const recent = [...(appData.checkins || [])].sort((a, b) => a.weekNum - b.weekNum).slice(-8);
   if (!recent.length) return '<p style="margin:12px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">完成每週評估後，這裡會自動顯示你的恢復趨勢，還有我為你下週做過的保護。</p>';
   const averageFatigue = recent.filter((item) => item.fatigue).reduce((sum, item, _, items) => sum + item.fatigue / items.length, 0);
   return `<div class="checkin-trend" aria-label="近期恢復趨勢">${recent.map((item) => {
-    const tone = item.painConcern || item.result === '停止品質課' ? 'danger' : item.fatigue >= 4 || item.result === '降載恢復' ? 'caution' : 'good';
+    const tone = checkinTone(item);
     const height = Math.max(14, Math.min(100, ((Number(item.fatigue) || 3) / 5) * 100));
     return `<div class="checkin-trend-item ${tone}" title="第 ${item.weekNum} 週｜疲勞 ${item.fatigue || '未填'}/5｜${reviewEscape(item.result || '維持')}"><div class="checkin-trend-bar"><i style="height:${height}%"></i></div><small>W${item.weekNum}</small></div>`;
   }).join('')}</div><p style="margin:8px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">近 ${recent.length} 週平均疲勞：${averageFatigue ? `${averageFatigue.toFixed(1)}/5` : '尚無主觀疲勞資料'}；柱越高代表疲勞越高，顏色代表我當週有沒有幫你降載保護。</p>`;
@@ -395,7 +403,7 @@ function renderCheckinHistory() {
   if (!past.length) return '';
   return `<span class="checkin-section-label" style="margin-top:18px">歷史評估</span>
     <div class="checkin-history">${past.map((item) => {
-      const tone = item.painConcern || item.result === '停止品質課' ? 'danger' : item.fatigue >= 4 || item.result === '降載恢復' ? 'caution' : 'good';
+      const tone = checkinTone(item);
       return `<div class="checkin-history-item ${tone}"><b>第 ${item.weekNum} 週</b><span>${reviewEscape(item.result || '維持')}｜疲勞 ${item.fatigue || '—'}/5</span><p>${reviewEscape(item.adjustment || item.safetyNote || '照計畫執行')}</p></div>`;
     }).join('')}</div>`;
 }

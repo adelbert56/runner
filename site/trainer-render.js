@@ -1999,6 +1999,12 @@ function renderCoachReviewPanel() {
       <div class="coach-evidence-head"><div><div class="coach-evidence-kicker">COACHING RECORD</div><h2 id="coach-evidence-title">判讀依據與調整歷程</h2><p>所有摘要預設展開；原始文字只在個別紀錄中保留。</p></div><span>已整合</span></div>
       <div class="coach-evidence-body">${reviewNotice}
         <div class="coach-evidence-group">${renderPlanChangeTimeline()}</div>
+        ${(() => {
+          // 課表變更紀錄只列「有改動」的最後 4 筆；跑者要回顧「每一週教練當時判定
+          // 什麼」（含維持不變的週），需要逐週決策索引，不只是變更差異。
+          const history = renderCheckinHistory();
+          return history ? `<div class="coach-evidence-group">${history}</div>` : '';
+        })()}
         <div class="coach-evidence-group"><div class="coach-evidence-group-title">資料訊號與歷史</div>${renderCoachDataSignals()}${notes ? `<section class="coach-history"><div class="coach-history-head"><b>分析快照歷史</b><span>不覆蓋目前訓練設定</span></div><ul>${notes}</ul></section>` : ''}</div>
       </div>
     </section>
@@ -2186,7 +2192,10 @@ function renderPhaseTabs(plan) {
 }
 
 function jumpToPhaseWeek(weekNum) {
-  currentWeek = weekNum;
+  // 所有現有呼叫端目前都自己先夾好範圍，但這裡沒有防線；一旦有新呼叫端傳壞值，
+  // 週分頁會直接印「找不到訓練週資料」而不是退到最近的合法週。
+  const totalWeeks = Array.isArray(appData.plan) ? appData.plan.length : 1;
+  currentWeek = Math.min(Math.max(1, Math.round(weekNum) || 1), Math.max(1, totalWeeks));
   saveUiState({ week: weekNum });
   // innerHTML 重繪會讓瀏覽器把捲動重置回頂，先記住再還原
   const scroller = document.scrollingElement || document.documentElement;
@@ -2279,13 +2288,21 @@ function renderWeekSection(plan) {
   const phaseRuleText = getPhaseRuleText(week, appData.profile, plan.length);
   const isHistoricalWeek = currentWeek < todayWeekNum();
   const isCurrentWeek = currentWeek === todayWeekNum();
+  const isFutureWeek = currentWeek > todayWeekNum();
+  // 遠期未來週沒有教練逐日確認過（coachWeekMatches 只會命中下一個待處理的週），
+  // 顯示的是產生器排出來的預測值。標籤要跟已鎖定的正式課表明顯區分，
+  // 不然使用者分不出「還會變」跟「教練定案不會再改」。
+  const historyBadge = isHistoricalWeek ? '<span class="week-status-pill is-history">歷史紀錄</span>' : '';
+  const previewBadge = isFutureWeek && !coachWeekMatches(week) ? '<span class="week-status-pill is-preview">預覽・未經教練確認</span>' : '';
   // 週期階段的 focus 可能提到下一週的檢測或後續規則；不能把它當成
   // 歷史週／進行中週的處方摘要，否則使用者會誤以為舊資料被後續課表改寫。
   const weekHeroCopy = isHistoricalWeek
     ? '歷史週：顯示該週當時已儲存的課程與完成紀錄；現行教練調整不會回寫。'
     : isCurrentWeek && !coachWeekMatches(week)
       ? '本週依已排定的正式課程執行；下一週的教練檢測會在對應週次才顯示。'
-      : coachPhase?.focus || (week.isTaper ? '收斂疲勞，讓雙腿在比賽前保持新鮮。' : isDeload ? '降低訓練負荷，讓身體吸收前一階段成果。' : '穩定完成本週課表，把訓練累積成下一階段的能力。');
+      : isFutureWeek && !coachWeekMatches(week)
+        ? '未來週預覽：內容是課表產生器依週期規劃排出的預測，還沒經過教練逐週檢測確認，實際課表會依屆時的完成度與恢復狀況調整。'
+        : coachPhase?.focus || (week.isTaper ? '收斂疲勞，讓雙腿在比賽前保持新鮮。' : isDeload ? '降低訓練負荷，讓身體吸收前一階段成果。' : '穩定完成本週課表，把訓練累積成下一階段的能力。');
   const effectiveTarget = effectiveWeekVolumeTarget(week);
   const context = buildContext();
   const dayCards = week.days.map((day) => {
@@ -2299,7 +2316,7 @@ function renderWeekSection(plan) {
       <button class="week-nav-btn" onclick="navWeek(-1)" ${currentWeek <= 1 ? 'disabled' : ''} aria-label="上一週">◀</button>
       <div class="week-header-title">
         <div class="plan-overview-kicker">Week ${currentWeek} / ${plan.length}</div>
-        <div class="week-header-label">第 ${currentWeek} 週 · ${coachPhase?.phase || week.phaseLabel}${deloadBadge}${taperBadge}${currentWeek === todayWeekNum() ? '<span class="week-status-pill">進行中</span>' : ''}</div>
+        <div class="week-header-label">第 ${currentWeek} 週 · ${coachPhase?.phase || week.phaseLabel}${deloadBadge}${taperBadge}${currentWeek === todayWeekNum() ? '<span class="week-status-pill">進行中</span>' : ''}${historyBadge}${previewBadge}</div>
         <p class="week-header-subtitle">${reviewEscape(weekHeroCopy)}</p>
         ${currentWeek !== todayWeekNum() ? `<div class="week-header-target"><span>${effectiveTarget.source === '教練本週目標' ? '教練本週目標' : '本週目標'}</span><strong>${effectiveTarget.display}</strong></div>` : ''}
       </div>
