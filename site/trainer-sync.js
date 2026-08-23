@@ -32,7 +32,9 @@
   }
 
   function storeSession(session) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    // 純本機快取；寫入失敗（私密瀏覽、容量滿）不該讓已成功的登入／同步被誤判為失敗，
+    // 下次重新整理只是要重新登入，資料本身仍在雲端。
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch {}
   }
 
   async function refreshSession() {
@@ -68,7 +70,10 @@
 
   function storeMeta(meta) {
     const userId = sessionUserId(readSession());
-    if (userId) localStorage.setItem(`${META_KEY}:${userId}`, JSON.stringify(meta));
+    if (!userId) return;
+    // 這只是本機快取版本號；寫入失敗不代表剛才的雲端同步失敗，不能讓呼叫端把
+    // 這裡的例外誤報成「同步暫時無法完成」。
+    try { localStorage.setItem(`${META_KEY}:${userId}`, JSON.stringify(meta)); } catch {}
   }
 
   function bytesToBase64(bytes) {

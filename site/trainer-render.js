@@ -62,6 +62,7 @@ function renderPlanView() {
 <div id="plan-tab-week" class="container" role="tabpanel" aria-labelledby="plan-tab-button-week">
   ${renderSafetyHoldCard()}
   ${renderRunnerOnboardingCard()}
+  ${renderTabIntroCard()}
   ${renderWeekOverviewCard(profile, plan)}
   ${renderRaceWeekCard(profile)}
   ${renderPhaseTabs(plan)}
@@ -2279,6 +2280,9 @@ function jumpToPhaseWeek(weekNum) {
   // 必須與 renderPlanView 的週分頁組成一致：boot 後所有重繪都走這裡，
   // 少列的卡片（automation brief、教練信）會永遠消失在畫面上
   document.getElementById('plan-tab-week').innerHTML = `
+    ${renderSafetyHoldCard()}
+    ${renderRunnerOnboardingCard()}
+    ${renderTabIntroCard()}
     ${renderWeekOverviewCard(appData.profile, appData.plan)}
     ${renderRaceWeekCard(appData.profile)}
     ${renderPhaseTabs(appData.plan)}
@@ -2314,6 +2318,25 @@ function renderRunnerOnboardingCard() {
   return `<section class="runner-guide-card" aria-label="新手三步上手">
     <div class="runner-guide-head"><div><div class="runner-guide-kicker">Start here</div><div class="runner-guide-title">先做好這三步，課表才會越來越準</div><p class="runner-guide-copy">不需要每天填一堆數字；先把執行、回報與恢復做成習慣。</p></div><button class="btn btn-secondary" style="padding:6px 10px;font-size:12px" onclick="dismissRunnerOnboarding()">暫時隱藏</button></div>
     <ul class="runner-guide-list">${items.map((item) => `<li class="${item.done ? '' : 'pending'}">${item.text}</li>`).join('')}</ul>
+  </section>`;
+}
+
+function dismissTabIntro() {
+  appData.onboarding = { ...(appData.onboarding || {}), tabIntroSeenAt: new Date().toISOString() };
+  saveData(appData);
+  document.getElementById('tab-intro-card')?.remove();
+}
+
+function renderTabIntroCard() {
+  if (appData.onboarding?.tabIntroSeenAt) return '';
+  return `<section class="runner-guide-card" id="tab-intro-card" aria-label="四個分頁導覽">
+    <div class="runner-guide-head"><div><div class="runner-guide-kicker">Where to look</div><div class="runner-guide-title">上面四個分頁分別在做什麼</div><p class="runner-guide-copy">之後不同狀況去不同分頁看，這裡先花 10 秒認識一次。</p></div><button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;white-space:nowrap" type="button" onclick="dismissTabIntro()">知道了，關閉</button></div>
+    <div class="tab-intro-grid">
+      <div class="tab-intro-item"><div class="ti-icon">📅</div><div class="ti-title">本週課表</div><div class="ti-desc">每天照著執行的正式菜單，這是唯一的執行來源。</div></div>
+      <div class="tab-intro-item"><div class="ti-icon">🏃</div><div class="ti-title">教練建議</div><div class="ti-desc">Garmin 同步後的判讀依據、風險提醒與逐週決策。</div></div>
+      <div class="tab-intro-item"><div class="ti-icon">📝</div><div class="ti-title">週評估</div><div class="ti-desc">每週結束前回報身體狀況，決定下週要不要調整。</div></div>
+      <div class="tab-intro-item"><div class="ti-icon">📈</div><div class="ti-title">進度與分析</div><div class="ti-desc">長期跑量、配速趨勢，以及週期／賽事管理。</div></div>
+    </div>
   </section>`;
 }
 
@@ -2623,7 +2646,13 @@ function renderSupportDrillRunner() {
 }
 
 function openSupportDrillRunner(payload) {
-  const drill = JSON.parse(decodeURIComponent(payload));
+  let drill;
+  try {
+    drill = JSON.parse(decodeURIComponent(payload));
+  } catch {
+    showModal('無法開啟這個動作', '<p style="margin:0;color:var(--c-text-muted);line-height:1.65">這個動作的資料格式跟不上目前的頁面版本，重新整理頁面後應該就能修好。</p>', [{ label: '關閉', primary: true, action: closeModal }]);
+    return;
+  }
   const plan = supportDrillPlan(drill.dose);
   stopSupportDrillTimer();
   supportDrillRunnerState = { name: drill.name, dose: drill.dose, plan, phase: 0, value: plan.mode === 'timer' ? plan.target : 0, completed: false, timerId: null };
@@ -3309,7 +3338,7 @@ function pickCompanionItems(keys, count, historyKey, items) {
   const freshKeys = keys.filter((key) => !history.includes(key));
   const candidates = freshKeys.length >= count ? freshKeys : keys;
   const selected = [...candidates].sort(() => Math.random() - 0.5).slice(0, count);
-  localStorage.setItem(historyKey, [...selected, ...history.filter((key) => !selected.includes(key))].slice(0, 6));
+  localStorage.setItem(historyKey, JSON.stringify([...selected, ...history.filter((key) => !selected.includes(key))].slice(0, 6)));
   return selected;
 }
 

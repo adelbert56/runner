@@ -6,7 +6,34 @@
   <title>訓練計畫生成器 — 跑者廣場</title>
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260727-brand2">
   <link rel="stylesheet" href="./styles.css?v=20260529-message-list1">
-  <link rel="stylesheet" href="trainer.css?v=20260823-week-index1">
+  <link rel="stylesheet" href="trainer.css?v=20260823-tab-intro1">
+  <script>
+    // 全域錯誤兜底：任何 render 路徑丟出的例外，沒有這層會直接是空白畫面、
+    // 使用者完全不知道發生什麼事。獨立於其他腳本之外（不依賴 showModal 等
+    // app 內部函式），確保連開頭初始化就壞掉時也能顯示。
+    (function () {
+      var shown = false;
+      function showRecoverableError() {
+        if (shown) return;
+        shown = true;
+        var bar = document.createElement('div');
+        bar.setAttribute('role', 'alert');
+        bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#fff7ed;color:#9a3412;border-top:1px solid #f0d3ba;padding:12px 16px;font:14px/1.6 "Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap';
+        var msg = document.createElement('span');
+        msg.textContent = '頁面出了一點問題，畫面可能沒有完全跑完；重新整理通常就能修好，你的訓練資料不會受影響。';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '重新整理';
+        btn.style.cssText = 'padding:8px 14px;border-radius:8px;border:1px solid #f0d3ba;background:#fff;color:#9a3412;font-weight:700;cursor:pointer';
+        btn.onclick = function () { location.reload(); };
+        bar.appendChild(msg);
+        bar.appendChild(btn);
+        document.body.appendChild(bar);
+      }
+      window.addEventListener('error', showRecoverableError);
+      window.addEventListener('unhandledrejection', showRecoverableError);
+    })();
+  </script>
 </head>
 <body>
 
@@ -58,8 +85,8 @@
 <script src="trainer-copy.js?v=20260823-coach-quality-type1"></script>
 <script src="trainer-plan.js?v=20260823-pace-generic1"></script>
 <script src="trainer-sync-config.js?v=20260721-sync1"></script>
-<script src="trainer-sync.js?v=20260721-sync1"></script>
-<script src="trainer-render.js?v=20260823-week-index1"></script>
+<script src="trainer-sync.js?v=20260823-resilience1"></script>
+<script src="trainer-render.js?v=20260823-tab-intro1"></script>
 <script src="trainer-actions.js?v=20260823-pace-generic1"></script>
 <script src="trainer.js?v=20260823-setup-intro1"></script>
 <script src="trainer-data.js?v=20260718-data1"></script>
