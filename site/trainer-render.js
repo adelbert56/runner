@@ -1051,6 +1051,7 @@ function garminActivityRecords() {
     power: Number(run.power) || null,
     trainingLoad: Number(run.trainingLoad) || null,
     laps: Array.isArray(run.laps) ? run.laps : [],
+    terrainSummary: run.terrainSummary && typeof run.terrainSummary === 'object' ? run.terrainSummary : null,
     sessionFamily: run.sessionFamily || 'easy',
     selfEvaluation: run.selfEvaluation || null
   })).filter((run) => run.date && run.km > 0);
@@ -1696,6 +1697,26 @@ async function loadRegistrationRaceCheckpoints() {
   refreshCoachReviewPanels();
 }
 
+function renderCoachDecisionCard(runs) {
+  const latest = runs.at(-1);
+  const recovery = typeof recoverySignalStatus === 'function' ? recoverySignalStatus() : null;
+  const quality = latest && typeof calibrationDataQuality === 'function' ? calibrationDataQuality(latest) : null;
+  const latestTerrain = latest?.terrainSummary;
+  const scheduledRaces = (appData.plan || []).flatMap((week) => week.days || []).filter((day) => day.type === 'race' && day.dateStr <= todayStr()).sort((a, b) => b.dateStr.localeCompare(a.dateStr));
+  const race = scheduledRaces[0];
+  const raceCheck = race ? appData.raceRecoveryChecks?.[race.dateStr] : null;
+  const recoveryBlocked = raceCheck && (raceCheck.pain !== 'none' || raceCheck.gait !== 'normal' || Number(raceCheck.fatigue) >= 4);
+  const rows = [
+    { label: '恢復訊號', state: recovery?.strained ? '暫緩' : recovery ? '可追蹤' : '缺資料', detail: recovery?.strained ? recovery.concerns.join('、') : recovery ? `近 ${recovery.samples} 天睡眠／HRV／Body Battery 未達雙重示警` : '尚未同步睡眠／HRV／Body Battery' },
+    { label: '最新跑步條件', state: quality?.usable ? '可比' : quality ? '不校正' : '缺資料', detail: quality?.usable ? `${latest.date} 的平路／天氣條件可作保守趨勢參考` : quality?.reasons?.join('、') || '尚無足夠活動資料' },
+    { label: '坡度分段', state: latestTerrain?.segments?.length ? '已分析' : '待同步', detail: latestTerrain?.segments?.length ? `每 ${latestTerrain.segment_m}m 摘要；上／下坡與配速、HR、步頻已保留，最高坡度 ${latestTerrain.max_abs_grade_pct}%` : 'Garmin 詳細圖表尚未回傳；暫只以總爬升判讀' },
+    { label: '賽後 48 小時', state: !race ? '未到賽後' : recoveryBlocked ? '暫緩' : raceCheck ? '已回報' : '待回報', detail: !race ? '下一場賽事後才需填寫' : raceCheck ? `${race.dateStr} 已記錄：疲勞 ${raceCheck.fatigue || '—'}/5、${raceCheck.pain === 'none' ? '無疼痛' : '有疼痛'}、${raceCheck.gait === 'normal' ? '步態正常' : '步態改變'}` : `${race.dateStr} 賽後請在 48 小時內填寫，未齊前不進階速度與長跑` },
+  ];
+  const allow = !recovery?.strained && quality?.usable && !recoveryBlocked && (!race || Boolean(raceCheck));
+  const nextLong = (appData.plan || []).flatMap((week) => week.days || []).find((day) => day.type === 'long' && Number(day.km) >= 16 && day.dateStr <= todayStr());
+  return `<section class="coach-decision-card ${allow ? 'is-ready' : 'is-hold'}" aria-label="本週放行判讀"><div class="coach-decision-head"><div><div class="training-status-kicker">COACH READINESS</div><h2>本週放行判讀</h2><p>${allow ? '證據完整，僅依正式課表保守前進；不會因單趟跑得快而跳級。' : '目前不以資料推進配速或長跑；先補齊或排除下列訊號。'}</p></div><span class="coach-decision-status">${allow ? '可維持／保守前進' : '暫緩進階'}</span></div><div class="coach-evidence-list">${rows.map((row) => `<div class="coach-evidence-row"><b>${reviewEscape(row.label)}</b><span class="coach-evidence-state">${reviewEscape(row.state)}</span><p>${reviewEscape(row.detail)}</p></div>`).join('')}</div><div class="coach-decision-actions">${race && !raceCheck ? `<button class="btn btn-primary" onclick="openRaceRecoveryCheckin('${race.dateStr}')">填寫賽後恢復</button>` : ''}${nextLong ? `<button class="btn btn-secondary" onclick="openFuelingLog('${nextLong.dateStr}')">${appData.fuelingLogs?.[nextLong.dateStr] ? '查看／更新長跑補給' : '記錄長跑補給'}</button>` : ''}<span>賽事角色：9/20 為基準檢測；11/8 與 11/15 需連同恢復資料判讀。</span></div></section>`;
+}
+
 function renderTrainingAnalysis() {
   const runs = coachRunRecords();
   // 完成度／提醒／自動決策已各自固定在本週總覽與教練建議；進度分頁只保留
@@ -1731,7 +1752,7 @@ function renderTrainingAnalysis() {
     return `<div class="trend-ramp trend-ramp-${tone}"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>${text}（${prev.km} → ${last.km} km）</p></div></div>`;
   })();
   const analyticsDate = reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt);
-  return `${renderLatestTrainingReport(runs)}<div class="card trend-card"><div class="trend-card-head"><div class="trend-card-icon" aria-hidden="true">📈</div><div><h2 class="trend-card-title">長期訓練趨勢</h2><span class="trend-card-badge">Garmin 最近 ${runs.length} 筆</span></div><span class="trend-card-updated">📅 Garmin 資料匯至 <b>${analyticsDate}</b></span></div>
+  return `${renderCoachDecisionCard(runs)}${renderLatestTrainingReport(runs)}<div class="card trend-card"><div class="trend-card-head"><div class="trend-card-icon" aria-hidden="true">📈</div><div><h2 class="trend-card-title">長期訓練趨勢</h2><span class="trend-card-badge">Garmin 最近 ${runs.length} 筆</span></div><span class="trend-card-updated">📅 Garmin 資料匯至 <b>${analyticsDate}</b></span></div>
     <div class="trend-hero-row"><div class="trend-hero-item trend-hero-primary"><span class="trend-hero-label"><i aria-hidden="true">🛣️</i>近四週跑量</span><strong class="trend-hero-value">${lastFourKm.toFixed(1)}<small>km</small></strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">👟</i>近四週最長跑</span><strong class="trend-hero-value">${longestRun ? `${longestRun.toFixed(1)}<small>km</small>` : '—'}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">⏱️</i>最近四趟平均配速</span><strong class="trend-hero-value">${formatPaceSeconds(averagePace)}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">❤️</i>最近四趟平均心率</span><strong class="trend-hero-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div></div>
     <div class="trend-monitor"><div class="trend-monitor-top"><div class="trend-monitor-col">${rampNote || '<div class="trend-ramp trend-ramp-good"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>資料不足，暫無法評估增幅。</p></div></div>'}</div><div class="trend-monitor-divider"></div><div class="trend-monitor-col trend-advanced-head"><b>進階訓練指標</b><p>只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p></div></div><div class="trend-tile-grid"><div class="trend-tile"><span class="trend-tile-label">最近四趟平均步頻</span><strong class="trend-tile-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟累積爬升</span><strong class="trend-tile-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟平均負荷</span><strong class="trend-tile-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">${latestVo2Label}</span><strong class="trend-tile-value">${latestVo2 || '—'}</strong></div></div></div>
     <div class="analysis-chart-grid"><section class="analysis-chart-card analysis-volume-card"><div class="analysis-chart-heading"><div><b>跑量趨勢</b><p>依 Garmin 實跑加總，包含額外跑步。</p></div><span class="pace-trend-badge">距離</span></div><div class="volume-trend-stack"><section class="volume-trend-section volume-trend-section--weekly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>週跑量</b><span>短週期 · 最近 8 週</span></div>${renderVolumeBars(trend, { chartClass: 'trend-bar-chart--weekly', barMaxHeight: 86 })}</section><section class="volume-trend-section volume-trend-section--monthly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>月跑量</b><span>長週期 · 最近 6 個月份</span></div>${renderVolumeBars(monthlyTrend, { periodKey: 'month', emptyText: '尚無可用的月跑量資料。', label: (month) => month.slice(5), chartClass: 'trend-bar-chart--monthly', barMaxHeight: 86 })}</section></div><div class="volume-trend-insights"><div class="volume-insight-head"><b>跑量摘要</b><span>Garmin 實跑</span></div><div class="volume-insight-grid"><div class="volume-insight"><span>${reviewEscape(latestMonth.month)} 累積</span><strong>${latestMonth.km}<small> km</small></strong></div><div class="volume-insight"><span>本月跑步次數</span><strong>${latestMonth.runs}<small> 次</small></strong></div><div class="volume-insight"><span>近六個月平均</span><strong>${averageMonthlyKm.toFixed(1)}<small> km</small></strong></div><div class="volume-insight"><span>單月最高</span><strong>${peakMonth.km}<small> km</small></strong><em>${reviewEscape(peakMonth.month)}</em></div></div></div></section><section class="analysis-chart-card analysis-chart-card--pace"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>
@@ -3273,8 +3294,19 @@ function openWeeklyGarminCalendarGuide(weekNumber = currentWeek) {
   ]);
 }
 
+function companionWorkoutType(day) {
+  const type = String(day?.type || 'easy');
+  if (['tempo', 'interval', 'long', 'race'].includes(type)) return type;
+  // 手寫教練處方偶爾仍保留產生器原本的 easy/recovery 欄位；用與卡片相同的
+  // 主課辨識補正，避免「卡片是節奏跑、陪伴卻是恢復跑」的雙重真相。
+  if (typeof coachPlanTrainingType === 'function' && typeof isHandwrittenCoachPlan === 'function' && isHandwrittenCoachPlan(day)) {
+    return coachPlanTrainingType(day.task || day.coachPlan?.plan || '');
+  }
+  return 'easy';
+}
+
 function runCompanionRecommendation(day) {
-  const type = day?.type || 'easy';
+  const type = companionWorkoutType(day);
   const recommendations = {
     easy: {
       title: '輕鬆跑的陪伴',
@@ -3324,6 +3356,18 @@ function runCompanionRecommendation(day) {
   return recommendations[type] || recommendations.easy;
 }
 
+function companionCourseForDay(dateStr) {
+  const found = findRawPlanDay(dateStr);
+  if (!found) return null;
+  // 用同一個 resolver 取得「眼前課程卡」真正採用的處方；安全降階會覆蓋教練
+  // 處方，教練處方則覆蓋舊的產生器欄位，陪伴內容必須完全跟著這個優先序。
+  try {
+    return typeof resolveCourse === 'function' ? resolveCourse(found.day, buildContext(), found.week).course : found.day;
+  } catch {
+    return found.day;
+  }
+}
+
 function companionItemHistory(historyKey, items) {
   try {
     const saved = JSON.parse(localStorage.getItem(historyKey) || '[]');
@@ -3358,7 +3402,7 @@ function estimatedRunMinutes(day) {
 }
 
 function showRunCompanion(dateStr) {
-  const day = findRawPlanDay(dateStr)?.day;
+  const day = companionCourseForDay(dateStr);
   if (!day || day.type === 'rest') return;
   const recommendation = runCompanionRecommendation(day);
   const estimatedMinutes = estimatedRunMinutes(day);
@@ -3462,7 +3506,7 @@ function renderDayCard(day, rationale = '', source = 'baseline') {
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
   const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? '<div style="color:var(--c-text-muted);font-size:13px">尚未到日期，無法先記錄</div>' : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
   const extraHTML = extraSessions.map((session) => renderExtraSession(day, session)).join('');
-  return `<div class="day-card schedule-day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}"><b>${coachBadge ? coachBadge.emoji : ''}${typeName}</b><small>${dayCardIntent(day)}</small></span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}<div class="day-card-prescription" aria-label="今日處方">${prescription}</div>${dayWeatherLine(day)}<details class="day-workout-details" open><summary>主課內容（可收合）</summary>${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}${renderStepCards(attachCourseGuides(day.steps, day.type))}</details>${extraHTML}${renderDaySessionSummary(day, garminRun)}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}</div>${actionsHTML}${!extraSessions.length ? `<button class="add-extra-session" onclick="openAddExtraSession('${day.dateStr}')">＋ 加入第二堂</button>` : ''}</div>`;
+  return `<div class="day-card schedule-day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}"><b>${coachBadge ? coachBadge.emoji : ''}${typeName}</b><small>${dayCardIntent(day)}</small></span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}<div class="day-card-prescription" aria-label="今日處方">${prescription}</div>${dayWeatherLine(day)}<details class="day-workout-details" open><summary>主課內容（可收合）</summary>${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}${renderStepCards(attachCourseGuides(day.steps, day.type))}</details>${extraHTML}${renderDaySessionSummary(day, garminRun)}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}${day.type === 'long' && Number(day.km) >= 16 ? `<button class="btn btn-secondary" onclick="openFuelingLog('${day.dateStr}')">🥤 ${appData.fuelingLogs?.[day.dateStr] ? '更新補給' : '記錄補給'}</button>` : ''}</div>${actionsHTML}${!extraSessions.length ? `<button class="add-extra-session" onclick="openAddExtraSession('${day.dateStr}')">＋ 加入第二堂</button>` : ''}</div>`;
 }
 
 /* drawer implementation removed; daily details remain in the original day card. */

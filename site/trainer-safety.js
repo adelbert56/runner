@@ -5,6 +5,21 @@ function activeSafetyHold() {
   return appData.safetyHold?.active ? appData.safetyHold : null;
 }
 
+function recentRaceRecoveryGate(days = 14) {
+  if (typeof appData === 'undefined') return null;
+  const races = (appData.plan || []).flatMap((week) => week.days || [])
+    .filter((day) => day.type === 'race' && day.dateStr <= todayStr() && day.dateStr >= addDaysToDateStr(todayStr(), -days))
+    .sort((left, right) => String(right.dateStr).localeCompare(String(left.dateStr)));
+  const race = races[0];
+  if (!race) return null;
+  const check = appData.raceRecoveryChecks?.[race.dateStr];
+  if (!check) return { blocked: true, reason: `${race.dateStr} 賽後 48 小時恢復回報尚未完成` };
+  if (check.pain !== 'none' || check.gait !== 'normal' || Number(check.fatigue) >= 4) {
+    return { blocked: true, reason: `${race.dateStr} 賽後恢復訊號尚未通過` };
+  }
+  return { blocked: false, reason: `${race.dateStr} 賽後恢復回報已通過` };
+}
+
 function renderSafetyHoldCard() {
   const hold = activeSafetyHold();
   if (!hold) return '';
@@ -86,6 +101,8 @@ function coachPromotionGate(evidence) {
   const qualityPlanned = Boolean(evidence.qualityPlanned);
   if (!qualityPlanned) return { status: 'not-applicable', label: '本週無品質檢測', reasons: [] };
   const reasons = [];
+  const raceRecovery = typeof recentRaceRecoveryGate === 'function' ? recentRaceRecoveryGate() : null;
+  if (raceRecovery?.blocked) reasons.push(raceRecovery.reason);
   if (!evidence.qualityCompleted) reasons.push('品質課未完成');
   if (!evidence.structuredEvidence) reasons.push('Garmin 未辨識到主課段，無法判讀節奏與心率');
   if (evidence.painConcern || evidence.nextDayPain) reasons.push('左腳疼痛、步態改變或隔天症狀未消退');
@@ -93,7 +110,7 @@ function coachPromotionGate(evidence) {
   if (evidence.paceCapBreached) reasons.push('主課快過處方的最快護欄');
   if (evidence.hrCapBreached) reasons.push('主課超過心率上限');
   if (Number(evidence.hrDrift) >= 8) reasons.push(`主課後半心率漂移 +${Math.round(Number(evidence.hrDrift))} bpm`);
-  if (evidence.painConcern || evidence.nextDayPain) return { status: 'blocked', label: '不通過', reasons };
+  if (evidence.painConcern || evidence.nextDayPain || raceRecovery?.blocked) return { status: 'blocked', label: '不通過', reasons };
   if (reasons.length) return { status: 'conditional', label: '條件通過', reasons };
   return { status: 'pass', label: '通過', reasons: ['主課有結構化紀錄，未見配速／心率護欄違規，且恢復自評正常'] };
 }

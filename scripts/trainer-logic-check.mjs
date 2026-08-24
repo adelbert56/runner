@@ -77,6 +77,22 @@ vm.createContext(coachCopySandbox);
 vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), extractFunction(trainerRenderJs, "normalizeCoachWorkoutSteps")].join("\n\n"), coachCopySandbox);
 const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbox;
 
+const companionSandbox = {
+  coachPlanTrainingType: (text) => /節奏|閾值|(?:^|\s)T\s*跑/.test(String(text || '')) ? 'tempo' : 'easy',
+  isHandwrittenCoachPlan: (day) => Boolean(day?.coachPlan),
+};
+vm.createContext(companionSandbox);
+vm.runInContext([extractFunction(trainerRenderJs, "companionWorkoutType"), extractFunction(trainerRenderJs, "runCompanionRecommendation")].join("\n\n"), companionSandbox);
+const { companionWorkoutType, runCompanionRecommendation } = companionSandbox;
+
+const cadenceSandbox = {
+  COACH_SIGNAL_POLICY: { cadence: { minPassingSpm: 165, sampleRuns: 8, minEvidenceRuns: 4, minLapKm: 0.5, minLapCadence: 150, maxRunningPaceSec: 570 } },
+  paceToSeconds: (value) => ({ '8:00': 480, '9:00': 540 }[value] || 0),
+};
+vm.createContext(cadenceSandbox);
+vm.runInContext(extractFunction(trainerCoachEngineJs, "coachCadenceAssessment"), cadenceSandbox);
+const { coachCadenceAssessment } = cadenceSandbox;
+
 const weekFlagSandbox = {};
 vm.createContext(weekFlagSandbox);
 vm.runInContext(extractFunction(trainerRenderJs, "effectiveWeekIsDeload"), weekFlagSandbox);
@@ -104,9 +120,22 @@ vm.createContext(scheduledEntrySandbox);
 vm.runInContext(extractFunction(trainerJs, "coachScheduledRaceEntries"), scheduledEntrySandbox);
 const { coachScheduledRaceEntries } = scheduledEntrySandbox;
 
+const deferredRacePackageSandbox = {
+  goalDistanceKm: () => 21.0975,
+  secToPace: (seconds) => `pace-${seconds}`,
+  coachRaceDirective: () => ({ deferCalibration: true, role: '九月基準檢測' }),
+  trainerWeather: {},
+  isHotSeasonDate: () => false,
+};
+vm.createContext(deferredRacePackageSandbox);
+vm.runInContext(extractFunction(trainerJs, "raceDayPackageSteps"), deferredRacePackageSandbox);
+const { raceDayPackageSteps } = deferredRacePackageSandbox;
+
 const assessmentGateSandbox = {
   coachRaceDirective: (date) => date === '2026-11-15'
     ? { requiresPriorDate: '2026-11-08', role: '半馬前節奏提醒' }
+    : date === '2026-09-20'
+      ? { deferCalibration: true, role: '九月基準檢測' }
     : null,
   appData: { assessments: [] },
 };
@@ -211,6 +240,8 @@ assertEqual(scheduled10kNeedsStrengthDeload({ scheduled: true, distance: '10km' 
 assertEqual(scheduled10kNeedsStrengthDeload({ scheduled: true, distance: '21km' }), false, "half-marathon directives do not use the 10K strength-deload rule");
 assertEqual(coachScheduledRaceEntries().length, 1, "only coach-confirmed scheduled races are integrated without registration data");
 assertEqual(coachScheduledRaceEntries()[0]?.race_date, '2026-11-08', "scheduled-race integration preserves the confirmed race date");
+assertEqual(assessmentCalibrationGate({ date: '2026-09-20' }).allowed, false, "9/20 10K retains evidence for coach review instead of auto-calibrating pace");
+assertEqual(raceDayPackageSteps({ goal: 'half', racePaceSec: 384 }, 10, '2026-09-20')[1]?.detail.includes('pace-'), false, "deferred 10K race card never reverse-calculates a pace from the half-marathon target");
 assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, false, "11/15 10K cannot recalibrate the half-marathon before 11/8 evidence exists");
 assessmentGateSandbox.appData.assessments.push({ date: '2026-11-08', type: 'race_10k' });
 assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, true, "11/15 10K may calibrate only after the 11/8 race evidence is retained");
@@ -231,6 +262,17 @@ assertThrows(() => assertPublishableCoachReview(JSON.stringify({
 assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, rpe: 7 }).status, 'pass', "structured quality evidence with controlled RPE passes the progression gate");
 assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: false, rpe: 6 }).status, 'conditional', "missing structured Garmin main evidence cannot advance long runs or intervals");
 assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, nextDayPain: true, rpe: 6 }).status, 'blocked', "next-day pain blocks quality progression regardless of pace result");
+
+assertEqual(companionWorkoutType({ type: 'easy', focus: 'recovery', coachPlan: true, task: '節奏跑 20 分鐘後 E 跑補量' }), 'tempo', "coach tempo prescription takes precedence over stale easy/recovery fields for companion selection");
+assertEqual(runCompanionRecommendation({ type: 'easy', focus: 'recovery', coachPlan: true, task: '節奏跑 20 分鐘後 E 跑補量' }).title, '節奏跑的陪伴', "tempo companion never falls back to recovery content");
+assertEqual(runCompanionRecommendation({ type: 'easy', focus: 'recovery' }).title, '恢復跑的陪伴', "genuine recovery run retains low-stimulation companion content");
+const cadenceWeighting = coachCadenceAssessment([
+  { qualityEligible: true, qualityCadence: 150, qualityKm: 1 },
+  { qualityEligible: true, qualityCadence: 170, qualityKm: 8 },
+  { qualityEligible: true, qualityCadence: 170, qualityKm: 8 },
+  { qualityEligible: true, qualityCadence: 170, qualityKm: 8 },
+]);
+assertEqual(cadenceWeighting.displayed, 169, "cadence caution uses distance-weighted effective main work instead of letting a short session dominate");
 
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);

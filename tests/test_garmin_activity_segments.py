@@ -93,3 +93,28 @@ def test_self_evaluation_normalizes_garmin_tenths() -> None:
     result = fetch_garmin.extract_self_evaluation({"nested": {"directWorkoutFeel": 50, "directWorkoutRpe": 30}})
 
     assert result == {"feel": 5, "rpe": 3, "source": "garmin-self-evaluation"}
+
+
+def test_terrain_summary_keeps_slope_evidence_without_route_coordinates() -> None:
+    payload = {
+        "metricDescriptors": [
+            {"key": "directTimestamp"}, {"key": "distance"}, {"key": "altitude"},
+            {"key": "heartRate"}, {"key": "speed"}, {"key": "runningCadence"},
+        ],
+        "activityDetailMetrics": [
+            {"metrics": [0, 0, 100, 130, 2.5, 168]},
+            {"metrics": [60000, 250, 108, 140, 2.5, 170]},
+            {"metrics": [120000, 500, 98, 142, 2.5, 171]},
+            {"metrics": [180000, 750, 88, 144, 2.5, 170]},
+            {"metrics": [240000, 1000, 82, 145, 2.5, 170]},
+        ],
+    }
+
+    summary = fetch_garmin.summarize_terrain(payload)
+
+    assert summary and summary["source"] == "garmin-detail-chart"
+    assert summary["segments"][0]["direction"] == "uphill"
+    assert summary["segments"][1]["direction"] == "downhill"
+    assert summary["segments"][0]["pace_per_km"] == "4:00"
+    assert "latitude" not in str(summary).lower()
+    assert "longitude" not in str(summary).lower()

@@ -23,7 +23,7 @@ function coachCadenceAssessment(runs = (typeof coachRunRecords === 'function' ? 
   const policy = COACH_SIGNAL_POLICY.cadence;
   const evidenceFor = (run) => {
     if (run.qualityEligible && Number(run.qualityCadence) > 0) {
-      return { ...run, cadence: Number(run.qualityCadence), cadenceSource: 'garmin-workout-steps' };
+      return { ...run, cadence: Number(run.qualityCadence), cadenceWeightKm: Math.max(Number(run.qualityKm) || 0, policy.minLapKm), cadenceSource: 'garmin-workout-steps' };
     }
     const runningLaps = (run.laps || []).filter((lap) => {
       const cadence = Number(lap?.avg_cadence) || 0;
@@ -33,11 +33,12 @@ function coachCadenceAssessment(runs = (typeof coachRunRecords === 'function' ? 
     const totalMinutes = runningLaps.reduce((sum, lap) => sum + (Number(lap.duration_min) || 0), 0);
     if (!runningLaps.length || totalMinutes <= 0) return null;
     const cadence = runningLaps.reduce((sum, lap) => sum + (Number(lap.avg_cadence) || 0) * (Number(lap.duration_min) || 0), 0) / totalMinutes;
-    return { ...run, cadence, cadenceSource: 'garmin-running-laps' };
+    return { ...run, cadence, cadenceWeightKm: runningLaps.reduce((sum, lap) => sum + Number(lap.distance_km || 0), 0), cadenceSource: 'garmin-running-laps' };
   };
   const evidenceRuns = runs.slice(-policy.sampleRuns).map(evidenceFor).filter(Boolean);
-  const average = evidenceRuns.length
-    ? evidenceRuns.reduce((sum, run) => sum + Number(run.cadence), 0) / evidenceRuns.length
+  const totalWeight = evidenceRuns.reduce((sum, run) => sum + Math.max(Number(run.cadenceWeightKm) || 0, policy.minLapKm), 0);
+  const average = totalWeight > 0
+    ? evidenceRuns.reduce((sum, run) => sum + Number(run.cadence) * Math.max(Number(run.cadenceWeightKm) || 0, policy.minLapKm), 0) / totalWeight
     : 0;
   const displayed = Math.round(average);
   return {

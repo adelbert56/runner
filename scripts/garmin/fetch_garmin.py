@@ -112,6 +112,8 @@ def pace_str(seconds_per_km: float | None) -> str | None:
 MAIN_INTENSITY_PRIORITY = (("MAIN",), ("ACTIVE",), ("INTERVAL",))
 NON_MAIN_INTENSITIES = {"WARMUP", "COOLDOWN", "RECOVERY", "REST"}
 MAX_LAP_SUMMARY = 64
+TERRAIN_SEGMENT_M = 250
+MAX_TERRAIN_SEGMENTS = 48
 
 
 def weighted_average(rows: list[dict], field: str) -> float | None:
@@ -155,6 +157,115 @@ def summarize_laps(split_payload: dict | None) -> list[dict]:
         for index, lap in enumerate(laps[:MAX_LAP_SUMMARY], start=1)
         if isinstance(lap, dict)
     ]
+
+
+def _metric_rows(detail_payload: dict | None) -> list[dict]:
+    """Read only numeric chart metrics needed for local terrain analysis.
+
+    Garmin's chart schema has changed between devices.  This normalizer accepts
+    both descriptor/array and already-keyed shapes, then discards every field
+    except time, distance, altitude, HR, speed and cadence.  In particular no
+    latitude/longitude or polyline is returned or written to disk.
+    """
+    if not isinstance(detail_payload, dict):
+        return []
+    descriptors = detail_payload.get("metricDescriptors") or []
+    keys = [str(item.get("key") or item.get("metricKey") or "") if isinstance(item, dict) else str(item) for item in descriptors]
+    payload_rows = detail_payload.get("activityDetailMetrics") or detail_payload.get("metrics") or []
+    aliases = {
+        "distance": {"distance", "distanceinmeters", "sumdistance", "directdistance"},
+        "altitude": {"altitude", "elevation", "enhancedaltitude"},
+        "time": {"directtimestamp", "timestamp", "timerduration", "elapsedtime"},
+        "hr": {"heartrate", "directheartrate"},
+        "speed": {"speed", "directspeed"},
+        "cadence": {"runningcadence", "directrunningcadence", "runcadence"},
+    }
+    def value_for(mapping: dict, names: set[str]) -> float | None:
+        for key, value in mapping.items():
+            normalized = "".join(char for char in str(key).lower() if char.isalnum())
+            if normalized in names:
+                try:
+                    numeric = float(value)
+                    return numeric if numeric == numeric else None
+                except (TypeError, ValueError):
+                    return None
+        return None
+    rows: list[dict] = []
+    for item in payload_rows:
+        source = item.get("metrics") if isinstance(item, dict) and isinstance(item.get("metrics"), list) else item
+        if isinstance(source, list):
+            mapping = {keys[index]: value for index, value in enumerate(source) if index < len(keys)}
+        elif isinstance(source, dict):
+            mapping = source
+        else:
+            continue
+        row = {field: value_for(mapping, names) for field, names in aliases.items()}
+        if row["distance"] is not None and row["altitude"] is not None:
+            rows.append(row)
+    return rows
+
+
+def summarize_terrain(detail_payload: dict | None) -> dict | None:
+    """Return privacy-safe 250 m slope/pace/HR summary; never route points."""
+    rows = _metric_rows(detail_payload)
+    if len(rows) < 3:
+        return None
+    rows.sort(key=lambda row: row["distance"] or 0)
+    valid = [row for row in rows if row["distance"] is not None and row["altitude"] is not None]
+    if len(valid) < 3 or (valid[-1]["distance"] - valid[0]["distance"]) < TERRAIN_SEGMENT_M:
+        return None
+    segments: list[dict] = []
+    ascent = descent = 0.0
+    start_index = 0
+    for end_index in range(1, len(valid)):
+        first, last = valid[start_index], valid[end_index]
+        distance = (last["distance"] or 0) - (first["distance"] or 0)
+        if distance < TERRAIN_SEGMENT_M:
+            continue
+        samples = valid[start_index:end_index + 1]
+        delta = (last["altitude"] or 0) - (first["altitude"] or 0)
+        grade = round(delta / distance * 100, 1)
+        direction = "uphill" if grade >= 2 else "downhill" if grade <= -2 else "flat"
+        ascent += max(0, delta)
+        descent += max(0, -delta)
+        timestamps = [sample["time"] for sample in samples if sample["time"] is not None]
+        pace = None
+        if len(timestamps) >= 2 and timestamps[-1] > timestamps[0]:
+            seconds = timestamps[-1] - timestamps[0]
+            # Garmin timestamps are normally ms; tolerate seconds in fixtures.
+            if seconds > 10000:
+                seconds /= 1000
+            pace = pace_str(seconds / (distance / 1000))
+        if not pace:
+            speeds = [sample["speed"] for sample in samples if sample["speed"] and sample["speed"] > 0]
+            if speeds:
+                pace = pace_str(1000 / (sum(speeds) / len(speeds)))
+        def average(field: str) -> float | None:
+            values = [sample[field] for sample in samples if sample[field] and sample[field] > 0]
+            return round(sum(values) / len(values), 1) if values else None
+        segments.append({
+            "start_km": round((first["distance"] or 0) / 1000, 2),
+            "end_km": round((last["distance"] or 0) / 1000, 2),
+            "direction": direction,
+            "grade_pct": grade,
+            "pace_per_km": pace,
+            "avg_hr": average("hr"),
+            "avg_cadence": average("cadence"),
+        })
+        start_index = end_index
+        if len(segments) >= MAX_TERRAIN_SEGMENTS:
+            break
+    if not segments:
+        return None
+    return {
+        "source": "garmin-detail-chart",
+        "segment_m": TERRAIN_SEGMENT_M,
+        "sample_count": len(valid),
+        "ascent_m": round(ascent, 1),
+        "descent_m": round(descent, 1),
+        "max_abs_grade_pct": round(max(abs(segment["grade_pct"]) for segment in segments), 1),
+        "segments": segments,
+    }
 
 
 def extract_self_evaluation(*payloads: object) -> dict | None:
@@ -259,6 +370,9 @@ def simplify(
     lap_summary = summarize_laps(split_payload)
     if lap_summary:
         record["lap_summary"] = lap_summary
+    terrain_summary = summarize_terrain(detail_payload)
+    if terrain_summary:
+        record["terrain_summary"] = terrain_summary
     self_evaluation = extract_self_evaluation(activity, activity_payload, detail_payload)
     if self_evaluation:
         record["self_evaluation"] = self_evaluation
@@ -429,7 +543,7 @@ def main() -> int:
                 # Garmin keeps the post-run feel/RPE under summaryDTO, not in
                 # the date-list response nor the chart detail endpoint.
                 activity_payload = client.get_activity(activity_id)
-                detail_payload = client.get_activity_details(activity_id, maxchart=1, maxpoly=0)
+                detail_payload = client.get_activity_details(activity_id, maxchart=2000, maxpoly=0)
             except Exception as exc:  # Self-evaluation is optional metadata.
                 print(f"警告：無法讀取活動 {activity_id} 的完整明細（{exc}）", file=sys.stderr)
         record = simplify(activity, split_payload, detail_payload, activity_payload)
@@ -449,6 +563,8 @@ def main() -> int:
                 r["lap_summary"] = previous["lap_summary"]
             if previous.get("self_evaluation") and not r.get("self_evaluation"):
                 r["self_evaluation"] = previous["self_evaluation"]
+            if previous.get("terrain_summary") and not r.get("terrain_summary"):
+                r["terrain_summary"] = previous["terrain_summary"]
         merged[r["activityId"]] = r
 
     recovery: list[dict] = []

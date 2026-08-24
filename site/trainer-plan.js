@@ -1435,6 +1435,9 @@ function autoRecalibratePlan() {
   try {
     const raceDay = plan.flatMap((week) => week.days || [])
       .filter((day) => day.raceReplacement === 'race' && day.dateStr < today && daysSinceDate(day.dateStr) <= 21)
+      // 受控階段檢測先留給教練綜合近期課表、心率、RPE 與恢復資料判讀，
+      // 不讓單一賽果在背景自動改寫後續配速。
+      .filter((day) => !coachRaceDirective(day.dateStr)?.deferCalibration)
       .sort((a, b) => b.dateStr.localeCompare(a.dateStr))[0];
     if (raceDay && appData.raceCalibratedFor !== raceDay.dateStr) {
       const raceRun = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
