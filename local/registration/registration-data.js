@@ -5,6 +5,7 @@ import {
   SELECTED_RACE_STORAGE_KEY,
   WORKSPACE_VIEW_STORAGE_KEY,
   NOTIFY_PREFS_STORAGE_KEY,
+  NOTIFY_PRESETS_STORAGE_KEY,
   SIDEBAR_COLLAPSED_STORAGE_KEY,
   normalizeArray,
   normalizeDistanceValue,
@@ -102,6 +103,26 @@ export function restoreNotifyPreferences() {
     state.notifyWorkspacePrimed = Boolean(parsed.workspacePrimed);
   } catch {
     // Ignore malformed saved prefs.
+  }
+}
+
+export function loadNotifyPresets() {
+  try {
+    const raw = localStorage.getItem(NOTIFY_PRESETS_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+    return normalizeArray(JSON.parse(raw));
+  } catch {
+    return [];
+  }
+}
+
+export function saveNotifyPresets(presets) {
+  try {
+    localStorage.setItem(NOTIFY_PRESETS_STORAGE_KEY, JSON.stringify(presets));
+  } catch {
+    // Saved presets are non-essential and must not affect registration data.
   }
 }
 

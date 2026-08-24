@@ -43,6 +43,7 @@ import {
   showStatus,
   setWorkspaceView,
   editEntry,
+  duplicateEntryToForm,
   deleteEntry,
 } from "./registration-actions.js";
 
@@ -315,6 +316,21 @@ export function renderNotifyPickerLists() {
       renderNotifyWorkspace();
     });
   });
+}
+
+export function renderNotifyPresetOptions() {
+  if (!els.notifyPresetSelect) {
+    return;
+  }
+  const currentValue = els.notifyPresetSelect.value;
+  const options = ['<option value="">套用常用篩選…</option>']
+    .concat(state.notifyPresets.map((preset) => (
+      `<option value="${escapeHtml(preset.id)}">${escapeHtml(preset.name)}</option>`
+    )));
+  els.notifyPresetSelect.innerHTML = options.join("");
+  if (state.notifyPresets.some((preset) => preset.id === currentValue)) {
+    els.notifyPresetSelect.value = currentValue;
+  }
 }
 
 export function renderNotifyWorkspace() {
@@ -1077,6 +1093,9 @@ export function updateEntriesBulkToolbar() {
   }
   const count = state.selectedEntryIds.size;
   els.entriesBulkToolbar.hidden = count === 0;
+  if (count === 0 && els.entriesBulkStatusPanel) {
+    els.entriesBulkStatusPanel.hidden = true;
+  }
   const countEl = els.entriesBulkToolbar.querySelector(".bulk-toolbar-count");
   if (countEl) {
     countEl.textContent = `已選 ${count} 筆`;
@@ -1211,6 +1230,7 @@ export function renderEntriesList() {
                   <td class="entry-table-actions">
                     ${person ? `<button class="mini-action${isShowingPersonDetails ? " is-active" : ""}" type="button" data-show-entry-person-details="${escapeHtml(entry.id)}" aria-expanded="${isShowingPersonDetails ? "true" : "false"}">查看</button>` : ""}
                     <button class="mini-action" type="button" data-edit-entry="${escapeHtml(entry.id)}">編輯</button>
+                    <button class="mini-action" type="button" data-duplicate-entry="${escapeHtml(entry.id)}">複製</button>
                     <button class="mini-action" type="button" data-delete-entry="${escapeHtml(entry.id)}">刪除</button>
                   </td>
                 </tr>
@@ -1238,6 +1258,9 @@ export function renderEntriesList() {
   });
   els.entriesList.querySelectorAll("[data-edit-entry]").forEach((button) => {
     button.addEventListener("click", () => editEntry(button.dataset.editEntry));
+  });
+  els.entriesList.querySelectorAll("[data-duplicate-entry]").forEach((button) => {
+    button.addEventListener("click", () => duplicateEntryToForm(button.dataset.duplicateEntry));
   });
   els.entriesList.querySelectorAll("[data-show-entry-person-details]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1283,6 +1306,7 @@ export function renderAll() {
   renderEntriesList();
   renderNotifyPickerLists();
   renderNotifyWorkspace();
+  renderNotifyPresetOptions();
   setWorkspaceView(state.workspaceView);
   focusRenderedCard();
 }

@@ -1,4 +1,4 @@
-import { savedWorkspaceView, savedSidebarCollapsed, setSidebarCollapsed, restoreNotifyPreferences, loadRaces, loadPrivateData } from "./registration-data.js";
+import { savedWorkspaceView, savedSidebarCollapsed, setSidebarCollapsed, restoreNotifyPreferences, loadNotifyPresets, loadRaces, loadPrivateData } from "./registration-data.js";
 import { renderAll } from "./registration-render.js";
 import { workspaceViewFromHash, wireEvents, resetEntryForm, showStatus, showNotifyStatus } from "./registration-actions.js";
 
@@ -9,6 +9,8 @@ export const SELECTED_RACE_STORAGE_KEY = "runner.registration.selectedRaceId";
 export const WORKSPACE_VIEW_STORAGE_KEY = "runner.registration.workspaceView";
 
 export const NOTIFY_PREFS_STORAGE_KEY = "runner.registration.notifyPrefs";
+
+export const NOTIFY_PRESETS_STORAGE_KEY = "runner.registration.notifyPresets";
 
 export const SIDEBAR_COLLAPSED_STORAGE_KEY = "runner.registration.sidebarCollapsed";
 
@@ -57,6 +59,7 @@ export const state = {
   notifyDensity: "compact",
   notifyCollapsedGroups: new Set(),
   notifyWorkspacePrimed: false,
+  notifyPresets: [],
   batchImport: null,
   loadState: "idle",
   loadError: "",
@@ -78,13 +81,22 @@ export const els = {
   peopleBulkCopy: document.querySelector("#people-bulk-copy"),
   peopleBulkDelete: document.querySelector("#people-bulk-delete"),
   peopleBulkClear: document.querySelector("#people-bulk-clear"),
+  peopleBulkToEntry: document.querySelector("#people-bulk-to-entry"),
   peopleAdd: document.querySelector("#people-add"),
   backToTop: document.querySelector("#back-to-top"),
   entriesList: document.querySelector("#entries-list"),
   entriesPagination: document.querySelector("#entries-pagination"),
   entriesBulkToolbar: document.querySelector("#entries-bulk-toolbar"),
+  entriesBulkStatus: document.querySelector("#entries-bulk-status"),
   entriesBulkDelete: document.querySelector("#entries-bulk-delete"),
   entriesBulkClear: document.querySelector("#entries-bulk-clear"),
+  entriesBulkStatusPanel: document.querySelector("#entries-bulk-status-panel"),
+  bulkStatusRegistered: document.querySelector("#bulk-status-registered"),
+  bulkStatusPaid: document.querySelector("#bulk-status-paid"),
+  bulkStatusAmount: document.querySelector("#bulk-status-amount"),
+  bulkStatusDate: document.querySelector("#bulk-status-date"),
+  bulkStatusMethod: document.querySelector("#bulk-status-method"),
+  bulkStatusApply: document.querySelector("#entries-bulk-status-apply"),
   peopleSearch: document.querySelector("#people-search"),
   peopleFilterGender: document.querySelector("#people-filter-gender"),
   peopleFilterSize: document.querySelector("#people-filter-size"),
@@ -110,6 +122,9 @@ export const els = {
   notifyOpenPreview: document.querySelector("#notify-open-preview"),
   notifyCopyBatch: document.querySelector("#notify-copy-batch"),
   notifyReset: document.querySelector("#notify-reset"),
+  notifyPresetSelect: document.querySelector("#notify-preset-select"),
+  notifyPresetSave: document.querySelector("#notify-preset-save"),
+  notifyPresetDelete: document.querySelector("#notify-preset-delete"),
   notifyDensityComfortable: document.querySelector("#notify-density-comfortable"),
   notifyDensityCompact: document.querySelector("#notify-density-compact"),
   notifyExpandAll: document.querySelector("#notify-expand-all"),
@@ -330,6 +345,7 @@ export async function init() {
     state.workspaceView = workspaceViewFromHash() || savedWorkspaceView();
     state.sidebarCollapsed = savedSidebarCollapsed();
     restoreNotifyPreferences();
+    state.notifyPresets = loadNotifyPresets();
     state.loadState = "loading";
     await Promise.all([loadRaces(), loadPrivateData()]);
     state.loadState = "ready";

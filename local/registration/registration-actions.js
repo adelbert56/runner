@@ -46,6 +46,7 @@ import {
   selectedEntryPersonIds,
   setSidebarCollapsed,
   saveSelectedRaceId,
+  saveNotifyPresets,
 } from "./registration-data.js";
 import {
   entryTimeBucket,
@@ -67,6 +68,8 @@ import {
   renderPeopleList,
   renderSelectedRaceSummary,
   renderRaceSelectHints,
+  updatePeopleBulkToolbar,
+  renderNotifyPresetOptions,
 } from "./registration-render.js";
 
 let notifyStatusClearTimer = null;
@@ -202,6 +205,31 @@ export async function bulkDeleteSelectedEntries() {
   await persistAndRender(`已刪除 ${ids.length} 筆報名紀錄`);
 }
 
+export async function applyBulkEntryStatus() {
+  const ids = [...state.selectedEntryIds];
+  if (!ids.length) {
+    return;
+  }
+  const amount = els.bulkStatusAmount.value.trim();
+  const date = els.bulkStatusDate.value;
+  const method = els.bulkStatusMethod.value;
+  state.entries = state.entries.map((entry) => {
+    if (!ids.includes(entry.id)) {
+      return entry;
+    }
+    return {
+      ...entry,
+      isRegistered: els.bulkStatusRegistered.checked,
+      isPaid: els.bulkStatusPaid.checked,
+      paidAmount: amount ? Number(amount) : entry.paidAmount,
+      paymentDate: date || entry.paymentDate,
+      paymentMethod: method || entry.paymentMethod,
+    };
+  });
+  els.entriesBulkStatusPanel.hidden = true;
+  await persistAndRender(`已更新 ${ids.length} 筆報名狀態`);
+}
+
 export function resetPersonForm() {
   els.personForm.reset();
   els.personId.value = "";
@@ -287,6 +315,41 @@ export function editEntry(entryId) {
   setWorkspaceView("entries");
   showStatus(`正在編輯 ${entry.raceName}`, "success");
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+export function duplicateEntryToForm(entryId) {
+  const entry = state.entries.find((item) => item.id === entryId);
+  if (!entry) {
+    return;
+  }
+  state.entryScope = entryTimeBucket(entry);
+  state.entryBatchPersonIds = new Set();
+  const matchedRace = raceByNameAndDate(entry.raceName, entry.raceDate);
+  setEntryDistanceOptions(matchedRace, entry.distance || "");
+  els.entryId.value = "";
+  els.entryRaceName.value = entry.raceName || "";
+  els.entryPersonId.value = "";
+  els.entryRaceDate.value = entry.raceDate || "";
+  els.entryDistance.value = entry.distance || "";
+  els.entryCounty.value = entry.county || "";
+  els.entryLocation.value = entry.location || "";
+  els.entryRegistrationUrl.value = entry.registrationUrl || "";
+  els.entryRegistrationOpensAt.value = entry.registrationOpensAt || "";
+  els.entryRegistrationDeadline.value = entry.registrationDeadline || "";
+  els.entryShirtSize.value = entry.shirtSize || "";
+  els.entryStatus.value = normalizeEntryStatusValue(entry.status);
+  els.entryIsRegistered.checked = false;
+  els.entryIsPaid.checked = false;
+  els.entryRegistrationDate.value = "";
+  els.entryPaidAmount.value = "";
+  els.entryPaymentDate.value = "";
+  els.entryPaymentMethod.value = "";
+  els.entryOrderCode.value = "";
+  els.entryTransferLastFive.value = "";
+  els.entryNotes.value = entry.notes || "";
+  renderEntryPersonBatch();
+  setWorkspaceView("entries", { scroll: true });
+  showStatus(`已複製「${entry.raceName}」的報名內容，請選擇人員後儲存`, "success");
 }
 
 export async function deletePerson(personId) {
@@ -1302,6 +1365,18 @@ export function wireEvents() {
   els.raceSearch.addEventListener("input", applyRaceSearch);
   els.personPhone.addEventListener("blur", validatePhoneField);
   els.personNationalId.addEventListener("blur", validateNationalIdField);
+  els.peopleBulkToEntry?.addEventListener("click", () => {
+    if (!state.selectedPersonIds.size) {
+      showStatus("請先勾選人員", "error");
+      return;
+    }
+    state.entryBatchPersonIds = new Set(state.selectedPersonIds);
+    syncEntryPersonSelectFromBatch();
+    renderEntryPersonBatch();
+    state.selectedPersonIds.clear();
+    updatePeopleBulkToolbar();
+    setWorkspaceView("entries", { scroll: true });
+  });
   els.peopleBulkCopy?.addEventListener("click", bulkCopySelectedPeople);
   els.peopleBulkDelete?.addEventListener("click", () => {
     bulkDeleteSelectedPeople().catch((error) => showStatus(error.message || "批次刪除失敗", "error"));
@@ -1327,6 +1402,12 @@ export function wireEvents() {
   els.entriesBulkClear?.addEventListener("click", () => {
     state.selectedEntryIds.clear();
     renderEntriesList();
+  });
+  els.entriesBulkStatus?.addEventListener("click", () => {
+    els.entriesBulkStatusPanel.hidden = !els.entriesBulkStatusPanel.hidden;
+  });
+  els.bulkStatusApply?.addEventListener("click", () => {
+    applyBulkEntryStatus().catch((error) => showStatus(error.message || "批次更新狀態失敗", "error"));
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") {
@@ -1571,6 +1652,12 @@ export function wireEvents() {
     renderSelectedRaceSummary(selectedRaceFromDropdown());
     renderRaceSelectHints(selectedRaceFromDropdown());
     renderOverview();
+    if (!els.entryId.value && !els.entryRaceName.value.trim()) {
+      const race = selectedRaceFromDropdown();
+      if (race) {
+        fillEntryFromRace(race);
+      }
+    }
   });
   els.sidebarCollapseToggle?.addEventListener("click", () => {
     setSidebarCollapsed(!state.sidebarCollapsed);
@@ -1646,6 +1733,63 @@ export function wireEvents() {
     renderNotifyPickerLists();
     renderNotifyWorkspace();
     showNotifyStatus("已清空通知篩選", "success");
+  });
+  els.notifyPresetSave?.addEventListener("click", () => {
+    const name = window.prompt("命名這組篩選", "");
+    if (!name || !name.trim()) {
+      return;
+    }
+    const preset = {
+      id: createId("notifyPreset"),
+      name: name.trim(),
+      scope: state.notifyScope,
+      progress: state.notifyProgress,
+      query: state.notifyQuery,
+      selectedRaceKeys: [...state.notifySelectedRaceKeys],
+      selectedPersonIds: [...state.notifySelectedPersonIds],
+    };
+    state.notifyPresets.push(preset);
+    saveNotifyPresets(state.notifyPresets);
+    renderNotifyPresetOptions();
+    showNotifyStatus(`已儲存篩選：${preset.name}`, "success");
+  });
+  els.notifyPresetSelect?.addEventListener("change", () => {
+    const presetId = els.notifyPresetSelect.value;
+    if (!presetId) {
+      return;
+    }
+    const preset = state.notifyPresets.find((item) => item.id === presetId);
+    if (!preset) {
+      return;
+    }
+    state.notifyScope = preset.scope || "active";
+    state.notifyProgress = preset.progress || "all";
+    state.notifyQuery = preset.query || "";
+    state.notifySelectedRaceKeys = new Set(normalizeArray(preset.selectedRaceKeys));
+    state.notifySelectedPersonIds = new Set(normalizeArray(preset.selectedPersonIds));
+    els.notifyScope.value = state.notifyScope;
+    els.notifyProgress.value = state.notifyProgress;
+    els.notifySearch.value = state.notifyQuery;
+    renderNotifyPickerLists();
+    renderNotifyWorkspace();
+  });
+  els.notifyPresetDelete?.addEventListener("click", () => {
+    const presetId = els.notifyPresetSelect?.value;
+    if (!presetId) {
+      return;
+    }
+    const preset = state.notifyPresets.find((item) => item.id === presetId);
+    if (!preset) {
+      return;
+    }
+    if (!window.confirm(`確定刪除篩選「${preset.name}」？此動作無法復原。`)) {
+      return;
+    }
+    state.notifyPresets = state.notifyPresets.filter((item) => item.id !== presetId);
+    saveNotifyPresets(state.notifyPresets);
+    renderNotifyPresetOptions();
+    els.notifyPresetSelect.value = "";
+    showNotifyStatus(`已刪除篩選：${preset.name}`, "success");
   });
   els.notifyDensityComfortable?.addEventListener("click", () => {
     state.notifyDensity = "comfortable";

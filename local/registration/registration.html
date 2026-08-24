@@ -13,7 +13,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/site/assets/favicon-32.png?v=20260630-registration-notify1">
     <link rel="apple-touch-icon" sizes="180x180" href="/site/assets/apple-touch-icon.png?v=20260630-registration-notify1">
     <link rel="stylesheet" href="/site/styles.css?v=20260701-registration-notify8">
-    <link rel="stylesheet" href="./registration.css?v=20260824-quickadd1">
+    <link rel="stylesheet" href="./registration.css?v=20260824-ux5">
     <link rel="stylesheet" href="./registration-system.css?v=20260724-workspace-system1">
   </head>
   <body class="registration-page">
@@ -313,6 +313,7 @@
                   </div>
                   <div class="bulk-toolbar" id="people-bulk-toolbar" hidden>
                     <span class="bulk-toolbar-count"></span>
+                    <button type="button" class="secondary-action" id="people-bulk-to-entry">帶去建立報名</button>
                     <button type="button" class="secondary-action" id="people-bulk-copy">複製已選基本資料</button>
                     <button type="button" class="secondary-action danger-action" id="people-bulk-delete">刪除已選</button>
                     <button type="button" class="ghost-action" id="people-bulk-clear">清除選取</button>
@@ -538,8 +539,26 @@
                   </div>
                   <div class="bulk-toolbar" id="entries-bulk-toolbar" hidden>
                     <span class="bulk-toolbar-count"></span>
+                    <button type="button" class="secondary-action" id="entries-bulk-status">批次更新狀態</button>
                     <button type="button" class="secondary-action danger-action" id="entries-bulk-delete">刪除已選</button>
                     <button type="button" class="ghost-action" id="entries-bulk-clear">清除選取</button>
+                  </div>
+                  <div class="bulk-status-panel" id="entries-bulk-status-panel" hidden>
+                    <label class="checkbox-field"><span>是否報名</span><input id="bulk-status-registered" type="checkbox"></label>
+                    <label class="checkbox-field"><span>是否繳費</span><input id="bulk-status-paid" type="checkbox"></label>
+                    <label><span>金額</span><input id="bulk-status-amount" type="number" min="0" step="1"></label>
+                    <label><span>繳費日期</span><input id="bulk-status-date" type="date"></label>
+                    <label><span>付款方式</span>
+                      <select id="bulk-status-method">
+                        <option value="">未設定</option>
+                        <option>信用卡</option>
+                        <option>ATM轉帳</option>
+                        <option>超商</option>
+                        <option>現金</option>
+                        <option>其他</option>
+                      </select>
+                    </label>
+                    <button type="button" class="primary-action" id="entries-bulk-status-apply">套用到已選</button>
                   </div>
                   <div id="entries-list" class="list-shell" role="tabpanel" aria-labelledby="entries-scope-tab-active entries-scope-tab-history entries-scope-tab-all">
                     <div class="empty-state">尚未建立報名紀錄</div>
@@ -576,6 +595,11 @@
                       <span>待收金額</span>
                       <strong id="notify-summary-unpaid">0</strong>
                     </article>
+                  </div>
+                  <div class="notify-preset-bar">
+                    <select id="notify-preset-select"><option value="">套用常用篩選…</option></select>
+                    <button class="mini-action" type="button" id="notify-preset-save">儲存目前篩選</button>
+                    <button class="mini-action danger-action" type="button" id="notify-preset-delete">刪除</button>
                   </div>
                   <div class="notify-filter-stack">
                     <label>
@@ -664,6 +688,6 @@
       <span>置頂</span>
     </button>
 
-    <script type="module" src="./registration.js?v=20260824-modsplit1"></script>
+    <script type="module" src="./registration.js"></script>
   </body>
 </html>
