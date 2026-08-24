@@ -60,6 +60,9 @@ function estimatePacesFromAssessment(assessment) {
 
 function assessmentCalibrationGate(assessment) {
   const directive = typeof coachRaceDirective === 'function' ? coachRaceDirective(assessment?.date) : null;
+  if (directive?.deferCalibration) {
+    return { allowed: false, message: `「${directive.role || '這場賽事'}」只保留 Garmin 成績作為階段檢測；請等賽後恢復資料與近期實跑一併判讀，再由教練安排後續配速。` };
+  }
   if (!directive?.requiresPriorDate) return { allowed: true };
   const prior = (appData.assessments || []).find((item) => item.date === directive.requiresPriorDate && item.type === 'race_10k');
   return prior
@@ -946,6 +949,31 @@ function saveRunFeedback(dateStr, { rpe, note }) {
   appData.runFeedback = { ...(appData.runFeedback || {}), [dateStr]: entry };
   saveData(appData);
   return true;
+}
+
+function openRaceRecoveryCheckin(dateStr) {
+  const existing = appData.raceRecoveryChecks?.[dateStr] || {};
+  showModal('賽後 48 小時恢復回報', `<p style="margin:0 0 12px;line-height:1.65">這份回報是下一次速度課或長跑能否進階的必要證據；若有疼痛或步態改變，系統會維持保守安排。</p>
+    <div class="form-group"><label class="form-label" for="race-recovery-fatigue">疲勞（1–5）</label><select class="form-input" id="race-recovery-fatigue"><option value="">請選擇</option>${[1,2,3,4,5].map((value) => `<option value="${value}" ${existing.fatigue === String(value) ? 'selected' : ''}>${value}${value <= 2 ? '｜已恢復' : value === 3 ? '｜普通' : '｜仍疲勞'}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label" for="race-recovery-pain">疼痛</label><select class="form-input" id="race-recovery-pain"><option value="none" ${existing.pain === 'none' ? 'selected' : ''}>無</option><option value="mild" ${existing.pain === 'mild' ? 'selected' : ''}>輕微</option><option value="pain" ${existing.pain === 'pain' ? 'selected' : ''}>明顯疼痛</option></select></div>
+    <div class="form-group"><label class="form-label" for="race-recovery-gait">步態</label><select class="form-input" id="race-recovery-gait"><option value="normal" ${existing.gait === 'normal' ? 'selected' : ''}>正常</option><option value="changed" ${existing.gait === 'changed' ? 'selected' : ''}>有改變／會避痛</option></select></div>
+    <div class="form-group"><label class="form-label" for="race-recovery-note">補充（選填）</label><input class="form-input" id="race-recovery-note" maxlength="240" value="${reviewEscape(existing.note || '')}" placeholder="例：右小腿緊、睡眠較差"></div>`, [
+    { label: '儲存回報', primary: true, action: () => { appData.raceRecoveryChecks = { ...(appData.raceRecoveryChecks || {}), [dateStr]: { fatigue: document.getElementById('race-recovery-fatigue')?.value || '', pain: document.getElementById('race-recovery-pain')?.value || 'none', gait: document.getElementById('race-recovery-gait')?.value || 'normal', note: document.getElementById('race-recovery-note')?.value || '', savedAt: todayStr() } }; saveData(appData); closeModal(); renderPlanView(); } },
+    { label: '取消', action: closeModal }
+  ]);
+}
+
+function openFuelingLog(dateStr) {
+  const existing = appData.fuelingLogs?.[dateStr] || {};
+  showModal('長跑補給紀錄', `<p style="margin:0 0 12px;line-height:1.65">記下實際做法，下一次 16K 以上長跑才能重現或修正；沒有正確答案，腸胃反應最重要。</p>
+    <div class="form-group"><label class="form-label" for="fuel-breakfast">跑前早餐／時間</label><input class="form-input" id="fuel-breakfast" maxlength="180" value="${reviewEscape(existing.breakfast || '')}"></div>
+    <div class="form-group"><label class="form-label" for="fuel-fluid">水分（ml）</label><input class="form-input" id="fuel-fluid" inputmode="numeric" maxlength="8" value="${reviewEscape(existing.fluidMl || '')}"></div>
+    <div class="form-group"><label class="form-label" for="fuel-electrolyte">電解質／補給站</label><input class="form-input" id="fuel-electrolyte" maxlength="120" value="${reviewEscape(existing.electrolyte || '')}"></div>
+    <div class="form-group"><label class="form-label" for="fuel-carbs">碳水／能量膠</label><input class="form-input" id="fuel-carbs" maxlength="120" value="${reviewEscape(existing.carbs || '')}"></div>
+    <div class="form-group"><label class="form-label" for="fuel-gut">腸胃反應</label><input class="form-input" id="fuel-gut" maxlength="120" value="${reviewEscape(existing.gut || '')}" placeholder="正常／脹／反胃…"></div>`, [
+    { label: '儲存紀錄', primary: true, action: () => { appData.fuelingLogs = { ...(appData.fuelingLogs || {}), [dateStr]: { breakfast: document.getElementById('fuel-breakfast')?.value || '', fluidMl: document.getElementById('fuel-fluid')?.value || '', electrolyte: document.getElementById('fuel-electrolyte')?.value || '', carbs: document.getElementById('fuel-carbs')?.value || '', gut: document.getElementById('fuel-gut')?.value || '', savedAt: todayStr() } }; saveData(appData); closeModal(); renderPlanView(); } },
+    { label: '取消', action: closeModal }
+  ]);
 }
 
 // 睡眠、HRV、body battery 是「這個人現在恢復得如何」的客觀那一半。原本恢復判斷

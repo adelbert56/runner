@@ -1165,6 +1165,22 @@
     .progress-hub-tab:hover { color:var(--c-primary-hover); background:rgba(36,114,79,.06); }
     .progress-hub-tab.active { color:var(--c-primary-hover); background:rgba(36,114,79,.11); }
     .progress-hub-panel[hidden] { display:none; }
+    .coach-decision-card { margin:0 0 14px; padding:18px; border:1px solid var(--c-border); border-radius:var(--radius-lg); background:var(--c-surface); box-shadow:var(--shadow-soft); }
+    .coach-decision-card.is-ready { border-left:4px solid var(--c-primary); }
+    .coach-decision-card.is-hold { border-left:4px solid var(--c-yellow); }
+    .coach-decision-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+    .coach-decision-head h2 { margin:3px 0 5px; font-size:18px; color:var(--c-text); }
+    .coach-decision-head p { margin:0; color:var(--c-text-muted); font-size:13px; line-height:1.55; }
+    .coach-decision-status { flex:0 0 auto; padding:7px 10px; border-radius:var(--radius-sm); color:var(--c-primary-hover); background:var(--c-tint-green); font-size:12px; font-weight:850; }
+    .coach-decision-card.is-hold .coach-decision-status { color:var(--c-text); background:var(--c-tint-yellow); }
+    .coach-evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 16px; margin-top:14px; border-top:1px solid var(--c-border); }
+    .coach-evidence-row { position:relative; padding:11px 0 10px; border-bottom:1px solid var(--c-border); }
+    .coach-evidence-row b { display:inline-block; font-size:13px; color:var(--c-text); }
+    .coach-evidence-row p { margin:4px 0 0; color:var(--c-text-muted); font-size:12px; line-height:1.5; }
+    .coach-evidence-state { float:right; color:var(--c-primary-hover); font-size:11px; font-weight:850; }
+    .coach-decision-card.is-hold .coach-evidence-state { color:var(--c-text-muted); }
+    .coach-decision-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .coach-decision-actions > span { color:var(--c-text-muted); font-size:11px; line-height:1.45; }
     .progress-hub-intro { display:flex; align-items:center; gap:18px; min-height:0; padding:16px 18px; border:1px solid rgba(36,114,79,.16); border-radius:var(--radius-lg); background:linear-gradient(105deg,#f1f8f2,#fffdf9); }
     .progress-hub-intro .runner-guide-kicker { margin:0; font-size:10px; }
     .progress-hub-intro .runner-guide-title { margin:2px 0 0; font-size:16px; }
@@ -1205,7 +1221,7 @@
     .garmin-sync-card time { color:var(--c-primary-hover); font-size:12px; font-weight:850; white-space:nowrap; }
     .garmin-empty-insight { padding:18px; border:1px dashed #c8dbce; border-radius:var(--radius-lg); color:var(--c-text); background:#fcfdfb; }
     .garmin-empty-insight p { margin:5px 0 0; color:var(--c-text-muted); font-size:12px; line-height:1.55; }
-    @media (max-width: 800px) { .progress-hub-intro { display:block; } .progress-hub-intro .runner-guide-copy { margin:8px 0 0; } .garmin-progress-layout { grid-template-columns:1fr; } .garmin-actual-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 800px) { .progress-hub-intro { display:block; } .progress-hub-intro .runner-guide-copy { margin:8px 0 0; } .garmin-progress-layout { grid-template-columns:1fr; } .garmin-actual-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .coach-decision-head { display:block; } .coach-decision-status { display:inline-block; margin-top:10px; } .coach-evidence-list { grid-template-columns:1fr; } }
     @media (max-width: 480px) { .garmin-actual-card, .fitness-projection-card { padding:16px; } .garmin-sync-card { grid-template-columns:auto minmax(0,1fr); } .garmin-sync-card time { grid-column:2; } }
 
     /* === Commercial visual system: shared surfaces, controls, and hierarchy === */

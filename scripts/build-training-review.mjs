@@ -98,6 +98,7 @@ function buildAnalyticsRuns(activities) {
       vo2max: activity.vo2max,
       power: activity.avg_power,
       trainingLoad: activity.training_load,
+      terrainSummary: activity.terrain_summary || null,
       // Course-quality metrics are populated only from explicit Garmin steps;
       // never infer them from automatic kilometre laps.
       qualityEligible,
@@ -116,15 +117,14 @@ function buildAnalyticsRuns(activities) {
   }).filter((activity) => activity.date && activity.km > 0);
 }
 
-// Publish slimming: the per-session lap detail only powers the recent-run
-// report (front-end history picker shows the last 8 activities). Keep laps for
-// the most recent runs and drop them from older ones so the published, encrypted
-// review stays lean. Volume/trend/completion use km & hr, not laps.
+// Publish slimming: per-session evidence only powers recent-run reports. Keep
+// laps and privacy-safe terrain summaries for recent runs; older history still
+// retains volume/trend fields but never route-like detail.
 function slimAnalyticsLaps(runs, keepRecent = 20) {
   const keep = new Set(
     [...runs].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, keepRecent).map((run) => run.activityId)
   );
-  return runs.map((run) => (keep.has(run.activityId) ? run : { ...run, laps: [] }));
+  return runs.map((run) => (keep.has(run.activityId) ? run : { ...run, laps: [], terrainSummary: null }));
 }
 
 function buildWeeklyTrend(runs) {

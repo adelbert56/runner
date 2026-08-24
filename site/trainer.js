@@ -44,7 +44,7 @@ function addLocalRegistrationLink() {
 addLocalRegistrationLink();
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, lastBackupAt: null, safetyHold: null, onboardingIntroSeenAt: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, raceRecoveryChecks: {}, fuelingLogs: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, lastBackupAt: null, safetyHold: null, onboardingIntroSeenAt: null };
 }
 
 // A formal day remains the single coaching prescription.  A second workout is
@@ -227,7 +227,20 @@ function raceDayPackageSteps(profile, raceKm, dateStr) {
   const startPace = directive?.startPace || (adjustedPaceSec > 0 ? secToPace(adjustedPaceSec + 12) : '—');
   const roleTitle = directive?.role ? `｜${directive.role}` : '';
 
-  const paceSteps = [
+  const paceSteps = directive?.deferCalibration ? [
+    {
+      icon: '🚦', title: '配速策略・前段保守', dose: '前 2 km',
+      detail: directive?.startInstruction || '以順暢步態與可控制呼吸起跑，不依半馬目標反推 10K 配速。'
+    },
+    {
+      icon: '🎯', title: '配速策略・中段穩定', dose: '依心率與體感',
+      detail: directive?.mainInstruction || '守住穩定輸出；心率、腳感或動作異常就轉為舒適完賽。'
+    },
+    {
+      icon: '🏁', title: '配速策略・安全收尾', dose: '依當天狀況',
+      detail: directive?.finishInstruction || '不衝刺；保留 Garmin、RPE 與恢復資料，賽後再由教練判讀後續配速。'
+    }
+  ] : [
     {
       icon: '🚦', title: '配速策略・前 5K', dose: '5 km',
       detail: directive?.startInstruction || (adjustedPaceSec > 0
@@ -368,7 +381,9 @@ function applyRegisteredSundayRaceReplacements(races) {
       raceDay.focus = 'race';
       const directive = coachRaceDirective(dateStr);
       raceDay.task = `${raceName}｜以賽代訓${directive?.role ? `｜${directive.role}` : ''}`;
-      raceDay.pace = directive?.summary || '依賽程距離與當日狀態執行；不另外補長跑';
+      raceDay.pace = directive?.deferCalibration
+        ? '受控階段檢測：不以半馬目標反推 10K 配速；賽後綜合近期實跑與恢復再決定後續處方'
+        : directive?.summary || '依賽程距離與當日狀態執行；不另外補長跑';
       raceDay.hrTarget = '';
       raceDay.steps = raceDayPackageSteps(appData.profile, raceMaxKm(race) || goalDistanceKm(appData.profile), dateStr);
       changed = true;
@@ -821,6 +836,13 @@ function normalizeRunFeedback(value) {
   return Object.fromEntries(entries);
 }
 
+function normalizeCoachLog(value, fields) {
+  if (!value || typeof value !== 'object') return {};
+  return Object.fromEntries(Object.entries(value)
+    .filter(([date, item]) => /^\d{4}-\d{2}-\d{2}$/.test(date) && item && typeof item === 'object')
+    .map(([date, item]) => [date, Object.fromEntries(fields.map(([key, max]) => [key, String(item[key] || '').trim().slice(0, max)]).concat([["savedAt", String(item.savedAt || '')]]))]));
+}
+
 function normalizeData(data) {
   const base = createEmptyData();
   const normalized = {
@@ -837,6 +859,8 @@ function normalizeData(data) {
     makeupRecords: normalizeMakeupRecords(data?.makeupRecords),
     activityAssignments: normalizeActivityAssignments(data?.activityAssignments),
     runFeedback: normalizeRunFeedback(data?.runFeedback),
+    raceRecoveryChecks: normalizeCoachLog(data?.raceRecoveryChecks, [['fatigue', 2], ['pain', 24], ['gait', 24], ['note', 240]]),
+    fuelingLogs: normalizeCoachLog(data?.fuelingLogs, [['breakfast', 180], ['fluidMl', 8], ['electrolyte', 120], ['carbs', 120], ['gut', 120], ['note', 240]]),
     safetyHold: normalizeSafetyHold(data?.safetyHold),
     planChangeHistory: normalizePlanChangeHistory(data?.planChangeHistory),
     trainingEvents: normalizeTrainingEvents(data?.trainingEvents),
