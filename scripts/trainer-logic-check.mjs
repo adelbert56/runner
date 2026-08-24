@@ -41,11 +41,12 @@ function extractFunction(source, name) {
   throw new Error(`unbalanced braces for function ${name}`);
 }
 
-const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerCoachEngineJs, trainerSafetyJs, trainingReviewBuilder] = await Promise.all([
+const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerActionsJs, trainerCoachEngineJs, trainerSafetyJs, trainingReviewBuilder] = await Promise.all([
   readFile(resolve(root, "site/trainer.js"), "utf8"),
   readFile(resolve(root, "site/trainer-copy.js"), "utf8"),
   readFile(resolve(root, "site/trainer-plan.js"), "utf8"),
   readFile(resolve(root, "site/trainer-render.js"), "utf8"),
+  readFile(resolve(root, "site/trainer-actions.js"), "utf8"),
   readFile(resolve(root, "site/trainer-coach-engine.js"), "utf8"),
   readFile(resolve(root, "site/trainer-safety.js"), "utf8"),
   readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
@@ -80,6 +81,38 @@ const weekFlagSandbox = {};
 vm.createContext(weekFlagSandbox);
 vm.runInContext(extractFunction(trainerRenderJs, "effectiveWeekIsDeload"), weekFlagSandbox);
 const { effectiveWeekIsDeload } = weekFlagSandbox;
+
+const racePhaseSandbox = {};
+vm.createContext(racePhaseSandbox);
+vm.runInContext(extractFunction(trainerActionsJs, "coachPhaseHasRaceReplacingQuality"), racePhaseSandbox);
+const { coachPhaseHasRaceReplacingQuality } = racePhaseSandbox;
+
+const scheduledRaceSandbox = {};
+vm.createContext(scheduledRaceSandbox);
+vm.runInContext(extractFunction(trainerJs, "scheduled10kNeedsStrengthDeload"), scheduledRaceSandbox);
+const { scheduled10kNeedsStrengthDeload } = scheduledRaceSandbox;
+
+const scheduledEntrySandbox = {
+  coachReviewData: {
+    raceDirectives: [
+      { date: '2026-11-08', name: '11/8 10K 路跑', distance: '10km', scheduled: true },
+      { date: '2026-10-04', role: '舊賽事判讀', scheduled: false },
+    ],
+  },
+};
+vm.createContext(scheduledEntrySandbox);
+vm.runInContext(extractFunction(trainerJs, "coachScheduledRaceEntries"), scheduledEntrySandbox);
+const { coachScheduledRaceEntries } = scheduledEntrySandbox;
+
+const assessmentGateSandbox = {
+  coachRaceDirective: (date) => date === '2026-11-15'
+    ? { requiresPriorDate: '2026-11-08', role: '半馬前節奏提醒' }
+    : null,
+  appData: { assessments: [] },
+};
+vm.createContext(assessmentGateSandbox);
+vm.runInContext(extractFunction(trainerActionsJs, "assessmentCalibrationGate"), assessmentGateSandbox);
+const { assessmentCalibrationGate } = assessmentGateSandbox;
 
 const coachEngineSandbox = {};
 vm.createContext(coachEngineSandbox);
@@ -172,6 +205,15 @@ assertEqual(coachPrescribedMainKm({ km: 14 }, { totalKm: 13, steps: [{ kind: 'ma
 assertEqual(effectiveWeekIsDeload({ isDeload: true }, { phase: "基礎強化", focus: "品質課" }), false, "formal base phase overrides the generator's stale deload flag");
 assertEqual(effectiveWeekIsDeload({ isDeload: false }, { phase: "降載", focus: "吸收訓練" }), true, "formal deload phase overrides the generator's non-deload flag");
 assertEqual(effectiveWeekIsDeload({ isDeload: true }, null), true, "legacy plans retain their generated deload flag without a formal phase");
+assertEqual(coachPhaseHasRaceReplacingQuality({ focus: "11/8、11/15 兩場 10K 賽事取代品質課" }), true, "confirmed 10K race weeks remove an extra quality session");
+assertEqual(coachPhaseHasRaceReplacingQuality({ focus: "長跑 16 km @E" }), false, "normal long-run weeks retain their separately planned quality decision");
+assertEqual(scheduled10kNeedsStrengthDeload({ scheduled: true, distance: '10km' }), true, "scheduled 10K races deload strength 48 hours before start");
+assertEqual(scheduled10kNeedsStrengthDeload({ scheduled: true, distance: '21km' }), false, "half-marathon directives do not use the 10K strength-deload rule");
+assertEqual(coachScheduledRaceEntries().length, 1, "only coach-confirmed scheduled races are integrated without registration data");
+assertEqual(coachScheduledRaceEntries()[0]?.race_date, '2026-11-08', "scheduled-race integration preserves the confirmed race date");
+assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, false, "11/15 10K cannot recalibrate the half-marathon before 11/8 evidence exists");
+assessmentGateSandbox.appData.assessments.push({ date: '2026-11-08', type: 'race_10k' });
+assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, true, "11/15 10K may calibrate only after the 11/8 race evidence is retained");
 assertThrows(() => assertPublishableCoachReview(JSON.stringify({
   reviewMode: 'final',
   nextWeek: {

@@ -70,6 +70,7 @@
 | 逐週索引下拉（week-index-*） | 已建立 | 有記錄／無記錄／本週進行中／歷史週可跳轉／手機單欄 | `--radius-md`、`--c-primary-hover`、`--c-surface2`、`--c-border` | `site/trainer.css`、`site/trainer-render.js` | 本次驗證 | 教練建議逐週索引 |
 | 首次上手橫幅（沿用 runner-guide-card） | 已存在（本次重新啟用＋新增進站前用法） | 顯示／略過後不再顯示 | `--radius-lg`、`--c-primary`、`--c-tint-green` | `site/trainer.css`、`site/trainer.js`、`site/trainer-render.js` | 本次驗證 | 新手上手流程 |
 | 四 tab 導覽卡（tab-intro-*） | 已建立 | 顯示／略過後不再顯示／手機 2 欄 | `--radius-md`、`--c-text`、`--c-text-muted` | `site/trainer.css`、`site/trainer-render.js` | 本次驗證 | 首次課表產出後導覽 |
+| 報名建立流程步驟列（entry-workflow） | 已建立 | 待選人／選人完成／選組別完成／可儲存／手機三欄 | `--surface`、`--soft`、`--line`、`--green-dark`、`--yellow`、`--radius` | `local/registration/registration.html`、`local/registration/registration.css`、`local/registration/registration-actions.js` | Playwright 桌機與 390px 截圖 | 報名管理作業流程優化 |
 
 （「來源階段」記錄這個元件是 S4 初建，還是後續某個功能 Epic 補做並回登的。）
 

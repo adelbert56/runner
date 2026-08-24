@@ -58,9 +58,23 @@ function estimatePacesFromAssessment(assessment) {
   };
 }
 
+function assessmentCalibrationGate(assessment) {
+  const directive = typeof coachRaceDirective === 'function' ? coachRaceDirective(assessment?.date) : null;
+  if (!directive?.requiresPriorDate) return { allowed: true };
+  const prior = (appData.assessments || []).find((item) => item.date === directive.requiresPriorDate && item.type === 'race_10k');
+  return prior
+    ? { allowed: true }
+    : { allowed: false, message: `「${directive.role || '這場賽事'}」需要先保留 ${directive.requiresPriorDate} 的 10K 成績與恢復紀錄，兩場證據齊全後才校正 2:15 配速。` };
+}
+
 function applyAssessmentToPlan(index = 0) {
   const assessment = (appData.assessments || [])[index];
   if (!assessment || !appData.profile) return;
+  const calibrationGate = assessmentCalibrationGate(assessment);
+  if (!calibrationGate.allowed) {
+    showModal('暫不校正半馬配速', calibrationGate.message, [{ label: '保留成績', primary: true, action: closeModal }]);
+    return;
+  }
   const nextPaces = estimatePacesFromAssessment(assessment);
   if (!nextPaces) {
     showModal('無法套用檢測', '這筆檢測資料不足，請確認時間或距離格式。', [{ label: '確認', action: closeModal }]);
@@ -567,6 +581,10 @@ function restoreHistoricalCoachPlansFromReview() {
   return changed;
 }
 
+function coachPhaseHasRaceReplacingQuality(phase) {
+  return /賽事取代品質|10K.*賽事|賽事.*10K/.test(String(phase?.focus || ''));
+}
+
 function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = {} } = {}) {
   const week = appData.plan?.[weekNum - 1];
   const phase = coachPhaseForWeek(week);
@@ -588,7 +606,9 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
   const effectiveVolume = Math.round(Math.min(volume * volumeFactor, holdProgression && priorTargetKm > 0 ? priorTargetKm : Infinity) * 10) / 10;
   const effectiveLongKm = Math.round(Math.min(longKm * volumeFactor, holdProgression && priorLongKm > 0 ? priorLongKm : Infinity) * 10) / 10;
   const deloadEachKm = Math.round(((effectiveVolume - effectiveLongKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
-  const removeQuality = Boolean(constraints.removeQuality);
+  // 賽事週的 10K 本身就是當週品質刺激；不能再由一般課表塞一堂 T/I。
+  const raceReplacesQuality = coachPhaseHasRaceReplacingQuality(phase);
+  const removeQuality = Boolean(constraints.removeQuality || raceReplacesQuality);
   const qualityMode = constraints.qualityMode === 'reduce' ? 'reduce' : 'keep';
   const suppressIntervals = Boolean(constraints.suppressIntervals || holdProgression);
   const weekStart = new Date(`${week.days?.[0]?.dateStr || todayStr()}T00:00:00`);
@@ -614,7 +634,7 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
     const courseKm = isLong ? effectiveLongKm : phaseDeload ? deloadEachKm : calcWorkoutKm(session.type, effectiveVolume, profile.goal, effectiveLongKm, session.focus);
     const course = buildDayCard(actualDow, day.dateStr, session.type, courseKm, profile, phaseDeload || removeQuality, false, false, todayStr(), day.weekNum || weekNum, week.phase || 'build', session.focus, session.label);
     if (qualityMode === 'reduce' && ['tempo', 'interval'].includes(course.type)) course.task = `${course.task}｜Garmin／週評估限制：主課只做原處方前 2/3，失控即改輕鬆跑。`;
-    course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: effectiveVolume, longKm: effectiveLongKm, volumeFactor, qualityMode, removeQuality, holdProgression, suppressIntervals };
+    course.coachPlan = { source: 'coach-periodization', phase: phase.phase, targetKm: effectiveVolume, longKm: effectiveLongKm, volumeFactor, qualityMode, removeQuality, raceReplacesQuality, holdProgression, suppressIntervals };
     mutatedAny = true;
     return course;
   });
@@ -623,7 +643,7 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
   if (!mutatedAny) return false;
   week.days = nextDays;
   week.targetKm = effectiveVolume;
-  const constraintNote = volumeFactor < 1 ? `；已依 Garmin／週評估下修 ${Math.round((1 - volumeFactor) * 100)}%` : qualityMode === 'reduce' ? '；品質課已降階' : holdProgression ? '；品質檢測未完全放行，總量與長跑不增加且不排 I 課' : '';
+  const constraintNote = volumeFactor < 1 ? `；已依 Garmin／週評估下修 ${Math.round((1 - volumeFactor) * 100)}%` : raceReplacesQuality ? '；10K 賽事取代品質課，不另疊 T/I' : qualityMode === 'reduce' ? '；品質課已降階' : holdProgression ? '；品質檢測未完全放行，總量與長跑不增加且不排 I 課' : '';
   const adaptiveNote = phase.adaptiveNote ? `；${phase.adaptiveNote}` : '';
   week.planningNote = `已依第 ${weekNum - 1} 週完成紀錄，套用教練「${phase.phase}」第 ${weekNum} 週處方${constraintNote}${adaptiveNote}。`;
   if (record) {

@@ -191,6 +191,28 @@ function coachRaceDirective(dateStr) {
   return directives.find((item) => item?.date === dateStr) || null;
 }
 
+// 已由正式教練週報確認的賽事，不必依賴另一個瀏覽器的報名 localStorage 才能保護課表。
+// 只採 scheduled: true，舊的十月判讀指令仍維持「有報名才整合」的既有行為。
+function coachScheduledRaceEntries() {
+  const directives = Array.isArray(coachReviewData?.raceDirectives) ? coachReviewData.raceDirectives : [];
+  return directives
+    .filter((item) => item?.scheduled === true && /^\d{4}-\d{2}-\d{2}$/.test(item.date || ''))
+    .map((item) => ({
+      race_id: `coach-directive:${item.date}`,
+      race_name: item.name || item.role || '教練確認賽事',
+      race_date: item.date,
+      distances: [item.distance || '10km'],
+      registration_status: '已確認'
+    }));
+}
+
+// 10K 是受控賽事仍會留下腿部疲勞；前 48 小時的肌力改成短版活動度，
+// 避免把深蹲、單腳離心等延遲痠痛帶到起跑線。只對正式教練確認的 8–12K 賽事生效。
+function scheduled10kNeedsStrengthDeload(directive) {
+  const distance = Number(String(directive?.distance || '').match(/[\d.]+/)?.[0]);
+  return directive?.scheduled === true && Number.isFinite(distance) && distance >= 8 && distance <= 12;
+}
+
 // 賽日包：配速策略 + 補給 + 賽前檢查，填進「以賽代訓」卡片的 steps。
 // raceKm 與課表目標距離不同時用 Riegel 公式微調配速；profile/weather 缺資料時仍需能安全回傳。
 function raceDayPackageSteps(profile, raceKm, dateStr) {
@@ -364,6 +386,18 @@ function applyRegisteredSundayRaceReplacements(races) {
       preRaceDay.steps = [];
       changed = true;
     }
+
+    const directive = coachRaceDirective(dateStr);
+    const preRaceStrengthDay = byDateStr.get(addDaysToDateStr(dateStr, -2));
+    if (scheduled10kNeedsStrengthDeload(directive) && preRaceStrengthDay
+      && preRaceStrengthDay.type === 'rest' && !preRaceStrengthDay.raceReplacement) {
+      preRaceStrengthDay.raceReplacementBase = { ...preRaceStrengthDay };
+      preRaceStrengthDay.raceReplacement = 'pre-race-taper';
+      preRaceStrengthDay.preRaceTaperOf = dateStr;
+      preRaceStrengthDay.task = `賽前肌力降負荷｜「${raceName}」前 48 小時，只做活動度、核心與足踝控制 10–15 分鐘`;
+      preRaceStrengthDay.steps = [];
+      changed = true;
+    }
   });
 
   // 賽後恢復：比賽後 N 天內不排品質課與長跑（N 依賽事距離）。
@@ -459,8 +493,9 @@ function recordRaceIntegrationLog(messages) {
 
 async function syncRegisteredSundayRaces() {
   const registeredKeys = runnerRegisteredRaceKeys();
+  const scheduledRaces = coachScheduledRaceEntries();
   if (!registeredKeys.size) {
-    if (applyRegisteredSundayRaceReplacements([])) {
+    if (applyRegisteredSundayRaceReplacements(scheduledRaces)) {
       saveData(appData);
       refreshPlanAfterRaceSync();
       recordRaceIntegrationLog(window.lastRaceIntegrationNotices);
@@ -475,7 +510,8 @@ async function syncRegisteredSundayRaces() {
     const registeredRaces = races.filter((race) => (
       registeredKeys.has(runnerRaceKey(race)) && !cancelledStatuses.has(race.registration_status)
     ));
-    if (applyRegisteredSundayRaceReplacements(registeredRaces)) {
+    const mergedRaces = [...registeredRaces, ...scheduledRaces.filter((scheduled) => !registeredRaces.some((race) => race.race_date === scheduled.race_date))];
+    if (applyRegisteredSundayRaceReplacements(mergedRaces)) {
       saveData(appData);
       refreshPlanAfterRaceSync();
       recordRaceIntegrationLog(window.lastRaceIntegrationNotices);
@@ -2679,6 +2715,9 @@ loadRegistrationRaceCheckpoints();
   function render(data) {
     coachReviewData = data;
     coachReviewLoadState = 'ready';
+    // 初次 init 時加密週報尚未解鎖，這裡取得 scheduled 賽事後必須再同步一次，
+    // 才能把正式確認的賽事真正寫進這個瀏覽器的本機課表。
+    syncRegisteredSundayRaces();
     const historicalCoachPlansRestored = restoreHistoricalCoachPlansFromReview();
     syncGarminRunsToPlan(data);
     const coachScheduleAligned = alignCoachScheduleDays();

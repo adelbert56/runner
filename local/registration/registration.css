@@ -5420,6 +5420,66 @@ button.command-metric:focus-visible {
   min-height: 44px;
 }
 
+/* Selected workflow A: guide the next required action without replacing the existing form. */
+.form-completion-summary {
+  margin: 12px 0 0;
+  color: var(--color-warning-700);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.form-completion-summary.is-complete { color: var(--color-primary-700); }
+
+.entry-workflow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.entry-workflow-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 56px;
+  padding: 12px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-sm);
+  color: var(--color-neutral-600);
+}
+
+.entry-workflow-step > span {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.entry-workflow-step strong,
+.entry-workflow-step small { display: block; }
+.entry-workflow-step strong { color: var(--color-neutral-800); font-size: 13px; }
+.entry-workflow-step small { margin-top: 2px; font-size: 12px; }
+.entry-workflow-step.is-active { border-color: var(--color-primary-500); background: var(--color-primary-50); }
+.entry-workflow-step.is-active > span { background: var(--color-primary-700); color: var(--surface); }
+.entry-workflow-step.is-active strong { color: var(--color-primary-800); }
+.entry-workflow-step.is-complete > span { background: var(--color-primary-100); color: var(--color-primary-800); }
+.field-hint { display: block; margin-top: 4px; color: var(--color-neutral-600); font-size: 12px; line-height: 1.5; }
+
+@media (max-width: 760px) {
+  .entry-workflow { gap: 8px; }
+  .entry-workflow-step { min-height: 72px; padding: 8px; }
+  .entry-workflow-step > span { flex: 0 0 24px; }
+  .entry-workflow-step strong { font-size: 12px; }
+  .entry-workflow-step small { font-size: 11px; }
+}
+
 /* --- Top stat cards: lower, calmer, spaced 16px from what follows. --- */
 .command-metric {
   min-height: 72px;

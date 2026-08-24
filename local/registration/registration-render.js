@@ -34,7 +34,7 @@ import {
   workspaceRaceStatus,
   avatarColor,
 } from "./registration-copy.js";
-import { saveNotifyPreferences, savedSelectedRaceId, saveSelectedRaceId } from "./registration-data.js";
+import { saveNotifyPreferences, savedSelectedRaceId, saveSelectedRaceId, savePageSizePreferences } from "./registration-data.js";
 import {
   syncEntryPersonSelectFromBatch,
   selectedRaceFromDropdown,
@@ -99,8 +99,10 @@ export function renderPagination(target, kind, pagination) {
       : `<button type="button" class="page-number${n === pagination.page ? " is-current" : ""}" data-page-kind="${escapeHtml(kind)}" data-page-set="${n}"${n === pagination.page ? ' aria-current="page"' : ""}>${n}</button>`))
     .join("");
   const pageSizeControl = kind === "people"
-    ? `<label class="pagination-page-size">每頁顯示<select data-people-page-size aria-label="每頁顯示筆數"><option value="6"${state.peoplePageSize === 6 ? " selected" : ""}>6 筆</option><option value="12"${state.peoplePageSize === 12 ? " selected" : ""}>12 筆</option><option value="24"${state.peoplePageSize === 24 ? " selected" : ""}>24 筆</option></select></label>`
-    : "";
+    ? `<label class="pagination-page-size">每頁顯示<select data-people-page-size aria-label="每頁顯示筆數"><option value="10"${state.peoplePageSize === 10 ? " selected" : ""}>10 筆</option><option value="20"${state.peoplePageSize === 20 ? " selected" : ""}>20 筆</option><option value="30"${state.peoplePageSize === 30 ? " selected" : ""}>30 筆</option><option value="40"${state.peoplePageSize === 40 ? " selected" : ""}>40 筆</option><option value="50"${state.peoplePageSize === 50 ? " selected" : ""}>50 筆</option><option value="all"${state.peoplePageSize === "all" ? " selected" : ""}>全部</option></select></label>`
+    : kind === "entries"
+      ? `<label class="pagination-page-size">每頁顯示<select data-entries-page-size aria-label="每頁顯示賽事筆數"><option value="5"${state.entriesPageSize === 5 ? " selected" : ""}>5 筆</option><option value="10"${state.entriesPageSize === 10 ? " selected" : ""}>10 筆</option><option value="15"${state.entriesPageSize === 15 ? " selected" : ""}>15 筆</option><option value="20"${state.entriesPageSize === 20 ? " selected" : ""}>20 筆</option><option value="all"${state.entriesPageSize === "all" ? " selected" : ""}>全部</option></select></label>`
+      : "";
   target.innerHTML = `
     <span class="pagination-status">顯示 ${escapeHtml(pagination.start)}–${escapeHtml(pagination.end)}，共 ${escapeHtml(pagination.total)} 筆</span>
     <span class="pagination-controls">${pageSizeControl}
@@ -762,13 +764,16 @@ export function renderPeopleList() {
     return;
   }
 
+  const peoplePageSize = state.peoplePageSize === "all"
+    ? Math.max(1, sortedPeople.length)
+    : Number(state.peoplePageSize) || PEOPLE_PAGE_SIZE;
   if (state.focusPersonId) {
     const focusIndex = sortedPeople.findIndex((person) => person.id === state.focusPersonId);
     if (focusIndex >= 0) {
-      state.peoplePage = Math.floor(focusIndex / PEOPLE_PAGE_SIZE) + 1;
+      state.peoplePage = Math.floor(focusIndex / peoplePageSize) + 1;
     }
   }
-  const pagination = paginateItems(sortedPeople, state.peoplePage, state.peoplePageSize);
+  const pagination = paginateItems(sortedPeople, state.peoplePage, peoplePageSize);
   state.peoplePage = pagination.page;
 
   const pageIds = pagination.items.map((person) => person.id);
@@ -908,8 +913,10 @@ export function renderPeopleList() {
   });
   renderPagination(els.peoplePagination, "people", pagination);
   els.peoplePagination.querySelector("[data-people-page-size]")?.addEventListener("change", (event) => {
-    state.peoplePageSize = Number(event.target.value) || PEOPLE_PAGE_SIZE;
+    state.peoplePageSize = event.target.value === "all" ? "all" : Number(event.target.value) || PEOPLE_PAGE_SIZE;
     state.peoplePage = 1;
+    state.focusPersonId = "";
+    savePageSizePreferences();
     renderPeopleList();
   });
   updatePeopleBulkToolbar();
@@ -1165,13 +1172,16 @@ export function renderEntriesList() {
 
   const peopleById = new Map(state.people.map((person) => [person.id, person]));
   const groupedEntries = groupEntriesByRace(filteredEntries);
+  const entryPageSize = state.entriesPageSize === "all"
+    ? Math.max(1, groupedEntries.length)
+    : Number(state.entriesPageSize) || ENTRY_GROUP_PAGE_SIZE;
   if (state.focusEntryId) {
     const focusGroupIndex = groupedEntries.findIndex((group) => group.entries.some((entry) => entry.id === state.focusEntryId));
     if (focusGroupIndex >= 0) {
-      state.entriesPage = Math.floor(focusGroupIndex / ENTRY_GROUP_PAGE_SIZE) + 1;
+      state.entriesPage = Math.floor(focusGroupIndex / entryPageSize) + 1;
     }
   }
-  const pagination = paginateItems(groupedEntries, state.entriesPage, ENTRY_GROUP_PAGE_SIZE);
+  const pagination = paginateItems(groupedEntries, state.entriesPage, entryPageSize);
   state.entriesPage = pagination.page;
   [...els.entriesScopeTabs.querySelectorAll("[data-entry-scope]")].forEach((button) => {
     button.classList.toggle("active", button.dataset.entryScope === state.entryScope);
@@ -1293,6 +1303,13 @@ export function renderEntriesList() {
     });
   });
   renderPagination(els.entriesPagination, "entries", pagination);
+  els.entriesPagination.querySelector("[data-entries-page-size]")?.addEventListener("change", (event) => {
+    state.entriesPageSize = event.target.value === "all" ? "all" : Number(event.target.value) || ENTRY_GROUP_PAGE_SIZE;
+    state.entriesPage = 1;
+    state.focusEntryId = "";
+    savePageSizePreferences();
+    renderEntriesList();
+  });
   updateEntriesBulkToolbar();
 }
 

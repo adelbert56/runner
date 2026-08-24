@@ -895,6 +895,10 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
           ? `HR ${zones.intervalLow}–${zones.intervalHigh}`
           : '';
   card.workoutStructure = buildGarminWorkoutStructure(type, card.steps, km, [card.pace, card.hrTarget].filter(Boolean).join(' · '));
+  if (type === 'long' && km >= 16) {
+    card.fuelingNote = '補給演練：使用賽日會吃的早餐與水分策略；60 分鐘後每 35–40 分鐘小口補給，腸胃不適就停止並記錄。';
+    card.task = `${card.task}｜補給演練：使用熟悉早餐與水分策略。`;
+  }
   if (hasInjury && ['tempo', 'interval'].includes(type)) {
     card.injuryNote = '傷處（左腳等）當天有任何不穩或異樣 → 本課改輕鬆跑，當週退回上一級跑量。';
   } else if (hasInjury && type === 'long') {

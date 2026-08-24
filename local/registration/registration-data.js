@@ -7,6 +7,9 @@ import {
   NOTIFY_PREFS_STORAGE_KEY,
   NOTIFY_PRESETS_STORAGE_KEY,
   SIDEBAR_COLLAPSED_STORAGE_KEY,
+  PAGE_SIZE_PREFS_STORAGE_KEY,
+  PEOPLE_PAGE_SIZE,
+  ENTRY_GROUP_PAGE_SIZE,
   normalizeArray,
   normalizeDistanceValue,
   normalizeEntryStatusValue,
@@ -66,6 +69,27 @@ export function setSidebarCollapsed(collapsed) {
     localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, String(state.sidebarCollapsed));
   } catch {
     // Sidebar preference is non-essential and must not affect registration data.
+  }
+}
+
+export function savePageSizePreferences() {
+  try {
+    localStorage.setItem(PAGE_SIZE_PREFS_STORAGE_KEY, JSON.stringify({
+      people: state.peoplePageSize,
+      entries: state.entriesPageSize,
+    }));
+  } catch {
+    // Pagination still works if browser storage is unavailable.
+  }
+}
+
+export function restorePageSizePreferences() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(PAGE_SIZE_PREFS_STORAGE_KEY) || "{}");
+    state.peoplePageSize = [10, 20, 30, 40, 50, "all"].includes(parsed.people) ? parsed.people : PEOPLE_PAGE_SIZE;
+    state.entriesPageSize = [5, 10, 15, 20, "all"].includes(parsed.entries) ? parsed.entries : ENTRY_GROUP_PAGE_SIZE;
+  } catch {
+    // Ignore unavailable or malformed browser preferences.
   }
 }
 

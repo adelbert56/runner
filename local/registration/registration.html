@@ -245,7 +245,8 @@
                         </select>
                       </label>
                     </div>
-                    <details class="workspace-form-details">
+                    <p class="form-completion-summary" id="person-profile-progress" aria-live="polite"></p>
+                    <details class="workspace-form-details" id="person-required-details" open>
                       <summary>
                         <span>聯絡與緊急資訊 <b aria-hidden="true">*</b></span>
                         <small>首次建立時必填</small>
@@ -336,8 +337,13 @@
                     </div>
                     <span class="panel-tip">一人一賽事一筆</span>
                   </div>
-                  <form id="entry-form" class="data-form">
+              <form id="entry-form" class="data-form">
                 <input type="hidden" id="entry-id">
+                <ol class="entry-workflow" id="entry-workflow" aria-label="建立報名流程">
+                  <li class="entry-workflow-step is-active" data-entry-workflow-step="people"><span>1</span><div><strong>選擇隊員</strong><small id="entry-workflow-people-note">可多人建立</small></div></li>
+                  <li class="entry-workflow-step" data-entry-workflow-step="distance"><span>2</span><div><strong>選擇組別</strong><small id="entry-workflow-distance-note">帶入賽事後選擇</small></div></li>
+                  <li class="entry-workflow-step" data-entry-workflow-step="save"><span>3</span><div><strong>建立報名</strong><small id="entry-workflow-save-note">確認後儲存</small></div></li>
+                </ol>
                 <div class="field-grid two">
                   <label>
                     <span>賽事</span>
@@ -415,7 +421,7 @@
                     </select>
                   </label>
                   <label>
-                    <span>目前狀態</span>
+                    <span>賽事開放狀態</span>
                     <select id="entry-status">
                       <option>待報名</option>
                       <option>待確認</option>
@@ -428,6 +434,7 @@
                       <option>停賽</option>
                       <option>取消</option>
                     </select>
+                    <small class="field-hint">這是賽事本身的報名窗口；隊員進度請以下方報名與付款為準。</small>
                   </label>
                   <label class="checkbox-field">
                     <span>是否報名</span>
@@ -539,6 +546,8 @@
                   </div>
                   <div class="bulk-toolbar" id="entries-bulk-toolbar" hidden>
                     <span class="bulk-toolbar-count"></span>
+                    <button type="button" class="secondary-action" id="entries-bulk-mark-registered">標示已報名</button>
+                    <button type="button" class="secondary-action" id="entries-bulk-mark-paid">標示已繳費</button>
                     <button type="button" class="secondary-action" id="entries-bulk-status">批次更新狀態</button>
                     <button type="button" class="secondary-action danger-action" id="entries-bulk-delete">刪除已選</button>
                     <button type="button" class="ghost-action" id="entries-bulk-clear">清除選取</button>

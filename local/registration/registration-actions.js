@@ -210,6 +210,10 @@ export async function applyBulkEntryStatus() {
   if (!ids.length) {
     return;
   }
+  if (els.bulkStatusPaid.checked && !els.bulkStatusRegistered.checked) {
+    showStatus("已繳費前必須先標示為已報名，請一併勾選「是否報名」。", "error");
+    return;
+  }
   const amount = els.bulkStatusAmount.value.trim();
   const date = els.bulkStatusDate.value;
   const method = els.bulkStatusMethod.value;
@@ -230,9 +234,24 @@ export async function applyBulkEntryStatus() {
   await persistAndRender(`已更新 ${ids.length} 筆報名狀態`);
 }
 
+export async function markSelectedEntriesProgress({ paid = false } = {}) {
+  const ids = [...state.selectedEntryIds];
+  if (!ids.length) {
+    return;
+  }
+  state.entries = state.entries.map((entry) => (
+    ids.includes(entry.id)
+      ? { ...entry, isRegistered: true, ...(paid ? { isPaid: true } : {}) }
+      : entry
+  ));
+  await persistAndRender(`已將 ${ids.length} 筆紀錄標示為${paid ? "已繳費（並確認已報名）" : "已報名"}`);
+}
+
 export function resetPersonForm() {
   els.personForm.reset();
   els.personId.value = "";
+  if (els.personRequiredDetails) els.personRequiredDetails.open = true;
+  updatePersonProfileProgress();
 }
 
 export function resetEntryForm() {
@@ -243,6 +262,7 @@ export function resetEntryForm() {
   state.entryBatchPersonIds = new Set();
   setEntryDistanceOptions(null, "");
   renderEntryPersonBatch();
+  updateEntryWorkflow();
 }
 
 export function fillEntryFromRace(race) {
@@ -259,7 +279,49 @@ export function fillEntryFromRace(race) {
   els.entryStatus.value = normalizeEntryStatusValue(workspaceRaceStatus(race));
   const person = selectedPerson();
   els.entryShirtSize.value = person?.defaultShirtSize || "";
+  updateEntryWorkflow();
   showStatus(`已帶入 ${raceName(race)} 的基本資料`, "success");
+}
+
+export function updatePersonProfileProgress() {
+  if (!els.personProfileProgress) return;
+  const person = collectPersonForm();
+  const missing = missingPersonFields(person);
+  const complete = 9 - missing.length;
+  els.personProfileProgress.textContent = missing.length
+    ? `基本資料完成 ${complete}／9；尚缺：${missing.join("、")}`
+    : "基本資料已完成，可儲存人員。";
+  els.personProfileProgress.classList.toggle("is-complete", !missing.length);
+}
+
+export function revealPersonRequiredFields({ focus = false } = {}) {
+  if (els.personRequiredDetails) els.personRequiredDetails.open = true;
+  updatePersonProfileProgress();
+  if (focus) {
+    const firstInvalid = els.personForm.querySelector(":invalid");
+    firstInvalid?.focus({ preventScroll: false });
+  }
+}
+
+export function updateEntryWorkflow() {
+  if (!els.entryWorkflow) return;
+  const hasPeople = selectedEntryPersonIds().length > 0;
+  const hasDistance = Boolean(els.entryDistance.value);
+  const steps = {
+    people: hasPeople,
+    distance: hasDistance,
+    save: hasPeople && hasDistance,
+  };
+  const current = !hasPeople ? "people" : !hasDistance ? "distance" : "save";
+  els.entryWorkflow.querySelectorAll("[data-entry-workflow-step]").forEach((step) => {
+    const key = step.dataset.entryWorkflowStep;
+    step.classList.toggle("is-complete", Boolean(steps[key]) && key !== current);
+    step.classList.toggle("is-active", key === current);
+    step.setAttribute("aria-current", key === current ? "step" : "false");
+  });
+  if (els.entryWorkflowPeopleNote) els.entryWorkflowPeopleNote.textContent = hasPeople ? `已選 ${selectedEntryPersonIds().length} 位` : state.people.length ? "可多人建立" : "請先建立人員";
+  if (els.entryWorkflowDistanceNote) els.entryWorkflowDistanceNote.textContent = hasDistance ? `已選 ${els.entryDistance.value}` : "帶入賽事後選擇";
+  if (els.entryWorkflowSaveNote) els.entryWorkflowSaveNote.textContent = steps.save ? "確認後儲存" : "完成前兩步後可儲存";
 }
 
 export function editPerson(personId) {
@@ -277,6 +339,8 @@ export function editPerson(personId) {
   els.personEmergencyName.value = person.emergencyName || "";
   els.personEmergencyRelationship.value = person.emergencyRelationship || "";
   els.personEmergencyPhone.value = person.emergencyPhone || "";
+  if (els.personRequiredDetails) els.personRequiredDetails.open = false;
+  updatePersonProfileProgress();
   setWorkspaceView("people");
   els.personForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -312,6 +376,7 @@ export function editEntry(entryId) {
   els.entryTransferLastFive.value = entry.transferLastFive || "";
   els.entryNotes.value = entry.notes || "";
   renderEntryPersonBatch();
+  updateEntryWorkflow();
   setWorkspaceView("entries");
   showStatus(`正在編輯 ${entry.raceName}`, "success");
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -348,6 +413,7 @@ export function duplicateEntryToForm(entryId) {
   els.entryTransferLastFive.value = "";
   els.entryNotes.value = entry.notes || "";
   renderEntryPersonBatch();
+  updateEntryWorkflow();
   setWorkspaceView("entries", { scroll: true });
   showStatus(`已複製「${entry.raceName}」的報名內容，請選擇人員後儲存`, "success");
 }
@@ -1295,6 +1361,7 @@ export async function onPersonSubmit(event) {
   const person = collectPersonForm();
   const missing = missingPersonFields(person);
   if (missing.length) {
+    revealPersonRequiredFields({ focus: true });
     showStatus(`人員主檔缺少必填欄位：${missing.join("、")}`, "error");
     return;
   }
@@ -1328,6 +1395,11 @@ export async function onEntrySubmit(event) {
   const personIds = selectedEntryPersonIds();
   if (!draft.raceName || !personIds.length) {
     showStatus("賽事與參加人員都必須填寫。", "error");
+    return;
+  }
+  if (draft.isPaid && !draft.isRegistered) {
+    showStatus("已繳費前必須先標示為已報名，請勾選「是否報名」後再儲存。", "error");
+    els.entryIsRegistered.focus();
     return;
   }
   const nextEntries = [];
@@ -1365,6 +1437,25 @@ export function wireEvents() {
   els.raceSearch.addEventListener("input", applyRaceSearch);
   els.personPhone.addEventListener("blur", validatePhoneField);
   els.personNationalId.addEventListener("blur", validateNationalIdField);
+  [
+    els.personName,
+    els.personGender,
+    els.personShirtSize,
+    els.personPhone,
+    els.personNationalId,
+    els.personBirthday,
+    els.personEmergencyName,
+    els.personEmergencyRelationship,
+    els.personEmergencyPhone,
+  ].forEach((field) => {
+    field?.addEventListener("input", updatePersonProfileProgress);
+    field?.addEventListener("change", updatePersonProfileProgress);
+  });
+  els.personForm.addEventListener("invalid", () => revealPersonRequiredFields(), true);
+  els.entryForm.addEventListener("input", updateEntryWorkflow);
+  els.entryForm.addEventListener("change", updateEntryWorkflow);
+  updatePersonProfileProgress();
+  updateEntryWorkflow();
   els.peopleBulkToEntry?.addEventListener("click", () => {
     if (!state.selectedPersonIds.size) {
       showStatus("請先勾選人員", "error");
@@ -1405,6 +1496,12 @@ export function wireEvents() {
   });
   els.entriesBulkStatus?.addEventListener("click", () => {
     els.entriesBulkStatusPanel.hidden = !els.entriesBulkStatusPanel.hidden;
+  });
+  els.entriesBulkMarkRegistered?.addEventListener("click", () => {
+    markSelectedEntriesProgress().catch((error) => showStatus(error.message || "批次標示已報名失敗", "error"));
+  });
+  els.entriesBulkMarkPaid?.addEventListener("click", () => {
+    markSelectedEntriesProgress({ paid: true }).catch((error) => showStatus(error.message || "批次標示已繳費失敗", "error"));
   });
   els.bulkStatusApply?.addEventListener("click", () => {
     applyBulkEntryStatus().catch((error) => showStatus(error.message || "批次更新狀態失敗", "error"));
@@ -1667,6 +1764,10 @@ export function wireEvents() {
     if (race) {
       fillEntryFromRace(race);
       setWorkspaceView("entries", { scroll: true });
+      requestAnimationFrame(() => {
+        const next = state.people.length ? els.entryPersonBatch.querySelector('input[type="checkbox"]') : els.entryAddPerson;
+        next?.focus({ preventScroll: true });
+      });
     }
   });
   els.exportSelectedRacePayments.addEventListener("click", downloadSelectedRacePaymentCsv);

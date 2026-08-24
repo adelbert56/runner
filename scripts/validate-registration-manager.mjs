@@ -66,8 +66,13 @@ const appJs = await readFile(resolve(root, "site/app.js"), "utf8");
 const readme = await readFile(resolve(root, "README.md"), "utf8");
 const registrationHtml = await readFile(resolve(root, "local/registration/registration.html"), "utf8");
 const registrationJs = await readFile(resolve(root, "local/registration/registration.js"), "utf8");
+const registrationActions = await readFile(resolve(root, "local/registration/registration-actions.js"), "utf8");
+const registrationRender = await readFile(resolve(root, "local/registration/registration-render.js"), "utf8");
+const registrationData = await readFile(resolve(root, "local/registration/registration-data.js"), "utf8");
+const registrationCopy = await readFile(resolve(root, "local/registration/registration-copy.js"), "utf8");
 const registrationCss = await readFile(resolve(root, "local/registration/registration.css"), "utf8");
 const registrationSystemCss = await readFile(resolve(root, "local/registration/registration-system.css"), "utf8");
+const registrationSource = [registrationJs, registrationActions, registrationRender, registrationData, registrationCopy].join("\n");
 
 assertCheck(
   entryDuplicateKey(baseEntry) === entryDuplicateKey(sameEntryDifferentSpacing),
@@ -136,17 +141,17 @@ assertCheck(
 );
 assertCheck(
   registrationHtml.includes("/site/styles.css") &&
-    registrationJs.includes("/site/data/races.json") &&
-    registrationJs.includes("/api/registration-data"),
+    registrationSource.includes("/site/data/races.json") &&
+    registrationSource.includes("/api/registration-data"),
   "local registration manager stays outside the public site path while using local server data"
 );
 assertCheck(
   registrationHtml.includes('id="export-batch-data"') &&
     registrationHtml.includes('id="import-batch-data"') &&
     registrationHtml.includes('id="batch-import-preview"') &&
-    registrationJs.includes("downloadBatchWorkbook") &&
-    registrationJs.includes("previewBatchImport") &&
-    registrationJs.includes("applyBatchImport") &&
+    registrationSource.includes("downloadBatchWorkbook") &&
+    registrationSource.includes("previewBatchImport") &&
+    registrationSource.includes("applyBatchImport") &&
     server.includes("/api/registration-batch.xlsx") &&
     server.includes("/api/registration-batch/preview") &&
     server.includes("registrationBatchPreviews"),
@@ -155,14 +160,14 @@ assertCheck(
 assertCheck(
   registrationHtml.includes('id="race-select"') &&
     registrationHtml.includes('id="use-selected-race"') &&
-    registrationJs.includes("selectedRaceFromDropdown") &&
-    !registrationJs.includes("data-use-race"),
+    registrationSource.includes("selectedRaceFromDropdown") &&
+    !registrationSource.includes("data-use-race"),
   "registration manager uses a dropdown race picker instead of a long card list"
 );
 assertCheck(
-  registrationJs.includes("hasOpenRegistrationWindow") &&
-    registrationJs.includes("workspaceRaceStatus") &&
-    registrationJs.includes('status === "已截止" && !hasOpenRegistrationWindow(race)'),
+    registrationSource.includes("hasOpenRegistrationWindow") &&
+    registrationSource.includes("workspaceRaceStatus") &&
+    registrationSource.includes('status === "已截止" && !hasOpenRegistrationWindow(race)'),
   "registration manager keeps a future-deadline race selectable when its source status is stale"
 );
 assertCheck(
@@ -177,7 +182,7 @@ assertCheck(
     "person-emergency-relationship",
     "person-emergency-phone",
   ].every((id) => registrationHtml.includes(`id="${id}"`)) &&
-    registrationJs.includes("missingPersonFields"),
+    registrationSource.includes("missingPersonFields"),
   "registration person profile includes required identity and emergency-contact fields"
 );
 assertCheck(
@@ -196,43 +201,43 @@ assertCheck(
     registrationHtml.includes('id="entries-filter-person"') &&
     registrationHtml.includes('id="entries-filter-progress"') &&
     registrationHtml.includes('id="entries-filter-status"') &&
-    registrationJs.includes("personSearchText") &&
-    registrationJs.includes("entrySearchText") &&
-    registrationJs.includes("entryYear") &&
-    registrationJs.includes("historySummary") &&
-    registrationJs.includes("entryTimeBucket") &&
-    registrationJs.includes("paginateItems") &&
-    registrationJs.includes("renderPagination") &&
-    registrationJs.includes("renderEntriesList") &&
-    registrationJs.includes("setWorkspaceView") &&
-    registrationJs.includes("renderOverview"),
+    registrationSource.includes("personSearchText") &&
+    registrationSource.includes("entrySearchText") &&
+    registrationSource.includes("entryYear") &&
+    registrationSource.includes("historySummary") &&
+    registrationSource.includes("entryTimeBucket") &&
+    registrationSource.includes("paginateItems") &&
+    registrationSource.includes("renderPagination") &&
+    registrationSource.includes("renderEntriesList") &&
+    registrationSource.includes("setWorkspaceView") &&
+    registrationSource.includes("renderOverview"),
   "registration manager includes workspace views, overview summary, people search, entry filters, history tabs, history summary, and pagination"
 );
 assertCheck(
   registrationHtml.includes('id="entry-person-batch"') &&
     registrationHtml.includes("多人快速建立") &&
-    registrationJs.includes("renderEntryPersonBatch") &&
-    registrationJs.includes("selectedEntryPersonIds"),
+    registrationSource.includes("renderEntryPersonBatch") &&
+    registrationSource.includes("selectedEntryPersonIds"),
   "registration manager supports batch person selection for new entries"
 );
 assertCheck(
-  registrationJs.includes("maskedPhone") &&
-    registrationJs.includes("person-row") &&
-    registrationJs.includes("目前賽事") &&
-    registrationJs.includes("personBasicDataText") &&
-    registrationJs.includes("data-copy-person-details") &&
-    registrationJs.includes("data-show-person-details") &&
-    registrationJs.includes("data-view-scope=\"history\"") &&
-    registrationJs.includes("focusRenderedCard"),
+    registrationSource.includes("maskedPhone") &&
+    registrationSource.includes("person-row") &&
+    registrationSource.includes("目前賽事") &&
+    registrationSource.includes("personBasicDataText") &&
+    registrationSource.includes("data-copy-person-details") &&
+    registrationSource.includes("data-show-person-details") &&
+    registrationSource.includes("data-view-scope=\"history\"") &&
+    registrationSource.includes("focusRenderedCard"),
   "registration manager masks list contacts, shows and copies full local basic details on demand, keeps history shortcuts, and returns focus after save"
 );
 assertCheck(
   registrationHtml.includes('class="panel-subtitle"') &&
     registrationHtml.includes('id="people-add"') &&
-    registrationJs.includes("people-select-all-page") &&
-    registrationJs.includes("els.peopleAdd") &&
-    registrationJs.includes("AVATAR_PALETTE") &&
-    registrationJs.includes("page-number") &&
+    registrationSource.includes("people-select-all-page") &&
+    registrationSource.includes("els.peopleAdd") &&
+    registrationSource.includes("AVATAR_PALETTE") &&
+    registrationSource.includes("page-number") &&
     registrationCss.includes("--people-row-columns: 34px") &&
     registrationCss.includes(".person-row-pending.has-pending") &&
     registrationCss.includes(".pagination-controls"),
@@ -244,51 +249,58 @@ assertCheck(
     registrationHtml.includes('id="people-filter-gender"') &&
     registrationHtml.includes('id="people-filter-size"') &&
     registrationHtml.includes('id="people-filter-pending"') &&
-    registrationJs.includes("workspaceViewFromHash") &&
-    registrationJs.includes("data-people-page-size") &&
-    registrationJs.includes("selectAll.indeterminate") &&
+    registrationSource.includes("workspaceViewFromHash") &&
+    registrationSource.includes("data-people-page-size") &&
+    registrationSource.includes('option value="50"') &&
+    registrationSource.includes('option value="all"') &&
+    registrationSource.includes("data-entries-page-size") &&
+    registrationSource.includes("entriesPageSize") &&
+    registrationSource.includes("PAGE_SIZE_PREFS_STORAGE_KEY") &&
+    registrationSource.includes("savePageSizePreferences") &&
+    registrationSource.includes("restorePageSizePreferences") &&
+    registrationSource.includes("selectAll.indeterminate") &&
     registrationCss.includes(".overview-queue-icon") &&
     registrationCss.includes(".people-filter-popover"),
   "registration pending queue and team directory retain their B2B UI controls, direct workspace hashes, and selection state"
 );
 assertCheck(
     registrationHtml.includes('id="export-selected-race-payments"') &&
-    registrationJs.includes("downloadSelectedRacePaymentCsv") &&
-    registrationJs.includes("paymentExportRows") &&
-    registrationJs.includes("繳費狀態") &&
-    registrationJs.includes("手機末三碼") &&
-    registrationJs.includes("phoneLastThree") &&
-    registrationJs.includes("text/csv;charset=utf-8") &&
-    registrationJs.includes("\\uFEFF"),
+    registrationSource.includes("downloadSelectedRacePaymentCsv") &&
+    registrationSource.includes("paymentExportRows") &&
+    registrationSource.includes("繳費狀態") &&
+    registrationSource.includes("手機末三碼") &&
+    registrationSource.includes("phoneLastThree") &&
+    registrationSource.includes("text/csv;charset=utf-8") &&
+    registrationSource.includes("\\uFEFF"),
   "registration manager exports selected-race payment confirmation CSV"
 );
 assertCheck(
   registrationHtml.includes('id="export-selected-race-payment-html"') &&
-    registrationJs.includes("downloadSelectedRacePaymentHtml") &&
-    registrationJs.includes("buildPaymentReminderHtml") &&
-    registrationJs.includes("Registration Payment Check") &&
-    registrationJs.includes("報名繳費確認表") &&
-    registrationJs.includes("text/html;charset=utf-8") &&
-    registrationJs.includes("繳費確認截圖") &&
-    !registrationJs.includes("催款"),
+    registrationSource.includes("downloadSelectedRacePaymentHtml") &&
+    registrationSource.includes("buildPaymentReminderHtml") &&
+    registrationSource.includes("Registration Payment Check") &&
+    registrationSource.includes("報名繳費確認表") &&
+    registrationSource.includes("text/html;charset=utf-8") &&
+    registrationSource.includes("繳費確認截圖") &&
+    !registrationSource.includes("催款"),
   "registration manager exports selected-race payment confirmation screenshot HTML"
 );
 assertCheck(
-  registrationJs.includes("participant-summary-card") &&
-    registrationJs.includes("preview-status-filter") &&
-    registrationJs.includes("paymentAmountPresentation") &&
-    registrationJs.includes("正在讀取報名與賽事資料") &&
-    registrationJs.includes("資料讀取失敗：") &&
-    registrationJs.includes("@media (max-width: 767px)") &&
-    registrationJs.includes("safe-area-inset-bottom"),
+  registrationSource.includes("participant-summary-card") &&
+    registrationSource.includes("preview-status-filter") &&
+    registrationSource.includes("paymentAmountPresentation") &&
+    registrationSource.includes("正在讀取報名與賽事資料") &&
+    registrationSource.includes("資料讀取失敗：") &&
+    registrationSource.includes("@media (max-width: 767px)") &&
+    registrationSource.includes("safe-area-inset-bottom"),
   "notification preview keeps responsive participant, status, and amount presentation"
 );
 assertCheck(
-  registrationJs.includes("SELECTED_RACE_STORAGE_KEY") &&
-    registrationJs.includes("savedSelectedRaceId") &&
-    registrationJs.includes("saveSelectedRaceId") &&
-    registrationJs.includes("localStorage") &&
-    registrationJs.includes("els.raceSelect.value || savedSelectedRaceId()"),
+  registrationSource.includes("SELECTED_RACE_STORAGE_KEY") &&
+    registrationSource.includes("savedSelectedRaceId") &&
+    registrationSource.includes("saveSelectedRaceId") &&
+    registrationSource.includes("localStorage") &&
+    registrationSource.includes("els.raceSelect.value || savedSelectedRaceId()"),
   "registration manager restores the selected race after page refresh"
 );
 assertCheck(
@@ -296,9 +308,9 @@ assertCheck(
     registrationHtml.includes("data-open-pending") &&
     registrationHtml.includes("data-open-unpaid") &&
     !registrationHtml.includes("sidebar-group-preview") &&
-    registrationJs.includes("openEntriesForWork") &&
-    registrationJs.includes("openNotifyForEntry") &&
-    registrationJs.includes("openUnpaidNotifications"),
+    registrationSource.includes("openEntriesForWork") &&
+    registrationSource.includes("openNotifyForEntry") &&
+    registrationSource.includes("openUnpaidNotifications"),
   "registration workbench routes pending tasks into entries and notifications without duplicate race context"
 );
 assertCheck(
@@ -311,12 +323,32 @@ assertCheck(
   "registration workspace layers optional form fields and keeps notification filters integrated horizontally"
 );
 assertCheck(
+  registrationHtml.includes('id="person-profile-progress"') &&
+    registrationHtml.includes('id="person-required-details"') &&
+    registrationHtml.includes('id="entry-workflow"') &&
+    registrationSource.includes("updatePersonProfileProgress") &&
+    registrationSource.includes("revealPersonRequiredFields") &&
+    registrationSource.includes("updateEntryWorkflow") &&
+    registrationSource.includes("draft.isPaid && !draft.isRegistered") &&
+    registrationSource.includes("els.bulkStatusPaid.checked && !els.bulkStatusRegistered.checked"),
+  "registration workflow guides required profile fields and rejects contradictory payment states"
+);
+assertCheck(
+  registrationHtml.includes('id="entries-bulk-mark-registered"') &&
+    registrationHtml.includes('id="entries-bulk-mark-paid"') &&
+    registrationJs.includes("entriesBulkMarkRegistered") &&
+    registrationActions.includes("markSelectedEntriesProgress") &&
+    registrationActions.includes("isRegistered: true") &&
+    registrationActions.includes("isPaid: true"),
+  "registration manager provides safe one-click bulk registration and payment progress actions"
+);
+assertCheck(
   registrationHtml.includes('registration-system.css') &&
     registrationHtml.includes('role="tablist"') &&
     registrationHtml.includes('role="tab"') &&
     registrationHtml.includes('role="tabpanel"') &&
-    registrationJs.includes("aria-selected") &&
-    registrationJs.includes("ArrowRight") &&
+    registrationSource.includes("aria-selected") &&
+    registrationSource.includes("ArrowRight") &&
     registrationSystemCss.includes("Registration workspace system") &&
     registrationSystemCss.includes("--rm-primary"),
   "registration workspace keeps the shared UI system and keyboard-accessible tab semantics"
