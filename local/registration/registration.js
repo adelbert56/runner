@@ -1,4 +1,4 @@
-import { savedWorkspaceView, savedSidebarCollapsed, restoreNotifyPreferences, loadRaces, loadPrivateData } from "./registration-data.js";
+import { savedWorkspaceView, savedSidebarCollapsed, setSidebarCollapsed, restoreNotifyPreferences, loadRaces, loadPrivateData } from "./registration-data.js";
 import { renderAll } from "./registration-render.js";
 import { workspaceViewFromHash, wireEvents, resetEntryForm, showStatus, showNotifyStatus } from "./registration-actions.js";
 
