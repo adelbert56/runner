@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T08:37:14.747Z",
+  "generated_at": "2026-08-25T10:03:42.186Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-08-hoka-clifton-11-review-by-ciaoantsai",
@@ -442,6 +442,26 @@
       ]
     },
     {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114571-subtitle-e3-80-90-e5-93-81-e",
+      "type": "news",
+      "title": "【品牌動態】SATISFY三度進駐霞慕尼 UTMB 期間限定店越野新裝、聯名鞋款、社群晨跑一次到位！",
+      "date": "2026-08-25",
+      "date_source": "source",
+      "article_date": "2026-08-25",
+      "first_seen_at": "2026-08-25",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "法國跑步品牌 SATISFY 連續第三年回歸阿爾卑斯山，於 UTMB（環勃朗峰超級越野賽） 賽事期間，在霞慕尼（Chamonix）開設「Off-Road Supply」期間限定店。活動將從 8 月 24 日至 29 日，每日上午 10 點至。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114571&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91SATISFY%E4%B8%89%E5%BA%A6%E9%80%B2%E9%A7%90%E9%9C%9E%E6%85%95%E5%B0%BC%20UTMB%20%E6%9C%9F%E9%96%93%E9%99%90%E5%AE%9A%E5%BA%97%E8%B6%8A%E9%87%8E%E6%96%B0%E8%A3%9D%E3%80%81%E8%81%AF%E5%90%8D%E9%9E%8B%E6%AC%BE%E3%80%81%E7%A4%BE%E7%BE%A4%E6%99%A8%E8%B7%91%E4%B8%80%E6%AC%A1%E5%88%B0%E4%BD%8D%EF%BC%81&label=all",
+      "score": 9,
+      "source_origin": "candidate",
+      "published_at": "2026-08-25",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
       "id": "news-www-don1don-com-archives-241008-2026-hoka-utmb-e7-92-b0-e5-8b-83-e6-9c-97-e5-b3-",
       "type": "news",
       "title": "2026 HOKA UTMB 環勃朗峰越野賽菁英 & 臺灣選手參賽名單",
@@ -539,26 +559,6 @@
       "publish_status": "published",
       "source_aliases": [
         "動一動"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114560-subtitle-e3-80-90-e8-b3-bd-e",
-      "type": "news",
-      "title": "【賽事】世界紀錄｜Kejelcha 布宜諾斯艾利斯半馬狂飆 56:51！重奪半馬世界紀錄！",
-      "date": "2026-08-24",
-      "date_source": "source",
-      "article_date": "2026-08-24",
-      "first_seen_at": "2026-08-25",
-      "source": "運動筆記",
-      "category": "賽事資訊",
-      "summary": "衣索比亞名將 Yomif Kejelcha 再次改寫半馬歷史！週末，於阿根廷布宜諾斯艾利斯城市半程馬拉松（Media Marat&oacute;n Ciudad de Buenos Aires）以驚人的 56 分 51 秒衝過終點線，將原本.",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114560&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%91%E4%B8%96%E7%95%8C%E7%B4%80%E9%8C%84%EF%BD%9CKejelcha%20%E5%B8%83%E5%AE%9C%E8%AB%BE%E6%96%AF%E8%89%BE%E5%88%A9%E6%96%AF%E5%8D%8A%E9%A6%AC%E7%8B%82%E9%A3%86%2056:51%EF%BC%81%E9%87%8D%E5%A5%AA%E5%8D%8A%E9%A6%AC%E4%B8%96%E7%95%8C%E7%B4%80%E9%8C%84%EF%BC%81&label=all",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-08-25",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
@@ -1096,7 +1096,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-25",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
     },
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114405-subtitle-e3-80-90-e7-b7-a8-e",
@@ -1113,7 +1116,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-25",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
     },
     {
       "id": "news-kenlu-net-2026-05-hoka-mach-7-review-by-grace-ho",
@@ -1130,7 +1136,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-25",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
@@ -1187,7 +1196,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-25",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "Tom's Guide Running"
+      ]
     },
     {
       "id": "shoe-kenlu-net-2026-08-asics-gt-2000-15-review",
