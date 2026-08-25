@@ -12,6 +12,7 @@ function automaticActivityAssignment(run) {
       actualKm: run.km,
       qualityEligible: Boolean(run.qualityEligible),
       qualityKm: Number(run.qualityKm) || 0,
+      laps: run.laps || [],
       source: 'garmin'
     });
   });

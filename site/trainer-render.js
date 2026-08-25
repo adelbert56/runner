@@ -281,7 +281,40 @@ function plannedCompletionTargetKm(day) {
   return Number(day?.km) || 0;
 }
 
+function plannedTimedQualitySeconds(day) {
+  const collect = (steps) => (steps || []).reduce((total, step) => {
+    const ownSeconds = step?.kind === 'interval' && step?.end?.type === 'time'
+      ? Math.max(0, Number(step.end.value) || 0)
+      : 0;
+    return total + ownSeconds + collect(step?.children);
+  }, 0);
+  return collect(day?.steps);
+}
+
+function completedTimedQualitySeconds(activity) {
+  return (activity?.laps || []).reduce((total, lap) => {
+    const intensity = String(lap?.intensity || '').toUpperCase();
+    return ['ACTIVE', 'MAIN', 'INTERVAL'].includes(intensity)
+      ? total + Math.max(0, Number(lap?.duration_min) || 0) * 60
+      : total;
+  }, 0);
+}
+
+function hasRecoveredGarminStepLabels(day, activity) {
+  if (!['tempo', 'interval'].includes(day?.type) || !activity?.qualityEligible) return false;
+  const prescribedSeconds = plannedTimedQualitySeconds(day);
+  const completedSeconds = completedTimedQualitySeconds(activity);
+  const targetKm = plannedCompletionTargetKm(day);
+  const minimumVolumeKm = targetKm * (garminCompletionPercent() / 100);
+  // Garmin preserves the selected step label. Credit later labels only if the
+  // prescribed timed quality work and the usual whole-session volume are both present.
+  return prescribedSeconds > 0
+    && completedSeconds >= prescribedSeconds * 0.9
+    && Number(activity?.actualKm) >= minimumVolumeKm;
+}
+
 function activityCompletionKm(day, activity) {
+  if (hasRecoveredGarminStepLabels(day, activity)) return plannedCompletionTargetKm(day);
   if (['tempo', 'interval'].includes(day?.type) && activity?.qualityEligible) return Number(activity.qualityKm) || 0;
   return Number(activity?.actualKm) || 0;
 }
@@ -325,6 +358,7 @@ function trainingCompletionSummary(plan = appData.plan || [], today = todayStr()
     actualKm: Number(run.km) || 0,
     qualityEligible: Boolean(run.qualityEligible),
     qualityKm: Number(run.qualityKm) || 0,
+    laps: run.laps || [],
     actualTimeMins: Math.round(paceToMinutes(run.pace) * (Number(run.km) || 0)),
     source: 'garmin'
   }));
@@ -550,7 +584,9 @@ function postRunVerdict(run, planned = plannedSessionFor(run)) {
     return { level: 'neutral', label: '額外跑步已保留', summary: '這趟已記入長期跑量，但不會被誤算為正式課程完成，也不會因此加量。', next: '下一堂仍照正式課表執行。' };
   }
   const targetKm = plannedCompletionTargetKm(planned);
-  const actualKm = activityCompletionKm(planned, { actualKm: run.km, qualityEligible: run.qualityEligible, qualityKm: run.qualityKm });
+  const activity = { actualKm: run.km, qualityEligible: run.qualityEligible, qualityKm: run.qualityKm, laps: run.laps || [] };
+  const recoveredStepLabels = hasRecoveredGarminStepLabels(planned, activity);
+  const actualKm = activityCompletionKm(planned, activity);
   const completionPct = targetKm ? Math.round((actualKm / targetKm) * 100) : null;
   if (completionPct !== null && completionPct < garminCompletionPercent()) {
     return { level: 'caution', label: '部分完成', summary: `主課完成 ${completionPct}%（${actualKm.toFixed(1)} / ${targetKm.toFixed(1)} km），我先保留原課表，缺口不會硬塞到明天。`, next: '先把身體養回來；想補跑的話，我只在安全的 3 天內幫你認列。' };
@@ -560,7 +596,9 @@ function postRunVerdict(run, planned = plannedSessionFor(run)) {
     return { level: 'good', label: '補跑已認列', summary: `我已經把這趟安全地補回你原本漏掉的那堂課，不會重複算跑量，也不會再排一次。${milestoneNote ? ` ${milestoneNote}。` : ''}`, next: '回到原本排程，下一堂照表執行。' };
   }
   const historyNote = historyComparisonNote(run, planned);
-  const baseSummary = targetKm ? `主課完成 ${completionPct ?? '—'}%，已與當日課表自動對應。` : '已與當日課表自動對應；課表沒有可量化主課距離，因此只保留完成紀錄。';
+  const baseSummary = recoveredStepLabels
+    ? `節奏段已完成，且全程 ${Number(run.km).toFixed(1)} km 已達課表跑量；Garmin 誤跳後標成收操的後段已補正認列。`
+    : targetKm ? `主課完成 ${completionPct ?? '—'}%，已與當日課表自動對應。` : '已與當日課表自動對應；課表沒有可量化主課距離，因此只保留完成紀錄。';
   const summary = `${baseSummary}${historyNote ? `${historyNote}。` : ''}${milestoneNote ? ` ${milestoneNote}。` : ''}`;
   return { level: 'good', label: '正式課程已完成', summary, next: '單次不會加量；若本週同課型持續比課表快、心率也還在安全範圍，我會自動幫你重算下一週還沒跑的配速處方。' };
 }
@@ -1225,18 +1263,26 @@ function renderLatestTrainingReport(runs) {
   const assignment = activityAssignmentFor(run);
   const planned = plannedSessionFor(run);
   const mainScope = run.qualityEligible;
+  const recoveredStepLabels = planned && hasRecoveredGarminStepLabels(planned, {
+    actualKm: run.km,
+    qualityEligible: run.qualityEligible,
+    qualityKm: run.qualityKm,
+    laps: run.laps || []
+  });
   const courseKm = mainScope ? run.qualityKm : run.km;
   const coursePace = mainScope ? run.qualityPace : run.fullPace;
   const courseHr = mainScope ? run.qualityHr : run.hr;
   const courseCadence = mainScope ? run.qualityCadence || run.cadence : run.cadence;
   const laps = run.laps.filter((lap) => Number(lap?.distance_km) > 0);
-  const status = mainScope ? '已辨識主課' : '全程紀錄';
+  const status = recoveredStepLabels ? '已補正步驟標籤' : mainScope ? '已辨識主課' : '全程紀錄';
   const statusClass = mainScope ? '' : ' neutral';
   const plannedType = planned ? trainingTypeLabel(planned.type, planned.focus) : '未找到同日課表';
   const goal = planned ? trainingTaskTitle(planned) : '這筆實跑未對應到正式課表';
   const target = [planned?.pace, planned?.hrTarget].filter(Boolean).join(' · ') || '以教練指示與舒適度完成';
-  const scopeText = mainScope ? `主課 ${courseKm?.toFixed(1)} km` : `全程 ${run.km.toFixed(1)} km`;
-  const evidence = mainScope
+  const scopeText = recoveredStepLabels ? `完整課程 ${plannedCompletionTargetKm(planned).toFixed(1)} km` : mainScope ? `主課 ${courseKm?.toFixed(1)} km` : `全程 ${run.km.toFixed(1)} km`;
+  const evidence = recoveredStepLabels
+    ? 'Garmin 保留原始主課、恢復與收操標籤；因時間型節奏段完整且全程跑量達標，誤跳後的後段僅作標籤補正，不會影響配速與心率品質判讀。'
+    : mainScope
     ? '品質判讀只使用 Garmin 明確標記的主課；熱身、恢復與收操仍保留在總負荷，不會拖慢主課成績。'
     : '本次僅用全程呈現，尚不會以此作為主課配速／心率的課表升降依據。';
   const intervalBlock = mainScope && isStructuredIntervalBlock(laps);
@@ -2131,6 +2177,7 @@ function earlyCoachPlanningEligibility() {
     actualKm: Number(run.km) || 0,
     qualityEligible: Boolean(run.qualityEligible),
     qualityKm: Number(run.qualityKm) || 0,
+    laps: run.laps || [],
     source: 'garmin'
   }]));
   const allPlanDays = (appData.plan || []).flatMap((planWeek) => planWeek.days || []);

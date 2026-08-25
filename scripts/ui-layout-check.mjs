@@ -568,6 +568,36 @@ async function assertTrainerReport(page, viewportName) {
   if (intervalCompletionCredit.targetKm !== 1.6 || intervalCompletionCredit.partial || !intervalCompletionCredit.complete) {
     throw new Error(`${viewportName}/trainer-interval-credit: weekly completion must use the same quality-work target ${JSON.stringify(intervalCompletionCredit)}`);
   }
+  const recoveredStepLabelCredit = await page.evaluate(() => {
+    const day = {
+      type: 'tempo',
+      km: 8,
+      steps: [
+        { kind: 'interval', end: { type: 'time', value: 300 } },
+        { kind: 'interval', end: { type: 'time', value: 600 } },
+        { kind: 'interval', end: { type: 'time', value: 300 } },
+        { kind: 'recovery', end: { type: 'distance', value: 5000 } }
+      ]
+    };
+    const activity = {
+      source: 'garmin', actualKm: 8.91, qualityEligible: true, qualityKm: 3.06,
+      laps: [
+        { intensity: 'ACTIVE', duration_min: 5 }, { intensity: 'ACTIVE', duration_min: 6.47 },
+        { intensity: 'ACTIVE', duration_min: 3.53 }, { intensity: 'ACTIVE', duration_min: 5 },
+        { intensity: 'COOLDOWN', duration_min: 23.73 }
+      ]
+    };
+    const incomplete = { ...activity, actualKm: 4.5, laps: activity.laps.slice(0, 2) };
+    return {
+      repaired: hasRecoveredGarminStepLabels(day, activity),
+      completed: activityCompletesDay(day, activity),
+      creditedKm: activityCompletionKm(day, activity),
+      incompleteStillRejected: !hasRecoveredGarminStepLabels(day, incomplete) && !activityCompletesDay(day, incomplete)
+    };
+  });
+  if (!recoveredStepLabelCredit.repaired || !recoveredStepLabelCredit.completed || recoveredStepLabelCredit.creditedKm !== 8 || !recoveredStepLabelCredit.incompleteStillRejected) {
+    throw new Error(`${viewportName}/trainer-step-label-recovery: Garmin step-label correction must require completed timed quality and normal volume ${JSON.stringify(recoveredStepLabelCredit)}`);
+  }
   const intervalWeeklyGate = await page.evaluate(() => {
     const previousData = cloneTrainingValue(appData);
     const previousWeek = currentWeek;
@@ -1553,6 +1583,50 @@ async function assertTrainerReport(page, viewportName) {
   if (!Object.values(planningScenarios).every(Boolean)) {
     throw new Error(`${viewportName}/trainer-planning-scenarios: coach planning acceptance failed ${JSON.stringify(planningScenarios)}`);
   }
+  await page.evaluate(() => {
+    const day = {
+      dateStr: '2026-08-25', dow: 2, type: 'tempo', focus: 'tempo', task: '節奏跑', km: 8,
+      steps: [
+        { kind: 'interval', title: '節奏前段', end: { type: 'time', value: 300 } },
+        { kind: 'interval', title: '節奏中段', end: { type: 'time', value: 600 } },
+        { kind: 'interval', title: '節奏末段', end: { type: 'time', value: 300 } },
+        { kind: 'recovery', title: 'E 跑恢復段', end: { type: 'distance', value: 5000 } }
+      ]
+    };
+    appData.plan = [{ weekNum: 1, days: [day] }];
+    const recoveredReview = {
+      analyticsRuns: [{
+        activityId: 825001, date: day.dateStr, name: '節奏跑', km: 8.91, durationMin: 66,
+        pace: '7:24', hr: 144, cadence: 166, qualityEligible: true, qualityKm: 3.06,
+        qualityPace: '6:33', qualityHr: 150, qualityCadence: 178,
+        laps: [
+          { intensity: 'ACTIVE', distance_km: 0.735, duration_min: 5, pace_per_km: '6:48' },
+          { intensity: 'ACTIVE', distance_km: 1, duration_min: 6.47, pace_per_km: '6:28' },
+          { intensity: 'ACTIVE', distance_km: 0.543, duration_min: 3.53, pace_per_km: '6:30' },
+          { intensity: 'ACTIVE', distance_km: 0.779, duration_min: 5, pace_per_km: '6:25' },
+          { intensity: 'COOLDOWN', distance_km: 4.263, duration_min: 23.73, pace_per_km: '7:16' }
+        ]
+      }],
+      autopilot: { metrics: { comparisonFamily: 'steady', qualityComparisonSampleSize: 0 } }
+    };
+    eval(`coachReviewData = ${JSON.stringify(recoveredReview)}`);
+    eval('selectedTrainingReportActivityId = 825001; selectedTrainingReportLapCategory = null;');
+    switchPlanTab('progress');
+    switchProgressPanel('analysis');
+    const host = document.getElementById('progress-panel-analysis') || document.getElementById('training-analysis-content');
+    if (host) host.innerHTML = renderTrainingAnalysis();
+  });
+  await page.waitForSelector('.session-report-status', { state: 'attached', timeout: 5000 });
+  const recoveredReport = await page.locator('.session-report').evaluate((element) => ({
+    status: element.querySelector('.session-report-status')?.textContent.trim(),
+    verdict: element.querySelector('.session-report-summary')?.textContent.replace(/\s+/g, ' ').trim(),
+    scope: element.querySelector('.session-report-metric strong')?.textContent.trim(),
+  }));
+  if (recoveredReport.status !== '已補正步驟標籤' || !recoveredReport.verdict.includes('已補正認列') || recoveredReport.scope !== '完整課程 8.0 km') {
+    throw new Error(`${viewportName}/trainer-step-label-recovery-report: corrected report copy is missing ${JSON.stringify(recoveredReport)}`);
+  }
+  await assertNoHorizontalOverflow(page, `${viewportName}/trainer-step-label-recovery-report`);
+  await page.screenshot({ path: resolve(screenshotDir, `${viewportName}-trainer-step-label-recovery.png`), fullPage: true });
   console.log(`OK ${viewportName}/trainer report layout`);
 }
 
