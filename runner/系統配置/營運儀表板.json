@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-24T02:13:48.692Z",
-  "basis_date": "2026-08-24",
+  "generated_at": "2026-08-25T02:09:18.892Z",
+  "basis_date": "2026-08-25",
   "races": {
     "total": 64,
     "follow_up_count": 21,
@@ -21,9 +21,8 @@
       "歷史": 9,
       "停辦": 2,
       "已截止": 21,
-      "報名中": 26,
+      "報名中": 27,
       "報名時間未定": 4,
-      "尚未開報": 1,
       "待確認": 1
     }
   },
@@ -31,30 +30,30 @@
     "shoe_cards": 60,
     "news_cards": 60,
     "newest_shoe_date": "2026-08-22",
-    "newest_news_date": "2026-08-24",
+    "newest_news_date": "2026-08-25",
     "published_count": 120,
     "candidate_count": 144,
     "editorial_count": 4,
     "candidate_by_category": {
-      "跑鞋新品": 56,
-      "跑步新聞": 65,
-      "入門知識": 12,
+      "跑鞋新品": 58,
+      "跑步新聞": 62,
+      "入門知識": 10,
+      "訓練": 10,
       "補給": 3,
-      "訓練": 7,
       "恢復": 1
     },
-    "source_stable_count": 12,
-    "source_watch_count": 0,
+    "source_stable_count": 11,
+    "source_watch_count": 1,
     "source_weak_count": 0,
     "source_health": [
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "運動筆記",
         "url": "https://running.biji.co/",
         "source_type": "跑步新聞 / 跑鞋專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 7,
+        "candidate_count": 8,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -69,13 +68,13 @@
         ]
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "動一動",
         "url": "https://www.don1don.com/",
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 25,
+        "candidate_count": 23,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -84,7 +83,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "Bounce",
         "url": "https://bouncin.net/",
         "source_type": "跑鞋新品",
@@ -99,7 +98,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "Runner's World",
         "url": "https://www.runnersworld.com/",
         "source_type": "英文跑鞋評測 / 訓練知識",
@@ -114,7 +113,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "Tom's Guide Running",
         "url": "https://www.tomsguide.com/",
         "source_type": "英文跑鞋評測 / 鞋款整理",
@@ -135,22 +134,22 @@
         ]
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "T3 Running",
         "url": "https://www.t3.com/",
         "source_type": "英文跑鞋新品 / 發表資訊",
-        "status": "穩定",
-        "ok": true,
-        "candidate_count": 1,
-        "consecutive_failures": 0,
+        "status": "可用需觀察",
+        "ok": false,
+        "candidate_count": 0,
+        "consecutive_failures": 1,
         "base_priority": 2,
         "effective_priority": 3,
-        "error_kind": "",
-        "error": "",
+        "error_kind": "unknown",
+        "error": "No crawlable entry URLs for T3 Running",
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "Women's Health Taiwan",
         "url": "https://www.womenshealthmag.com/tw/fitness/",
         "source_type": "跑鞋選購 / 健康訓練",
@@ -165,7 +164,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "HK01 跑步",
         "url": "https://global.hk01.com/tag/14679",
         "source_type": "跑步裝備 / 跑步知識",
@@ -180,13 +179,13 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "KENLU",
         "url": "https://kenlu.net/",
         "source_type": "跑鞋評測 / 裝備情報",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 70,
+        "candidate_count": 65,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -195,7 +194,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "KENLU 越野",
         "url": "https://kenlu.net/tag/trail-run/",
         "source_type": "越野跑鞋 / 越野訓練",
@@ -210,7 +209,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "運動科學網",
         "url": "https://www.sportscience.com.tw/",
         "source_type": "訓練知識 / 運動科學",
@@ -225,7 +224,7 @@
         "error_details": []
       },
       {
-        "checked_at": "2026-08-24",
+        "checked_at": "2026-08-25",
         "source": "IR SPORTS",
         "url": "https://irsports.com.tw/",
         "source_type": "路跑活動 / 訓練資訊",
