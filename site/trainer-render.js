@@ -282,13 +282,25 @@ function plannedCompletionTargetKm(day) {
 }
 
 function plannedTimedQualitySeconds(day) {
+  // 舊版課表卡的 steps 只有顯示文案；實際上傳 Garmin 的細分節奏段在
+  // workoutStructure。認列時必須優先用正式結構，否則 5/10/5 分鐘會被誤判為
+  // 沒有可驗證的時間主課。
+  const savedStructure = Array.isArray(day?.workoutStructure) && day.workoutStructure.length
+    ? day.workoutStructure
+    : null;
+  const structuredSteps = Array.isArray(day?.steps) && day.steps.some((step) => step?.kind && step?.end)
+    ? day.steps
+    : null;
+  const sourceSteps = savedStructure || structuredSteps || (typeof workoutStructureForDay === 'function'
+    ? workoutStructureForDay(day)
+    : day?.steps);
   const collect = (steps) => (steps || []).reduce((total, step) => {
     const ownSeconds = step?.kind === 'interval' && step?.end?.type === 'time'
       ? Math.max(0, Number(step.end.value) || 0)
       : 0;
     return total + ownSeconds + collect(step?.children);
   }, 0);
-  return collect(day?.steps);
+  return collect(sourceSteps);
 }
 
 function completedTimedQualitySeconds(activity) {

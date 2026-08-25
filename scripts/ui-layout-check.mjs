@@ -588,14 +588,20 @@ async function assertTrainerReport(page, viewportName) {
       ]
     };
     const incomplete = { ...activity, actualKm: 4.5, laps: activity.laps.slice(0, 2) };
+    const legacyCardDay = {
+      type: 'tempo', km: 8, coachPlan: true,
+      steps: [{ title: '主課', dose: '3.1 km', detail: '舊版卡片只保留摘要。' }],
+      workoutStructure: day.steps
+    };
     return {
       repaired: hasRecoveredGarminStepLabels(day, activity),
+      repairedLegacyCard: hasRecoveredGarminStepLabels(legacyCardDay, activity),
       completed: activityCompletesDay(day, activity),
       creditedKm: activityCompletionKm(day, activity),
       incompleteStillRejected: !hasRecoveredGarminStepLabels(day, incomplete) && !activityCompletesDay(day, incomplete)
     };
   });
-  if (!recoveredStepLabelCredit.repaired || !recoveredStepLabelCredit.completed || recoveredStepLabelCredit.creditedKm !== 8 || !recoveredStepLabelCredit.incompleteStillRejected) {
+  if (!recoveredStepLabelCredit.repaired || !recoveredStepLabelCredit.repairedLegacyCard || !recoveredStepLabelCredit.completed || recoveredStepLabelCredit.creditedKm !== 8 || !recoveredStepLabelCredit.incompleteStillRejected) {
     throw new Error(`${viewportName}/trainer-step-label-recovery: Garmin step-label correction must require completed timed quality and normal volume ${JSON.stringify(recoveredStepLabelCredit)}`);
   }
   const intervalWeeklyGate = await page.evaluate(() => {
