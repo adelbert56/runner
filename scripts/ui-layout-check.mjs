@@ -1627,8 +1627,10 @@ async function assertTrainerReport(page, viewportName) {
     status: element.querySelector('.session-report-status')?.textContent.trim(),
     verdict: element.querySelector('.session-report-summary')?.textContent.replace(/\s+/g, ' ').trim(),
     scope: element.querySelector('.session-report-metric strong')?.textContent.trim(),
+    metrics: [...element.querySelectorAll('.session-report-metric')].map((metric) => metric.textContent.replace(/\s+/g, ' ').trim()),
+    secondary: element.querySelector('.session-secondary-metrics')?.textContent.replace(/\s+/g, ' ').trim(),
   }));
-  if (recoveredReport.status !== '已補正步驟標籤' || !recoveredReport.verdict.includes('已補正認列') || recoveredReport.scope !== '完整課程 8.0 km') {
+  if (recoveredReport.status !== '已補正步驟標籤' || !recoveredReport.verdict.includes('已補正認列') || recoveredReport.scope !== '完整課程 8.0 km' || !recoveredReport.metrics.includes('全程配速7:24/km') || !recoveredReport.metrics.includes('全程平均心率HR 144') || !recoveredReport.secondary.includes('全程平均步頻 166 spm') || !recoveredReport.secondary.includes('節奏段品質 6:33/km · HR 150 · 178 spm')) {
     throw new Error(`${viewportName}/trainer-step-label-recovery-report: corrected report copy is missing ${JSON.stringify(recoveredReport)}`);
   }
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-step-label-recovery-report`);
