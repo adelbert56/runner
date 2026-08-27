@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Runner Garmin 與教練週報執行架構",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "sync-path",
+        "label": "同步主路徑",
+        "focus": ["runner", "local-server", "sync-api", "sync-script", "garmin", "review-builder", "review-store"],
+        "note": "本機操作只啟動同步；它不會直接產生外部 AI 教練決策。"
+      },
+      {
+        "id": "review-consumption",
+        "label": "週報消費",
+        "focus": ["review-store", "trainer", "browser"],
+        "note": "Trainer 讀取加密週報與 Garmin 證據後，才呈現教練結論。"
+      }
+    ]
+  },
+  "components": [
+    { "id": "runner", "type": "external", "label": "跑者", "sublabel": "瀏覽器操作", "pos": [40, 300], "size": [132, 64] },
+    { "id": "browser", "type": "frontend", "label": "Trainer UI", "sublabel": "site/trainer-*.js", "pos": [224, 300], "size": [152, 64] },
+    { "id": "local-server", "type": "backend", "label": "本機 Runner 服務", "sublabel": "site/server.mjs", "pos": [428, 300], "size": [156, 64] },
+    { "id": "sync-api", "type": "backend", "label": "活動同步 API", "sublabel": "/api/garmin-activity-sync", "pos": [632, 300], "size": [180, 64] },
+    { "id": "sync-script", "type": "backend", "label": "同步編排", "sublabel": "sync-garmin.ps1", "pos": [856, 300], "size": [152, 64] },
+    { "id": "garmin", "type": "external", "label": "Garmin 資料", "sublabel": "活動與結構化課表", "pos": [856, 112], "size": [152, 64] },
+    { "id": "review-builder", "type": "backend", "label": "週報產生器", "sublabel": "build-training-review.mjs", "pos": [856, 488], "size": [188, 64] },
+    { "id": "review-store", "type": "database", "label": "加密週報資料", "sublabel": "training-review.enc.json", "pos": [628, 488], "size": [184, 64] },
+    { "id": "trainer", "type": "frontend", "label": "教練決策層", "sublabel": "完成判定／週檢測／處方", "pos": [412, 488], "size": [172, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Runner 本機工作區", "wraps": ["browser", "local-server", "sync-api", "sync-script", "review-builder", "review-store", "trainer"] },
+    { "kind": "security-group", "label": "外部資料邊界", "wraps": ["garmin"] }
+  ],
+  "connections": [
+    { "id": "runner-browser", "from": "runner", "to": "browser", "label": "操作", "variant": "emphasis" },
+    { "id": "browser-server", "from": "browser", "to": "local-server", "label": "本機 HTTP" },
+    { "id": "server-sync", "from": "local-server", "to": "sync-api", "label": "啟動／查詢", "labelDy": 56 },
+    { "id": "sync-script-call", "from": "sync-api", "to": "sync-script", "label": "執行同步", "variant": "emphasis", "labelDy": 56 },
+    { "id": "garmin-fetch", "from": "sync-script", "to": "garmin", "label": "讀取活動", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "id": "build-review", "from": "sync-script", "to": "review-builder", "label": "刷新週報", "fromSide": "bottom", "toSide": "top" },
+    { "id": "save-review", "from": "review-builder", "to": "review-store", "label": "加密寫入", "labelDy": 56 },
+    { "id": "coach-read", "from": "review-store", "to": "trainer", "label": "載入證據", "labelDy": 56 },
+    { "id": "render-coach", "from": "trainer", "to": "browser", "label": "呈現判定", "fromSide": "top", "toSide": "bottom" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "同步責任", "items": ["同步 API 只負責啟動與輪詢本機任務", "同步腳本拉取 Garmin 並觸發週報刷新"] },
+    { "dot": "violet", "title": "教練責任", "items": ["Trainer 以週報與活動證據呈現決策", "本圖不把本機同步誤稱為外部 AI 呼叫"] },
+    { "dot": "rose", "title": "資料邊界", "items": ["Garmin 是外部資料來源", "週報落地為加密資料後才供本機 UI 使用"] }
+  ]
+}

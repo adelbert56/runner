@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Runner 教練週保護生命週期",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "formal-path", "label": "正式處方", "focus": ["pending", "early", "checkin", "formal", "archived"], "note": "正式處方是未來週課的單一寫入者。" },
+      { "id": "protection-path", "label": "保護分支", "focus": ["formal", "duplicate", "reconstruct", "preserved"], "note": "重複收據與既有歷史課程都優先被保留。" }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "教練週處方" },
+    { "id": "protection", "label": "歷史與重複保護" },
+    { "id": "terminal", "label": "保留結果" }
+  ],
+  "states": [
+    { "id": "pending", "type": "start", "label": "待規劃", "sublabel": "current week", "lane": "main", "col": 0, "step": "01", "tag": "open" },
+    { "id": "early", "type": "active", "label": "提前調整", "sublabel": "earlyTrigger", "lane": "main", "col": 1, "step": "02", "tag": "current only" },
+    { "id": "checkin", "type": "decision", "label": "週檢測", "sublabel": "completion evidence", "lane": "main", "col": 2, "step": "03", "tag": "gate" },
+    { "id": "formal", "type": "success", "label": "正式處方", "sublabel": "single writer", "lane": "main", "col": 3, "step": "04", "tag": "confirmed" },
+    { "id": "archived", "type": "waiting", "label": "歷史週鎖定", "sublabel": "已封存", "lane": "main", "col": 4, "step": "05", "tag": "frozen" },
+    { "id": "duplicate", "type": "neutral", "label": "重複跳過", "sublabel": "同週已確認", "lane": "protection", "col": 2, "tag": "same reviewWeek" },
+    { "id": "reconstruct", "type": "active", "label": "受限重建", "sublabel": "僅缺失課程", "lane": "protection", "col": 0, "tag": "explicit source" },
+    { "id": "preserved", "type": "success", "label": "原始紀錄保留", "sublabel": "原收據／既存課", "lane": "terminal", "col": 2, "tag": "terminal" }
+  ],
+  "transitions": [
+    { "from": "pending", "to": "early", "variant": "emphasis" },
+    { "from": "early", "to": "checkin", "variant": "default" },
+    { "from": "checkin", "to": "formal", "variant": "emphasis" },
+    { "from": "formal", "to": "archived", "variant": "security" },
+    { "from": "formal", "to": "duplicate", "variant": "dashed", "route": "bottom-channel" },
+    { "from": "duplicate", "to": "preserved", "variant": "security", "route": "straight" },
+    { "from": "reconstruct", "to": "preserved", "variant": "default", "route": "bottom-channel" },
+    { "from": "archived", "to": "preserved", "variant": "emphasis", "route": "right-channel" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "單一寫入者", "items": ["正式處方抑制中間週檢測重寫", "提前調整不在正式處方後重播"] },
+    { "dot": "violet", "title": "歷史隔離", "items": ["既存歷史課程優先於重建", "重建明示來源且只補遺失課程"] },
+    { "dot": "rose", "title": "防重複", "items": ["同 reviewWeek 已確認即跳過", "原始收據由 duplicateOf 保留"] }
+  ]
+}
