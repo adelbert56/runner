@@ -118,3 +118,52 @@ def test_terrain_summary_keeps_slope_evidence_without_route_coordinates() -> Non
     assert summary["segments"][0]["pace_per_km"] == "4:00"
     assert "latitude" not in str(summary).lower()
     assert "longitude" not in str(summary).lower()
+
+
+def test_temperature_uses_detail_average_when_activity_summary_omits_it() -> None:
+    temperature, source = fetch_garmin.extract_activity_temperature(
+        {"activityId": 42},
+        {"summaryDTO": {"averageTemperature": 29.4}},
+        None,
+    )
+
+    assert temperature == 29.4
+    assert source == "garmin-activity-detail"
+
+
+def test_temperature_can_be_safely_aggregated_from_detail_chart() -> None:
+    temperature, source = fetch_garmin.extract_activity_temperature(
+        {"activityId": 42},
+        None,
+        {
+            "metricDescriptors": [{"key": "distance"}, {"key": "temperature"}, {"key": "latitude"}],
+            "activityDetailMetrics": [{"metrics": [0, 28.2, 24.1]}, {"metrics": [250, 29.0, 24.2]}],
+        },
+    )
+
+    assert temperature == 28.6
+    assert source == "garmin-detail-chart"
+
+
+def test_legacy_activity_records_keep_distinct_storage_keys() -> None:
+    first = fetch_garmin.activity_storage_key({"date": "2026-08-24", "name": "輕鬆跑", "distance_km": 7.45})
+    second = fetch_garmin.activity_storage_key({"date": "2026-08-25", "name": "節奏跑", "distance_km": 8.91})
+
+    assert first.startswith("legacy:")
+    assert first != second
+
+
+def test_missing_activity_id_is_explained_without_requesting_route_data() -> None:
+    record = fetch_garmin.simplify({
+        "startTimeLocal": "2026-08-25 18:30:00",
+        "activityName": "舊快照",
+        "activityType": {"typeKey": "running"},
+        "distance": 8910,
+        "duration": 3300,
+        "elevationGain": 26,
+    })
+
+    assert record["terrain_detail_status"] == "missing-activity-id"
+    assert record["avg_temperature_c"] is None
+    assert "latitude" not in record
+    assert "longitude" not in record

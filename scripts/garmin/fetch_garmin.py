@@ -114,6 +114,19 @@ NON_MAIN_INTENSITIES = {"WARMUP", "COOLDOWN", "RECOVERY", "REST"}
 MAX_LAP_SUMMARY = 64
 TERRAIN_SEGMENT_M = 250
 MAX_TERRAIN_SEGMENTS = 48
+DETAIL_RETRY_DAYS = 21
+
+
+def _finite_number(value: object) -> float | None:
+    try:
+        numeric = float(value)
+        return numeric if numeric == numeric else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _normal_key(value: object) -> str:
+    return "".join(char for char in str(value).lower() if char.isalnum())
 
 
 def weighted_average(rows: list[dict], field: str) -> float | None:
@@ -203,6 +216,62 @@ def _metric_rows(detail_payload: dict | None) -> list[dict]:
         if row["distance"] is not None and row["altitude"] is not None:
             rows.append(row)
     return rows
+
+
+def _temperature_from_detail_metrics(detail_payload: dict | None) -> float | None:
+    """Average Garmin's chart temperature samples without retaining the chart.
+
+    `averageTemperature` is absent from some activity-list responses even when
+    the detailed activity contains an ambient-temperature chart.  Only the
+    aggregate is retained; raw metric rows (including any location fields) are
+    discarded immediately.
+    """
+    if not isinstance(detail_payload, dict):
+        return None
+    descriptors = detail_payload.get("metricDescriptors") or []
+    keys = [str(item.get("key") or item.get("metricKey") or "") if isinstance(item, dict) else str(item) for item in descriptors]
+    rows = detail_payload.get("activityDetailMetrics") or detail_payload.get("metrics") or []
+    values: list[float] = []
+    temperature_keys = {"temperature", "ambienttemperature", "directtemperature", "airtemperature"}
+    for item in rows:
+        source = item.get("metrics") if isinstance(item, dict) and isinstance(item.get("metrics"), list) else item
+        mapping = {keys[index]: value for index, value in enumerate(source) if index < len(keys)} if isinstance(source, list) else source
+        if not isinstance(mapping, dict):
+            continue
+        for key, value in mapping.items():
+            if _normal_key(key) not in temperature_keys:
+                continue
+            numeric = _finite_number(value)
+            # Guard the local summary against a malformed metric descriptor.
+            if numeric is not None and -60 <= numeric <= 70:
+                values.append(numeric)
+    return round(sum(values) / len(values), 1) if values else None
+
+
+def _temperature_from_payload(payload: object) -> float | None:
+    """Find a whole-activity average without treating arbitrary weather text as data."""
+    if not isinstance(payload, dict):
+        return None
+    for key in ("averageTemperature", "avgTemperature"):
+        numeric = _finite_number(payload.get(key))
+        if numeric is not None and -60 <= numeric <= 70:
+            return numeric
+    for value in payload.values():
+        if isinstance(value, dict):
+            numeric = _temperature_from_payload(value)
+            if numeric is not None:
+                return numeric
+    return None
+
+
+def extract_activity_temperature(activity: dict, activity_payload: dict | None, detail_payload: dict | None) -> tuple[float | None, str | None]:
+    """Prefer Garmin's explicit activity average, then safely aggregate chart data."""
+    for payload, source in ((activity, "garmin-activity-summary"), (activity_payload, "garmin-activity-detail")):
+        temperature = _temperature_from_payload(payload)
+        if temperature is not None:
+            return temperature, source
+    temperature = _temperature_from_detail_metrics(detail_payload)
+    return (temperature, "garmin-detail-chart" if temperature is not None else None)
 
 
 def summarize_terrain(detail_payload: dict | None) -> dict | None:
@@ -343,6 +412,13 @@ def simplify(
     distance_m = activity.get("distance") or 0
     duration_s = activity.get("duration") or 0
     sec_per_km = (duration_s / (distance_m / 1000)) if distance_m else None
+    temperature, temperature_source = extract_activity_temperature(activity, activity_payload, detail_payload)
+    terrain_summary = summarize_terrain(detail_payload)
+    detail_status = "not-requested"
+    if activity.get("activityId") in (None, ""):
+        detail_status = "missing-activity-id"
+    elif detail_payload is not None:
+        detail_status = "available" if terrain_summary else "no-elevation-series"
     record = {
         "activityId": activity.get("activityId"),
         "date": (activity.get("startTimeLocal") or "")[:10],
@@ -356,7 +432,9 @@ def simplify(
         "max_hr": activity.get("maxHR"),
         "avg_cadence": activity.get("averageRunningCadenceInStepsPerMinute"),
         "elevation_gain_m": activity.get("elevationGain"),
-        "avg_temperature_c": activity.get("averageTemperature"),
+        "avg_temperature_c": temperature,
+        "temperature_source": temperature_source,
+        "terrain_detail_status": detail_status,
         "calories": activity.get("calories"),
         "aerobic_te": activity.get("aerobicTrainingEffect"),
         "anaerobic_te": activity.get("anaerobicTrainingEffect"),
@@ -370,7 +448,6 @@ def simplify(
     lap_summary = summarize_laps(split_payload)
     if lap_summary:
         record["lap_summary"] = lap_summary
-    terrain_summary = summarize_terrain(detail_payload)
     if terrain_summary:
         record["terrain_summary"] = terrain_summary
     self_evaluation = extract_self_evaluation(activity, activity_payload, detail_payload)
@@ -379,12 +456,28 @@ def simplify(
     return record
 
 
-def load_existing() -> dict[int, dict]:
+def activity_storage_key(record: dict) -> str:
+    activity_id = record.get("activityId")
+    if activity_id not in (None, ""):
+        return f"id:{activity_id}"
+    # Legacy/manual records cannot be enriched without an ID, but they must
+    # remain distinct rather than collapsing into one `None` dictionary key.
+    return "legacy:{date}|{start}|{name}|{distance}".format(
+        date=record.get("date") or "",
+        start=record.get("startTime") or "",
+        name=record.get("name") or "",
+        distance=record.get("distance_km") or "",
+    )
+
+
+def load_existing() -> dict[str, dict]:
     if not OUTPUT_PATH.exists():
         return {}
     try:
         data = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
-        return {a["activityId"]: a for a in data.get("activities", [])}
+        # Preserve every legacy activity that predates activity IDs.  The old
+        # `{None: record}` mapping silently collapsed all but one such record.
+        return {activity_storage_key(a): a for a in data.get("activities", []) if isinstance(a, dict)}
     except (json.JSONDecodeError, KeyError, TypeError):
         print(f"警告：{OUTPUT_PATH} 格式異常，將重建", file=sys.stderr)
         return {}
@@ -483,6 +576,21 @@ def fetch_recovery(client: "Garmin", days: int, existing: dict[str, dict]) -> li
     return [collected[key] for key in sorted(collected)][-180:]
 
 
+def needs_detail_enrichment(activity: dict, previous: dict | None, force: bool, today: date) -> bool:
+    """Fetch details once for new/recent incomplete records, never in a daily loop."""
+    if activity.get("activityId") in (None, ""):
+        return False
+    if force or previous is None:
+        return True
+    if previous.get("terrain_detail_status") not in (None, "not-requested"):
+        return False
+    activity_date = str(activity.get("startTimeLocal") or "")[:10]
+    try:
+        return date.fromisoformat(activity_date) >= today - timedelta(days=DETAIL_RETRY_DAYS)
+    except ValueError:
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="抓取 Garmin 跑步紀錄")
     parser.add_argument("--days", type=int, default=90, help="回溯天數（預設 90）")
@@ -534,7 +642,16 @@ def main() -> int:
         # remain valid for volume, but are never silently reinterpreted as a
         # main-course result without Garmin's explicit step labels.
         split_payload = detail_payload = activity_payload = None
-        if args.refresh_segments or activity_id not in existing:
+        storage_key = activity_storage_key({
+            "activityId": activity_id,
+            "date": str(activity.get("startTimeLocal") or "")[:10],
+            "startTime": activity.get("startTimeLocal"),
+            "name": activity.get("activityName"),
+            "distance_km": round(float(activity.get("distance") or 0) / 1000, 2),
+        })
+        previous = existing.get(storage_key)
+        detail_attempted = needs_detail_enrichment(activity, previous, args.refresh_segments, end)
+        if detail_attempted:
             try:
                 split_payload = client.get_activity_splits(activity_id)
             except Exception as exc:  # One malformed activity must not block sync.
@@ -544,14 +661,18 @@ def main() -> int:
                 # the date-list response nor the chart detail endpoint.
                 activity_payload = client.get_activity(activity_id)
                 detail_payload = client.get_activity_details(activity_id, maxchart=2000, maxpoly=0)
-            except Exception as exc:  # Self-evaluation is optional metadata.
+            except Exception as exc:  # Detail evidence is optional metadata.
                 print(f"警告：無法讀取活動 {activity_id} 的完整明細（{exc}）", file=sys.stderr)
         record = simplify(activity, split_payload, detail_payload, activity_payload)
+        if detail_attempted and detail_payload is None and activity_id not in (None, ""):
+            record["terrain_detail_status"] = "detail-unavailable"
         runs.append(record)
     merged = existing
-    new_count = sum(1 for r in runs if r["activityId"] not in merged)
+    enriched_keys = {activity_storage_key(record) for record in runs if record.get("terrain_detail_status") != "not-requested"}
+    new_count = sum(1 for r in runs if activity_storage_key(r) not in merged)
     for r in runs:
-        previous = merged.get(r["activityId"])
+        storage_key = activity_storage_key(r)
+        previous = merged.get(storage_key)
         # A normal daily list response has only whole-activity values.  Keep a
         # previously fetched structured main block until a newer split response
         # explicitly replaces it, rather than regressing the coach to all-run
@@ -565,7 +686,13 @@ def main() -> int:
                 r["self_evaluation"] = previous["self_evaluation"]
             if previous.get("terrain_summary") and not r.get("terrain_summary"):
                 r["terrain_summary"] = previous["terrain_summary"]
-        merged[r["activityId"]] = r
+                r["terrain_detail_status"] = "available"
+            if previous.get("avg_temperature_c") is not None and r.get("avg_temperature_c") is None:
+                r["avg_temperature_c"] = previous["avg_temperature_c"]
+                r["temperature_source"] = previous.get("temperature_source")
+            if storage_key not in enriched_keys and not r.get("terrain_summary") and previous.get("terrain_detail_status"):
+                r["terrain_detail_status"] = previous["terrain_detail_status"]
+        merged[storage_key] = r
 
     recovery: list[dict] = []
     if args.recovery_days > 0:
