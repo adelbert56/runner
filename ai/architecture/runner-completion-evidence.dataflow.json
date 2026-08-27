@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Runner 主課完成判定資料流",
+    "quality_profile": "showcase",
+    "viewBox": [1080, 760],
+    "views": [
+      {
+        "id": "quality-path",
+        "label": "品質課認列",
+        "focus": ["prescription", "target", "activity", "verdict"],
+        "note": "品質課只以主課距離或正式時間段證據認列，不以整趟總距離取代。"
+      },
+      {
+        "id": "weekly-path",
+        "label": "週檢測消費",
+        "focus": ["verdict", "summary", "checkin", "adaptation"],
+        "note": "同一個完成摘要供週檢測與教練調整使用，避免第二套規則。"
+      }
+    ]
+  },
+  "stages": [
+    { "label": "處方" },
+    { "label": "目標" },
+    { "label": "Garmin 證據" },
+    { "label": "判定" },
+    { "label": "教練決策" }
+  ],
+  "nodes": [
+    { "id": "prescription", "type": "frontend", "label": "課表日", "sublabel": "day.workoutStructure", "stage": 0, "row": 1, "tag": "正式處方" },
+    { "id": "target", "type": "backend", "label": "完成目標", "sublabel": "主課目標公里", "stage": 1, "row": 1, "tag": "主課距離" },
+    { "id": "timed", "type": "backend", "label": "時間主課", "sublabel": "時間段秒數", "stage": 1, "row": 4, "tag": "結構化" },
+    { "id": "activity", "type": "external", "label": "Garmin 活動", "sublabel": "activityCompletionKm", "stage": 2, "row": 3, "tag": "主課實績" },
+    { "id": "verdict", "type": "backend", "label": "單日完成判定", "sublabel": "主課完成門檻", "stage": 3, "row": 1, "tag": "60% 門檻" },
+    { "id": "recovery", "type": "backend", "label": "標籤補正", "sublabel": "90% 時間段＋跑量", "stage": 3, "row": 4, "tag": "保留原始標籤" },
+    { "id": "summary", "type": "database", "label": "完成摘要", "sublabel": "共用完成摘要", "stage": 4, "row": 0, "tag": "共用真相" },
+    { "id": "checkin", "type": "frontend", "label": "週檢測", "sublabel": "週檢測時機", "stage": 4, "row": 2, "tag": "週期" },
+    { "id": "adaptation", "type": "backend", "label": "教練調整", "sublabel": "未來課表調整", "stage": 4, "row": 4, "tag": "未來處方" }
+  ],
+  "flows": [
+    { "id": "derive-target", "from": "prescription", "to": "target", "label": "解析主課", "classification": "prescription", "variant": "emphasis", "route": "straight", "labelDy": -48 },
+    { "id": "derive-time", "from": "prescription", "to": "timed", "label": "解析時間段", "classification": "prescription", "variant": "default", "labelDy": 48 },
+    { "id": "measure-quality", "from": "target", "to": "verdict", "label": "比對目標", "classification": "threshold", "variant": "emphasis", "route": "straight" },
+    { "id": "apply-quality", "from": "activity", "to": "verdict", "label": "主課實績", "classification": "activity evidence", "variant": "emphasis", "route": "bottom-channel", "labelDy": 36 },
+    { "id": "repair-label", "from": "timed", "to": "recovery", "label": "90% 時間", "classification": "structured evidence", "variant": "security", "route": "straight" },
+    { "id": "credit-recovery", "from": "recovery", "to": "verdict", "label": "僅補正解讀", "classification": "no raw rewrite", "variant": "security", "route": "top-channel", "labelDy": -42 },
+    { "id": "summarize", "from": "verdict", "to": "summary", "label": "彙整完成度", "classification": "shared rule", "variant": "emphasis" },
+    { "id": "check-week", "from": "summary", "to": "checkin", "label": "週檢測依據", "classification": "shared truth", "variant": "default" },
+    { "id": "adapt-course", "from": "checkin", "to": "adaptation", "label": "限制條件", "classification": "future only", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "唯一判定規則", "items": ["間歇與節奏課的主課完成度不由整趟距離決定", "週檢測沿用同一份完成摘要"] },
+    { "dot": "rose", "title": "標籤異常保護", "items": ["只有正式時間品質段與正常跑量同時達標才補正", "原始 Garmin 步驟標籤保留為稽核證據"] },
+    { "dot": "violet", "title": "決策邊界", "items": ["完成證據限制未來教練調整", "不重寫已發生的活動或歷史課程"] }
+  ]
+}

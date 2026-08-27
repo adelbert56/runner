@@ -1784,11 +1784,30 @@ function renderCoachDecisionCard(runs) {
   return `<section class="coach-decision-card ${allow ? 'is-ready' : 'is-hold'}" aria-label="本週放行判讀"><div class="coach-decision-head"><div><div class="training-status-kicker">COACH READINESS</div><h2>本週放行判讀</h2><p>${allow ? '證據完整，僅依正式課表保守前進；不會因單趟跑得快而跳級。' : '目前不以資料推進配速或長跑；先補齊或排除下列訊號。'}</p></div><span class="coach-decision-status">${allow ? '可維持／保守前進' : '暫緩進階'}</span></div><div class="coach-evidence-list">${rows.map((row) => `<div class="coach-evidence-row"><b>${reviewEscape(row.label)}</b><span class="coach-evidence-state">${reviewEscape(row.state)}</span><p>${reviewEscape(row.detail)}</p></div>`).join('')}</div><div class="coach-decision-actions">${race && !raceCheck ? `<button class="btn btn-primary" onclick="openRaceRecoveryCheckin('${race.dateStr}')">填寫賽後恢復</button>` : ''}${nextLong ? `<button class="btn btn-secondary" onclick="openFuelingLog('${nextLong.dateStr}')">${appData.fuelingLogs?.[nextLong.dateStr] ? '查看／更新長跑補給' : '記錄長跑補給'}</button>` : ''}<span>賽事角色：9/20 為基準檢測；11/8 與 11/15 需連同恢復資料判讀。</span></div></section>`;
 }
 
+function renderCoachDecisionFlowCard(runs) {
+  const hasEvidence = runs.length > 0;
+  const evidenceDetail = hasEvidence
+    ? '已有實跑資料可供比對；同步只刷新證據，不會自行改寫課表。'
+    : '尚無可用實跑；先同步 Garmin 或手動補登，再開始比對。';
+  const qualityDetail = hasEvidence
+    ? '品質課還會比對主課完成度；總公里數不是唯一答案。'
+    : '取得實跑後，才會依課表結構檢查主課品質。';
+  return `<section class="coach-flow-card" aria-label="教練判讀順序">
+    <div class="coach-flow-head"><div><div class="training-status-kicker">HOW RUNNER DECIDES</div><h2>先知道判讀順序，再看本週結論</h2><p>Garmin 提供實跑證據；教練邏輯才負責決定下週是否維持、調整或降載。</p></div><span class="coach-flow-status">${hasEvidence ? '已有實跑證據' : '等待實跑證據'}</span></div>
+    <ol class="coach-flow-grid">
+      <li class="coach-flow-step"><span class="coach-flow-index">1</span><div><b>取得實跑與回饋</b><p>${evidenceDetail}</p></div></li>
+      <li class="coach-flow-step coach-flow-step--quality"><span class="coach-flow-index">2</span><div><b>確認主課品質</b><p>${qualityDetail}</p></div></li>
+      <li class="coach-flow-step"><span class="coach-flow-index">3</span><div><b>形成教練建議</b><p>把完成狀態、恢復與風險一起看，不因單趟跑得快就跳級。</p></div></li>
+      <li class="coach-flow-step"><span class="coach-flow-index">4</span><div><b>保留歷史週判讀</b><p>已結束週維持當時快照；新資料不回頭覆寫原本決策。</p></div></li>
+    </ol>
+  </section>`;
+}
+
 function renderTrainingAnalysis() {
   const runs = coachRunRecords();
   // 完成度／提醒／自動決策已各自固定在本週總覽與教練建議；進度分頁只保留
   // 預測、趨勢與單堂分析，避免同一狀態資料跨 tab 重複出現。
-  if (!runs.length) return '<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>';
+  if (!runs.length) return `${renderCoachDecisionFlowCard(runs)}<div class="card"><div class="card-title">📈 訓練分析</div><p style="color:var(--c-text-muted);margin:0">尚無 Garmin 資料；目前課表採「設定基準」模式，不會自行假設你的配速或恢復能力。完成至少 3 筆有效跑步同步後，才會顯示趨勢並校正未來週課表。</p></div>`;
   const trend = weeklyRunTrend(runs);
   const monthlyTrend = monthlyRunTrend(runs);
   const latestMonth = monthlyTrend.at(-1);
@@ -1819,7 +1838,7 @@ function renderTrainingAnalysis() {
     return `<div class="trend-ramp trend-ramp-${tone}"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>${text}（${prev.km} → ${last.km} km）</p></div></div>`;
   })();
   const analyticsDate = reviewEscape(coachReviewData.analyticsUpdatedAt || coachReviewData.updatedAt);
-  return `${renderCoachDecisionCard(runs)}${renderLatestTrainingReport(runs)}<div class="card trend-card"><div class="trend-card-head"><div class="trend-card-icon" aria-hidden="true">📈</div><div><h2 class="trend-card-title">長期訓練趨勢</h2><span class="trend-card-badge">Garmin 最近 ${runs.length} 筆</span></div><span class="trend-card-updated">📅 Garmin 資料匯至 <b>${analyticsDate}</b></span></div>
+  return `${renderCoachDecisionFlowCard(runs)}${renderCoachDecisionCard(runs)}${renderLatestTrainingReport(runs)}<div class="card trend-card"><div class="trend-card-head"><div class="trend-card-icon" aria-hidden="true">📈</div><div><h2 class="trend-card-title">長期訓練趨勢</h2><span class="trend-card-badge">Garmin 最近 ${runs.length} 筆</span></div><span class="trend-card-updated">📅 Garmin 資料匯至 <b>${analyticsDate}</b></span></div>
     <div class="trend-hero-row"><div class="trend-hero-item trend-hero-primary"><span class="trend-hero-label"><i aria-hidden="true">🛣️</i>近四週跑量</span><strong class="trend-hero-value">${lastFourKm.toFixed(1)}<small>km</small></strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">👟</i>近四週最長跑</span><strong class="trend-hero-value">${longestRun ? `${longestRun.toFixed(1)}<small>km</small>` : '—'}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">⏱️</i>最近四趟平均配速</span><strong class="trend-hero-value">${formatPaceSeconds(averagePace)}</strong></div><div class="trend-hero-item"><span class="trend-hero-label"><i aria-hidden="true">❤️</i>最近四趟平均心率</span><strong class="trend-hero-value">${averageHr ? `HR ${Math.round(averageHr)}` : '—'}</strong></div></div>
     <div class="trend-monitor"><div class="trend-monitor-top"><div class="trend-monitor-col">${rampNote || '<div class="trend-ramp trend-ramp-good"><i class="trend-ramp-dot" aria-hidden="true"></i><div><b>週增幅監控</b><p>資料不足，暫無法評估增幅。</p></div></div>'}</div><div class="trend-monitor-divider"></div><div class="trend-monitor-col trend-advanced-head"><b>進階訓練指標</b><p>只顯示 Garmin 有回傳的數值；這些資料會提供教練建議作為恢復與負荷判讀的依據。</p></div></div><div class="trend-tile-grid"><div class="trend-tile"><span class="trend-tile-label">最近四趟平均步頻</span><strong class="trend-tile-value">${averageCadence ? `${Math.round(averageCadence)} spm` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟累積爬升</span><strong class="trend-tile-value">${elevation ? `${Math.round(elevation)} m` : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">最近四趟平均負荷</span><strong class="trend-tile-value">${averageLoad ? Math.round(averageLoad) : '—'}</strong></div><div class="trend-tile"><span class="trend-tile-label">${latestVo2Label}</span><strong class="trend-tile-value">${latestVo2 || '—'}</strong></div></div></div>
     <div class="analysis-chart-grid"><section class="analysis-chart-card analysis-volume-card"><div class="analysis-chart-heading"><div><b>跑量趨勢</b><p>依 Garmin 實跑加總，包含額外跑步。</p></div><span class="pace-trend-badge">距離</span></div><div class="volume-trend-stack"><section class="volume-trend-section volume-trend-section--weekly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>週跑量</b><span>短週期 · 最近 8 週</span></div>${renderVolumeBars(trend, { chartClass: 'trend-bar-chart--weekly', barMaxHeight: 86 })}</section><section class="volume-trend-section volume-trend-section--monthly"><div class="volume-trend-subhead"><b><i aria-hidden="true"></i>月跑量</b><span>長週期 · 最近 6 個月份</span></div>${renderVolumeBars(monthlyTrend, { periodKey: 'month', emptyText: '尚無可用的月跑量資料。', label: (month) => month.slice(5), chartClass: 'trend-bar-chart--monthly', barMaxHeight: 86 })}</section></div><div class="volume-trend-insights"><div class="volume-insight-head"><b>跑量摘要</b><span>Garmin 實跑</span></div><div class="volume-insight-grid"><div class="volume-insight"><span>${reviewEscape(latestMonth.month)} 累積</span><strong>${latestMonth.km}<small> km</small></strong></div><div class="volume-insight"><span>本月跑步次數</span><strong>${latestMonth.runs}<small> 次</small></strong></div><div class="volume-insight"><span>近六個月平均</span><strong>${averageMonthlyKm.toFixed(1)}<small> km</small></strong></div><div class="volume-insight"><span>單月最高</span><strong>${peakMonth.km}<small> km</small></strong><em>${reviewEscape(peakMonth.month)}</em></div></div></div></section><section class="analysis-chart-card analysis-chart-card--pace"><div class="analysis-chart-heading"><div><b>最近跑步配速</b><p>最新 12 趟；以每公里配速呈現，數字越小越快。</p></div><span class="pace-trend-badge">Garmin 實跑</span></div>${renderPaceTrend(runs)}</section></div>

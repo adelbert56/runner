@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Runner 教練週決策流程</title>
+  <style>
+    :root { --bg:#f6f8f5; --surface:#ffffff; --line:#d9e3db; --ink:#17251f; --muted:#607168; --green:#0e6245; --green-soft:#edf6ef; --orange:#b85c1e; --orange-soft:#fff2e8; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:32px 20px; background:var(--bg); color:var(--ink); font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; }
+    main { max-width:1280px; margin:0 auto; }
+    .eyebrow { margin:0 0 8px; color:var(--green); font-size:12px; font-weight:900; letter-spacing:.1em; }
+    h1 { margin:0; font-size:clamp(30px,5vw,52px); line-height:1.08; letter-spacing:-.03em; }
+    .lead { max-width:760px; margin:16px 0 28px; color:var(--muted); font-size:16px; font-weight:700; line-height:1.75; }
+    .figure { overflow-x:auto; padding:20px; border:1px solid rgba(23,37,31,.10); border-radius:24px; background:linear-gradient(135deg,rgba(231,242,235,.88),rgba(255,253,248,.98)); }
+    svg { display:block; width:100%; min-width:980px; height:auto; }
+    .notes { display:grid; grid-template-columns:1.2fr .9fr .9fr; gap:12px; margin-top:16px; }
+    .note { padding:16px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .note h2 { margin:0 0 6px; color:var(--green); font-size:14px; }
+    .note p { margin:0; color:var(--muted); font-size:13px; font-weight:700; line-height:1.65; }
+    footer { margin-top:16px; padding-top:14px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">RUNNER · COACHING WEEK</p>
+    <h1>教練週如何把跑步證據，變成下一週的處方</h1>
+    <p class="lead">這張圖說明 Runner 現有規則的責任順序：Garmin 同步提供證據，但不代替教練；完成判定看的是主課品質；已結束週的決策則保持可追溯。</p>
+    <section class="figure" aria-label="Runner 教練週決策流程圖">
+      <svg viewBox="0 0 1200 680" role="img" aria-labelledby="runner-coach-week-decision-title runner-coach-week-decision-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="runner-coach-week-decision-title">Runner 教練週決策流程</title>
+        <desc id="runner-coach-week-decision-desc">以五個階段與問題、輸入、判定、輸出四個欄位，說明同步證據如何形成完成判定與下一週教練處方，並保護歷史週資料。</desc>
+        <defs>
+          <marker id="runner-coach-week-decision-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#607168"/></marker>
+          <marker id="runner-coach-week-decision-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#b85c1e"/></marker>
+        </defs>
+        <rect width="1200" height="680" rx="24" fill="#f6f8f5"/>
+        <text x="80" y="56" fill="#0e6245" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" letter-spacing="1.4">每一週都回答同一組問題</text>
+        <text x="80" y="88" fill="#17251f" font-size="24" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif">從資料到教練決策，而不是從公里數直接跳到結論</text>
+
+        <g fill="#607168" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="end">
+          <text x="64" y="200">要回答什麼？</text><text x="64" y="288">需要哪些證據？</text><text x="64" y="404">系統如何判定？</text><text x="64" y="516">產出什麼？</text>
+        </g>
+        <g stroke="#d9e3db" stroke-width="1">
+          <line x1="80" y1="144" x2="1120" y2="144"/><line x1="80" y1="240" x2="1120" y2="240"/><line x1="80" y1="336" x2="1120" y2="336"/><line x1="80" y1="464" x2="1120" y2="464"/>
+        </g>
+
+        <!-- connectors are intentionally drawn before cells -->
+        <g fill="none" stroke="#607168" stroke-width="2" marker-end="url(#runner-coach-week-decision-arrow)">
+          <line x1="256" y1="508" x2="288" y2="508"/><line x1="464" y1="508" x2="496" y2="508"/><line x1="672" y1="508" x2="704" y2="508"/>
+        </g>
+        <path d="M880 508 H896 Q912 508 912 492 V480" fill="none" stroke="#b85c1e" stroke-width="2" marker-end="url(#runner-coach-week-decision-arrow-accent)"/>
+
+        <!-- Stage 1 -->
+        <g>
+          <rect x="80" y="112" width="176" height="24" rx="8" fill="#0e6245"/><text x="168" y="130" fill="#fff" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">1 · 收集</text>
+          <rect x="80" y="160" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="168" y="188" fill="#17251f" font-size="14" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">本週實際跑了什麼？</text><text x="168" y="208" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">有沒有不適或缺課？</text>
+          <rect x="80" y="256" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="168" y="284" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">跑者回饋</text><text x="168" y="304" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">RPE、疼痛、睡眠</text>
+          <rect x="80" y="352" width="176" height="96" rx="12" fill="#edf6ef" stroke="#0e6245"/><text x="168" y="384" fill="#0e6245" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">先分清「計畫」與「實做」</text><text x="168" y="408" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">回饋是判定的起點</text>
+          <rect x="80" y="480" width="176" height="56" rx="12" fill="#fff" stroke="#d9e3db"/><text x="168" y="514" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">待比對的週計畫</text>
+        </g>
+
+        <!-- Stage 2 -->
+        <g>
+          <rect x="288" y="112" width="176" height="24" rx="8" fill="#0e6245"/><text x="376" y="130" fill="#fff" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">2 · 補足證據</text>
+          <rect x="288" y="160" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="376" y="188" fill="#17251f" font-size="14" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">有可用活動證據嗎？</text><text x="376" y="208" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">同步只刷新證據</text>
+          <rect x="288" y="256" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="376" y="284" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">Garmin／手動紀錄</text><text x="376" y="304" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">日期、距離、配速、步驟</text>
+          <rect x="288" y="352" width="176" height="96" rx="12" fill="#edf6ef" stroke="#0e6245"/><text x="376" y="384" fill="#0e6245" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">同步不是教練調整</text><text x="376" y="408" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">它不能自行改寫課表</text>
+          <rect x="288" y="480" width="176" height="56" rx="12" fill="#fff" stroke="#d9e3db"/><text x="376" y="514" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">可比對的活動證據</text>
+        </g>
+
+        <!-- Stage 3 -->
+        <g>
+          <rect x="496" y="112" width="176" height="24" rx="8" fill="#b85c1e"/><text x="584" y="130" fill="#fff" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">3 · 完成判定</text>
+          <rect x="496" y="160" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="584" y="188" fill="#17251f" font-size="14" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">主課真的完成了嗎？</text><text x="584" y="208" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">不是只看總里程</text>
+          <rect x="496" y="256" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="584" y="284" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">課表結構＋活動資料</text><text x="584" y="304" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">主課、暖身、收操</text>
+          <rect x="496" y="352" width="176" height="96" rx="12" fill="#fff2e8" stroke="#b85c1e"/><text x="584" y="384" fill="#b85c1e" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">品質課看時間／品質</text><text x="584" y="408" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">原始 Garmin 標籤會保留</text>
+          <rect x="496" y="480" width="176" height="56" rx="12" fill="#fff2e8" stroke="#b85c1e"/><text x="584" y="514" fill="#b85c1e" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">完成／部分／未完成</text>
+        </g>
+
+        <!-- Stage 4 -->
+        <g>
+          <rect x="704" y="112" width="176" height="24" rx="8" fill="#0e6245"/><text x="792" y="130" fill="#fff" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">4 · 教練決策</text>
+          <rect x="704" y="160" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="792" y="188" fill="#17251f" font-size="14" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">下週該維持、調整或降載？</text>
+          <rect x="704" y="256" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="792" y="284" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">完成狀態＋恢復訊號</text><text x="792" y="304" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">總量、感受、風險</text>
+          <rect x="704" y="352" width="176" height="96" rx="12" fill="#edf6ef" stroke="#0e6245"/><text x="792" y="384" fill="#0e6245" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">處方由教練邏輯產生</text><text x="792" y="408" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">證據支援，而非取代決策</text>
+          <rect x="704" y="480" width="176" height="56" rx="12" fill="#fff" stroke="#d9e3db"/><text x="792" y="514" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">下一週的建議課表</text>
+        </g>
+
+        <!-- Stage 5 -->
+        <g>
+          <rect x="912" y="112" width="176" height="24" rx="8" fill="#0e6245"/><text x="1000" y="130" fill="#fff" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">5 · 固化與隔離</text>
+          <rect x="912" y="160" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="1000" y="188" fill="#17251f" font-size="14" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">如何保留可追溯性？</text><text x="1000" y="208" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">新舊週不可混寫</text>
+          <rect x="912" y="256" width="176" height="64" rx="12" fill="#fff" stroke="#d9e3db"/><text x="1000" y="284" fill="#17251f" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">教練週快照與封存</text><text x="1000" y="304" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">既有歷史優先保留</text>
+          <rect x="912" y="352" width="176" height="96" rx="12" fill="#edf6ef" stroke="#0e6245"/><text x="1000" y="384" fill="#0e6245" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">只在歷史缺失時重建</text><text x="1000" y="408" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">不讓後來資料覆蓋當時判斷</text>
+          <rect x="912" y="480" width="176" height="56" rx="12" fill="#edf6ef" stroke="#0e6245"/><text x="1000" y="514" fill="#0e6245" font-size="13" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" text-anchor="middle">可回看、可審核的週記錄</text>
+        </g>
+
+        <line x1="80" y1="584" x2="1120" y2="584" stroke="#d9e3db" stroke-width="1"/>
+        <text x="80" y="616" fill="#607168" font-size="12" font-weight="900" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif">讀圖重點</text>
+        <circle cx="216" cy="612" r="6" fill="#0e6245"/><text x="232" y="616" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif">綠色＝常規資料與保護邊界</text>
+        <circle cx="536" cy="612" r="6" fill="#b85c1e"/><text x="552" y="616" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif">橘色＝完成品質判定焦點</text>
+        <text x="80" y="652" fill="#607168" font-size="12" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif">此圖描述目前程式責任；不表示 Garmin 官方 Training API 已啟用，也不表示任何個人活動已同步。</text>
+      </svg>
+    </section>
+    <section class="notes" aria-label="閱讀說明">
+      <article class="note"><h2>同步的角色</h2><p>它把活動資料帶入比對，不會自行改課表或代替真人／教練邏輯。</p></article>
+      <article class="note"><h2>判定的角色</h2><p>品質課的核心是主課完成度；總距離足夠不等於課表達標。</p></article>
+      <article class="note"><h2>歷史的角色</h2><p>已形成的週記錄是審核依據，後來的資料不應回頭覆蓋它。</p></article>
+    </section>
+    <footer>來源：Runner 現行 Trainer 同步、完成判定與歷史課程保護程式責任。文件產物，不修改產品介面。</footer>
+  </main>
+</body>
+</html>

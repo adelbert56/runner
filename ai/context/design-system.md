@@ -72,6 +72,7 @@
 | 四 tab 導覽卡（tab-intro-*） | 已建立 | 顯示／略過後不再顯示／手機 2 欄 | `--radius-md`、`--c-text`、`--c-text-muted` | `site/trainer.css`、`site/trainer-render.js` | 本次驗證 | 首次課表產出後導覽 |
 | 報名建立流程步驟列（entry-workflow） | 已建立 | 待選人／選人完成／選組別完成／可儲存／手機三欄 | `--surface`、`--soft`、`--line`、`--green-dark`、`--yellow`、`--radius` | `local/registration/registration.html`、`local/registration/registration.css`、`local/registration/registration-actions.js` | Playwright 桌機與 390px 截圖 | 報名管理作業流程優化 |
 | 教練判讀證據列（coach-decision-card） | 已建立 | 可維持／暫緩／資料缺失／窄螢幕單欄 | `--c-surface`、`--c-border`、`--c-primary`、`--c-yellow`、`--radius-lg` | `site/trainer-render.js`、`site/trainer.css` | 靜態 DOM／layout 驗證 | 教練判讀完整化 |
+| 教練流程說明（coach-flow-card） | 已建立 | 有實跑證據／等待實跑證據／手機雙欄 | `--c-surface2`、`--c-surface`、`--c-border`、`--c-primary`、`--c-yellow`、`--radius-lg` | `site/trainer-render.js`、`site/trainer.css` | Playwright 桌機與 390px 截圖 | 教練流程可視化 |
 
 （「來源階段」記錄這個元件是 S4 初建，還是後續某個功能 Epic 補做並回登的。）
 
@@ -84,3 +85,4 @@
 | 訓練手冊設定首次說明 | 變體 A（輕量橫幅） | `ai/artifacts/新手上手流程/mockup-decision-新手上手流程.md` | Squall／2026-08-23 |
 | 首次課表產出後四 tab 導覽 | 變體 A（獨立卡） | `ai/artifacts/首次課表產出後導覽/mockup-decision-首次課表產出後導覽.md` | Squall／2026-08-23 |
 | 訓練分析放行判讀 | 變體 A（單一整合卡） | `ai/artifacts/教練判讀完整化/mockup-decision-訓練分析判讀.md` | Squall／2026-08-24 |
+| 訓練分析教練判讀順序 | 變體 A（判讀流程帶） | `ai/artifacts/教練流程可視化/mockup-decision-教練決策說明.md` | Squall／2026-08-27 |
