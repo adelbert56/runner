@@ -92,6 +92,7 @@ function buildAnalyticsRuns(activities) {
       cadence: activity.avg_cadence,
       elevationGainM: activity.elevation_gain_m,
       temperatureC: activity.avg_temperature_c,
+      temperatureSource: activity.temperature_source || null,
       calories: activity.calories,
       aerobicTe: activity.aerobic_te,
       anaerobicTe: activity.anaerobic_te,
@@ -99,6 +100,7 @@ function buildAnalyticsRuns(activities) {
       power: activity.avg_power,
       trainingLoad: activity.training_load,
       terrainSummary: activity.terrain_summary || null,
+      terrainDetailStatus: activity.terrain_detail_status || (activity.terrain_summary ? 'available' : activity.activityId ? 'not-requested' : 'missing-activity-id'),
       // Course-quality metrics are populated only from explicit Garmin steps;
       // never infer them from automatic kilometre laps.
       qualityEligible,

@@ -1773,11 +1773,44 @@ function renderCoachDecisionCard(runs) {
   const race = scheduledRaces[0];
   const raceCheck = race ? appData.raceRecoveryChecks?.[race.dateStr] : null;
   const recoveryBlocked = raceCheck && (raceCheck.pain !== 'none' || raceCheck.gait !== 'normal' || Number(raceCheck.fatigue) >= 4);
+  const recoveryMetrics = [
+    recovery?.sleepHours ? `近 ${recovery.samples} 天平均睡眠 ${recovery.sleepHours} 小時` : null,
+    recovery?.hrvOvernight && recovery?.hrvWeekly ? `HRV ${recovery.hrvOvernight}（個人週基準 ${recovery.hrvWeekly}）` : recovery?.hrvStatus ? `Garmin HRV 狀態 ${recovery.hrvStatus}` : null,
+    recovery?.bodyBatteryHigh ? `Body Battery 高點平均 ${recovery.bodyBatteryHigh}` : null,
+  ].filter(Boolean).join('；');
+  const recoveryDetail = recovery?.strained
+    ? `目前先暫緩：${recovery.concerns.join('、')}。至少兩項同時警示才會暫緩。`
+    : recovery
+      ? `${recoveryMetrics || `近 ${recovery.samples} 天已有恢復資料`}；目前未同時出現兩項警示。`
+      : '尚未取得睡眠、HRV 或 Body Battery；不以恢復資料推進課表。';
+  const totalClimb = Number(latest?.elevationGainM);
+  const rawTemperature = latest?.temperatureC;
+  const activityTemperature = rawTemperature === null || rawTemperature === undefined || rawTemperature === ''
+    ? null
+    : Number(rawTemperature);
+  const hasActivityTemperature = Number.isFinite(activityTemperature);
+  const latestRunFacts = [
+    latest?.date ? `${latest.date}${Number.isFinite(Number(latest?.km)) ? `・${Number(latest.km).toFixed(1)} km` : ''}` : null,
+    Number.isFinite(totalClimb) ? `總爬升 ${totalClimb}m` : null,
+    hasActivityTemperature ? `活動溫度 ${activityTemperature}°C` : '本次同步未回傳活動溫度',
+  ].filter(Boolean).join('；');
+  const runConditionDetail = quality?.usable
+    ? `${latestRunFacts || '最近一趟活動'}。未偵測到跑步機或陡坡限制${hasActivityTemperature ? '，活動溫度未達高溫門檻' : '；本次未以活動溫度校正'}，可作趨勢參考；不會直接改寫你的配速。`
+    : quality
+      ? `${latestRunFacts || '最近一趟活動'}。本次不拿來校正配速：${quality.reasons.join('、')}。`
+      : '尚無可用跑步資料，無法判斷是否適合用來調整課表。';
+  const terrainDetail = latestTerrain?.segments?.length
+    ? `已按每 ${latestTerrain.segment_m}m 分段；最高坡度 ${latestTerrain.max_abs_grade_pct}%。上／下坡會與配速、心率、步頻一起保留。`
+    : latest?.terrainDetailStatus === 'missing-activity-id'
+      ? `這筆本機快照缺少 Garmin 活動連結${Number.isFinite(totalClimb) ? `；目前只知道總爬升 ${totalClimb}m` : ''}。按「同步 Garmin」後，系統會自動嘗試建立逐段坡度摘要；不需要重跑或手動補登。`
+      : latest?.terrainDetailStatus === 'detail-unavailable'
+        ? `Garmin 此次未提供可讀的詳細高度資料${Number.isFinite(totalClimb) ? `；目前只知道總爬升 ${totalClimb}m` : ''}。系統會保留總爬升判讀，不需要重跑或手動補登。`
+        : `這筆活動沒有每段坡度資料${Number.isFinite(totalClimb) ? `；目前只知道總爬升 ${totalClimb}m` : ''}。它只影響這趟能否作平路趨勢參考，不需要你重跑或手動補登。`;
   const rows = [
-    { label: '恢復訊號', state: recovery?.strained ? '暫緩' : recovery ? '可追蹤' : '缺資料', detail: recovery?.strained ? recovery.concerns.join('、') : recovery ? `近 ${recovery.samples} 天睡眠／HRV／Body Battery 未達雙重示警` : '尚未同步睡眠／HRV／Body Battery' },
-    { label: '最新跑步條件', state: quality?.usable ? '可比' : quality ? '不校正' : '缺資料', detail: quality?.usable ? `${latest.date} 的平路／天氣條件可作保守趨勢參考` : quality?.reasons?.join('、') || '尚無足夠活動資料' },
-    { label: '坡度分段', state: latestTerrain?.segments?.length ? '已分析' : '待同步', detail: latestTerrain?.segments?.length ? `每 ${latestTerrain.segment_m}m 摘要；上／下坡與配速、HR、步頻已保留，最高坡度 ${latestTerrain.max_abs_grade_pct}%` : 'Garmin 詳細圖表尚未回傳；暫只以總爬升判讀' },
-    { label: '賽後 48 小時', state: !race ? '未到賽後' : recoveryBlocked ? '暫緩' : raceCheck ? '已回報' : '待回報', detail: !race ? '下一場賽事後才需填寫' : raceCheck ? `${race.dateStr} 已記錄：疲勞 ${raceCheck.fatigue || '—'}/5、${raceCheck.pain === 'none' ? '無疼痛' : '有疼痛'}、${raceCheck.gait === 'normal' ? '步態正常' : '步態改變'}` : `${race.dateStr} 賽後請在 48 小時內填寫，未齊前不進階速度與長跑` },
+    { label: '身體恢復（睡眠／HRV／Body Battery）', state: recovery?.strained ? '先暫緩' : recovery?.concerns?.length ? '需留意' : recovery ? '無雙重警示' : '尚無資料', detail: recoveryDetail },
+    { label: '最新一趟是否可用來調整課表', state: quality?.usable ? '可作趨勢參考' : quality ? '不拿來調速' : '尚無跑步資料', detail: runConditionDetail },
+    { label: '路線坡度細節（選填）', state: latestTerrain?.segments?.length ? '有分段細節' : '未提供', detail: terrainDetail },
+    { label: '賽後恢復回報（比賽後才需要）', state: !race ? '目前不用填' : recoveryBlocked ? '先暫緩' : raceCheck ? '已回報' : '待回報', detail: !race ? '下一場賽事後 48 小時內，再填疲勞、疼痛與步態；現在不需要做任何事。' : raceCheck ? `${race.dateStr} 已記錄：疲勞 ${raceCheck.fatigue || '—'}/5、${raceCheck.pain === 'none' ? '無疼痛' : '有疼痛'}、${raceCheck.gait === 'normal' ? '步態正常' : '步態改變'}` : `${race.dateStr} 賽後請在 48 小時內填寫，未齊前不進階速度與長跑` },
   ];
   const allow = !recovery?.strained && quality?.usable && !recoveryBlocked && (!race || Boolean(raceCheck));
   const nextLong = (appData.plan || []).flatMap((week) => week.days || []).find((day) => day.type === 'long' && Number(day.km) >= 16 && day.dateStr <= todayStr());
