@@ -75,8 +75,13 @@ function buildAnalyticsRuns(activities) {
     const intensities = new Set(laps.map((lap) => String(lap?.intensity || '').toUpperCase()));
     // A bare INTERVAL lap may simply be an automatic/manual kilometre lap.
     // Only structured Garmin workout steps can define a quality-session family.
+    // ACTIVE + RECOVERY is also used by Garmin for a tempo course with a
+    // recovery block; it is not evidence of a dedicated strides prescription.
+    // A strides family therefore requires the formal course name to say so.
+    const courseName = String(activity.name || '');
+    const explicitStrides = /(?:加速跑|ST\s*快步)/i.test(courseName);
     const sessionFamily = qualityEligible
-      ? (intensities.has('INTERVAL') ? 'interval' : intensities.has('MAIN') ? 'steady' : intensities.has('ACTIVE') && intensities.has('RECOVERY') ? 'strides' : 'easy')
+      ? (intensities.has('INTERVAL') ? 'interval' : explicitStrides ? 'strides' : 'steady')
       : 'easy';
     return {
       activityId: activity.activityId,

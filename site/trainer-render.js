@@ -1077,6 +1077,7 @@ function garminActivityRecords() {
   return rawRuns.map((run) => ({
     activityId: run.activityId || null,
     date: run.date,
+    startTime: run.startTime || null,
     name: run.name || 'Garmin 跑步',
     km: Number(run.km) || 0,
     durationMin: Number(run.durationMin) || null,
@@ -1094,7 +1095,8 @@ function garminActivityRecords() {
     maxHr: Number(run.maxHr) || null,
     cadence: Number(run.cadence) || null,
     elevationGainM: Number.isFinite(Number(run.elevationGainM)) ? Number(run.elevationGainM) : null,
-    temperatureC: Number(run.temperatureC) || null,
+    temperatureC: Number.isFinite(Number(run.temperatureC)) ? Number(run.temperatureC) : null,
+    temperatureSource: run.temperatureSource || null,
     aerobicTe: Number(run.aerobicTe) || null,
     anaerobicTe: Number(run.anaerobicTe) || null,
     vo2max: Number(run.vo2max) || null,
@@ -1351,7 +1353,7 @@ function renderLatestTrainingReport(runs) {
   const lapTotalLabel = selectedLapCategory === 'ALL' ? '全部分段合計' : `${selectedGroup?.label || '所選分段'}合計`;
   const lapTotal = visibleLaps.length ? `<div class="session-lap-total" aria-label="${reviewEscape(lapTotalLabel)}"><strong>${reviewEscape(lapTotalLabel)}</strong> <div class="session-lap-total-metrics"><span>總距離 <b>${visibleLapMetrics.totalDistanceKm.toFixed(2)} km</b></span> <span>平均配速 <b>${visibleLapMetrics.averagePace}</b></span> <span>平均步頻 <b>${visibleLapMetrics.averageCadence ? `${visibleLapMetrics.averageCadence} spm` : '—'}</b></span> <span>平均心率 <b>${visibleLapMetrics.averageHr ? `HR ${visibleLapMetrics.averageHr}` : '—'}</b></span></div></div>` : '';
   const autopilot = coachReviewData?.autopilot?.metrics || {};
-  const comparisonLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[autopilot.comparisonFamily] || '主課';
+  const comparisonLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '快段＋恢復' }[autopilot.comparisonFamily] || '主課';
   const confidence = mainScope
     ? `${comparisonLabel}比較資料：最近兩次同課型主課（${autopilot.qualityComparisonSampleSize || 0}/2 筆）；兩筆比較會採較嚴格門檻才下修課表。`
     : '本次尚無主課段別，教練維持保守判讀。';
@@ -1532,10 +1534,13 @@ function renderGarminDecisionSummary() {
   const metrics = autopilot.metrics || {};
   const volumeFactor = Number(autopilot.volumeFactor) || 1;
   const factorText = volumeFactor === 1 ? '維持原量' : `${volumeFactor > 1 ? '+' : ''}${Math.round((volumeFactor - 1) * 100)}%`;
-  const familyLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '加速跑' }[metrics.comparisonFamily] || '主課';
+  const familyLabel = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '快段＋恢復' }[metrics.comparisonFamily] || '主課';
+  const comparisonSampleSize = Math.min(2, Math.max(0, Number(metrics.qualityComparisonSampleSize) || 0));
   const qualityMetric = metrics.recentPace
     ? `${formatPaceSeconds(metrics.recentPace)}${metrics.paceDeltaSeconds !== null && metrics.paceDeltaSeconds !== undefined ? ` · ${metrics.paceDeltaSeconds > 0 ? '+' : ''}${metrics.paceDeltaSeconds}s` : ''}${metrics.recentHr ? ` · HR ${Math.round(metrics.recentHr)}` : ''}`
-    : `${familyLabel}資料 ${metrics.qualityComparisonSampleSize || 0}/2 筆`;
+    : comparisonSampleSize
+      ? `已收 ${comparisonSampleSize}/2 筆${familyLabel}主課；再完成 ${2 - comparisonSampleSize} 筆才比較`
+      : `尚無可比較的${familyLabel}主課；完成 2 筆才比較`;
   const qualityMode = autopilot.qualityMode === 'skip' ? '取消品質課' : autopilot.qualityMode === 'reduce' ? '品質課降階' : '保留品質課';
   return `<div class="coach-decision-garmin" aria-label="Garmin 實跑判讀">
     <div><b>Garmin 實跑判讀</b><span class="coach-pill">${reviewEscape(autopilot.label || '資料判讀中')}</span></div>
@@ -1789,13 +1794,21 @@ function renderCoachDecisionCard(runs) {
     ? null
     : Number(rawTemperature);
   const hasActivityTemperature = Number.isFinite(activityTemperature);
+  const activityTemperatureLabel = hasActivityTemperature
+    ? `活動平均溫度 ${activityTemperature.toFixed(1)}°C（Garmin）`
+    : '本次同步未回傳活動溫度';
+  const activityHumidity = typeof activityForecastHumidity === 'function' ? activityForecastHumidity(latest) : null;
+  const activityHumidityLabel = Number.isFinite(activityHumidity)
+    ? `活動時段濕度 ${Math.round(activityHumidity)}%（Open-Meteo 預報）`
+    : '活動時段濕度尚無對應的氣象預報';
   const latestRunFacts = [
     latest?.date ? `${latest.date}${Number.isFinite(Number(latest?.km)) ? `・${Number(latest.km).toFixed(1)} km` : ''}` : null,
     Number.isFinite(totalClimb) ? `總爬升 ${totalClimb}m` : null,
-    hasActivityTemperature ? `活動溫度 ${activityTemperature}°C` : '本次同步未回傳活動溫度',
+    activityTemperatureLabel,
+    activityHumidityLabel,
   ].filter(Boolean).join('；');
   const runConditionDetail = quality?.usable
-    ? `${latestRunFacts || '最近一趟活動'}。未偵測到跑步機或陡坡限制${hasActivityTemperature ? '，活動溫度未達高溫門檻' : '；本次未以活動溫度校正'}，可作趨勢參考；不會直接改寫你的配速。`
+    ? `${latestRunFacts || '最近一趟活動'}。未偵測到跑步機或陡坡限制${hasActivityTemperature ? '；活動溫度已納入熱度校正，未達 35°C 的排除門檻' : '；本次未以活動溫度校正'}，可作趨勢參考；不會直接改寫你的配速。`
     : quality
       ? `${latestRunFacts || '最近一趟活動'}。本次不拿來校正配速：${quality.reasons.join('、')}。`
       : '尚無可用跑步資料，無法判斷是否適合用來調整課表。';

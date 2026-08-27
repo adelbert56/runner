@@ -1165,7 +1165,7 @@ function renderHeroPanel() {
 // 台中市大雅區 7 日預報（open-meteo，免金鑰）；提供清晨／傍晚跑步時段，快取 90 分鐘
 let trainerWeather = null;
 async function loadTrainerWeather() {
-  const CACHE_KEY = 'trainer-weather-cache-v3';
+  const CACHE_KEY = 'trainer-weather-cache-v4';
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
     if (cached?.byDate && Date.now() - cached.at < 90 * 60 * 1000) {
@@ -1174,16 +1174,18 @@ async function loadTrainerWeather() {
     }
   } catch { /* 快取壞掉就直接重抓 */ }
   try {
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=24.2291408&longitude=120.64778&daily=temperature_2m_max,precipitation_probability_max&hourly=precipitation_probability&timezone=Asia%2FTaipei&forecast_days=7');
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=24.2291408&longitude=120.64778&daily=temperature_2m_max,precipitation_probability_max&hourly=precipitation_probability,relative_humidity_2m&timezone=Asia%2FTaipei&forecast_days=7');
     if (!res.ok) return;
     const data = await res.json();
     const hourlyRain = data.hourly?.time?.reduce((map, time, index) => {
       const date = String(time).slice(0, 10);
       const hour = Number(String(time).slice(11, 13));
-      if (!map[date]) map[date] = { morning: [], evening: [] };
+      if (!map[date]) map[date] = { morning: [], evening: [], humidityByHour: {} };
       const value = data.hourly?.precipitation_probability?.[index];
+      const humidity = data.hourly?.relative_humidity_2m?.[index];
       if (Number.isFinite(value) && hour >= 5 && hour <= 8) map[date].morning.push(value);
       if (Number.isFinite(value) && hour >= 18 && hour <= 21) map[date].evening.push(value);
+      if (Number.isFinite(humidity)) map[date].humidityByHour[hour] = humidity;
       return map;
     }, {}) || {};
     const windowRain = (values) => values?.length ? Math.max(...values) : null;
@@ -1194,7 +1196,8 @@ async function loadTrainerWeather() {
         tmax: data.daily.temperature_2m_max?.[index] ?? null,
         rain: data.daily.precipitation_probability_max?.[index] ?? null,
         morningRain: windowRain(windows.morning),
-        eveningRain: windowRain(windows.evening)
+        eveningRain: windowRain(windows.evening),
+        humidityByHour: windows.humidityByHour || {}
       };
     });
     trainerWeather = byDate;
@@ -1202,6 +1205,13 @@ async function loadTrainerWeather() {
   } catch { /* 離線或 API 掛掉：不顯示天氣，不影響課表 */ }
 }
 
+function activityForecastHumidity(run) {
+  const date = String(run?.date || '').slice(0, 10);
+  const startTime = String(run?.startTime || '');
+  const hour = Number(startTime.match(/(?:T|\s)(\d{2}):/)?.[1]);
+  const humidity = trainerWeather?.[date]?.humidityByHour?.[hour];
+  return Number.isFinite(Number(humidity)) ? Number(humidity) : null;
+}
 function dayWeatherLine(day, { showForRest = true } = {}) {
   const wx = trainerWeather?.[day.dateStr];
   if (!wx || wx.tmax === null) return '';
@@ -2647,11 +2657,13 @@ function init() {
     syncBackToTop();
   }
   loadTrainerWeather().then(() => {
-    // 天氣載入後先做出發前調整，週視圖才會直接呈現調整後的今天
+    // 天氣載入後先做出發前調整，週視圖才會直接呈現調整後的今天。
+    // 活動時段濕度也在這一步到位，因此同步重繪已開啟的分析卡。
     if (typeof runCoachAdaptation === 'function') runCoachAdaptation('weather-ready');
     if (trainerWeather && document.getElementById('plan-tab-week')) {
       jumpToPhaseWeek(currentWeek);
     }
+    if (typeof refreshCoachReviewPanels === 'function') refreshCoachReviewPanels();
   });
   syncRegisteredSundayRaces();
   window.addEventListener('storage', (event) => {

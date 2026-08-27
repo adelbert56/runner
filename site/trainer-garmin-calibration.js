@@ -16,7 +16,7 @@ function calibrationDataQuality(run) {
   if (Number(run?.temperatureC) >= 35) reasons.push(`高溫 ${run.temperatureC}°C`);
   const forecast = run?.date === todayStr() ? trainerWeather?.[run.date] : null;
   if (Number(forecast?.tmax) >= 36) reasons.push(`預報高溫 ${forecast.tmax}°C`);
-  if (Number(forecast?.rain) >= 70) reasons.push(`降雨機率 ${forecast.rain}%`);
+  if (Number(forecast?.rain) >= 70) reasons.push(`今日預報降雨機率 ${forecast.rain}%`);
   return { usable: reasons.length === 0, reasons, terrainAvailable: Boolean(terrain?.segments?.length) };
 }
 
