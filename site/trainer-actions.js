@@ -1185,7 +1185,7 @@ function coachHrGuard(text) {
 
 // 將 Garmin 結構化主課、課後 RPE 與週檢核收斂成可稽核的升級證據。未結構化
 // 的全程紀錄仍會計入跑量，但不能當成放行 I 課或拉長長跑的證明。
-function weeklyCoachPromotionEvidence(weekNum, { painConcern = false } = {}) {
+function weeklyCoachPromotionEvidence(weekNum, { painConcern = false, answers = [] } = {}) {
   const week = appData.plan?.[Number(weekNum) - 1];
   const qualityDays = (week?.days || []).filter((day) => ['tempo', 'interval'].includes(day.type));
   if (!qualityDays.length) return { qualityPlanned: false };
@@ -1216,13 +1216,16 @@ function weeklyCoachPromotionEvidence(weekNum, { painConcern = false } = {}) {
     };
   });
   const notes = details.map((item) => item.note).join(' ');
-  const nextDayPain = /(?:左腳|腳痛|疼痛|步態|頭暈|噁心)/.test(notes);
+  const nextDayPain = /(?:腳痛|疼痛|步態|跛行|胸悶|頭暈|暈眩|噁心)/.test(notes);
   return {
     qualityPlanned: true,
     qualityCompleted: details.every((item) => item.completed),
     structuredEvidence: details.every((item) => item.structured),
     painConcern: Boolean(painConcern),
     nextDayPain,
+    rpeRecorded: details.every((item) => item.rpe >= 1 && item.rpe <= 10),
+    nextDayRecoveryConfirmed: Boolean(answers[3]),
+    talkTestPassed: Boolean(answers[4]),
     rpe: Math.max(0, ...details.map((item) => item.rpe)),
     paceCapBreached: details.some((item) => item.paceCapBreached),
     hrCapBreached: details.some((item) => item.hrCapBreached),
@@ -1274,7 +1277,7 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const score = answers.filter(Boolean).length;
   const timing = weeklyCheckinTiming();
   const decision = checkinSafetyDecision({ answers, fatigue, painConcern: effectivePainConcern });
-  const promotionGate = coachPromotionGate(weeklyCoachPromotionEvidence(currentWeek, { painConcern: effectivePainConcern }));
+  const promotionGate = coachPromotionGate(weeklyCoachPromotionEvidence(currentWeek, { painConcern: effectivePainConcern, answers }));
   applyCoachPromotionGate(decision, promotionGate);
   if (!timing.ready && decision.allowIntensity && !earlyTrigger) {
     decision.result = '維持';

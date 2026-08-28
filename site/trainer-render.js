@@ -3706,7 +3706,7 @@ function removedWorkoutDetailDrawer(dateStr) {
     <div class="drawer-metrics"><div><span>距離／時間</span><b>${day.km ? `${day.km} km` : day.duration || '依身體狀態'}</b></div><div><span>配速／心率</span><b>${[day.pace, day.hrTarget].filter(Boolean).join(' · ') || '舒適恢復'}</b></div><div><span>強度</span><b>${trainingTypeLabel(day.type, day.focus)}</b></div></div>
     ${dayWeatherLine(day)}
     <section class="drawer-section"><h3>課程內容</h3>${day.type === 'rest' ? renderSupportCards(day.supportBlocks) : renderStepCards(attachCourseGuides(day.steps, day.type))}</section>
-    ${(day.injuryNote || day.recoveryProtection || day.heatNote || resolved.rationale) ? `<section class="drawer-section drawer-notes"><h3>執行提醒</h3>${resolved.rationale ? `<p>${reviewEscape(resolved.rationale)}</p>` : ''}${day.injuryNote ? `<p>🦶 ${reviewEscape(day.injuryNote)}</p>` : ''}${day.recoveryProtection ? `<p>🛡️ ${reviewEscape(day.recoveryProtection)}</p>` : ''}${day.heatNote ? `<p>☀️ ${reviewEscape(day.heatNote)}</p>` : ''}</section>` : ''}
+    ${(day.executionNote || day.injuryNote || day.recoveryProtection || day.heatNote || resolved.rationale) ? `<section class="drawer-section drawer-notes"><h3>執行提醒</h3>${resolved.rationale ? `<p>${reviewEscape(resolved.rationale)}</p>` : ''}${day.executionNote ? `<p>🧭 ${reviewEscape(day.executionNote)}</p>` : ''}${day.injuryNote ? `<p>🦶 ${reviewEscape(day.injuryNote)}</p>` : ''}${day.recoveryProtection ? `<p>🛡️ ${reviewEscape(day.recoveryProtection)}</p>` : ''}${day.heatNote ? `<p>☀️ ${reviewEscape(day.heatNote)}</p>` : ''}</section>` : ''}
     <div class="drawer-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">跑步陪伴</button></div>${actions}`;
   backdrop.hidden = false;
   drawer.classList.add('open');

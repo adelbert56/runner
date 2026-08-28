@@ -105,12 +105,15 @@ function coachPromotionGate(evidence) {
   if (raceRecovery?.blocked) reasons.push(raceRecovery.reason);
   if (!evidence.qualityCompleted) reasons.push('品質課未完成');
   if (!evidence.structuredEvidence) reasons.push('Garmin 未辨識到主課段，無法判讀節奏與心率');
-  if (evidence.painConcern || evidence.nextDayPain) reasons.push('左腳疼痛、步態改變或隔天症狀未消退');
+  if (!evidence.rpeRecorded) reasons.push('未取得有效主課 RPE，不能把資料缺失當成恢復良好');
+  if (!evidence.nextDayRecoveryConfirmed) reasons.push('尚未確認長跑／品質課隔天恢復');
+  if (!evidence.talkTestPassed) reasons.push('未確認輕鬆跑／長跑仍可短句交談');
+  if (evidence.painConcern || evidence.nextDayPain) reasons.push('疼痛、步態改變或隔天症狀未消退');
   if (Number(evidence.rpe) >= 8) reasons.push(`主課 RPE ${evidence.rpe}/10 過高`);
   if (evidence.paceCapBreached) reasons.push('主課快過處方的最快護欄');
   if (evidence.hrCapBreached) reasons.push('主課超過心率上限');
   if (Number(evidence.hrDrift) >= 8) reasons.push(`主課後半心率漂移 +${Math.round(Number(evidence.hrDrift))} bpm`);
   if (evidence.painConcern || evidence.nextDayPain || raceRecovery?.blocked) return { status: 'blocked', label: '不通過', reasons };
   if (reasons.length) return { status: 'conditional', label: '條件通過', reasons };
-  return { status: 'pass', label: '通過', reasons: ['主課有結構化紀錄，未見配速／心率護欄違規，且恢復自評正常'] };
+  return { status: 'pass', label: '通過', reasons: ['主課有結構化紀錄、RPE 與隔天恢復，未見配速／心率護欄違規，且輕鬆跑仍可交談'] };
 }

@@ -88,6 +88,16 @@ vm.createContext(longRunHrSandbox);
 vm.runInContext(extractFunction(trainerPlanJs, 'longRunHrTarget'), longRunHrSandbox);
 const { longRunHrTarget } = longRunHrSandbox;
 
+const stressBudgetSandbox = {
+  buildDayCard: (dow, dateStr, type, km, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName, focus, label) => ({ dow, dateStr, type, km, focus, label })
+};
+vm.createContext(stressBudgetSandbox);
+vm.runInContext([
+  extractFunction(trainerPlanJs, 'stressEventKind'),
+  extractFunction(trainerPlanJs, 'applyStressBudget')
+].join('\n\n'), stressBudgetSandbox);
+const { applyStressBudget } = stressBudgetSandbox;
+
 const coachCopySandbox = {};
 vm.createContext(coachCopySandbox);
 vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), extractFunction(trainerRenderJs, "normalizeCoachWorkoutSteps")].join("\n\n"), coachCopySandbox);
@@ -291,9 +301,23 @@ assertThrows(() => assertPublishableCoachReview(JSON.stringify({
   },
 })), "cumulative total cannot be published as a second Garmin distance step");
 
-assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, rpe: 7 }).status, 'pass', "structured quality evidence with controlled RPE passes the progression gate");
-assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: false, rpe: 6 }).status, 'conditional', "missing structured Garmin main evidence cannot advance long runs or intervals");
-assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, nextDayPain: true, rpe: 6 }).status, 'blocked', "next-day pain blocks quality progression regardless of pace result");
+const completePromotionEvidence = { qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, rpeRecorded: true, nextDayRecoveryConfirmed: true, talkTestPassed: true, rpe: 7 };
+assertEqual(coachPromotionGate(completePromotionEvidence).status, 'pass', "structured quality evidence with controlled RPE, recovery, and talk test passes the progression gate");
+assertEqual(coachPromotionGate({ ...completePromotionEvidence, structuredEvidence: false }).status, 'conditional', "missing structured Garmin main evidence cannot advance long runs or intervals");
+assertEqual(coachPromotionGate({ ...completePromotionEvidence, rpeRecorded: false }).status, 'conditional', "missing RPE is evidence insufficient and cannot advance training");
+assertEqual(coachPromotionGate({ ...completePromotionEvidence, nextDayRecoveryConfirmed: false }).status, 'conditional', "unconfirmed next-day recovery cannot advance training");
+assertEqual(coachPromotionGate({ ...completePromotionEvidence, talkTestPassed: false }).status, 'conditional', "failed or missing talk test cannot advance training");
+assertEqual(coachPromotionGate({ ...completePromotionEvidence, nextDayPain: true, rpe: 6 }).status, 'blocked', "next-day symptoms block quality progression regardless of pace result");
+
+const stressBudgetDays = applyStressBudget([
+  { dow: 1, dateStr: '2026-09-01', type: 'tempo', km: 8 },
+  { dow: 4, dateStr: '2026-09-04', type: 'long', km: 14, longRunProgression: true },
+  { dow: 6, dateStr: '2026-09-06', type: 'race', km: 10 }
+], {}, false, false, false, '2026-09-01', 1, 'build');
+assertEqual(stressBudgetDays[0]?.type, 'easy', "lower-priority quality work becomes recovery when a progressive long run and race already use the budget");
+assertEqual(stressBudgetDays[1]?.stressBudget, '1/2', "progressive long run retains the first weekly stress-budget slot");
+assertEqual(stressBudgetDays[2]?.stressBudget, '2/2', "registered race retains the second weekly stress-budget slot");
+assertEqual(stressBudgetDays[0]?.recoveryProtection?.includes('壓力事件'), true, "stress-budget downgrade retains an auditable reason");
 
 assertEqual(companionWorkoutType({ type: 'easy', focus: 'recovery', coachPlan: true, task: '節奏跑 20 分鐘後 E 跑補量' }), 'tempo', "coach tempo prescription takes precedence over stale easy/recovery fields for companion selection");
 assertEqual(runCompanionRecommendation({ type: 'easy', focus: 'recovery', coachPlan: true, task: '節奏跑 20 分鐘後 E 跑補量' }).title, '節奏跑的陪伴', "tempo companion never falls back to recovery content");

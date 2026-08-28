@@ -922,12 +922,15 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
           ? `HR ${zones.intervalLow}–${zones.intervalHigh}`
           : '';
   card.workoutStructure = buildGarminWorkoutStructure(type, card.steps, km, [card.pace, card.hrTarget].filter(Boolean).join(' · '));
+  if (type === 'long' && !hasInjury) {
+    card.executionNote = `長跑以可短句交談、RPE 4–6 為主；HR 155 是上限，不是要追的目標。若心率持續超過 155、說話困難或感覺吃力，先走 1 分鐘再跑；仍無法恢復就縮短並結束，不補里程也不收快。`;
+  }
   if (type === 'long' && km >= 16) {
     card.fuelingNote = '補給演練：使用賽日會吃的早餐與水分策略；60 分鐘後每 35–40 分鐘小口補給，腸胃不適就停止並記錄。';
     card.task = `${card.task}｜補給演練：使用熟悉早餐與水分策略。`;
   }
   if (hasInjury && ['tempo', 'interval'].includes(type)) {
-    card.injuryNote = '傷處（左腳等）當天有任何不穩或異樣 → 本課改輕鬆跑，當週退回上一級跑量。';
+    card.injuryNote = '任何局部疼痛、步態改變或越跑越不對勁 → 本課改輕鬆跑，當週退回上一級跑量。';
   } else if (hasInjury && type === 'long') {
     card.injuryNote = '長跑距離已為傷況保護版（下修 20%）；當天有任何不穩或異樣 → 提前結束，不硬撐里程。';
   } else if (profile.cadenceCaution && type === 'long') {
@@ -967,6 +970,37 @@ function applyCourseSpacingGuard(days, profile, isDeload, isTaper, hasInjury, to
       : '兩堂品質課相隔不足一天，後一堂已自動改為恢復跑，避免連續高負荷。';
     const recovery = buildDayCard(day.dow, day.dateStr, 'easy', Math.max(3, Math.round((day.km || 0) * 0.85 * 10) / 10), profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName, 'recovery', '恢復保護');
     recovery.recoveryProtection = reason;
+    return recovery;
+  });
+}
+
+function stressEventKind(day) {
+  if (day?.type === 'race' || day?.isRace) return '賽事';
+  if (['tempo', 'interval'].includes(day?.type)) return '品質課';
+  if (day?.type === 'long' && day?.longRunProgression) return '長跑品質段';
+  return '';
+}
+
+// 一週的強刺激最多保留兩個。一般長跑不算品質事件；只有明確含品質段的長跑才
+// 佔用額度，避免為了追求變化而把長跑、品質課和賽事全部堆在同一週。
+function applyStressBudget(days, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName) {
+  const ranked = days.map((day, index) => ({ day, index, kind: stressEventKind(day) }))
+    .filter((item) => item.kind)
+    .sort((left, right) => {
+      const priority = { '賽事': 3, '長跑品質段': 2, '品質課': 1 };
+      return (priority[right.kind] - priority[left.kind]) || (left.index - right.index);
+    });
+  const retained = new Set(ranked.slice(0, 2).map((item) => item.index));
+  let used = 0;
+  return days.map((day, index) => {
+    const kind = stressEventKind(day);
+    if (!kind || retained.has(index)) {
+      if (kind) used += 1;
+      return kind ? { ...day, stressEvent: kind, stressBudget: `${used}/2` } : day;
+    }
+    const recovery = buildDayCard(day.dow, day.dateStr, 'easy', Math.max(3, Math.round((day.km || 0) * 0.8 * 10) / 10), profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName, 'recovery', '壓力預算保護');
+    recovery.recoveryProtection = `本週已保留兩個壓力事件；原定${kind}改為恢復跑，避免與既有長跑／品質課／賽事疊加。`;
+    recovery.stressBudget = '2/2';
     return recovery;
   });
 }
@@ -1020,7 +1054,8 @@ function buildWeekDays(profile, trainDows, longDow, otherDows, targetKm, isDeloa
     }
   }
 
-  return applyCourseSpacingGuard(days, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName);
+  const spaced = applyCourseSpacingGuard(days, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName);
+  return applyStressBudget(spaced, profile, isDeload, isTaper, hasInjury, today, weekNum, phaseName);
 }
 
 function buildPlan(profile) {
