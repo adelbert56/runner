@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T02:18:00.330Z",
+  "generated_at": "2026-08-28T12:48:18.059Z",
   "basis_date": "2026-08-28",
   "races": {
     "total": 65,
@@ -29,18 +29,17 @@
   "content": {
     "shoe_cards": 60,
     "news_cards": 60,
-    "newest_shoe_date": "2026-08-27",
-    "newest_news_date": "2026-08-27",
+    "newest_shoe_date": "2026-08-28",
+    "newest_news_date": "2026-08-28",
     "published_count": 120,
-    "candidate_count": 144,
+    "candidate_count": 142,
     "editorial_count": 4,
     "candidate_by_category": {
-      "跑鞋新品": 67,
-      "跑步新聞": 57,
+      "跑鞋新品": 69,
+      "跑步新聞": 54,
       "入門知識": 9,
       "補給": 3,
-      "訓練": 7,
-      "恢復": 1
+      "訓練": 7
     },
     "source_stable_count": 11,
     "source_watch_count": 0,
@@ -53,7 +52,7 @@
         "source_type": "跑步新聞 / 跑鞋專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 8,
+        "candidate_count": 6,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -74,7 +73,7 @@
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 14,
+        "candidate_count": 9,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -104,7 +103,7 @@
         "source_type": "英文跑鞋評測 / 訓練知識",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 148,
+        "candidate_count": 151,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,
@@ -128,8 +127,8 @@
         "error_details": [
           {
             "url": "https://www.tomsguide.com/wellness/running",
-            "kind": "http",
-            "detail": "404 Not Found"
+            "kind": "timeout",
+            "detail": "23"
           }
         ]
       },
@@ -141,7 +140,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 6,
+        "consecutive_failures": 7,
         "base_priority": 2,
         "effective_priority": 1,
         "error_kind": "unknown",
@@ -155,7 +154,7 @@
         "source_type": "跑鞋選購 / 健康訓練",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 42,
+        "candidate_count": 41,
         "consecutive_failures": 0,
         "base_priority": 3,
         "effective_priority": 4,

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T02:17:59.956Z",
+  "generated_at": "2026-08-28T12:48:17.545Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-08-hoka-clifton-11-review-by-ciaoantsai",
@@ -79,6 +79,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114603-subtitle-e7-ac-ac-e4-ba-8c-e",
+      "type": "news",
+      "title": "第二年的約定，美國百年專業運動品牌BROOKS 再度攜手華航馬拉松，打造年度跑步盛事",
+      "date": "2026-08-28",
+      "date_source": "source",
+      "article_date": "2026-08-28",
+      "first_seen_at": "2026-08-28",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "備受跑者期待的《2026華航馬拉松》，將於10月31日正式登場。美國百年專業運動品牌BROOKS 將連續第二年以合作夥伴身分投入賽事。延續去年的合作基礎，雙方今年持續把焦點放在跑者需求與參與體驗，並將品牌專業從賽事現場延伸至備賽、訓練與正式。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114603&subtitle=%E7%AC%AC%E4%BA%8C%E5%B9%B4%E7%9A%84%E7%B4%84%E5%AE%9A%EF%BC%8C%E7%BE%8E%E5%9C%8B%E7%99%BE%E5%B9%B4%E5%B0%88%E6%A5%AD%E9%81%8B%E5%8B%95%E5%93%81%E7%89%8CBROOKS%20%E5%86%8D%E5%BA%A6%E6%94%9C%E6%89%8B%E8%8F%AF%E8%88%AA%E9%A6%AC%E6%8B%89%E6%9D%BE%EF%BC%8C%E6%89%93%E9%80%A0%E5%B9%B4%E5%BA%A6%E8%B7%91%E6%AD%A5%E7%9B%9B%E4%BA%8B&label=all",
+      "score": 21,
+      "source_origin": "candidate",
+      "published_at": "2026-08-28",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
       ]
     },
     {
@@ -462,46 +482,6 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-08-puma-speedcat-latte-brown-fw-2026",
-      "type": "news",
-      "title": "Speedcat 入秋先換「拿鐵色」！PUMA 淺棕新色，白 T、寬褲就能穿出秋天",
-      "date": "2026-08-27",
-      "date_source": "source",
-      "article_date": "2026-08-27",
-      "first_seen_at": "2026-08-28",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "一雙鞋流行超過一季之後，接下來的問題就是要怎麼繼續穿？從去年一路紅到現在的薄底鞋就是如此，而其中最具代表性的 PUMA Speedcat，進入初秋後也開始換上更適合季節的顏色。",
-      "url": "https://kenlu.net/2026/08/puma-speedcat-latte-brown-fw-2026/",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-08-28",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-241187-2027-e6-b8-a3-e6-89-93-e8-87-ba-e5-8c-97-e5-85-a",
-      "type": "news",
-      "title": "2027 渣打臺北公益馬拉松報名啟動",
-      "date": "2026-08-27",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-27",
-      "source": "動一動",
-      "category": "賽事資訊",
-      "summary": "2026 年 8 月 26 日，台北 ─ 由中華民國路跑協會主辦、渣打銀行冠名贊助的臺灣指標性馬拉松賽事「2027 渣打臺北公益馬拉松」，今（26）日宣布正式啟動報名，賽事將於明（2027）年 1 月 10 日熱血開跑，2027 年賽事設有 3 公里、12 公里、半馬及全馬等多元組別，提供跑者更多元...",
-      "url": "https://www.don1don.com/archives/241187/2027-%e6%b8%a3%e6%89%93%e8%87%ba%e5%8c%97%e5%85%ac%e7%9b%8a%e9%a6%ac%e6%8b%89%e6%9d%be%e5%a0%b1%e5%90%8d%e5%95%9f%e5%8b%95",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-08-28",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
       "id": "news-www-don1don-com-archives-241162-e4-b9-85-e5-9d-90-e4-b8-80-e6-95-b4-e5-a4-a9-e8-",
       "type": "news",
       "title": "久坐一整天 要跑步運動多少才補得回來？",
@@ -539,26 +519,6 @@
       "publish_status": "published",
       "source_aliases": [
         "動一動"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114586-subtitle-e3-80-90-e5-93-81-e",
-      "type": "news",
-      "title": "【品牌動態】曹佑寧不被定義的高級品味 PUMA SPEEDCAT 簡單搭出初秋氛圍",
-      "date": "2026-08-27",
-      "date_source": "source",
-      "article_date": "2026-08-27",
-      "first_seen_at": "2026-08-27",
-      "source": "運動筆記",
-      "category": "跑鞋裝備",
-      "summary": "初秋穿搭不需要過度堆疊，簡單經典就能成就耐看的質感。PUMA 攜手演員曹佑寧，以簡約俐落的日常造型，演繹帶著拿鐵淺棕的經典 Speedcat，從色調、版型到鞋款細節展現恰到好處的層次與比例，營造屬於初秋的時髦氛圍；此次曹佑寧以簡潔俐落的造型。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114586&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E6%9B%B9%E4%BD%91%E5%AF%A7%E4%B8%8D%E8%A2%AB%E5%AE%9A%E7%BE%A9%E7%9A%84%E9%AB%98%E7%B4%9A%E5%93%81%E5%91%B3%20PUMA%20SPEEDCAT%20%E7%B0%A1%E5%96%AE%E6%90%AD%E5%87%BA%E5%88%9D%E7%A7%8B%E6%B0%9B%E5%9C%8D&label=all",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-08-28",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
@@ -642,26 +602,6 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-06-the-north-face-exploration-summit-trail-run-houhou-87815-inter",
-      "type": "news",
-      "title": "跑步之後，探索才開始 我還是充滿好奇心",
-      "date": "2026-06-08",
-      "date_source": "source",
-      "article_date": "2026-06-08",
-      "first_seen_at": "2026-07-02",
-      "source": "KENLU",
-      "category": "賽事資訊",
-      "summary": "就是越野跑者在每次完賽後所得到的多巴胺吧。「我還記得第二場越野賽 Formosa Trails 18K，那時才剛開始接觸越野跑，第一次跑山徑比例高的賽道，」侯士婧看著腳上穿著的 The North Face Summit 系列 VECTIV PRO 3。",
-      "url": "https://kenlu.net/2026/06/the-north-face-exploration-summit-trail-run-houhou-87815-interview/",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-08-28",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
       "id": "news-irsports-com-tw-w-bd-1569",
       "type": "news",
       "title": "IR跑步科學｜跑步經濟性：跑姿要怎麼調，才會更省力？ | 部落格 | IR SPORTS 跑創運動",
@@ -679,6 +619,46 @@
       "publish_status": "published",
       "source_aliases": [
         "IR SPORTS"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a73552126-7-exercise-burns-the-most",
+      "type": "news",
+      "title": "消耗熱量最多的運動是「這個」？專業教練揭「7種高效燃脂運動」有效替代跑步，對膝蓋、關節更友善",
+      "date": "2026-08-28",
+      "date_source": "source",
+      "article_date": "2026-08-28",
+      "first_seen_at": "2026-08-28",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "名人健身教練揭露「熱量消耗最高」的7種運動！",
+      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a73552126/7-exercise-burns-the-most-calories/",
+      "score": 5,
+      "source_origin": "candidate",
+      "published_at": "2026-08-28",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-g73549651-harvard-best-fat-burning-",
+      "type": "news",
+      "title": "討厭跑步必看！哈佛大學認證「這運動」才是燃脂天花板： 效率完勝慢跑，花最少時間瘦最快",
+      "date": "2026-08-28",
+      "date_source": "source",
+      "article_date": "2026-08-28",
+      "first_seen_at": "2026-08-28",
+      "source": "Women's Health Taiwan",
+      "category": "入門知識",
+      "summary": "同時提升心肺功能、耐力與下半身肌力而且幾乎不需器材！",
+      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/g73549651/harvard-best-fat-burning-exercise/",
+      "score": 5,
+      "source_origin": "candidate",
+      "published_at": "2026-08-28",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -713,26 +693,6 @@
       "category": "跑步新聞",
       "summary": "為什麼是HYROX？Amazon想賣什麼？運動消費又將走向哪裡？",
       "url": "https://www.womenshealthmag.com/tw/fitness/a73527080/amazon-hyrox-global-partnership-fitness-ecommerce-trend/",
-      "score": 5,
-      "source_origin": "candidate",
-      "published_at": "2026-08-28",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a73491830-treadmill-vs-walking",
-      "type": "news",
-      "title": "跑步機 vs. 戶外走路哪個好？減脂、燃脂、心肺效果一次比較，3大迷思別再信",
-      "date": "2026-08-22",
-      "date_source": "source",
-      "article_date": "2026-08-22",
-      "first_seen_at": "2026-08-24",
-      "source": "Women's Health Taiwan",
-      "category": "跑步新聞",
-      "summary": "想靠走路減脂、增加日常活動量，卻不知道該上跑步機還是直接出門走？",
-      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a73491830/treadmill-vs-walking/",
       "score": 5,
       "source_origin": "candidate",
       "published_at": "2026-08-28",
@@ -833,26 +793,6 @@
       "category": "訓練",
       "summary": "研究指出： 這類運動的「間歇性高強度訓練（HIIT）」特質正是抗老關鍵。",
       "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a73517697/exercise-to-live-longer/",
-      "score": 4,
-      "source_origin": "candidate",
-      "published_at": "2026-08-28",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-g73500621-need-to-wear-shoes-for-sl",
-      "type": "news",
-      "title": "室內「超慢跑」到底要不要穿鞋？想要不傷膝蓋，教練教你這樣做",
-      "date": "2026-08-22",
-      "date_source": "source",
-      "article_date": "2026-08-22",
-      "first_seen_at": "2026-08-24",
-      "source": "Women's Health Taiwan",
-      "category": "恢復保養",
-      "summary": "你也是喜歡在家超慢跑的人嗎？超慢跑時到底要不要穿鞋？來看專業教練怎麼說。",
-      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/g73500621/need-to-wear-shoes-for-slow-jogging-indoor/",
       "score": 4,
       "source_origin": "candidate",
       "published_at": "2026-08-28",
@@ -1096,7 +1036,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-28",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "news-kenlu-net-2026-05-hoka-speedgoat-7-review-by-yangzz421",
@@ -1113,7 +1056,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-28",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "news-kenlu-net-2026-05-hoka-mach-7-review-by-sain",
@@ -1130,7 +1076,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-28",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "news-kenlu-net-2026-06-chi-wei-puma-deviate-nitro-elite-4-review",
@@ -1147,7 +1096,47 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-08-28",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114468-subtitle-e3-80-90-e6-96-b0-e",
+      "type": "news",
+      "title": "【新鞋上市】首度進軍混合體能競速鞋競賽市場，On Cloud X Tempo Pro 8/6 開賣",
+      "date": "2026-08-07",
+      "date_source": "source",
+      "article_date": "2026-08-07",
+      "first_seen_at": "2026-08-08",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "隨著 HYROX 等「混合體能競賽（Hybrid Fitness Racing）」快速成長，參賽者不只要跑步，還得在比賽過程穿插推雪橇、拉雪橇、弓箭步、划船、Wall Ball 等動作。對鞋子的要求也變得相當矛盾：跑步時需要輕量、緩震與回彈。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114468&subtitle=%E3%80%90%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%E3%80%91%E9%A6%96%E5%BA%A6%E9%80%B2%E8%BB%8D%E6%B7%B7%E5%90%88%E9%AB%94%E8%83%BD%E7%AB%B6%E9%80%9F%E9%9E%8B%E7%AB%B6%E8%B3%BD%E5%B8%82%E5%A0%B4%EF%BC%8COn%20Cloud%20X%20Tempo%20Pro%208/6%20%E9%96%8B%E8%B3%A3&label=all",
+      "score": 26,
+      "source_origin": "archive",
+      "published_at": "2026-08-28",
       "publish_status": "published"
+    },
+    {
+      "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
+      "type": "news",
+      "title": "I ran 40 miles in the Hoka Clifton Pro and it&rsquo;s the best Clifton I&rsquo;ve tested and a worthwhile upgrade on the Clifton 11",
+      "date": "2026-07-19",
+      "date_source": "source",
+      "article_date": "2026-07-19",
+      "first_seen_at": "2026-07-21",
+      "source": "Tom's Guide Running",
+      "category": "跑鞋裝備",
+      "summary": "A comfortable cruiser for daily training runs。",
+      "url": "https://www.tomsguide.com/wellness/running/hoka-clifton-pro-review",
+      "score": 23,
+      "source_origin": "candidate",
+      "published_at": "2026-08-28",
+      "publish_status": "published",
+      "source_aliases": [
+        "Tom's Guide Running"
+      ]
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-saucony-endorphin-elite-3-review",
@@ -1162,6 +1151,26 @@
       "summary": "Squishy, springy and speedy。",
       "url": "https://www.tomsguide.com/wellness/running/saucony-endorphin-elite-3-review",
       "score": 23,
+      "source_origin": "candidate",
+      "published_at": "2026-08-28",
+      "publish_status": "published",
+      "source_aliases": [
+        "Tom's Guide Running"
+      ]
+    },
+    {
+      "id": "news-www-tomsguide-com-wellness-running-asics-blazeblast-review",
+      "type": "news",
+      "title": "I ran 35 miles in the Asics Blazeblast, and it proved the perfect vacation shoe thanks to its versatile design",
+      "date": "2026-08-05",
+      "date_source": "source",
+      "article_date": "2026-08-05",
+      "first_seen_at": "2026-08-07",
+      "source": "Tom's Guide Running",
+      "category": "跑鞋裝備",
+      "summary": "A Novablast built for gravel roads。",
+      "url": "https://www.tomsguide.com/wellness/running/asics-blazeblast-review",
+      "score": 17,
       "source_origin": "candidate",
       "published_at": "2026-08-28",
       "publish_status": "published",
@@ -1190,23 +1199,23 @@
       ]
     },
     {
-      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114590-subtitle-e3-80-90-e7-b7-a8-e",
+      "id": "shoe-kenlu-net-2026-08-nike-acg-picklejus-launch",
       "type": "shoe",
-      "title": "【編輯開箱】中底配方幾乎沒變！BROOKS HYPERION MAX 4 為何把改款重點放在鞋面？",
-      "date": "2026-08-27",
-      "date_source": "source",
-      "article_date": "2026-08-27",
+      "title": "新聞分享 / 酸黃瓜、山羊蹄也能做鞋？Nike ACG 發表頂級越野跑鞋 Picklejus",
+      "date": "2026-08-28",
+      "date_source": "first_seen",
+      "article_date": "",
       "first_seen_at": "2026-08-28",
-      "source": "運動筆記",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114590&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91%E4%B8%AD%E5%BA%95%E9%85%8D%E6%96%B9%E5%B9%BE%E4%B9%8E%E6%B2%92%E8%AE%8A%EF%BC%81BROOKS%20HYPERION%20MAX%204%20%E7%82%BA%E4%BD%95%E6%8A%8A%E6%94%B9%E6%AC%BE%E9%87%8D%E9%BB%9E%E6%94%BE%E5%9C%A8%E9%9E%8B%E9%9D%A2%EF%BC%9F&label=all",
-      "score": 33,
+      "source": "KENLU",
+      "category": "越野",
+      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
+      "url": "https://kenlu.net/2026/08/nike-acg-picklejus-launch/",
+      "score": 27,
       "source_origin": "candidate",
       "published_at": "2026-08-28",
       "publish_status": "published",
       "source_aliases": [
-        "運動筆記"
+        "KENLU"
       ]
     },
     {
@@ -1507,6 +1516,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114590-subtitle-e3-80-90-e7-b7-a8-e",
+      "type": "shoe",
+      "title": "【編輯開箱】中底配方幾乎沒變！BROOKS HYPERION MAX 4 為何把改款重點放在鞋面？",
+      "date": "2026-08-27",
+      "date_source": "source",
+      "article_date": "2026-08-27",
+      "first_seen_at": "2026-08-28",
+      "source": "運動筆記",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114590&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91%E4%B8%AD%E5%BA%95%E9%85%8D%E6%96%B9%E5%B9%BE%E4%B9%8E%E6%B2%92%E8%AE%8A%EF%BC%81BROOKS%20HYPERION%20MAX%204%20%E7%82%BA%E4%BD%95%E6%8A%8A%E6%94%B9%E6%AC%BE%E9%87%8D%E9%BB%9E%E6%94%BE%E5%9C%A8%E9%9E%8B%E9%9D%A2%EF%BC%9F&label=all",
+      "score": 32,
+      "source_origin": "archive",
+      "published_at": "2026-08-28",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
       ]
     },
     {
@@ -2264,26 +2293,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114331-subtitle-e3-80-90-e5-93-81-e",
-      "type": "shoe",
-      "title": "【品牌動態】KEELY HODGKINSON 首個 NIKE 個人簽名系列正式登場",
-      "date": "2026-07-16",
-      "date_source": "source",
-      "article_date": "2026-07-16",
-      "first_seen_at": "2026-07-17",
-      "source": "運動筆記",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114331&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91KEELY%20HODGKINSON%20%E9%A6%96%E5%80%8B%20NIKE%20%E5%80%8B%E4%BA%BA%E7%B0%BD%E5%90%8D%E7%B3%BB%E5%88%97%E6%AD%A3%E5%BC%8F%E7%99%BB%E5%A0%B4&label=all",
-      "score": 16,
-      "source_origin": "archive",
-      "published_at": "2026-08-28",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
