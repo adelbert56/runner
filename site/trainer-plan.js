@@ -519,11 +519,21 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
       ]
     },
     {
-      task: `長跑 ${km} km（後段漸進收快）`,
-      pace: `前段 ${easy}/km，最後 20–25% 收至 ${tempo}/km`,
+      task: `長跑 ${km} km（跑走比例）`,
+      pace: `跑 ${km >= 25 ? 4 : 9} 分 + 走 1 分，循環到底`,
       steps: [
-        { icon: '🚶', title: '熱身', dose: '5–10 分', detail: '前段完全放鬆起跑，把力氣留給後段收快。' },
-        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前 75–80% 維持 ${easy}/km，最後 20–25% 逐步收到接近馬拉松配速 ${tempo}/km，練後段還能加速的節奏感。` },
+        { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '先用同樣比例試跑 5 分鐘，確認今天的跑走節奏抓得住。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `全程用固定跑走比例（跑 ${km >= 25 ? 4 : 9} 分／走 1 分）循環，走的那 1 分鐘拿來喝水、補給，不是累了才走，是主動排進節奏裡。` },
+        { icon: '🧘', title: '收操', dose: '10 分', detail: '記一下今天跑走比例用起來的感受，後段有沒有明顯掉速，供下次調整比例。' }
+      ]
+    },
+    {
+      task: `長跑 ${km} km（餘裕時自然收快）`,
+      pace: `全程以 ${easy}/km 為主；末段仍有餘裕才自然微幅加速`,
+      longRunProgression: true,
+      steps: [
+        { icon: '🚶', title: '熱身', dose: '5–10 分', detail: '前段完全放鬆起跑；後段是否自然加速由當天餘裕決定。' },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `全程以 ${easy}/km 和可交談強度為主；最後 20–25% 僅在仍有餘裕時自然微幅加速，任何吃力都維持 E 跑或跑走。` },
         { icon: '🧘', title: '收操', dose: '10 分', detail: '慢走回收、補給，記錄收快段的感受供下次微調。' }
       ]
     }
@@ -557,11 +567,11 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
       ]
     },
     {
-      task: `長跑 ${km} km（尾段收快）`,
-      pace: `前段 ${easy}/km，最後 2–3 km 收至 ${fastEasy}/km`,
+      task: `長跑 ${km} km（餘裕時收快）`,
+      pace: `全程以 ${easy}/km 為主；末段有餘裕才自然微幅加速`,
       steps: [
         { icon: '🚶', title: '熱身', dose: '8 分', detail: '慢走與動態伸展後，用非常輕鬆的步伐起跑。' },
-        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前段穩穩跑，最後 2–3 km 略收快，練長距離後段仍能維持姿勢。` },
+        { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前段守住 ${easy}/km；末段只有仍可交談且有餘裕時才自然微幅加速，否則全程 E 跑。` },
         { icon: '🧘', title: '收操', dose: '10 分', detail: '步行回收、補給、下肢伸展，避免累積性緊繃。' }
       ]
     },
@@ -584,11 +594,12 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
         ]
       },
       {
-        task: `長跑 ${km} km（後段漸進收快）`,
-        pace: `前段 ${easy}/km，最後 20–25% 收至 ${tempo}/km`,
+        task: `長跑 ${km} km（餘裕時自然收快）`,
+        pace: `全程以 ${easy}/km 為主；末段仍有餘裕才自然微幅加速`,
+        longRunProgression: true,
         steps: [
-          { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '前段完全放鬆起跑，把力氣留給後段收快。' },
-          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `前 75–80% 維持 ${easy}/km，最後 20–25% 逐步收到接近節奏配速 ${tempo}/km，練後段還能加速的節奏感。` },
+          { icon: '🚶', title: '熱身', dose: '5–8 分', detail: '前段完全放鬆起跑；後段是否自然加速由當天餘裕決定。' },
+          { icon: '🏃', title: '主課', dose: `${km} km`, detail: `全程以 ${easy}/km 和可交談強度為主；最後 20–25% 僅在仍有餘裕時自然微幅加速，任何吃力都維持 E 跑或跑走。` },
           { icon: '🧘', title: '收操', dose: '10 分', detail: '慢走回收、補水，記錄收快段的感受供下次微調。' }
         ]
       }
@@ -602,6 +613,10 @@ function buildWorkoutContent(type, km, profile, phaseName, weekNum, isDeload, is
       ? longVariants[longVariants.length - 1]
       : longVariants[phaseBucket === 'peak' ? Math.min(1, longVariants.length - 1) : rotation % longVariants.length];
   longVariant.paceSource = easyAdaptive.source;
+  if (goal === 'full' && phaseBucket === 'peak' && Array.isArray(longVariant.steps) && longVariant.steps.length) {
+    const cooldown = longVariant.steps[longVariant.steps.length - 1];
+    cooldown.detail = `${cooldown.detail}比賽前這幾週的長跑，順便穿正式比賽的鞋襪、衣物和腰包試跑，確認不會磨破皮或掉東西。`;
+  }
   return longVariant;
 }
 
@@ -777,6 +792,18 @@ function attachCourseGuides(steps, type) {
   });
 }
 
+function longRunHrTarget(profile, options) {
+  const zones = hrZones(profile);
+  const { hasInjury = false } = options || {};
+  if (hasInjury) {
+    return `HR ≤${zones.easyMax}（${easyZoneLabel()}）`;
+  }
+  // 長跑容許自然心率漂移；上限是護欄，不是末段必須追上的目標。
+  const longMin = Math.max(0, zones.easyMax - 20);
+  const longMax = zones.easyMax + 5;
+  return `HR ${longMin}–${longMax}（長跑區間；${longMax} 是上限，不是目標）`;
+}
+
 // Garmin 匯入不能只靠畫面文案反推。排課時即把主課拆成可執行的步驟，
 // 特別是間歇／巡航／法特雷克的重複組，避免「4×400m」被誤當作單一主課。
 function buildGarminWorkoutStructure(type, steps, km, target = '') {
@@ -888,7 +915,7 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
         ? `HR ${zones.steadyLow}–${zones.steadyHigh}（穩定有氧）`
         : `HR ≤${zones.easyMax}（${easyZoneLabel()}）`)
     : type === 'long'
-      ? `HR ≤${zones.easyMax}（${easyZoneLabel()}）`
+      ? longRunHrTarget(profile, { progressive: content.longRunProgression, isDeload, isTaper, hasInjury, dateStr })
       : type === 'tempo'
         ? `HR ${zones.tempoLow}–${zones.tempoHigh}`
         : type === 'interval'

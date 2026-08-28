@@ -150,9 +150,45 @@ function returnToPlan() {
   switchPlanTab(setupReturnTab || 'week');
 }
 
+function renderPostRaceCard(profile, daysToRace) {
+  const daysSince = -daysToRace;
+  const goal = profile.goal || 'half';
+  const recoveryDays = { '5k10k': 3, half: 7, full: 14, rehab: 7 }[goal] || 7;
+  return `
+<div class="card race-week-card">
+  <div class="race-week-head">
+    <div>
+      <div class="plan-overview-kicker">Recovery</div>
+      <h2 class="plan-overview-title">🛌 賽後恢復 · 完賽第 ${daysSince} 天</h2>
+    </div>
+    <div class="plan-overview-meta">${profile.targetDate} · 辛苦了</div>
+  </div>
+  <div class="race-week-grid">
+    <section>
+      <b>🩹 這幾天先這樣</b>
+      <ul class="race-week-list">
+        <li>睡眠與飲食優先，碳水與蛋白質都補回來</li>
+        <li>只做低強度活動（散步、輕鬆騎車），不安排品質課</li>
+        <li>留意局部痠痛是否在減退；持續加劇或單點刺痛要先休而非硬撐</li>
+        <li>不要新增未納入週期的賽事，也不要急著恢復原本跑量；已排定的賽事依其受控規則執行</li>
+      </ul>
+    </section>
+    <section>
+      <b>📅 大致回歸節奏</b>
+      <p class="race-week-copy">${goal === 'full' ? '全馬賽後建議至少 1–2 週不安排任何品質課，恢復跑也先降量；約 2 週後視身體訊號再逐步加回輕鬆跑。' : `建議至少 ${recoveryDays} 天以低強度活動為主，恢復跑先降量，視身體訊號再逐步加回原本課表。`}</p>
+    </section>
+  </div>
+</div>`;
+}
+
 function renderRaceWeekCard(profile) {
   const daysToRace = daysUntilTargetDate(profile?.targetDate);
-  if (daysToRace === null || daysToRace < 0 || daysToRace > 7) return '';
+  if (daysToRace === null || daysToRace > 7) return '';
+  if (daysToRace < 0) {
+    const goal = profile.goal || 'half';
+    const postRaceWindow = { '5k10k': 5, half: 10, full: 16, rehab: 10 }[goal] || 10;
+    return daysToRace < -postRaceWindow ? '' : renderPostRaceCard(profile, daysToRace);
+  }
   const goal = profile.goal || 'half';
   const pace = profile.racePaceSec || 0;
   const p = (offset) => pace ? `${secToPace(pace + offset)}/km` : '目標配速';

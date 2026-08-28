@@ -41,7 +41,7 @@ function extractFunction(source, name) {
   throw new Error(`unbalanced braces for function ${name}`);
 }
 
-const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerActionsJs, trainerCoachEngineJs, trainerSafetyJs, trainingReviewBuilder] = await Promise.all([
+const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerActionsJs, trainerCoachEngineJs, trainerSafetyJs, trainingReviewBuilder, coachGoalRaw, weeklyReportRaw, garminRequestRaw] = await Promise.all([
   readFile(resolve(root, "site/trainer.js"), "utf8"),
   readFile(resolve(root, "site/trainer-copy.js"), "utf8"),
   readFile(resolve(root, "site/trainer-plan.js"), "utf8"),
@@ -50,7 +50,14 @@ const [trainerJs, trainerCopyJs, trainerPlanJs, trainerRenderJs, trainerActionsJ
   readFile(resolve(root, "site/trainer-coach-engine.js"), "utf8"),
   readFile(resolve(root, "site/trainer-safety.js"), "utf8"),
   readFile(resolve(root, "scripts/build-training-review.mjs"), "utf8"),
+  readFile(resolve(root, "runner/訓練/教練目標.json"), "utf8"),
+  readFile(resolve(root, "runner/訓練/週報.json"), "utf8"),
+  readFile(resolve(root, "runner/訓練/garmin-workout-sync-request.json"), "utf8"),
 ]);
+
+const coachGoalData = JSON.parse(coachGoalRaw);
+const weeklyReportData = JSON.parse(weeklyReportRaw);
+const garminRequestData = JSON.parse(garminRequestRaw);
 
 const sandbox = { TRAINING_TYPE_LABELS: { easy: "輕鬆跑", tempo: "節奏跑", interval: "間歇跑", long: "長跑" } };
 vm.createContext(sandbox);
@@ -71,6 +78,15 @@ const structureSandbox = {};
 vm.createContext(structureSandbox);
 vm.runInContext(extractFunction(trainerPlanJs, "buildGarminWorkoutStructure"), structureSandbox);
 const { buildGarminWorkoutStructure } = structureSandbox;
+
+const longRunHrSandbox = {
+  hrZones: () => ({ easyMax: 150, steadyLow: 150, steadyHigh: 157 }),
+  easyZoneLabel: () => 'Garmin Z2',
+  isHotSeasonDate: (date) => date.getMonth() === 7,
+};
+vm.createContext(longRunHrSandbox);
+vm.runInContext(extractFunction(trainerPlanJs, 'longRunHrTarget'), longRunHrSandbox);
+const { longRunHrTarget } = longRunHrSandbox;
 
 const coachCopySandbox = {};
 vm.createContext(coachCopySandbox);
@@ -172,6 +188,13 @@ assertEqual(secToPace(-5), "—", "secToPace shows em-dash for negative seconds"
 assertEqual(timeToSec("2:10:00"), 7800, "timeToSec parses H:MM:SS");
 assertEqual(timeToSec("5:30"), 330, "timeToSec parses M:SS");
 assertEqual(timeToSec(""), 0, "timeToSec returns 0 for empty input");
+
+// Long-run intensity permits a small natural drift. The upper bound is a guardrail,
+// never a required finish target.
+assertEqual(longRunHrTarget({}, { progressive: false }), 'HR 130–155（長跑區間；155 是上限，不是目標）', 'steady long run uses the dedicated 130–155 range');
+assertEqual(longRunHrTarget({}, { progressive: true, dateStr: '2026-10-03' }), 'HR 130–155（長跑區間；155 是上限，不是目標）', 'optional pickup does not turn 155 into a target');
+assertEqual(longRunHrTarget({}, { progressive: true, dateStr: '2026-08-29' }), 'HR 130–155（長跑區間；155 是上限，不是目標）', 'summer long run retains the same protected range');
+assertEqual(longRunHrTarget({}, { progressive: true, hasInjury: true }), 'HR ≤150（Garmin Z2）', 'injury-protected long run cannot progress above easy HR');
 assertEqual(timeToSec("abc"), 0, "timeToSec returns 0 for non-numeric input");
 
 // targetTimeToSec: the "2:10" ambiguity bug fixed 2026-07 — a two-segment
@@ -237,6 +260,7 @@ assertEqual(effectiveWeekIsDeload({ isDeload: true }, null), true, "legacy plans
 assertEqual(coachPhaseHasRaceReplacingQuality({ focus: "11/8、11/15 兩場 10K 賽事取代品質課" }), true, "confirmed 10K race weeks remove an extra quality session");
 assertEqual(coachPhaseHasRaceReplacingQuality({ focus: "長跑 16 km @E" }), false, "normal long-run weeks retain their separately planned quality decision");
 assertEqual(scheduled10kNeedsStrengthDeload({ scheduled: true, distance: '10km' }), true, "scheduled 10K races deload strength 48 hours before start");
+assertEqual(scheduled10kNeedsStrengthDeload({ scheduled: true, distance: '9.7km' }), true, "scheduled 9.7K race retains the same pre-race strength protection as a 10K");
 assertEqual(scheduled10kNeedsStrengthDeload({ scheduled: true, distance: '21km' }), false, "half-marathon directives do not use the 10K strength-deload rule");
 assertEqual(coachScheduledRaceEntries().length, 1, "only coach-confirmed scheduled races are integrated without registration data");
 assertEqual(coachScheduledRaceEntries()[0]?.race_date, '2026-11-08', "scheduled-race integration preserves the confirmed race date");
@@ -245,6 +269,14 @@ assertEqual(raceDayPackageSteps({ goal: 'half', racePaceSec: 384 }, 10, '2026-09
 assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, false, "11/15 10K cannot recalibrate the half-marathon before 11/8 evidence exists");
 assessmentGateSandbox.appData.assessments.push({ date: '2026-11-08', type: 'race_10k' });
 assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, true, "11/15 10K may calibrate only after the 11/8 race evidence is retained");
+const scheduled97k = coachGoalData.raceDirectives.find((item) => item.date === '2026-11-08');
+const postGoalHalf = coachGoalData.raceDirectives.find((item) => item.date === '2026-12-13');
+const saturdayCourse = weeklyReportData.nextWeek.menu.find((item) => item.day === '六');
+const garminSaturday = garminRequestData.workouts.find((item) => item.date === '2026-08-29');
+assertEqual(scheduled97k?.distance, '9.7km', "11/8 directive preserves the registered 9.7K distance");
+assertEqual(postGoalHalf?.role, '主目標賽後受控參賽', "12/13 half is explicitly constrained after the 12/6 primary goal");
+assertEqual(saturdayCourse?.totalKm, 13.5, "website long-run total remains 13.5 km after its progressive split");
+assertEqual(garminSaturday?.steps?.filter((step) => step.kind === 'main').map((step) => step.end?.value).join(','), '13500', "Garmin long run has one easy 13.5 km step with no mandatory hard finish");
 assertThrows(() => assertPublishableCoachReview(JSON.stringify({
   reviewMode: 'final',
   nextWeek: {
