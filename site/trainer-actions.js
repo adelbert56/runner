@@ -402,11 +402,16 @@ function checkinTone(item) {
 function renderCheckinTrend() {
   const recent = [...(appData.checkins || [])].sort((a, b) => a.weekNum - b.weekNum).slice(-8);
   if (!recent.length) return '<p style="margin:12px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">完成每週評估後，這裡會自動顯示你的恢復趨勢，還有我為你下週做過的保護。</p>';
-  const averageFatigue = recent.filter((item) => item.fatigue).reduce((sum, item, _, items) => sum + item.fatigue / items.length, 0);
+  const fatigueRating = (value) => {
+    const rating = Number(value);
+    return Number.isInteger(rating) && rating >= 1 && rating <= 5 ? rating : 3;
+  };
+  const averageFatigue = recent.reduce((sum, item) => sum + fatigueRating(item.fatigue), 0) / recent.length;
   return `<div class="checkin-trend" aria-label="近期恢復趨勢">${recent.map((item) => {
+    const fatigue = fatigueRating(item.fatigue);
     const tone = checkinTone(item);
-    const height = Math.max(14, Math.min(100, ((Number(item.fatigue) || 3) / 5) * 100));
-    return `<div class="checkin-trend-item ${tone}" title="第 ${item.weekNum} 週｜疲勞 ${item.fatigue || '未填'}/5｜${reviewEscape(item.result || '維持')}"><div class="checkin-trend-bar"><i style="height:${height}%"></i></div><small>W${item.weekNum}</small></div>`;
+    const height = Math.max(14, Math.min(100, (fatigue / 5) * 100));
+    return `<div class="checkin-trend-item ${tone}" title="第 ${item.weekNum} 週｜疲勞 ${fatigue}/5｜${reviewEscape(item.result || '維持')}"><div class="checkin-trend-bar"><i style="height:${height}%"></i></div><small>W${item.weekNum}</small></div>`;
   }).join('')}</div><p style="margin:8px 0 0;color:var(--c-text-muted);font-size:12px;line-height:1.55">近 ${recent.length} 週平均疲勞：${averageFatigue ? `${averageFatigue.toFixed(1)}/5` : '尚無主觀疲勞資料'}；柱越高代表疲勞越高，顏色代表我當週有沒有幫你降載保護。</p>`;
 }
 
@@ -420,7 +425,8 @@ function renderCheckinHistory() {
   return `<span class="checkin-section-label" style="margin-top:18px">歷史評估</span>
     <div class="checkin-history">${past.map((item) => {
       const tone = checkinTone(item);
-      return `<div class="checkin-history-item ${tone}"><b>第 ${item.weekNum} 週</b><span>${reviewEscape(item.result || '維持')}｜疲勞 ${item.fatigue || '—'}/5</span><p>${reviewEscape(item.adjustment || item.safetyNote || '照計畫執行')}</p></div>`;
+      const fatigue = Number.isInteger(Number(item.fatigue)) && Number(item.fatigue) >= 1 && Number(item.fatigue) <= 5 ? Number(item.fatigue) : 3;
+      return `<div class="checkin-history-item ${tone}"><b>第 ${item.weekNum} 週</b><span>${reviewEscape(item.result || '維持')}｜疲勞 ${fatigue}/5</span><p>${reviewEscape(item.adjustment || item.safetyNote || '照計畫執行')}</p></div>`;
     }).join('')}</div>`;
 }
 
@@ -451,7 +457,7 @@ function renderCheckinSection() {
     <ul class="checkin-questions">${qHTML}</ul>
     <span class="checkin-section-label">主觀感受</span>
     <div class="log-form-grid" style="margin-top:18px">
-      <div class="form-group"><label class="form-label">本週整體疲勞 (1–5)</label><input class="form-input" id="cw-fatigue" type="number" min="1" max="5" placeholder="3"><div class="field-help">1 很輕鬆，3 正常可恢復，5 非常疲勞。</div></div>
+      <div class="form-group"><label class="form-label">本週整體疲勞 (1–5)</label><input class="form-input" id="cw-fatigue" type="number" min="1" max="5" value="3"><div class="field-help">1 很輕鬆，3 正常可恢復，5 非常疲勞。</div></div>
       <div class="form-group"><label class="form-label">本週一句話備註</label><input class="form-input" id="cw-note" type="text" placeholder="例：長跑後腿有點重，但隔天恢復"></div>
     </div>
     <label class="checkin-safety"><input id="cw-pain-concern" type="checkbox" style="margin-top:3px">本週有疼痛、跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</label>
@@ -799,7 +805,7 @@ function submitCheckin() {
   const answers = CHECKIN_QUESTIONS.map((_, index) => Boolean(document.getElementById(`cq-${index}`)?.checked));
   completeWeeklyCheckin({
     answers,
-    fatigue: parseInt(document.getElementById('cw-fatigue')?.value, 10) || 0,
+    fatigue: parseInt(document.getElementById('cw-fatigue')?.value, 10) || 3,
     note: document.getElementById('cw-note')?.value?.trim() || '',
     painConcern: Boolean(document.getElementById('cw-pain-concern')?.checked)
   });
@@ -816,7 +822,7 @@ function submitEarlyCoachPlanning(manualConfirmation = false) {
   const answers = [true, ...CHECKIN_QUESTIONS.slice(1).map((_, index) => Boolean(document.getElementById(`early-check-${index + 1}`)?.checked))];
   completeWeeklyCheckin({
     answers,
-    fatigue: parseInt(document.getElementById('early-fatigue')?.value, 10) || 0,
+    fatigue: parseInt(document.getElementById('early-fatigue')?.value, 10) || 3,
     note: document.getElementById('early-note')?.value?.trim() || '',
     painConcern: !answers[1],
     earlyTrigger: true,

@@ -522,19 +522,17 @@ async function assertTrainerReport(page, viewportName) {
       coachReviewData.autopilot = { status: "ready", decision: "deload", label: "自動降量", volumeFactor: 0.85, qualityMode: "reduce" };
       openEarlyCoachPlanning();
       CHECKIN_QUESTIONS.slice(1).forEach((_, index) => { document.getElementById(`early-check-${index + 1}`).checked = true; });
-      document.getElementById("early-fatigue").value = "3";
       document.getElementById("early-note").value = "本次長跑有加入上坡跑，所以比較辛苦，有氧耐力還不夠需要多練，跑到後面都沒力了";
       submitEarlyCoachPlanning();
       const checkin = appData.checkins.find((item) => item.weekNum === currentWeek);
       if (checkin) checkin.provisional = false;
       openEarlyCoachPlanning();
       CHECKIN_QUESTIONS.slice(1).forEach((_, index) => { document.getElementById(`early-check-${index + 1}`).checked = true; });
-      document.getElementById("early-fatigue").value = "3";
       submitEarlyCoachPlanning();
       const hasQuality = nextWeek.days.some((day) => ["tempo", "interval"].includes(day.type));
       const coachTargetKm = Number((String(coachReviewData.nextWeek.targetKm).match(/\d+(?:\.\d+)?/) || [])[0]);
       const automaticTerrainSignal = classifyEarlyFeedback("長跑後段掉速、感覺沒力", { elevationGainM: 120, elevationPerKm: 9.4 });
-      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), feedbackRecorded: checkin?.note === "本次長跑有加入上坡跑，所以比較辛苦，有氧耐力還不夠需要多練，跑到後面都沒力了", feedbackTerrainMeasured: checkin?.feedbackTerrainEvidence?.elevationGainM === 120, automaticTerrainDetected: automaticTerrainSignal.some((signal) => signal.includes("Garmin +120 m")), feedbackResponded: typeof checkin?.coachFeedbackResponse === "string" && checkin.coachFeedbackResponse.includes("Garmin +120 m") && checkin.coachFeedbackResponse.includes("長跑後段失力") && checkin.coachFeedbackResponse.includes("平坦路線"), nextWeekExists: Boolean(appData.plan[currentWeek]), coachScheduleApplied: checkin?.coachScheduleApplied === true, nextWeekAdjustmentApplied: checkin?.nextWeekAdjustmentApplied === true, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
+      return { recorded: Boolean(checkin), earlyTrigger: checkin?.earlyTrigger === true, fatigueDefaultsToThree: checkin?.fatigue === 3, hasSchedulingDecision: typeof checkin?.adjustment === "string" && checkin.adjustment.includes("85%"), feedbackRecorded: checkin?.note === "本次長跑有加入上坡跑，所以比較辛苦，有氧耐力還不夠需要多練，跑到後面都沒力了", feedbackTerrainMeasured: checkin?.feedbackTerrainEvidence?.elevationGainM === 120, automaticTerrainDetected: automaticTerrainSignal.some((signal) => signal.includes("Garmin +120 m")), feedbackResponded: typeof checkin?.coachFeedbackResponse === "string" && checkin.coachFeedbackResponse.includes("Garmin +120 m") && checkin.coachFeedbackResponse.includes("長跑後段失力") && checkin.coachFeedbackResponse.includes("平坦路線"), nextWeekExists: Boolean(appData.plan[currentWeek]), coachScheduleApplied: checkin?.coachScheduleApplied === true, nextWeekAdjustmentApplied: checkin?.nextWeekAdjustmentApplied === true, qualityReduced: !hasQuality || nextWeek.days.some((day) => day.coachPlan?.qualityMode === "reduce"), repeatSubmissionTitle: document.getElementById("modal-title")?.textContent?.trim() };
     } finally {
       appData = previousData;
       currentWeek = previousWeek;
@@ -546,7 +544,7 @@ async function assertTrainerReport(page, viewportName) {
       closeModal();
     }
   });
-  if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.feedbackRecorded || !earlyPlanningSubmission.feedbackTerrainMeasured || !earlyPlanningSubmission.automaticTerrainDetected || !earlyPlanningSubmission.feedbackResponded || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.nextWeekAdjustmentApplied || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
+  if (!earlyPlanningSubmission.recorded || !earlyPlanningSubmission.earlyTrigger || !earlyPlanningSubmission.fatigueDefaultsToThree || !earlyPlanningSubmission.hasSchedulingDecision || !earlyPlanningSubmission.feedbackRecorded || !earlyPlanningSubmission.feedbackTerrainMeasured || !earlyPlanningSubmission.automaticTerrainDetected || !earlyPlanningSubmission.feedbackResponded || !earlyPlanningSubmission.nextWeekExists || earlyPlanningSubmission.nextWeekAdjustmentApplied || !earlyPlanningSubmission.qualityReduced || earlyPlanningSubmission.repeatSubmissionTitle !== "下週已安排") {
     throw new Error(`${viewportName}/trainer-early-planning-submit: completed Garmin sessions did not complete the next-week scheduling flow ${JSON.stringify(earlyPlanningSubmission)}`);
   }
   const intervalCompletionTarget = await page.evaluate(() => plannedMainTargetKm({
