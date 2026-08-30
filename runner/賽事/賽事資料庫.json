@@ -542,20 +542,7 @@
     "first_seen_at": "2026-05-26",
     "scraped_at": "2026-08-27T10:28:47.971308+00:00",
     "cancellation_notice": "",
-    "cancellation_notice_url": "",
-    "weather_forecast": {
-      "forecast_for": "2026-08-30",
-      "updated_at": "2026-08-29T23:48:18.792Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "臺中市",
-      "summary": "臺中市縣市預報，雷雨，25-30°C，降雨機率 100%，最大風速 10 km/h",
-      "weather_code": 96,
-      "temperature_min_c": 25,
-      "temperature_max_c": 30,
-      "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 10.1
-    }
+    "cancellation_notice_url": ""
   },
   {
     "race_id": "953ecd2b-5be8-4d9f-bfd0-399a4af54e0e",
@@ -601,16 +588,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-09-04",
-      "updated_at": "2026-08-29T23:48:18.924Z",
+      "updated_at": "2026-08-30T23:39:58.395Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "南投縣",
-      "summary": "南投縣縣市預報，雷雨，22-29°C，降雨機率 100%，最大風速 7 km/h",
-      "weather_code": 96,
+      "summary": "南投縣縣市預報，雷雨，22-29°C，降雨機率 100%，最大風速 8 km/h",
+      "weather_code": 95,
       "temperature_min_c": 22.1,
-      "temperature_max_c": 28.5,
+      "temperature_max_c": 28.8,
       "precipitation_probability_max": 100,
-      "wind_speed_max_kmh": 7.3
+      "wind_speed_max_kmh": 7.7
     }
   },
   {
@@ -661,16 +648,16 @@
     "co_organizer": null,
     "weather_forecast": {
       "forecast_for": "2026-09-06",
-      "updated_at": "2026-08-29T23:48:19.054Z",
+      "updated_at": "2026-08-30T23:39:58.495Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，毛毛雨，24-29°C，降雨機率 51%，最大風速 18 km/h",
-      "weather_code": 51,
-      "temperature_min_c": 24.2,
-      "temperature_max_c": 28.9,
-      "precipitation_probability_max": 51,
-      "wind_speed_max_kmh": 17.7
+      "summary": "苗栗縣縣市預報，降雨，23-26°C，降雨機率 55%，最大風速 15 km/h",
+      "weather_code": 81,
+      "temperature_min_c": 23.1,
+      "temperature_max_c": 25.7,
+      "precipitation_probability_max": 55,
+      "wind_speed_max_kmh": 14.5
     }
   },
   {
