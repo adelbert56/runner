@@ -489,6 +489,26 @@ async function assertTrainerReport(page, viewportName) {
   if (!coachDecisionOwnership.hasSharedDecision || !coachDecisionOwnership.hasEvidence || coachDecisionOwnership.hasLegacyMenu || !coachDecisionOwnership.hasWeekLink) {
     throw new Error(`${viewportName}/trainer-coach-decision: coach ownership is incomplete ${JSON.stringify(coachDecisionOwnership)}`);
   }
+  const coachEvidenceIntegration = await page.evaluate(() => {
+    const host = document.getElementById("coach-review-content");
+    const read = () => ({
+      active: host?.querySelector(".coach-evidence-tab[aria-selected='true']")?.dataset.coachEvidenceSection || "",
+      tabCount: host?.querySelectorAll(".coach-evidence-tab[role='tab']").length || 0,
+      panelCount: host?.querySelectorAll(".coach-evidence [role='tabpanel']").length || 0,
+      hasDuplicateTimeline: Boolean(host?.querySelector(".coach-evidence .automation-timeline")),
+      hasDecision: Boolean(host?.querySelector(".coach-decision-workspace")),
+    });
+    const initial = read();
+    selectCoachEvidenceSection("history");
+    const history = read();
+    moveCoachEvidenceSection({ key: "End", preventDefault() {} });
+    const signals = read();
+    selectCoachEvidenceSection("current");
+    return { initial, history, signals, restored: read() };
+  });
+  if (coachEvidenceIntegration.initial.active !== "current" || coachEvidenceIntegration.initial.tabCount !== 3 || coachEvidenceIntegration.initial.panelCount !== 1 || coachEvidenceIntegration.initial.hasDuplicateTimeline || !coachEvidenceIntegration.initial.hasDecision || coachEvidenceIntegration.history.active !== "history" || coachEvidenceIntegration.signals.active !== "signals" || coachEvidenceIntegration.restored.active !== "current") {
+    throw new Error(`${viewportName}/trainer-coach-evidence-integration: coach details must be selectable without a duplicate current-week timeline ${JSON.stringify(coachEvidenceIntegration)}`);
+  }
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-coach-decision`);
   await page.screenshot({
     path: resolve(screenshotDir, `${viewportName}-trainer-coach-decision.png`),

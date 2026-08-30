@@ -949,6 +949,29 @@ function renderPlanChangeTimeline() {
 // 逐週教練決定索引：把「本週有 2 則筆記、上週沒動靜」這種每週決策攤開成
 // 可選的週次清單，而不是只能靠日期去對照最近 8 則筆記／4 次排課變更。
 let coachWeekIndexSelectedWeek = null;
+let coachReviewEvidenceSection = 'current';
+
+const COACH_REVIEW_EVIDENCE_SECTIONS = ['current', 'history', 'signals'];
+
+function selectCoachEvidenceSection(section) {
+  if (!COACH_REVIEW_EVIDENCE_SECTIONS.includes(section)) return;
+  coachReviewEvidenceSection = section;
+  const host = document.getElementById('coach-review-content');
+  if (host) host.innerHTML = renderCoachReviewPanel();
+  requestAnimationFrame(() => document.querySelector(`[data-coach-evidence-section="${section}"]`)?.focus());
+}
+
+function moveCoachEvidenceSection(event) {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  const currentIndex = COACH_REVIEW_EVIDENCE_SECTIONS.indexOf(coachReviewEvidenceSection);
+  const nextIndex = event.key === 'Home'
+    ? 0
+    : event.key === 'End'
+      ? COACH_REVIEW_EVIDENCE_SECTIONS.length - 1
+      : (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + COACH_REVIEW_EVIDENCE_SECTIONS.length) % COACH_REVIEW_EVIDENCE_SECTIONS.length;
+  selectCoachEvidenceSection(COACH_REVIEW_EVIDENCE_SECTIONS[nextIndex]);
+}
 
 function coachWeekIndexEntries(plan = appData.plan || []) {
   const notes = [...(coachReviewData?.history || []), ...(appData.garminAnalysisHistory || [])]
@@ -1009,6 +1032,38 @@ function setCoachWeekIndexSelection(value) {
   if (!host) return;
   const entries = coachWeekIndexEntries(appData.plan || []);
   host.innerHTML = renderCoachWeekIndexBody(entries.find((entry) => entry.weekNum === coachWeekIndexSelectedWeek), todayWeekNum());
+}
+
+function renderCoachEvidencePanel({ rawCoachNotes = '', reviewNotice = '', weekIndex = '', checkinHistory = '', dataSignals = '', notes = '' } = {}) {
+  const selected = COACH_REVIEW_EVIDENCE_SECTIONS.includes(coachReviewEvidenceSection) ? coachReviewEvidenceSection : 'current';
+  const sections = {
+    current: {
+      label: '本週判讀',
+      title: '判讀補充與套用範圍',
+      content: `${rawCoachNotes || '<p class="coach-evidence-empty">本週的結論、下一步與 Garmin 關鍵依據已整合在上方；目前沒有額外判讀文字。</p>'}${reviewNotice || ''}`
+    },
+    history: {
+      label: '逐週回顧',
+      title: '逐週判讀與課表變更',
+      // 逐週索引本身已整合週評估與變更紀錄；不再額外輸出第二條重複的變更時間軸。
+      content: `${weekIndex || '<p class="coach-evidence-empty">目前沒有可回顧的逐週判讀。</p>'}${checkinHistory ? `<div class="coach-evidence-subsection">${checkinHistory}</div>` : ''}`
+    },
+    signals: {
+      label: '資料訊號',
+      title: 'Garmin 訊號與分析快照',
+      content: `${dataSignals || '<p class="coach-evidence-empty">尚無足夠 Garmin 進階訊號；完成同步後會在這裡顯示。</p>'}${notes ? `<section class="coach-history"><div class="coach-history-head"><b>分析快照歷史</b><span>不覆蓋目前訓練設定</span></div><ul>${notes}</ul></section>` : ''}`
+    }
+  };
+  const active = sections[selected];
+  return `<section class="coach-evidence" aria-labelledby="coach-evidence-title">
+    <div class="coach-evidence-head"><div><div class="coach-evidence-kicker">COACHING RECORD</div><h2 id="coach-evidence-title">需要時再查看完整依據</h2><p>本週結論已在上方；這裡只保留追溯資料，避免重複閱讀。</p></div><span>已整合</span></div>
+    <div class="coach-evidence-tablist" role="tablist" aria-label="教練資料閱讀">
+      ${Object.entries(sections).map(([id, section]) => `<button type="button" class="coach-evidence-tab ${id === selected ? 'active' : ''}" role="tab" id="coach-evidence-tab-${id}" aria-selected="${id === selected}" aria-controls="coach-evidence-panel-${id}" tabindex="${id === selected ? '0' : '-1'}" data-coach-evidence-section="${id}" onclick="selectCoachEvidenceSection('${id}')" onkeydown="moveCoachEvidenceSection(event)">${section.label}</button>`).join('')}
+    </div>
+    <div class="coach-evidence-body" id="coach-evidence-panel-${selected}" role="tabpanel" aria-labelledby="coach-evidence-tab-${selected}">
+      <div class="coach-evidence-group coach-evidence-group--active"><div class="coach-evidence-group-title">${active.title}</div>${active.content}</div>
+    </div>
+  </section>`;
 }
 
 function jumpToWeekCoachReview(weekNum) {
@@ -1620,11 +1675,12 @@ function renderCoachDecisionWorkspace(plan = appData.plan || []) {
   if (!decision?.next) return '';
   const source = decision.next.resolved.source;
   const focus = decision.next.resolved.course;
+  const appliedPhase = (displayWeek?.days || []).find((day) => day.type !== 'rest' && day.coachPlan?.phase)?.coachPlan?.phase || displayWeek?.phaseLabel || '';
   const sourceSummary = Object.entries(decision.sourceCounts || {})
     .filter(([key, count]) => key !== 'baseline' && count)
     .map(([key, count]) => `${courseResolutionLabel(key)} ${count} 堂`);
   const riskText = upcomingCoachPrescription
-    ? `已依第 ${currentPlanWeek?.weekNum || currentWeek} 週完成紀錄，將教練處方寫入第 ${displayWeek?.weekNum || currentWeek + 1} 週正式課表。`
+    ? `已依第 ${currentPlanWeek?.weekNum || currentWeek} 週完成紀錄，將${appliedPhase ? `「${appliedPhase}」` : ''}教練處方寫入第 ${displayWeek?.weekNum || currentWeek + 1} 週正式課表。`
     : sourceSummary.length
     ? `本週決策已納入 ${sourceSummary.join('、')}。`
     : '目前沒有需要覆蓋正式課表的風險或教練處方。';
@@ -1634,17 +1690,12 @@ function renderCoachDecisionWorkspace(plan = appData.plan || []) {
     : source === 'baseline'
     ? '照正式課表穩定執行'
     : `${courseResolutionLabel(source)}已套用`;
-  const rawCoachNotes = [
-    decision.coachNote ? renderCoachNarrativeDetail('教練完整判讀', decision.coachNote) : '',
-    decision.planningNote ? renderCoachNarrativeDetail('排課調整說明', decision.planningNote) : ''
-  ].filter(Boolean).join('');
   return `<section class="coach-decision-workspace" aria-label="教練決策摘要">
     <div class="coach-decision-kicker">Coach decision · same course resolver</div>
     <div class="coach-decision-headline">${reviewEscape(verdict)}</div>
     <p class="coach-decision-copy">${reviewEscape(riskText)}</p>
     ${renderGarminDecisionSummary()}
     <div class="coach-decision-next"><span>${reviewEscape(decision.focusLabel)}</span><div><b>${reviewEscape(nextLabel)}</b><p>${reviewEscape(decision.next.resolved.rationale || '這堂課照正式課表執行。')}</p></div></div>
-    ${rawCoachNotes ? `<section class="coach-brief" aria-labelledby="coach-brief-title"><div class="coach-brief-title" id="coach-brief-title">教練重點</div><div class="coach-decision-detail-body">${rawCoachNotes}</div></section>` : ''}
     <div class="training-status-actions coach-decision-actions"><button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看${upcomingCoachPrescription ? `第 ${displayWeek?.weekNum || currentWeek + 1} 週` : '本週'}正式課表</button></div>
   </section>`;
 }
@@ -2186,6 +2237,8 @@ function renderCoachReviewPanel() {
   const upcomingPlanWeek = appData.plan?.[currentWeek] || null;
   const hasCurrentCoachPlan = coachWeekMatches(activePlanWeek);
   const hasUpcomingCoachPlan = !hasCurrentCoachPlan && coachWeekMatches(upcomingPlanWeek);
+  const decisionWeek = hasUpcomingCoachPlan ? upcomingPlanWeek : activePlanWeek;
+  const decisionDetails = resolveWeeklyDecision(buildContext(), decisionWeek);
   const upcomingWeekStart = appData.plan?.[currentWeek]?.days?.[0]?.dateStr || '';
   const reviewWeekStart = nextWeek.weekStart || '';
   const garminUpdatedAt = coachReviewData.analyticsUpdatedAt || coachReviewData.syncedAt || coachReviewData.updatedAt;
@@ -2232,23 +2285,17 @@ function renderCoachReviewPanel() {
     ${garminOnlyNotice}
     ${renderHistoryCoachContext()}
     ${renderCoachDecisionWorkspace(appData.plan || [])}
-    <section class="coach-evidence" aria-labelledby="coach-evidence-title">
-      <div class="coach-evidence-head"><div><div class="coach-evidence-kicker">COACHING RECORD</div><h2 id="coach-evidence-title">判讀依據與調整歷程</h2><p>所有摘要預設展開；原始文字只在個別紀錄中保留。</p></div><span>已整合</span></div>
-      <div class="coach-evidence-body">${reviewNotice}
-        <div class="coach-evidence-group">${renderPlanChangeTimeline()}</div>
-        ${(() => {
-          const weekIndex = renderCoachWeekIndex(appData.plan || []);
-          return weekIndex ? `<div class="coach-evidence-group">${weekIndex}</div>` : '';
-        })()}
-        ${(() => {
-          // 課表變更紀錄只列「有改動」的最後 4 筆；上面的逐週索引補了「每一週教練當時判定
-          // 什麼」（含維持不變的週）；這裡繼續只看週評估歷史。
-          const history = renderCheckinHistory();
-          return history ? `<div class="coach-evidence-group">${history}</div>` : '';
-        })()}
-        <div class="coach-evidence-group"><div class="coach-evidence-group-title">資料訊號與歷史</div>${renderCoachDataSignals()}${notes ? `<section class="coach-history"><div class="coach-history-head"><b>分析快照歷史</b><span>不覆蓋目前訓練設定</span></div><ul>${notes}</ul></section>` : ''}</div>
-      </div>
-    </section>
+    ${renderCoachEvidencePanel({
+      rawCoachNotes: [
+        decisionDetails?.coachNote ? renderCoachNarrativeDetail('教練完整判讀', decisionDetails.coachNote) : '',
+        decisionDetails?.planningNote ? renderCoachNarrativeDetail('排課調整說明', decisionDetails.planningNote) : ''
+      ].filter(Boolean).join(''),
+      reviewNotice,
+      weekIndex: renderCoachWeekIndex(appData.plan || []),
+      checkinHistory: renderCheckinHistory(),
+      dataSignals: renderCoachDataSignals(),
+      notes
+    })}
   </div>`;
 }
 
