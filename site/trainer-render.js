@@ -840,6 +840,17 @@ function historicalWeekCheckin(weekNum) {
     .sort((left, right) => String(right?.date || '').localeCompare(String(left?.date || '')))[0] || null;
 }
 
+// 一週不必等到隔週一才可回顧：最後一堂正式課到期且全部完成後，該週的
+// 處方已沒有任何可被即時教練調整的空間，必須立刻改讀凍結的當週資料。
+function isHistoricalCourseWeek(week, weekNum = currentWeek, today = todayStr()) {
+  if (Number(weekNum) < todayWeekNum()) return true;
+  if (Number(weekNum) !== todayWeekNum()) return false;
+  const scheduledDays = (week?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
+  if (!scheduledDays.length || scheduledDays.some((day) => day.dateStr > today)) return false;
+  const completedDates = new Set(trainingCompletionSummary([week], today).completedDays.map((day) => day.dateStr));
+  return scheduledDays.every((day) => completedDates.has(day.dateStr));
+}
+
 function renderHistoricalCourseDecisionPanel(week) {
   const checkin = historicalWeekCheckin(week?.weekNum);
   const snapshot = checkin?.evidenceSnapshot || null;
@@ -888,7 +899,7 @@ function renderCourseDecisionPanel(plan = appData.plan || [], phaseRuleText = ''
   if (!week) return '';
   // 歷史週只能使用該週留下的課程與評估快照；即時恢復、近期 RPE、下週處方
   // 都是「現在」的資料，放在舊週會讓同一份教練判讀看似被套用到所有歷史週。
-  if (currentWeek < todayWeekNum()) return renderHistoricalCourseDecisionPanel(week);
+  if (isHistoricalCourseWeek(week)) return renderHistoricalCourseDecisionPanel(week);
   const context = buildContext();
   const decision = resolveWeeklyDecision(context, week);
   if (!decision?.rows.length) return '';
@@ -2317,9 +2328,24 @@ function syncGarminRunsToPlan(review) {
   const logByDate = new Map((appData.log || []).map((entry, index) => [entry.date, index]));
   let changed = false;
 
-  appData.plan.forEach((week) => week.days.forEach((day) => {
+  appData.plan.forEach((week) => week.days.forEach((rawDay, index) => {
+    let day = rawDay;
     const run = runsByDate.get(day.dateStr);
     if (!run || day.type === 'rest') return;
+    // 已完成日的 Garmin 實績不能反推或重寫原課表。若舊版背景流程曾把本機
+    // 卡片洗成通用課表，而封存的正式教練處方仍存在，先只回復那份課程本體；
+    // 狀態與後續 Garmin 實績仍以目前資料為準。
+    const archivedDay = archivedCoachWeek(appData, week.weekNum)?.days?.find((item) => item?.dateStr === day.dateStr);
+    if (archivedDay?.coachPlan && !day.coachPlan) {
+      day = {
+        ...cloneTrainingValue(archivedDay),
+        status: day.status,
+        isMakeup: day.isMakeup,
+        extraSessions: day.extraSessions
+      };
+      week.days[index] = day;
+      changed = true;
+    }
     const actualKm = Number(run.km) || 0;
     const actualTimeMins = Math.round(paceToMinutes(run.fullPace || run.pace) * actualKm);
     const entry = {
@@ -2517,8 +2543,8 @@ function renderWeekSection(plan) {
   const deloadBadge = isDeload ? '<span class="week-flag-badge is-deload">減量週</span>' : '';
   const taperBadge = week.isTaper ? '<span class="week-flag-badge is-taper">賽前減量</span>' : '';
   const phaseRuleText = getPhaseRuleText(week, appData.profile, plan.length);
-  const isHistoricalWeek = currentWeek < todayWeekNum();
-  const isCurrentWeek = currentWeek === todayWeekNum();
+  const isHistoricalWeek = isHistoricalCourseWeek(week);
+  const isCurrentWeek = currentWeek === todayWeekNum() && !isHistoricalWeek;
   const isFutureWeek = currentWeek > todayWeekNum();
   // 遠期未來週沒有教練逐日確認過（coachWeekMatches 只會命中下一個待處理的週），
   // 顯示的是產生器排出來的預測值。標籤要跟已鎖定的正式課表明顯區分，
@@ -2547,9 +2573,9 @@ function renderWeekSection(plan) {
       <button class="week-nav-btn" onclick="navWeek(-1)" ${currentWeek <= 1 ? 'disabled' : ''} aria-label="上一週">◀</button>
       <div class="week-header-title">
         <div class="plan-overview-kicker">Week ${currentWeek} / ${plan.length}</div>
-        <div class="week-header-label">第 ${currentWeek} 週 · ${coachPhase?.phase || week.phaseLabel}${deloadBadge}${taperBadge}${currentWeek === todayWeekNum() ? '<span class="week-status-pill">進行中</span>' : ''}${historyBadge}${previewBadge}</div>
+        <div class="week-header-label">第 ${currentWeek} 週 · ${coachPhase?.phase || week.phaseLabel}${deloadBadge}${taperBadge}${isCurrentWeek ? '<span class="week-status-pill">進行中</span>' : ''}${historyBadge}${previewBadge}</div>
         <p class="week-header-subtitle">${reviewEscape(weekHeroCopy)}</p>
-        ${currentWeek !== todayWeekNum() ? `<div class="week-header-target"><span>${effectiveTarget.source === '教練本週目標' ? '教練本週目標' : '本週目標'}</span><strong>${effectiveTarget.display}</strong></div>` : ''}
+        ${!isCurrentWeek ? `<div class="week-header-target"><span>${effectiveTarget.source === '教練本週目標' ? '教練本週目標' : '本週目標'}</span><strong>${effectiveTarget.display}</strong></div>` : ''}
       </div>
       <button class="week-nav-btn" onclick="navWeek(1)" ${currentWeek >= plan.length ? 'disabled' : ''} aria-label="下一週">▶</button>
     </div>
@@ -2899,11 +2925,15 @@ function getPhaseRuleText(week, profile, totalWeeks) {
   const coachPhase = coachPhaseForWeek(week);
   if (coachPhase) {
     const hot = weekStart ? isHotSeasonDate(weekStart) : false;
+    // 週期表的 km 是階段規劃時的舊參考值；一旦正式週課表已排定，所有對跑者
+    // 顯示的「本週跑量」都必須以同一個正式週目標為準，不能讓舊 phase.km 覆蓋。
+    const formalTarget = effectiveWeekVolumeTarget(week);
+    const weeklyKm = formalTarget.numericKm || Number((String(coachPhase.km || '').match(/\d+(?:\.\d+)?/) || [])[0]) || 0;
     // 教練週期一旦覆蓋這週的日期，收量／降載文案就必須以正式 phase 名稱判讀，
     // 不能沿用課表產生器自己內部推算的 week.isTaper／isDeload——那組旗標不知道
     // 外部教練週期表，會把「基礎強化出口檢測週」誤標成恢復週。
     const taperNote = /減量.*比賽|賽前/.test(coachPhase.phase || '') ? ' 本週已進入賽前收量。' : coachPhaseIsDeload(coachPhase) ? ' 本週為恢復週，總量下修。' : '';
-    return `🧭 教練週期：目前屬「${coachPhase.phase}」${coachPhase.km ? `（週跑量 ${coachPhase.km} km）` : ''}。${coachPhase.focus || ''}${taperNote}${hot ? ' 夏季高溫：課表以心率為準，配速放慢屬正常。' : ''} 距離目標日還有 ${totalWeeks - week.weekNum + 1} 週。`;
+    return `🧭 教練週期：目前屬「${coachPhase.phase}」${weeklyKm ? `（週跑量 ${weeklyKm} km）` : ''}。${coachPhase.focus || ''}${taperNote}${hot ? ' 夏季高溫：課表以心率為準，配速放慢屬正常。' : ''} 距離目標日還有 ${totalWeeks - week.weekNum + 1} 週。`;
   }
   const phaseGuides = {
     base: '先用輕鬆跑與長跑把有氧底盤墊起來，品質課只會少量出現。',

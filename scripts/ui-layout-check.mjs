@@ -293,6 +293,7 @@ async function assertPanel(page, panel, viewportName) {
 async function assertTrainerReport(page, viewportName) {
   // The trainer loads encrypted coach data in the background.  Network idle is
   // not a page-readiness signal here and can time out on CI despite a usable UI.
+  await page.addInitScript(() => { window.__RUNNER_UI_FIXTURE__ = true; });
   await page.goto(`${baseUrl}trainer.html`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("#trainer-hero-shell", { timeout: 5000 });
   await page.evaluate((sample) => localStorage.setItem("runner-trainer-v1", JSON.stringify(sample)), trainerVisualSample);
@@ -336,10 +337,68 @@ async function assertTrainerReport(page, viewportName) {
     hasActionableTitle: element.textContent.includes("本週執行重點") || element.textContent.includes("這週怎麼跑，先看這裡"),
     hasVisibleGuidance: element.textContent.trim().length > 40,
     coachBriefOpen: !element.querySelector(".coach-insight-details") || element.querySelector(".coach-insight-details")?.open === true,
-    beforeCourseTable: Boolean(element.compareDocumentPosition(document.querySelector(".week-calendar")) & Node.DOCUMENT_POSITION_FOLLOWING),
+    beforeCourseTable: (() => {
+      const weekContent = document.querySelector("#plan-tab-week");
+      const calendar = weekContent?.querySelector(".week-calendar");
+      return Boolean(calendar) && [...weekContent.querySelectorAll(".course-decision-panel, .week-calendar")].indexOf(element) < [...weekContent.querySelectorAll(".course-decision-panel, .week-calendar")].indexOf(calendar);
+    })(),
   }));
   if ((courseDecision.hasFocus && (courseDecision.hasDuplicateFocus || !courseDecision.hasActionableTitle || !courseDecision.hasVisibleGuidance || !courseDecision.coachBriefOpen)) || !courseDecision.beforeCourseTable) {
     throw new Error(`${viewportName}/trainer-course-decision: visible coaching brief is incomplete ${JSON.stringify(courseDecision)}`);
+  }
+  const completedCurrentWeekReview = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousWeek = currentWeek;
+    try {
+      const today = todayStr();
+      const monday = mondayOfWeek(new Date(`${today}T00:00:00`));
+      appData.profile = { ...appData.profile, generatedAt: monday.toISOString().slice(0, 10) };
+      const completedDay = { dateStr: today, type: 'easy', km: 5, task: '輕鬆跑 5 km', hrTarget: 'HR≤150', status: 'done' };
+      const currentWeekPlan = { weekNum: 1, phaseLabel: '基礎強化', targetKm: 5, days: [completedDay] };
+      appData.plan = [currentWeekPlan];
+      appData.log = [{ date: today, source: 'garmin', plannedKm: 5, actualKm: 5.2 }];
+      currentWeek = 1;
+      const historical = isHistoricalCourseWeek(currentWeekPlan);
+      const rendered = renderWeekSection(appData.plan);
+      completedDay.status = 'planned';
+      appData.log = [];
+      const incompleteIsLive = !isHistoricalCourseWeek(currentWeekPlan);
+      return {
+        historical,
+        incompleteIsLive,
+        hasReview: rendered.includes('第 1 週課程回顧') && rendered.includes('HISTORICAL REVIEW'),
+        notInProgress: !rendered.includes('進行中')
+      };
+    } finally {
+      appData = previousData;
+      currentWeek = previousWeek;
+    }
+  });
+  if (!completedCurrentWeekReview.historical || !completedCurrentWeekReview.incompleteIsLive || !completedCurrentWeekReview.hasReview || !completedCurrentWeekReview.notInProgress) {
+    throw new Error(`${viewportName}/trainer-completed-current-week-review: a completed current week must switch to frozen course review without masking an incomplete week ${JSON.stringify(completedCurrentWeekReview)}`);
+  }
+  const formalWeekVolumeSingleSource = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousReview = cloneTrainingValue(coachReviewData);
+    try {
+      const today = todayStr();
+      const formalWeek = {
+        weekNum: 9,
+        targetKm: 30,
+        days: [6, 6, 6, 12].map((km, index) => ({ dateStr: today, dow: index + 1, type: index === 3 ? 'long' : 'easy', km, status: 'planned' }))
+      };
+      appData.profile = { ...appData.profile, goal: appData.profile?.goal || 'half' };
+      coachReviewData = { periodization: [{ phase: '降載', start: today, weeks: 1, km: '28', focus: '長跑 12 km' }] };
+      const formalTarget = effectiveWeekVolumeTarget(formalWeek);
+      const summary = getPhaseRuleText(formalWeek, appData.profile, 22);
+      return { formalTarget: formalTarget.numericKm, summary };
+    } finally {
+      appData = previousData;
+      coachReviewData = previousReview;
+    }
+  });
+  if (formalWeekVolumeSingleSource.formalTarget !== 30 || !formalWeekVolumeSingleSource.summary.includes('週跑量 30 km') || formalWeekVolumeSingleSource.summary.includes('週跑量 28 km')) {
+    throw new Error(`${viewportName}/trainer-formal-week-volume-single-source: coach summary diverged from the formal week target ${JSON.stringify(formalWeekVolumeSingleSource)}`);
   }
   const weekBriefAfterNavigation = await page.evaluate(() => {
     const previousData = structuredClone(appData);
@@ -465,6 +524,95 @@ async function assertTrainerReport(page, viewportName) {
   });
   if (inputValidation.validErrors.length || inputValidation.malformedErrors.length < 3) {
     throw new Error(`${viewportName}/trainer-profile-validation: expected valid setup to pass and malformed setup to be blocked ${JSON.stringify(inputValidation)}`);
+  }
+  const frozenW8Repair = await page.evaluate(() => {
+    const source = {
+      profile: { planVersion: 11 },
+      plan: [{ weekNum: 8, targetKm: 29, days: [
+        { dateStr: "2026-08-24", type: "easy", km: 5, task: "被覆寫", status: "done" },
+        { dateStr: "2026-08-25", type: "easy", km: 5, task: "被覆寫", status: "done" },
+        { dateStr: "2026-08-27", type: "easy", km: 5, task: "被覆寫", status: "done" },
+        { dateStr: "2026-08-29", type: "long", km: 14, task: "長跑 14 km（終時收快）", hrTarget: "HR≤150（持續超 155 走 1 分）", steps: [{ title: "主課", dose: "14 km", detail: "舊版" }], status: "done", coachPlan: { source: "historical-formal-repair", frozen: true, repairedAt: FROZEN_W8_REPAIR_ID } }
+      ] }],
+      log: [{ date: "2026-08-24", source: "garmin", plannedKm: 5, actualKm: 7.45 }, { date: "2026-08-25", source: "garmin", plannedKm: 5, actualKm: 8.91 }, { date: "2026-08-27", source: "garmin", plannedKm: 5, actualKm: 6.51 }, { date: "2026-08-29", source: "garmin", plannedKm: 14, actualKm: 14.13 }],
+      historicalCourseRepairs: [FROZEN_W8_REPAIR_ID],
+    };
+    const repaired = normalizeData(source);
+    const monday = repaired.plan[0].days[0];
+    const tempo = repaired.plan[0].days[1];
+    const long = repaired.plan[0].days[3];
+    return { targetKm: repaired.plan[0].targetKm, mondayKm: monday.km, mondayTitle: monday.task, tempoKm: tempo.km, tempoTitle: tempo.task, thursdayKm: repaired.plan[0].days[2].km, plannedKm: long.km, title: long.task, target: long.hrTarget, status: long.status, logPlannedKm: repaired.log[3].plannedKm, repairCount: repaired.historicalCourseRepairs?.length || 0 };
+  });
+  if (frozenW8Repair.targetKm !== 35.5 || frozenW8Repair.mondayKm !== 7 || frozenW8Repair.mondayTitle !== "輕鬆跑 7 km" || frozenW8Repair.tempoKm !== 8 || !frozenW8Repair.tempoTitle.includes("20 分連續節奏檢測") || frozenW8Repair.thursdayKm !== 7 || frozenW8Repair.plannedKm !== 13.5 || frozenW8Repair.title.includes("終時收快") || frozenW8Repair.target !== "HR 130–155（155 是上限；持續超過才走 1 分）" || frozenW8Repair.status !== "done" || frozenW8Repair.logPlannedKm !== 13.5 || !frozenW8Repair.repairCount) {
+    throw new Error(`${viewportName}/trainer-frozen-w8-repair: formal W8 course must be restored without changing Garmin completion ${JSON.stringify(frozenW8Repair)}`);
+  }
+  const frozenCourseWriteBarrier = await page.evaluate(() => {
+    const previousStored = localStorage.getItem(STORAGE_KEY);
+    const previousFixtureMode = window.__RUNNER_UI_FIXTURE__;
+    try {
+      window.__RUNNER_UI_FIXTURE__ = false;
+      const baseline = normalizeData({
+        profile: { planVersion: PLAN_SCHEMA_VERSION },
+        plan: [{ weekNum: 1, targetKm: 18, days: [{ dateStr: "2026-08-28", type: "easy", km: 5, task: "輕鬆跑 5 km", hrTarget: "HR≤150", status: "upcoming" }] }],
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(baseline));
+      // 模擬另一個新分頁完成 Garmin 同步；舊分頁尚持有完成前的 appData。
+      const newerWriter = cloneTrainingValue(baseline);
+      newerWriter.log = [{ date: "2026-08-28", source: "garmin", plannedKm: 5, actualKm: 6.1 }];
+      saveData(newerWriter);
+      const staleWriter = cloneTrainingValue(baseline);
+      staleWriter.plan[0].targetKm = 99;
+      staleWriter.plan[0].days[0].km = 99;
+      staleWriter.plan[0].days[0].task = "被背景流程覆寫";
+      staleWriter.plan[0].days[0].hrTarget = "HR≤99";
+      saveData(staleWriter);
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      const day = saved.plan[0].days[0];
+      return { targetKm: saved.plan[0].targetKm, km: day.km, task: day.task, hrTarget: day.hrTarget, status: day.status, actualKm: saved.log[0].actualKm };
+    } finally {
+      window.__RUNNER_UI_FIXTURE__ = previousFixtureMode;
+      if (previousStored === null) localStorage.removeItem(STORAGE_KEY);
+      else localStorage.setItem(STORAGE_KEY, previousStored);
+    }
+  });
+  if (frozenCourseWriteBarrier.targetKm !== 18 || frozenCourseWriteBarrier.km !== 5 || frozenCourseWriteBarrier.task !== "輕鬆跑 5 km" || frozenCourseWriteBarrier.hrTarget !== "HR≤150" || frozenCourseWriteBarrier.status !== "done" || frozenCourseWriteBarrier.actualKm !== 6.1) {
+    throw new Error(`${viewportName}/trainer-frozen-course-write-barrier: stale background data rewrote a completed historical course ${JSON.stringify(frozenCourseWriteBarrier)}`);
+  }
+  const longRunHeartRateGuard = await page.evaluate(() => {
+    const previousData = cloneTrainingValue(appData);
+    const previousStored = localStorage.getItem(STORAGE_KEY);
+    try {
+      const dateStr = addDaysToDateStr(todayStr(), 7);
+      const legacy = buildDayCard(6, dateStr, "long", 12, appData.profile, false, false, false, todayStr(), 2, "降載", "long", "長跑");
+      const completedToday = buildDayCard(6, todayStr(), "long", 13.5, appData.profile, false, false, false, todayStr(), 1, "基礎強化", "long", "長跑");
+      const zones = hrZones(appData.profile);
+      legacy.hrTarget = `HR ≤${zones.easyMax}（${easyZoneLabel()}）`;
+      legacy.workoutStructure = buildGarminWorkoutStructure(legacy.type, legacy.steps, legacy.km, [legacy.pace, legacy.hrTarget].filter(Boolean).join(" · "));
+      completedToday.task = "長跑 13.5 km（高溫跑走）";
+      completedToday.hrTarget = "HR 130–155（155 是上限；持續超過才走 1 分）";
+      completedToday.status = "done";
+      completedToday.coachPlan = { source: "historical-formal-repair", frozen: true, repairedAt: FROZEN_W8_REPAIR_ID };
+      const completedSnapshot = cloneTrainingValue(completedToday);
+      appData.plan = [{ weekNum: 1, targetKm: 33.5, days: [completedToday] }, { weekNum: 2, days: [legacy] }];
+      // 此測試專注「一般當日課表」的對齊鎖；W8 專屬資料修復已由上一個測試覆蓋。
+      appData.historicalCourseRepairs = [FROZEN_W8_REPAIR_ID];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile: appData.profile, plan: [], frozenCourseArchive: { version: 1, days: {} }, historicalCourseRepairs: [FROZEN_W8_REPAIR_ID] }));
+      const aligned = alignLongRunHeartRateTargets();
+      return {
+        aligned,
+        expectedTarget: longRunHrTarget(appData.profile),
+        target: appData.plan[1].days[0].hrTarget,
+        mainTarget: workoutStructureForDay(appData.plan[1].days[0]).find((step) => step.kind === "main")?.target,
+        completedCoursePreserved: appData.plan[0].days[0].km === completedSnapshot.km && appData.plan[0].days[0].task === completedSnapshot.task && appData.plan[0].days[0].hrTarget === completedSnapshot.hrTarget && appData.plan[0].days[0].status === completedSnapshot.status,
+      };
+    } finally {
+      appData = previousData;
+      if (previousStored === null) localStorage.removeItem(STORAGE_KEY);
+      else localStorage.setItem(STORAGE_KEY, previousStored);
+    }
+  });
+  if (!longRunHeartRateGuard.aligned || longRunHeartRateGuard.target !== longRunHeartRateGuard.expectedTarget || !String(longRunHeartRateGuard.mainTarget || "").includes(longRunHeartRateGuard.target) || !longRunHeartRateGuard.completedCoursePreserved) {
+    throw new Error(`${viewportName}/trainer-long-run-heart-rate-guard: future long-run target must retain the 155 walk guard without rewriting today's completed course ${JSON.stringify(longRunHeartRateGuard)}`);
   }
   const earlyPlanning = await page.evaluate(() => {
     currentWeek = 1;
@@ -1298,10 +1446,13 @@ async function assertTrainerReport(page, viewportName) {
     const previousData = cloneTrainingValue(appData);
     const previousPlan = cloneTrainingValue(appData.plan);
     const previousReview = cloneTrainingValue(coachReviewData);
+    const previousStored = localStorage.getItem(STORAGE_KEY);
     try {
       const today = todayStr();
       const shift = (days) => addDaysToDateStr(today, -days);
       appData.plan = [{ weekNum: 1, days: [1, 3, 5].map((offset) => ({ dateStr: shift(offset), dow: offset, type: "easy", km: 6, status: "done" })) }];
+      appData.frozenCourseArchive = { version: 1, days: {} };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile: appData.profile, plan: [], frozenCourseArchive: { version: 1, days: {} } }));
       appData.runFeedback = {};
       appData.log = [];
       coachReviewData = {
@@ -1322,7 +1473,8 @@ async function assertTrainerReport(page, viewportName) {
       appData = previousData;
       appData.plan = previousPlan;
       coachReviewData = previousReview;
-      saveData(appData);
+      if (previousStored === null) localStorage.removeItem(STORAGE_KEY);
+      else localStorage.setItem(STORAGE_KEY, previousStored);
     }
   });
   if (watchRpe.watchSamples !== 3 || watchRpe.watchAvgRpe !== 8 || !watchRpe.badgeShowsWatch || !watchRpe.manualLowersAverage) {

@@ -6,7 +6,7 @@ const DEVICE_KEY = 'runner-trainer:device-id';
 const STORAGE_KEY = `runner-trainer:${getDeviceId()}:v1`;
 const PRE_RESTORE_STORAGE_KEY = `${STORAGE_KEY}:pre-restore`;
 const RUNNER_REGISTERED_RACES_SUFFIX = ':registered-races';
-const PLAN_SCHEMA_VERSION = 11;
+const PLAN_SCHEMA_VERSION = 12;
 const GUIDE_ASSET_VERSION = 7;
 const GARMIN_WORKOUT_PAIRING_KEY = 'runner-garmin-workout-pairing-v1';
 const SKIP_REASON_LABELS = {
@@ -44,7 +44,7 @@ function addLocalRegistrationLink() {
 addLocalRegistrationLink();
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, raceRecoveryChecks: {}, fuelingLogs: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, lastBackupAt: null, safetyHold: null, onboardingIntroSeenAt: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, raceRecoveryChecks: {}, fuelingLogs: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, frozenCourseArchive: { version: 1, days: {} }, lastBackupAt: null, safetyHold: null, onboardingIntroSeenAt: null };
 }
 
 // A formal day remains the single coaching prescription.  A second workout is
@@ -98,6 +98,90 @@ function snapshotStoredCoachWeeks(data) {
 function archivedCoachWeek(data, weekNum) {
   const week = data?.coachPlanArchive?.weeks?.[String(weekNum)];
   return week && Array.isArray(week.days) ? cloneTrainingValue(week) : null;
+}
+
+// 歷史課表與 Garmin 實跑是兩種資料：前者在完成或日期過去後必須不可變，
+// 後者仍可補同步。這個 archive 是資料層的最後防線，不依賴任何畫面載入順序。
+function normalizeFrozenCourseArchive(value) {
+  const days = value?.days && typeof value.days === 'object' ? value.days : {};
+  const normalized = {};
+  Object.entries(days).forEach(([date, entry]) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !entry?.day || typeof entry.day !== 'object') return;
+    normalized[date] = { weekNum: Number(entry.weekNum) || 0, targetKm: Number(entry.targetKm) || 0, day: cloneTrainingValue(entry.day) };
+  });
+  return { version: 1, days: normalized };
+}
+
+function frozenCourseDaySnapshot(week, day) {
+  return { weekNum: Number(week?.weekNum) || 0, targetKm: Number(week?.targetKm) || 0, day: cloneTrainingValue(day) };
+}
+
+// Playwright 的畫面樣本會在同一頁反覆置換虛擬歷史資料；那不是產品寫入路徑。
+// 正常網站從不設定這個旗標，所有真實 localStorage 寫入仍一律經凍結閘門。
+function trainerUiFixtureMode() {
+  return typeof window !== 'undefined' && window.__RUNNER_UI_FIXTURE__ === true;
+}
+
+function restoreFrozenCourseArchive(data) {
+  const archive = normalizeFrozenCourseArchive(data?.frozenCourseArchive);
+  let changed = false;
+  (data?.plan || []).forEach((week) => (week.days || []).forEach((day, index) => {
+    const frozen = archive.days[day?.dateStr];
+    if (!frozen) return;
+    const currentCourse = JSON.stringify(day);
+    const restored = {
+      ...cloneTrainingValue(frozen.day),
+      // 這些是執行紀錄，不是課表內容；可繼續由 Garmin／人工補入。
+      status: day.status || frozen.day.status,
+      extraSessions: day.extraSessions || frozen.day.extraSessions,
+      isMakeup: day.isMakeup || frozen.day.isMakeup
+    };
+    if (JSON.stringify(restored) !== currentCourse) {
+      week.days[index] = restored;
+      changed = true;
+    }
+    if (frozen.targetKm > 0 && week.targetKm !== frozen.targetKm) {
+      week.targetKm = frozen.targetKm;
+      changed = true;
+    }
+  }));
+  data.frozenCourseArchive = archive;
+  return changed;
+}
+
+// 課表處方凍結以外，已完成的實跑也是歷史事實。舊分頁可能還握有
+// Garmin 同步前的 appData；若直接覆寫 localStorage，不能讓它把較新的
+// 完成狀態或唯一一筆實跑紀錄沖掉。完成狀態是終態，新的同步若帶有同一
+// 筆紀錄則仍由呼叫端的資料更新其內容。
+function preservePersistedCompletedRuns(data, persisted) {
+  const persistedDoneDates = new Set([
+    ...Object.entries(normalizeDayStatuses(persisted?.dayStatuses))
+      .filter(([, status]) => status === 'done')
+      .map(([dateStr]) => dateStr),
+    ...(persisted?.log || []).map((entry) => entry?.date).filter(Boolean)
+  ]);
+  const currentLogKeys = new Set((data?.log || []).map((entry) => `${entry?.date || ''}|${entry?.type || ''}|${entry?.source || ''}|${entry?.activityId || entry?.garminActivityId || ''}`));
+  const missingPersistedRuns = (persisted?.log || []).filter((entry) => {
+    const key = `${entry?.date || ''}|${entry?.type || ''}|${entry?.source || ''}|${entry?.activityId || entry?.garminActivityId || ''}`;
+    return entry?.date && !currentLogKeys.has(key);
+  });
+  if (missingPersistedRuns.length) data.log = [...(data.log || []), ...cloneTrainingValue(missingPersistedRuns)];
+  data.dayStatuses = normalizeDayStatuses(data?.dayStatuses);
+  persistedDoneDates.forEach((dateStr) => { data.dayStatuses[dateStr] = 'done'; });
+  applyStoredDayStatuses(data);
+  return missingPersistedRuns.length > 0 || persistedDoneDates.size > 0;
+}
+
+function snapshotFrozenCourseArchive(data, { replaceDates = [] } = {}) {
+  const archive = normalizeFrozenCourseArchive(data?.frozenCourseArchive);
+  const replace = new Set(replaceDates);
+  const cutoff = todayStr();
+  (data?.plan || []).forEach((week) => (week.days || []).forEach((day) => {
+    if (!day?.dateStr || !(day.dateStr < cutoff || day.status === 'done' || day.status === 'missed')) return;
+    if (!archive.days[day.dateStr] || replace.has(day.dateStr)) archive.days[day.dateStr] = frozenCourseDaySnapshot(week, day);
+  }));
+  data.frozenCourseArchive = archive;
+  return archive;
 }
 
 function sameWeekTimeline(left, right) {
@@ -843,6 +927,61 @@ function normalizeCoachLog(value, fields) {
     .map(([date, item]) => [date, Object.fromEntries(fields.map(([key, max]) => [key, String(item[key] || '').trim().slice(0, max)]).concat([["savedAt", String(item.savedAt || '')]]))]));
 }
 
+// 2026-08-24 的 W8 已完成後曾被背景通用課表覆蓋。W7 正式週報（2026-08-22）
+// 留有四堂結構化處方：7 / 8 / 7 / 13.5 km，共 35.5 km；Garmin 之後的 37 km
+// 與 14.13 km 長跑均屬實跑，不是原處方。
+// 此為一次性資料修復，不以任何今日的訓練狀態重算歷史菜單。
+const FROZEN_W8_REPAIR_ID = '2026-08-29-w8-formal-course-v1';
+function repairFrozenW8Course(data) {
+  const repaired = new Set(Array.isArray(data.historicalCourseRepairs) ? data.historicalCourseRepairs : []);
+  const week = (data.plan || []).find((item) => (item.days || []).some((day) => day?.dateStr === '2026-08-29'));
+  const daysByDate = new Map((week?.days || []).map((day) => [day.dateStr, day]));
+  const longRun = daysByDate.get('2026-08-29');
+  if (!week || !longRun || !['2026-08-24', '2026-08-25', '2026-08-27'].every((date) => daysByDate.has(date))) return false;
+  // W8 正式長跑處方是範圍 HR 130–155；155 是上限，不是前段的目標值。
+  // 納入 canonical 判定，讓先前被錯誤修成 HR≤150 的既有快照能再次自動修復。
+  const formalLongRunTarget = 'HR 130–155（155 是上限；持續超過才走 1 分）';
+  const alreadyCanonical = week.targetKm === 35.5
+    && daysByDate.get('2026-08-24')?.km === 7
+    && daysByDate.get('2026-08-25')?.km === 8
+    && daysByDate.get('2026-08-27')?.km === 7
+    && longRun.km === 13.5
+    && longRun.hrTarget === formalLongRunTarget
+    && longRun.coachPlan?.repairedAt === FROZEN_W8_REPAIR_ID;
+  if (repaired.has(FROZEN_W8_REPAIR_ID) && alreadyCanonical) return false;
+  const warmup = { title: '熱身', dose: '8 分', target: '', detail: '原地動態活動髖、踝與小腿；熱身不佔跑步里程。' };
+  const cooldown = { title: '收操', dose: '6 分', target: '', detail: '走路、補水與伸展；不佔跑步里程。' };
+  const replaceDay = (date, patch) => {
+    const day = daysByDate.get(date);
+    const next = { ...patch, status: day.status, extraSessions: day.extraSessions, isMakeup: day.isMakeup, coachPlan: { ...(day.coachPlan || {}), source: 'historical-formal-repair', frozen: true, repairedAt: FROZEN_W8_REPAIR_ID } };
+    next.workoutStructure = buildGarminWorkoutStructure(next.type, next.steps, next.km, [next.pace, next.hrTarget].filter(Boolean).join(' · '));
+    Object.assign(day, next);
+  };
+  week.targetKm = 35.5;
+  replaceDay('2026-08-24', {
+    type: 'easy', focus: 'easy', km: 7, task: '輕鬆跑 7 km', pace: '', hrTarget: 'HR≤150',
+    steps: [warmup, { title: '主課', dose: '7 km', target: 'HR≤150', detail: '7 km 是手錶實跑總量；完成後安排肌力 C。' }, cooldown]
+  });
+  replaceDay('2026-08-25', {
+    type: 'tempo', focus: 'tempo', km: 8, task: '20 分連續節奏檢測（總量 8 km）', pace: '6:55→6:45/km', hrTarget: 'HR≤166（末段；E 補量 HR≤150）',
+    steps: [warmup, { title: '主課', dose: '20 分', target: '6:55→6:45/km；末段可 6:35–6:45/km · HR≤166 · RPE 6–7', detail: '前 5 分 6:55–7:05/km，中段 10 分 6:45–6:55/km；最快不得快於 6:30/km。' }, { title: 'E 跑補量', dose: '補至手錶總量 8 km', target: 'HR≤150', detail: '檢測段與 E 跑合計手錶實跑總量 8 km。' }, cooldown]
+  });
+  replaceDay('2026-08-27', {
+    type: 'easy', focus: 'easy', km: 7, task: '輕鬆跑 7 km', pace: '', hrTarget: 'HR≤150',
+    steps: [warmup, { title: '主課', dose: '7 km', target: 'HR≤150', detail: '7 km 是手錶實跑總量；完成後安排肌力 A。' }, cooldown]
+  });
+  replaceDay('2026-08-29', {
+    type: 'long', focus: 'long', km: 13.5, task: '長跑 13.5 km（高溫跑走）', pace: '', hrTarget: formalLongRunTarget,
+    steps: [warmup, { title: '主課', dose: '13.5 km', target: formalLongRunTarget, detail: '帶水與電解質；高溫從開始即跑走，不加速、不補量。' }, cooldown]
+  });
+  const plannedKmByDate = { '2026-08-24': 7, '2026-08-25': 8, '2026-08-27': 7, '2026-08-29': 13.5 };
+  (data.log || []).filter((entry) => entry?.source === 'garmin' && plannedKmByDate[entry.date]).forEach((entry) => { entry.plannedKm = plannedKmByDate[entry.date]; });
+  repaired.add(FROZEN_W8_REPAIR_ID);
+  data.historicalCourseRepairs = [...repaired];
+  if (!trainerUiFixtureMode()) snapshotFrozenCourseArchive(data, { replaceDates: Object.keys(plannedKmByDate) });
+  return true;
+}
+
 function normalizeData(data) {
   const base = createEmptyData();
   const normalized = {
@@ -867,13 +1006,18 @@ function normalizeData(data) {
     cycleHistory: normalizeCycleHistory(data?.cycleHistory),
     nextCycleDraft: data?.nextCycleDraft && typeof data.nextCycleDraft === 'object' ? cloneTrainingValue(data.nextCycleDraft) : null,
     nextCycleCoachContext: data?.nextCycleCoachContext && typeof data.nextCycleCoachContext === 'object' ? cloneTrainingValue(data.nextCycleCoachContext) : null,
-    coachPlanArchive: normalizeCoachPlanArchive(data?.coachPlanArchive)
+    coachPlanArchive: normalizeCoachPlanArchive(data?.coachPlanArchive),
+    frozenCourseArchive: normalizeFrozenCourseArchive(data?.frozenCourseArchive)
   };
   normalized.dayStatuses = {
     ...collectLegacyDayStatuses(normalized),
     ...normalized.dayStatuses
   };
-  return applyStoredMakeupRecords(applyStoredDayStatuses(normalized));
+  const restored = applyStoredMakeupRecords(applyStoredDayStatuses(normalized));
+  if (!trainerUiFixtureMode()) restoreFrozenCourseArchive(restored);
+  repairFrozenW8Course(restored);
+  if (!trainerUiFixtureMode()) snapshotFrozenCourseArchive(restored);
+  return restored;
 }
 
 function loadData() {
@@ -919,6 +1063,25 @@ function syncCoachProfileSnapshot(data) {
 
 function saveData(data) {
   const normalized = normalizeData(data);
+  // 即使舊分頁仍握有過期 appData，也必須以目前 localStorage 的凍結快照為準。
+  // 所有寫入端都會經過這裡，不能繞過歷史課表保護。
+  if (!trainerUiFixtureMode()) {
+    try {
+      const persistedRaw = localStorage.getItem(STORAGE_KEY);
+      if (persistedRaw) {
+        const persisted = normalizeData(JSON.parse(persistedRaw));
+        const persistedArchive = normalizeFrozenCourseArchive(persisted.frozenCourseArchive);
+        const localArchive = normalizeFrozenCourseArchive(normalized.frozenCourseArchive);
+        normalized.frozenCourseArchive = {
+          version: 1,
+          days: { ...localArchive.days, ...persistedArchive.days }
+        };
+        preservePersistedCompletedRuns(normalized, persisted);
+        restoreFrozenCourseArchive(normalized);
+      }
+    } catch { /* 保存前保護不可用時，仍讓既有儲存錯誤處理負責呈現訊息。 */ }
+    snapshotFrozenCourseArchive(normalized);
+  }
   normalized.coachPlanArchive = snapshotStoredCoachWeeks(normalized);
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
@@ -2044,6 +2207,14 @@ function easyZoneLabel() {
   return configured || 'Z2';
 }
 
+// 長跑的 Z2 是日常目標；比目標高 5 bpm 才是高溫／漂移時的跑走介入護欄。
+// 兩者必須同時出現在課表，否則跑者容易把 155 誤讀成長跑應維持的目標。
+function longRunHrTarget(profile) {
+  const zones = hrZones(profile);
+  const interventionCap = zones.easyMax + 5;
+  return `HR ≤${zones.easyMax}（${easyZoneLabel()}；持續超 ${interventionCap} 走 1 分）`;
+}
+
 function recoveryRunInstruction(profile) {
   const recoveryMax = hrZones(profile).recoveryMax;
   const resumeAt = Math.max(0, recoveryMax - 5);
@@ -2623,10 +2794,11 @@ function init() {
     const coachCourseNamesAligned = alignCoachCourseNames();
     const coachDeloadStructureAligned = alignCoachDeloadStructure();
     const recoveryTargetsAligned = alignRecoveryCourseTargets();
+    const longRunTargetsAligned = alignLongRunHeartRateTargets();
     renderPlanView();
     const restoredEarlyAdjustment = restorePendingEarlyCoachAdjustment();
     const restoredEarlySchedule = restorePendingEarlyCoachSchedule();
-    if (coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || restoredEarlyAdjustment || restoredEarlySchedule) renderPlanView();
+    if (coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || longRunTargetsAligned || restoredEarlyAdjustment || restoredEarlySchedule) renderPlanView();
     if (ui.view === 'setup') {
       renderSetupView();
       showView('setup');
@@ -2760,12 +2932,13 @@ loadRegistrationRaceCheckpoints();
     const coachCourseNamesAligned = alignCoachCourseNames();
     const coachDeloadStructureAligned = alignCoachDeloadStructure();
     const recoveryTargetsAligned = alignRecoveryCourseTargets();
+    const longRunTargetsAligned = alignLongRunHeartRateTargets();
     // 校準與出發前調整都經單一 mutation 入口；背景觸發不跳 toast。
     const adaptation = runCoachAdaptation('coach-review-ready');
     // 還原必須排在校準之後：先還原再校準的話，已提前排定的教練週會被同一輪
     // 的自動校準覆蓋，跑者隔天看到的又是非教練版課表。
     const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
-    if ((historicalCoachPlansRestored || coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    if ((historicalCoachPlansRestored || coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || longRunTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }
 

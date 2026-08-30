@@ -667,9 +667,12 @@ function alignCoachScheduleDays() {
   const schedule = coachScheduleContract();
   if (!schedule.trainingDows.length || !schedule.trainingDows.includes(schedule.longDow)) return false;
   const expectedState = coachScheduleDayState(schedule);
+  const cutoff = todayStr();
   let changed = JSON.stringify(appData.profile?.dayState || []) !== JSON.stringify(expectedState);
   (appData.plan || []).forEach((week) => {
-    const courses = (week.days || []).filter((day) => day.coachPlan?.source === 'coach-periodization' && canMutatePlanDay(day, 'align'));
+    // 排程對齊是前瞻性的設定修正；同一週只要已有今天或過去的課，就不能整週重建。
+    const canRewriteWeek = (week.days || []).every((day) => !day.dateStr || day.dateStr > cutoff);
+    const courses = canRewriteWeek ? (week.days || []).filter((day) => day.coachPlan?.source === 'coach-periodization' && canMutateFuturePlanDay(day, 'align', cutoff)) : [];
     const actualDows = courses.map((day) => new Date(`${day.dateStr}T00:00:00`).getDay()).sort((left, right) => left - right);
     const storedDows = courses.map((day) => day.dow).sort((left, right) => left - right);
     if (courses.length && (JSON.stringify(actualDows) !== JSON.stringify(schedule.trainingDows) || JSON.stringify(storedDows) !== JSON.stringify(schedule.trainingDows))) {
@@ -684,10 +687,17 @@ function alignCoachScheduleDays() {
   return changed;
 }
 
+// 對齊／校正不是教練重新開處方：絕不能碰今天、過去日期或已有 Garmin 完成實績。
+// `canMutatePlanDay` 保留今天給明確的安全覆寫；背景自動對齊則一律只能處理未來。
+function canMutateFuturePlanDay(day, source, today = todayStr()) {
+  return Boolean(day?.dateStr && day.dateStr > today && canMutatePlanDay(day, source, today));
+}
+
 function alignCoachCourseNames() {
+  const cutoff = todayStr();
   let changed = false;
   (appData.plan || []).forEach((week) => (week.days || []).forEach((day) => {
-    if (day.coachPlan?.source !== 'coach-periodization' || !day.dateStr || !canMutatePlanDay(day, 'align')) return;
+    if (day.coachPlan?.source !== 'coach-periodization' || !canMutateFuturePlanDay(day, 'align', cutoff)) return;
     const nextTask = String(day.task || '').replace(/^教練輕鬆跑/, '輕鬆跑').replace(/^教練長跑/, '長跑');
     if (nextTask !== day.task) {
       day.task = nextTask;
@@ -706,7 +716,7 @@ function alignCoachDeloadStructure() {
   let changed = false;
   (appData.plan || []).forEach((week) => {
     (week.days || []).forEach((day, index) => {
-      if (day.type !== 'easy' || day.focus !== 'recovery' || !day.dateStr || !canMutatePlanDay(day, 'align', cutoff)) return;
+      if (day.type !== 'easy' || day.focus !== 'recovery' || !canMutateFuturePlanDay(day, 'align', cutoff)) return;
       if (day.coachPlan?.source !== 'coach-periodization' || day.coachPlan?.phase !== '降載') return;
       const replacement = buildDayCard(day.dow, day.dateStr, 'easy', day.km, profile, true, false, false, cutoff, day.weekNum || week.weekNum, week.phase || day.phaseName || '降載', 'easy', '輕鬆跑');
       replacement.coachPlan = { ...day.coachPlan };
@@ -729,7 +739,7 @@ function alignRecoveryCourseTargets() {
   let changed = false;
   (appData.plan || []).forEach((week) => {
     (week.days || []).forEach((day) => {
-      if (day.type !== 'easy' || day.focus !== 'recovery' || !day.dateStr || !canMutatePlanDay(day, 'align', cutoff)) return;
+      if (day.type !== 'easy' || day.focus !== 'recovery' || !canMutateFuturePlanDay(day, 'align', cutoff)) return;
       const nextDetail = `今天是恢復跑：${recovery.detail}`;
       const nextHeatNote = isHotSeasonDate(new Date(`${day.dateStr}T00:00:00`))
         ? `高溫期：恢復跑守 ${recovery.hrTarget}，不守配速；超過 ${zones.recoveryMax} 就放慢，仍降不下來就走到 HR ≤${Math.max(0, zones.recoveryMax - 5)} 再跑。`
@@ -740,6 +750,30 @@ function alignRecoveryCourseTargets() {
         day.hrTarget = recovery.hrTarget;
         day.heatNote = nextHeatNote;
         day.steps = nextSteps;
+        changed = true;
+      }
+    });
+  });
+  if (changed) saveData(appData);
+  return changed;
+}
+
+// 舊版長跑只呈現 Z2 目標，卻沒有呈現高溫時「持續超過 Z2 + 5 才走一分鐘」的護欄。
+// 僅補上未來、尚未完成且原本使用 Z2 上限的卡片；手寫的個別長跑區間維持原樣。
+function alignLongRunHeartRateTargets() {
+  const profile = appData?.profile || {};
+  const zones = hrZones(profile);
+  const cutoff = todayStr();
+  const generatedZ2Target = new RegExp(`^HR\\s*[≤<]\\s*\\d+(?:\\s*（${easyZoneLabel()}(?:；[^）]*)?）)?$`);
+  const nextTarget = longRunHrTarget(profile);
+  let changed = false;
+  (appData.plan || []).forEach((week) => {
+    (week.days || []).forEach((day) => {
+      if (day.type !== 'long' || !canMutateFuturePlanDay(day, 'align', cutoff) || !generatedZ2Target.test(String(day.hrTarget || ''))) return;
+      const nextStructure = buildGarminWorkoutStructure(day.type, day.steps, Number(day.km) || 5, [day.pace, nextTarget].filter(Boolean).join(' · '));
+      if (day.hrTarget !== nextTarget || JSON.stringify(day.workoutStructure || []) !== JSON.stringify(nextStructure)) {
+        day.hrTarget = nextTarget;
+        day.workoutStructure = nextStructure;
         changed = true;
       }
     });

@@ -888,7 +888,7 @@ function buildDayCard(dow, dateStr, type, km, profile, isDeload, isTaper, hasInj
         ? `HR ${zones.steadyLow}–${zones.steadyHigh}（穩定有氧）`
         : `HR ≤${zones.easyMax}（${easyZoneLabel()}）`)
     : type === 'long'
-      ? `HR ≤${zones.easyMax}（${easyZoneLabel()}）`
+      ? longRunHrTarget(profile)
       : type === 'tempo'
         ? `HR ${zones.tempoLow}–${zones.tempoHigh}`
         : type === 'interval'
