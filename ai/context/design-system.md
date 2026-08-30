@@ -73,6 +73,7 @@
 | 報名建立流程步驟列（entry-workflow） | 已建立 | 待選人／選人完成／選組別完成／可儲存／手機三欄 | `--surface`、`--soft`、`--line`、`--green-dark`、`--yellow`、`--radius` | `local/registration/registration.html`、`local/registration/registration.css`、`local/registration/registration-actions.js` | Playwright 桌機與 390px 截圖 | 報名管理作業流程優化 |
 | 教練判讀證據列（coach-decision-card） | 已建立 | 可維持／暫緩／資料缺失／窄螢幕單欄 | `--c-surface`、`--c-border`、`--c-primary`、`--c-yellow`、`--radius-lg` | `site/trainer-render.js`、`site/trainer.css` | 靜態 DOM／layout 驗證 | 教練判讀完整化 |
 | 教練流程說明（coach-flow-card） | 已建立 | 有實跑證據／等待實跑證據／手機雙欄 | `--c-surface2`、`--c-surface`、`--c-border`、`--c-primary`、`--c-yellow`、`--radius-lg` | `site/trainer-render.js`、`site/trainer.css` | Playwright 桌機與 390px 截圖 | 教練流程可視化 |
+| 教練記憶列（coach-memory） | 已建立 | 有記憶／空狀態／展開舊記憶／手機單欄 | `--c-surface2`、`--c-border`、`--c-primary-hover`、`--c-text-muted`、`--radius-md` | `site/trainer-render.js`、`site/trainer.css` | Playwright 驗證待補 | 教練記憶與行程協商 |
 
 （「來源階段」記錄這個元件是 S4 初建，還是後續某個功能 Epic 補做並回登的。）
 

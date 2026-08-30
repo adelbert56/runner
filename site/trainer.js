@@ -44,7 +44,7 @@ function addLocalRegistrationLink() {
 addLocalRegistrationLink();
 
 function createEmptyData() {
-  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, raceRecoveryChecks: {}, fuelingLogs: {}, planChangeHistory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, frozenCourseArchive: { version: 1, days: {} }, lastBackupAt: null, safetyHold: null, onboardingIntroSeenAt: null };
+  return { profile: null, plan: [], log: [], checkins: [], assessments: [], adaptationPrompts: {}, dayStatuses: {}, skipReasons: {}, makeupRecords: {}, activityAssignments: {}, runFeedback: {}, raceRecoveryChecks: {}, fuelingLogs: {}, planChangeHistory: [], coachMemory: [], garminAnalysisHistory: [], garminSyncManifest: {}, trainingEvents: [], cycleHistory: [], nextCycleDraft: null, nextCycleCoachContext: null, coachPlanArchive: { version: 1, weeks: {} }, frozenCourseArchive: { version: 1, days: {} }, lastBackupAt: null, safetyHold: null, onboardingIntroSeenAt: null };
 }
 
 // A formal day remains the single coaching prescription.  A second workout is
@@ -708,6 +708,24 @@ function normalizePlanChangeHistory(history) {
   }, []);
 }
 
+function normalizeCoachMemory(memory) {
+  if (!Array.isArray(memory)) return [];
+  const seen = new Set();
+  return memory.filter((item) => item && /^\d{4}-\d{2}-\d{2}T/.test(item.at || '') && String(item.title || '').trim())
+    .map((item) => ({
+      id: String(item.id || `${item.at}-${item.title}`).slice(0, 120), at: item.at,
+      date: /^\d{4}-\d{2}-\d{2}$/.test(item.date || '') ? item.date : String(item.at).slice(0, 10),
+      source: String(item.source || 'coach').slice(0, 32), title: String(item.title).slice(0, 120),
+      action: String(item.action || '').slice(0, 280), rejected: String(item.rejected || '').slice(0, 220), next: String(item.next || '').slice(0, 220),
+      sourceDate: /^\d{4}-\d{2}-\d{2}$/.test(item.sourceDate || '') ? item.sourceDate : '', targetDate: /^\d{4}-\d{2}-\d{2}$/.test(item.targetDate || '') ? item.targetDate : ''
+    }))
+    .filter((item) => !seen.has(item.id) && seen.add(item.id)).slice(-100);
+}
+
+function mergeCoachMemory(...lists) {
+  return normalizeCoachMemory(lists.flat()).sort((a, b) => String(a.at).localeCompare(String(b.at))).slice(-100);
+}
+
 function normalizeTrainingCheckins(checkins) {
   if (!Array.isArray(checkins)) return [];
   const byWeek = new Map();
@@ -846,6 +864,16 @@ function recordTrainingEvent(type, payload = {}) {
     ...payload
   });
   appData.trainingEvents = appData.trainingEvents.slice(-500);
+}
+
+// 只記錄真正影響安排的事件；不靠每日問卷堆出一條聊天紀錄。
+function recordCoachMemory({ source = 'coach', title, action = '', rejected = '', next = '', sourceDate = '', targetDate = '' } = {}) {
+  if (!String(title || '').trim()) return;
+  appData.coachMemory = normalizeCoachMemory(appData.coachMemory);
+  const date = todayStr();
+  if (appData.coachMemory.some((item) => item.date === date && item.source === source && item.title === title && item.action === action && item.sourceDate === sourceDate && item.targetDate === targetDate)) return;
+  appData.coachMemory.push({ id: globalThis.crypto?.randomUUID?.() || `coach-memory-${Date.now()}-${Math.random().toString(16).slice(2)}`, at: new Date().toISOString(), date, source, title, action, rejected, next, sourceDate, targetDate });
+  appData.coachMemory = normalizeCoachMemory(appData.coachMemory);
 }
 
 function collectLegacyDayStatuses(data) {
@@ -1002,6 +1030,7 @@ function normalizeData(data) {
     fuelingLogs: normalizeCoachLog(data?.fuelingLogs, [['breakfast', 180], ['fluidMl', 8], ['electrolyte', 120], ['carbs', 120], ['gut', 120], ['note', 240]]),
     safetyHold: normalizeSafetyHold(data?.safetyHold),
     planChangeHistory: normalizePlanChangeHistory(data?.planChangeHistory),
+    coachMemory: normalizeCoachMemory(data?.coachMemory),
     trainingEvents: normalizeTrainingEvents(data?.trainingEvents),
     cycleHistory: normalizeCycleHistory(data?.cycleHistory),
     nextCycleDraft: data?.nextCycleDraft && typeof data.nextCycleDraft === 'object' ? cloneTrainingValue(data.nextCycleDraft) : null,
@@ -1076,6 +1105,7 @@ function saveData(data) {
           version: 1,
           days: { ...localArchive.days, ...persistedArchive.days }
         };
+        normalized.coachMemory = mergeCoachMemory(persisted.coachMemory, normalized.coachMemory);
         preservePersistedCompletedRuns(normalized, persisted);
         restoreFrozenCourseArchive(normalized);
       }

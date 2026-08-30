@@ -1066,6 +1066,15 @@ function renderCoachEvidencePanel({ rawCoachNotes = '', reviewNotice = '', weekI
   </section>`;
 }
 
+function renderCoachMemoryCard() {
+  const memory = (appData.coachMemory || []).filter((item) => item && item.title).sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  if (!memory.length) return `<section class="coach-memory" aria-label="近期教練記憶"><div class="coach-memory-head"><div><div class="coach-evidence-kicker">COACH MEMORY</div><b>近期教練記憶</b></div></div><p class="coach-memory-empty">目前沒有需要追蹤的課表變動；正式課表會在有足夠證據時才調整。</p></section>`;
+  const renderItem = (item) => `<li class="coach-memory-item"><time>${reviewEscape(item.date || String(item.at || '').slice(0, 10))}</time><div><b>${reviewEscape(item.title)}</b><p>${reviewEscape(item.action)}</p>${item.rejected ? `<span>未採用：${reviewEscape(item.rejected)}</span>` : ''}${item.next ? `<small>接下來看：${reviewEscape(item.next)}</small>` : ''}</div></li>`;
+  const recent = memory.slice(0, 3);
+  const older = memory.slice(3);
+  return `<section class="coach-memory" aria-label="近期教練記憶"><div class="coach-memory-head"><div><div class="coach-evidence-kicker">COACH MEMORY</div><b>近期教練記憶</b><p>只記錄影響課表的判斷，不重複 Garmin 資料。</p></div><span>${memory.length} 筆</span></div><ul>${recent.map(renderItem).join('')}</ul>${older.length ? `<details class="coach-memory-more"><summary>查看其餘 ${older.length} 筆教練記憶</summary><ul>${older.map(renderItem).join('')}</ul></details>` : ''}</section>`;
+}
+
 function jumpToWeekCoachReview(weekNum) {
   jumpToPhaseWeek(weekNum);
   switchPlanTab('week');
@@ -1295,6 +1304,11 @@ function recordPlanChange(before, source, title) {
     appData.planChangeHistory.push({ date: today, source, title, changes });
   }
   appData.planChangeHistory = appData.planChangeHistory.slice(-30);
+  if (typeof recordCoachMemory === 'function') {
+    const sourceLabels = { garmin: 'Garmin 實跑調整', checkin: '週評估調整', coach: '教練處方', settings: '訓練設定調整', assessment: '檢測結果調整' };
+    const rejected = source === 'garmin' ? '不把單趟實跑直接當成加量依據。' : source === 'checkin' ? '不在恢復證據不足時推進下一週。' : '不改動已完成或歷史課程。';
+    recordCoachMemory({ source, title: sourceLabels[source] || '課表調整', action: `${title}：${changes.join('；')}`, rejected, next: '後續依正式課表與下一次 Garmin 實跑持續判讀。' });
+  }
 }
 
 function sessionQualitySignals(run) {
@@ -1697,6 +1711,7 @@ function renderCoachDecisionWorkspace(plan = appData.plan || []) {
     ${renderGarminDecisionSummary()}
     <div class="coach-decision-next"><span>${reviewEscape(decision.focusLabel)}</span><div><b>${reviewEscape(nextLabel)}</b><p>${reviewEscape(decision.next.resolved.rationale || '這堂課照正式課表執行。')}</p></div></div>
     <div class="training-status-actions coach-decision-actions"><button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看${upcomingCoachPrescription ? `第 ${displayWeek?.weekNum || currentWeek + 1} 週` : '本週'}正式課表</button></div>
+    ${renderCoachMemoryCard()}
   </section>`;
 }
 
@@ -3714,7 +3729,7 @@ function renderDayCard(day, rationale = '', source = 'baseline') {
     day.pace ? `<span>${reviewEscape(day.pace)}</span>` : ''
   ].filter(Boolean).join('');
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
-  const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? '<div style="color:var(--c-text-muted);font-size:13px">尚未到日期，無法先記錄</div>' : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
+  const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? `<div class="day-card-actions"><button class="btn btn-secondary" onclick="negotiateFutureRun('${day.dateStr}')">這天不能跑</button></div>` : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
   const extraHTML = extraSessions.map((session) => renderExtraSession(day, session)).join('');
   return `<div class="day-card schedule-day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}"><b>${coachBadge ? coachBadge.emoji : ''}${typeName}</b><small>${dayCardIntent(day)}</small></span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}<div class="day-card-prescription" aria-label="今日處方">${prescription}</div>${dayWeatherLine(day)}<details class="day-workout-details" open><summary>主課內容（可收合）</summary>${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}${renderStepCards(attachCourseGuides(day.steps, day.type))}</details>${extraHTML}${renderDaySessionSummary(day, garminRun)}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}${day.type === 'long' && Number(day.km) >= 16 ? `<button class="btn btn-secondary" onclick="openFuelingLog('${day.dateStr}')">🥤 ${appData.fuelingLogs?.[day.dateStr] ? '更新補給' : '記錄補給'}</button>` : ''}</div>${actionsHTML}${!extraSessions.length ? `<button class="add-extra-session" onclick="openAddExtraSession('${day.dateStr}')">＋ 加入第二堂</button>` : ''}</div>`;
 }

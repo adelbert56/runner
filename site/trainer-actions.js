@@ -238,17 +238,30 @@ function removeExtraSession(dateStr, sessionId) {
   ]);
 }
 
-function futureMakeupCandidates(sourceDate) {
+function calendarDaysBetween(fromDate, toDate) {
+  return Math.round((new Date(`${toDate}T00:00:00`) - new Date(`${fromDate}T00:00:00`)) / 86400000);
+}
+
+function futureMakeupCandidateIsSafe(source, target) {
+  const daysApart = calendarDaysBetween(source.dateStr, target.dateStr);
+  if (daysApart < 1 || daysApart > 3) return false;
+  const highLoadDays = (appData.plan || []).flatMap((week) => week.days || []).filter((day) => day.dateStr !== source.dateStr && day.dateStr !== target.dateStr && (!day.status || day.status === 'upcoming') && ['tempo', 'interval', 'long', 'race'].includes(day.type));
+  return !highLoadDays.some((day) => Math.abs(calendarDaysBetween(day.dateStr, target.dateStr)) < 2);
+}
+
+function futureMakeupCandidates(sourceDate, { strict = false } = {}) {
   const today = todayStr();
+  const source = (appData.plan || []).flatMap((week) => week.days || []).find((day) => day.dateStr === sourceDate);
   return (appData.plan || []).flatMap((week, weekIndex) => (week.days || []).map(day => ({ day, week, weekIndex })))
     .filter(({ day }) => {
       const isAvailable = !day.status || day.status === 'upcoming';
-      return day.type === 'rest' && day.dateStr >= today && day.dateStr > sourceDate && isAvailable && !getGarminRunForDate(day.dateStr);
+      return day.type === 'rest' && day.dateStr >= today && day.dateStr > sourceDate && isAvailable && !getGarminRunForDate(day.dateStr) && (!strict || (source && futureMakeupCandidateIsSafe(source, day)));
     });
 }
 
 function finishMissedDecision(dateStr) {
   recordTrainingEvent('skipped', { date: dateStr, detail: formatSkipReason(appData.skipReasons?.[dateStr]) });
+  recordCoachMemory?.({ source: 'schedule', title: '本週不補跑', action: `${dateStr} 的課程已依行程原因標記跳過。`, rejected: '沒有把缺口硬塞進接下來的課表。', next: '照下一堂正式課表執行；恢復與完成度會在週評估一起判讀。', sourceDate: dateStr });
   markDayStatus(dateStr, 'missed');
   closeModal();
   renderPlanView();
@@ -263,6 +276,7 @@ function scheduleMakeupRun(sourceDate, targetDate) {
   appData.makeupRecords = normalizeMakeupRecords(appData.makeupRecords);
   appData.makeupRecords[sourceDate] = { targetDate, source: 'scheduled' };
   recordTrainingEvent('makeup_scheduled', { sourceDate, targetDate, detail: formatSkipReason(appData.skipReasons?.[sourceDate]) });
+  recordCoachMemory?.({ source: 'schedule', title: '行程協商已安排', action: `${sourceDate} 的課程改至 ${targetDate}，內容縮短 20%。`, rejected: '不把原處方完整補回，也不移動已排定的品質與長跑。', next: '完成補跑後回到原本週期；若恢復不足，補跑不會成為加量依據。', sourceDate, targetDate });
   markDayStatus(sourceDate, 'missed');
   saveData(appData);
   closeModal();
@@ -303,19 +317,19 @@ function undoMissed(dateStr) {
   showView('plan');
 }
 
-function markMissed(dateStr) {
-  const candidates = futureMakeupCandidates(dateStr);
+function markMissed(dateStr, { futureNegotiation = false } = {}) {
+  const candidates = futureMakeupCandidates(dateStr, { strict: futureNegotiation });
   const options = candidates.map(({ day, week }) => `<option value="${day.dateStr}">${DOW_NAMES[day.dow]} ${day.dateStr} · 第 ${week.weekNum} 週休息日</option>`).join('');
   const skipReasonFields = renderSkipReasonFields(appData.skipReasons?.[dateStr]);
   const makeupControl = candidates.length
     ? `<div class="form-group"><label class="form-label" for="m-makeup-date">補跑日期</label><select class="form-input" id="m-makeup-date">${options}</select><div class="field-help">可選今天起尚未安排、沒有 Garmin 紀錄的休息日；補跑會取代該日的恢復內容。</div></div>`
     : `<div class="skip-reason">接下來的課表沒有可安全替換的休息日，因此這次不建議補跑。</div>`;
   showModal(
-    '安排這次跳過',
-    `<div class="field-help" style="margin-bottom:14px">補跑內容會比原計畫縮短 20%，避免把訓練負荷硬塞回來。</div>${makeupControl}${skipReasonFields}`,
+    futureNegotiation ? '協商這天行程' : '安排這次跳過',
+    `<div class="field-help" style="margin-bottom:14px">${futureNegotiation ? '我只提供符合品質間隔、且 3 天內的安全補跑選項。' : '補跑內容會比原計畫縮短 20%，避免把訓練負荷硬塞回來。'}</div>${makeupControl}${skipReasonFields}`,
     [
       ...(candidates.length ? [{
-        label: '確認補跑',
+        label: futureNegotiation ? '採用這個安排' : '確認補跑',
         primary: true,
         action: () => {
           const code = document.getElementById('m-skip-reason-code')?.value;
@@ -329,7 +343,7 @@ function markMissed(dateStr) {
         }
       }] : []),
       {
-        label: '不補跑',
+        label: futureNegotiation ? '這週不補跑' : '不補跑',
         action: () => {
           const code = document.getElementById('m-skip-reason-code')?.value;
           if (!SKIP_REASON_LABELS[code]) {
@@ -345,6 +359,12 @@ function markMissed(dateStr) {
       { label: '取消', action: closeModal }
     ]
   );
+}
+
+function negotiateFutureRun(dateStr) {
+  const day = (appData.plan || []).flatMap((week) => week.days || []).find((item) => item.dateStr === dateStr);
+  if (!day || day.dateStr <= todayStr() || day.status || day.type === 'rest') return;
+  markMissed(dateStr, { futureNegotiation: true });
 }
 
 function renderSkipReasonFields(existingReason) {
