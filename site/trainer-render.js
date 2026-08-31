@@ -1066,10 +1066,19 @@ function renderCoachEvidencePanel({ rawCoachNotes = '', reviewNotice = '', weekI
   </section>`;
 }
 
+function coachMemorySummary(item) {
+  const text = `${item.title || ''} ${item.action || ''}`;
+  if (/Garmin.*(?:校準|調整)|實跑調整/.test(text)) return '依近期實跑資料，已保守調整未來跑量與品質課頻率。';
+  if (/行程協商/.test(text)) return '已改排至安全空檔，保留品質課與長跑間隔。';
+  if (/不補跑|跳過/.test(text)) return '本週不硬補，直接銜接下一堂正式課表。';
+  const firstSentence = String(item.action || '').split(/[。；]/).map((part) => part.trim()).find(Boolean) || '已記錄本次課表判斷。';
+  return firstSentence.length > 56 ? `${firstSentence.slice(0, 56)}…` : firstSentence;
+}
+
 function renderCoachMemoryCard() {
   const memory = (appData.coachMemory || []).filter((item) => item && item.title).sort((a, b) => String(b.at).localeCompare(String(a.at)));
   if (!memory.length) return `<section class="coach-memory" aria-label="近期教練記憶"><div class="coach-memory-head"><div><div class="coach-evidence-kicker">COACH MEMORY</div><b>近期教練記憶</b></div></div><p class="coach-memory-empty">目前沒有需要追蹤的課表變動；正式課表會在有足夠證據時才調整。</p></section>`;
-  const renderItem = (item) => `<li class="coach-memory-item"><time>${reviewEscape(item.date || String(item.at || '').slice(0, 10))}</time><div><b>${reviewEscape(item.title)}</b><p>${reviewEscape(item.action)}</p>${item.rejected ? `<span>未採用：${reviewEscape(item.rejected)}</span>` : ''}${item.next ? `<small>接下來看：${reviewEscape(item.next)}</small>` : ''}</div></li>`;
+  const renderItem = (item) => `<li class="coach-memory-item"><time>${reviewEscape(item.date || String(item.at || '').slice(0, 10))}</time><div><b>${reviewEscape(item.title)}</b><p class="coach-memory-summary">${reviewEscape(coachMemorySummary(item))}</p>${item.next ? `<small>下一步：${reviewEscape(item.next)}</small>` : ''}<details class="coach-memory-detail"><summary>查看完整變更</summary><p>${reviewEscape(item.action || '沒有額外變更說明。')}</p>${item.rejected ? `<p>未採用：${reviewEscape(item.rejected)}</p>` : ''}</details></div></li>`;
   const recent = memory.slice(0, 3);
   const older = memory.slice(3);
   return `<section class="coach-memory" aria-label="近期教練記憶"><div class="coach-memory-head"><div><div class="coach-evidence-kicker">COACH MEMORY</div><b>近期教練記憶</b><p>只記錄影響課表的判斷，不重複 Garmin 資料。</p></div><span>${memory.length} 筆</span></div><ul>${recent.map(renderItem).join('')}</ul>${older.length ? `<details class="coach-memory-more"><summary>查看其餘 ${older.length} 筆教練記憶</summary><ul>${older.map(renderItem).join('')}</ul></details>` : ''}</section>`;
@@ -1704,13 +1713,20 @@ function renderCoachDecisionWorkspace(plan = appData.plan || []) {
     : source === 'baseline'
     ? '照正式課表穩定執行'
     : `${courseResolutionLabel(source)}已套用`;
-  return `<section class="coach-decision-workspace" aria-label="教練決策摘要">
-    <div class="coach-decision-kicker">Coach decision · same course resolver</div>
-    <div class="coach-decision-headline">${reviewEscape(verdict)}</div>
-    <p class="coach-decision-copy">${reviewEscape(riskText)}</p>
-    ${renderGarminDecisionSummary()}
-    <div class="coach-decision-next"><span>${reviewEscape(decision.focusLabel)}</span><div><b>${reviewEscape(nextLabel)}</b><p>${reviewEscape(decision.next.resolved.rationale || '這堂課照正式課表執行。')}</p></div></div>
-    <div class="training-status-actions coach-decision-actions"><button class="btn btn-secondary" onclick="showWeekPlanFromStatus()">查看${upcomingCoachPrescription ? `第 ${displayWeek?.weekNum || currentWeek + 1} 週` : '本週'}正式課表</button></div>
+  return `<section class="coach-decision-workspace" aria-label="本週教練判讀">
+    <div class="coach-decision-hero">
+      <div class="coach-decision-summary">
+        <div>
+          <div class="coach-decision-kicker">本週教練判讀</div>
+          <h2 class="coach-decision-headline">${reviewEscape(verdict)}</h2>
+          <p class="coach-decision-copy">${reviewEscape(riskText)}</p>
+        </div>
+        <span class="coach-decision-status">以正式課表為準</span>
+      </div>
+      <div class="coach-decision-next"><span>下一堂</span><div><b>${reviewEscape(nextLabel)}</b><p>${reviewEscape(decision.next.resolved.rationale || '這堂課照正式課表執行。')}</p></div></div>
+    </div>
+    <div class="training-status-actions coach-decision-actions"><button class="btn btn-primary" onclick="showWeekPlanFromStatus()">查看${upcomingCoachPrescription ? `第 ${displayWeek?.weekNum || currentWeek + 1} 週` : '本週'}正式課表</button><span>訓練安排只以這份正式課表為準。</span></div>
+    <details class="coach-decision-evidence"><summary>查看 Garmin 實跑判讀與決策依據</summary>${renderGarminDecisionSummary()}</details>
     ${renderCoachMemoryCard()}
   </section>`;
 }
