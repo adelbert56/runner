@@ -13,9 +13,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-08-30",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結。"
+      "next_check_date": "2026-09-01",
+      "cadence": "weekly",
+      "reason": "開報日已過，仍缺：官方報名連結。"
     },
     "missing": [
       {
@@ -61,7 +61,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-08-30",
+      "next_check_date": "2026-09-01",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：官方報名連結、各距離開跑時間、費用、名額。"
     },

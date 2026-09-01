@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-08-27T10:32:44.416Z",
-  "basis_date": "2026-08-27",
+  "generated_at": "2026-09-01T10:33:30.312Z",
+  "basis_date": "2026-09-01",
   "items": [
     {
       "platform": "運動筆記",
-      "total": 13,
+      "total": 14,
       "official_direct": 8,
-      "verified": 13,
-      "missing": 7,
+      "verified": 14,
+      "missing": 8,
       "opened_gap": 1,
       "date_anomaly": 0,
       "due_now": 2,
@@ -16,10 +16,10 @@
         "TOYOTA RUN 台中 視障專場",
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
       ],
-      "complete_rate": "46%",
-      "official_direct_rate": "62%",
+      "complete_rate": "43%",
+      "official_direct_rate": "57%",
       "verified_rate": "100%",
-      "score": 72,
+      "score": 69,
       "status": "可用需觀察"
     },
     {
@@ -90,7 +90,7 @@
       "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 BOBDOG RUN(台中場)",
         "2026 松鶴越野",
@@ -130,7 +130,7 @@
       "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 2,
       "sample_races": [
         "2026第九屆幸福龍井活力健康路跑健走",
         "2026 浪漫台三線新店老街路跑賽",

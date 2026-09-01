@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-09-01T01:56:24.140Z",
+  "generated_at": "2026-09-01T10:33:30.312Z",
   "basis_date": "2026-09-01",
   "races": {
-    "total": 65,
-    "follow_up_count": 22,
+    "total": 66,
+    "follow_up_count": 23,
     "complete_count": 43,
-    "complete_rate": "66%",
+    "complete_rate": "65%",
     "launch_blocking_gap_count": 8,
-    "launch_ready_count": 57,
+    "launch_ready_count": 58,
     "launch_ready_rate": "88%",
     "official_direct_count": 58,
-    "official_direct_rate": "89%",
-    "verified_count": 65,
+    "official_direct_rate": "88%",
+    "verified_count": 66,
     "verified_rate": "100%",
     "opened_gap_count": 2,
     "date_anomaly_count": 0,
-    "due_now_count": 11,
-    "monthly_tracking_count": 4,
+    "due_now_count": 10,
+    "monthly_tracking_count": 5,
     "state_counts": {
       "歷史": 9,
       "停辦": 2,
       "已截止": 22,
       "報名中": 26,
-      "報名時間未定": 5,
+      "報名時間未定": 6,
       "待確認": 1
     }
   },
@@ -282,10 +282,10 @@
     "items": [
       {
         "platform": "運動筆記",
-        "total": 13,
+        "total": 14,
         "official_direct": 8,
-        "verified": 13,
-        "missing": 7,
+        "verified": 14,
+        "missing": 8,
         "opened_gap": 1,
         "date_anomaly": 0,
         "due_now": 2,
@@ -294,10 +294,10 @@
           "TOYOTA RUN 台中 視障專場",
           "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
         ],
-        "complete_rate": "46%",
-        "official_direct_rate": "62%",
+        "complete_rate": "43%",
+        "official_direct_rate": "57%",
         "verified_rate": "100%",
-        "score": 72,
+        "score": 69,
         "status": "可用需觀察"
       },
       {
@@ -368,7 +368,7 @@
         "missing": 3,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 0,
         "sample_races": [
           "2026 BOBDOG RUN(台中場)",
           "2026 松鶴越野",
