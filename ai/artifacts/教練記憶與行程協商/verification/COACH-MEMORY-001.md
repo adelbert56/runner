@@ -21,7 +21,7 @@
 
 | Viewport | 螢幕截圖 | 備註 |
 |---|---|---|
-| 行動裝置版 | `output/playwright/mobile-trainer-coach-decision.png` | 教練記憶位於主決策之後，空狀態不重複 Garmin 內容。 |
+| 行動裝置版 | `output/playwright/mobile-trainer-coach-decision.png` | 教練記憶只在有改課事件時顯示，避免空狀態佔據主畫面。 |
 | 桌面版 | `output/playwright/desktop-trainer-coach-decision.png` | 主決策保持第一層級，記憶列為次要可追溯資訊。 |
 
 ## 殘留風險

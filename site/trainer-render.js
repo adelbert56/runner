@@ -1077,7 +1077,8 @@ function coachMemorySummary(item) {
 
 function renderCoachMemoryCard() {
   const memory = (appData.coachMemory || []).filter((item) => item && item.title).sort((a, b) => String(b.at).localeCompare(String(a.at)));
-  if (!memory.length) return `<section class="coach-memory" aria-label="近期教練記憶"><div class="coach-memory-head"><div><div class="coach-evidence-kicker">COACH MEMORY</div><b>近期教練記憶</b></div></div><p class="coach-memory-empty">目前沒有需要追蹤的課表變動；正式課表會在有足夠證據時才調整。</p></section>`;
+  // 沒有事件就不占畫面。教練記憶不是要跑者額外管理的工具，只在能解釋目前安排時出現。
+  if (!memory.length) return '';
   const renderItem = (item) => `<li class="coach-memory-item"><time>${reviewEscape(item.date || String(item.at || '').slice(0, 10))}</time><div><b>${reviewEscape(item.title)}</b><p class="coach-memory-summary">${reviewEscape(coachMemorySummary(item))}</p>${item.next ? `<small>下一步：${reviewEscape(item.next)}</small>` : ''}<details class="coach-memory-detail"><summary>查看完整變更</summary><p>${reviewEscape(item.action || '沒有額外變更說明。')}</p>${item.rejected ? `<p>未採用：${reviewEscape(item.rejected)}</p>` : ''}</details></div></li>`;
   const recent = memory.slice(0, 3);
   const older = memory.slice(3);
@@ -1321,7 +1322,9 @@ function recordPlanChange(before, source, title) {
 }
 
 function sessionQualitySignals(run) {
-  const mainLaps = run.laps.filter((lap) => ['MAIN', 'INTERVAL'].includes(String(lap?.intensity || '').toUpperCase()) && paceToSeconds(lap.pace_per_km));
+  const usableLaps = run.laps.filter((lap) => paceToSeconds(lap.pace_per_km));
+  const intensity = ['MAIN', 'ACTIVE', 'INTERVAL'].find((item) => usableLaps.some((lap) => String(lap?.intensity || '').toUpperCase() === item));
+  const mainLaps = intensity ? usableLaps.filter((lap) => String(lap?.intensity || '').toUpperCase() === intensity) : [];
   if (mainLaps.length < 2) return null;
   const midpoint = Math.ceil(mainLaps.length / 2);
   const average = (items, field) => items.reduce((sum, item) => sum + (Number(item[field]) || 0), 0) / items.length;
@@ -1329,6 +1332,45 @@ function sessionQualitySignals(run) {
   const paceDelta = Math.round(average(last, 'duration_min') / average(last, 'distance_km') * 60 - average(first, 'duration_min') / average(first, 'distance_km') * 60);
   const hrDelta = first.some((lap) => lap.avg_hr) && last.some((lap) => lap.avg_hr) ? Math.round(average(last, 'avg_hr') - average(first, 'avg_hr')) : null;
   return { paceDelta, hrDelta, label: paceDelta <= 5 ? '主課節奏穩定' : `後半慢 ${paceDelta} 秒/km` };
+}
+
+function sessionCoachStory(run) {
+  const usableLaps = (run?.laps || []).filter((lap) => paceToSeconds(lap?.pace_per_km) > 0);
+  const intensity = ['MAIN', 'ACTIVE', 'INTERVAL'].find((item) => usableLaps.some((lap) => String(lap?.intensity || '').toUpperCase() === item));
+  const mainLaps = intensity ? usableLaps.filter((lap) => String(lap?.intensity || '').toUpperCase() === intensity) : [];
+  if (mainLaps.length < 2) return null;
+  const segmentCount = Math.min(3, mainLaps.length);
+  const segments = Array.from({ length: segmentCount }, (_, index) => {
+    const laps = mainLaps.slice(Math.floor(index * mainLaps.length / segmentCount), Math.floor((index + 1) * mainLaps.length / segmentCount));
+    const distanceKm = laps.reduce((sum, lap) => sum + (Number(lap?.distance_km) || 0), 0);
+    const durationMin = laps.reduce((sum, lap) => sum + (Number(lap?.duration_min) || 0), 0);
+    const weightedAverage = (field) => {
+      const values = laps.map((lap) => ({ value: Number(lap?.[field]), weight: Number(lap?.duration_min) || 0 })).filter((item) => Number.isFinite(item.value) && item.value > 0 && item.weight > 0);
+      const weight = values.reduce((sum, item) => sum + item.weight, 0);
+      return weight ? Math.round(values.reduce((sum, item) => sum + item.value * item.weight, 0) / weight) : null;
+    };
+    const paceSeconds = distanceKm > 0 && durationMin > 0 ? Math.round(durationMin * 60 / distanceKm) : null;
+    return { label: ['主課前段', '主課中段', '主課後段'][index] || `主課第 ${index + 1} 段`, paceSeconds, pace: paceSeconds ? formatPaceSeconds(paceSeconds) : '—', hr: weightedAverage('avg_hr'), cadence: weightedAverage('avg_cadence') };
+  });
+  const first = segments[0], last = segments.at(-1);
+  const paceDelta = first.paceSeconds && last.paceSeconds ? last.paceSeconds - first.paceSeconds : null;
+  const hrDelta = first.hr && last.hr ? last.hr - first.hr : null;
+  const paceSummary = paceDelta === null ? '主課配速資料不足，僅保留分段紀錄。' : Math.abs(paceDelta) <= 5 ? '主課前後配速大致穩定。' : paceDelta < 0 ? `後段比前段快 ${Math.abs(paceDelta)} 秒/km。` : `後段比前段慢 ${paceDelta} 秒/km。`;
+  const hrSummary = hrDelta === null ? '心率未提供，不判斷心率代價。' : `前後段心率 ${hrDelta >= 0 ? '+' : ''}${hrDelta} bpm。`;
+  return { segments, headline: `${paceSummary}${hrSummary}` };
+}
+
+function sessionFollowUpAssessment(run, autopilot) {
+  const metrics = autopilot?.metrics || {};
+  const sampleSize = Math.min(2, Math.max(0, Number(metrics.qualityComparisonSampleSize) || 0));
+  const family = { easy: '輕鬆跑', steady: '穩定跑', interval: '間歇', strides: '快段＋恢復' }[metrics.comparisonFamily] || '同課型主課';
+  if (!autopilot || autopilot.status !== 'ready') return { title: '等待教練評比', detail: '這堂已保留為訓練紀錄；待 Garmin 教練資料完成後，才會評比未來處方。' };
+  if (String(metrics.latestRunDate || '') !== String(run?.date || '')) return { title: '等待本堂納入評比', detail: `目前最新評比截至 ${metrics.latestRunDate || '最近一次同步'}；這堂不會被拿去覆寫歷史課表。` };
+  if (!metrics.qualityComparisonReady) return { title: '評比資料累積中', detail: `已收 ${sampleSize}/2 筆${family}主課；完成第二筆可比主課前，後續課表維持原安排。` };
+  const volumeFactor = Number(autopilot.volumeFactor) || 1;
+  const qualityAction = autopilot.qualityMode === 'skip' ? '品質課暫停' : autopilot.qualityMode === 'reduce' ? '品質課降階' : '品質課維持';
+  const volumeAction = volumeFactor === 1 ? '跑量維持' : `未來跑量 ${volumeFactor > 1 ? '+' : ''}${Math.round((volumeFactor - 1) * 100)}%`;
+  return { title: `評比完成：${autopilot.label || '維持節奏'}`, detail: `${qualityAction}、${volumeAction}。${autopilot.headline || '近期實跑已納入後續課表判讀。'}` };
 }
 
 function plannedMainTargetKm(day) {
@@ -1448,10 +1490,21 @@ function renderLatestTrainingReport(runs) {
     : '本次尚無主課段別，教練維持保守判讀。';
   const postRun = postRunVerdict(run, planned);
   const signals = sessionQualitySignals(run);
+  const coachStory = mainScope ? sessionCoachStory(run) : null;
+  const dataQuality = typeof calibrationDataQuality === 'function' ? calibrationDataQuality(run) : null;
+  const followUp = sessionFollowUpAssessment(run, coachReviewData?.autopilot);
+  const dataLimit = !mainScope
+    ? '沒有 Garmin 明確主課標籤；本次只保留紀錄，不作配速調整。'
+    : dataQuality?.usable
+      ? '路線與環境未觸發校正排除；仍僅作趨勢參考，不因單趟表現調速。'
+      : dataQuality
+        ? `這趟不作配速調整：${dataQuality.reasons.join('、')}。`
+        : '活動條件資料未齊；本次不以環境條件推論能力變化。';
   const feel = run.selfEvaluation;
   const signalText = signals
     ? `${signals.label}${signals.hrDelta !== null ? `；後半心率 ${signals.hrDelta >= 0 ? '+' : ''}${signals.hrDelta} bpm。` : ''}`
     : '';
+  const storyRows = coachStory?.segments.map((segment) => `<div class="session-coach-story-row"><b>${reviewEscape(segment.label)}</b><span>${reviewEscape(segment.pace)}/km · ${segment.hr ? `HR ${segment.hr}` : '心率未提供'} · ${segment.cadence ? `${segment.cadence} spm` : '步頻未提供'}</span></div>`).join('') || '';
   const history = runs.slice(-8).reverse().map((item) => `<button class="session-report-history ${item.activityId === run.activityId ? 'active' : ''}" onclick="selectTrainingReport('${item.activityId || ''}')">${reviewEscape(item.date.slice(5))}<small>${item.qualityPace || item.pace || '—'}/km</small></button>`).join('');
   const nextAction = postRun.next;
   const reportTitle = planned ? `${plannedType}完成報告` : `${reviewEscape(run.name)}｜實跑報告`;
@@ -1465,7 +1518,7 @@ function renderLatestTrainingReport(runs) {
     <div class="session-report-head"><div><div class="session-report-kicker">Training report · Garmin</div><h2 class="session-report-title">${reportTitle}</h2><div class="session-report-meta">${reviewEscape(run.date)} · 全程 ${run.km.toFixed(2)} km · ${formatSessionDuration(run.durationMin)}</div></div><span class="session-report-status${statusClass}">${status}</span></div>
     <div class="session-report-body"><div class="session-report-grid"><div class="session-report-verdict"><div class="session-report-label">這次該怎麼看</div><p class="session-report-summary"><b>${reviewEscape(postRun.label)}</b>　${reviewEscape(postRun.summary)}</p><p class="session-report-note">${evidence}</p><div class="session-next-action"><b>下一步</b><span>${reviewEscape(nextAction)}</span></div></div><aside class="session-report-target"><div class="session-report-label">正式課表對照</div><div class="session-plan-row"><span>課表內容</span><b>${reviewEscape(goal)}</b></div><div class="session-plan-row"><span>目標提示</span><b>${reviewEscape(target)}</b></div>${assignmentDateNote ? `<div class="session-plan-row"><span>對應日期</span><b>${reviewEscape(assignmentDateNote)}</b></div>` : ''}${assignmentConfidenceNote ? `<div class="session-plan-row"><span>可信度</span><b>${assignmentConfidenceNote}</b></div>` : ''}<div class="training-status-actions" style="margin-top:10px;justify-content:flex-start">${assignmentAction}</div></aside></div>
     <div class="session-report-metrics"><div class="session-report-metric"><span>判讀範圍</span><strong>${scopeText}</strong></div><div class="session-report-metric"><span>${paceMetricLabel}</span><strong>${coursePace ? `${reviewEscape(coursePace)}/km` : '—'}</strong></div><div class="session-report-metric"><span>${hrMetricLabel}</span><strong>${courseHr ? `HR ${Math.round(courseHr)}` : '—'}</strong></div></div><div class="session-secondary-metrics"><span>${cadenceMetricLabel} <b>${courseCadence ? `${Math.round(courseCadence)} spm` : '—'}</b></span>${qualityMetricNote}${feel ? `<span>Garmin 自我評量 <b>${garminFeelLabel(feel.feel)} · RPE ${feel.rpe}/10</b></span>` : '<span>Garmin 自我評量 <b>尚未填寫</b></span>'}</div>
-    <details class="session-report-details" open><summary>查看分圈配速與教練判讀</summary><div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">${mainScope ? '課程分段與配速' : 'Garmin 計圈與配速'}</h3><p class="session-breakdown-copy">${mainScope ? '預設聚焦主課；需要時可切換熱身、活動、恢復、收操或全部。' : '本次沒有可安全判讀的課程段別；以下僅顯示 Garmin 計圈，不會覆寫正式課表。'}</p>${lapFilters}<p class="session-lap-filter-note">${lapFilterNote}</p><div class="session-speed-legend" aria-label="速度熱度說明"><span class="easy">較慢</span><i></i><span class="steady">穩定</span><i></i><span class="fast">較快</span><b>以目前篩選分段的最快配速為基準</b></div><div class="session-lap-table">${visibleLaps.length ? `<div class="session-lap-head"><span class="col-segment">${selectedLapCategory === 'MAIN' ? '公里段' : '分段'}</span><span class="col-rhythm">速度</span><span class="col-distance">距離</span><span class="col-pace">配速</span><span class="col-cadence">步頻</span><span class="col-hr">心率</span></div>` : ''}<div class="session-lap-list">${lapRows}</div>${lapTotal}</div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '這筆資料保留為趨勢參考，不會改寫正式課表。'}</strong><p>${signalText}${confidence}</p></div></div></details><div class="session-report-history-wrap"><div class="session-report-history-label">最近訓練</div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div></div>
+    <details class="session-report-details" open><summary>查看分圈配速與教練判讀</summary><div class="session-breakdown"><div class="session-breakdown-card"><h3 class="session-breakdown-title">${mainScope ? '課程分段與配速' : 'Garmin 計圈與配速'}</h3><p class="session-breakdown-copy">${mainScope ? '預設聚焦主課；需要時可切換熱身、活動、恢復、收操或全部。' : '本次沒有可安全判讀的課程段別；以下僅顯示 Garmin 計圈，不會覆寫正式課表。'}</p>${lapFilters}<p class="session-lap-filter-note">${lapFilterNote}</p><div class="session-speed-legend" aria-label="速度熱度說明"><span class="easy">較慢</span><i></i><span class="steady">穩定</span><i></i><span class="fast">較快</span><b>以目前篩選分段的最快配速為基準</b></div><div class="session-lap-table">${visibleLaps.length ? `<div class="session-lap-head"><span class="col-segment">${selectedLapCategory === 'MAIN' ? '公里段' : '分段'}</span><span class="col-rhythm">速度</span><span class="col-distance">距離</span><span class="col-pace">配速</span><span class="col-cadence">步頻</span><span class="col-hr">心率</span></div>` : ''}<div class="session-lap-list">${lapRows}</div>${lapTotal}</div></div><div class="session-coach-callout"><div class="session-report-label">教練判讀</div><strong>${coachStory ? reviewEscape(coachStory.headline) : mainScope ? '主課成績已單獨入帳，不會被熱身與收操稀釋。' : '這筆資料保留為趨勢參考，不會改寫正式課表。'}</strong>${storyRows ? `<div class="session-coach-story" aria-label="依主課進程的判讀">${storyRows}</div>` : ''}<p>${signalText}${confidence}</p><p class="session-coach-limit"><b>資料限制</b>${reviewEscape(dataLimit)}</p><div class="session-follow-up" aria-label="後續課表評比"><b>${reviewEscape(followUp.title)}</b><p>${reviewEscape(followUp.detail)}</p></div></div></div></details><div class="session-report-history-wrap"><div class="session-report-history-label">最近訓練</div><div class="session-report-history" aria-label="近期單堂課報告">${history}</div></div></div>
   </section>`;
 }
 
@@ -3745,7 +3798,7 @@ function renderDayCard(day, rationale = '', source = 'baseline') {
     day.pace ? `<span>${reviewEscape(day.pace)}</span>` : ''
   ].filter(Boolean).join('');
   const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
-  const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? `<div class="day-card-actions"><button class="btn btn-secondary" onclick="negotiateFutureRun('${day.dateStr}')">這天不能跑</button></div>` : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
+  const actionsHTML = garminRun ? renderGarminRunResult(garminRun) : day.status === 'done' ? '<div style="color:var(--c-green);font-size:13px;font-weight:600">✓ 已完成</div>' : day.status === 'missed' ? `<div style="color:var(--c-red);font-size:13px">✗ 已跳過</div>` : day.dateStr > todayStr() ? `<div class="day-card-actions"><button class="btn btn-secondary" onclick="negotiateFutureRun('${day.dateStr}')">這天不能跑，安全改排</button></div>` : `<div class="day-card-actions"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">📝 手動補登</button><button class="btn btn-secondary" onclick="markMissed('${day.dateStr}','${day.type}')">跳過</button></div>`;
   const extraHTML = extraSessions.map((session) => renderExtraSession(day, session)).join('');
   return `<div class="day-card schedule-day-card type-${day.type} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}"><div class="day-card-header"><span class="day-card-date">${DOW_NAMES[day.dow]} ${day.dateStr?.slice(5) || ''}</span>${isTodayCard ? '<span class="day-card-today-badge">今天</span>' : ''}</div><span class="workout-badge ${badgeClass}"><b>${coachBadge ? coachBadge.emoji : ''}${typeName}</b><small>${dayCardIntent(day)}</small></span><div class="day-card-task ${handwrittenCoachPlan ? 'coach-headline' : ''}"><span>${reviewEscape(taskTitle)}</span>${taskIntent ? `<small>${reviewEscape(taskIntent)}</small>` : ''}</div>${rationale && !['baseline', 'coach-prescription'].includes(source) ? `<div class="course-rationale"><span>${reviewEscape(courseResolutionLabel(source))}</span>${reviewEscape(rationale)}</div>` : ''}<div class="day-card-prescription" aria-label="今日處方">${prescription}</div>${dayWeatherLine(day)}<details class="day-workout-details" open><summary>主課內容（可收合）</summary>${handwrittenCoachPlan ? '<p class="coach-detail-hint">依序完成熱身、主課與收操；以心率與動作品質為主。</p>' : ''}${renderStepCards(attachCourseGuides(day.steps, day.type))}</details>${extraHTML}${renderDaySessionSummary(day, garminRun)}<div class="day-card-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}${day.type === 'long' && Number(day.km) >= 16 ? `<button class="btn btn-secondary" onclick="openFuelingLog('${day.dateStr}')">🥤 ${appData.fuelingLogs?.[day.dateStr] ? '更新補給' : '記錄補給'}</button>` : ''}</div>${actionsHTML}${!extraSessions.length ? `<button class="add-extra-session" onclick="openAddExtraSession('${day.dateStr}')">＋ 加入第二堂</button>` : ''}</div>`;
 }

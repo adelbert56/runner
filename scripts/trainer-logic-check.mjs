@@ -77,6 +77,14 @@ vm.createContext(coachCopySandbox);
 vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), extractFunction(trainerRenderJs, "normalizeCoachWorkoutSteps")].join("\n\n"), coachCopySandbox);
 const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbox;
 
+const sessionStorySandbox = {
+  paceToSeconds: (pace) => ({ '7:00': 420, '6:50': 410, '6:40': 400, '6:30': 390 }[pace] || 0),
+  formatPaceSeconds: (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`,
+};
+vm.createContext(sessionStorySandbox);
+vm.runInContext([extractFunction(trainerRenderJs, "sessionCoachStory"), extractFunction(trainerRenderJs, "sessionFollowUpAssessment")].join("\n\n"), sessionStorySandbox);
+const { sessionCoachStory, sessionFollowUpAssessment } = sessionStorySandbox;
+
 const companionSandbox = {
   coachPlanTrainingType: (text) => /節奏|閾值|(?:^|\s)T\s*跑/.test(String(text || '')) ? 'tempo' : 'easy',
   isHandwrittenCoachPlan: (day) => Boolean(day?.coachPlan),
@@ -167,6 +175,31 @@ assertEqual(secToPace(330), "5:30", "secToPace formats whole minutes:seconds");
 assertEqual(secToPace(305), "5:05", "secToPace zero-pads sub-10 seconds");
 assertEqual(secToPace(0), "—", "secToPace shows em-dash for zero/invalid seconds");
 assertEqual(secToPace(-5), "—", "secToPace shows em-dash for negative seconds");
+
+// 單堂主課敘事：只依 Garmin 主課步驟、以順序拆前中後段，缺值不臆測。
+const story = sessionCoachStory({ laps: [
+  { intensity: 'WARMUP', pace_per_km: '7:00', distance_km: 1, duration_min: 7, avg_hr: 120, avg_cadence: 170 },
+  { intensity: 'ACTIVE', pace_per_km: '7:00', distance_km: 1, duration_min: 7, avg_hr: 130, avg_cadence: 176 },
+  { intensity: 'ACTIVE', pace_per_km: '6:50', distance_km: 1, duration_min: 6.8333, avg_hr: 140, avg_cadence: 178 },
+  { intensity: 'ACTIVE', pace_per_km: '6:40', distance_km: 1, duration_min: 6.6667, avg_hr: 150, avg_cadence: 180 },
+  { intensity: 'ACTIVE', pace_per_km: '6:30', distance_km: 1, duration_min: 6.5, avg_hr: 160, avg_cadence: 181 },
+] });
+assertEqual(story?.segments.length, 3, "single-session coach story splits an ACTIVE main workout into ordered front, middle, and finish evidence");
+assertEqual(story?.segments[0]?.label, '主課前段', "single-session coach story labels the first main segment without treating warmup as main work");
+assertEqual(story?.segments.at(-1)?.hr, 155, "single-session coach story time-weights heart rate across the final main segment");
+assertEqual(story?.headline.includes('後段比前段快 25 秒/km'), true, "single-session coach story reports pace change instead of inventing a training upgrade");
+const missingMetricStory = sessionCoachStory({ laps: [
+  { intensity: 'MAIN', pace_per_km: '7:00', distance_km: 1, duration_min: 7 },
+  { intensity: 'MAIN', pace_per_km: '6:50', distance_km: 1, duration_min: 6.8333 },
+] });
+assertEqual(missingMetricStory?.headline.includes('心率未提供'), true, "single-session coach story explicitly downgrades missing heart-rate evidence");
+const followUp = sessionFollowUpAssessment({ date: '2026-09-02' }, {
+  status: 'ready', label: '小幅推進', volumeFactor: 1.05, qualityMode: 'keep', headline: '近兩週完成度穩定，可小幅推進。',
+  metrics: { latestRunDate: '2026-09-02', qualityComparisonSampleSize: 2, qualityComparisonReady: true, comparisonFamily: 'steady' }
+});
+assertEqual(followUp.title, '評比完成：小幅推進', "single-session report exposes the completed downstream course assessment instead of only its sample count");
+assertEqual(followUp.detail.includes('未來跑量 +5%'), true, "single-session report names the actual future-volume direction when an assessment is ready");
+assertEqual(sessionFollowUpAssessment({ date: '2026-09-02' }, { status: 'ready', metrics: { latestRunDate: '2026-09-02', qualityComparisonSampleSize: 1, qualityComparisonReady: false, comparisonFamily: 'steady' } }).title, '評比資料累積中', "single-session report makes insufficient comparison evidence visible");
 
 // timeToSec
 assertEqual(timeToSec("2:10:00"), 7800, "timeToSec parses H:MM:SS");

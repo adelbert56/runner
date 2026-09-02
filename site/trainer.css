@@ -691,6 +691,15 @@
     .session-lap-filter-note { margin:0 0 10px; color:var(--c-text-muted); font-size:12px; font-weight:700; }
     .session-coach-callout { padding:18px 18px; border-radius: var(--radius-xl); border:1px solid rgba(36,114,79,.18); background:var(--c-tint-green); }
     .session-coach-callout strong { display:block; margin-top:5px; font-size:15px; line-height:1.5; }
+    .session-coach-story { display:grid; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid rgba(36,114,79,.16); }
+    .session-coach-story-row { display:grid; grid-template-columns:76px minmax(0,1fr); gap:8px; font-size:12px; line-height:1.55; }
+    .session-coach-story-row b { color:var(--c-primary-hover); font-weight:850; }
+    .session-coach-story-row span { color:var(--c-text-muted); font-variant-numeric:tabular-nums; }
+    .session-coach-callout .session-coach-limit { margin-top:12px; padding-top:12px; border-top:1px solid rgba(36,114,79,.16); }
+    .session-coach-limit b { display:block; margin-bottom:2px; color:var(--c-primary-hover); font-size:11px; font-weight:900; letter-spacing:.04em; }
+    .session-follow-up { margin-top:14px; padding:12px; border-radius:var(--radius-md); background:var(--c-surface); }
+    .session-follow-up > b { color:var(--c-primary-hover); font-size:13px; font-weight:900; }
+    .session-coach-callout .session-follow-up p { margin:3px 0 0; }
     .session-report-history-wrap { margin-top:18px; padding-top:17px; border-top:1px solid rgba(31,42,36,.09); }
     .session-report-history-label { margin:0 0 9px; color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
     .session-report-history { display:flex; flex-wrap:wrap; gap:8px; }
@@ -709,7 +718,7 @@
     .checkin-section-label { display:block; margin:18px 0 9px; color:var(--c-text-muted); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
     .checkin-safety { display:flex; gap:9px; align-items:flex-start; margin-top:14px; padding:11px 12px; border:1px solid #f0d3ba; border-radius:11px; background:#fff7ed; color:#9a3412; font-size:12px; font-weight:650; line-height:1.55; }
     .checkin-submit { width:100%; margin-top:14px; min-height:44px; box-shadow:0 8px 16px rgba(36,114,79,.15); }
-    @media (max-width:620px) { .checkin-head { align-items:flex-start; flex-direction:column; } .checkin-week-switcher { width:100%; } .checkin-week-switcher select { flex:1; } .checkin-body { padding:16px; } }
+    @media (max-width:620px) { .checkin-head { align-items:flex-start; flex-direction:column; } .checkin-week-switcher { width:100%; } .checkin-week-switcher select { flex:1; } .checkin-body { padding:16px; } .session-coach-story-row { grid-template-columns:1fr; gap:2px; } }
 
     .week-index-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
     .week-index-select { min-width:150px; height:36px; padding:0 30px 0 10px; border:1px solid var(--c-border); border-radius: var(--radius-md); background:rgba(255,253,248,.92); color:var(--c-text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
