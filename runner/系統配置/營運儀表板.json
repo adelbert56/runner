@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-09-03T04:52:53.271Z",
+  "generated_at": "2026-09-03T13:48:43.285Z",
   "basis_date": "2026-09-03",
   "races": {
-    "total": 66,
-    "follow_up_count": 23,
+    "total": 67,
+    "follow_up_count": 24,
     "complete_count": 43,
-    "complete_rate": "65%",
+    "complete_rate": "64%",
     "launch_blocking_gap_count": 8,
-    "launch_ready_count": 58,
+    "launch_ready_count": 59,
     "launch_ready_rate": "88%",
     "official_direct_count": 58,
-    "official_direct_rate": "88%",
-    "verified_count": 66,
+    "official_direct_rate": "87%",
+    "verified_count": 67,
     "verified_rate": "100%",
     "opened_gap_count": 2,
     "date_anomaly_count": 0,
     "due_now_count": 10,
-    "monthly_tracking_count": 5,
+    "monthly_tracking_count": 6,
     "state_counts": {
       "歷史": 10,
       "停辦": 2,
       "已截止": 21,
       "報名中": 26,
-      "報名時間未定": 6,
+      "報名時間未定": 7,
       "待確認": 1
     }
   },
@@ -286,6 +286,26 @@
         "status": "穩定"
       },
       {
+        "platform": "Lohas",
+        "total": 10,
+        "official_direct": 8,
+        "verified": 10,
+        "missing": 2,
+        "opened_gap": 0,
+        "date_anomaly": 0,
+        "due_now": 0,
+        "sample_races": [
+          "2026中興新村半程馬拉松-披興戴月的想你",
+          "2026年FUN電多巴胺路跑嘉年華",
+          "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
+        ],
+        "complete_rate": "80%",
+        "official_direct_rate": "80%",
+        "verified_rate": "100%",
+        "score": 88,
+        "status": "穩定"
+      },
+      {
         "platform": "Focusline",
         "total": 10,
         "official_direct": 10,
@@ -304,26 +324,6 @@
         "verified_rate": "100%",
         "score": 79,
         "status": "可用需觀察"
-      },
-      {
-        "platform": "Lohas",
-        "total": 9,
-        "official_direct": 8,
-        "verified": 9,
-        "missing": 1,
-        "opened_gap": 0,
-        "date_anomaly": 0,
-        "due_now": 0,
-        "sample_races": [
-          "2026中興新村半程馬拉松-披興戴月的想你",
-          "2026年FUN電多巴胺路跑嘉年華",
-          "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
-        ],
-        "complete_rate": "89%",
-        "official_direct_rate": "89%",
-        "verified_rate": "100%",
-        "score": 93,
-        "status": "穩定"
       },
       {
         "platform": "bao-ming",
