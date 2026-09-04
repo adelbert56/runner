@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T04:52:52.866Z",
+  "generated_at": "2026-09-04T04:56:45.096Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-08-hoka-clifton-11-review-by-ciaoantsai",
@@ -15,7 +15,7 @@
       "url": "https://kenlu.net/2026/08/hoka-clifton-11-review-by-ciaoantsai/",
       "score": 33,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -35,7 +35,7 @@
       "url": "https://kenlu.net/2026/07/puma-deviate-nitro-4-review-yangzz421/",
       "score": 29,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -55,30 +55,10 @@
       "url": "https://kenlu.net/2026/09/nike-pegasus-plus-2-im2541-600-release-info/",
       "score": 23,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114619-subtitle-e3-80-90-e5-93-81-e",
-      "type": "news",
-      "title": "【品牌動態】年末馬拉松賽季來臨！PUMA 破PB裝備推薦 DEVIATE、FAST-R 頂級競速跑履",
-      "date": "2026-09-02",
-      "date_source": "source",
-      "article_date": "2026-09-02",
-      "first_seen_at": "2026-09-03",
-      "source": "運動筆記",
-      "category": "跑鞋裝備",
-      "summary": "年末馬拉松賽季來臨！全球運動領導品牌 PUMA 今日正式曝光上市旗下最受矚目的兩款頂級競速賽事鞋款：DEVIATE NITRO&trade; Elite 4 菁英超速利器與 FAST-R NITRO&trade; Elite 3 頂級競速跑.",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114619&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E5%B9%B4%E6%9C%AB%E9%A6%AC%E6%8B%89%E6%9D%BE%E8%B3%BD%E5%AD%A3%E4%BE%86%E8%87%A8%EF%BC%81PUMA%20%E7%A0%B4PB%E8%A3%9D%E5%82%99%E6%8E%A8%E8%96%A6%20DEVIATE%E3%80%81FAST-R%20%E9%A0%82%E7%B4%9A%E7%AB%B6%E9%80%9F%E8%B7%91%E5%B1%A5&label=all",
-      "score": 23,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
@@ -95,7 +75,7 @@
       "url": "https://kenlu.net/2026/08/the-north-face-offtrail-ultra-official-news/",
       "score": 23,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -115,7 +95,7 @@
       "url": "https://kenlu.net/2026/08/invincible-x-madness-x-asics-gel-kayano-12-1-cream-release-info/",
       "score": 19,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -135,7 +115,7 @@
       "url": "https://kenlu.net/2026/08/vandy-the-pink-x-asics-gel-kayano-12-1-vanilla-1203b302-100-release-info/",
       "score": 19,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -155,10 +135,30 @@
       "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73237702/best-shoes-for-back-pain-recommend/",
       "score": 19,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "news-kenlu-net-2026-09-nike-twelve-time-ep-im4162-600-release-info",
+      "type": "news",
+      "title": "上市速報 / Ja Morant 子系列開賣！Nike Twelve Time EP 紅白配色臺灣販售資訊整理",
+      "date": "2026-09-04",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-04",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "Nike Twelve Time EP 紅白配色臺灣 9 月 4 日起發售，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
+      "url": "https://kenlu.net/2026/09/nike-twelve-time-ep-im4162-600-release-info/",
+      "score": 17,
+      "source_origin": "candidate",
+      "published_at": "2026-09-04",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
       ]
     },
     {
@@ -175,7 +175,7 @@
       "url": "https://kenlu.net/2026/09/on-cloudsoma-paf-release-info/",
       "score": 17,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -195,7 +195,7 @@
       "url": "https://kenlu.net/2026/08/nike-cryoshot-mercurial-vapor-r9-og-iq8160-400-release-info/",
       "score": 17,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -215,27 +215,7 @@
       "url": "https://kenlu.net/2026/08/nike-air-bakin-high-sp-black-varsity-red-release-info/",
       "score": 17,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-08-bad-bunny-x-adidas-f50-ghost-sprint-hp4218-release-info",
-      "type": "news",
-      "title": "上市速報 / Bad Bunny x adidas F50 Ghost Sprint 黑色款臺灣販售資訊整理",
-      "date": "2026-08-29",
-      "date_source": "source",
-      "article_date": "2026-08-29",
-      "first_seen_at": "2026-08-29",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "Bad Bunny x adidas F50 Ghost Sprint 黑色款臺灣 8 月 29 日起發售，為大家整理已經公布販售資訊的店點，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
-      "url": "https://kenlu.net/2026/08/bad-bunny-x-adidas-f50-ghost-sprint-hp4218-release-info/",
-      "score": 17,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -255,7 +235,7 @@
       "url": "https://kenlu.net/2026/08/asics-x-studio-nicholson-gel-kinetic-sp-release-info/",
       "score": 17,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -275,7 +255,7 @@
       "url": "https://kenlu.net/2026/04/saucony-engineered-garments-shadow-original-official-news/",
       "score": 17,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -295,27 +275,7 @@
       "url": "https://kenlu.net/2026/05/saucony-endorphin-elite-3-official-news/",
       "score": 17,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-09-mercedes-amg-petronas-f1-team-x-adidas-adizero-evo-sl-release-",
-      "type": "news",
-      "title": "上市速報 / 配色靈感來自新加坡國花 Mercedes AMG Petronas F1 Team x adidas ADIZERO EVO SL 臺灣販售資訊整理",
-      "date": "2026-09-03",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-03",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "Mercedes AMG Petronas F1 Team x adidas ADIZERO EVO SL 臺灣現已發售，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
-      "url": "https://kenlu.net/2026/09/mercedes-amg-petronas-f1-team-x-adidas-adizero-evo-sl-release-info/",
-      "score": 15,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -335,7 +295,7 @@
       "url": "https://kenlu.net/2026/09/asics-gel-ds-trainer-sp-official-news/",
       "score": 15,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -355,7 +315,7 @@
       "url": "https://kenlu.net/2026/08/westside-gunn-x-saucony-grid-jazz-9-awesome-gods-news/",
       "score": 11,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -375,7 +335,7 @@
       "url": "https://global.hk01.com/%E5%BC%80%E7%BD%90/60359085/%E8%B6%B3%E9%83%A8%E4%B8%93%E5%AE%B6%E8%AF%84%E6%B5%8B14%E6%AC%BE-%E9%98%B2%E8%84%9A%E7%97%9B%E6%B3%A2%E9%9E%8B-%E6%8E%A8%E8%8D%90-4%E6%AC%BEhoka-1%E6%AC%BEasics%E5%85%A5%E5%9B%B4",
       "score": 11,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
@@ -395,7 +355,7 @@
       "url": "https://kenlu.net/2026/07/saucony-progrid-v2-mule/",
       "score": 11,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -415,7 +375,7 @@
       "url": "https://www.don1don.com/archives/241371/%e3%80%90utmb%e3%80%912026-hoka-utmb-mont-blanc-ccc%e3%80%81utmb%e3%80%81ptl-%e6%88%90%e7%b8%be",
       "score": 9,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
@@ -435,7 +395,7 @@
       "url": "https://kenlu.net/2023/05/2023-tnf100-ultra-trail-challenge/",
       "score": 9,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU 越野"
@@ -455,10 +415,30 @@
       "url": "https://www.don1don.com/archives/241389/%e5%85%ad%e5%a4%a9%e8%b7%91%e7%a0%b4%e4%b8%80%e5%8d%83%e5%85%ac%e9%87%8c-phil-gore-%e6%8e%a2%e7%b4%a2-backyard-ultra-%e6%a5%b5%e9%99%90",
       "score": 7,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
+      ]
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114626-subtitle-e3-80-90-e8-a9-b1-e",
+      "type": "news",
+      "title": "【話題】帶球跑進 3 小時 Ali Anderson 懷孕 32 週雪梨馬 2:59:43",
+      "date": "2026-09-03",
+      "date_source": "source",
+      "article_date": "2026-09-03",
+      "first_seen_at": "2026-09-04",
+      "source": "運動筆記",
+      "category": "賽事資訊",
+      "summary": "懷孕 32 週，還能跑進 3 小時。2026 雪梨馬拉松除了菁英選手競逐之外，美國跑者Ali Anderson 也因一場破三引起討論。現年 29 歲、來自奧克拉荷馬州的 Anderson，當時已懷孕 32 週，最後仍以2 小時 59 分。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114626&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%91%E5%B8%B6%E7%90%83%E8%B7%91%E9%80%B2%203%20%E5%B0%8F%E6%99%82%20Ali%20Anderson%20%E6%87%B7%E5%AD%95%2032%20%E9%80%B1%E9%9B%AA%E6%A2%A8%E9%A6%AC%202:59:43&label=all",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-09-04",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
       ]
     },
     {
@@ -475,27 +455,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114622&subtitle=%E3%80%90%E6%96%B0%E8%81%9E%E3%80%91%E4%B8%AD%E8%8F%AF%E5%A5%A7%E6%9C%83%E6%95%B4%E5%82%99%E4%BB%A3%E8%A1%A8%E5%9C%98%E8%A3%9D%E5%82%99%20%E5%8A%A0%E7%A2%BC%E4%BA%9E%E9%81%8B%E7%8D%8E%E5%8B%B5%E9%87%91%20%E6%94%9C%E6%89%8B%E5%90%84%E7%95%8C%E5%8A%9B%E6%8C%BA%E4%B8%AD%E8%8F%AF%E9%9A%8A%EF%BC%81&label=all",
       "score": 7,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114617-subtitle-e3-80-90-e8-b3-bd-e",
-      "type": "news",
-      "title": "【賽事】「一次的失敗就是終點」新谷仁美靠恐懼感逆襲 北海道馬拉松奪冠刷新賽道紀錄！",
-      "date": "2026-09-02",
-      "date_source": "source",
-      "article_date": "2026-09-02",
-      "first_seen_at": "2026-09-03",
-      "source": "運動筆記",
-      "category": "賽事資訊",
-      "summary": "現年 38 歲的日本女子馬拉松好手 新谷仁美 於上週末（8/30）舉行的北海道馬拉松以 2 小時 24 分 14 秒的成績刷新大會紀錄奪冠，同時也拿下 2028 洛杉磯奧運選拔賽 MGC 的參賽資格。新谷仁美坐擁日本歷代第三佳成績（2:19。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114617&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%91%E3%80%8C%E4%B8%80%E6%AC%A1%E7%9A%84%E5%A4%B1%E6%95%97%E5%B0%B1%E6%98%AF%E7%B5%82%E9%BB%9E%E3%80%8D%E6%96%B0%E8%B0%B7%E4%BB%81%E7%BE%8E%E9%9D%A0%E6%81%90%E6%87%BC%E6%84%9F%E9%80%86%E8%A5%B2%20%E5%8C%97%E6%B5%B7%E9%81%93%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%A5%AA%E5%86%A0%E5%88%B7%E6%96%B0%E8%B3%BD%E9%81%93%E7%B4%80%E9%8C%84%EF%BC%81&label=all",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -515,27 +475,7 @@
       "url": "https://www.don1don.com/archives/241340/2026-%e9%9b%aa%e6%a2%a8%e9%a6%ac%e6%8b%89%e6%9d%be%ef%bd%9cgobena-%e6%8d%b2%e5%9c%9f%e9%87%8d%e4%be%86%e7%a0%b4%e8%b3%bd%e9%81%93%e7%b4%80%e9%8c%84%e3%80%81jepchirchir-%e6%94%b6%e4%b8%8b%e7%ac%ac",
       "score": 7,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-241318-e5-be-9e-e4-b8-96-e7-95-8c-e8-b7-91-e9-80-b2-e5-",
-      "type": "news",
-      "title": "從世界跑進墾丁！2026屏東墾丁日本航空國際馬拉松熱血啟動 亞洲冬季跑旅首選，奔向台灣最南端的山海美景",
-      "date": "2026-08-31",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-31",
-      "source": "動一動",
-      "category": "賽事資訊",
-      "summary": "當十一月的北部微微帶點初冬的濕冷，位於台灣最南端的屏東墾丁，正以最溫暖的陽光、最純粹的蔚藍太平洋，以及熱情的落山風，等待著全台與全亞洲的跑者前來踏浪奔跑。備受矚目的冬季跑旅盛會——「2026 屏東墾丁日本航空國際馬拉松」將於 2026 年 11 月 15 日 在墾丁大灣草坪熱血開跑！",
-      "url": "https://www.don1don.com/archives/241318/%e5%be%9e%e4%b8%96%e7%95%8c%e8%b7%91%e9%80%b2%e5%a2%be%e4%b8%81%ef%bc%812026%e5%b1%8f%e6%9d%b1%e5%a2%be%e4%b8%81%e6%97%a5%e6%9c%ac%e8%88%aa%e7%a9%ba%e5%9c%8b%e9%9a%9b%e9%a6%ac%e6%8b%89%e6%9d%be",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
@@ -555,30 +495,10 @@
       "url": "https://www.don1don.com/archives/241162/%e4%b9%85%e5%9d%90%e4%b8%80%e6%95%b4%e5%a4%a9-%e8%a6%81%e9%81%8b%e5%8b%95%e5%a4%9a%e5%b0%91%e6%89%8d%e8%a3%9c%e5%be%97%e5%9b%9e%e4%be%86%ef%bc%9f",
       "score": 7,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114582-subtitle-e3-80-90-e8-a8-93-e",
-      "type": "news",
-      "title": "【訓練】你知道什麼是最大攝氧量嗎？ 最大攝氧量越高，會跑得比較快嗎？",
-      "date": "2026-08-27",
-      "date_source": "source",
-      "article_date": "2026-08-27",
-      "first_seen_at": "2026-08-27",
-      "source": "運動筆記",
-      "category": "訓練",
-      "summary": "打開 Garmin、COROS 或其他運動手錶，不少跑者都會看到一個數字：VO₂max。但 VO₂max 到底代表什麼？數字越高，就一定代表跑得越快嗎？｜最大攝氧量，就是身體使用氧氣的「最大能力」最大攝氧量英文稱為VO₂max，指的是人在高。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114582&subtitle=%E3%80%90%E8%A8%93%E7%B7%B4%E3%80%91%E4%BD%A0%E7%9F%A5%E9%81%93%E4%BB%80%E9%BA%BC%E6%98%AF%E6%9C%80%E5%A4%A7%E6%94%9D%E6%B0%A7%E9%87%8F%E5%97%8E%EF%BC%9F%20%E6%9C%80%E5%A4%A7%E6%94%9D%E6%B0%A7%E9%87%8F%E8%B6%8A%E9%AB%98%EF%BC%8C%E6%9C%83%E8%B7%91%E5%BE%97%E6%AF%94%E8%BC%83%E5%BF%AB%E5%97%8E%EF%BC%9F",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
@@ -595,30 +515,10 @@
       "url": "https://www.don1don.com/archives/241110/%e8%b7%91%e6%ad%a5%e8%8b%a6%e4%b8%8d%e6%98%af%e5%a4%a9%e6%b0%a3%e7%86%b1-%e6%b1%97%e6%b0%b4%e7%84%a1%e6%b3%95%e8%92%b8%e7%99%bc%e7%9a%84%e9%ab%98%e6%bf%95%e5%ba%a6%e6%89%8d%e6%98%af%e5%85%83%e5%85%87",
       "score": 7,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114518-subtitle-e3-80-90-e8-b3-bd-e",
-      "type": "news",
-      "title": "【賽事】2027 東京馬拉松松抽籤開放登記！8/28 截止、9/18 公布結果",
-      "date": "2026-08-17",
-      "date_source": "source",
-      "article_date": "2026-08-17",
-      "first_seen_at": "2026-08-18",
-      "source": "運動筆記",
-      "category": "賽事資訊",
-      "summary": "想在明年春天跑進東京街頭的跑者，可以準備登記了！2027 東京馬拉松（Tokyo Marathon 2027）一般抽籤已正式開放，報名時間自 8 月 14 日起至 8 月 28 日止。東京馬拉松官方也已公告，由於開放首日申請人數便超過一般抽。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114518&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%912027%20%E6%9D%B1%E4%BA%AC%E9%A6%AC%E6%8B%89%E6%9D%BE%E6%8A%BD%E7%B1%A4%E9%96%8B%E6%94%BE%E7%99%BB%E8%A8%98%EF%BC%818/28%20%E6%88%AA%E6%AD%A2%E3%80%819/18%20%E5%85%AC%E5%B8%83%E7%B5%90%E6%9E%9C",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
@@ -635,10 +535,30 @@
       "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a71879781/best-adidas-walking-shoes/",
       "score": 7,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "news-kenlu-net-2026-09-shuhua-skechers-go-walk-glide-step-2-0-cozy-fit-news",
+      "type": "news",
+      "title": "官方新聞 / 舒華著用的健走鞋！SKECHERS GO WALK GLIDE-STEP 2.0 COZY FIT 打造五星級舒適感",
+      "date": "2026-09-04",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-04",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "從日常通勤、城市漫步到旅行出遊，一雙好的行走鞋不只要舒適，更要兼顧輕盈腳感、穩定支撐與日常穿搭。全球舒適科技領導品牌 SKECHERS 持續升級 GO WALK 行走系列，今夏推出全新 GO WALK GLIDE-STEP 2.",
+      "url": "https://kenlu.net/2026/09/shuhua-skechers-go-walk-glide-step-2-0-cozy-fit-news/",
+      "score": 6,
+      "source_origin": "candidate",
+      "published_at": "2026-09-04",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
       ]
     },
     {
@@ -655,30 +575,10 @@
       "url": "https://www.don1don.com/archives/241426/%e5%b0%8d%e8%b7%91%e8%80%85%e8%80%8c%e8%a8%80%ef%bc%8c%e4%bd%95%e6%99%82%e6%8d%90%e8%a1%80%e8%bc%83%e5%90%88%e9%81%a9%ef%bc%9f",
       "score": 6,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114615-subtitle-e3-80-90-e8-a9-b1-e",
-      "type": "news",
-      "title": "【話題】走 8000 步就能換 50 元！運動部「揮汗有禮」9/1 開跑，14 週最多領 700 元",
-      "date": "2026-09-02",
-      "date_source": "source",
-      "article_date": "2026-09-02",
-      "first_seen_at": "2026-09-03",
-      "source": "運動筆記",
-      "category": "跑步新聞",
-      "summary": "平常有跑步、騎車，甚至只是每天走路累積步數，現在都可以拿來換「健康好禮」。運動部自 9 月 1 日起至 11 月 30 日推出「揮汗有禮・全民動起來」活動，只要年滿 16 歲，每週完成指定運動任務，將運動紀錄上傳活動網站並通過審核，就能取得。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114615&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%91%E8%B5%B0%208000%20%E6%AD%A5%E5%B0%B1%E8%83%BD%E6%8F%9B%2050%20%E5%85%83%EF%BC%81%E9%81%8B%E5%8B%95%E9%83%A8%E3%80%8C%E6%8F%AE%E6%B1%97%E6%9C%89%E7%A6%AE%E3%80%8D9/1%20%E9%96%8B%E8%B7%91%EF%BC%8C14%20%E9%80%B1%E6%9C%80%E5%A4%9A%E9%A0%98%20700%20%E5%85%83&label=all",
-      "score": 6,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
@@ -695,7 +595,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114620&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%91%E8%B6%85%E9%A6%AC%E5%A5%BD%E6%89%8B%20Phil%20Gore%20%E6%8C%91%E6%88%B0%E3%80%8AProject%20168%E3%80%8B%206%20%E5%A4%A9%E8%B7%91%201,019%20%E5%85%AC%E9%87%8C%EF%BC%81&label=all",
       "score": 6,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -712,13 +612,33 @@
       "source": "運動筆記",
       "category": "賽事資訊",
       "summary": "2026 IAU 100 公里世界錦標賽將於 9 月 20 日在西班牙阿梅斯（Ames）登場，臺灣本屆將由朱宏仁、周平記、陳佳隆、蔡峻宇、李鴻斌及馮耀武共 6 名男子選手組成中華代表隊，迎戰來自世界各地的頂尖超級馬拉松選手。賽事將於西班牙時。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114616&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%91%E8%87%BA%E7%81%A3%206%20%E5%90%8D%E8%B6%85%E9%A6%AC%E8%B7%91%E8%80%85%E6%8C%91%E6%88%B0%20IAU%20100%20%E5%85%AC%E9%87%8C%E4%B8%96%E7%95%8C%E9%8C%A6%E6%A8%99%E8%B3%BD%EF%BC%819%EF%BC%8F20%20%E8%A5%BF%E7%8F%AD%E7%89%99%E9%96%8B%E8%B7%91&label=all",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114616&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%91%E8%87%BA%E7%81%A3%206%20%E5%90%8D%E8%B6%85%E9%A6%AC%E8%B7%91%E8%80%85%E6%8C%91%E6%88%B0%20IAU%20100%20%E5%85%AC%E9%87%8C%E4%B8%96%E7%95%8C%E9%8C%A6%E6%A8%99%E8%B3%BD%EF%BC%819%EF%BC%8F20%20%E8%A5%BF%E7%8F%AD%E7%89%99%E9%96%8B%E8%B7%91",
       "score": 6,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
+      ]
+    },
+    {
+      "id": "news-www-don1don-com-archives-241318-e5-be-9e-e4-b8-96-e7-95-8c-e8-b7-91-e9-80-b2-e5-",
+      "type": "news",
+      "title": "從世界跑進墾丁！2026屏東墾丁日本航空國際馬拉松熱血啟動 亞洲冬季跑旅首選，奔向台灣最南端的山海美景",
+      "date": "2026-08-31",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-08-31",
+      "source": "動一動",
+      "category": "賽事資訊",
+      "summary": "當十一月的北部微微帶點初冬的濕冷，位於台灣最南端的屏東墾丁，正以最溫暖的陽光、最純粹的蔚藍太平洋，以及熱情的落山風，等待著全台與全亞洲的跑者前來踏浪奔跑。備受矚目的冬季跑旅盛會——「2026 屏東墾丁日本航空國際馬拉松」將於 2026 年 11 月 15 日 在墾丁大灣草坪熱血開跑！",
+      "url": "https://www.don1don.com/archives/241318/%e5%be%9e%e4%b8%96%e7%95%8c%e8%b7%91%e9%80%b2%e5%a2%be%e4%b8%81%ef%bc%812026%e5%b1%8f%e6%9d%b1%e5%a2%be%e4%b8%81%e6%97%a5%e6%9c%ac%e8%88%aa%e7%a9%ba%e5%9c%8b%e9%9a%9b%e9%a6%ac%e6%8b%89%e6%9d%be",
+      "score": 6,
+      "source_origin": "candidate",
+      "published_at": "2026-09-04",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
       ]
     },
     {
@@ -735,7 +655,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114568&subtitle=%E3%80%90%E5%81%A5%E5%BA%B7%E3%80%91%E8%AA%8D%E8%AD%98%E9%81%8B%E5%8B%95%E5%B8%B8%E8%A6%8B%E7%9A%84%E7%9A%AE%E8%86%9A%E5%95%8F%E9%A1%8C%EF%BD%9C%E8%B7%91%E8%80%85%E9%BB%91%E8%B6%BE%E7%94%B2%20%E8%B7%91%E5%AE%8C%E8%B6%BE%E7%94%B2%E8%AE%8A%E9%BB%91%EF%BC%8C%E4%B8%8D%E4%B8%80%E5%AE%9A%E5%8F%AA%E6%98%AF%E9%9E%8B%E5%AD%90%E5%A4%AA%E5%B0%8F%EF%BC%81",
       "score": 6,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -755,30 +675,10 @@
       "url": "https://irsports.com.tw/w/bd/1569",
       "score": 6,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "IR SPORTS"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-running-a73588245-stanford-study-running-knee",
-      "type": "news",
-      "title": "跑步會傷膝蓋嗎？「史丹佛研究」追蹤20年：結果跟你想的不一樣",
-      "date": "2026-09-02",
-      "date_source": "source",
-      "article_date": "2026-09-02",
-      "first_seen_at": "2026-09-03",
-      "source": "Women's Health Taiwan",
-      "category": "恢復保養",
-      "summary": "「跑久了膝蓋會壞掉」是真的嗎？聽聽史丹佛的研究怎麼說。",
-      "url": "https://www.womenshealthmag.com/tw/fitness/running/a73588245/stanford-study-running-knee-osteoarthritis/",
-      "score": 5,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -795,7 +695,7 @@
       "url": "https://bouncin.net/p/news/hot-topics/6188/skechers-second-best-selling-footwear-brand-us",
       "score": 5,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Bounce"
@@ -815,50 +715,10 @@
       "url": "https://www.hk01.com/%E5%8D%B3%E6%99%82%E9%AB%94%E8%82%B2/60385511/%E8%B7%91%E6%AD%A5-%E8%90%AC%E5%AE%9C%E8%B7%AF%E4%B8%8A%E8%90%BD%E9%AB%98%E4%BD%8E-713%E7%B1%B3-%E6%9B%BE%E6%9B%89%E5%BD%A4%E6%95%99%E4%BD%A0%E5%85%8B%E6%9C%8D-%E9%AD%94%E9%AC%BC%E7%B4%9A%E9%8B%B8%E9%BD%92%E7%88%AC%E5%8D%87",
       "score": 5,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-g73566012-5-exercises-for-longevity",
-      "type": "news",
-      "title": "馬拉松沒上榜？哈佛專家推薦5種「最佳運動」：降血壓、防失智還能瘦身",
-      "date": "2026-08-31",
-      "date_source": "source",
-      "article_date": "2026-08-31",
-      "first_seen_at": "2026-09-01",
-      "source": "Women's Health Taiwan",
-      "category": "賽事資訊",
-      "summary": "馬拉松進步不只靠高強度，穩定低強度跑量才是地基。安排課表時，要先確保恢復能力跟得上。",
-      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/g73566012/5-exercises-for-longevity/",
-      "score": 5,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-running-g73566400-forbes-top-10-exotic-marath",
-      "type": "news",
-      "title": "台北「這場馬拉松」登上《富比士》！全球10大特色馬拉松：跑進肯亞草原、死海到阿拉斯加",
-      "date": "2026-08-26",
-      "date_source": "source",
-      "article_date": "2026-08-26",
-      "first_seen_at": "2026-09-01",
-      "source": "Women's Health Taiwan",
-      "category": "賽事資訊",
-      "summary": "《富比士》最新選出的10場特色馬拉松，讓「跑步＋旅行」成為一次完成的冒險。",
-      "url": "https://www.womenshealthmag.com/tw/fitness/running/g73566400/forbes-top-10-exotic-marathons/",
-      "score": 5,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -875,7 +735,7 @@
       "url": "https://www.sportscience.com.tw/article/detail/%E8%B7%91%E5%86%8D%E5%A4%9A%E9%82%84%E6%98%AF%E7%A0%B4%E4%B8%8D%E4%BA%86PB%EF%BC%9F%E5%95%8F%E9%A1%8C%E5%8F%AF%E8%83%BD%E4%B8%8D%E5%9C%A8%E8%A8%93%E7%B7%B4",
       "score": 5,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動科學網"
@@ -895,7 +755,7 @@
       "url": "https://event.womenshealth.com.tw/2026/runningyou/",
       "score": 5,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Women's Health Taiwan"
@@ -915,30 +775,10 @@
       "url": "https://www.sportscience.com.tw/article/detail/%E7%A9%BF%E6%88%B4%E5%BC%8F%E7%A7%91%E6%8A%80%EF%BC%8C%E7%9C%9F%E7%9A%84%E8%AE%93%E8%B7%91%E6%AD%A5%E7%A7%91%E5%AD%B8%E8%B5%B0%E5%87%BA%E5%AF%A6%E9%A9%97%E5%AE%A4%E4%BA%86%E5%97%8E%EF%BC%9F",
       "score": 5,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動科學網"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-g73565354-sport-ministry-sweat-rewa",
-      "type": "news",
-      "title": "運動部「揮汗有禮」怎麼領？走8000步、運動30分鐘領50元，申請資格、APP、兌換方式一次看",
-      "date": "2026-09-03",
-      "date_source": "source",
-      "article_date": "2026-09-03",
-      "first_seen_at": "2026-09-01",
-      "source": "Women's Health Taiwan",
-      "category": "跑步新聞",
-      "summary": "「怎麼登記？8000步算嗎？重訓可以嗎？皮克敏能不能用？為什麼收不到驗證碼？」一次整理。",
-      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/g73565354/sport-ministry-sweat-rewards-2026/",
-      "score": 4,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -955,7 +795,7 @@
       "url": "https://irsports.com.tw/w/bd/1568",
       "score": 4,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "IR SPORTS"
@@ -975,30 +815,10 @@
       "url": "https://global.hk01.com/%E7%A9%BF%E6%90%AD%E7%AC%94%E8%AE%B0/60359625/5%E6%AC%BE%E8%88%92%E9%80%82%E6%B3%A2%E9%9E%8B%E6%8E%A8%E4%BB%8B-%E6%97%A5%E8%A1%8C%E4%B8%87%E6%AD%A5%E4%B8%8D%E6%80%95%E7%A3%A8%E8%84%9A-iu%E5%90%8C%E6%AC%BE%E5%A4%8D%E5%8F%A4%E7%99%BE%E6%90%AD%E8%B6%85%E6%98%BE%E7%98%A6",
       "score": 4,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-yoga-a73197563-walking-yoga-benefit",
-      "type": "news",
-      "title": "不是超慢跑也不是健走！「走路瑜珈」國外爆紅！每天5動作，邊走邊減肥還能壓力全消！",
-      "date": "2026-07-21",
-      "date_source": "source",
-      "article_date": "2026-07-21",
-      "first_seen_at": "2026-07-22",
-      "source": "Women's Health Taiwan",
-      "category": "跑步新聞",
-      "summary": "簡單改變走路方式就能達到運動與療癒的效果！",
-      "url": "https://www.womenshealthmag.com/tw/fitness/yoga/a73197563/walking-yoga-benefit/",
-      "score": 4,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -1015,30 +835,10 @@
       "url": "https://www.sportscience.com.tw/article/detail/%E8%8F%81%E8%8B%B1%E8%B7%91%E8%80%85%E7%9A%84%E7%B5%82%E6%A5%B5%E5%AF%86%E7%A2%BC%EF%BC%9F%E5%B0%8F%E5%BF%83%E8%AA%A4%E5%88%A4%E8%80%90%E5%8A%9B%E6%8C%87%E6%A8%99",
       "score": 4,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動科學網"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-g71691331-world-cup-players-best-sn",
-      "type": "news",
-      "title": "【2026世足】世界盃球星個個是鞋頭！5 雙私服夢幻神鞋曝光，哈蘭德穿紅椰子、Vinícius 倒鉤聯名太狂",
-      "date": "2026-06-24",
-      "date_source": "source",
-      "article_date": "2026-06-24",
-      "first_seen_at": "2026-07-02",
-      "source": "Women's Health Taiwan",
-      "category": "跑步新聞",
-      "summary": "世足除了球賽本身值得關注，球星私下穿的球鞋也同樣精彩。",
-      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/g71691331/world-cup-players-best-sneakers-2026/",
-      "score": 4,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -1055,7 +855,7 @@
       "url": "https://irsports.com.tw/w/bd/1570",
       "score": 3,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "IR SPORTS"
@@ -1075,7 +875,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114434&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91On%20Cloudrunner%203%20Max%20%E7%8D%A8%E8%B7%91%E6%99%82%E7%9A%84%E9%9A%B1%E5%BD%A2%E9%98%B2%E8%AD%B7%E6%95%99%E7%B7%B4%EF%BC%8C%E5%B9%AB%E5%8A%A9%E4%BD%A0%E6%9B%B4%E5%BF%AB%E6%89%BE%E5%88%B0%E8%88%92%E9%81%A9%E7%9A%84%E8%B7%91%E6%AD%A5%E7%AF%80%E5%A5%8F",
       "score": 34,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1095,7 +895,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114548&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91%E4%B8%8D%E5%8F%AA%E6%98%AF%E6%8F%9B%E4%B8%8A%E6%96%B0%E6%B3%A1%E6%A3%89%EF%BC%81BROOKS%20HYPERION%20ELITE%206%20%E7%9A%84%E4%B8%89%E9%A0%85%E7%AB%B6%E9%80%9F%E6%94%B9%E9%80%A0&label=all",
       "score": 32,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1115,11 +915,164 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114466&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91%E5%BE%9E%E8%B7%91%E6%AD%A5%E5%88%B0%20HYROX%20%E9%AB%94%E8%83%BD%E6%88%B0%EF%BC%8CASICS%20GT-2000%2015%20%E6%89%93%E9%80%A0%E5%85%A8%E6%96%B9%E4%BD%8D%E8%A4%87%E5%90%88%E8%A8%93%E7%B7%B4%E7%9A%84%E6%9C%80%E4%BD%B3%E6%88%B0%E9%9D%B4",
       "score": 32,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
       ]
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114464-subtitle-e3-80-90-e7-b7-a8-e",
+      "type": "news",
+      "title": "【編輯開箱】The North Face Offtrail Ultra 專為技術地形而生的越野跑鞋",
+      "date": "2026-08-11",
+      "date_source": "source",
+      "article_date": "2026-08-11",
+      "first_seen_at": "2026-08-11",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "富士山周邊賽事從公路馬到長距離越野都有，重點不是只看距離，而是爬升、補給、旅跑成本與自身山徑經驗是否匹配。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114464&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91The%20North%20Face%20Offtrail%20Ultra%20%E5%B0%88%E7%82%BA%E6%8A%80%E8%A1%93%E5%9C%B0%E5%BD%A2%E8%80%8C%E7%94%9F%E7%9A%84%E8%B6%8A%E9%87%8E%E8%B7%91%E9%9E%8B&label=all",
+      "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114405-subtitle-e3-80-90-e7-b7-a8-e",
+      "type": "news",
+      "title": "【編輯開箱】ARC",
+      "date": "2026-07-29",
+      "date_source": "source",
+      "article_date": "2026-07-29",
+      "first_seen_at": "2026-07-30",
+      "source": "運動筆記",
+      "category": "跑步新聞",
+      "summary": "高速越野跑的過程中，像風一樣輕盈流動，在山林間自在穿梭，全新 ARC。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114405&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91ARC%27TERYX%20SYLAN%202%20%E8%B6%8A%E9%87%8E%E8%B7%91%E9%9E%8B%E8%A9%95%E6%B8%AC%EF%BD%9C%E9%87%8D%E9%87%8F%E3%80%81%E7%A2%B3%E6%9D%BF%E3%80%81%E4%B8%AD%E5%BA%95%E3%80%81%E5%AF%A6%E8%B7%91%E5%BF%83%E5%BE%97%E5%AE%8C%E6%95%B4%E8%A7%A3%E6%9E%90&label=all",
+      "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-kenlu-net-2026-05-hoka-mach-7-review-by-grace-ho",
+      "type": "news",
+      "title": "網友 何奕儒 鞋評 / HOKA Mach 7",
+      "date": "2026-07-02",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-07-02",
+      "source": "KENLU",
+      "category": "恢復保養",
+      "summary": "我叫何奕儒，目前是台大急診醫學部主治醫師，同時也是一名熱愛馬拉松與鐵人三項的業餘運動員。",
+      "url": "https://kenlu.net/2026/05/hoka-mach-7-review-by-grace-ho/",
+      "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-kenlu-net-2026-05-hoka-speedgoat-7-review-by-yangzz421",
+      "type": "news",
+      "title": "網友 劉名洋 鞋評 / HOKA Speedgoat 7",
+      "date": "2026-07-02",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-07-02",
+      "source": "KENLU",
+      "category": "恢復保養",
+      "summary": "我是鋼鐵運動訓練的劉名洋。平常訓練以路跑賽事、場內課表為主，這幾年也陸續接觸越野跑與登山。過去參加過幾場越野賽，像是 2022 Formosa Trail 16K 拿下總排第 3、2023 墾丁 Xterra 21K 總排第 7，而當時陪我完賽的是 HOKA Speedgoat 4。",
+      "url": "https://kenlu.net/2026/05/hoka-speedgoat-7-review-by-yangzz421/",
+      "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-kenlu-net-2026-05-hoka-mach-7-review-by-sain",
+      "type": "news",
+      "title": "網友 林俊賢 鞋評 / HOKA Mach 7",
+      "date": "2026-07-02",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-07-02",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "Hello，大家好！我是林俊賢，目前是位市民跑者，曾經生涯的6年當中，也是守護國家元首及民眾的一名職業軍人，因此跑步就是可以維持體態，及體能最好的管道。",
+      "url": "https://kenlu.net/2026/05/hoka-mach-7-review-by-sain/",
+      "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-kenlu-net-2026-06-chi-wei-puma-deviate-nitro-elite-4-review",
+      "type": "news",
+      "title": "網友 紀薇 鞋評 / ChiWei PUMA DEVIATE NITRO™ Elite 4",
+      "date": "2026-07-02",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-07-02",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "隨著夏季來臨氣溫升高，下半年的賽季訓練也慢慢拉開序幕，當身體準備好迎接夏訓的挑戰、再次提速時，陪伴我訓練的腳下夥伴，依然是 PUMA DEVIATE NITRO™ Elite 4。",
+      "url": "https://kenlu.net/2026/06/chi-wei-puma-deviate-nitro-elite-4-review/",
+      "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-kenlu-net-2026-08-adidas-harden-vol-1-restomod-pioneer-release-info",
+      "type": "news",
+      "title": "上市速報 / 中底改用 HYPERBOOST 科技 adidas Harden Vol. 1 Restomod ‘Pioneer’ 臺灣販售資整理",
+      "date": "2026-08-27",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-08-27",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "adidas Harden Vol.1 Restomod ‘Pioneer’ 臺灣現已發售，為大家整理已經公布販售資訊的店點，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
+      "url": "https://kenlu.net/2026/08/adidas-harden-vol-1-restomod-pioneer-release-info/",
+      "score": 26,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114468-subtitle-e3-80-90-e6-96-b0-e",
+      "type": "news",
+      "title": "【新鞋上市】首度進軍混合體能競速鞋競賽市場，On Cloud X Tempo Pro 8/6 開賣",
+      "date": "2026-08-07",
+      "date_source": "source",
+      "article_date": "2026-08-07",
+      "first_seen_at": "2026-08-08",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "隨著 HYROX 等「混合體能競賽（Hybrid Fitness Racing）」快速成長，參賽者不只要跑步，還得在比賽過程穿插推雪橇、拉雪橇、弓箭步、划船、Wall Ball 等動作。對鞋子的要求也變得相當矛盾：跑步時需要輕量、緩震與回彈。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114468&subtitle=%E3%80%90%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%E3%80%91%E9%A6%96%E5%BA%A6%E9%80%B2%E8%BB%8D%E6%B7%B7%E5%90%88%E9%AB%94%E8%83%BD%E7%AB%B6%E9%80%9F%E9%9E%8B%E7%AB%B6%E8%B3%BD%E5%B8%82%E5%A0%B4%EF%BC%8COn%20Cloud%20X%20Tempo%20Pro%208/6%20%E9%96%8B%E8%B3%A3&label=all",
+      "score": 26,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114441-subtitle-e3-80-90-e8-b7-91-e",
+      "type": "news",
+      "title": "【跑鞋】Nike HYROX 專用鞋登場？Hybrid Fly瞄準混合體能賽市場，碳板跑鞋也能推雪橇",
+      "date": "2026-08-04",
+      "date_source": "source",
+      "article_date": "2026-08-04",
+      "first_seen_at": "2026-08-05",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "HYROX 的選鞋一直存在一個很難兼顧的矛盾。比賽包含 8 趟 1 公里跑步，總跑量達 8 公里，中間卻還穿插 SkiErg、雪橇推拉、波比跳遠、划船、農夫走路、負重弓箭步與 Wall Balls 等功能性訓練。選手既需要跑鞋的輕量與推進效。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114441&subtitle=%E3%80%90%E8%B7%91%E9%9E%8B%E3%80%91Nike%20HYROX%20%E5%B0%88%E7%94%A8%E9%9E%8B%E7%99%BB%E5%A0%B4%EF%BC%9FHybrid%20Fly%E7%9E%84%E6%BA%96%E6%B7%B7%E5%90%88%E9%AB%94%E8%83%BD%E8%B3%BD%E5%B8%82%E5%A0%B4%EF%BC%8C%E7%A2%B3%E6%9D%BF%E8%B7%91%E9%9E%8B%E4%B9%9F%E8%83%BD%E6%8E%A8%E9%9B%AA%E6%A9%87",
+      "score": 26,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
@@ -1135,7 +1088,7 @@
       "url": "https://www.tomsguide.com/wellness/running/hoka-clifton-pro-review",
       "score": 23,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
@@ -1155,7 +1108,7 @@
       "url": "https://www.tomsguide.com/wellness/running/saucony-endorphin-elite-3-review",
       "score": 23,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
@@ -1175,7 +1128,7 @@
       "url": "https://www.tomsguide.com/wellness/running/i-ran-40-miles-in-the-on-cloudboom-volt-and-its-a-snappy-super-sneaker-for-training-and-racing",
       "score": 18,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
@@ -1195,11 +1148,28 @@
       "url": "https://www.tomsguide.com/wellness/running/12-stylish-new-balance-sneakers-your-feet-will-thank-you-for-buying-from-usd47",
       "score": 14,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
       ]
+    },
+    {
+      "id": "news-www-tomsguide-com-wellness-running-ive-tested-almost-every-hoka-running-shoe-and",
+      "type": "news",
+      "title": "I&rsquo;ve tested almost every Hoka running shoe and 3 of my favorites are reduced right now",
+      "date": "2026-07-15",
+      "date_source": "source",
+      "article_date": "2026-07-15",
+      "first_seen_at": "2026-07-16",
+      "source": "Tom's Guide Running",
+      "category": "跑鞋裝備",
+      "summary": "Hoka&rsquo;s in-house sale is packed with bargains right now and I&rsquo;ve picked out 3 of the best shoes I&rsquo;ve tested that are available at big...",
+      "url": "https://www.tomsguide.com/wellness/running/ive-tested-almost-every-hoka-running-shoe-and-3-of-my-favorites-are-reduced-right-now",
+      "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-09-04",
+      "publish_status": "published"
     },
     {
       "id": "shoe-kenlu-net-2026-08-nike-acg-picklejus-launch",
@@ -1215,10 +1185,30 @@
       "url": "https://kenlu.net/2026/08/nike-acg-picklejus-launch/",
       "score": 27,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114630-subtitle-e3-80-90-e5-93-81-e",
+      "type": "shoe",
+      "title": "【品牌動態】adidas ADIZERO DROPSET 系列強勢登場！突破跑鞋與訓練鞋界線",
+      "date": "2026-09-04",
+      "date_source": "source",
+      "article_date": "2026-09-04",
+      "first_seen_at": "2026-09-04",
+      "source": "運動筆記",
+      "category": "跑鞋新品",
+      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114630&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91adidas%20ADIZERO%20DROPSET%20%E7%B3%BB%E5%88%97%E5%BC%B7%E5%8B%A2%E7%99%BB%E5%A0%B4%EF%BC%81%E7%AA%81%E7%A0%B4%E8%B7%91%E9%9E%8B%E8%88%87%E8%A8%93%E7%B7%B4%E9%9E%8B%E7%95%8C%E7%B7%9A&label=all",
+      "score": 23,
+      "source_origin": "candidate",
+      "published_at": "2026-09-04",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
       ]
     },
     {
@@ -1235,10 +1225,50 @@
       "url": "https://www.hk01.com/%E8%B7%91%E6%AD%A5/60380547/%E8%B7%91%E9%9E%8B%E6%8E%A8%E8%96%A6-new-balance%E6%9C%80%E6%96%B0%E7%AB%B6%E9%80%9F%E8%B7%91%E9%9E%8B%E5%AF%A6%E6%B8%AC-%E9%96%93%E6%AD%87%E8%B7%91%E7%AF%80%E5%A5%8F%E8%B7%91%E5%8D%87%E7%B4%9A%E5%88%A9%E5%99%A8",
       "score": 23,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
+      ]
+    },
+    {
+      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114558-subtitle-e3-80-90-e8-a9-95-e",
+      "type": "shoe",
+      "title": "【評測】城市與山林的跨界防禦：從身體結構剖析 Salomon AERO BLAZE 4 GRAVEL GTX 的平衡與流暢",
+      "date": "2026-08-25",
+      "date_source": "source",
+      "article_date": "2026-08-25",
+      "first_seen_at": "2026-08-25",
+      "source": "運動筆記",
+      "category": "防水",
+      "summary": "這雙鞋目前以「防水」定位收錄。適合雨天、通勤慢跑與濕冷環境，夏季長跑要留意悶熱與排汗。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114558&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91%E8%B7%A8%E7%95%8C%E5%9F%8E%E5%B8%82%E8%88%87%E5%B1%B1%E6%9E%97%EF%BC%9A%E8%BA%AB%E9%AB%94%E7%B5%90%E6%A7%8B%E5%89%96%E6%9E%90%20Salomon%20AERO%20BLAZE%204%20GRAVEL%20GTX",
+      "score": 21,
+      "source_origin": "candidate",
+      "published_at": "2026-09-04",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
+      "id": "shoe-kenlu-net-2026-09-adidas-adizero-evo-sl-laceless",
+      "type": "shoe",
+      "title": "新聞分享 / 不用鞋帶也能跑！adidas ADIZERO EVO SL Laceless 全新版本登場",
+      "date": "2026-09-04",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-04",
+      "source": "KENLU",
+      "category": "跑鞋新品",
+      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
+      "url": "https://kenlu.net/2026/09/adidas-adizero-evo-sl-laceless/",
+      "score": 11,
+      "source_origin": "candidate",
+      "published_at": "2026-09-04",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
       ]
     },
     {
@@ -1255,7 +1285,7 @@
       "url": "https://kenlu.net/2022/08/jason-brooks-caldera-6-review/",
       "score": 35,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU 越野"
@@ -1275,7 +1305,7 @@
       "url": "https://kenlu.net/2026/07/asics-novablast-6-review-by-one-long-run-club/",
       "score": 33,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1295,7 +1325,7 @@
       "url": "https://kenlu.net/2026/07/hoka-clifton-pro-review-by-morris-chang/",
       "score": 31,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1315,7 +1345,7 @@
       "url": "https://kenlu.net/2026/08/asics-gt-2000-15-review/",
       "score": 29,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1335,7 +1365,7 @@
       "url": "https://kenlu.net/2026/04/saucony-omni-23-st-review-by-kai/",
       "score": 29,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1355,7 +1385,7 @@
       "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73198037/asics-novablast-6/",
       "score": 27,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Women's Health Taiwan"
@@ -1375,7 +1405,7 @@
       "url": "https://www.hk01.com/%E8%B7%91%E6%AD%A5/60382471/%E8%B7%91%E9%9E%8B%E6%8E%A8%E8%96%A6-adidas-hyperboost-edge-%E5%AF%A6%E6%B8%AC%E7%84%A1%E7%A2%B3%E6%9D%BF%E8%BC%95%E5%BD%88%E8%B7%91%E9%9E%8B%E6%9C%80%E4%BD%B3%E9%85%8D%E9%80%9F",
       "score": 23,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
@@ -1395,7 +1425,7 @@
       "url": "https://www.hk01.com/%E8%B7%91%E6%AD%A5/60374849/%E6%A2%81%E5%BE%B7%E6%B4%8B%E5%AF%A6%E6%B8%AChoka-clifton-11%E8%88%87clifton-pro-%E4%BB%A4%E8%A8%93%E7%B7%B4%E6%9B%B4%E8%B1%90%E5%AF%8C%E7%9A%84%E5%A5%BD%E6%8B%8D%E6%AA%94",
       "score": 21,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
@@ -1415,7 +1445,7 @@
       "url": "https://www.womenshealthmag.com/tw/fashion/equipment/g71879573/best-hoka-shoes-for-walking/",
       "score": 19,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Women's Health Taiwan"
@@ -1435,7 +1465,7 @@
       "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a72268341/hoka-clifton-11/",
       "score": 28,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Women's Health Taiwan"
@@ -1455,7 +1485,7 @@
       "url": "https://kenlu.net/2026/08/asics-gel-kinetic-fr-release-info/",
       "score": 25,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1475,7 +1505,7 @@
       "url": "https://kenlu.net/2019/10/new-balance-all-terrain-trail-hierro-v5-crag-v2/",
       "score": 25,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1495,7 +1525,7 @@
       "url": "https://kenlu.net/2026/08/saucony-max-cushion-family-unboxing/",
       "score": 23,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1515,7 +1545,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114590&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91%E4%B8%AD%E5%BA%95%E9%85%8D%E6%96%B9%E5%B9%BE%E4%B9%8E%E6%B2%92%E8%AE%8A%EF%BC%81BROOKS%20HYPERION%20MAX%204%20%E7%82%BA%E4%BD%95%E6%8A%8A%E6%94%B9%E6%AC%BE%E9%87%8D%E9%BB%9E%E6%94%BE%E5%9C%A8%E9%9E%8B%E9%9D%A2%EF%BC%9F&label=all",
       "score": 32,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1535,30 +1565,10 @@
       "url": "https://kenlu.net/2026/09/puma-deviate-nitro-elite-4-fast-r-3-new-colorway/",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114558-subtitle-e3-80-90-e8-a9-95-e",
-      "type": "shoe",
-      "title": "【評測】城市與山林的跨界防禦：從身體結構剖析 Salomon AERO BLAZE 4 GRAVEL GTX 的平衡與流暢",
-      "date": "2026-08-25",
-      "date_source": "source",
-      "article_date": "2026-08-25",
-      "first_seen_at": "2026-08-25",
-      "source": "運動筆記",
-      "category": "防水",
-      "summary": "這雙鞋目前以「防水」定位收錄。適合雨天、通勤慢跑與濕冷環境，夏季長跑要留意悶熱與排汗。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114558&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91%E8%B7%A8%E7%95%8C%E5%9F%8E%E5%B8%82%E8%88%87%E5%B1%B1%E6%9E%97%EF%BC%9A%E8%BA%AB%E9%AB%94%E7%B5%90%E6%A7%8B%E5%89%96%E6%9E%90%20Salomon%20AERO%20BLAZE%204%20GRAVEL%20GTX",
-      "score": 20,
-      "source_origin": "archive",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
       ]
     },
     {
@@ -1575,7 +1585,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114446&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91Nike%20Aero-FIT%20%E8%B7%91%E6%AD%A5%E8%83%8C%E5%BF%83%E7%99%BB%E5%A0%B4%EF%BC%81%E5%BE%9E%E5%B8%83%E6%96%99%E3%80%81%E7%B6%B2%E7%9C%BC%E5%88%B0%E5%89%AA%E8%A3%81%EF%BC%8C%E7%9C%8B%E6%87%82%E6%96%B0%E4%B8%80%E4%BB%A3%E6%95%A3%E7%86%B1%E7%A7%91%E6%8A%80",
       "score": 34,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1595,7 +1605,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114442&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91NIKE%20ACG%20ULTRAFLY%20TRAIL%20%E5%80%BC%E5%BE%97%E5%85%A5%E6%89%8B%E5%97%8E%EF%BC%9F50%20%E5%85%AC%E9%87%8C%E9%9B%A8%E6%88%B0%E5%AF%A6%E6%B8%AC&label=all",
       "score": 32,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1615,7 +1625,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114290&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91UTMB%20%E5%86%A0%E8%BB%8D%E8%B7%91%E9%9E%8B%20ASICS%20METAFUJI%20TRAIL%202%20%E5%8E%9F%E5%9E%8B%E9%9E%8B%E9%96%8B%E7%AE%B1&label=all",
       "score": 32,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1635,7 +1645,7 @@
       "url": "https://kenlu.net/2026/06/asics-gel-kayano-33-review-long-long/",
       "score": 32,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1655,7 +1665,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114428&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91UTMB%20%E5%86%A0%E8%BB%8D%E5%8E%9F%E5%9E%8B%E5%86%8D%E9%80%B2%E5%8C%96%EF%BC%9A%E6%AD%90%E9%9C%B8%E6%95%99%E7%B7%B4%E5%AF%A6%E6%B8%ACASICS%20METAFUJI%20TRAIL%202%E7%9A%84%E7%A9%A9%E5%AE%9A%E9%80%B2%E5%8C%96",
       "score": 30,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published"
     },
     {
@@ -1672,7 +1682,7 @@
       "url": "https://kenlu.net/2026/04/asics-gel-cumulus-28-review-by-yishanshan-yuna/",
       "score": 28,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1692,7 +1702,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114248&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91SAUCONY%20Triumph%2024%20%E5%AF%A6%E6%B8%AC%EF%BC%9A%E9%A0%82%E7%B4%9A%E7%B7%A9%E9%9C%87%E4%B8%8D%E5%8F%AA%E9%81%A9%E5%90%88%E6%85%A2%E8%B7%91%EF%BC%8C%E7%AF%80%E5%A5%8F%E8%B7%91%E8%88%87%E9%96%93%E6%AD%87%E4%B9%9F%E8%83%BD%E6%87%89%E4%BB%98",
       "score": 28,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1712,7 +1722,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114517&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91PARAMOUNT%20MAX%E3%80%81HURRICANE%2026%20%E6%80%8E%E9%BA%BC%E9%81%B8%EF%BC%9F%E7%B4%A2%E5%BA%B7%E5%B0%BC%E7%A9%A9%E5%AE%9A%E4%BF%9D%E8%AD%B7%E5%AE%B6%E6%97%8F%E4%B8%80%E6%AC%A1%E7%9C%8B%E6%87%82&label=all",
       "score": 27,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1732,7 +1742,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114313&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91%E5%A4%8F%E5%AD%A3%E5%82%99%E6%88%B0%EF%BC%8C%E5%BE%9E%E6%AF%8F%E5%A4%A9%E7%9A%84%E8%BC%95%E9%AC%86%E8%B7%91%E9%96%8B%E5%A7%8B%E2%94%80%E2%94%80HOKA%20Clifton%20PRO%20%E9%99%AA%E4%BD%A0%E7%A9%A9%E7%A9%A9%E7%B4%AF%E7%A9%8D%E6%AF%8F%E4%B8%80%E6%AD%A5",
       "score": 22,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1752,7 +1762,7 @@
       "url": "https://bouncin.net/p/news/new-stuff/6150/brooks-hyperion-elite-6-hyperion-max-4",
       "score": 31,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Bounce"
@@ -1772,7 +1782,7 @@
       "url": "https://kenlu.net/2026/07/hoka-clifton-11-official-news/",
       "score": 30,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1792,7 +1802,7 @@
       "url": "https://kenlu.net/2026/07/hoka-clifton-pro-official-news/",
       "score": 30,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1812,7 +1822,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114425&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E6%A9%9F%E8%83%BD%E8%B7%91%E9%9E%8B%E8%AE%8A%E8%BA%AB%E8%A1%97%E9%A0%AD%E8%97%9D%E8%A1%93%E5%93%81%EF%BC%81HOKA%20x%20BEAMS%20%E8%81%AF%E5%90%8D%E6%96%B0%E4%BD%9C%20Bondi%207%20%E9%9C%87%E6%92%BC%E7%99%BB%E5%A0%B4&label=all",
       "score": 28,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1832,7 +1842,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114419&subtitle=%E3%80%90%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%E3%80%91HOKA%20Clifton%20PRO%20%E7%94%A8%E8%B6%85%E8%87%A8%E7%95%8C%E6%B3%A1%E6%A3%89%E6%89%93%E9%80%A0%E5%8F%AF%E5%8A%A0%E9%80%9F%E7%9A%84%E6%97%A5%E5%B8%B8%E8%A8%93%E7%B7%B4%E9%9E%8B&label=all",
       "score": 28,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1852,7 +1862,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114327&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%EF%BD%9C%E8%88%92%E9%81%A9%E9%9E%8B%E9%9D%A2%E8%88%87%E9%9B%99%E5%B1%A4%E4%B8%AD%E5%BA%95%E7%A7%91%E6%8A%80%EF%BC%81BROOKS%20Hyperion%20Max%204%E5%8F%B0%E7%81%A3%E6%AD%A3%E5%BC%8F%E9%96%8B%E8%B3%A3&label=all",
       "score": 28,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1872,7 +1882,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114267&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91HOKA%20Clifton%20PRO%E7%99%BB%E5%A0%B4%EF%BC%81%E5%85%A8%E6%96%B0%E8%B6%85%E8%87%A8%E7%95%8C%E4%B8%AD%E5%BA%95%20%E6%8C%91%E6%88%B0%E9%AB%98%E9%9A%8E%E6%97%A5%E5%B8%B8%E8%A8%93%E7%B7%B4%E9%9E%8B%E5%B8%82%E5%A0%B4",
       "score": 28,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1892,7 +1902,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114475&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91ASICS%20%E7%A9%A9%E5%AE%9A%E6%94%AF%E6%92%90%E5%9E%8B%E8%B7%91%E9%9E%8B%20GT-2000%2015%20%E5%8D%87%E7%B4%9A%E4%B8%8A%E5%B8%82",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1912,7 +1922,7 @@
       "url": "https://kenlu.net/2026/08/nike-hybrid-flyhybrid-rn-official-news/",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1932,7 +1942,7 @@
       "url": "https://kenlu.net/2026/07/distance-x-nike-vaporfly-4-vomero-plus-release-info/",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -1952,7 +1962,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114278&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91ASICS%20Novablast%206%20%E7%99%BB%E5%A0%B4%EF%BC%81%E6%97%97%E8%89%A6%E6%B3%A1%E6%A3%89%E4%B8%8B%E6%94%BE%20%E5%BE%9E%E8%88%92%E9%81%A9%E8%A8%93%E7%B7%B4%E9%9E%8B%E9%80%B2%E5%8C%96%E6%88%90%E5%85%A8%E8%83%BD%E4%B8%BB%E5%8A%9B&label=all",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1972,7 +1982,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114232&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%EF%BD%9C%E9%99%AA%E4%BD%A0%E5%BE%88%E4%B9%85%E5%BE%88%E4%B9%85%20%E5%9C%8B%E6%B0%91%E8%A8%93%E7%B7%B4%E9%9E%8BMizuno%20Wave%20Rider%E9%82%81%E5%85%A5%E7%AC%AC30%E4%BB%A3%EF%BC%81",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -1992,7 +2002,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114222&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%EF%BD%9C%E7%84%A1%E7%97%9B%E5%90%83%E4%B8%8B%E9%95%B7%E8%B7%9D%E9%9B%A2%E9%87%8C%E7%A8%8B%EF%BC%81Mizuno%E8%B6%85%E7%B4%9A%E8%A8%93%E7%B7%B4%E9%9E%8BNeo%20Vista%203%E5%85%AD%E6%9C%88%E5%8D%B3%E5%B0%87%E4%B8%8A%E5%B8%82",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -2012,7 +2022,7 @@
       "url": "https://bouncin.net/p/news/new-stuff/6147/asics-gt-2000-15",
       "score": 25,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Bounce"
@@ -2032,7 +2042,7 @@
       "url": "https://bouncin.net/p/news/new-stuff/6103/keely-hodgkinson-nike-signature-collection",
       "score": 25,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Bounce"
@@ -2052,7 +2062,7 @@
       "url": "https://www.don1don.com/archives/240718/asics-%e7%a9%a9%e5%ae%9a%e6%94%af%e6%92%90%e5%9e%8b%e8%b7%91%e9%9e%8b-gt-2000-15-%e5%8d%87%e7%b4%9a%e4%b8%8a%e5%b8%82",
       "score": 23,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
@@ -2072,7 +2082,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114219&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%EF%BD%9C%E4%B8%8D%E5%86%8D%E5%BC%B7%E8%BF%AB%E7%9F%AF%E6%AD%A3%E8%B6%B3%E5%BC%93%EF%BC%81%E4%BA%9E%E7%91%9F%E5%A3%ABKayano%2033%E6%8D%A8%E6%A3%84%E5%82%B3%E7%B5%B1%E6%94%AF%E6%92%90%E7%89%87%EF%BC%8C%E8%BF%8E%E4%BE%86%E6%9C%80%E8%87%AA%E7%84%B6%E6%B5%81%E6%9A%A2%E7%9A%84%E9%80%B2%E5%8C%96",
       "score": 23,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -2092,7 +2102,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114533&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91ASICS%E6%94%9C%E6%89%8Bblacktoes%20%E6%8E%A8%E5%87%BA%E5%85%A8%E6%96%B0%E8%81%AF%E5%90%8D%EF%BC%81%E4%BB%A5%E6%91%BA%E7%B4%99%E5%B7%A5%E8%97%9D%E5%BB%B6%E7%BA%8C%E3%80%8C%E5%AE%89%E9%9D%9C%E8%B7%91%E6%AD%A5%E3%80%8D%E9%9D%9C%E8%AC%90%E5%93%B2%E5%AD%B8",
       "score": 22,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -2112,7 +2122,7 @@
       "url": "https://kenlu.net/2026/08/brooks-hyperion-elite-6-hyperion-max-4-official-news/",
       "score": 22,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -2132,7 +2142,7 @@
       "url": "https://kenlu.net/2026/08/nike-pegasus-plus-2-official-images/",
       "score": 20,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -2152,7 +2162,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114555&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91NIKE%20PEGASUS%20PLUS%202%20%E5%8D%B3%E5%B0%87%E7%99%BB%E5%A0%B4%EF%BC%8C%E8%A7%A3%E9%8E%96%E6%97%A5%E5%B8%B8%E8%A8%93%E7%B7%B4%E6%96%B0%E9%85%8D%E9%80%9F&label=all",
       "score": 20,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -2172,7 +2182,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114532&subtitle=%E3%80%90%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%E3%80%91ASICS%20SONICBLAST%202%208/24%20%E5%85%A8%E7%90%83%E4%B8%8A%E5%B8%82%EF%BC%81%E4%B8%BB%E6%89%93%E9%80%9F%E5%BA%A6%E8%A8%93%E7%B7%B4%E5%AE%9A%E4%BD%8D&label=all",
       "score": 20,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -2192,7 +2202,7 @@
       "url": "https://kenlu.net/2026/07/adidas-hyperboos-family-launch-event/",
       "score": 20,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
@@ -2212,7 +2222,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114415&subtitle=%E3%80%90%E6%96%B0%E9%9E%8B%E4%B8%8A%E5%B8%82%E3%80%91BROOKS%20Ghost%20Amp%20%E7%94%A8%20DNA%20HYPE%20%E6%89%93%E9%80%A0%E8%BC%95%E5%BF%AB%E6%97%A5%E5%B8%B8%E8%A8%93%E7%B7%B4%E6%96%B0%E9%81%B8%E6%93%87&label=all",
       "score": 20,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -2232,7 +2242,7 @@
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114400&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91adidas%20HYPERBOOST%20%E8%B6%85%E7%B4%9A%E7%B7%A9%E9%9C%87%E8%B7%91%E9%9E%8B%E5%AE%B6%E6%97%8F%E7%B3%BB%E5%88%97%E8%BC%95%E5%BD%88%E7%99%BB%E5%A0%B4%EF%BC%81&label=all",
       "score": 20,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
@@ -2252,50 +2262,10 @@
       "url": "https://www.don1don.com/archives/241076/nike-pegasus-plus-2%e5%8d%b3%e5%b0%87%e7%99%bb%e5%a0%b4%ef%bc%8c%e8%a7%a3%e9%8e%96%e6%97%a5%e5%b8%b8%e8%a8%93%e7%b7%b4%e6%96%b0%e9%85%8d%e9%80%9f",
       "score": 19,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "動一動"
-      ]
-    },
-    {
-      "id": "shoe-kenlu-net-2026-08-on-cloudboom-strike-2-official-news",
-      "type": "shoe",
-      "title": "官方新聞 / 速度再進化！瑞士昂跑 On Cloudboom Strike 2 全新登場",
-      "date": "2026-08-21",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-21",
-      "source": "KENLU",
-      "category": "速度訓練",
-      "summary": "這雙鞋目前以「速度訓練」定位收錄。適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
-      "url": "https://kenlu.net/2026/08/on-cloudboom-strike-2-official-news/",
-      "score": 18,
-      "source_origin": "archive",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a71231662-adidas-adizero-adios-pro-4-review",
-      "type": "shoe",
-      "title": "The Adidas Sub-2 Marathon Shoe Sold Out in 2 Minutes. The Brand’s Adizero Adios Pro 4 Is Still Available for Almost Half the Price.",
-      "date": "2026-09-03",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-03",
-      "source": "Runner's World",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a71231662/adidas-adizero-adios-pro-4-review/",
-      "score": 19,
-      "source_origin": "candidate",
-      "published_at": "2026-09-03",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
       ]
     },
     {
@@ -2312,7 +2282,7 @@
       "url": "https://www.tomsguide.com/wellness/running/brooks-ghost-18-review",
       "score": 25,
       "source_origin": "candidate",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
@@ -2332,7 +2302,7 @@
       "url": "https://www.runnersworld.com/gear/a71677406/brooks-cascadia-19-review/",
       "score": 31,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Runner's World"
@@ -2352,7 +2322,7 @@
       "url": "https://www.tomsguide.com/wellness/running/on-cloudmonster-3-vs-on-cloudmonster-3-hyper-which-running-shoe-should-you-buy",
       "score": 22,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
@@ -2372,7 +2342,7 @@
       "url": "https://www.runnersworld.com/gear/a23311221/best-altra-running-shoes/",
       "score": 26,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "Runner's World"
@@ -2392,7 +2362,7 @@
       "url": "https://www.t3.com/active/running/norda-055-launch-0726",
       "score": 19,
       "source_origin": "archive",
-      "published_at": "2026-09-03",
+      "published_at": "2026-09-04",
       "publish_status": "published",
       "source_aliases": [
         "T3 Running"
