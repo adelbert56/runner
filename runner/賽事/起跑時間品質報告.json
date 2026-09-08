@@ -21,5 +21,55 @@
         "hint": "距離：10K、3.5K、健走尋寶組；起跑列：活力組（10K）、健走尋寶組（3.5K）"
       }
     ]
+  },
+  {
+    "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
+    "race_name": "2026 台灣米倉田中馬拉松",
+    "race_date": "2026-11-08",
+    "race_county": "彰化縣",
+    "distances": [
+      "42.195km",
+      "22.6km",
+      "9.7km",
+      "4km",
+      "21.2km",
+      "4.6km"
+    ],
+    "start_times": "全程馬拉松組（42.195K） 起跑 06:20、半程馬拉松組（21.2K） 起跑 06:40、健跑組（9.7K） 起跑 07:15、友善樂跑組（4.6K） 起跑 07:00",
+    "registration_link": "https://irunner.biji.co/Tianzhong2026/signup",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：全馬（42.195K）、超半馬（22.6K）、9.7K、4K、半馬（21.2K）、4.6K；起跑列：全程馬拉松組（42.195K）、半程馬拉松組（21.2K）、健跑組（9.7K）、友善樂跑組（4.6K）"
+      }
+    ]
+  },
+  {
+    "race_id": "567466c5-20c8-47f3-a0af-5e9b5241647d",
+    "race_name": "第四屆國姓鹿跑—四鹿尋境・漫跑國姓",
+    "race_date": "2026-12-13",
+    "race_county": "南投縣",
+    "distances": [
+      "42.195km",
+      "23km",
+      "13km",
+      "4.5km"
+    ],
+    "start_times": "全馬組 起跑 06:30、超半馬組 起跑 06:30、挑戰組 起跑 06:30",
+    "registration_link": "https://irunner.biji.co/2026Guomatathon",
+    "official_event_url": "https://irunner.biji.co/2026Guomatathon",
+    "detail_url": "https://irunner.biji.co/2026Guomatathon",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "low",
+        "label": "起跑組別少於距離數",
+        "hint": "距離：全馬（42.195K）、超半馬（23K）、13K、4.5K；起跑列：全馬組、超半馬組、挑戰組"
+      }
+    ]
   }
 ]

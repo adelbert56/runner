@@ -1,21 +1,21 @@
 {
-  "generated_at": "2026-09-08T05:12:01.369Z",
+  "generated_at": "2026-09-08T10:29:11.066Z",
   "basis_date": "2026-09-08",
   "races": {
     "total": 67,
     "follow_up_count": 24,
     "complete_count": 43,
     "complete_rate": "64%",
-    "launch_blocking_gap_count": 8,
-    "launch_ready_count": 59,
-    "launch_ready_rate": "88%",
-    "official_direct_count": 58,
-    "official_direct_rate": "87%",
+    "launch_blocking_gap_count": 9,
+    "launch_ready_count": 58,
+    "launch_ready_rate": "87%",
+    "official_direct_count": 59,
+    "official_direct_rate": "88%",
     "verified_count": 67,
     "verified_rate": "100%",
-    "opened_gap_count": 2,
+    "opened_gap_count": 1,
     "date_anomaly_count": 0,
-    "due_now_count": 10,
+    "due_now_count": 11,
     "monthly_tracking_count": 6,
     "state_counts": {
       "歷史": 10,
@@ -242,7 +242,7 @@
   "platform_stability": {
     "stable_count": 6,
     "watch_count": 2,
-    "weak_count": 1,
+    "weak_count": 0,
     "items": [
       {
         "platform": "運動筆記",
@@ -252,7 +252,7 @@
         "missing": 8,
         "opened_gap": 1,
         "date_anomaly": 0,
-        "due_now": 2,
+        "due_now": 4,
         "sample_races": [
           "2026 KOF拳皇公益主題路跑",
           "TOYOTA RUN 台中 視障專場",
@@ -266,10 +266,10 @@
       },
       {
         "platform": "iRunner",
-        "total": 11,
-        "official_direct": 11,
-        "verified": 11,
-        "missing": 1,
+        "total": 12,
+        "official_direct": 12,
+        "verified": 12,
+        "missing": 2,
         "opened_gap": 0,
         "date_anomaly": 0,
         "due_now": 2,
@@ -278,10 +278,10 @@
           "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
           "2026 東城盃合歡山越野馬拉松"
         ],
-        "complete_rate": "91%",
+        "complete_rate": "83%",
         "official_direct_rate": "100%",
         "verified_rate": "100%",
-        "score": 97,
+        "score": 94,
         "status": "穩定"
       },
       {
@@ -352,7 +352,7 @@
         "missing": 2,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 0,
+        "due_now": 1,
         "sample_races": [
           "2026 VISOGE 夜跑派對 台中場",
           "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
@@ -372,7 +372,7 @@
         "missing": 1,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 2,
+        "due_now": 1,
         "sample_races": [
           "2026第九屆幸福龍井活力健康路跑健走",
           "2026 浪漫台三線新店老街路跑賽",
@@ -402,24 +402,6 @@
         "verified_rate": "100%",
         "score": 100,
         "status": "穩定"
-      },
-      {
-        "platform": "跑者廣場全國賽會",
-        "total": 1,
-        "official_direct": 0,
-        "verified": 1,
-        "missing": 1,
-        "opened_gap": 1,
-        "date_anomaly": 0,
-        "due_now": 1,
-        "sample_races": [
-          "第四屆國姓鹿跑—四鹿尋境・漫跑國姓"
-        ],
-        "complete_rate": "0%",
-        "official_direct_rate": "0%",
-        "verified_rate": "100%",
-        "score": 40,
-        "status": "需補強"
       }
     ]
   }
