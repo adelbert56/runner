@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-09-08T10:29:11.066Z",
-  "basis_date": "2026-09-08",
+  "generated_at": "2026-09-10T12:24:59.996Z",
+  "basis_date": "2026-09-10",
   "items": [
     {
       "platform": "運動筆記",
-      "total": 14,
+      "total": 15,
       "official_direct": 8,
-      "verified": 14,
-      "missing": 8,
+      "verified": 15,
+      "missing": 9,
       "opened_gap": 1,
       "date_anomaly": 0,
       "due_now": 4,
@@ -16,10 +16,10 @@
         "TOYOTA RUN 台中 視障專場",
         "2026 第五屆泰安烏嘎彥原鄉秘境森林馬拉松"
       ],
-      "complete_rate": "43%",
-      "official_direct_rate": "57%",
+      "complete_rate": "40%",
+      "official_direct_rate": "53%",
       "verified_rate": "100%",
-      "score": 69,
+      "score": 67,
       "status": "可用需觀察"
     },
     {
@@ -27,26 +27,26 @@
       "total": 12,
       "official_direct": 12,
       "verified": 12,
-      "missing": 2,
+      "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 1,
       "sample_races": [
         "2026 專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
         "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
         "2026 東城盃合歡山越野馬拉松"
       ],
-      "complete_rate": "83%",
+      "complete_rate": "92%",
       "official_direct_rate": "100%",
       "verified_rate": "100%",
-      "score": 94,
+      "score": 97,
       "status": "穩定"
     },
     {
       "platform": "Lohas",
-      "total": 10,
-      "official_direct": 8,
-      "verified": 10,
+      "total": 11,
+      "official_direct": 9,
+      "verified": 11,
       "missing": 2,
       "opened_gap": 0,
       "date_anomaly": 0,
@@ -56,10 +56,10 @@
         "2026年FUN電多巴胺路跑嘉年華",
         "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
       ],
-      "complete_rate": "80%",
-      "official_direct_rate": "80%",
+      "complete_rate": "82%",
+      "official_direct_rate": "82%",
       "verified_rate": "100%",
-      "score": 88,
+      "score": 89,
       "status": "穩定"
     },
     {
