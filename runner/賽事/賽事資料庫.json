@@ -670,16 +670,16 @@
     "scraped_at": "2026-09-10T12:21:13.033240+00:00",
     "weather_forecast": {
       "forecast_for": "2026-09-12",
-      "updated_at": "2026-09-10T12:24:59.635Z",
+      "updated_at": "2026-09-10T23:36:17.975Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，雷雨，23-31°C，降雨機率 47%，最大風速 15 km/h",
-      "weather_code": 95,
-      "temperature_min_c": 23.1,
-      "temperature_max_c": 30.8,
-      "precipitation_probability_max": 47,
-      "wind_speed_max_kmh": 15
+      "summary": "苗栗縣縣市預報，毛毛雨，24-31°C，降雨機率 62%，最大風速 12 km/h",
+      "weather_code": 51,
+      "temperature_min_c": 23.5,
+      "temperature_max_c": 30.5,
+      "precipitation_probability_max": 62,
+      "wind_speed_max_kmh": 12.1
     }
   },
   {
