@@ -161,7 +161,11 @@ function paceToMinutes(pace) {
 // 一堂課可在品質段後接 E 跑補量；課型必須由最高強度的主課決定，不能因文字
 // 後段出現「E 跑」就把節奏檢測誤標成輕鬆跑。
 function coachPlanTrainingType(planText) {
-  const text = String(planText || '').trim();
+  // 安全提醒會寫「非間歇／不排間歇」；分類前先移除否定詞，否則只要看見
+  // 「間歇」兩字就會把 E 跑＋輕快步誤標成真正的 interval 課。
+  const text = String(planText || '').trim()
+    .replace(/非間歇/g, '')
+    .replace(/不(?:是|做|排|安排)?間歇/g, '');
   if (/(?:^|\s)I\s*跑|間歇|快段/.test(text)) return 'interval';
   if (/(?:^|\s)T\s*跑|節奏|閾值/.test(text)) return 'tempo';
   if (/長跑|耐力跑/.test(text)) return 'long';

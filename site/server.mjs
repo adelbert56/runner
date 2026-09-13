@@ -189,17 +189,22 @@ function validGarminSyncPayload(payload) {
     && step.end && ["distance", "time", "reps", "open"].includes(step.end.type)
     && Number.isFinite(Number(step.end.value)) && Number(step.end.value) >= 0
     && (!step.children || (Array.isArray(step.children) && step.children.every(validStep)));
-  return payload.workouts.every((workout) => (
-    workout
-    && /^\d{4}-\d{2}-\d{2}$/.test(String(workout.date || ""))
-    && typeof workout.name === "string"
-    && workout.name.length > 0
-    && workout.name.length <= 120
-    && Number.isFinite(Number(workout.km))
-    && Number(workout.km) > 0
-    && Number(workout.km) <= 100
-    && (!workout.steps || (Array.isArray(workout.steps) && workout.steps.length <= 12 && workout.steps.every(validStep)))
-  ));
+  return payload.workouts.every((workout) => {
+    const hasStructuredSteps = Array.isArray(workout.steps) && workout.steps.length > 0
+      && workout.steps.length <= 12 && workout.steps.every(validStep);
+    // 間歇／坡道課主課常以時間或趟數表示（無總距離），km 會是 0；
+    // 只要有合法步驟結構就放行，km 只在無步驟時才強制 >0。
+    return workout
+      && /^\d{4}-\d{2}-\d{2}$/.test(String(workout.date || ""))
+      && typeof workout.name === "string"
+      && workout.name.length > 0
+      && workout.name.length <= 120
+      && Number.isFinite(Number(workout.km))
+      && Number(workout.km) >= 0
+      && Number(workout.km) <= 100
+      && (hasStructuredSteps || Number(workout.km) > 0)
+      && (!workout.steps || hasStructuredSteps);
+  });
 }
 
 async function readGarminSyncStatus() {

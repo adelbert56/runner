@@ -220,7 +220,7 @@ function coachPrescribedMainKm(day, entry) {
 function coachPrescription(day, ctx, week) {
   // 已報名賽事、賽前減壓與賽後恢復是硬約束；教練週處方只能安排其餘訓練日，
   // 不能把以賽代訓重新蓋成一般跑課。
-  if (day.raceReplacement) return null;
+  if (day.raceReplacement && day.raceReplacement !== 'race') return null;
   const coachDays = coachDaysForWeek(week);
   const entry = coachDays.find((item) => item.scheduledDow === day.dow);
   if (!entry) return null;
@@ -230,6 +230,25 @@ function coachPrescription(day, ctx, week) {
   const mainKm = coachPrescribedMainKm(day, entry);
   const prescribedDay = scheduledKm > 0 ? { ...day, km: scheduledKm, coachMainKm: mainKm } : day;
   const suppliedSteps = Array.isArray(entry.steps) ? entry.steps : [];
+  // 只有正式菜單附帶可執行步驟時，才允許它補上賽事 Garmin 結構；
+  // 純文字一般跑課不可把既有賽事卡改標成 tempo/easy。
+  if (day.raceReplacement === 'race' && !suppliedSteps.length) return null;
+  // 賽事身份、名稱與卡片說明仍由 race replacement 擁有；但 Garmin 結構必須採用
+  // 同週正式教練菜單的主課，不能把賽事資訊卡的前段／中段／收尾誤解成累加距離。
+  if (day.raceReplacement === 'race' && suppliedSteps.length) {
+    return {
+      type: 'replace',
+      course: {
+        ...prescribedDay,
+        type: 'race',
+        workoutStructure: coachWorkoutStructure(entry.plan, prescribedDay, suppliedSteps),
+        workoutStructureConfidence: 'coach',
+        coachPlan: true
+      },
+      rationale: '賽事調整：保留以賽代訓身份，Garmin 步驟採正式教練賽事處方。',
+      source: 'race-adjustment'
+    };
+  }
   const prescribedType = typeof coachPlanTrainingType === 'function' ? coachPlanTrainingType(entry.plan) : prescribedDay.type;
   const headline = coachPlanHeadline(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);
   const mainInstruction = coachPlanMainInstruction(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);

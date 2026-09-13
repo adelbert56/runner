@@ -67,6 +67,13 @@ vm.runInContext(
 );
 const { secToPace, coachPlanTrainingType, coachPlanHeadline, timeToSec, targetTimeToSec, isValidClockInput } = sandbox;
 
+const garminRunnableSandbox = {
+  garminManualBuilderSteps: (day) => day?.testSteps || [],
+};
+vm.createContext(garminRunnableSandbox);
+vm.runInContext(extractFunction(trainerRenderJs, "garminDayHasRunnableWork"), garminRunnableSandbox);
+const { garminDayHasRunnableWork } = garminRunnableSandbox;
+
 const structureSandbox = {};
 vm.createContext(structureSandbox);
 vm.runInContext(extractFunction(trainerPlanJs, "buildGarminWorkoutStructure"), structureSandbox);
@@ -76,6 +83,21 @@ const coachCopySandbox = {};
 vm.createContext(coachCopySandbox);
 vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), extractFunction(trainerRenderJs, "normalizeCoachWorkoutSteps")].join("\n\n"), coachCopySandbox);
 const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbox;
+
+const racePrescriptionSandbox = {
+  coachDaysForWeek: () => [{ scheduledDow: 0, totalKm: 10, plan: "10K 路跑檢測", steps: [{ kind: "main", end: { type: "distance", value: 10000, label: "10 km" } }] }],
+  coachWorkoutStructure: (_plan, _day, steps) => steps,
+  coachPlanTrainingType,
+  coachPlanHeadline,
+  coachPlanMainInstruction,
+};
+vm.createContext(racePrescriptionSandbox);
+vm.runInContext([
+  extractFunction(trainerCoachEngineJs, "coachPrescribedKm"),
+  extractFunction(trainerCoachEngineJs, "coachPrescribedMainKm"),
+  extractFunction(trainerCoachEngineJs, "coachPrescription"),
+].join("\n\n"), racePrescriptionSandbox);
+const { coachPrescription } = racePrescriptionSandbox;
 
 const sessionStorySandbox = {
   paceToSeconds: (pace) => ({ '7:00': 420, '6:50': 410, '6:40': 400, '6:30': 390 }[pace] || 0),
@@ -131,7 +153,7 @@ const { coachScheduledRaceEntries } = scheduledEntrySandbox;
 const deferredRacePackageSandbox = {
   goalDistanceKm: () => 21.0975,
   secToPace: (seconds) => `pace-${seconds}`,
-  coachRaceDirective: () => ({ deferCalibration: true, role: '九月基準檢測' }),
+  coachRaceDirective: (date) => date === '2026-09-20' ? ({ deferCalibration: true, role: '九月基準檢測' }) : null,
   trainerWeather: {},
   isHotSeasonDate: () => false,
 };
@@ -220,6 +242,14 @@ assertEqual(isValidClockInput("2:10:00", [2, 3]), true, "isValidClockInput accep
 assertEqual(isValidClockInput("2:70", [2, 3]), false, "isValidClockInput rejects out-of-range minutes/seconds");
 assertEqual(isValidClockInput("0:30", [2, 3]), false, "isValidClockInput rejects a zero leading unit");
 assertEqual(isValidClockInput("7:30", [2]), true, "isValidClockInput accepts M:SS pace input");
+assertEqual(coachPlanTrainingType("E 跑 6 km；非間歇、非品質課"), "easy", "negated interval wording stays an easy run");
+assertEqual(coachPlanTrainingType("本週不排間歇，只做 E 跑"), "easy", "do-not-schedule interval wording does not relabel the course");
+assertEqual(garminDayHasRunnableWork({ dateStr: "2026-09-19", type: "easy", km: 0, testSteps: [] }), false, "optional pre-race rest does not become a default Garmin 5 km workout");
+assertEqual(garminDayHasRunnableWork({ dateStr: "2026-09-20", type: "race", km: 10, testSteps: [] }), true, "race prescription with explicit distance remains Garmin-syncable");
+const formalRacePrescription = coachPrescription({ dateStr: "2026-09-20", dow: 0, type: "race", km: 0, raceReplacement: "race", task: "以賽代訓" }, {}, {});
+assertEqual(formalRacePrescription.course.type, "race", "formal Garmin steps preserve the race identity");
+assertEqual(formalRacePrescription.course.km, 10, "formal race menu owns the Garmin race distance");
+assertEqual(formalRacePrescription.course.workoutStructure[0].end.value, 10000, "formal 10K structure replaces informational race-card segments");
 
 const intervalStructure = buildGarminWorkoutStructure("interval", [
   { title: "熱身", dose: "15 分" },
@@ -275,6 +305,8 @@ assertEqual(coachScheduledRaceEntries().length, 1, "only coach-confirmed schedul
 assertEqual(coachScheduledRaceEntries()[0]?.race_date, '2026-11-08', "scheduled-race integration preserves the confirmed race date");
 assertEqual(assessmentCalibrationGate({ date: '2026-09-20' }).allowed, false, "9/20 10K retains evidence for coach review instead of auto-calibrating pace");
 assertEqual(raceDayPackageSteps({ goal: 'half', racePaceSec: 384 }, 10, '2026-09-20')[1]?.detail.includes('pace-'), false, "deferred 10K race card never reverse-calculates a pace from the half-marathon target");
+assertEqual(raceDayPackageSteps({ goal: 'half', racePaceSec: 364 }, 10, '2026-11-08')[1]?.detail.includes('pace-'), false, "a checkpoint 10K without an evidence-based directive never receives a pace reverse-calculated from the half-marathon goal");
+assertEqual(raceDayPackageSteps({ goal: 'half', racePaceSec: 364 }, 10, '2026-11-08')[1]?.detail.includes('RPE 5–6'), true, "a checkpoint 10K without sufficient pace evidence receives a conservative effort prescription");
 assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, false, "11/15 10K cannot recalibrate the half-marathon before 11/8 evidence exists");
 assessmentGateSandbox.appData.assessments.push({ date: '2026-11-08', type: 'race_10k' });
 assertEqual(assessmentCalibrationGate({ date: '2026-11-15' }).allowed, true, "11/15 10K may calibrate only after the 11/8 race evidence is retained");

@@ -2657,6 +2657,41 @@ function coachDaysForWeek(week) {
   return coachNextWeek ? coachMenuForCurrentSchedule(coachNextWeek.menu) : [];
 }
 
+// 正式週報不能只在 render-time 覆蓋畫面。若不把處方寫回 plan，週報切到
+// 下一週後，舊週就會退回通用產生器內容，連凍結 archive 都只會存到錯的底稿。
+function materializeCoachReviewWeek() {
+  const week = (appData.plan || []).find((item) => coachWeekMatches(item));
+  const coachDays = week ? coachDaysForWeek(week) : [];
+  if (!week || !coachDays.length) return false;
+  const context = buildContext();
+  let changed = false;
+  week.days = (week.days || []).map((day) => {
+    const prescription = coachPrescription(day, context, week);
+    if (!prescription?.course) return day;
+    const next = {
+      ...prescription.course,
+      status: day.status,
+      isMakeup: day.isMakeup,
+      extraSessions: day.extraSessions,
+      coachPlan: {
+        ...(day.coachPlan && typeof day.coachPlan === 'object' ? day.coachPlan : {}),
+        source: 'manual-coach-review',
+        reviewWeekStart: String(coachReviewData?.nextWeek?.weekStart || ''),
+        locked: true
+      }
+    };
+    if (JSON.stringify(next) !== JSON.stringify(day)) changed = true;
+    return next;
+  });
+  const targetKm = coachDays.reduce((sum, entry) => sum + (Number(entry?.totalKm) || 0), 0);
+  if (targetKm > 0 && Number(week.targetKm) !== targetKm) {
+    week.targetKm = Math.round(targetKm * 10) / 10;
+    changed = true;
+  }
+  if (changed) saveData(appData);
+  return changed;
+}
+
 // 通用產生器每四週會帶 isDeload；正式教練週期一旦存在，必須以它為準。
 // 否則像 W8 基礎強化這種有品質課與正常跑量的週，會被錯貼成「減量週」。
 function effectiveWeekIsDeload(week, coachPhase) {
@@ -3144,6 +3179,21 @@ function workoutStructureForDay(day) {
   }
   // 教練手寫課表與賽事處方才保留其明確 supplied structure，不自行改寫。
   if (Array.isArray(day?.workoutStructure) && day.workoutStructure.length) return day.workoutStructure;
+  // 賽事日若沒有正式 workoutStructure，day.steps 只是配速策略／補給／安全叮嚀
+  // 卡片（畫面文案），不是 Garmin 步驟結構。若照通用邏輯逐卡轉換，凡是卡片文字
+  // 沒有明確公里數（例如「依心率與體感」「依當天狀況」）都會誤退回預設 5 km，
+  // 讓 10K 賽事被同步成一堆 5 km 主課。賽事只需一個涵蓋全程距離的主課步驟。
+  if (day?.type === 'race') {
+    const raceKm = garminRaceDistanceKm(day) || Number(day?.km) || 0;
+    return raceKm > 0 ? [{
+      order: 1,
+      kind: 'main',
+      title: '賽事',
+      end: { type: 'distance', value: Math.round(raceKm * 1000), label: `${raceKm} km` },
+      target: [day?.pace, day?.hrTarget].filter(Boolean).join(' · '),
+      detail: day?.task || '依正式課表完成'
+    }] : [];
+  }
   const courseSteps = attachCourseGuides(day?.steps || [], day?.type);
   return courseSteps.map((step, index) => {
     const kind = workoutStepKind(step.title);
@@ -3235,6 +3285,20 @@ function coachWorkoutStructure(planText, day, suppliedSteps = []) {
 function garminManualBuilderSteps(day) {
   // 重複組的子步驟（快段／恢復）也要帶 targetSpec：發布腳本是逐步讀 targetSpec 的，
   // 只算最外層會讓組內快段在 Garmin 上變成沒有目標的空步驟。
+  const allowedKinds = new Set(['warmup', 'main', 'interval', 'recovery', 'cooldown', 'repeat']);
+  const allowedEndTypes = new Set(['distance', 'time', 'reps', 'open']);
+  const sanitize = (steps) => (Array.isArray(steps) ? steps : [])
+    .filter((step) => step && allowedKinds.has(step.kind) && step.end)
+    .slice(0, 12)
+    .map((step) => ({
+      ...step,
+      end: {
+        ...step.end,
+        type: allowedEndTypes.has(step.end.type) ? step.end.type : 'open',
+        value: Math.max(0, Number(step.end.value) || 0)
+      },
+      children: sanitize(step.children)
+    }));
   const withSpec = (step, index) => ({
     ...step,
     order: index + 1,
@@ -3244,7 +3308,21 @@ function garminManualBuilderSteps(day) {
     targetSpec: garminTargetSpec(step.target, day?.type, step.kind),
     ...(Array.isArray(step.children) && step.children.length ? { children: step.children.map(withSpec) } : {})
   });
-  return workoutStructureForDay(day).map(withSpec);
+  let safeSteps = sanitize(workoutStructureForDay(day));
+  // 舊版已儲存的賽事／教練步驟可能使用 Garmin API 不接受的自訂 kind。
+  // 不可讓整週因此被 400 擋下；至少保留一個明確距離主課，且不杜撰配速。
+  const effectiveKm = garminEffectiveDistanceKm(day);
+  if (!safeSteps.length && effectiveKm > 0) {
+    safeSteps = [{
+      kind: 'main',
+      title: day.type === 'race' ? '賽事' : '主課',
+      end: { type: 'distance', value: Math.round(effectiveKm * 1000), label: `${effectiveKm} km` },
+      target: '',
+      detail: day.task || '依正式課表完成',
+      children: []
+    }];
+  }
+  return safeSteps.map(withSpec);
 }
 
 function paceSecondsFromText(value) {
@@ -3283,6 +3361,17 @@ function renderGarminWorkoutStructure(day) {
   }).join('')}</div>`;
 }
 
+// Garmin／行事曆的事件標題有顯示寬度限制；trainingTaskTitle() 給畫面卡片用，
+// 賽前調整日的完整教練提醒句（"賽前休息或 20-30 分鐘輕鬆跑，明天「某某路跑」以賽
+// 代訓，不安排長跑"）直接當標題會整行擠爆行事曆格子。標題只需要簡短辨識，完整
+// 提醒文字留在 garminManualBuilderText() 的說明內容即可。
+function garminEventTitle(day) {
+  const short = day?.raceReplacement === 'pre-race'
+    ? `賽前輕鬆跑｜明天「${day?.raceName || '賽事'}」以賽代訓`
+    : trainingTaskTitle(day);
+  return short.length > 40 ? `${short.slice(0, 39)}…` : short;
+}
+
 function garminManualBuilderText(day) {
   const steps = garminManualBuilderSteps(day);
   return [
@@ -3318,7 +3407,7 @@ function weeklyGarminCalendarIcs(week) {
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${icsDate(day.dateStr)}`,
       `DTEND;VALUE=DATE:${nextIcsDate(day.dateStr)}`,
-      `SUMMARY:${icsEscape(`Runner｜${trainingTaskTitle(day)}`)}`,
+      `SUMMARY:${icsEscape(`Runner｜${garminEventTitle(day)}`)}`,
       `DESCRIPTION:${icsEscape(garminManualBuilderText(day))}`,
       'END:VEVENT'
     );
@@ -3405,18 +3494,46 @@ function renderLocalGarminPairingButton() {
 function estimatedGarminWorkoutSeconds(day) {
   const paceMatch = String(day.pace || '').match(/(\d+):(\d{2})/);
   const paceSeconds = paceMatch ? Number(paceMatch[1]) * 60 + Number(paceMatch[2]) : 420;
-  return Math.max(1800, Math.round((Number(day.km) || 5) * paceSeconds + 900));
+  return Math.max(1800, Math.round((garminEffectiveDistanceKm(day) || 5) * paceSeconds + 900));
+}
+
+function garminRaceDistanceKm(day) {
+  const explicit = Number(day?.raceDistanceKm || day?.raceKm || day?.race?.distanceKm);
+  if (explicit > 0) return explicit;
+  const text = `${day?.raceName || ''} ${day?.task || ''}`;
+  const match = text.match(/(\d+(?:\.\d+)?)\s*(?:k|公里)/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function garminEffectiveDistanceKm(day) {
+  return Math.max(0, Number(day?.km) || garminRaceDistanceKm(day));
 }
 
 function garminMainDistanceKm(day) {
   const mainStep = garminManualBuilderSteps(day).find((step) => ['main', 'interval'].includes(step.kind));
-  return mainStep?.end?.type === 'distance' ? Number(mainStep.end.value) / 1000 : (Number(day.km) || 5);
+  return mainStep?.end?.type === 'distance' ? Number(mainStep.end.value) / 1000 : garminEffectiveDistanceKm(day);
+}
+
+function garminDayHasRunnableWork(day) {
+  if (!day || day.type === 'rest' || !day.dateStr) return false;
+  const raceText = `${day.raceName || ''} ${day.task || ''}`;
+  const raceMatch = raceText.match(/(\d+(?:\.\d+)?)\s*(?:k|公里)/i);
+  const effectiveKm = Math.max(0, Number(day.km) || Number(day.raceDistanceKm) || Number(day.raceKm) || Number(raceMatch?.[1]) || 0);
+  if (effectiveKm > 0) return true;
+  return garminManualBuilderSteps(day).some((step) => {
+    if (!['main', 'interval', 'repeat'].includes(step.kind)) return false;
+    if (Number(step?.end?.value) > 0) return true;
+    return Array.isArray(step.children) && step.children.some((child) => Number(child?.end?.value) > 0);
+  });
 }
 
 function weeklyGarminSyncPayload(week) {
   const runningDays = (week?.days || [])
     .filter((day) => day.type !== 'rest' && day.dateStr)
-    .map((day) => resolveCourse(day, buildContext(), week).course);
+    .map((day) => resolveCourse(day, buildContext(), week).course)
+    // 賽前「休息優先、可選 20–30 分鐘」不是一堂確定的跑課；km=0 且沒有
+    // 可執行主課步驟時不得用預設 5 km 填入 Garmin。
+    .filter(garminDayHasRunnableWork);
   const syncableDays = runningDays.filter((day) => day.workoutStructureConfidence !== 'note-only');
   const skippedDays = runningDays.filter((day) => day.workoutStructureConfidence === 'note-only');
   return {
@@ -3424,13 +3541,13 @@ function weeklyGarminSyncPayload(week) {
     source: 'runner-local-garmin-sync',
     week: Number(week?.weekNum || currentWeek),
     replaceExisting: true,
-    skippedDays: skippedDays.map((day) => ({ date: day.dateStr, name: trainingTaskTitle(day), reason: '教練文字缺少可安全轉換的距離／時間步驟' })),
+    skippedDays: skippedDays.map((day) => ({ date: day.dateStr, name: garminEventTitle(day), reason: '教練文字缺少可安全轉換的距離／時間步驟' })),
     workouts: syncableDays.map((day) => ({
       date: day.dateStr,
-      name: `Runner｜${day.dateStr}｜${trainingTaskTitle(day)}`.slice(0, 120),
+      name: `Runner｜${day.dateStr}｜${garminEventTitle(day)}`.slice(0, 120),
       type: day.type,
       structureConfidence: day.workoutStructureConfidence || 'formal',
-      km: Number(day.km) || 5,
+      km: garminEffectiveDistanceKm(day),
       mainKm: garminMainDistanceKm(day),
       pace: day.pace || '',
       steps: garminManualBuilderSteps(day),
@@ -3532,7 +3649,16 @@ async function syncWeekToGarmin(weekNumber = currentWeek) {
       openGarminWorkoutPairing(weekNumber);
       return;
     }
-    if (!response.ok) throw new Error(result.message || 'Garmin 課程同步器未能啟動');
+    if (!response.ok) {
+      if (response.status === 400) {
+        showModal('Garmin 課表資料無法送出', `<p style="margin-top:0;line-height:1.7">本機同步器有正常啟動，但這週仍有課程結構未通過檢查；沒有寫入任何不完整課程。</p><p style="color:var(--c-text-muted);font-size:12px">${reviewEscape(result.message || '課表資料格式不正確')}</p>`, [
+          { label: '下載 ICS 備用', action: () => downloadWeeklyGarminCalendar(weekNumber) },
+          { label: '關閉', primary: true, action: closeModal }
+        ]);
+        return;
+      }
+      throw new Error(result.message || 'Garmin 課程同步器未能啟動');
+    }
     closeModal();
     showModal('正在同步本週課程到 Garmin', `<p style="margin-top:0;color:var(--c-text-muted);line-height:1.7">已將 ${payload.workouts.length} 堂課交給本機同步器。同名課程會安全替換成新版，避免保留舊內容。</p><p style="color:var(--c-text-muted);font-size:12px;line-height:1.6">Runner 只會使用你電腦既有的 Garmin 授權，不會傳送帳密到網站。</p>`, [{
       label: '查看結果', primary: true, action: async () => {

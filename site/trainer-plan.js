@@ -1656,8 +1656,7 @@ function updatePlanInPlace(profile) {
     (week.days || []).forEach((day, index) => {
       const old = oldByDate.get(day.dateStr);
       if (!old) return;
-      if (day.dateStr < today) week.days[index] = old;
-      else if (old.raceReplacementBase || old.status === 'done' || old.status === 'missed' || old.isMakeup) Object.assign(day, old);
+      if (day.dateStr <= today || old.coachPlan || old.raceReplacementBase || old.status === 'done' || old.status === 'missed' || old.isMakeup) week.days[index] = old;
     });
   });
   appData.profile = profile;

@@ -4878,6 +4878,11 @@ h3 {
 }
 
 @media (max-width: 960px) {
+  .race-fact-details {
+    margin-top: 20px;
+    padding-top: 16px;
+  }
+
   .split .section-heading,
   .news-section .section-heading {
     grid-template-columns: 1fr;
@@ -5867,6 +5872,14 @@ h3 {
 
   .race-header-row {
     gap: 8px;
+  }
+
+  /* A 版：日期仍是首層必要資訊，地點也保留；兩者在手機並排，避免各自
+     佔一整列把主要操作推到 560px 以下。 */
+  .race-hero-facts {
+    grid-template-columns: minmax(82px, 100px) minmax(0, 1fr);
+    gap: 8px;
+    align-items: stretch;
   }
 
   .race-summary-line,

@@ -275,6 +275,13 @@ function coachRaceDirective(dateStr) {
   return directives.find((item) => item?.date === dateStr) || null;
 }
 
+function readableRaceInstruction(value, fallback) {
+  const text = String(value || '').trim();
+  // 舊版 localStorage 曾以錯誤編碼保存中文；不要把 ?��? 直接渲染給跑者。
+  const questionMarks = (text.match(/\?/g) || []).length;
+  return text && questionMarks < 2 ? text : fallback;
+}
+
 // 已由正式教練週報確認的賽事，不必依賴另一個瀏覽器的報名 localStorage 才能保護課表。
 // 只採 scheduled: true，舊的十月判讀指令仍維持「有報名才整合」的既有行為。
 function coachScheduledRaceEntries() {
@@ -300,6 +307,10 @@ function scheduled10kNeedsStrengthDeload(directive) {
 // 賽日包：配速策略 + 補給 + 賽前檢查，填進「以賽代訓」卡片的 steps。
 // raceKm 與課表目標距離不同時用 Riegel 公式微調配速；profile/weather 缺資料時仍需能安全回傳。
 function raceDayPackageSteps(profile, raceKm, dateStr) {
+  const readable = (value, fallback) => {
+    const text = String(value || '').trim();
+    return text && (text.match(/\?/g) || []).length < 2 ? text : fallback;
+  };
   const km = Number(raceKm) > 0 ? Number(raceKm) : goalDistanceKm(profile);
   const goalDist = profile?.goal ? goalDistanceKm(profile) : km;
   const baseRacePaceSec = Number(profile?.racePaceSec) || 0;
@@ -310,19 +321,23 @@ function raceDayPackageSteps(profile, raceKm, dateStr) {
   const racePace = directive?.paceTarget || secToPace(adjustedPaceSec);
   const startPace = directive?.startPace || (adjustedPaceSec > 0 ? secToPace(adjustedPaceSec + 12) : '—');
   const roleTitle = directive?.role ? `｜${directive.role}` : '';
+  // 短於主目標距離的檢查賽不是主目標成績。沒有教練依近期實跑明確給速時，
+  // 絕不能拿半馬目標時間用 Riegel 反推 10K，再把願望配速寫成執行處方。
+  const isCheckpointRace = goalDist > 0 && km + 0.5 < goalDist;
+  const deferNumericPace = directive?.deferCalibration === true || (isCheckpointRace && !directive?.paceTarget && !directive?.startPace);
 
-  const paceSteps = directive?.deferCalibration ? [
+  const paceSteps = deferNumericPace ? [
     {
       icon: '🚦', title: '配速策略・前段保守', dose: '前 2 km',
-      detail: directive?.startInstruction || '以順暢步態與可控制呼吸起跑，不依半馬目標反推 10K 配速。'
+      detail: readable(directive?.startInstruction, '前段以可完整控制的呼吸與順暢步態起跑；不依半馬目標反推這場配速。')
     },
     {
       icon: '🎯', title: '配速策略・中段穩定', dose: '依心率與體感',
-      detail: directive?.mainInstruction || '守住穩定輸出；心率、腳感或動作異常就轉為舒適完賽。'
+      detail: readable(directive?.mainInstruction, '中段維持 RPE 5–6；只有呼吸、腳感與動作都穩定才自然維持，不追手錶上的願望配速。')
     },
     {
       icon: '🏁', title: '配速策略・安全收尾', dose: '依當天狀況',
-      detail: directive?.finishInstruction || '不衝刺；保留 Garmin、RPE 與恢復資料，賽後再由教練判讀後續配速。'
+      detail: readable(directive?.finishInstruction, '不衝刺；保留 Garmin、RPE 與恢復資料，賽後再由教練判讀後續配速。')
     }
   ] : [
     {
@@ -462,15 +477,32 @@ function applyRegisteredSundayRaceReplacements(races) {
       raceDay.raceName = raceName;
       raceDay.type = 'race';
       raceDay.km = 0;
+      // Garmin 匯出用實際比賽距離；km 刻意留 0（避免拿它當訓練跑量），
+      // 不能讓 Garmin 結構產生器沒有距離可用而每張配速卡都退回預設 5 km。
+      raceDay.raceDistanceKm = raceMaxKm(race) || goalDistanceKm(appData.profile);
       raceDay.focus = 'race';
       const directive = coachRaceDirective(dateStr);
       raceDay.task = `${raceName}｜以賽代訓${directive?.role ? `｜${directive.role}` : ''}`;
       raceDay.pace = directive?.deferCalibration
         ? '受控階段檢測：不以半馬目標反推 10K 配速；賽後綜合近期實跑與恢復再決定後續處方'
-        : directive?.summary || '依賽程距離與當日狀態執行；不另外補長跑';
+        : readableRaceInstruction(directive?.summary, '本場以穩定完成與資料蒐集為主，不預設目標配速。');
       raceDay.hrTarget = '';
-      raceDay.steps = raceDayPackageSteps(appData.profile, raceMaxKm(race) || goalDistanceKm(appData.profile), dateStr);
+      raceDay.steps = raceDayPackageSteps(appData.profile, raceDay.raceDistanceKm, dateStr);
       changed = true;
+    }
+
+    // 已存在的賽事日也要重新套用最新教練處方；否則舊的 race steps/配速會永久留在 plan。
+    if (raceDay.raceReplacement === 'race' && raceDay.raceName === raceName) {
+      const freshDirective = coachRaceDirective(dateStr);
+      raceDay.raceDistanceKm = raceMaxKm(race) || goalDistanceKm(appData.profile);
+      const freshSteps = raceDayPackageSteps(appData.profile, raceDay.raceDistanceKm, dateStr);
+      const freshPace = freshDirective?.deferCalibration
+        ? '受控階段檢測：不以半馬目標反推 10K 配速；賽後綜合近期實跑與恢復再決定後續處方'
+        : readableRaceInstruction(freshDirective?.summary, '本場以穩定完成與資料蒐集為主，不預設目標配速。');
+      if (JSON.stringify(raceDay.steps) !== JSON.stringify(freshSteps) || raceDay.pace !== freshPace) changed = true;
+      raceDay.steps = freshSteps;
+      raceDay.pace = freshPace;
+      raceDay.hrTarget = '';
     }
 
     if (preRaceDay && preRaceDay.type === 'long' && preRaceDay.raceReplacement !== 'pre-race') {
@@ -1010,6 +1042,95 @@ function repairFrozenW8Course(data) {
   return true;
 }
 
+// W9 正式週報已確認為 30 km 降載（6/6/6/12），但舊版未將 render-time
+// 處方持久化，後續通用產生器把它改成恢復跑／法特雷克／錯誤長跑距離。
+const FROZEN_W9_REPAIR_ID = '2026-09-13-w9-formal-course-v1';
+function repairFrozenW9Course(data) {
+  const repaired = new Set(Array.isArray(data.historicalCourseRepairs) ? data.historicalCourseRepairs : []);
+  const dates = ['2026-08-31', '2026-09-01', '2026-09-03', '2026-09-05'];
+  const week = (data.plan || []).find((item) => (item.days || []).some((day) => day?.dateStr === '2026-09-05'));
+  const daysByDate = new Map((week?.days || []).map((day) => [day.dateStr, day]));
+  if (!week || !dates.every((date) => daysByDate.has(date))) return false;
+  const canonical = week.targetKm === 30
+    && dates.every((date, index) => daysByDate.get(date)?.km === [6, 6, 6, 12][index])
+    && dates.slice(0, 3).every((date) => daysByDate.get(date)?.type === 'easy')
+    && daysByDate.get('2026-09-05')?.type === 'long'
+    && daysByDate.get('2026-09-05')?.coachPlan?.repairedAt === FROZEN_W9_REPAIR_ID;
+  if (repaired.has(FROZEN_W9_REPAIR_ID) && canonical) return false;
+  const warmup = { title: '熱身', dose: '8 分', target: '舒適強度', detail: '原地動態活動髖、踝與小腿；熱身不佔跑步里程。' };
+  const cooldown = { title: '收操', dose: '6 分', target: '舒適強度', detail: '走路、補水與伸展；不佔跑步里程。' };
+  const replaceDay = (date, type, km) => {
+    const day = daysByDate.get(date);
+    const isLong = type === 'long';
+    const next = {
+      type, focus: isLong ? 'long' : 'easy', km,
+      task: `${isLong ? '降載長跑' : '降載輕鬆跑'} ${km} km`, pace: '', hrTarget: 'HR≤150（Z2 上限，不是追逐目標）',
+      steps: [warmup, { title: '主課', dose: `${km} km`, target: 'HR≤150（Z2）', detail: `${km} km 為手錶實跑總量；本週降載、全程可對話，不安排品質課或補量。` }, cooldown],
+      status: day.status, extraSessions: day.extraSessions, isMakeup: day.isMakeup,
+      coachPlan: { ...(day.coachPlan || {}), source: 'historical-formal-repair', frozen: true, phase: '降載', repairedAt: FROZEN_W9_REPAIR_ID }
+    };
+    next.workoutStructure = buildGarminWorkoutStructure(next.type, next.steps, next.km, next.hrTarget);
+    Object.assign(day, next);
+  };
+  week.targetKm = 30;
+  replaceDay('2026-08-31', 'easy', 6);
+  replaceDay('2026-09-01', 'easy', 6);
+  replaceDay('2026-09-03', 'easy', 6);
+  replaceDay('2026-09-05', 'long', 12);
+  const plannedKmByDate = { '2026-08-31': 6, '2026-09-01': 6, '2026-09-03': 6, '2026-09-05': 12 };
+  (data.log || []).filter((entry) => entry?.source === 'garmin' && plannedKmByDate[entry.date]).forEach((entry) => { entry.plannedKm = plannedKmByDate[entry.date]; });
+  repaired.add(FROZEN_W9_REPAIR_ID);
+  data.historicalCourseRepairs = [...repaired];
+  if (!trainerUiFixtureMode()) snapshotFrozenCourseArchive(data, { replaceDates: dates });
+  return true;
+}
+
+// W10 的正式 Garmin 發佈契約仍在本機，但舊版只把週報處方套在畫面上，
+// 週報換週後底層通用課表便重新露出。此修復只復原當時已確認的 34 km，
+// 不用今日狀態重算歷史，也不改 Garmin 實跑距離。
+const FROZEN_W10_REPAIR_ID = '2026-09-13-w10-formal-course-v1';
+function repairFrozenW10Course(data) {
+  const repaired = new Set(Array.isArray(data.historicalCourseRepairs) ? data.historicalCourseRepairs : []);
+  const week = (data.plan || []).find((item) => (item.days || []).some((day) => day?.dateStr === '2026-09-12'));
+  const daysByDate = new Map((week?.days || []).map((day) => [day.dateStr, day]));
+  const dates = ['2026-09-07', '2026-09-08', '2026-09-10', '2026-09-12'];
+  if (!week || !dates.every((date) => daysByDate.has(date))) return false;
+  const alreadyCanonical = week.targetKm === 34
+    && daysByDate.get('2026-09-07')?.km === 7
+    && daysByDate.get('2026-09-08')?.km === 7
+    && daysByDate.get('2026-09-08')?.type === 'tempo'
+    && daysByDate.get('2026-09-10')?.km === 7
+    && daysByDate.get('2026-09-12')?.km === 13
+    && daysByDate.get('2026-09-12')?.coachPlan?.repairedAt === FROZEN_W10_REPAIR_ID;
+  if (repaired.has(FROZEN_W10_REPAIR_ID) && alreadyCanonical) return false;
+  const warmup = { title: '熱身', dose: '8 分', target: '舒適強度', detail: '原地動態活動髖、踝與小腿；熱身不佔跑步里程。' };
+  const cooldown = { title: '收操', dose: '6 分', target: '舒適強度', detail: '走路、補水與伸展；不佔跑步里程。' };
+  const replaceDay = (date, patch) => {
+    const day = daysByDate.get(date);
+    const next = { ...patch, status: day.status, extraSessions: day.extraSessions, isMakeup: day.isMakeup, coachPlan: { ...(day.coachPlan || {}), source: 'historical-formal-repair', frozen: true, repairedAt: FROZEN_W10_REPAIR_ID } };
+    next.workoutStructure = buildGarminWorkoutStructure(next.type, next.steps, next.km, [next.pace, next.hrTarget].filter(Boolean).join(' · '));
+    Object.assign(day, next);
+  };
+  week.targetKm = 34;
+  const easySteps = (km) => [warmup, { title: '主課', dose: `${km} km`, target: 'HR≤150（Z2）', detail: `${km} km 是手錶實跑總量；全程可完整對話，不做快步或補量。` }, cooldown];
+  replaceDay('2026-09-07', { type: 'easy', focus: 'easy', km: 7, task: '輕鬆跑 7 km', pace: '', hrTarget: 'HR≤150（Z2）', steps: easySteps(7) });
+  replaceDay('2026-09-08', {
+    type: 'tempo', focus: 'tempo', km: 7, task: '3×6 分受控節奏（總量約 7 km）', pace: '6:20–6:30/km', hrTarget: 'HR≤162 · RPE 5–6',
+    steps: [warmup, { title: '3×6 分受控節奏', dose: '3 趟', target: '6:20–6:30/km · HR≤162 · RPE 5–6', detail: '每趟後慢跑恢復 3 分；最快不得快於 6:15/km；若有腸胃症狀，不執行本組。' }, { title: 'E 跑完成段', dose: '約 3 km', target: 'HR≤150', detail: '完成節奏組後以 E 跑收足當天約 7 km；不是第二段品質課。' }, cooldown]
+  });
+  replaceDay('2026-09-10', { type: 'easy', focus: 'easy', km: 7, task: '輕鬆跑 7 km', pace: '', hrTarget: 'HR≤150（Z2）', steps: easySteps(7) });
+  replaceDay('2026-09-12', {
+    type: 'long', focus: 'long', km: 13, task: '長跑 13 km', pace: '', hrTarget: 'HR≤150（Z2）；持續超 155 即走 1 分',
+    steps: [warmup, { title: '主課', dose: '13 km', target: 'HR≤150（Z2）；持續超 155 即走 1 分', detail: '選平路，不爬坡或後段加速；帶水與電解質。腹痛、腹瀉或噁心發作即停止。' }, cooldown]
+  });
+  const plannedKmByDate = { '2026-09-07': 7, '2026-09-08': 7, '2026-09-10': 7, '2026-09-12': 13 };
+  (data.log || []).filter((entry) => entry?.source === 'garmin' && plannedKmByDate[entry.date]).forEach((entry) => { entry.plannedKm = plannedKmByDate[entry.date]; });
+  repaired.add(FROZEN_W10_REPAIR_ID);
+  data.historicalCourseRepairs = [...repaired];
+  if (!trainerUiFixtureMode()) snapshotFrozenCourseArchive(data, { replaceDates: dates });
+  return true;
+}
+
 function normalizeData(data) {
   const base = createEmptyData();
   const normalized = {
@@ -1045,6 +1166,8 @@ function normalizeData(data) {
   const restored = applyStoredMakeupRecords(applyStoredDayStatuses(normalized));
   if (!trainerUiFixtureMode()) restoreFrozenCourseArchive(restored);
   repairFrozenW8Course(restored);
+  repairFrozenW9Course(restored);
+  repairFrozenW10Course(restored);
   if (!trainerUiFixtureMode()) snapshotFrozenCourseArchive(restored);
   return restored;
 }
@@ -1201,7 +1324,7 @@ function rebuildStoredPlan(data) {
   const mergedPlan = freshPlan.map((freshWeek, index) => {
     const oldWeek = oldPlan[index];
     const sameTimeline = sameWeekTimeline(oldWeek, freshWeek);
-    const oldTouched = sameTimeline && oldWeek.days.some((day) => day.status === 'done' || day.status === 'missed');
+    const oldTouched = sameTimeline && oldWeek.days.some((day) => day.status === 'done' || day.status === 'missed' || day.dateStr <= todayStr());
     const archivedWeek = archivedCoachWeek(data, freshWeek.weekNum);
     // 不只週期處方，早期真人教練課表（coachPlan: true）與安全降階也都是
     // 已確認的決策。重建只能換通用課表；若目前週已遺失標記，優先用封存副本復原。
@@ -2956,6 +3079,7 @@ loadRegistrationRaceCheckpoints();
     // 初次 init 時加密週報尚未解鎖，這裡取得 scheduled 賽事後必須再同步一次，
     // 才能把正式確認的賽事真正寫進這個瀏覽器的本機課表。
     syncRegisteredSundayRaces();
+    const formalCoachWeekMaterialized = materializeCoachReviewWeek();
     const historicalCoachPlansRestored = restoreHistoricalCoachPlansFromReview();
     syncGarminRunsToPlan(data);
     const coachScheduleAligned = alignCoachScheduleDays();
@@ -2968,7 +3092,7 @@ loadRegistrationRaceCheckpoints();
     // 還原必須排在校準之後：先還原再校準的話，已提前排定的教練週會被同一輪
     // 的自動校準覆蓋，跑者隔天看到的又是非教練版課表。
     const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
-    if ((historicalCoachPlansRestored || coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || longRunTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    if ((formalCoachWeekMaterialized || historicalCoachPlansRestored || coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || longRunTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
     refreshCoachReviewPanels();
   }
 

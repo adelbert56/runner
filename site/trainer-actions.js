@@ -490,16 +490,24 @@ function renderCheckinSection() {
 function adjustNextWeek(factor, removeQuality, qualityMode = 'keep', weekNum = currentWeek) {
   const nextWeekPlan = appData.plan[weekNum];
   if (!nextWeekPlan) return;
+  const lockedFormalWeek = typeof coachPrescriptionLocksWeek === 'function' && coachPrescriptionLocksWeek(nextWeekPlan);
+  // 已確認的教練週不可再被一般週評估按比例改寫。安全訊號只允許降階品質課，
+  // 不得順手重算其他日距離或整週目標。
+  if (lockedFormalWeek && !removeQuality && qualityMode === 'keep') return;
   const beforePlan = futurePlanSnapshot(weekNum + 1);
-  nextWeekPlan.targetKm = Math.round(nextWeekPlan.targetKm * factor * 10) / 10;
+  if (!lockedFormalWeek) nextWeekPlan.targetKm = Math.round(nextWeekPlan.targetKm * factor * 10) / 10;
   nextWeekPlan.days = nextWeekPlan.days.map(day => {
     if (removeQuality && ['tempo', 'interval'].includes(day.type)) {
       const recovery = buildDayCard(day.dow, day.dateStr, 'easy', Math.round((day.km || 0) * factor * 10) / 10, appData.profile, false, false, !(appData.profile?.injuries || []).includes('none'), todayStr(), day.weekNum || weekNum + 1, day.phaseName || nextWeekPlan.phase, 'recovery', '恢復跑');
       recovery.safetyOverride = true;
       recovery.recoveryProtection = '週評估偵測到疼痛、疲勞或恢復不足，品質課已改為恢復跑。';
+      recovery.coachPlan = day.coachPlan;
+      recovery.status = day.status;
+      recovery.isMakeup = day.isMakeup;
+      recovery.extraSessions = day.extraSessions;
       return recovery;
     }
-    if (day.type !== 'rest') day.km = Math.round((day.km || 0) * factor * 10) / 10;
+    if (!lockedFormalWeek && day.type !== 'rest') day.km = Math.round((day.km || 0) * factor * 10) / 10;
     if (qualityMode === 'reduce' && ['tempo', 'interval'].includes(day.type)) {
       day.task = `${day.task || '品質課'}｜Garmin 教練調整：主課只做原處方前 2/3，失控即改輕鬆跑。`;
       day.coachPlan = { source: 'garmin-autopilot', qualityMode: 'reduce' };
@@ -1638,9 +1646,14 @@ function promptGoalDowngrade() {
 
 function resetPlanFromNow() {
   const newPlan = buildPlan({ ...appData.profile, generatedAt: new Date().toISOString() });
+  // 「從現在重設」仍不能抹掉本週已發生的課程；真正的新排程由下一週開始。
+  const futurePlan = newPlan.slice(1).map((week, index) => {
+    const weekNum = currentWeek + index + 1;
+    return { ...week, weekNum, days: (week.days || []).map((day) => ({ ...day, weekNum })) };
+  });
   appData.plan = [
-    ...appData.plan.slice(0, currentWeek - 1),
-    ...newPlan.slice(0, Math.max(0, newPlan.length - (currentWeek - 1)))
+    ...appData.plan.slice(0, currentWeek),
+    ...futurePlan
   ];
   saveData(appData);
   renderPlanView();
@@ -1710,6 +1723,8 @@ function rebuildWeeksFrom(startWeekNum, count) {
     const week = appData.plan[weekIdx];
     const archivedWeek = typeof archivedCoachWeek === 'function' ? archivedCoachWeek(appData, week.weekNum) : null;
     if (typeof weekHasStoredCoachPlan === 'function' && weekHasStoredCoachPlan(week)) continue;
+    // 週一旦開始即視為執行紀錄，不允許背景校準把整週換回通用模板。
+    if ((week.days || []).some((day) => day?.dateStr && day.dateStr <= todayStr())) continue;
     if (archivedWeek && typeof sameWeekTimeline === 'function' && sameWeekTimeline(archivedWeek, week)) {
       appData.plan[weekIdx] = archivedWeek;
       continue;
