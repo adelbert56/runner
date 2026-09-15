@@ -1,6 +1,38 @@
 [
   {
-    "race_id": "91e7f00b-49f3-452f-81ed-4f044a4c4729",
+    "race_id": "30fd9ddd-a292-4673-bb33-a720733fdc9f",
+    "race_name": "2027 臺灣集集半程國際馬拉松",
+    "race_date": "2027-03-21",
+    "race_county": "南投縣",
+    "source_platform": "跑者廣場全國賽會",
+    "is_official_direct": false,
+    "priority_score": 15,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-09-15",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 187 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      "official_registration_link",
+      "registration_opens_at",
+      "registration_deadline",
+      "start_times",
+      "fees",
+      "quota",
+      "verified_at"
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "",
+      "detail_url": "",
+      "source_registration_link": "",
+      "facebook_search_url": ""
+    }
+  },
+  {
+    "race_id": "46bc7c06-c2de-4ee4-9019-494e43bc6f49",
     "race_name": "2027 晨曦麥香馬拉松",
     "race_date": "2027-02-21",
     "race_county": "臺中市",
@@ -10,7 +42,7 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-10-01",
+      "next_check_date": "2026-09-15",
       "cadence": "monthly_1_15",
       "reason": "距離賽事 159 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
@@ -41,7 +73,7 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-10-01",
+      "next_check_date": "2026-09-15",
       "cadence": "monthly_1_15",
       "reason": "距離賽事 165 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
@@ -72,7 +104,7 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-10-01",
+      "next_check_date": "2026-09-15",
       "cadence": "monthly_1_15",
       "reason": "距離賽事 166 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
@@ -93,6 +125,37 @@
     }
   },
   {
+    "race_id": "433aef2e-f196-4765-ba0d-4e88439b1b45",
+    "race_name": "2027 高美濕地馬拉松",
+    "race_date": "2027-03-14",
+    "race_county": "臺中市",
+    "source_platform": "Lohas、運動筆記",
+    "is_official_direct": false,
+    "priority_score": 14,
+    "tracking": {
+      "status": "monitor_monthly",
+      "status_label": "每月追蹤",
+      "next_check_date": "2026-09-15",
+      "cadence": "monthly_1_15",
+      "reason": "距離賽事 180 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+    },
+    "missing": [
+      "official_registration_link",
+      "registration_opens_at",
+      "registration_deadline",
+      "start_times",
+      "fees",
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "",
+      "official_event_url": "https://lohasnet.tw/#/event",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13143&subtitle=2027+%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13143",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%20%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE"
+    }
+  },
+  {
     "race_id": "af93e6ee-f655-40fe-a8c6-efc36ac6df5d",
     "race_name": "2027 集集濁水溪半程國際馬拉松",
     "race_date": "2027-03-21",
@@ -103,7 +166,7 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-10-01",
+      "next_check_date": "2026-09-15",
       "cadence": "monthly_1_15",
       "reason": "距離賽事 187 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
@@ -134,7 +197,7 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-10-01",
+      "next_check_date": "2026-09-15",
       "cadence": "monthly_1_15",
       "reason": "距離賽事 194 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
@@ -165,7 +228,7 @@
     "tracking": {
       "status": "monitor_monthly",
       "status_label": "每月追蹤",
-      "next_check_date": "2026-10-01",
+      "next_check_date": "2026-09-15",
       "cadence": "monthly_1_15",
       "reason": "距離賽事 214 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
@@ -196,7 +259,7 @@
     "tracking": {
       "status": "wait_future",
       "status_label": "未來再查",
-      "next_check_date": "2027-06-08",
+      "next_check_date": "2027-06-07",
       "cadence": "future",
       "reason": "距離賽事 446 天，先排到賽前約 180 天再追。"
     },
@@ -352,6 +415,34 @@
       "detail_url": "https://www.focusline.com.tw/261001JF",
       "source_registration_link": "",
       "facebook_search_url": ""
+    }
+  },
+  {
+    "race_id": "b312a0fe-0227-4517-a48d-e3f23b758a68",
+    "race_name": "2027 台中 MIZUNO 國際半程馬拉松",
+    "race_date": "2027-01-17",
+    "race_county": "臺中市",
+    "source_platform": "CTRun、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 3,
+    "tracking": {
+      "status": "wait_until_open_window",
+      "status_label": "等待開報當天",
+      "next_check_date": "2026-09-16",
+      "cadence": "on_open_date",
+      "reason": "已知開報日 2026-09-16，尚有 2 天開報；先等正式開報再重爬官方報名、地點、主辦、費用與名額。"
+    },
+    "missing": [
+      "start_times",
+      "fees",
+      "quota"
+    ],
+    "current_links": {
+      "registration_link": "https://ctrun.tw/MZ270117",
+      "official_event_url": "https://ctrun.tw/MZ270117",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13183&subtitle=2027+%E5%8F%B0%E4%B8%AD+MIZUNO+%E5%9C%8B%E9%9A%9B%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13183",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2027%20%E5%8F%B0%E4%B8%AD%20MIZUNO%20%E5%9C%8B%E9%9A%9B%E5%8D%8A%E7%A8%8B%E9%A6%AC%E6%8B%89%E6%9D%BE"
     }
   },
   {
