@@ -27,7 +27,7 @@ def load_overrides(path: Path) -> dict[str, dict]:
         race_date = row.get("race_date", "").strip()
         if not race_name or not race_date:
             continue
-        fields = {k: v for k, v in row.items() if k not in {"race_name", "race_date"}}
+        fields = {k: v for k, v in row.items() if k not in {"race_name", "race_date", "force_override"}}
         overrides[f"{race_name}||{race_date}"] = fields
     return overrides
 
@@ -38,7 +38,13 @@ def apply_overrides(races: list[dict], overrides: dict[str, dict]) -> int:
         fields = overrides.get(_key(race))
         if not fields:
             continue
+        if fields.get("suppress") is True:
+            race["_suppress"] = True
+            updated += 1
+            continue
         for field, value in fields.items():
+            if field == "suppress":
+                continue
             if value == "__CLEAR__":
                 if race.get(field) != "":
                     race[field] = ""
@@ -48,5 +54,6 @@ def apply_overrides(races: list[dict], overrides: dict[str, dict]) -> int:
                 race[field] = value
                 updated += 1
     if updated:
+        races[:] = [race for race in races if not race.pop("_suppress", False)]
         logger.info(f"Applied {updated} manually verified race fields")
     return updated

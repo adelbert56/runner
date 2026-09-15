@@ -87,3 +87,4 @@
 | 首次課表產出後四 tab 導覽 | 變體 A（獨立卡） | `ai/artifacts/首次課表產出後導覽/mockup-decision-首次課表產出後導覽.md` | Squall／2026-08-23 |
 | 訓練分析放行判讀 | 變體 A（單一整合卡） | `ai/artifacts/教練判讀完整化/mockup-decision-訓練分析判讀.md` | Squall／2026-08-24 |
 | 訓練分析教練判讀順序 | 變體 A（判讀流程帶） | `ai/artifacts/教練流程可視化/mockup-decision-教練決策說明.md` | Squall／2026-08-27 |
+| 我的賽事待辦 | 變體 B（有內容的時間分組） | `ai/artifacts/網站可信度與功能健全化/mockup-decision-我的賽事待辦.md` | Squall／2026-09-15 |

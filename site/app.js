@@ -1966,6 +1966,8 @@ function renderRaceCard(race) {
   const cancelled = isCancelledRace(race);
   const raceDays = dateDiffDays(race.race_date);
   const expired = raceDays !== null && raceDays < 0;
+  const registeredRaceSoon = registered && raceDays !== null && raceDays >= 0 && raceDays < 7;
+  const registeredRaceToday = registeredRaceSoon && raceDays === 0;
   const canPlanTraining = !cancelled && raceDays !== null && raceDays >= 0;
   const disabledTrainingLabel = cancelled ? "活動停辦" : "賽事已過";
   const venue = venueForRace(race);
@@ -2009,7 +2011,7 @@ function renderRaceCard(race) {
   ].filter(Boolean);
 
   return `
-    <article id="${escapeHtml(raceDomId(race))}" class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""}">
+    <article id="${escapeHtml(raceDomId(race))}" class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""} ${registeredRaceSoon ? "race-registered-soon" : ""} ${registeredRaceToday ? "race-registered-today" : ""}">
       <div class="race-main">
         <div class="race-header-row">
           <div class="race-identity">
@@ -2439,8 +2441,7 @@ function renderRaceTodo() {
     { key: "today", title: "今天要處理", items: todos.filter(({ days }) => days === 0) },
     { key: "week", title: "7 天內", items: todos.filter(({ days }) => days > 0 && days <= 7) },
     { key: "month", title: "30 天內", items: todos.filter(({ days }) => days > 7 && days <= 30) },
-  ];
-  const priorityItems = todos.filter(({ race }) => isFavorite(race) && isRegisteredRace(race));
+  ].filter((group) => group.items.length > 0);
 
   els.raceTodo.innerHTML = `
     <article class="race-todo-card">
@@ -2448,22 +2449,9 @@ function renderRaceTodo() {
         <div>
           <p class="race-todo-kicker">我的賽事待辦</p>
           <h3>${todos.length} 場已報名賽事快開跑</h3>
-          <p>我先幫你拉出 30 天內的已報名場次，優先清單會先放收藏且已報名的賽事，讓你不用自己判斷。</p>
+          <p>未來 30 天，已依開跑時間整理。</p>
         </div>
-        <span class="race-todo-meta">已報名 ${registeredCount} 場 · 收藏且已報名 ${favoriteRegistered} 場</span>
-      </div>
-      <div class="race-todo-section">
-        <div class="race-todo-section-head">
-          <span>優先清單</span>
-          <em>收藏＋已報名</em>
-        </div>
-        <div class="race-todo-list">
-          ${
-            priorityItems.length
-              ? priorityItems.map(({ race, days }) => todoItemHtml(race, days, "priority")).join("")
-              : `<div class="race-todo-emptyline">目前還沒有同時收藏且已報名的賽事。</div>`
-          }
-        </div>
+        <span class="race-todo-meta">收藏＋已報名 ${favoriteRegistered} 場</span>
       </div>
       ${groups.map((group) => `
         <div class="race-todo-section">
@@ -2472,11 +2460,7 @@ function renderRaceTodo() {
             <em>${escapeHtml(String(group.items.length))} 場</em>
           </div>
           <div class="race-todo-list">
-            ${
-              group.items.length
-                ? group.items.map(({ race, days }) => todoItemHtml(race, days)).join("")
-                : `<div class="race-todo-emptyline">沒有符合這個時間範圍的已報名賽事。</div>`
-            }
+            ${group.items.map(({ race, days }) => todoItemHtml(race, days)).join("")}
           </div>
         </div>
       `).join("")}
@@ -2509,13 +2493,13 @@ function renderRaceTodo() {
   });
 }
 
-function todoItemHtml(race, days, variant = "") {
+function todoItemHtml(race, days) {
   const key = getRaceKey(race);
   const date = formatDateParts(race.race_date);
   const status = getRegistrationDisplayStatus(race);
   const distanceText = (race.distances || []).slice(0, 2).join(" / ") || "距離待確認";
   const countdown = days === 0 ? "今天開跑" : `倒數 ${days} 天`;
-  const isPriority = variant === "priority" || (isFavorite(race) && isRegisteredRace(race));
+  const isPriority = isFavorite(race) && isRegisteredRace(race);
   return `
     <button type="button" class="race-todo-item ${isPriority ? "race-todo-priority" : ""}" data-race-todo="${escapeHtml(key)}">
       <span class="race-todo-date">${escapeHtml(date.month)}/${escapeHtml(date.day)}</span>

@@ -642,9 +642,17 @@
   {
     "race_name": "2026 公勝盃公益路跑",
     "race_date": "2026-10-04",
-    "start_times": "活力組（10K） 起跑 07:00、健走尋寶組（3.5K） 起跑 07:10",
-    "verified_at": "2026-07-11",
-    "verification_note": "人工查證：running.biji.co 詳情頁只列 10K 活力組時間；3.5K 健走尋寶組 07:10 依使用者確認補上，來源頁無法獨立驗證。"
+    "force_override": true,
+    "distances": [
+      "10km",
+      "3.5km"
+    ],
+    "registration_deadline": "2026-08-16",
+    "fees": "10公里活力組 590元、健走尋寶組 390元；10公里活力組另收晶片押金100元。",
+    "start_times": "10公里活力組（10K） 起跑 07:00、健走尋寶組（3.5K） 起跑 07:10",
+    "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=339",
+    "verified_at": "2026-09-15",
+    "verification_note": "人工重新比對：CTRun 官方活動頁確認 10公里活力組與健走尋寶組、起始時間及費用，但現行頁面未標示尋寶距離；2026 Marathon's World 兩筆賽事資料均列 3.5K，且 2025 同場官方紀錄為 3.5公里健走尋寶組，因此距離摘要採 10K／3.5K，組名保留於詳細起跑資訊。報名截止日為 2026-08-16。"
   },
   {
     "race_name": "115 年運動i臺灣2.0計畫-臺中市潭子區旱溪水岸慢跑健走嘉年華",
@@ -713,5 +721,61 @@
     "registration_note": "人工補登：依使用者提供之 CTRun 官方活動頁連結校正。",
     "verified_at": "2026-08-20",
     "verification_note": "CTRun 活動簡章物資組別頁面逐一切換確認：10公里800元、10公里永續組400元、5公里700元、5公里永續組300元；主辦單位欄改用簡章載明之「國聚建設股份有限公司」（原資料誤抓活動規程/免責文字）；官方簡章未公告各組名額上限，原「30人、30人、60人」實為「30人以上贈休息帳篷」促銷文字誤抓，清除避免捏造名額表格。"
+  },
+  {
+    "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
+    "race_date": "2027-01-10",
+    "force_override": true,
+    "suppress": true,
+    "verified_at": "2026-09-15",
+    "verification_note": "重新比對運動筆記 cid=13107 與賽事列表：神岡馬正確日期為 2027-03-28；01-10 紀錄混入其他賽事縣市、場地及連結，予以移除。"
+  },
+  {
+    "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松",
+    "race_date": "2027-03-28",
+    "force_override": true,
+    "race_county": "臺中市",
+    "distances": [
+      "42.195km",
+      "21km",
+      "9.5km",
+      "4.5km"
+    ],
+    "registration_status": "報名時間未定",
+    "registration_link": "__CLEAR__",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13107",
+    "registration_note": "運動筆記賽事頁目前尚未公布官方報名連結與報名期間。",
+    "registration_opens_at": "__CLEAR__",
+    "registration_deadline": "__CLEAR__",
+    "venue": "臺中市神岡區神岡國小",
+    "start_location": "臺中市神岡區神岡國小（臺中市神岡區神岡里神圳路1號）",
+    "organizer": "神豐國際同濟會",
+    "co_organizer": "__CLEAR__",
+    "fees": "__CLEAR__",
+    "quota": "__CLEAR__",
+    "start_times": "__CLEAR__",
+    "source_registration_link": "__CLEAR__",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13107",
+    "source_platform": "運動筆記",
+    "is_official_direct": false,
+    "verified_at": "2026-09-15",
+    "verification_note": "人工重新比對運動筆記 cid=13107 與跑寶島賽事頁：活動日期 2027-03-28，地點臺中市神岡區神岡國小，主辦神豐國際同濟會，組別 42.195K、21K、9.5K、4.5K；報名資訊尚未公布。"
+  },
+  {
+    "race_name": "2026 台灣米倉田中馬拉松",
+    "race_date": "2026-11-08",
+    "force_override": true,
+    "distances": [
+      "42.195km",
+      "21.2km",
+      "9.7km",
+      "4.6km"
+    ],
+    "start_times": "全程馬拉松組（42.195K） 起跑 06:20、半程馬拉松組（21.2K） 起跑 06:40、健跑組（9.7K） 起跑 07:15、友善樂跑組（4.6K） 起跑 07:00",
+    "official_event_url": "https://irunner.biji.co/Tianzhong2026?page=5069",
+    "source_platform": "運動筆記、iRunner",
+    "is_official_direct": true,
+    "verified_at": "2026-09-15",
+    "verification_note": "巡檢同類距離污染後重新比對 iRunner 官方規程：正式組別距離為 42.195K、21.2K、9.7K、4.6K；移除合併殘留的 22.6K 與 4K。"
   }
 ]

@@ -3,25 +3,7 @@
 // Extracted from trainer.js (2026-07-19 refactor). Classic script; all
 // top-level functions stay global. Loaded before trainer.js so init() can call them.
 
-// 版面去重：同一段教練文案在一次渲染裡只印一次。教練判讀會同時流進週檢視的
-// 執行重點、教練週報與判讀依據，任何一處各自複製都會讓跑者上下滑到兩份一模
-// 一樣的文字，既佔版面又看不出哪一份才是最新的。
-let claimedCoachCopy = new Set();
-
-function resetCoachCopyClaims() {
-  claimedCoachCopy = new Set();
-}
-
-function claimCoachCopy(text) {
-  const key = String(text || '').replace(/\s+/g, '');
-  if (!key) return false;
-  if (claimedCoachCopy.has(key)) return false;
-  claimedCoachCopy.add(key);
-  return true;
-}
-
 function renderPlanView() {
-  resetCoachCopyClaims();
   const el = document.getElementById('view-plan');
   const profile = appData.profile;
   const plan = appData.plan || [];
@@ -772,11 +754,21 @@ function alignCoachStrengthAdvice(items, strengthRotation) {
     : item);
 }
 
-function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null, earlyFeedback = null, planningNote = '', week = null } = {}) {
+function uniqueCoachItems(groups) {
+  const seen = new Set();
+  return groups.map((items) => items.filter((item) => {
+    const key = String(item || '').replace(/[。；，、,.!?！？\s]/g, '');
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }));
+}
+
+function renderCoachAdviceNote(note, { weeksRemaining = null, earlyFeedback = null, planningNote = '', week = null } = {}) {
   // 教練週報常以分號串接多個判讀；顯示時以完整語意片段分欄，避免整段擠進單一卡片。
   const sentences = String(note || '').split(/[；。]/).map((sentence) => sentence.trim()).filter(Boolean).map((sentence) => `${sentence}。`);
   if (!sentences.length) return '';
-  const conclusion = sentences.slice(0, 1);
+  let conclusion = sentences.slice(0, 1);
   const remaining = sentences.slice(1);
   // 週報原始資料仍是一段完整教練敘述；顯示層只依可辨識的執行語句分組，
   // 不重寫或改變判定內容。
@@ -790,7 +782,7 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
   const responseAlreadyInNote = earlyFeedback ? remaining.filter((sentence) => /^回饋的實際處置/.test(sentence)) : [];
   const filteredRemaining = remaining.filter((sentence) => !responseAlreadyInNote.includes(sentence) && !actionSignatures.has(sentence.replace(/[。；\s]/g, '')));
   let execution = filteredRemaining.filter((sentence) => /^(本週|下週|今天|仍|肌力|長跑|體感|課表)/.test(sentence));
-  const evidence = filteredRemaining.filter((sentence) => !execution.includes(sentence));
+  let evidence = filteredRemaining.filter((sentence) => !execution.includes(sentence));
   // 判讀依據要看得到真正的實跑數字，否則跑者只會看到一段結論式評語，
   // 無從判斷教練是不是真的讀了這週的紀錄。
   const runnerEvidence = typeof runnerEvidenceSummary === 'function' ? runnerEvidenceSummary() : '';
@@ -814,7 +806,9 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
     if (earlyFeedback.rejectedOption) evidence.push(`沒有採用的選項：${earlyFeedback.rejectedOption}`);
     execution.push(...coachActionSteps(earlyResponse));
   }
+  if (planningNote) execution.push(...String(planningNote).split(/[；。]/).map((item) => item.trim()).filter(Boolean).map((item) => `${item}。`));
   execution = alignCoachStrengthAdvice(execution, scheduledStrengthRotation(week));
+  [conclusion, evidence, execution] = uniqueCoachItems([conclusion, evidence, execution]);
   const coachInsightCards = [
     { id: 'conclusion', title: '本週判定', subtitle: '先照這個方向執行', items: conclusion },
     { id: 'evidence', title: '判讀依據', subtitle: '哪些實跑訊號影響了安排', items: evidence },
@@ -824,14 +818,8 @@ function renderCoachAdviceNote(note, { focusSummary = '', weeksRemaining = null,
     const items = splitCoachInsightItems(card.items.length ? card.items : ['目前沒有需要特別處理的訊號。']);
     return `<article class="coach-insight-card coach-insight-card--${card.id}"><div class="coach-insight-card__header"><span class="coach-insight-card__icon" aria-hidden="true">${coachInsightIcon(card.id)}</span><div><h3 class="coach-insight-card__title">${card.title}</h3><p class="coach-insight-card__subtitle">${card.subtitle}</p></div></div>${card.id === 'evidence' ? evidenceMetrics : ''}<ul class="coach-insight-list coach-insight-list--${card.id}">${items.map((item, index) => `<li class="coach-insight-list__item"><span class="coach-insight-list__bullet" aria-hidden="true">${card.id === 'execution' ? index + 1 : ''}</span><p>${renderCoachInsightHighlights(item)}</p></li>`).join('')}</ul></article>`;
   };
-  const briefing = focusSummary || '把教練判讀整理成一份可快速採取行動的週報；完整紀錄仍保留在下方，方便你需要時追溯。';
-  claimCoachCopy(briefing);
-  const integratedBriefing = [
-    briefing.replace(/^\s*(?:🎯\s*)?教練週期：\s*/, ''),
-    planningNote
-  ].filter(Boolean).join(' ');
   const status = Number.isFinite(weeksRemaining) ? `距離目標 ${weeksRemaining} 週` : '本週行動指南';
-  return `<details class="coach-insight-details" open><summary><span><small>COACHING BRIEF</small><b>本週執行重點</b></span><span class="coach-insight-status">${status}</span></summary><section class="weekly-coach-insight" aria-label="教練判讀與執行依據"><div class="coach-insight-overview"><div class="coach-insight-summary"><p class="coach-insight-description">${reviewEscape(integratedBriefing)}</p></div></div><div class="coach-insight-grid">${coachInsightCards.map(renderCard).join('')}</div></section></details>`;
+  return `<details class="coach-insight-details" open><summary><span><small>COACHING BRIEF</small><b>本週判讀與執行</b></span><span class="coach-insight-status">${status}</span></summary><section class="weekly-coach-insight" aria-label="教練判讀與執行依據"><div class="coach-insight-grid">${coachInsightCards.map(renderCard).join('')}</div></section></details>`;
 }
 
 function historicalWeekCheckin(weekNum) {
@@ -851,6 +839,40 @@ function isHistoricalCourseWeek(week, weekNum = currentWeek, today = todayStr())
   return scheduledDays.every((day) => completedDates.has(day.dateStr));
 }
 
+function historicalTrainingFeedback({ week, checkin, snapshot, recordedKm, scheduledDays, completedDays }) {
+  const plannedKm = Number(weekPlannedKm(week)) || 0;
+  const completionRate = scheduledDays.length ? completedDays.length / scheduledDays.length : 0;
+  const avgRpe = Number(snapshot?.avgRpe) || 0;
+  const sleepHours = Number(snapshot?.sleepHours) || 0;
+  const decisionText = `${checkin?.result || ''} ${checkin?.adjustment || ''} ${checkin?.safetyNote || ''}`;
+  const performance = [];
+
+  if (completionRate === 1) performance.push('本週正式跑課完整執行');
+  else if (completionRate >= 0.75) performance.push('本週大部分正式跑課已完成');
+  else if (scheduledDays.length) performance.push('本週課表完成度不足，回顧時應先找出中斷原因');
+  else performance.push('本週沒有可判讀的正式跑課');
+
+  if (plannedKm > 0 && recordedKm > 0) {
+    const ratio = recordedKm / plannedKm;
+    if (ratio > 1.1) performance.push('實跑量高於原定安排，負荷增幅需要留意');
+    else if (ratio >= 0.9) performance.push('總跑量大致符合安排');
+    else performance.push('實跑量低於原定安排，訓練刺激未完全累積');
+  }
+  if (avgRpe > 0) {
+    if (avgRpe >= 7) performance.push('主觀負荷偏高');
+    else if (avgRpe <= 4) performance.push('主觀負荷維持可控');
+  }
+  if (sleepHours > 0 && sleepHours < 6.5) performance.push('睡眠恢復偏少');
+
+  let takeaway = '當週沒有留下完整評估，因此只保留完成狀況，不推論後續進階。';
+  if (/停止品質課|降載恢復|禁止進/.test(decisionText)) takeaway = '當時訊號顯示恢復或品質課尚未穩定，下一步以降載與避免進階為主。';
+  else if (/不升級|維持|下修/.test(decisionText)) takeaway = '本週完成度可接受，但尚不足以支持進階；下一步先維持或下修，再用後續課表確認適應。';
+  else if (/小幅推進|進階|增加/.test(decisionText)) takeaway = '本週完成與恢復訊號支持小幅推進，但仍應維持原有安全上限。';
+  else if (checkin?.result) takeaway = '本週已有正式評估；後續安排以當時留下的判定為準。';
+
+  return `${performance.join('，')}。${takeaway}`;
+}
+
 function renderHistoricalCourseDecisionPanel(week) {
   const checkin = historicalWeekCheckin(week?.weekNum);
   const snapshot = checkin?.evidenceSnapshot || null;
@@ -860,7 +882,7 @@ function renderHistoricalCourseDecisionPanel(week) {
   const actualKm = Math.round(completion.allActivity.reduce((sum, activity) => sum + (Number(activity.actualKm) || 0), 0) * 10) / 10;
   const recordedKm = actualKm || Number(snapshot?.weeklyKm) || 0;
   const result = checkin?.result ? `當週評估為「${checkin.result}」。` : '未留下週評估；保留已排定的正式課程與完成狀態。';
-  const completionText = scheduledDays.length ? `已完成 ${completedDays.length}/${scheduledDays.length} 堂正式跑課。` : '';
+  const trainingFeedback = historicalTrainingFeedback({ week, checkin, snapshot, recordedKm, scheduledDays, completedDays });
   const cards = [
     {
       id: 'conclusion',
@@ -891,7 +913,7 @@ function renderHistoricalCourseDecisionPanel(week) {
     }
   ];
   const renderCard = (card) => `<article class="coach-insight-card coach-insight-card--${card.id}"><div class="coach-insight-card__header"><span class="coach-insight-card__icon" aria-hidden="true">${coachInsightIcon(card.id)}</span><div><h3 class="coach-insight-card__title">${card.title}</h3><p class="coach-insight-card__subtitle">${card.subtitle}</p></div></div><ul class="coach-insight-list coach-insight-list--${card.id}">${splitCoachInsightItems(card.items).map((item, index) => `<li class="coach-insight-list__item"><span class="coach-insight-list__bullet" aria-hidden="true">${card.id === 'execution' ? index + 1 : ''}</span><p>${renderCoachInsightHighlights(item)}</p></li>`).join('')}</ul></article>`;
-  return `<section class="course-decision-panel course-decision-panel--history" aria-label="歷史週課程摘要"><details class="coach-insight-details" open><summary><span><small>HISTORICAL REVIEW</small><b>第 ${week?.weekNum || currentWeek} 週課程回顧</b></span><span class="coach-insight-status">已凍結</span></summary><section class="weekly-coach-insight" aria-label="歷史週判定與完成紀錄"><div class="coach-insight-overview"><div class="coach-insight-summary"><p class="coach-insight-description">${reviewEscape(`這是第 ${week?.weekNum || currentWeek} 週當時留下的正式課程、實跑與評估紀錄；不套用目前恢復判讀、下一週處方或倒數目標。${completionText}`)}</p></div></div><div class="coach-insight-grid">${cards.map(renderCard).join('')}</div></section></details></section>`;
+  return `<section class="course-decision-panel course-decision-panel--history" aria-label="歷史週課程摘要"><details class="coach-insight-details" open><summary><span><small>HISTORICAL REVIEW</small><b>第 ${week?.weekNum || currentWeek} 週課程回顧</b></span><span class="coach-insight-status">已凍結</span></summary><section class="weekly-coach-insight" aria-label="歷史週判定與完成紀錄"><div class="coach-insight-overview"><div class="coach-insight-summary"><span class="coach-insight-kicker">本週練跑總結</span><p class="coach-insight-description">${reviewEscape(trainingFeedback)}</p></div></div><div class="coach-insight-grid">${cards.map(renderCard).join('')}</div></section></details></section>`;
 }
 
 function renderCourseDecisionPanel(plan = appData.plan || [], phaseRuleText = '') {
@@ -916,7 +938,7 @@ function renderCourseDecisionPanel(plan = appData.plan || [], phaseRuleText = ''
   return `<section class="course-decision-panel" aria-label="課表決策總覽">
     ${showsFocusContext ? `<div class="course-decision-context"><div class="course-focus-icon">🎯</div><div><b>本週執行重點</b><p>${reviewEscape(focusSummary)}</p></div><div class="course-focus-metric"><span>距離目標賽事</span><strong>${weeksRemaining}<small>週</small></strong></div></div>` : ''}
     ${!showsCoachBrief && decision.planningNote ? `<div class="course-decision-note"><div class="course-note-head"><b>本週排課調整</b><span>WEEKLY PLAN UPDATE</span></div><p>${reviewEscape(decision.planningNote)}</p></div>` : ''}
-    ${showsCoachBrief ? renderCoachAdviceNote(decision.coachNote || '本週回饋已完成判讀。', { focusSummary, weeksRemaining, earlyFeedback: earlyFeedbackForCoachBrief(week?.weekNum), planningNote: decision.planningNote, week }) : ''}
+    ${showsCoachBrief ? renderCoachAdviceNote(decision.coachNote || '本週回饋已完成判讀。', { weeksRemaining, earlyFeedback: earlyFeedbackForCoachBrief(week?.weekNum), planningNote: decision.planningNote, week }) : ''}
     ${overrides.some((item) => item.startsWith('教練處方')) ? '<div class="training-status-actions" style="margin-top:10px;justify-content:flex-start"><button class="btn btn-secondary" onclick="switchPlanTab(\'coach\')">查看教練完整依據</button></div>' : ''}
   </section>`;
 }
@@ -2725,7 +2747,9 @@ function renderWeekSection(plan) {
       ? '本週依已排定的正式課程執行；下一週的教練檢測會在對應週次才顯示。'
       : isFutureWeek && !coachWeekMatches(week)
         ? '未來週預覽：內容是課表產生器依週期規劃排出的預測，還沒經過教練逐週檢測確認，實際課表會依屆時的完成度與恢復狀況調整。'
-        : coachPhase?.focus || (week.isTaper ? '收斂疲勞，讓雙腿在比賽前保持新鮮。' : isDeload ? '降低訓練負荷，讓身體吸收前一階段成果。' : '穩定完成本週課表，把訓練累積成下一階段的能力。');
+        : coachPhase
+          ? `本週已套用「${coachPhase.phase}」正式課表；完整判讀與執行條件請看下方。`
+          : (week.isTaper ? '收斂疲勞，讓雙腿在比賽前保持新鮮。' : isDeload ? '降低訓練負荷，讓身體吸收前一階段成果。' : '穩定完成本週課表，把訓練累積成下一階段的能力。');
   const effectiveTarget = effectiveWeekVolumeTarget(week);
   const context = buildContext();
   const dayCards = week.days.map((day) => {

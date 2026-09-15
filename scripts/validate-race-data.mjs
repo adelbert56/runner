@@ -421,9 +421,9 @@ function startTimeQualityIssues(race) {
   if (expectedDistanceLabels.length > 1 && groupRows.length > 1 && groupRows.length < Math.min(expectedDistanceLabels.length, 6)) {
     issues.push({
       key: "group_count_less_than_distance_count",
-      severity: "low",
+      severity: "high",
       label: "起跑組別少於距離數",
-      hint: `距離：${expectedDistanceLabels.join("、")}；起跑列：${groupRows.map((row) => row.group).join("、")}`,
+      hint: `可能混入過期或其他來源的組別；距離：${expectedDistanceLabels.join("、")}；起跑列：${groupRows.map((row) => row.group).join("、")}`,
     });
   }
 

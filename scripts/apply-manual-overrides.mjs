@@ -36,6 +36,8 @@ const XLSX_FIELDS = [
   "verification_note",
 ];
 
+const CONTROL_FIELDS = new Set(["force_override", "suppress"]);
+
 async function fileExists(path) {
   try {
     await readFile(path);
@@ -100,7 +102,10 @@ async function loadOverrideRows() {
     const merged = new Map(jsonRows.map((row) => [normalizedKeyFor(row), { ...row }]));
     for (const row of rows) {
       const key = normalizedKeyFor(row);
-      merged.set(key, { ...(merged.get(key) || {}), ...row });
+      const jsonRow = merged.get(key) || {};
+      merged.set(key, jsonRow.force_override
+        ? { ...row, ...jsonRow }
+        : { ...jsonRow, ...row });
     }
     return [...merged.values()];
   }
@@ -145,9 +150,12 @@ function normalizeOverrides(rows) {
     }
     const fields = Object.fromEntries(
       Object.entries(row).filter(([field, value]) => {
-        return !["race_name", "race_date"].includes(field) && value !== null && value !== "";
+        return !["race_name", "race_date", ...CONTROL_FIELDS].includes(field) && value !== null && value !== "";
       })
     );
+    if (row.suppress === true) {
+      fields.suppress = true;
+    }
     overrides.set(key, fields);
     if (normalizedKey !== "||") {
       overrides.set(normalizedKey, fields);
@@ -159,13 +167,18 @@ function normalizeOverrides(rows) {
 function applyOverrides(races, overrides) {
   let updatedFields = 0;
   let updatedRaces = 0;
-  const next = races.map((race) => {
+  const next = races.flatMap((race) => {
     const fields = overrides.get(keyFor(race)) || overrides.get(normalizedKeyFor(race));
     if (!fields) {
-      return race;
+      return [race];
+    }
+    if (fields.suppress) {
+      updatedRaces += 1;
+      return [];
     }
     let changed = false;
     const updated = { ...race };
+    delete updated.suppress;
     for (const [field, value] of Object.entries(fields)) {
       const nextValue = value === "__CLEAR__" ? "" : value;
       if (updated[field] !== nextValue) {
@@ -177,7 +190,7 @@ function applyOverrides(races, overrides) {
     if (changed) {
       updatedRaces += 1;
     }
-    return updated;
+    return [updated];
   });
   return { races: next, updatedFields, updatedRaces };
 }
