@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-09-17T01:34:53.970Z",
+  "generated_at": "2026-09-17T10:32:06.932Z",
   "basis_date": "2026-09-17",
   "races": {
     "total": 71,
     "follow_up_count": 26,
     "complete_count": 45,
     "complete_rate": "63%",
-    "launch_blocking_gap_count": 7,
-    "launch_ready_count": 64,
-    "launch_ready_rate": "90%",
+    "launch_blocking_gap_count": 6,
+    "launch_ready_count": 65,
+    "launch_ready_rate": "92%",
     "official_direct_count": 61,
     "official_direct_rate": "86%",
     "verified_count": 70,
@@ -20,8 +20,8 @@
     "state_counts": {
       "歷史": 10,
       "停辦": 2,
-      "已截止": 28,
-      "報名中": 21,
+      "已截止": 27,
+      "報名中": 22,
       "報名時間未定": 8,
       "未知": 1,
       "待確認": 1
@@ -313,7 +313,7 @@
         "missing": 6,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 3,
+        "due_now": 2,
         "sample_races": [
           "夏日馬拉松 - 南投埔里場",
           "2026 梨山水蜜桃路跑",
@@ -353,7 +353,7 @@
         "missing": 3,
         "opened_gap": 0,
         "date_anomaly": 0,
-        "due_now": 1,
+        "due_now": 2,
         "sample_races": [
           "2026 VISOGE 夜跑派對 台中場",
           "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
