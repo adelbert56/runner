@@ -702,20 +702,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "http://www.taipeimarathon.org.tw/contest.aspx",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-09-16T11:01:35.712901+00:00",
-    "weather_forecast": {
-      "forecast_for": "2026-09-19",
-      "updated_at": "2026-09-15T01:34:37.885Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，多雲，23-30°C，降雨機率 10%，最大風速 22 km/h",
-      "weather_code": 2,
-      "temperature_min_c": 22.7,
-      "temperature_max_c": 29.8,
-      "precipitation_probability_max": 10,
-      "wind_speed_max_kmh": 21.6
-    }
+    "scraped_at": "2026-09-16T11:01:35.712901+00:00"
   },
   {
     "race_id": "349b31c3-5908-4e96-9987-4d5ec0befd3f",
@@ -750,20 +737,7 @@
     "source": "運動筆記",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-25",
-    "scraped_at": "2026-09-16T11:01:35.711213+00:00",
-    "weather_forecast": {
-      "forecast_for": "2026-09-19",
-      "updated_at": "2026-09-15T01:34:37.988Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "臺中市",
-      "summary": "臺中市縣市預報，多雲，24-33°C，降雨機率 27%，最大風速 15 km/h",
-      "weather_code": 3,
-      "temperature_min_c": 24.4,
-      "temperature_max_c": 32.8,
-      "precipitation_probability_max": 27,
-      "wind_speed_max_kmh": 15.1
-    }
+    "scraped_at": "2026-09-16T11:01:35.711213+00:00"
   },
   {
     "race_id": "0cbfb0b7-c08d-44f8-a648-6ea360f29597",
@@ -806,20 +780,7 @@
       "健康組（10K）": "06:10"
     },
     "first_seen_at": "2026-05-16",
-    "co_organizer": null,
-    "weather_forecast": {
-      "forecast_for": "2026-09-20",
-      "updated_at": "2026-09-15T01:34:38.089Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，毛毛雨，24-29°C，降雨機率 20%，最大風速 22 km/h",
-      "weather_code": 51,
-      "temperature_min_c": 23.8,
-      "temperature_max_c": 28.6,
-      "precipitation_probability_max": 20,
-      "wind_speed_max_kmh": 22.2
-    }
+    "co_organizer": null
   },
   {
     "race_id": "9435cbf4-7877-40a1-a6ec-34e4bf08a34f",
@@ -857,20 +818,7 @@
     "co_organizer": "全統運動用品股份有限公司",
     "registration_opens_at": "2026-06-15",
     "quota": "10K 2600人、3K 2600人",
-    "start_times": "競賽組（10KM） 起跑 06:30、休閒組（3KM） 起跑 06:40",
-    "weather_forecast": {
-      "forecast_for": "2026-09-20",
-      "updated_at": "2026-09-15T01:34:38.191Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "臺中市",
-      "summary": "臺中市縣市預報，毛毛雨，24-32°C，降雨機率 29%，最大風速 16 km/h",
-      "weather_code": 51,
-      "temperature_min_c": 24.3,
-      "temperature_max_c": 31.8,
-      "precipitation_probability_max": 29,
-      "wind_speed_max_kmh": 16.2
-    }
+    "start_times": "競賽組（10KM） 起跑 06:30、休閒組（3KM） 起跑 06:40"
   },
   {
     "race_id": "269e9045-3335-4a6b-b2c7-aef66050c677",
@@ -2566,7 +2514,7 @@
     "verified_at": "2026-09-10",
     "verification_note": "平台爬蟲自動查證：Lohas、運動筆記",
     "source_platform": "Lohas、運動筆記",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13170",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2027%20%E6%99%A8%E6%9B%A6%E9%BA%A5%E9%A6%99%E9%A6%AC%E6%8B%89%E6%9D%BE",
@@ -2680,7 +2628,7 @@
     "verified_at": "",
     "verification_note": "",
     "source_platform": "",
-    "is_official_direct": true,
+    "is_official_direct": false,
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13143",
     "social_links": [],
     "facebook_search_url": "https://www.facebook.com/search/top?q=2027%20%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE",
