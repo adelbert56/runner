@@ -1633,6 +1633,10 @@ function isFeeNote(item) {
   return /晶片|押金|行政處理費|運費|接駁|備註|另收|另有調整/u.test(item);
 }
 
+function factGroupHeader(rows) {
+  return rows.length && rows.every((row) => /^\d+(?:\.\d+)?\s*(?:K|KM|公里)$/iu.test(String(row[0] || "").trim())) ? "距離" : "組別";
+}
+
 function renderFees(value) {
   const items = feeMatrixItems(value);
   const ratePattern = /^(.+?)（(.+?)）\s*([^\s]+元)[。.]?$/;
@@ -1664,10 +1668,10 @@ function renderFees(value) {
       "友善共融／陪跑": "友善",
     }[channel] || channel));
     const rows = [...rates.entries()].map(([group, amounts]) => [group, ...channels.map((channel) => amounts[channel] || "—")]);
-    return renderFactDataTable(["組別", ...headers], rows, notes);
+    return renderFactDataTable([factGroupHeader(rows), ...headers], rows, notes);
   }
   if (simpleRates.length >= 2) {
-    return renderFactDataTable(["組別", "費用"], simpleRates, notes);
+    return renderFactDataTable([factGroupHeader(simpleRates), "費用"], simpleRates, notes);
   }
   return renderFactBulletList(value, "費用");
 }
@@ -1695,7 +1699,7 @@ function renderQuota(value) {
       rows.push([match[1].trim(), `${match[2]}${match[3]}${String(match[4] || "").replace(/[。.]+$/u, "")}`]);
     });
   });
-  return rows.length >= 2 ? renderFactDataTable(["組別", "名額"], rows, notes) : renderFactBulletList(value, "名額");
+  return rows.length >= 2 ? renderFactDataTable([factGroupHeader(rows), "名額"], rows, notes) : renderFactBulletList(value, "名額");
 }
 
 function factClassFor(label) {
@@ -1976,9 +1980,23 @@ function renderRaceCard(race) {
   const weather = weatherSummaryForRace(race);
   const disclaimerText = /同意|責任|危險性|免責|隱私政策|活動規程|個人資料保護法|隱私權政策|個資法/;
   const organizerRaw = race.organizer || race.host || race.organizer_name || "";
-  const organizer = disclaimerText.test(organizerRaw) ? "" : organizerRaw;
+  let organizer = disclaimerText.test(organizerRaw) ? "" : organizerRaw;
   const coOrganizerRaw = race.co_organizer || race.coorganizer || "";
-  const coOrganizer = disclaimerText.test(coOrganizerRaw) ? "" : coOrganizerRaw;
+  let coOrganizer = disclaimerText.test(coOrganizerRaw) ? "" : coOrganizerRaw;
+  const organizationKey = (value) => String(value || "")
+    .replace(/股份有限公司|有限公司/g, "")
+    .replace(/[\s，,。．、/／()（）]/g, "")
+    .toLowerCase();
+  if (organizer && coOrganizer) {
+    const organizerParts = organizer.split(/[、/／]/).map((item) => item.trim()).filter(Boolean);
+    const coOrganizerKey = organizationKey(coOrganizer);
+    const remainingOrganizerParts = organizerParts.filter((item) => organizationKey(item) !== coOrganizerKey);
+    if (remainingOrganizerParts.length === 0) {
+      coOrganizer = "";
+    } else if (remainingOrganizerParts.length !== organizerParts.length) {
+      organizer = remainingOrganizerParts.join("、");
+    }
+  }
   const fees = race.fees || race.registration_fee || "";
   const quota = race.quota || race.registration_quota || "";
   const verifiedAt = race.verified_at || race.last_verified_at || race.data_verified_at || "";
