@@ -879,7 +879,7 @@ function renderHistoricalCourseDecisionPanel(week) {
   const completion = trainingCompletionSummary([week]);
   const scheduledDays = (week?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup);
   const completedDays = completion.completedDays.filter((day) => scheduledDays.some((scheduled) => scheduled.dateStr === day.dateStr));
-  const actualKm = Math.round(completion.allActivity.reduce((sum, activity) => sum + (Number(activity.actualKm) || 0), 0) * 10) / 10;
+  const actualKm = Number(completion.allActivity.reduce((sum, activity) => sum + (Number(activity.actualKm) || 0), 0).toFixed(1));
   const recordedKm = actualKm || Number(snapshot?.weeklyKm) || 0;
   const result = checkin?.result ? `當週評估為「${checkin.result}」。` : '未留下週評估；保留已排定的正式課程與完成狀態。';
   const trainingFeedback = historicalTrainingFeedback({ week, checkin, snapshot, recordedKm, scheduledDays, completedDays });
@@ -908,7 +908,7 @@ function renderHistoricalCourseDecisionPanel(week) {
       subtitle: '保留回顧，不改寫舊課表',
       items: [
         checkin?.note ? `跑者週記：${checkin.note}` : '當週沒有留下跑者週記。',
-        checkin?.coachFeedbackResponse ? `當時教練處置：${checkin.coachFeedbackResponse}` : ''
+        checkin?.coachFeedbackResponse ? `當時教練處置${checkin.date ? `（紀錄日期 ${checkin.date}）` : ''}：${String(checkin.coachFeedbackResponse).replace(/本週實跑/g, '回饋儲存時該週累計實跑')}（以上為回饋儲存時的資料；後續同步的活動請見「當週實跑依據」。）` : ''
       ].filter(Boolean)
     }
   ];

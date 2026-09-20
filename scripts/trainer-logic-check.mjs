@@ -339,6 +339,32 @@ const cadenceWeighting = coachCadenceAssessment([
 ]);
 assertEqual(cadenceWeighting.displayed, 169, "cadence caution uses distance-weighted effective main work instead of letting a short session dominate");
 
+// A late Garmin sync must update weekly totals without rewriting the saved coaching decision.
+const savedFeedback = '對照你的實跑紀錄：本週實跑 25.3 km／4 次。';
+const historicalMileageSandbox = {
+  appData: { checkins: [{ weekNum: 11, date: '2026-09-20', coachFeedbackResponse: savedFeedback }] },
+  currentWeek: 11,
+  trainingCompletionSummary: () => ({ completedDays: [], allActivity: [{ actualKm: 25.28 }, { actualKm: 9.77 }] }),
+  weekPlannedKm: () => 27,
+  historicalTrainingFeedback: () => '週回顧',
+  coachInsightIcon: () => '',
+  splitCoachInsightItems: (items) => items,
+  renderCoachInsightHighlights: (text) => text,
+  reviewEscape: (text) => text,
+};
+vm.createContext(historicalMileageSandbox);
+vm.runInContext([
+  extractFunction(trainerRenderJs, 'historicalWeekCheckin'),
+  extractFunction(trainerRenderJs, 'renderHistoricalCourseDecisionPanel'),
+].join('\n'), historicalMileageSandbox);
+const mileageHistoryHtml = historicalMileageSandbox.renderHistoricalCourseDecisionPanel({ weekNum: 11, days: [] });
+assertEqual(mileageHistoryHtml.includes('當週實跑 35 km'), true, 'historical mileage includes the late-synced race with the same rounding as the progress bar');
+assertEqual(mileageHistoryHtml.includes('回饋儲存時該週累計實跑 25.3 km／4 次'), true, 'saved mileage is explicitly identified as a feedback snapshot');
+assertEqual(mileageHistoryHtml.includes('紀錄日期 2026-09-20'), true, 'saved coaching response exposes its recorded date');
+assertEqual(historicalMileageSandbox.appData.checkins[0].coachFeedbackResponse, savedFeedback, 'rendering preserves the original coaching response');
+delete historicalMileageSandbox.appData.checkins[0].date;
+assertEqual(historicalMileageSandbox.renderHistoricalCourseDecisionPanel({ weekNum: 11, days: [] }).includes('紀錄日期'), false, 'legacy feedback without a date does not invent a timestamp');
+
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);
 });
