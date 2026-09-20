@@ -1546,15 +1546,16 @@ h3 {
 
 .race-todo-section {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: 124px minmax(0, 1fr);
   gap: 16px;
 }
 
 .race-todo-section-head {
   display: flex;
+  flex-wrap: nowrap;
   align-items: baseline;
   justify-content: start;
-  gap: 8px;
+  gap: 6px;
   padding-top: 12px;
 }
 
@@ -1562,6 +1563,7 @@ h3 {
   color: var(--green-dark);
   font-size: 14px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .race-todo-section-head em {
@@ -1569,6 +1571,7 @@ h3 {
   font-size: 13px;
   font-style: normal;
   font-weight: 400;
+  white-space: nowrap;
 }
 
 .race-todo-item {
@@ -5043,10 +5046,16 @@ h3 {
 
   .date-block div {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    justify-content: center;
+    gap: 2px 10px;
     width: 100%;
+  }
+
+  .date-block span,
+  .date-block em {
+    white-space: nowrap;
   }
 
   .date-block strong {
@@ -5853,12 +5862,21 @@ h3 {
     min-height: auto;
   }
 
+  /* 手機日期方塊寬度只有 82-100px，原本 flex 橫排會把「週日」擠成零寬並溢出
+     到地點文字上；改成垂直堆疊並禁止換行。 */
   .date-block div {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
     padding-right: 0;
   }
 
   .date-block strong {
     font-size: 1.12rem;
+  }
+
+  .date-block em {
+    margin: 0;
   }
 
   .race-title-row {
