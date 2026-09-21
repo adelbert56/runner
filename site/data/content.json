@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T02:46:54.387Z",
+  "generated_at": "2026-09-21T08:29:53.046Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-08-hoka-clifton-11-review-by-ciaoantsai",
@@ -122,23 +122,23 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-08-invincible-x-madness-x-asics-gel-kayano-12-1-cream-release-inf",
+      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a73237702-best-shoes-for-back-pain-",
       "type": "news",
-      "title": "上市速報 / INVINCIBLE® x MADNESS x ASICS GEL-KAYANO 12.1 ‘Cream’ 臺灣販售資訊整理",
-      "date": "2026-08-20",
+      "title": "走沒多久就腰痠背痛？專家實測7雙「久走不累鞋」，HOKA、New Balance都上榜",
+      "date": "2026-07-23",
       "date_source": "source",
-      "article_date": "2026-08-20",
-      "first_seen_at": "2026-08-20",
-      "source": "KENLU",
+      "article_date": "2026-07-23",
+      "first_seen_at": "2026-07-23",
+      "source": "Women's Health Taiwan",
       "category": "跑鞋裝備",
-      "summary": "INVINCIBLE® x MADNESS x ASICS GEL-KAYANO 12.1 ‘Cream’ 臺灣 8 月 23 日起發售，為大家整理已經公布販售資訊的店點，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
-      "url": "https://kenlu.net/2026/08/invincible-x-madness-x-asics-gel-kayano-12-1-cream-release-info/",
+      "summary": "一雙具備良好支撐與緩震設計的鞋子，可能就是改善不適的關鍵。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73237702/best-shoes-for-back-pain-recommend/",
       "score": 19,
       "source_origin": "candidate",
       "published_at": "2026-09-21",
       "publish_status": "published",
       "source_aliases": [
-        "KENLU"
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -402,6 +402,26 @@
       ]
     },
     {
+      "id": "news-kenlu-net-2026-09-puma-speedcat-bloom-official-images",
+      "type": "news",
+      "title": "官方新聞 / 跟上 Melinda 的秋日調色盤！PUMA 經典 T7 系列搭配新款 Speedcat Bloom",
+      "date": "2026-09-21",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-21",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "微涼天氣裡，想換上早秋感的慵懶穿搭，也想替日常加上一點可愛的小心思。PUMA 攜手品味指標代言人 Melinda，換上一身柔和的秋日色調，從新鞋款 Speedcat Bloom 珍珠、緞帶蝴蝶結到經典 T7 系列的俐落剪裁，將甜美與率性放進同一套穿搭裡，為早秋日常換上一身剛剛好的慵懶感。",
+      "url": "https://kenlu.net/2026/09/puma-speedcat-bloom-official-images/",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114710-subtitle-e3-80-90-e8-b3-bd-e",
       "type": "news",
       "title": "【賽事】終點衝刺勝肯亞選手！Andreas Almgren 飆 58:06 締造歐洲半馬紀錄奪金！",
@@ -462,6 +482,26 @@
       ]
     },
     {
+      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a71879781-best-adidas-walking-shoes",
+      "type": "news",
+      "title": "2026 最佳12雙 Adidas 健走鞋推薦！Samba、Gazelle、Stan Smith...最好走又最好搭一次看",
+      "date": "2026-07-13",
+      "date_source": "source",
+      "article_date": "2026-07-13",
+      "first_seen_at": "2026-07-14",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "精選 12 雙 Adidas 最值得入手的健走鞋，兼具舒適腳感與日常百搭性，找出最適合你的那一雙。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a71879781/best-adidas-walking-shoes/",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114256-subtitle-e3-80-90-e8-a9-b1-e",
       "type": "news",
       "title": "【話題】2027 東京馬拉松報名時程公布！一般抽籤 8 月 14 日開放、9 月 18 日公布結果",
@@ -474,6 +514,26 @@
       "summary": "迎接第 20 屆里程碑，2027 東京馬拉松除了公布全新的賽事主視覺，官方也進一步揭曉各類參賽管道的完整報名時程。2027 東京馬拉松將於 2027 年 3 月 7 日舉行，報名管道包括慈善跑者、RUN as ONE 半菁英選手、ONE T。",
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114256&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%912027%20%E6%9D%B1%E4%BA%AC%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%A0%B1%E5%90%8D%E6%99%82%E7%A8%8B%E5%85%AC%E5%B8%83%EF%BC%81%E4%B8%80%E8%88%AC%E6%8A%BD%E7%B1%A4%208%20%E6%9C%88%2014%20%E6%97%A5%E9%96%8B%E6%94%BE%E3%80%819%20%E6%9C%88%2018%20%E6%97%A5%E5%85%AC%E5%B8%83%E7%B5%90%E6%9E%9C",
       "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114711-subtitle-e3-80-90-e8-b3-bd-e",
+      "type": "news",
+      "title": "【賽事】2027 高雄馬今日 15:00 開放報名！全新路線首度從夢時代跑到國家體育場 貫穿南北高雄",
+      "date": "2026-09-21",
+      "date_source": "source",
+      "article_date": "2026-09-21",
+      "first_seen_at": "2026-09-21",
+      "source": "運動筆記",
+      "category": "賽事資訊",
+      "summary": "2027 富邦人壽高雄馬拉松將於 2027 年 1 月 9、10 日登場，賽事今（21）日下午 3 點正式開放報名。今年全馬與半馬迎來近年幅度最大的路線調整，首次採用 A-B 點設計，從夢時代時代大道出發，一路向北跑至高雄國家體育場，全馬路。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114711&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%912027%20%E9%AB%98%E9%9B%84%E9%A6%AC%E4%BB%8A%E6%97%A5%2015:00%20%E9%96%8B%E6%94%BE%E5%A0%B1%E5%90%8D%EF%BC%81%E5%85%A8%E6%96%B0%E8%B7%AF%E7%B7%9A%E9%A6%96%E5%BA%A6%E5%BE%9E%E5%A4%A2%E6%99%82%E4%BB%A3%E8%B7%91%E5%88%B0%E5%9C%8B%E5%AE%B6%E9%AB%94%E8%82%B2%E5%A0%B4%20%E8%B2%AB%E7%A9%BF%E5%8D%97%E5%8C%97%E9%AB%98%E9%9B%84&label=all",
+      "score": 6,
       "source_origin": "candidate",
       "published_at": "2026-09-21",
       "publish_status": "published",
@@ -519,6 +579,26 @@
       "publish_status": "published",
       "source_aliases": [
         "IR SPORTS"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a73756662-garland-pose-guide",
+      "type": "news",
+      "title": "金剛蹲3分鐘贏過跑步30分鐘？醫師解析正確姿勢與5大功效，久坐族、經痛、想瘦小腹都適合",
+      "date": "2026-09-16",
+      "date_source": "source",
+      "article_date": "2026-09-16",
+      "first_seen_at": "2026-09-21",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "從中醫到運動醫學都在推！金剛蹲到底是什麼？5大功效、正確姿勢、誰不能做，全部看這篇。",
+      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a73756662/garland-pose-guide/",
+      "score": 5,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -662,6 +742,26 @@
       ]
     },
     {
+      "id": "news-www-womenshealthmag-com-tw-fitness-yoga-a73197563-walking-yoga-benefit",
+      "type": "news",
+      "title": "不是超慢跑也不是健走！「走路瑜珈」國外爆紅！每天5動作，邊走邊減肥還能壓力全消！",
+      "date": "2026-07-21",
+      "date_source": "source",
+      "article_date": "2026-07-21",
+      "first_seen_at": "2026-07-22",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "簡單改變走路方式就能達到運動與療癒的效果！",
+      "url": "https://www.womenshealthmag.com/tw/fitness/yoga/a73197563/walking-yoga-benefit/",
+      "score": 4,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
       "id": "news-www-sportscience-com-tw-article-detail-e8-8f-81-e8-8b-b1-e8-b7-91-e8-80-85-e7-9a",
       "type": "news",
       "title": "菁英跑者的終極密碼？小心誤判耐力指標",
@@ -679,6 +779,26 @@
       "publish_status": "published",
       "source_aliases": [
         "運動科學網"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-g71691331-world-cup-players-best-sn",
+      "type": "news",
+      "title": "【2026世足】世界盃球星個個是鞋頭！5 雙私服夢幻神鞋曝光，哈蘭德穿紅椰子、Vinícius 倒鉤聯名太狂",
+      "date": "2026-06-24",
+      "date_source": "source",
+      "article_date": "2026-06-24",
+      "first_seen_at": "2026-07-02",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "世足除了球賽本身值得關注，球星私下穿的球鞋也同樣精彩。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/g71691331/world-cup-players-best-sneakers-2026/",
+      "score": 4,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -936,7 +1056,10 @@
       "score": 26,
       "source_origin": "archive",
       "published_at": "2026-09-21",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
     },
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114441-subtitle-e3-80-90-e8-b7-91-e",
@@ -953,7 +1076,10 @@
       "score": 26,
       "source_origin": "archive",
       "published_at": "2026-09-21",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
     },
     {
       "id": "news-kenlu-net-2026-09-brooks-road-to-sub4-official-news",
@@ -970,94 +1096,9 @@
       "score": 24,
       "source_origin": "archive",
       "published_at": "2026-09-21",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114663-subtitle-e3-80-90-e8-a9-95-e",
-      "type": "news",
-      "title": "【評測】彈力再加速！ASICS SONICBLAST 2 靈敏柔彈的極速體驗，陪你並肩訓練迎戰目標",
-      "date": "2026-09-11",
-      "date_source": "source",
-      "article_date": "2026-09-11",
-      "first_seen_at": "2026-09-12",
-      "source": "運動筆記",
-      "category": "跑鞋裝備",
-      "summary": "「靈敏卻不暴力，是這雙鞋最讓我印象深刻的地方。」&mdash;&mdash; 蔣尼「祝你好運」跑團核心召集人。擁有約七年全馬資歷、並在今年東京馬拉松創下 2 小時 52 分 55 秒個人最佳（PB）的 蔣尼，本身是「祝你好運」跑。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114663&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91%E5%BD%88%E5%8A%9B%E5%86%8D%E5%8A%A0%E9%80%9F%EF%BC%81ASICS%20SONICBLAST%202%20%E9%9D%88%E6%95%8F%E6%9F%94%E5%BD%88%E7%9A%84%E6%A5%B5%E9%80%9F%E9%AB%94%E9%A9%97%EF%BC%8C%E9%99%AA%E4%BD%A0%E4%B8%A6%E8%82%A9%E8%A8%93%E7%B7%B4%E8%BF%8E%E6%88%B0%E7%9B%AE%E6%A8%99&label=all",
-      "score": 24,
-      "source_origin": "archive",
-      "published_at": "2026-09-21",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114381-subtitle-e3-80-90-e8-a9-95-e",
-      "type": "news",
-      "title": "【評測】HOKA Clifton 11 陪你穩定邁出每一步的訓練夥伴",
-      "date": "2026-07-28",
-      "date_source": "source",
-      "article_date": "2026-07-28",
-      "first_seen_at": "2026-07-29",
-      "source": "運動筆記",
-      "category": "跑鞋裝備",
-      "summary": "你也有一起訓練的夥伴嗎？剛開始接觸跑步時，我就加入 Montreal Athlete Club （MAC），在每一次的團練與互動認識許多跑友，從休閒跑、聊天、彼此鼓勵，一起準備半馬、全馬甚至是鐵人比賽，也因著這些跑友讓我逐漸從一個休閒跑者，。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114381&subtitle=%E3%80%90%E8%A9%95%E6%B8%AC%E3%80%91HOKA%20Clifton%2011%20%E9%99%AA%E4%BD%A0%E7%A9%A9%E5%AE%9A%E9%82%81%E5%87%BA%E6%AF%8F%E4%B8%80%E6%AD%A5%E7%9A%84%E8%A8%93%E7%B7%B4%E5%A4%A5%E4%BC%B4",
-      "score": 24,
-      "source_origin": "archive",
-      "published_at": "2026-09-21",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-kenlu-net-2026-09-adidas-adizero-dropset-seires-official-news",
-      "type": "news",
-      "title": "官分新聞 / 突破跑鞋與訓練鞋界線！adidas ADIZERO DROPSET 系列強勢登場！",
-      "date": "2026-09-05",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-05",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "Hybrid Training（混合訓練）迅速崛起，並發展至熱門的 Hybrid Racing（混合競賽）等競技項目。",
-      "url": "https://kenlu.net/2026/09/adidas-adizero-dropset-seires-official-news/",
-      "score": 22,
-      "source_origin": "archive",
-      "published_at": "2026-09-21",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-kenlu-net-2026-09-nike-pegasus-plus-2-im2541-600-release-info",
-      "type": "news",
-      "title": "上市速報 / Nike Pegasus Plus 2 ‘Crimson’ 臺灣販售資訊整理",
-      "date": "2026-09-03",
-      "date_source": "source",
-      "article_date": "2026-09-03",
-      "first_seen_at": "2026-09-03",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "Nike Pegasus Plus 2 ‘Crimson’ 臺灣 9 月 3 日起發售，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
-      "url": "https://kenlu.net/2026/09/nike-pegasus-plus-2-im2541-600-release-info/",
-      "score": 22,
-      "source_origin": "archive",
-      "published_at": "2026-09-21",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-www-tomsguide-com-best-picks-the-best-cross-training-shoes-for-gym-workouts",
-      "type": "news",
-      "title": "Best cross training shoes 2026: tried, tested and reviewed by personal trainers",
-      "date": "2026-08-20",
-      "date_source": "source",
-      "article_date": "2026-08-20",
-      "first_seen_at": "2026-07-02",
-      "source": "Tom's Guide Running",
-      "category": "跑步新聞",
-      "summary": "The best cross training shoes for weightlifting, CrossFit, and Hyrox.",
-      "url": "https://www.tomsguide.com/best-picks/the-best-cross-training-shoes-for-gym-workouts",
-      "score": 23,
-      "source_origin": "candidate",
-      "published_at": "2026-09-21",
       "publish_status": "published",
       "source_aliases": [
-        "Tom's Guide Running"
+        "KENLU"
       ]
     },
     {
@@ -1073,26 +1114,6 @@
       "summary": "A comfortable cruiser for daily training runs。",
       "url": "https://www.tomsguide.com/wellness/running/hoka-clifton-pro-review",
       "score": 23,
-      "source_origin": "candidate",
-      "published_at": "2026-09-21",
-      "publish_status": "published",
-      "source_aliases": [
-        "Tom's Guide Running"
-      ]
-    },
-    {
-      "id": "news-www-tomsguide-com-wellness-running-i-tested-shoes-from-5-up-and-coming-running-b",
-      "type": "news",
-      "title": "I tested shoes from 5 up-and-coming running brands &mdash; here are the ones worth your money",
-      "date": "2026-08-07",
-      "date_source": "source",
-      "article_date": "2026-08-07",
-      "first_seen_at": "2026-08-16",
-      "source": "Tom's Guide Running",
-      "category": "跑步新聞",
-      "summary": "Look beyond the biggest running brands。",
-      "url": "https://www.tomsguide.com/wellness/running/i-tested-shoes-from-5-up-and-coming-running-brands-here-are-the-ones-worth-your-money",
-      "score": 19,
       "source_origin": "candidate",
       "published_at": "2026-09-21",
       "publish_status": "published",
@@ -1361,6 +1382,26 @@
       ]
     },
     {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a73198037-asics-novablast-6",
+      "type": "shoe",
+      "title": "ASICS NOVABLAST 6 編輯實測心得：推進力大升級，穩定度更讓人意外！【跑鞋速報】",
+      "date": "2026-07-21",
+      "date_source": "source",
+      "article_date": "2026-07-21",
+      "first_seen_at": "2026-07-22",
+      "source": "Women's Health Taiwan",
+      "category": "日常訓練",
+      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73198037/asics-novablast-6/",
+      "score": 27,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
       "id": "shoe-www-hk01-com-e8-b7-91-e6-ad-a5-60380547-e8-b7-91-e9-9e-8b-e6-8e-a8-e8-96-a6-new-",
       "type": "shoe",
       "title": "跑鞋推薦｜New Balance最新競速跑鞋實測 間歇跑節奏跑升級利器",
@@ -1418,6 +1459,46 @@
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
+      ]
+    },
+    {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-g71879573-best-hoka-shoes-for-walki",
+      "type": "shoe",
+      "title": "2026 Hoka 步行鞋推薦！6雙人氣鞋款評比，足科醫師與運動編輯實測解析",
+      "date": "2026-07-09",
+      "date_source": "source",
+      "article_date": "2026-07-09",
+      "first_seen_at": "2026-07-10",
+      "source": "Women's Health Taiwan",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/g71879573/best-hoka-shoes-for-walking/",
+      "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a72268341-hoka-clifton-11",
+      "type": "shoe",
+      "title": "HOKA Clifton 11正式登場！滑順腳感全面升級，規格、配色、售價一次看【跑鞋速報】",
+      "date": "2026-07-16",
+      "date_source": "source",
+      "article_date": "2026-07-16",
+      "first_seen_at": "2026-07-17",
+      "source": "Women's Health Taiwan",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a72268341/hoka-clifton-11/",
+      "score": 28,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -1678,26 +1759,6 @@
       ]
     },
     {
-      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a73198037-asics-novablast-6",
-      "type": "shoe",
-      "title": "ASICS NOVABLAST 6 編輯實測心得：推進力大升級，穩定度更讓人意外！【跑鞋速報】",
-      "date": "2026-07-21",
-      "date_source": "source",
-      "article_date": "2026-07-21",
-      "first_seen_at": "2026-07-22",
-      "source": "Women's Health Taiwan",
-      "category": "日常訓練",
-      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
-      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73198037/asics-novablast-6/",
-      "score": 26,
-      "source_origin": "archive",
-      "published_at": "2026-09-21",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
-      ]
-    },
-    {
       "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114313-subtitle-e3-80-90-e8-a9-95-e",
       "type": "shoe",
       "title": "【評測】夏季備戰，從每天的輕鬆跑開始──HOKA Clifton PRO 陪你穩穩累積每一步",
@@ -1895,26 +1956,6 @@
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
-      ]
-    },
-    {
-      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a72268341-hoka-clifton-11",
-      "type": "shoe",
-      "title": "HOKA Clifton 11正式登場！滑順腳感全面升級，規格、配色、售價一次看【跑鞋速報】",
-      "date": "2026-07-16",
-      "date_source": "source",
-      "article_date": "2026-07-16",
-      "first_seen_at": "2026-07-17",
-      "source": "Women's Health Taiwan",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a72268341/hoka-clifton-11/",
-      "score": 27,
-      "source_origin": "archive",
-      "published_at": "2026-09-21",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -2232,7 +2273,10 @@
       "score": 20,
       "source_origin": "archive",
       "published_at": "2026-09-21",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114415-subtitle-e3-80-90-e6-96-b0-e",
@@ -2255,23 +2299,6 @@
       ]
     },
     {
-      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114400-subtitle-e3-80-90-e5-93-81-e",
-      "type": "shoe",
-      "title": "【品牌動態】adidas HYPERBOOST 超級緩震跑鞋家族系列輕彈登場 ！",
-      "date": "2026-07-28",
-      "date_source": "source",
-      "article_date": "2026-07-28",
-      "first_seen_at": "2026-07-29",
-      "source": "運動筆記",
-      "category": "長距離緩震",
-      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114400&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91adidas%20HYPERBOOST%20%E8%B6%85%E7%B4%9A%E7%B7%A9%E9%9C%87%E8%B7%91%E9%9E%8B%E5%AE%B6%E6%97%8F%E7%B3%BB%E5%88%97%E8%BC%95%E5%BD%88%E7%99%BB%E5%A0%B4%EF%BC%81&label=all",
-      "score": 20,
-      "source_origin": "archive",
-      "published_at": "2026-09-21",
-      "publish_status": "published"
-    },
-    {
       "id": "shoe-www-runnersworld-com-gear-a73761888-nike-alphafly-4-launch-review",
       "type": "shoe",
       "title": "Nike Delivers the Alphafly 4 Ahead of Fall Marathon Season. We’ve Tested It and Have the Deets",
@@ -2284,6 +2311,26 @@
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.runnersworld.com/gear/a73761888/nike-alphafly-4-launch-review/",
       "score": 31,
+      "source_origin": "candidate",
+      "published_at": "2026-09-21",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a73667372-hoka-tecton-x-4-review",
+      "type": "shoe",
+      "title": "The Hoka Tecton X 4 Review: They’re Fast, Light, and Ready for Rocky Trails",
+      "date": "2026-09-11",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-11",
+      "source": "Runner's World",
+      "category": "越野",
+      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
+      "url": "https://www.runnersworld.com/gear/a73667372/hoka-tecton-x-4-review/",
+      "score": 26,
       "source_origin": "candidate",
       "published_at": "2026-09-21",
       "publish_status": "published",
@@ -2309,26 +2356,6 @@
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a23311221-best-altra-running-shoes",
-      "type": "shoe",
-      "title": "The 8 Best Altra Running Shoes in 2026 - Altra Shoe Reviews",
-      "date": "2026-07-19",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-07-19",
-      "source": "Runner's World",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a23311221/best-altra-running-shoes/",
-      "score": 27,
-      "source_origin": "candidate",
-      "published_at": "2026-09-21",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
       ]
     },
     {
