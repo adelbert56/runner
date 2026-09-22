@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
+    "race_name": "慵懶跑者聚樂部-COZY RUNNER CLUB",
+    "race_date": "2026-11-15",
+    "race_county": "臺中市",
+    "distances": [
+      "10km",
+      "5km"
+    ],
+    "start_times": "10公里 起跑 06:30、5公里 起跑 06:45、10公里 起跑 09:00",
+    "registration_link": "https://www.ctrun.com.tw/Activity?EventMain_ID=308&Register=true&ActionStr=Create&Team=false",
+    "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=308&Register=true&ActionStr=Create&Team=false",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13045&subtitle=2026%E5%9C%8B%E8%81%9A%E6%85%B5%E6%87%B6%E8%B7%91%E8%80%85%E8%81%9A%E6%A8%82%E9%83%A8",
+    "issues": [
+      {
+        "key": "same_group_multiple_times",
+        "severity": "high",
+        "label": "同一組別出現多個起跑時間",
+        "hint": "可疑組別：10公里"
+      }
+    ]
+  }
+]
