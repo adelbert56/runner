@@ -20,5 +20,56 @@
         "hint": "可疑組別：10公里"
       }
     ]
+  },
+  {
+    "race_id": "c34f3feb-959b-4eca-af66-611548a15f22",
+    "race_name": "2027 第八屆BC臺灣柏釧公益路跑",
+    "race_date": "2027-02-21",
+    "race_county": "臺中市",
+    "distances": [
+      "42.195km",
+      "21km",
+      "12.2km",
+      "5km",
+      "12.5km",
+      "10km",
+      "3km"
+    ],
+    "start_times": "全馬組（42.195K） 起跑 06:00、半馬組（21K） 起跑 06:15、挑戰組（12.2K） 起跑 06:30、休閒組（5K） 起跑 06:45",
+    "registration_link": "https://signup.lohasnet.tw/signup/4297",
+    "official_event_url": "https://lohasnet.tw/#/",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13170&subtitle=2027+%E6%99%A8%E6%9B%A6%E9%BA%A5%E9%A6%99%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "high",
+        "label": "起跑組別少於距離數",
+        "hint": "可能混入過期或其他來源的組別；距離：全馬（42.195K）、半馬（21K）、12.2K、5K、12.5K、10K、3K；起跑列：全馬組（42.195K）、半馬組（21K）、挑戰組（12.2K）、休閒組（5K）"
+      }
+    ]
+  },
+  {
+    "race_id": "05ea484a-216e-479f-8822-2511d85cdb8f",
+    "race_name": "2027 高美濕地馬拉松",
+    "race_date": "2027-03-14",
+    "race_county": "臺中市",
+    "distances": [
+      "42.195km",
+      "21km",
+      "10km",
+      "5km"
+    ],
+    "start_times": "42公里 起跑 06:00、21公里 起跑 06:10、10公里 起跑 06:20、5公里 起跑 06:30、5公里 起跑 08:00、10公里 起跑 08:50、21公里 起跑 10:40、42公里 起跑 12:30",
+    "registration_link": "https://lohasnet.tw/Taichung_Harbor2027/",
+    "official_event_url": "https://lohasnet.tw/Taichung_Harbor2027/",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13143&subtitle=2027+%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "same_group_multiple_times",
+        "severity": "high",
+        "label": "同一組別出現多個起跑時間",
+        "hint": "可疑組別：42公里、21公里、10公里、5公里"
+      }
+    ]
   }
 ]
