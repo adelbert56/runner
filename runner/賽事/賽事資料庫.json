@@ -866,16 +866,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-10-03",
-      "updated_at": "2026-09-26T00:18:39.884Z",
+      "updated_at": "2026-09-26T23:42:58.420Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，毛毛雨，25-30°C，降雨機率 39%，最大風速 7 km/h",
+      "summary": "苗栗縣縣市預報，毛毛雨，24-31°C，降雨機率 45%，最大風速 22 km/h",
       "weather_code": 51,
-      "temperature_min_c": 24.5,
-      "temperature_max_c": 29.9,
-      "precipitation_probability_max": 39,
-      "wind_speed_max_kmh": 6.6
+      "temperature_min_c": 23.8,
+      "temperature_max_c": 30.5,
+      "precipitation_probability_max": 45,
+      "wind_speed_max_kmh": 21.5
     }
   },
   {
@@ -922,7 +922,20 @@
     "first_seen_at": "2026-05-16",
     "co_organizer": "南投縣埔里愛跑協會；交通部公路局第二區養護工程處埔里工務段、埔里鎮民代表會",
     "cancellation_notice": "",
-    "cancellation_notice_url": ""
+    "cancellation_notice_url": "",
+    "weather_forecast": {
+      "forecast_for": "2026-10-04",
+      "updated_at": "2026-09-26T23:42:58.518Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "南投縣",
+      "summary": "南投縣縣市預報，毛毛雨，19-27°C，降雨機率 75%，最大風速 9 km/h",
+      "weather_code": 51,
+      "temperature_min_c": 19,
+      "temperature_max_c": 26.6,
+      "precipitation_probability_max": 75,
+      "wind_speed_max_kmh": 8.5
+    }
   },
   {
     "race_id": "6fc07515-5d73-4c07-813e-f64c20be1372",
@@ -958,7 +971,20 @@
     "registration_opens_at": "2026-06-22",
     "co_organizer": "全統運動用品股份有限公司",
     "start_times": "10公里活力組（10K） 起跑 07:00、健走尋寶組（3.5K） 起跑 07:10",
-    "quota": null
+    "quota": null,
+    "weather_forecast": {
+      "forecast_for": "2026-10-04",
+      "updated_at": "2026-09-26T23:42:58.615Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "臺中市",
+      "summary": "臺中市縣市預報，毛毛雨，24-32°C，降雨機率 57%，最大風速 8 km/h",
+      "weather_code": 51,
+      "temperature_min_c": 24.1,
+      "temperature_max_c": 31.5,
+      "precipitation_probability_max": 57,
+      "wind_speed_max_kmh": 7.5
+    }
   },
   {
     "race_id": "34b4433b-8832-42e6-a063-1df6c91e8b30",
