@@ -85,6 +85,7 @@ vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), e
 const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbox;
 
 const racePrescriptionSandbox = {
+  coachReviewForWeek: () => null,
   coachDaysForWeek: () => [{ scheduledDow: 0, totalKm: 10, plan: "10K 路跑檢測", steps: [{ kind: "main", end: { type: "distance", value: 10000, label: "10 km" } }] }],
   coachWorkoutStructure: (_plan, _day, steps) => steps,
   coachPlanTrainingType,
@@ -98,6 +99,10 @@ vm.runInContext([
   extractFunction(trainerCoachEngineJs, "coachPrescription"),
 ].join("\n\n"), racePrescriptionSandbox);
 const { coachPrescription } = racePrescriptionSandbox;
+racePrescriptionSandbox.coachReviewForWeek = () => ({ restDates: ['2026-10-03', '2026-10-04'] });
+assertEqual(coachPrescription({ dateStr: '2026-10-03', dow: 6, type: 'long', km: 16 }, {}, {}).course.type, 'rest', 'a confirmed pre-race rest date removes the generated Saturday long run');
+assertEqual(coachPrescription({ dateStr: '2026-10-04', dow: 0, type: 'race', raceReplacement: 'race' }, {}, {}).course.type, 'race', 'a rest-date constraint never cancels a registered race');
+racePrescriptionSandbox.coachReviewForWeek = () => null;
 
 const sessionStorySandbox = {
   paceToSeconds: (pace) => ({ '7:00': 420, '6:50': 410, '6:40': 400, '6:30': 390 }[pace] || 0),
@@ -340,11 +345,11 @@ const cadenceWeighting = coachCadenceAssessment([
 assertEqual(cadenceWeighting.displayed, 169, "cadence caution uses distance-weighted effective main work instead of letting a short session dominate");
 
 // A late Garmin sync must update weekly totals without rewriting the saved coaching decision.
-const savedFeedback = '對照你的實跑紀錄：本週實跑 25.3 km／4 次。';
+const savedFeedback = '我已讀到你的備註。對照你的實跑紀錄：本週實跑 25.3 km／4 次；前一週 36.9 km／4 次（-11.6 km）；同心率配速 6:43 → 6:57/km。正式課表維持原處方。';
 const historicalMileageSandbox = {
   appData: { checkins: [{ weekNum: 11, date: '2026-09-20', coachFeedbackResponse: savedFeedback }] },
   currentWeek: 11,
-  trainingCompletionSummary: () => ({ completedDays: [], allActivity: [{ actualKm: 25.28 }, { actualKm: 9.77 }] }),
+  trainingCompletionSummary: () => ({ completedDays: [], allActivity: [6.50, 6.36, 7.01, 5.41, 9.77].map((actualKm) => ({ actualKm })) }),
   weekPlannedKm: () => 27,
   historicalTrainingFeedback: () => '週回顧',
   coachInsightIcon: () => '',
@@ -359,11 +364,128 @@ vm.runInContext([
 ].join('\n'), historicalMileageSandbox);
 const mileageHistoryHtml = historicalMileageSandbox.renderHistoricalCourseDecisionPanel({ weekNum: 11, days: [] });
 assertEqual(mileageHistoryHtml.includes('當週實跑 35 km'), true, 'historical mileage includes the late-synced race with the same rounding as the progress bar');
-assertEqual(mileageHistoryHtml.includes('回饋儲存時該週累計實跑 25.3 km／4 次'), true, 'saved mileage is explicitly identified as a feedback snapshot');
+assertEqual(mileageHistoryHtml.includes('當週實跑 35.0 km／5 次'), true, 'feedback card uses the same current activity total and count as weekly progress');
+assertEqual(/25\.3|11\.6|6:43/.test(mileageHistoryHtml), false, 'stale embedded mileage, delta and pace comparison are not presented as current evidence');
+assertEqual(mileageHistoryHtml.includes('正式課表維持原處方'), true, 'historical coaching decision is preserved');
 assertEqual(mileageHistoryHtml.includes('紀錄日期 2026-09-20'), true, 'saved coaching response exposes its recorded date');
 assertEqual(historicalMileageSandbox.appData.checkins[0].coachFeedbackResponse, savedFeedback, 'rendering preserves the original coaching response');
 delete historicalMileageSandbox.appData.checkins[0].date;
 assertEqual(historicalMileageSandbox.renderHistoricalCourseDecisionPanel({ weekNum: 11, days: [] }).includes('紀錄日期'), false, 'legacy feedback without a date does not invent a timestamp');
+historicalMileageSandbox.trainingCompletionSummary = () => ({ completedDays: [], allActivity: [] });
+assertEqual(historicalMileageSandbox.renderHistoricalCourseDecisionPanel({ weekNum: 11, days: [] }).includes('最新實跑紀錄'), false, 'missing activity data does not fabricate a current total');
+
+const raceVolumeSandbox = { coachReviewData: { nextWeek: { weekStart: '2026-09-14', targetKm: 27, menu: [{}] } } };
+vm.createContext(raceVolumeSandbox);
+vm.runInContext(['weekPlannedKm', 'coachReviewForWeek', 'coachWeekMatches', 'effectiveWeekVolumeTarget'].map((name) => extractFunction(trainerRenderJs, name)).join('\n'), raceVolumeSandbox);
+const raceWeek = { weekNum: 11, targetKm: 27, days: [
+  { dateStr: '2026-09-14', type: 'easy', km: 6 },
+  { dateStr: '2026-09-15', type: 'easy', km: 6 },
+  { dateStr: '2026-09-17', type: 'easy', km: 5 },
+  { dateStr: '2026-09-19', type: 'rest', km: 0 },
+  { dateStr: '2026-09-20', type: 'race', raceReplacement: 'race', km: 0, raceDistanceKm: 10, status: 'done' },
+] };
+assertEqual(raceVolumeSandbox.weekPlannedKm(raceWeek), 27, 'race-week formal volume includes the separately stored race distance');
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(raceWeek).numericKm, 27, 'W11 target matches the active coach review');
+raceVolumeSandbox.coachReviewData = { nextWeek: { weekStart: '2026-09-21', targetKm: 36, menu: [{}] } };
+const reloadedRaceWeek = JSON.parse(JSON.stringify(raceWeek));
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(reloadedRaceWeek).numericKm, 27, 'W11 remains 27 km after review rolls to W12 and the stored plan reloads');
+raceVolumeSandbox.coachReviewData = null;
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(reloadedRaceWeek).numericKm, 27, 'race-week volume does not depend on a decrypted coach review');
+reloadedRaceWeek.days.at(-1).km = 10;
+assertEqual(raceVolumeSandbox.weekPlannedKm(reloadedRaceWeek), 27, 'materialized race distance is counted once');
+delete reloadedRaceWeek.days.at(-1).raceDistanceKm;
+assertEqual(raceVolumeSandbox.weekPlannedKm(reloadedRaceWeek), 27, 'legacy race courses retain their stored km');
+reloadedRaceWeek.days.at(-1).isMakeup = true;
+assertEqual(raceVolumeSandbox.weekPlannedKm(reloadedRaceWeek), 17, 'makeup sessions remain excluded from original weekly prescription');
+
+// Weekly totals must use the same resolved days as the cards, including recovery overrides.
+const recoveryWeek = { weekNum: 12, targetKm: 36, days: [
+  { dateStr: '2026-09-21', type: 'rest', km: 0, raceReplacement: 'post-race' },
+  { dateStr: '2026-09-22', type: 'easy', km: 5, raceReplacement: 'post-race' },
+  { dateStr: '2026-09-24', type: 'easy', km: 6, resolvedKm: 8 },
+  { dateStr: '2026-09-26', type: 'long', km: 12, resolvedKm: 16 },
+] };
+raceVolumeSandbox.coachReviewData = { nextWeek: { weekStart: '2026-09-21', targetKm: 36, menu: [{}] } };
+raceVolumeSandbox.buildContext = () => ({ plan: [recoveryWeek] });
+raceVolumeSandbox.resolveCourse = (day) => ({ course: day.resolvedKm ? { ...day, km: day.resolvedKm } : day });
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(recoveryWeek).numericKm, 29, 'W12 resolved 5 + 8 + 16 km overrides the obsolete 36 km review target');
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(JSON.parse(JSON.stringify(recoveryWeek))).display, '29 km', 'W12 reload keeps the resolved weekly target');
+// Exercise the real course resolver and coach adapter: post-race days must keep their overrides.
+Object.assign(raceVolumeSandbox, racePrescriptionSandbox, {
+  safetyGuard: () => null,
+  paceResolver: () => ({}),
+  courseRationale: () => '',
+  courseResolutionSource: () => 'baseline',
+  coachStructureConfidence: () => 'coach',
+  coachDaysForWeek: () => [
+    { scheduledDow: 1, totalKm: 6, plan: '輕鬆跑 6 km' },
+    { scheduledDow: 2, totalKm: 6, plan: '輕鬆跑 6 km' },
+    { scheduledDow: 4, totalKm: 8, plan: '輕鬆跑 8 km' },
+    { scheduledDow: 6, totalKm: 16, plan: '長跑 16 km' },
+  ],
+});
+recoveryWeek.days.forEach((day, index) => { day.dow = [1, 2, 4, 6][index]; });
+vm.runInContext([
+  ...['coachPrescribedKm', 'coachPrescribedMainKm', 'coachPrescription', 'resolveCourse'].map((name) => extractFunction(trainerCoachEngineJs, name)),
+].join('\n'), raceVolumeSandbox);
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(recoveryWeek).numericKm, 29, 'real course resolver preserves post-race rest and 5 km while applying 8 km and 16 km coach prescriptions');
+raceVolumeSandbox.resolveCourse = (day) => ({ course: { ...day, type: 'rest', km: 0 } });
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(recoveryWeek).numericKm, 0, 'a fully rested week never falls back to an obsolete positive target');
+
+const selectedWeekSandbox = {
+  currentWeek: 12,
+  trainingDataHealth: () => ({ currentWeekCompleted: Array(5), currentWeekDays: Array(5), syncAge: 0 }),
+  trainingAutopilotDecision: () => ({ title: '正式課程已完成' }),
+  effectiveWeekVolumeTarget: () => ({ numericKm: 29, display: '29 km', source: '正式課表' }),
+  trainingCompletionSummary: (weeks) => {
+    assertEqual(weeks[0].weekNum, 12, 'completion calculation receives the selected week only');
+    return { completedSessions: 0, elapsedSessions: 0, adherence: 0 };
+  },
+  buildStatusReminders: () => ({}),
+};
+vm.createContext(selectedWeekSandbox);
+vm.runInContext(extractFunction(trainerCoachEngineJs, 'planStatus'), selectedWeekSandbox);
+const selectedStatus = selectedWeekSandbox.planStatus({ todayWeek: 11, today: '2026-09-20', plan: [...Array(11), recoveryWeek], completion: { allActivity: [{ date: '2026-09-20', actualKm: 9.77 }], totalKm: 379.2 } });
+assertEqual(selectedStatus.weekDoneKm, 0, 'W12 does not inherit W11 race mileage');
+assertEqual(selectedStatus.currentWeekCompleted, 0, 'W12 does not inherit W11 completed sessions');
+assertEqual(selectedStatus.currentWeekDays, 3, 'W12 planned session count matches its three running cards');
+assertEqual(selectedStatus.adherence, null, 'future W12 shows not started instead of 100 percent adherence');
+assertEqual(selectedStatus.decision.title, '課程尚未開始', 'future W12 does not claim the W11 race is completed');
+assertEqual(selectedStatus.totalKm, 379.2, 'lifetime mileage remains independent of the selected week');
+
+const confirmedWeekSandbox = {
+  appData: { profile: { dayState: [0, 1, 1, 0, 1, 0, 2] } },
+  coachReviewData: {
+    nextWeek: { weekStart: '2026-09-28', menu: [
+      { day: '一', scheduledDow: 1, totalKm: 5 },
+      { day: '二', scheduledDow: 2, totalKm: 6 },
+      { day: '四', scheduledDow: 4, totalKm: 3 },
+      { day: '日', scheduledDow: 0, totalKm: 10 },
+    ] },
+    confirmedWeeks: [{ weekStart: '2026-09-21', menu: [{ day: '六', totalKm: 16, plan: '長跑16 km' }] }],
+  },
+};
+vm.createContext(confirmedWeekSandbox);
+vm.runInContext(['coachReviewForWeek', 'coachWeekMatches', 'coachMenuForCurrentSchedule', 'coachDaysForWeek', 'materializeCoachReviewWeek'].map(name => extractFunction(trainerRenderJs, name)).join('\n'), confirmedWeekSandbox);
+const preservedW12 = { days: [{ dateStr: '2026-09-21', dow: 1, task: '原課表', km: 5 }] };
+const confirmedW13 = { days: [{ dateStr: '2026-09-28', dow: 1, status: 'planned' }] };
+assertEqual(confirmedWeekSandbox.coachWeekMatches(preservedW12), true, 'W12 remains a confirmed week after the review advances to W13');
+assertEqual(confirmedWeekSandbox.coachReviewForWeek(preservedW12).menu[0].totalKm, 16, 'archived W12 retains its original long-run prescription');
+confirmedWeekSandbox.appData.profile.dayState = [2, 1, 1, 0, 1, 0, 0];
+assertEqual(confirmedWeekSandbox.coachDaysForWeek(preservedW12)[0].scheduledDow, 6, 'changing future training preferences cannot move the archived W12 Saturday long run');
+assertEqual(confirmedWeekSandbox.coachWeekMatches(confirmedW13), true, 'W13 receives its own confirmed menu');
+assertEqual(confirmedWeekSandbox.coachWeekMatches({ days: [{ dateStr: '2026-10-05' }] }), false, 'an unconfirmed future week cannot borrow an archived menu');
+const fixedRaceMenu = confirmedWeekSandbox.coachDaysForWeek(confirmedW13);
+assertEqual(fixedRaceMenu.at(-1).scheduledDow, 0, 'a confirmed Sunday race is never remapped to the Saturday training slot');
+assertEqual(fixedRaceMenu.some(entry => entry.scheduledDow === 6), false, 'the confirmed race-week menu leaves Saturday without a running prescription');
+confirmedWeekSandbox.appData.plan = [preservedW12, confirmedW13];
+confirmedWeekSandbox.buildContext = () => ({});
+confirmedWeekSandbox.coachPrescription = day => ({ course: { ...day, km: 5, coachPlan: true } });
+confirmedWeekSandbox.saveData = () => {};
+const originalW12 = JSON.stringify(preservedW12);
+confirmedWeekSandbox.materializeCoachReviewWeek();
+assertEqual(JSON.stringify(preservedW12), originalW12, 'materializing W13 never mutates the archived W12 plan');
+assertEqual(confirmedW13.days[0].coachPlan.reviewWeekStart, '2026-09-28', 'materialized W13 is locked to its own review date');
 
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);

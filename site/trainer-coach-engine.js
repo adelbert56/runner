@@ -107,11 +107,12 @@ function buildStatusReminders(health = trainingDataHealth(appData.plan || [])) {
 function planStatus(ctx = buildContext()) {
   const plan = ctx.plan;
   const health = trainingDataHealth(plan);
-  const decision = trainingAutopilotDecision(plan);
+  const decision = currentWeek === ctx.todayWeek ? trainingAutopilotDecision(plan)
+    : { title: currentWeek > ctx.todayWeek ? '課程尚未開始' : '課程回顧', next: currentWeek > ctx.todayWeek ? '依本週每日正式課程執行，週跑量已納入恢復與安全調整。' : '查看本週留下的正式課程與完成紀錄。' };
   const projection = (typeof fitnessProjection === 'function' ? fitnessProjection(ctx.profile) : null);
-  // 用 currentWeek（app 目前聚焦週，瀏覽會變）對齊 renderWeekOverviewCard 既有行為；
-  // health.currentWeekCompleted 仍是今日日曆週（既有卡本就是這樣混用，保留不改）。
+  // 週目標、完成堂數與執行率都屬於目前選取週；累積實跑仍涵蓋整個週期。
   const currWeekPlan = plan[currentWeek - 1] || plan[ctx.todayWeek - 1];
+  const selectedCompletion = trainingCompletionSummary(currWeekPlan ? [currWeekPlan] : [], ctx.today);
   const effectiveTarget = effectiveWeekVolumeTarget(currWeekPlan);
   const weekDates = new Set((currWeekPlan?.days || []).map((d) => d.dateStr));
   const currWeekDone = ctx.completion.allActivity
@@ -122,10 +123,10 @@ function planStatus(ctx = buildContext()) {
     health,
     decision,
     projection,
-    completion: ctx.completion,
-    currentWeekCompleted: health.currentWeekCompleted.length,
-    currentWeekDays: health.currentWeekDays.length,
-    adherence: ctx.completion.elapsedSessions ? ctx.completion.adherence : null,
+    completion: selectedCompletion,
+    currentWeekCompleted: selectedCompletion.completedSessions,
+    currentWeekDays: (currWeekPlan?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup).length,
+    adherence: selectedCompletion.elapsedSessions ? selectedCompletion.adherence : null,
     totalKm: ctx.completion.totalKm,
     syncAge: health.syncAge,
     weekTargetKm,
@@ -218,6 +219,15 @@ function coachPrescribedMainKm(day, entry) {
 }
 
 function coachPrescription(day, ctx, week) {
+  const restDates = coachReviewForWeek(week)?.restDates || [];
+  if (restDates.includes(day.dateStr) && day.type !== 'race' && day.raceReplacement !== 'race') {
+    return {
+      type: 'replace',
+      course: { ...day, type: 'rest', km: 0, coachMainKm: 0, task: '教練確認：休息／輕鬆活動度，不補跑。', pace: '', hrTarget: '', steps: [], workoutStructure: null, coachPlan: true },
+      rationale: '教練處方：保留已確認的休息日。',
+      source: 'coach-prescription'
+    };
+  }
   // 已報名賽事、賽前減壓與賽後恢復是硬約束；教練週處方只能安排其餘訓練日，
   // 不能把以賽代訓重新蓋成一般跑課。
   if (day.raceReplacement && day.raceReplacement !== 'race') return null;
@@ -387,7 +397,7 @@ function resolveWeeklyDecision(ctx = buildContext(), week = ctx.plan[currentWeek
     sourceCounts,
     next,
     focusLabel: thisWeekNext ? '下一堂' : nextWeekDay ? '下週第一堂' : '本週最後一堂',
-    coachNote: coachWeekMatches(week) ? ctx.coachReview?.nextWeek?.coachNote || '' : '',
+    coachNote: coachReviewForWeek(week)?.coachNote || '',
     planningNote: week.planningNote || ''
   };
 }

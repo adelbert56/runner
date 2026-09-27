@@ -652,8 +652,9 @@ function renderWeekOverviewCard(profile, plan = appData.plan || []) {
   // 狀態數據全部取自 planStatus（單一狀態源）；此處只保留顯示專屬的組裝
   // （下一堂課文字、評估提示、暫停橫幅、教練信）。
   const s = planStatus();
-  const today = findTodayPlanDay()?.day;
-  const next = today || (plan.find((week) => week.weekNum === currentWeek)?.days || []).find((day) => day.dateStr > todayStr() && day.type !== 'rest');
+  const selectedDays = plan.find((week) => week.weekNum === currentWeek)?.days || [];
+  const next = selectedDays.find((day) => day.dateStr >= todayStr() && day.type !== 'rest')
+    || selectedDays.filter((day) => day.type !== 'rest').at(-1);
   const course = next ? `${trainingTypeLabel(next.type, next.focus)} · ${trainingTaskTitle(next)}` : '本週先把恢復做穩';
   const syncText = s.syncAge === null ? '尚未取得' : s.syncAge === 0 ? '今天已同步' : `${s.syncAge} 天前`;
   const assessmentHint = getAssessmentCycleHint(plan);
@@ -881,6 +882,12 @@ function renderHistoricalCourseDecisionPanel(week) {
   const completedDays = completion.completedDays.filter((day) => scheduledDays.some((scheduled) => scheduled.dateStr === day.dateStr));
   const actualKm = Number(completion.allActivity.reduce((sum, activity) => sum + (Number(activity.actualKm) || 0), 0).toFixed(1));
   const recordedKm = actualKm || Number(snapshot?.weeklyKm) || 0;
+  // 舊回覆混存了活動統計與教練處置；統計由同一份週活動重算，處置仍保留原文。
+  const feedbackActions = String(checkin?.coachFeedbackResponse || '')
+    .replace(/對照你的實跑紀錄：[^。]*(?:。|$)/g, '').trim();
+  const latestRunEvidence = completion.allActivity.length
+    ? `對照該週最新實跑紀錄：當週實跑 ${actualKm.toFixed(1)} km／${completion.allActivity.length} 次。`
+    : '';
   const result = checkin?.result ? `當週評估為「${checkin.result}」。` : '未留下週評估；保留已排定的正式課程與完成狀態。';
   const trainingFeedback = historicalTrainingFeedback({ week, checkin, snapshot, recordedKm, scheduledDays, completedDays });
   const cards = [
@@ -908,7 +915,8 @@ function renderHistoricalCourseDecisionPanel(week) {
       subtitle: '保留回顧，不改寫舊課表',
       items: [
         checkin?.note ? `跑者週記：${checkin.note}` : '當週沒有留下跑者週記。',
-        checkin?.coachFeedbackResponse ? `當時教練處置${checkin.date ? `（紀錄日期 ${checkin.date}）` : ''}：${String(checkin.coachFeedbackResponse).replace(/本週實跑/g, '回饋儲存時該週累計實跑')}（以上為回饋儲存時的資料；後續同步的活動請見「當週實跑依據」。）` : ''
+        latestRunEvidence,
+        feedbackActions ? `當時教練處置${checkin.date ? `（紀錄日期 ${checkin.date}）` : ''}：${feedbackActions}` : ''
       ].filter(Boolean)
     }
   ];
@@ -2140,10 +2148,14 @@ function coachPhaseForWeek(week) {
   return best ? best.phase : null;
 }
 
+function coachReviewForWeek(week) {
+  if (!Array.isArray(week?.days)) return null;
+  const reviews = [coachReviewData?.nextWeek, ...(coachReviewData?.confirmedWeeks || [])];
+  return reviews.find((review) => review?.weekStart && week.days.some((day) => day.dateStr === review.weekStart)) || null;
+}
+
 function coachWeekMatches(week) {
-  const weekStart = coachReviewData?.nextWeek?.weekStart;
-  if (!weekStart || !Array.isArray(week?.days)) return false;
-  return week.days.some((day) => day.dateStr === weekStart);
+  return Boolean(coachReviewForWeek(week));
 }
 
 // week.targetKm 是課表產生器分配每日課表前的參考目標，calcWorkoutKm/
@@ -2152,24 +2164,30 @@ function coachWeekMatches(week) {
 // 一律用這個函式加總實際排定課表，不要直接讀 week.targetKm——不然這裡
 // 跟每日卡片、跟本週跑量進度條會各講各的數字。
 function weekPlannedKm(week) {
-  return Math.round((week?.days || []).reduce((sum, day) => sum + (day.type !== 'rest' && !day.isMakeup ? (Number(day.km) || 0) : 0), 0) * 10) / 10;
+  return Math.round((week?.days || []).reduce((sum, day) => {
+    if (day.type === 'rest' || day.isMakeup) return sum;
+    // 以賽代訓的 km 可以是 0；比賽距離另存於 raceDistanceKm，仍是正式週負荷。
+    const km = day.type === 'race' || day.raceReplacement === 'race'
+      ? Number(day.raceDistanceKm) || Number(day.km) || 0
+      : Number(day.km) || 0;
+    return sum + km;
+  }, 0) * 10) / 10;
 }
 
 function effectiveWeekVolumeTarget(week) {
-  const formalKm = weekPlannedKm(week) || Number(week?.targetKm) || 0;
-  // nextWeek.menu 為空代表教練週報還沒有真人手動菜單，targetKm 只會是像
-  // 「依正式課表安排」這種說明文字，不是數字；此時一律回退正式課表，
-  // 避免把說明文字硬接上「km」顯示成亂碼，也避免誤標成「教練本週目標」。
-  if (!coachWeekMatches(week) || !coachReviewData?.nextWeek?.menu?.length || !coachReviewData?.nextWeek?.targetKm) {
-    return { numericKm: formalKm, display: formalKm ? `${formalKm} km` : '—', source: '正式課表' };
-  }
-  const raw = String(coachReviewData.nextWeek.targetKm);
-  const values = (raw.match(/\d+(?:\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
-  const numericKm = values.length > 1 ? (values[0] + values[1]) / 2 : (values[0] || formalKm);
-  return { numericKm, display: `${raw} km`, source: '教練本週目標' };
+  // 與每日卡片共用最終處方；週報原始目標尚未扣除賽後恢復／安全覆寫。
+  const context = typeof buildContext === 'function' ? buildContext() : null;
+  const days = (week?.days || []).map((day) => context && typeof resolveCourse === 'function'
+    ? resolveCourse(day, context, week).course : day);
+  const numericKm = weekPlannedKm({ days });
+  return { numericKm, display: `${numericKm} km`, source: '正式課表' };
 }
 
 function coachMenuForCurrentSchedule(menu) {
+  // 已確認日期的課程包含休息日以外的賽事，不可再依固定練跑日搬移。
+  if (Array.isArray(menu) && menu.length && menu.every((entry) => Number.isInteger(entry.scheduledDow) && entry.scheduledDow >= 0 && entry.scheduledDow <= 6)) {
+    return menu.map((entry) => ({ ...entry }));
+  }
   const profile = appData.profile || {};
   const dayState = Array.isArray(profile.dayState) ? profile.dayState : [];
   const trainingDows = dayState.map((state, dow) => state >= 1 ? dow : -1).filter((dow) => dow >= 0);
@@ -2674,15 +2692,17 @@ function renderTabIntroCard() {
 }
 
 function coachDaysForWeek(week) {
-  const isCoachWeek = coachWeekMatches(week);
-  const coachNextWeek = isCoachWeek ? coachReviewData?.nextWeek : null;
+  const coachNextWeek = coachReviewForWeek(week);
+  if (coachNextWeek && coachNextWeek !== coachReviewData?.nextWeek) {
+    return (coachNextWeek.menu || []).map((entry) => ({ ...entry, scheduledDow: ['日', '一', '二', '三', '四', '五', '六'].indexOf(entry.day) }));
+  }
   return coachNextWeek ? coachMenuForCurrentSchedule(coachNextWeek.menu) : [];
 }
 
 // 正式週報不能只在 render-time 覆蓋畫面。若不把處方寫回 plan，週報切到
 // 下一週後，舊週就會退回通用產生器內容，連凍結 archive 都只會存到錯的底稿。
 function materializeCoachReviewWeek() {
-  const week = (appData.plan || []).find((item) => coachWeekMatches(item));
+  const week = (appData.plan || []).find((item) => item.days?.some((day) => day.dateStr === coachReviewData?.nextWeek?.weekStart));
   const coachDays = week ? coachDaysForWeek(week) : [];
   if (!week || !coachDays.length) return false;
   const context = buildContext();
