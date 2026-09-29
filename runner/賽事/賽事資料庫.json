@@ -866,16 +866,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-10-03",
-      "updated_at": "2026-09-29T06:53:55.026Z",
+      "updated_at": "2026-09-29T09:42:57.463Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，毛毛雨，23-31°C，降雨機率 78%，最大風速 9 km/h",
-      "weather_code": 51,
-      "temperature_min_c": 23.4,
-      "temperature_max_c": 30.7,
+      "summary": "苗栗縣縣市預報，雷雨，23-31°C，降雨機率 78%，最大風速 9 km/h",
+      "weather_code": 95,
+      "temperature_min_c": 23.1,
+      "temperature_max_c": 30.6,
       "precipitation_probability_max": 78,
-      "wind_speed_max_kmh": 9.4
+      "wind_speed_max_kmh": 8.7
     }
   },
   {
@@ -925,16 +925,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-10-04",
-      "updated_at": "2026-09-29T06:53:55.174Z",
+      "updated_at": "2026-09-29T09:42:57.600Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "南投縣",
       "summary": "南投縣縣市預報，毛毛雨，17-30°C，降雨機率 74%，最大風速 9 km/h",
       "weather_code": 51,
       "temperature_min_c": 17.2,
-      "temperature_max_c": 30,
+      "temperature_max_c": 29.7,
       "precipitation_probability_max": 74,
-      "wind_speed_max_kmh": 8.5
+      "wind_speed_max_kmh": 9.2
     }
   },
   {
@@ -974,16 +974,16 @@
     "quota": null,
     "weather_forecast": {
       "forecast_for": "2026-10-04",
-      "updated_at": "2026-09-29T06:53:55.324Z",
+      "updated_at": "2026-09-29T09:42:57.737Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，毛毛雨，23-32°C，降雨機率 71%，最大風速 8 km/h",
-      "weather_code": 51,
+      "summary": "臺中市縣市預報，毛毛雨，23-32°C，降雨機率 71%，最大風速 6 km/h",
+      "weather_code": 53,
       "temperature_min_c": 23.4,
-      "temperature_max_c": 31.9,
+      "temperature_max_c": 31.6,
       "precipitation_probability_max": 71,
-      "wind_speed_max_kmh": 7.8
+      "wind_speed_max_kmh": 6
     }
   },
   {
