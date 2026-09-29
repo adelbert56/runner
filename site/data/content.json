@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-29T02:39:33.238Z",
+  "generated_at": "2026-09-29T10:47:30.302Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-08-hoka-clifton-11-review-by-ciaoantsai",
@@ -102,6 +102,26 @@
       ]
     },
     {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114768-subtitle-e3-80-90-e8-a9-b1-e",
+      "type": "news",
+      "title": "【話題】2026 馬拉松大滿貫期中盤點：破二世界紀錄誕生，adidas 5 場追平去年獎牌數",
+      "date": "2026-09-29",
+      "date_source": "source",
+      "article_date": "2026-09-29",
+      "first_seen_at": "2026-09-29",
+      "source": "運動筆記",
+      "category": "賽事資訊",
+      "summary": "馬拉松進步不只靠高強度，穩定低強度跑量才是地基。安排課表時，要先確保恢復能力跟得上。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114768&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%912026%20%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%A4%A7%E6%BB%BF%E8%B2%AB%E6%9C%9F%E4%B8%AD%E7%9B%A4%E9%BB%9E%EF%BC%9A%E7%A0%B4%E4%BA%8C%E4%B8%96%E7%95%8C%E7%B4%80%E9%8C%84%E8%AA%95%E7%94%9F%EF%BC%8Cadidas%205%20%E5%A0%B4%E8%BF%BD%E5%B9%B3%E5%8E%BB%E5%B9%B4%E7%8D%8E%E7%89%8C%E6%95%B8&label=all",
+      "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
       "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a73237702-best-shoes-for-back-pain-",
       "type": "news",
       "title": "走沒多久就腰痠背痛？專家實測7雙「久走不累鞋」，HOKA、New Balance都上榜",
@@ -162,17 +182,17 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-09-lm-rt-x-new-balance-2010-u20102z1-release-info",
+      "id": "news-kenlu-net-2026-09-nikola-jokic-361-tanz-002",
       "type": "news",
-      "title": "上市速報 / LM.RT x New Balance 2010 臺灣販售資訊整理",
-      "date": "2026-09-27",
-      "date_source": "source",
-      "article_date": "2026-09-27",
-      "first_seen_at": "2026-09-27",
+      "title": "勘履滑手機 / Nikola Jokic 媒體日實著 361°「夜倓」，TanZ 圓夢：約老師穿了我的鞋！",
+      "date": "2026-09-29",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-29",
       "source": "KENLU",
       "category": "跑鞋裝備",
-      "summary": "LM.RT x New Balance 2010 ‘Black and White’ 臺灣 9 月 27 日起發售，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。販售資訊一覽 (如有更多店點公佈消息本文會持續更新)： LM.",
-      "url": "https://kenlu.net/2026/09/lm-rt-x-new-balance-2010-u20102z1-release-info/",
+      "summary": "金塊隊舉辦新賽季媒體日，陣中一哥 Nikola Jokic 早早就到球場報到，值得一提的是，他穿著人氣球鞋內容創作者 TanZ 攜手 361° 聯名的鞋款現身，讓 TanZ 本人都發文表示「有種美夢成真的感覺」。",
+      "url": "https://kenlu.net/2026/09/nikola-jokic-361-tanz-002/",
       "score": 15,
       "source_origin": "candidate",
       "published_at": "2026-09-29",
@@ -239,26 +259,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-241835-e5-85-a8-e6-96-b0-nike-alphafly-4-e7-82-ba-e9-80",
-      "type": "news",
-      "title": "全新 NIKE ALPHAFLY 4 為速度而生，為自信而跑",
-      "date": "2026-09-22",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-22",
-      "source": "動一動",
-      "category": "跑鞋裝備",
-      "summary": "Alphafly 4 將於 10 月 29 日起於Nike 臺北品牌體驗店、Nike士林品牌體驗店、馬拉松世界台北門市及馬拉松世界市府門市發售。更多跑者，更快速度，更多可能Nike 正式推出 Alphafly 4，這是一雙以完整系統重新打造。",
-      "url": "https://www.don1don.com/archives/241835/%e5%85%a8%e6%96%b0-nike-alphafly-4-%e7%82%ba%e9%80%9f%e5%ba%a6%e8%80%8c%e7%94%9f%ef%bc%8c%e7%82%ba%e8%87%aa%e4%bf%a1%e8%80%8c%e8%b7%91",
-      "score": 12,
-      "source_origin": "candidate",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
       ]
     },
     {
@@ -382,6 +382,26 @@
       ]
     },
     {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114763-subtitle-e3-80-90-e9-85-8d-e",
+      "type": "news",
+      "title": "【配速攻略】風再大，也擋不住你想飛的心，讓我陪你勇敢一次！2026 新屋魚米之鄉馬拉松 配速指南",
+      "date": "2026-09-29",
+      "date_source": "source",
+      "article_date": "2026-09-29",
+      "first_seen_at": "2026-09-29",
+      "source": "運動筆記",
+      "category": "補給",
+      "summary": "最具桃園代表性的「新屋魚米之鄉馬拉松」即將在本週 10/4 (日) 於桃園農業博覽會基地正式起跑！賽道不僅串聯了新屋黃金田園、永安海螺文化體驗園區與蔚藍海岸，更以澎湃的客家美食補給享譽全台。平坦無陡坡且具備 AIMS 認證的路線，加上成熟的。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114763&subtitle=%E3%80%90%E9%85%8D%E9%80%9F%E6%94%BB%E7%95%A5%E3%80%91%E9%A2%A8%E5%86%8D%E5%A4%A7%EF%BC%8C%E4%B9%9F%E6%93%8B%E4%B8%8D%E4%BD%8F%E4%BD%A0%E6%83%B3%E9%A3%9B%E7%9A%84%E5%BF%83%EF%BC%8C%E8%AE%93%E6%88%91%E9%99%AA%E4%BD%A0%E5%8B%87%E6%95%A2%E4%B8%80%E6%AC%A1%EF%BC%812026%20%E6%96%B0%E5%B1%8B%E9%AD%9A%E7%B1%B3%E4%B9%8B%E9%84%89%E9%A6%AC%E6%8B%89%E6%9D%BE%20%E9%85%8D%E9%80%9F%E6%8C%87%E5%8D%97&label=all",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
       "id": "news-kenlu-net-2026-09-under-armour-heartbeat-feature",
       "type": "news",
       "title": "HB Runner 2 輕量、貼合再進化 / UA HEARTBEAT 心潮系列哪雙最對你的節奏？",
@@ -422,26 +442,6 @@
       ]
     },
     {
-      "id": "news-www-don1don-com-archives-241859-2027-e5-af-8c-e9-82-a6-e4-ba-ba-e5-a3-bd-e9-ab-9",
-      "type": "news",
-      "title": "2027富邦人壽高雄馬拉松全新路線亮相 從夢時代跑向國家體育場",
-      "date": "2026-09-22",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-22",
-      "source": "動一動",
-      "category": "賽事資訊",
-      "summary": "由高雄市政府運動發展局主辦、富邦人壽冠名贊助的「2027富邦人壽高雄馬拉松」，將於2027年1月9日、10日熱鬧登場。2027年賽事推出全新亮點，馬拉松組與半程馬拉松組首度採用「貫穿。",
-      "url": "https://www.don1don.com/archives/241859/2027%e5%af%8c%e9%82%a6%e4%ba%ba%e5%a3%bd%e9%ab%98%e9%9b%84%e9%a6%ac%e6%8b%89%e6%9d%be%e5%85%a8%e6%96%b0%e8%b7%af%e7%b7%9a%e4%ba%ae%e7%9b%b8-%e5%be%9e%e5%a4%a2%e6%99%82%e4%bb%a3%e8%b7%91%e5%90%91",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
       "id": "news-kenlu-net-2026-09-asics-supports-the-asian-para-games-aichi-nagoya-2026",
       "type": "news",
       "title": "官方新聞 / ASICS 宣布成為 2026 亞洲帕拉運動會官方合作夥伴 以多元行動推廣運動",
@@ -462,23 +462,23 @@
       ]
     },
     {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114757-subtitle-e3-80-90-e6-9f-8f-e",
+      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a71879781-best-adidas-walking-shoes",
       "type": "news",
-      "title": "【柏林馬】跑進 2 小時 20 分！周庭印 2:19:56 35歲大破 PB，蔡政軒小破個人最佳",
-      "date": "2026-09-28",
+      "title": "2026 最佳12雙 Adidas 健走鞋推薦！Samba、Gazelle、Stan Smith...最好走又最好搭一次看",
+      "date": "2026-07-13",
       "date_source": "source",
-      "article_date": "2026-09-28",
-      "first_seen_at": "2026-09-29",
-      "source": "運動筆記",
-      "category": "賽事資訊",
-      "summary": "2026 柏林馬拉松於 9 月 27 日登場，除了世界頂尖好手齊聚德國首都，今年台灣跑者也有亮眼表現。其中，35 歲的周庭印以 晶片成績 2 小時 19 分 56 秒完成比賽，生涯首度突破 2 小時 20 分大關，將自己在 2024 臺北馬。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114757&subtitle=%E3%80%90%E6%9F%8F%E6%9E%97%E9%A6%AC%E3%80%91%E8%B7%91%E9%80%B2%202%20%E5%B0%8F%E6%99%82%2020%20%E5%88%86%EF%BC%81%E5%91%A8%E5%BA%AD%E5%8D%B0%202:19:56%2035%E6%AD%B2%E5%A4%A7%E7%A0%B4%20PB%EF%BC%8C%E8%94%A1%E6%94%BF%E8%BB%92%E5%B0%8F%E7%A0%B4%E5%80%8B%E4%BA%BA%E6%9C%80%E4%BD%B3&label=all",
-      "score": 6,
+      "article_date": "2026-07-13",
+      "first_seen_at": "2026-07-14",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "精選 12 雙 Adidas 最值得入手的健走鞋，兼具舒適腳感與日常百搭性，找出最適合你的那一雙。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a71879781/best-adidas-walking-shoes/",
+      "score": 7,
       "source_origin": "candidate",
       "published_at": "2026-09-29",
       "publish_status": "published",
       "source_aliases": [
-        "運動筆記"
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -499,26 +499,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-241491-e5-ae-8c-e7-be-8e-e4-b8-94-e7-94-a8-e7-9b-a1-e5-",
-      "type": "news",
-      "title": "完美且用盡全力的五千公尺怎麼跑",
-      "date": "2026-09-08",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-08",
-      "source": "動一動",
-      "category": "賽事資訊",
-      "summary": "五千公尺的競賽挑戰看似只有馬拉松的八分之一，可認真跑起來，痛苦程度卻一點也不低。整體距離短，意味著沒有容錯空間。前面只要衝得稍微快一點，後半段就可能迅速掉速，最後兩千公尺甚至變成漫長的煎熬。如果你是半程馬拉松或全程馬拉松的跑者，我們尤其容易低。",
-      "url": "https://www.don1don.com/archives/241491/%e5%ae%8c%e7%be%8e%e4%b8%94%e7%94%a8%e7%9b%a1%e5%85%a8%e5%8a%9b%e7%9a%84%e4%ba%94%e5%8d%83%e5%85%ac%e5%b0%ba%e6%80%8e%e9%ba%bc%e8%b7%91",
-      "score": 6,
-      "source_origin": "candidate",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
       ]
     },
     {
@@ -602,26 +582,6 @@
       ]
     },
     {
-      "id": "news-www-hk01-com-e5-8d-b3-e6-99-82-e9-ab-94-e8-82-b2-60393927-e4-ba-9e-e9-81-8b-e6-9",
-      "type": "news",
-      "title": "亞運會2026馬拉松︱林穎璋抱恙仍力追 冀啟發下一代挑戰亞洲水平",
-      "date": "2026-09-27",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-27",
-      "source": "HK01 跑步",
-      "category": "賽事資訊",
-      "summary": "香港跑手林穎璋出戰名古屋亞運2026馬拉松，以2小時22分04秒列第15名。他賽後表示身體「出咗少少狀況」，但仍盡力追名次，成功從前段的第19位追至第。",
-      "url": "https://www.hk01.com/%E5%8D%B3%E6%99%82%E9%AB%94%E8%82%B2/60393927/%E4%BA%9E%E9%81%8B%E6%9C%832026%E9%A6%AC%E6%8B%89%E6%9D%BE-%E6%9E%97%E7%A9%8E%E7%92%8B%E6%8A%B1%E6%81%99%E4%BB%8D%E5%8A%9B%E8%BF%BD-%E5%86%80%E5%95%9F%E7%99%BC%E4%B8%8B%E4%B8%80%E4%BB%A3%E6%8C%91%E6%88%B0%E4%BA%9E%E6%B4%B2%E6%B0%B4%E5%B9%B3",
-      "score": 5,
-      "source_origin": "candidate",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "HK01 跑步"
-      ]
-    },
-    {
       "id": "news-www-hk01-com-e5-8d-b3-e6-99-82-e9-ab-94-e8-82-b2-60393940-e4-ba-9e-e9-81-8b-e6-9",
       "type": "news",
       "title": "亞運會2026馬拉松︱羅映潮8星期前受傷壓力山大 黃卓寧開心圓夢",
@@ -694,6 +654,26 @@
       "summary": "我們為了心情跑、為了健康跑、因為無聊跑，用自己的方式跑出多巴胺、跑出自信！",
       "url": "https://event.womenshealth.com.tw/2026/runningyou/",
       "score": 5,
+      "source_origin": "candidate",
+      "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a73910056-leg-shaping-improvement-e",
+      "type": "news",
+      "title": "蘿蔔腿是因為運動太多？專家揭露真正原因「是這個」！再教3分鐘企鵝體操＋選對鞋就能瘦小腿",
+      "date": "2026-09-29",
+      "date_source": "source",
+      "article_date": "2026-09-29",
+      "first_seen_at": "2026-09-29",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "小腿怎麼都瘦不下來？小心是你的走路姿勢錯了！",
+      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a73910056/leg-shaping-improvement-exercise/",
+      "score": 4,
       "source_origin": "candidate",
       "published_at": "2026-09-29",
       "publish_status": "published",
@@ -1096,6 +1076,26 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
+      "id": "news-kenlu-net-2026-08-adidas-harden-vol-1-restomod-pioneer-release-info",
+      "type": "news",
+      "title": "上市速報 / 中底改用 HYPERBOOST 科技 adidas Harden Vol. 1 Restomod ‘Pioneer’ 臺灣販售資整理",
+      "date": "2026-08-27",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-08-27",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "adidas Harden Vol.1 Restomod ‘Pioneer’ 臺灣現已發售，為大家整理已經公布販售資訊的店點，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
+      "url": "https://kenlu.net/2026/08/adidas-harden-vol-1-restomod-pioneer-release-info/",
+      "score": 26,
+      "source_origin": "archive",
+      "published_at": "2026-09-29",
       "publish_status": "published"
     },
     {
@@ -1219,6 +1219,66 @@
       ]
     },
     {
+      "id": "shoe-bouncin-net-p-news-new-stuff-6213-nike-alphafly-4-speed-running",
+      "type": "shoe",
+      "title": "NIKE 旗艦競速跑鞋 ALPHAFLY 4 正式發表",
+      "date": "2026-09-29",
+      "date_source": "source",
+      "article_date": "2026-09-29",
+      "first_seen_at": "2026-09-29",
+      "source": "Bounce",
+      "category": "競速",
+      "summary": "這雙鞋目前以「競速」定位收錄。適合放在比賽日、節奏跑與間歇課，週跑量還不穩時不要拿來天天穿。",
+      "url": "https://bouncin.net/p/news/new-stuff/6213/nike-alphafly-4-speed-running",
+      "score": 28,
+      "source_origin": "candidate",
+      "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "Bounce"
+      ]
+    },
+    {
+      "id": "shoe-bouncin-net-p-news-new-stuff-6216-adidas-adizero-adios-pro-5",
+      "type": "shoe",
+      "title": "adidas ADIZERO ADIOS PRO 5 進化登場 《HOUSE OF SPEED 破速特區》同步開放報名 邀跑者體驗 ADIZERO 破速魅力",
+      "date": "2026-09-29",
+      "date_source": "source",
+      "article_date": "2026-09-29",
+      "first_seen_at": "2026-09-29",
+      "source": "Bounce",
+      "category": "跑鞋新品",
+      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
+      "url": "https://bouncin.net/p/news/new-stuff/6216/adidas-adizero-adios-pro-5",
+      "score": 14,
+      "source_origin": "candidate",
+      "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "Bounce"
+      ]
+    },
+    {
+      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114764-subtitle-e3-80-90-e5-93-81-e",
+      "type": "shoe",
+      "title": "【品牌動態】點亮城市夜幕！MIZUNO攜手FIELD DAY發表全新 TSUKIAKARI 月影系列",
+      "date": "2026-09-29",
+      "date_source": "source",
+      "article_date": "2026-09-29",
+      "first_seen_at": "2026-09-29",
+      "source": "運動筆記",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114764&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91%E9%BB%9E%E4%BA%AE%E5%9F%8E%E5%B8%82%E5%A4%9C%E5%B9%95%EF%BC%81MIZUNO%E6%94%9C%E6%89%8BFIELD%20DAY%E7%99%BC%E8%A1%A8%E5%85%A8%E6%96%B0%20TSUKIAKARI%20%E6%9C%88%E5%BD%B1%E7%B3%BB%E5%88%97&label=all",
+      "score": 13,
+      "source_origin": "candidate",
+      "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
       "id": "shoe-kenlu-net-2026-09-brooks-hyperion-max-4-review-by-erik-tai",
       "type": "shoe",
       "title": "勘履鞋評 / 菁英級超馬跑者 Erik 實測 BROOKS HYPERION MAX 4：「穩定推進不費力的頂級訓練鞋！」",
@@ -1299,6 +1359,26 @@
       ]
     },
     {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a73198037-asics-novablast-6",
+      "type": "shoe",
+      "title": "ASICS NOVABLAST 6 編輯實測心得：推進力大升級，穩定度更讓人意外！【跑鞋速報】",
+      "date": "2026-07-21",
+      "date_source": "source",
+      "article_date": "2026-07-21",
+      "first_seen_at": "2026-07-22",
+      "source": "Women's Health Taiwan",
+      "category": "日常訓練",
+      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73198037/asics-novablast-6/",
+      "score": 27,
+      "source_origin": "candidate",
+      "published_at": "2026-09-29",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
       "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-g71879573-best-hoka-shoes-for-walki",
       "type": "shoe",
       "title": "2026 Hoka 步行鞋推薦！6雙人氣鞋款評比，足科醫師與運動編輯實測解析",
@@ -1356,26 +1436,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "shoe-bouncin-net-p-news-new-stuff-6207-on-cloudmonster-3-hyper-ls",
-      "type": "shoe",
-      "title": "一體成形無縫鞋面! 瑞士 On 昂跑 Cloudmonster 3 Hyper LS 台灣正式上市",
-      "date": "2026-09-14",
-      "date_source": "source",
-      "article_date": "2026-09-14",
-      "first_seen_at": "2026-09-15",
-      "source": "Bounce",
-      "category": "長距離緩震",
-      "summary": "這雙鞋目前以「長距離緩震」定位收錄。適合長跑、恢復跑與累積里程，挑選時要看後段穩定，不只看剛試穿的彈感。",
-      "url": "https://bouncin.net/p/news/new-stuff/6207/on-cloudmonster-3-hyper-ls",
-      "score": 26,
-      "source_origin": "candidate",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
       ]
     },
     {
@@ -1996,6 +2056,23 @@
       ]
     },
     {
+      "id": "shoe-bouncin-net-p-news-new-stuff-6207-on-cloudmonster-3-hyper-ls",
+      "type": "shoe",
+      "title": "一體成形無縫鞋面! 瑞士 On 昂跑 Cloudmonster 3 Hyper LS 台灣正式上市",
+      "date": "2026-09-14",
+      "date_source": "source",
+      "article_date": "2026-09-14",
+      "first_seen_at": "2026-09-15",
+      "source": "Bounce",
+      "category": "長距離緩震",
+      "summary": "這雙鞋目前以「長距離緩震」定位收錄。適合長跑、恢復跑與累積里程，挑選時要看後段穩定，不只看剛試穿的彈感。",
+      "url": "https://bouncin.net/p/news/new-stuff/6207/on-cloudmonster-3-hyper-ls",
+      "score": 25,
+      "source_origin": "archive",
+      "published_at": "2026-09-29",
+      "publish_status": "published"
+    },
+    {
       "id": "shoe-bouncin-net-p-news-new-stuff-6147-asics-gt-2000-15",
       "type": "shoe",
       "title": "ASICS 穩定支撐型跑鞋 GT-2000 15 升級上市",
@@ -2236,63 +2313,23 @@
       ]
     },
     {
-      "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114400-subtitle-e3-80-90-e5-93-81-e",
+      "id": "shoe-www-runnersworld-com-gear-a73761888-nike-alphafly-4-launch-review",
       "type": "shoe",
-      "title": "【品牌動態】adidas HYPERBOOST 超級緩震跑鞋家族系列輕彈登場 ！",
-      "date": "2026-07-28",
-      "date_source": "source",
-      "article_date": "2026-07-28",
-      "first_seen_at": "2026-07-29",
-      "source": "運動筆記",
-      "category": "長距離緩震",
-      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114400&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91adidas%20HYPERBOOST%20%E8%B6%85%E7%B4%9A%E7%B7%A9%E9%9C%87%E8%B7%91%E9%9E%8B%E5%AE%B6%E6%97%8F%E7%B3%BB%E5%88%97%E8%BC%95%E5%BD%88%E7%99%BB%E5%A0%B4%EF%BC%81&label=all",
-      "score": 20,
-      "source_origin": "archive",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
-      ]
-    },
-    {
-      "id": "shoe-www-don1don-com-archives-241076-nike-pegasus-plus-2-e5-8d-b3-e5-b0-87-e7-99-bb-e",
-      "type": "shoe",
-      "title": "NIKE PEGASUS PLUS 2即將登場，解鎖日常訓練新配速",
-      "date": "2026-08-22",
+      "title": "Nike Delivers the Alphafly 4 Ahead of Fall Marathon Season. We’ve Tested It and Have the Deets",
+      "date": "2026-09-21",
       "date_source": "first_seen",
       "article_date": "",
-      "first_seen_at": "2026-08-22",
-      "source": "動一動",
-      "category": "日常訓練",
-      "summary": "這雙鞋目前以「日常訓練」定位收錄。適合輕鬆跑、恢復跑與日常累積里程，是多數跑者第一雙主力鞋的優先選項。",
-      "url": "https://www.don1don.com/archives/241076/nike-pegasus-plus-2%e5%8d%b3%e5%b0%87%e7%99%bb%e5%a0%b4%ef%bc%8c%e8%a7%a3%e9%8e%96%e6%97%a5%e5%b8%b8%e8%a8%93%e7%b7%b4%e6%96%b0%e9%85%8d%e9%80%9f",
-      "score": 19,
-      "source_origin": "archive",
+      "first_seen_at": "2026-09-21",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a73761888/nike-alphafly-4-launch-review/",
+      "score": 30,
+      "source_origin": "candidate",
       "published_at": "2026-09-29",
       "publish_status": "published",
       "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
-      "id": "shoe-kenlu-net-2026-08-on-cloudboom-strike-2-official-news",
-      "type": "shoe",
-      "title": "官方新聞 / 速度再進化！瑞士昂跑 On Cloudboom Strike 2 全新登場",
-      "date": "2026-08-21",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-21",
-      "source": "KENLU",
-      "category": "速度訓練",
-      "summary": "這雙鞋目前以「速度訓練」定位收錄。適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
-      "url": "https://kenlu.net/2026/08/on-cloudboom-strike-2-official-news/",
-      "score": 18,
-      "source_origin": "archive",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
+        "Runner's World"
       ]
     },
     {
@@ -2353,46 +2390,6 @@
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a71231662-adidas-adizero-adios-pro-4-review",
-      "type": "shoe",
-      "title": "The Adidas Sub-2 Marathon Shoe Sold Out in 2 Minutes. The Brand’s Adizero Adios Pro 4 Is Still Available for Almost Half the Price.",
-      "date": "2026-09-03",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-03",
-      "source": "Runner's World",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a71231662/adidas-adizero-adios-pro-4-review/",
-      "score": 18,
-      "source_origin": "archive",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
-      ]
-    },
-    {
-      "id": "shoe-www-t3-com-active-running-norda-055-launch-0726",
-      "type": "shoe",
-      "title": "The cult Canadian trail brand challenging Hoka just unveiled a record-breaking new shoe",
-      "date": "2026-07-07",
-      "date_source": "source",
-      "article_date": "2026-07-07",
-      "first_seen_at": "2026-07-09",
-      "source": "T3 Running",
-      "category": "越野",
-      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
-      "url": "https://www.t3.com/active/running/norda-055-launch-0726",
-      "score": 19,
-      "source_origin": "archive",
-      "published_at": "2026-09-29",
-      "publish_status": "published",
-      "source_aliases": [
-        "T3 Running"
       ]
     }
   ]
