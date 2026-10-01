@@ -47,5 +47,34 @@
         "hint": "可能混入過期或其他來源的組別；距離：全馬（42.195K）、半馬（21K）、12.2K、5K、12.5K、10K、3K；起跑列：全馬組（42.195K）、半馬組（21K）、挑戰組（12.2K）、休閒組（5K）"
       }
     ]
+  },
+  {
+    "race_id": "8bec1055-3a03-4b34-8e80-8a315f18aee5",
+    "race_name": "2027 The North Face 100 谷關越野挑戰賽",
+    "race_date": "2027-04-25",
+    "race_county": "臺中市",
+    "distances": [
+      "60km",
+      "40km",
+      "25km",
+      "13.2km",
+      "3人接力",
+      "58.9km",
+      "37.4km",
+      "24.7km",
+      "12.3km"
+    ],
+    "start_times": "超馬組（100K） 起跑 04:00、超馬組（65K） 起跑 04:30、超半馬組（40K） 起跑 06:30、20K 起跑 07:00",
+    "registration_link": "https://bao-ming.com/eb/content/7183#34112",
+    "official_event_url": "https://bao-ming.com/eb/content/7183#34112",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13188&subtitle=2027+The+North+Face+100+%E8%B0%B7%E9%97%9C%E8%B6%8A%E9%87%8E%E6%8C%91%E6%88%B0%E8%B3%BD",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "high",
+        "label": "起跑組別少於距離數",
+        "hint": "可能混入過期或其他來源的組別；距離：超馬（60K）、超半馬（40K）、超半馬（25K）、13.2K、3K、超馬（58.9K）、超半馬（37.4K）、超半馬（24.7K）、12.3K；起跑列：超馬組（100K）、超馬組（65K）、超半馬組（40K）、20K"
+      }
+    ]
   }
 ]

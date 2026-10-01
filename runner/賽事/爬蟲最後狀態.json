@@ -1,8 +1,8 @@
 {
-  "scrape_date": "2026-09-29 10:48",
-  "added": 1,
+  "scrape_date": "2026-10-01 10:51",
+  "added": 2,
   "updated": 1,
-  "total": 74,
+  "total": 75,
   "sources": [
     "運動筆記",
     "中華民國路跑協會",
@@ -15,7 +15,8 @@
     "115 年臺中市體育總會理事長盃北區路跑嘉年華||2026-11-14: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7180",
     "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7016",
     "2026 Miaoli Fun Young！跑酷越野障礙賽||2026-12-19: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7204",
-    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004"
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004",
+    "2027 The North Face 100 谷關越野挑戰賽||2027-04-25: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7183"
   ],
   "has_errors": true,
   "enrichment_errors": [
@@ -24,7 +25,8 @@
     "115 年臺中市體育總會理事長盃北區路跑嘉年華||2026-11-14: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7180",
     "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7016",
     "2026 Miaoli Fun Young！跑酷越野障礙賽||2026-12-19: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7204",
-    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004"
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7004",
+    "2027 The North Face 100 谷關越野挑戰賽||2027-04-25: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7183"
   ],
   "has_enrichment_errors": true
 }
