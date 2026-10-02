@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02T08:57:20.954Z",
+  "generated_at": "2026-10-02T10:35:48.654Z",
   "items": [
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114698-subtitle-e3-80-90-e7-b7-a8-e",
@@ -259,6 +259,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a73237702-best-shoes-for-back-pain-",
+      "type": "news",
+      "title": "走沒多久就腰痠背痛？專家實測7雙「久走不累鞋」，HOKA、New Balance都上榜",
+      "date": "2026-07-23",
+      "date_source": "source",
+      "article_date": "2026-07-23",
+      "first_seen_at": "2026-07-23",
+      "source": "Women's Health Taiwan",
+      "category": "跑鞋裝備",
+      "summary": "一雙具備良好支撐與緩震設計的鞋子，可能就是改善不適的關鍵。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73237702/best-shoes-for-back-pain-recommend/",
+      "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-10-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -1096,24 +1116,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-10-02",
-      "publish_status": "published"
-    },
-    {
-      "id": "news-kenlu-net-2026-05-hoka-speedgoat-7-review-by-yangzz421",
-      "type": "news",
-      "title": "網友 劉名洋 鞋評 / HOKA Speedgoat 7",
-      "date": "2026-07-02",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-07-02",
-      "source": "KENLU",
-      "category": "恢復保養",
-      "summary": "我是鋼鐵運動訓練的劉名洋。平常訓練以路跑賽事、場內課表為主，這幾年也陸續接觸越野跑與登山。過去參加過幾場越野賽，像是 2022 Formosa Trail 16K 拿下總排第 3、2023 墾丁 Xterra 21K 總排第 7，而當時陪我完賽的是 HOKA Speedgoat 4。",
-      "url": "https://kenlu.net/2026/05/hoka-speedgoat-7-review-by-yangzz421/",
-      "score": 28,
-      "source_origin": "archive",
-      "published_at": "2026-10-02",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
@@ -1428,6 +1434,26 @@
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.womenshealthmag.com/tw/fashion/equipment/g71879573/best-hoka-shoes-for-walking/",
       "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-10-02",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a72268341-hoka-clifton-11",
+      "type": "shoe",
+      "title": "HOKA Clifton 11正式登場！滑順腳感全面升級，規格、配色、售價一次看【跑鞋速報】",
+      "date": "2026-07-16",
+      "date_source": "source",
+      "article_date": "2026-07-16",
+      "first_seen_at": "2026-07-17",
+      "source": "Women's Health Taiwan",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a72268341/hoka-clifton-11/",
+      "score": 28,
       "source_origin": "candidate",
       "published_at": "2026-10-02",
       "publish_status": "published",
@@ -1831,23 +1857,6 @@
       "source_aliases": [
         "運動筆記"
       ]
-    },
-    {
-      "id": "shoe-www-hk01-com-e8-b7-91-e6-ad-a5-60374849-e6-a2-81-e5-be-b7-e6-b4-8b-e5-af-a6-e6-b",
-      "type": "shoe",
-      "title": "梁德洋實測HOKA Clifton 11與Clifton PRO：令訓練更豐富的好拍檔",
-      "date": "2026-08-05",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-05",
-      "source": "HK01 跑步",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.hk01.com/%E8%B7%91%E6%AD%A5/60374849/%E6%A2%81%E5%BE%B7%E6%B4%8B%E5%AF%A6%E6%B8%AChoka-clifton-11%E8%88%87clifton-pro-%E4%BB%A4%E8%A8%93%E7%B7%B4%E6%9B%B4%E8%B1%90%E5%AF%8C%E7%9A%84%E5%A5%BD%E6%8B%8D%E6%AA%94",
-      "score": 20,
-      "source_origin": "archive",
-      "published_at": "2026-10-02",
-      "publish_status": "published"
     },
     {
       "id": "shoe-bouncin-net-p-news-new-stuff-6150-brooks-hyperion-elite-6-hyperion-max-4",
