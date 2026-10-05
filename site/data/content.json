@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-05T09:37:01.027Z",
+  "generated_at": "2026-10-05T12:41:24.363Z",
   "items": [
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114698-subtitle-e3-80-90-e7-b7-a8-e",
@@ -562,6 +562,26 @@
       ]
     },
     {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114775-subtitle-e3-80-90-e5-81-b4-e",
+      "type": "news",
+      "title": "【側記】跑進山林，Arcteryx 讓裝備真正有了答案！北中南線下野練跑聚全紀錄",
+      "date": "2026-10-05",
+      "date_source": "source",
+      "article_date": "2026-10-05",
+      "first_seen_at": "2026-10-05",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "越野跑的裝備好不好用，規格表只能提供一部分答案。真正進入山徑後，面對上坡、碎石、樹根、濕滑路面與長時間移動，鞋子的抓地與推進、背心的貼合與取物便利性，才會真正被放大檢視。今年 Arc。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114775&subtitle=%E3%80%90%E5%81%B4%E8%A8%98%E3%80%91%E8%B7%91%E9%80%B2%E5%B1%B1%E6%9E%97%EF%BC%8CArcteryx%20%E8%AE%93%E8%A3%9D%E5%82%99%E7%9C%9F%E6%AD%A3%E6%9C%89%E4%BA%86%E7%AD%94%E6%A1%88%EF%BC%81%E5%8C%97%E4%B8%AD%E5%8D%97%E7%B7%9A%E4%B8%8B%E9%87%8E%E7%B7%B4%E8%B7%91%E8%81%9A%E5%85%A8%E7%B4%80%E9%8C%84&label=all",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-10-05",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114791-subtitle-e3-80-90-e5-93-81-e",
       "type": "news",
       "title": "【品牌動態】SKECHERS玩真的！成立「舒適無法黨」四大鞋款角逐舒適代表",
@@ -573,6 +593,26 @@
       "category": "跑鞋裝備",
       "summary": "一年一度的週年慶開跑，除了搶優惠、買新品，今年更要「選邊站」！全球舒適科技領導品牌SKECHERS發揮創意，推出話題企劃「舒適無法黨」，將不同生活型態與穿鞋需求化身四大「候選人」，從全天候機能、跑步競速到潮流穿搭與復古時尚，各自端出代表。",
       "url": "https://running.biji.co/index.php?q=news&act=info&id=114791&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91SKECHERS%E7%8E%A9%E7%9C%9F%E7%9A%84%EF%BC%81%E6%88%90%E7%AB%8B%E3%80%8C%E8%88%92%E9%81%A9%E7%84%A1%E6%B3%95%E9%BB%A8%E3%80%8D%E5%9B%9B%E5%A4%A7%E9%9E%8B%E6%AC%BE%E8%A7%92%E9%80%90%E8%88%92%E9%81%A9%E4%BB%A3%E8%A1%A8&label=all",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-10-05",
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114795-subtitle-e3-80-90-e8-b3-bd-e",
+      "type": "news",
+      "title": "【賽事】2026 Xtrail 貓空站上週末熱血落幕！首創「三貓串連」解鎖城市山林新體驗",
+      "date": "2026-10-05",
+      "date_source": "source",
+      "article_date": "2026-10-05",
+      "first_seen_at": "2026-10-05",
+      "source": "運動筆記",
+      "category": "賽事資訊",
+      "summary": "穿梭於翠綠茶園與溼滑山徑之間，2026 Xtrail 越野跑挑戰賽&mdash;貓空站於上週末盛大登場！本次賽事分為 5K 體驗組、17K 進階組以及 31K 挑戰組三個組別，吸引無數國內外越野好手齊聚，在貓空獨特的地貌與高落差賽道中展開激.",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114795&subtitle=%E3%80%90%E8%B3%BD%E4%BA%8B%E3%80%912026%20Xtrail%20%E8%B2%93%E7%A9%BA%E7%AB%99%E4%B8%8A%E9%80%B1%E6%9C%AB%E7%86%B1%E8%A1%80%E8%90%BD%E5%B9%95%EF%BC%81%E9%A6%96%E5%89%B5%E3%80%8C%E4%B8%89%E8%B2%93%E4%B8%B2%E9%80%A3%E3%80%8D%E8%A7%A3%E9%8E%96%E5%9F%8E%E5%B8%82%E5%B1%B1%E6%9E%97%E6%96%B0%E9%AB%94%E9%A9%97&label=all",
       "score": 7,
       "source_origin": "candidate",
       "published_at": "2026-10-05",
@@ -692,7 +732,7 @@
       "source": "運動筆記",
       "category": "跑步新聞",
       "summary": "一圈約 5 公里、不需要停紅綠燈，又位在東京市中心，「皇居跑（皇居ラン）」長年是日本最具代表性的城市跑步路線之一。但近來開始出現「皇居跑是不是該禁止了」、「步道應該優先給行人」等討論。東京都千代田區也證實，曾收到民眾反映部分跑者高速通過，甚。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114786&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%91%E6%9D%B1%E4%BA%AC%E3%80%8C%E7%9A%87%E5%B1%85%E8%B7%91%E3%80%8D%E5%87%BA%E7%8F%BE%E7%A6%81%E8%B7%91%E8%81%B2%E6%B5%AA%EF%BC%81%E5%96%AE%E6%97%A5%E9%80%BE%E8%90%AC%E5%90%8D%E8%B7%91%E8%80%85%EF%BC%8C%E5%85%AC%E5%85%B1%E6%AD%A5%E9%81%93%E7%9A%84%E4%BD%BF%E7%94%A8%E8%A1%9D%E7%AA%81%E6%B5%AE%E4%B8%8A%E6%AA%AF%E9%9D%A2&label=all",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114786&subtitle=%E3%80%90%E8%A9%B1%E9%A1%8C%E3%80%91%E6%9D%B1%E4%BA%AC%E3%80%8C%E7%9A%87%E5%B1%85%E8%B7%91%E3%80%8D%E5%87%BA%E7%8F%BE%E7%A6%81%E8%B7%91%E8%81%B2%E6%B5%AA%EF%BC%81%E5%96%AE%E6%97%A5%E9%80%BE%E8%90%AC%E5%90%8D%E8%B7%91%E8%80%85%EF%BC%8C%E5%85%AC%E5%85%B1%E6%AD%A5%E9%81%93%E7%9A%84%E4%BD%BF%E7%94%A8%E8%A1%9D%E7%AA%81%E6%B5%AE%E4%B8%8A%E6%AA%AF%E9%9D%A2",
       "score": 6,
       "source_origin": "candidate",
       "published_at": "2026-10-05",
@@ -862,6 +902,26 @@
       ]
     },
     {
+      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a74026804-walking-live-longer-study",
+      "type": "news",
+      "title": "不是慢跑也不是重訓！研究揭密「最強長壽運動」是它，做對了多活11年",
+      "date": "2026-10-05",
+      "date_source": "source",
+      "article_date": "2026-10-05",
+      "first_seen_at": "2026-10-05",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "HYROX 類型訓練提醒跑者：肌力、動作控制與心肺耐力會互相影響。想提升表現，不能只堆跑量。",
+      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a74026804/walking-live-longer-study/",
+      "score": 4,
+      "source_origin": "candidate",
+      "published_at": "2026-10-05",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
       "id": "news-www-hk01-com-e5-8d-b3-e6-99-82-e9-ab-94-e8-82-b2-60394061-e4-ba-9e-e9-81-8b-e6-9",
       "type": "news",
       "title": "亞運會2026｜葉景維200米準決賽跑20.74秒晉級 吳君浩無緣決賽",
@@ -939,6 +999,26 @@
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fitness-yoga-a73197563-walking-yoga-benefit",
+      "type": "news",
+      "title": "不是超慢跑也不是健走！「走路瑜珈」國外爆紅！每天5動作，邊走邊減肥還能壓力全消！",
+      "date": "2026-07-21",
+      "date_source": "source",
+      "article_date": "2026-07-21",
+      "first_seen_at": "2026-07-22",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "簡單改變走路方式就能達到運動與療癒的效果！",
+      "url": "https://www.womenshealthmag.com/tw/fitness/yoga/a73197563/walking-yoga-benefit/",
+      "score": 4,
+      "source_origin": "candidate",
+      "published_at": "2026-10-05",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -1042,46 +1122,6 @@
       ]
     },
     {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114464-subtitle-e3-80-90-e7-b7-a8-e",
-      "type": "news",
-      "title": "【編輯開箱】The North Face Offtrail Ultra 專為技術地形而生的越野跑鞋",
-      "date": "2026-08-11",
-      "date_source": "source",
-      "article_date": "2026-08-11",
-      "first_seen_at": "2026-08-11",
-      "source": "運動筆記",
-      "category": "跑鞋裝備",
-      "summary": "富士山周邊賽事從公路馬到長距離越野都有，重點不是只看距離，而是爬升、補給、旅跑成本與自身山徑經驗是否匹配。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114464&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91The%20North%20Face%20Offtrail%20Ultra%20%E5%B0%88%E7%82%BA%E6%8A%80%E8%A1%93%E5%9C%B0%E5%BD%A2%E8%80%8C%E7%94%9F%E7%9A%84%E8%B6%8A%E9%87%8E%E8%B7%91%E9%9E%8B&label=all",
-      "score": 28,
-      "source_origin": "archive",
-      "published_at": "2026-10-05",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
-      ]
-    },
-    {
-      "id": "news-running-biji-co-index-php-q-news-act-info-id-114405-subtitle-e3-80-90-e7-b7-a8-e",
-      "type": "news",
-      "title": "【編輯開箱】ARC",
-      "date": "2026-07-29",
-      "date_source": "source",
-      "article_date": "2026-07-29",
-      "first_seen_at": "2026-07-30",
-      "source": "運動筆記",
-      "category": "跑步新聞",
-      "summary": "高速越野跑的過程中，像風一樣輕盈流動，在山林間自在穿梭，全新 ARC。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114405&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91ARC%27TERYX%20SYLAN%202%20%E8%B6%8A%E9%87%8E%E8%B7%91%E9%9E%8B%E8%A9%95%E6%B8%AC%EF%BD%9C%E9%87%8D%E9%87%8F%E3%80%81%E7%A2%B3%E6%9D%BF%E3%80%81%E4%B8%AD%E5%BA%95%E3%80%81%E5%AF%A6%E8%B7%91%E5%BF%83%E5%BE%97%E5%AE%8C%E6%95%B4%E8%A7%A3%E6%9E%90&label=all",
-      "score": 28,
-      "source_origin": "archive",
-      "published_at": "2026-10-05",
-      "publish_status": "published",
-      "source_aliases": [
-        "運動筆記"
-      ]
-    },
-    {
       "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
       "type": "news",
       "title": "I ran 40 miles in the Hoka Clifton Pro and it&rsquo;s the best Clifton I&rsquo;ve tested and a worthwhile upgrade on the Clifton 11",
@@ -1142,26 +1182,6 @@
       ]
     },
     {
-      "id": "news-www-tomsguide-com-wellness-running-i-ran-40-miles-in-the-on-cloudboom-volt-and-i",
-      "type": "news",
-      "title": "I ran 40 miles in the On Cloudboom Volt and it&rsquo;s a snappy super-sneaker for training and racing",
-      "date": "2026-08-30",
-      "date_source": "source",
-      "article_date": "2026-08-30",
-      "first_seen_at": "2026-09-01",
-      "source": "Tom's Guide Running",
-      "category": "跑鞋裝備",
-      "summary": "Looks good, runs good。",
-      "url": "https://www.tomsguide.com/wellness/running/i-ran-40-miles-in-the-on-cloudboom-volt-and-its-a-snappy-super-sneaker-for-training-and-racing",
-      "score": 17,
-      "source_origin": "candidate",
-      "published_at": "2026-10-05",
-      "publish_status": "published",
-      "source_aliases": [
-        "Tom's Guide Running"
-      ]
-    },
-    {
       "id": "news-www-tomsguide-com-wellness-running-i-ran-35-miles-in-the-adidas-adizero-adios-pr",
       "type": "news",
       "title": "I ran 35 miles in the Adidas Adizero Adios Pro Evo 3 &mdash; is the record-breaking carbon super-shoe worth its $500 price?",
@@ -1182,26 +1202,6 @@
       ]
     },
     {
-      "id": "news-www-tomsguide-com-wellness-running-ive-tested-almost-every-hoka-running-shoe-and",
-      "type": "news",
-      "title": "I&rsquo;ve tested almost every Hoka running shoe and 3 of my favorites are reduced right now",
-      "date": "2026-07-15",
-      "date_source": "source",
-      "article_date": "2026-07-15",
-      "first_seen_at": "2026-07-16",
-      "source": "Tom's Guide Running",
-      "category": "跑鞋裝備",
-      "summary": "Hoka&rsquo;s in-house sale is packed with bargains right now and I&rsquo;ve picked out 3 of the best shoes I&rsquo;ve tested that are available at big...",
-      "url": "https://www.tomsguide.com/wellness/running/ive-tested-almost-every-hoka-running-shoe-and-3-of-my-favorites-are-reduced-right-now",
-      "score": 28,
-      "source_origin": "archive",
-      "published_at": "2026-10-05",
-      "publish_status": "published",
-      "source_aliases": [
-        "Tom's Guide Running"
-      ]
-    },
-    {
       "id": "shoe-running-biji-co-index-php-q-news-act-info-id-114785-subtitle-e3-80-90-e5-93-81-e",
       "type": "shoe",
       "title": "【品牌動態】adidas 2026臺北馬拉松限定色 BOSTON 13 與限定服飾全新登場",
@@ -1212,7 +1212,7 @@
       "source": "運動筆記",
       "category": "跑鞋新品",
       "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://running.biji.co/index.php?q=news&act=info&id=114785&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91adidas%202026%E8%87%BA%E5%8C%97%E9%A6%AC%E6%8B%89%E6%9D%BE%E9%99%90%E5%AE%9A%E8%89%B2%20BOSTON%2013%20%E8%88%87%E9%99%90%E5%AE%9A%E6%9C%8D%E9%A3%BE%E5%85%A8%E6%96%B0%E7%99%BB%E5%A0%B4&label=all",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114785&subtitle=%E3%80%90%E5%93%81%E7%89%8C%E5%8B%95%E6%85%8B%E3%80%91adidas%202026%E8%87%BA%E5%8C%97%E9%A6%AC%E6%8B%89%E6%9D%BE%E9%99%90%E5%AE%9A%E8%89%B2%20BOSTON%2013%20%E8%88%87%E9%99%90%E5%AE%9A%E6%9C%8D%E9%A3%BE%E5%85%A8%E6%96%B0%E7%99%BB%E5%A0%B4",
       "score": 27,
       "source_origin": "candidate",
       "published_at": "2026-10-05",
@@ -1279,6 +1279,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a73198037-asics-novablast-6",
+      "type": "shoe",
+      "title": "ASICS NOVABLAST 6 編輯實測心得：推進力大升級，穩定度更讓人意外！【跑鞋速報】",
+      "date": "2026-07-21",
+      "date_source": "source",
+      "article_date": "2026-07-21",
+      "first_seen_at": "2026-07-22",
+      "source": "Women's Health Taiwan",
+      "category": "日常訓練",
+      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73198037/asics-novablast-6/",
+      "score": 27,
+      "source_origin": "candidate",
+      "published_at": "2026-10-05",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -2276,43 +2296,6 @@
       ]
     },
     {
-      "id": "shoe-kenlu-net-2026-08-on-cloudboom-strike-2-official-news",
-      "type": "shoe",
-      "title": "官方新聞 / 速度再進化！瑞士昂跑 On Cloudboom Strike 2 全新登場",
-      "date": "2026-08-21",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-21",
-      "source": "KENLU",
-      "category": "速度訓練",
-      "summary": "這雙鞋目前以「速度訓練」定位收錄。適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
-      "url": "https://kenlu.net/2026/08/on-cloudboom-strike-2-official-news/",
-      "score": 18,
-      "source_origin": "archive",
-      "published_at": "2026-10-05",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "shoe-www-don1don-com-archives-240353-adidas-hyperboost-e8-b6-85-e7-b4-9a-e7-b7-a9-e9-",
-      "type": "shoe",
-      "title": "adidas HYPERBOOST超級緩震跑鞋家族系列輕彈登場",
-      "date": "2026-07-29",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-07-29",
-      "source": "動一動",
-      "category": "長距離緩震",
-      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://www.don1don.com/archives/240353/adidas-hyperboost%e8%b6%85%e7%b4%9a%e7%b7%a9%e9%9c%87%e8%b7%91%e9%9e%8b%e5%ae%b6%e6%97%8f%e7%b3%bb%e5%88%97%e8%bc%95%e5%bd%88%e7%99%bb%e5%a0%b4",
-      "score": 17,
-      "source_origin": "archive",
-      "published_at": "2026-10-05",
-      "publish_status": "published"
-    },
-    {
       "id": "shoe-www-t3-com-active-running-adidas-adizero-adios-pro-5-review",
       "type": "shoe",
       "title": "Adidas Adizero Adios Pro 5 review: The marathon supershoe for the rest of us",
@@ -2324,12 +2307,52 @@
       "category": "跑鞋新品",
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.t3.com/active/running/adidas-adizero-adios-pro-5-review",
-      "score": 28,
+      "score": 30,
       "source_origin": "candidate",
       "published_at": "2026-10-05",
       "publish_status": "published",
       "source_aliases": [
         "T3 Running"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a73761888-nike-alphafly-4-launch-review",
+      "type": "shoe",
+      "title": "Nike Delivers the Alphafly 4 Ahead of Fall Marathon Season. We’ve Tested It and Have the Deets",
+      "date": "2026-09-21",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-21",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a73761888/nike-alphafly-4-launch-review/",
+      "score": 30,
+      "source_origin": "candidate",
+      "published_at": "2026-10-05",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a73667372-hoka-tecton-x-4-review",
+      "type": "shoe",
+      "title": "The Hoka Tecton X 4 Review: They’re Fast, Light, and Ready for Rocky Trails",
+      "date": "2026-09-11",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-11",
+      "source": "Runner's World",
+      "category": "越野",
+      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
+      "url": "https://www.runnersworld.com/gear/a73667372/hoka-tecton-x-4-review/",
+      "score": 26,
+      "source_origin": "candidate",
+      "published_at": "2026-10-05",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
       ]
     },
     {
@@ -2350,26 +2373,6 @@
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a71231662-adidas-adizero-adios-pro-4-review",
-      "type": "shoe",
-      "title": "The Adidas Sub-2 Marathon Shoe Sold Out in 2 Minutes. The Brand’s Adizero Adios Pro 4 Is Still Available for Almost Half the Price.",
-      "date": "2026-09-03",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-03",
-      "source": "Runner's World",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a71231662/adidas-adizero-adios-pro-4-review/",
-      "score": 18,
-      "source_origin": "archive",
-      "published_at": "2026-10-05",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
       ]
     },
     {
