@@ -49,6 +49,32 @@
     ]
   },
   {
+    "race_id": "ea093a65-67f3-4504-baea-087dce8680e5",
+    "race_name": "2027神岡馬-神豐國際同濟會全國公益馬拉松-慢飛天使圓夢 讓愛起飛",
+    "race_date": "2027-03-28",
+    "race_county": "臺中市",
+    "distances": [
+      "42.195km",
+      "23km",
+      "10.5km",
+      "4.5km",
+      "21km",
+      "9.5km"
+    ],
+    "start_times": "超半馬組（23K） 起跑 06:00、挑戰組（10.5K） 起跑 06:10、樂活健走組（4.5K） 起跑 06:20",
+    "registration_link": "https://signup.lohasnet.tw/signup/4273",
+    "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13107",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13107&subtitle=2027%E7%A5%9E%E5%B2%A1%E9%A6%AC-%E7%A5%9E%E8%B1%90%E5%9C%8B%E9%9A%9B%E5%90%8C%E6%BF%9F%E6%9C%83%E5%85%A8%E5%9C%8B%E5%85%AC%E7%9B%8A%E9%A6%AC%E6%8B%89%E6%9D%BE-%E6%85%A2%E9%A3%9B%E5%A4%A9%E4%BD%BF%E5%9C%93%E5%A4%A2+%E8%AE%93%E6%84%9B%E8%B5%B7%E9%A3%9B",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "high",
+        "label": "起跑組別少於距離數",
+        "hint": "可能混入過期或其他來源的組別；距離：全馬（42.195K）、超半馬（23K）、10.5K、4.5K、半馬（21K）、9.5K；起跑列：超半馬組（23K）、挑戰組（10.5K）、樂活健走組（4.5K）"
+      }
+    ]
+  },
+  {
     "race_id": "8bec1055-3a03-4b34-8e80-8a315f18aee5",
     "race_name": "2027 The North Face 100 谷關越野挑戰賽",
     "race_date": "2027-04-25",
