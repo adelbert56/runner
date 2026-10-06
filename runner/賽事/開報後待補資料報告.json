@@ -6,16 +6,16 @@
     "race_county": "臺中市",
     "registration_opens_at": "2026-07-31",
     "registration_deadline": "2026-10-06",
-    "registration_status": "報名中",
+    "registration_status": "已截止",
     "source_platform": "運動筆記",
     "is_official_direct": false,
     "priority_score": 5,
     "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-10-06",
-      "cadence": "weekly",
-      "reason": "開報日已過，仍缺：官方報名連結。"
+      "status": "closed_gap",
+      "status_label": "已截止，低頻補齊",
+      "next_check_date": "2026-10-07",
+      "cadence": "manual",
+      "reason": "報名已截止但仍缺：官方報名連結。保留供歷史資料補齊。"
     },
     "missing": [
       {
