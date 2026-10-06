@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T07:38:24.441Z",
+  "generated_at": "2026-10-06T08:52:24.326Z",
   "items": [
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114698-subtitle-e3-80-90-e7-b7-a8-e",
@@ -239,6 +239,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a73237702-best-shoes-for-back-pain-",
+      "type": "news",
+      "title": "走沒多久就腰痠背痛？專家實測7雙「久走不累鞋」，HOKA、New Balance都上榜",
+      "date": "2026-07-23",
+      "date_source": "source",
+      "article_date": "2026-07-23",
+      "first_seen_at": "2026-07-23",
+      "source": "Women's Health Taiwan",
+      "category": "跑鞋裝備",
+      "summary": "一雙具備良好支撐與緩震設計的鞋子，可能就是改善不適的關鍵。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73237702/best-shoes-for-back-pain-recommend/",
+      "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -502,6 +522,26 @@
       ]
     },
     {
+      "id": "news-www-don1don-com-archives-242170-e8-b7-91-e6-ad-a5-e8-88-87-e5-96-ae-e8-bb-8a-e6-",
+      "type": "news",
+      "title": "跑步與單車機能品牌 REMA 服飾首辦跑步訓練班",
+      "date": "2026-10-06",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-10-06",
+      "source": "動一動",
+      "category": "入門知識",
+      "summary": "最近，以單車與跑步服飾聞名的 REMA 也成立了 REMA RUNNING CLUB (RRC)，大刀闊斧地邀請了小風教練、高鈺安與黃琬鈐三位好手擔任跑班教練。針對新手、半馬目標與全馬挑戰等進行策略安排。據我所知的是，。",
+      "url": "https://www.don1don.com/archives/242170/%e8%b7%91%e6%ad%a5%e8%88%87%e5%96%ae%e8%bb%8a%e6%a9%9f%e8%83%bd%e5%93%81%e7%89%8c-rema-%e6%9c%8d%e9%a3%be%e9%a6%96%e8%be%a6%e8%b7%91%e6%ad%a5%e8%a8%93%e7%b7%b4%e7%8f%ad",
+      "score": 9,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114799-subtitle-e3-80-90-e8-a9-b1-e",
       "type": "news",
       "title": "【話題】被抓包！中國健身網紅柏林馬爆「坐單車」作弊 宣稱破PB後遭揪出，BROOKS 終止合作",
@@ -519,26 +559,6 @@
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-242052-merrell-xtrail-e8-b6-8a-e9-87-8e-e8-b7-91-e8-b2-",
-      "type": "news",
-      "title": "MERRELL Xtrail 越野跑貓空站特難 阿竣分享第一手賽道攻略",
-      "date": "2026-10-01",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-10-01",
-      "source": "動一動",
-      "category": "跑步新聞",
-      "summary": "阿竣說，越野跑最好玩的地方，是山徑裡從來沒有一個標準答案。譬如同一段上坡，有人能跑，也有人選擇快走。進入下坡路段，有跑者可以大膽放開速度，也有跑者收住腳步。每條道路上是石階、泥土、樹根，碎石與濕滑路面不斷轉換，越野跑者每一秒都必須重新觀察、判斷，然後做出選擇。",
-      "url": "https://www.don1don.com/archives/242052/merrell-xtrail-%e8%b6%8a%e9%87%8e%e8%b7%91%e8%b2%93%e7%a9%ba%e7%ab%99%e7%89%b9%e9%9b%a3-%e9%98%bf%e7%ab%a3%e5%88%86%e4%ba%ab%e7%ac%ac%e4%b8%80%e6%89%8b%e8%b3%bd%e9%81%93%e6%94%bb%e7%95%a5",
-      "score": 9,
-      "source_origin": "candidate",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
       ]
     },
     {
@@ -719,6 +739,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fashion-equipment-a71879781-best-adidas-walking-shoes",
+      "type": "news",
+      "title": "2026 最佳12雙 Adidas 健走鞋推薦！Samba、Gazelle、Stan Smith...最好走又最好搭一次看",
+      "date": "2026-07-13",
+      "date_source": "source",
+      "article_date": "2026-07-13",
+      "first_seen_at": "2026-07-14",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "精選 12 雙 Adidas 最值得入手的健走鞋，兼具舒適腳感與日常百搭性，找出最適合你的那一雙。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a71879781/best-adidas-walking-shoes/",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -1076,7 +1116,10 @@
       "score": 32,
       "source_origin": "archive",
       "published_at": "2026-10-06",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
@@ -1139,46 +1182,6 @@
       ]
     },
     {
-      "id": "news-www-tomsguide-com-wellness-running-i-ran-40-miles-in-the-on-cloudboom-volt-and-i",
-      "type": "news",
-      "title": "I ran 40 miles in the On Cloudboom Volt and it&rsquo;s a snappy super-sneaker for training and racing",
-      "date": "2026-08-30",
-      "date_source": "source",
-      "article_date": "2026-08-30",
-      "first_seen_at": "2026-09-01",
-      "source": "Tom's Guide Running",
-      "category": "跑鞋裝備",
-      "summary": "Looks good, runs good。",
-      "url": "https://www.tomsguide.com/wellness/running/i-ran-40-miles-in-the-on-cloudboom-volt-and-its-a-snappy-super-sneaker-for-training-and-racing",
-      "score": 17,
-      "source_origin": "candidate",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "Tom's Guide Running"
-      ]
-    },
-    {
-      "id": "news-www-tomsguide-com-wellness-running-asics-blazeblast-review",
-      "type": "news",
-      "title": "I ran 35 miles in the Asics Blazeblast, and it proved the perfect vacation shoe thanks to its versatile design",
-      "date": "2026-08-05",
-      "date_source": "source",
-      "article_date": "2026-08-05",
-      "first_seen_at": "2026-08-07",
-      "source": "Tom's Guide Running",
-      "category": "跑鞋裝備",
-      "summary": "A Novablast built for gravel roads。",
-      "url": "https://www.tomsguide.com/wellness/running/asics-blazeblast-review",
-      "score": 17,
-      "source_origin": "candidate",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "Tom's Guide Running"
-      ]
-    },
-    {
       "id": "news-www-tomsguide-com-wellness-running-i-ran-35-miles-in-the-adidas-adizero-adios-pr",
       "type": "news",
       "title": "I ran 35 miles in the Adidas Adizero Adios Pro Evo 3 &mdash; is the record-breaking carbon super-shoe worth its $500 price?",
@@ -1216,6 +1219,26 @@
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
+      ]
+    },
+    {
+      "id": "shoe-www-don1don-com-archives-242016-e9-87-8d-e6-96-b0-e6-80-9d-e8-80-83-e5-85-a8-e6-",
+      "type": "shoe",
+      "title": "重新思考全方位訓練 Nike 推出 Hybrid RN 運動鞋",
+      "date": "2026-09-30",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-30",
+      "source": "動一動",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.don1don.com/archives/242016/%e9%87%8d%e6%96%b0%e6%80%9d%e8%80%83%e5%85%a8%e6%96%b9%e4%bd%8d%e8%a8%93%e7%b7%b4-nike-%e6%8e%a8%e5%87%ba-hybrid-rn-%e9%81%8b%e5%8b%95%e9%9e%8b",
+      "score": 16,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
       ]
     },
     {
@@ -1276,6 +1299,66 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a73198037-asics-novablast-6",
+      "type": "shoe",
+      "title": "ASICS NOVABLAST 6 編輯實測心得：推進力大升級，穩定度更讓人意外！【跑鞋速報】",
+      "date": "2026-07-21",
+      "date_source": "source",
+      "article_date": "2026-07-21",
+      "first_seen_at": "2026-07-22",
+      "source": "Women's Health Taiwan",
+      "category": "日常訓練",
+      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73198037/asics-novablast-6/",
+      "score": 27,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-g71879573-best-hoka-shoes-for-walki",
+      "type": "shoe",
+      "title": "2026 Hoka 步行鞋推薦！6雙人氣鞋款評比，足科醫師與運動編輯實測解析",
+      "date": "2026-07-09",
+      "date_source": "source",
+      "article_date": "2026-07-09",
+      "first_seen_at": "2026-07-10",
+      "source": "Women's Health Taiwan",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/g71879573/best-hoka-shoes-for-walking/",
+      "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
+      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a72268341-hoka-clifton-11",
+      "type": "shoe",
+      "title": "HOKA Clifton 11正式登場！滑順腳感全面升級，規格、配色、售價一次看【跑鞋速報】",
+      "date": "2026-07-16",
+      "date_source": "source",
+      "article_date": "2026-07-16",
+      "first_seen_at": "2026-07-17",
+      "source": "Women's Health Taiwan",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a72268341/hoka-clifton-11/",
+      "score": 28,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -1576,26 +1659,6 @@
       ]
     },
     {
-      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a73198037-asics-novablast-6",
-      "type": "shoe",
-      "title": "ASICS NOVABLAST 6 編輯實測心得：推進力大升級，穩定度更讓人意外！【跑鞋速報】",
-      "date": "2026-07-21",
-      "date_source": "source",
-      "article_date": "2026-07-21",
-      "first_seen_at": "2026-07-22",
-      "source": "Women's Health Taiwan",
-      "category": "日常訓練",
-      "summary": "Novablast 6 偏日常訓練與彈性腳感，適合想用一雙鞋處理大多數里程、又希望比傳統日常鞋更有推進感的跑者。",
-      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a73198037/asics-novablast-6/",
-      "score": 26,
-      "source_origin": "archive",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
-      ]
-    },
-    {
       "id": "shoe-www-hk01-com-e8-b7-91-e6-ad-a5-60380547-e8-b7-91-e9-9e-8b-e6-8e-a8-e8-96-a6-new-",
       "type": "shoe",
       "title": "跑鞋推薦｜New Balance最新競速跑鞋實測 間歇跑節奏跑升級利器",
@@ -1693,26 +1756,6 @@
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
-      ]
-    },
-    {
-      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-g71879573-best-hoka-shoes-for-walki",
-      "type": "shoe",
-      "title": "2026 Hoka 步行鞋推薦！6雙人氣鞋款評比，足科醫師與運動編輯實測解析",
-      "date": "2026-07-09",
-      "date_source": "source",
-      "article_date": "2026-07-09",
-      "first_seen_at": "2026-07-10",
-      "source": "Women's Health Taiwan",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/g71879573/best-hoka-shoes-for-walking/",
-      "score": 18,
-      "source_origin": "archive",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -1873,26 +1916,6 @@
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
-      ]
-    },
-    {
-      "id": "shoe-www-womenshealthmag-com-tw-fashion-equipment-a72268341-hoka-clifton-11",
-      "type": "shoe",
-      "title": "HOKA Clifton 11正式登場！滑順腳感全面升級，規格、配色、售價一次看【跑鞋速報】",
-      "date": "2026-07-16",
-      "date_source": "source",
-      "article_date": "2026-07-16",
-      "first_seen_at": "2026-07-17",
-      "source": "Women's Health Taiwan",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.womenshealthmag.com/tw/fashion/equipment/a72268341/hoka-clifton-11/",
-      "score": 27,
-      "source_origin": "archive",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
       ]
     },
     {
@@ -2293,23 +2316,43 @@
       ]
     },
     {
-      "id": "shoe-kenlu-net-2026-08-on-cloudboom-strike-2-official-news",
+      "id": "shoe-www-runnersworld-com-gear-a73761888-nike-alphafly-4-launch-review",
       "type": "shoe",
-      "title": "官方新聞 / 速度再進化！瑞士昂跑 On Cloudboom Strike 2 全新登場",
-      "date": "2026-08-21",
+      "title": "Nike Delivers the Alphafly 4 Ahead of Fall Marathon Season. We’ve Tested It and Have the Deets",
+      "date": "2026-09-21",
       "date_source": "first_seen",
       "article_date": "",
-      "first_seen_at": "2026-08-21",
-      "source": "KENLU",
-      "category": "速度訓練",
-      "summary": "這雙鞋目前以「速度訓練」定位收錄。適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
-      "url": "https://kenlu.net/2026/08/on-cloudboom-strike-2-official-news/",
-      "score": 18,
-      "source_origin": "archive",
+      "first_seen_at": "2026-09-21",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a73761888/nike-alphafly-4-launch-review/",
+      "score": 30,
+      "source_origin": "candidate",
       "published_at": "2026-10-06",
       "publish_status": "published",
       "source_aliases": [
-        "KENLU"
+        "Runner's World"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a73667372-hoka-tecton-x-4-review",
+      "type": "shoe",
+      "title": "The Hoka Tecton X 4 Review: They’re Fast, Light, and Ready for Rocky Trails",
+      "date": "2026-09-11",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-11",
+      "source": "Runner's World",
+      "category": "越野",
+      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
+      "url": "https://www.runnersworld.com/gear/a73667372/hoka-tecton-x-4-review/",
+      "score": 26,
+      "source_origin": "candidate",
+      "published_at": "2026-10-06",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
       ]
     },
     {
@@ -2324,8 +2367,8 @@
       "category": "跑鞋新品",
       "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
       "url": "https://www.t3.com/active/running/adidas-adizero-adios-pro-5-review",
-      "score": 30,
-      "source_origin": "candidate",
+      "score": 29,
+      "source_origin": "archive",
       "published_at": "2026-10-06",
       "publish_status": "published",
       "source_aliases": [
@@ -2350,46 +2393,6 @@
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a71231662-adidas-adizero-adios-pro-4-review",
-      "type": "shoe",
-      "title": "The Adidas Sub-2 Marathon Shoe Sold Out in 2 Minutes. The Brand’s Adizero Adios Pro 4 Is Still Available for Almost Half the Price.",
-      "date": "2026-09-03",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-03",
-      "source": "Runner's World",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a71231662/adidas-adizero-adios-pro-4-review/",
-      "score": 18,
-      "source_origin": "archive",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
-      ]
-    },
-    {
-      "id": "shoe-www-t3-com-active-running-norda-055-launch-0726",
-      "type": "shoe",
-      "title": "The cult Canadian trail brand challenging Hoka just unveiled a record-breaking new shoe",
-      "date": "2026-07-07",
-      "date_source": "source",
-      "article_date": "2026-07-07",
-      "first_seen_at": "2026-07-09",
-      "source": "T3 Running",
-      "category": "越野",
-      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
-      "url": "https://www.t3.com/active/running/norda-055-launch-0726",
-      "score": 19,
-      "source_origin": "archive",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "T3 Running"
       ]
     }
   ]
