@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T08:52:24.326Z",
+  "generated_at": "2026-10-06T09:21:02.020Z",
   "items": [
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114698-subtitle-e3-80-90-e7-b7-a8-e",
@@ -1222,26 +1222,6 @@
       ]
     },
     {
-      "id": "shoe-www-don1don-com-archives-242016-e9-87-8d-e6-96-b0-e6-80-9d-e8-80-83-e5-85-a8-e6-",
-      "type": "shoe",
-      "title": "重新思考全方位訓練 Nike 推出 Hybrid RN 運動鞋",
-      "date": "2026-09-30",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-30",
-      "source": "動一動",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.don1don.com/archives/242016/%e9%87%8d%e6%96%b0%e6%80%9d%e8%80%83%e5%85%a8%e6%96%b9%e4%bd%8d%e8%a8%93%e7%b7%b4-nike-%e6%8e%a8%e5%87%ba-hybrid-rn-%e9%81%8b%e5%8b%95%e9%9e%8b",
-      "score": 16,
-      "source_origin": "candidate",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
       "id": "shoe-kenlu-net-2026-09-brooks-hyperion-max-4-review-by-erik-tai",
       "type": "shoe",
       "title": "勘履鞋評 / 菁英級超馬跑者 Erik 實測 BROOKS HYPERION MAX 4：「穩定推進不費力的頂級訓練鞋！」",
@@ -2394,6 +2374,23 @@
       "source_aliases": [
         "Tom's Guide Running"
       ]
+    },
+    {
+      "id": "shoe-www-t3-com-active-running-norda-055-launch-0726",
+      "type": "shoe",
+      "title": "The cult Canadian trail brand challenging Hoka just unveiled a record-breaking new shoe",
+      "date": "2026-07-07",
+      "date_source": "source",
+      "article_date": "2026-07-07",
+      "first_seen_at": "2026-07-09",
+      "source": "T3 Running",
+      "category": "越野",
+      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
+      "url": "https://www.t3.com/active/running/norda-055-launch-0726",
+      "score": 19,
+      "source_origin": "archive",
+      "published_at": "2026-10-06",
+      "publish_status": "published"
     }
   ]
 }
