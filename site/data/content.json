@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T07:35:38.689Z",
+  "generated_at": "2026-10-06T07:38:24.441Z",
   "items": [
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114698-subtitle-e3-80-90-e7-b7-a8-e",
@@ -722,26 +722,6 @@
       ]
     },
     {
-      "id": "news-www-don1don-com-archives-242011-2027-e6-b3-a2-e5-a3-ab-e9-a0-93-e9-a6-ac-e6-8b-8",
-      "type": "news",
-      "title": "2027 波士頓馬拉松錄取門檻出爐！須比 BQ 標準再快 5 分 17 秒",
-      "date": "2026-09-04",
-      "date_source": "source",
-      "article_date": "2026-09-04",
-      "first_seen_at": "2026-09-30",
-      "source": "動一動",
-      "category": "賽事資訊",
-      "summary": "2027 年波士頓馬拉松的錄取門檻出爐了：報名跑者全馬的成績，必須比所屬年齡及性別組別的 BQ 標準快至少 5 分 17 秒才能獲得錄取！",
-      "url": "https://www.don1don.com/archives/242011/2027-%e6%b3%a2%e5%a3%ab%e9%a0%93%e9%a6%ac%e6%8b%89%e6%9d%be%e9%8c%84%e5%8f%96%e9%96%80%e6%aa%bb%e5%87%ba%e7%88%90%ef%bc%81%e9%a0%88%e6%af%94-bq-%e6%a8%99%e6%ba%96%e5%86%8d%e5%bf%ab-5-%e5%88%86-17",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-10-06",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
       "id": "news-bouncin-net-p-news-hot-topics-6226-asics-2026-asian-para-games-official-partner",
       "type": "news",
       "title": "ASICS 宣布成為 2026 亞洲帕拉運動會官方合作夥伴",
@@ -1080,6 +1060,23 @@
       "source_aliases": [
         "運動筆記"
       ]
+    },
+    {
+      "id": "news-running-biji-co-index-php-q-news-act-info-id-114548-subtitle-e3-80-90-e7-b7-a8-e",
+      "type": "news",
+      "title": "【編輯開箱】不只是換上新泡棉！BROOKS HYPERION ELITE 6 的三項競速改造",
+      "date": "2026-08-20",
+      "date_source": "source",
+      "article_date": "2026-08-20",
+      "first_seen_at": "2026-08-21",
+      "source": "運動筆記",
+      "category": "跑鞋裝備",
+      "summary": "在碳板競速鞋已普遍採用 PEBA 泡棉、高堆疊中底與全掌碳纖維板的現在，決定一雙鞋表現的關鍵，早已不只是「用了什麼材料」，更在於泡棉、碳板與鞋底幾何如何共同運作。BROOKS 最新推出的 HYPERION ELITE 6，延續前代的 DNA。",
+      "url": "https://running.biji.co/index.php?q=news&act=info&id=114548&subtitle=%E3%80%90%E7%B7%A8%E8%BC%AF%E9%96%8B%E7%AE%B1%E3%80%91%E4%B8%8D%E5%8F%AA%E6%98%AF%E6%8F%9B%E4%B8%8A%E6%96%B0%E6%B3%A1%E6%A3%89%EF%BC%81BROOKS%20HYPERION%20ELITE%206%20%E7%9A%84%E4%B8%89%E9%A0%85%E7%AB%B6%E9%80%9F%E6%94%B9%E9%80%A0&label=all",
+      "score": 32,
+      "source_origin": "archive",
+      "published_at": "2026-10-06",
+      "publish_status": "published"
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
@@ -2310,7 +2307,10 @@
       "score": 18,
       "source_origin": "archive",
       "published_at": "2026-10-06",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "shoe-www-t3-com-active-running-adidas-adizero-adios-pro-5-review",
@@ -2367,7 +2367,10 @@
       "score": 18,
       "source_origin": "archive",
       "published_at": "2026-10-06",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
+      ]
     },
     {
       "id": "shoe-www-t3-com-active-running-norda-055-launch-0726",

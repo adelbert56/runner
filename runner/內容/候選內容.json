@@ -508,7 +508,7 @@
     ],
     "first_seen_at": "2026-10-06",
     "last_seen_at": "2026-10-06",
-    "seen_count": 3
+    "seen_count": 2
   },
   {
     "checked_at": "2026-10-06",
@@ -1307,21 +1307,7 @@
     ],
     "first_seen_at": "2026-10-06",
     "last_seen_at": "2026-10-06",
-    "seen_count": 4
-  },
-  {
-    "checked_at": "2026-10-06",
-    "source": "動一動",
-    "source_type": "跑鞋新品 / 跑步專題",
-    "title": "2027 波士頓馬拉松錄取門檻出爐！須比 BQ 標準再快 5 分 17 秒",
-    "url": "https://www.don1don.com/archives/242011/2027-%e6%b3%a2%e5%a3%ab%e9%a0%93%e9%a6%ac%e6%8b%89%e6%9d%be%e9%8c%84%e5%8f%96%e9%96%80%e6%aa%bb%e5%87%ba%e7%88%90%ef%bc%81%e9%a0%88%e6%af%94-bq-%e6%a8%99%e6%ba%96%e5%86%8d%e5%bf%ab-5-%e5%88%86-17",
-    "category": "訓練",
-    "score": 7,
-    "article_date": "2026-09-04",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "2027 年波士頓馬拉松的錄取門檻出爐了：報名跑者全馬的成績，必須比所屬年齡及性別組別的 BQ 標準快至少 5 分 17 秒才能獲得錄取！"
+    "seen_count": 5
   },
   {
     "checked_at": "2026-10-06",
@@ -2242,5 +2228,25 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": ""
+  },
+  {
+    "checked_at": "2026-10-06",
+    "source": "Runner's World",
+    "source_type": "英文跑鞋評測 / 訓練知識",
+    "title": "Client Challenge",
+    "url": "https://www.runnersworld.com/gear/a73948066/saucony-endorphin-speed-5-amazon-sale-september-2026/",
+    "category": "跑步新聞",
+    "score": 12,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "",
+    "source_aliases": [
+      "Runner's World"
+    ],
+    "first_seen_at": "2026-10-06",
+    "last_seen_at": "2026-10-06",
+    "seen_count": 2
   }
 ]

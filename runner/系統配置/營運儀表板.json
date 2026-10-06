@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T07:35:39.218Z",
+  "generated_at": "2026-10-06T07:38:24.988Z",
   "basis_date": "2026-10-06",
   "races": {
     "total": 74,
@@ -37,10 +37,10 @@
     "editorial_count": 4,
     "candidate_by_category": {
       "跑鞋新品": 59,
-      "跑步新聞": 66,
+      "跑步新聞": 67,
       "入門知識": 6,
       "補給": 1,
-      "訓練": 10,
+      "訓練": 9,
       "恢復": 2
     },
     "source_stable_count": 12,
@@ -75,7 +75,7 @@
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 16,
+        "candidate_count": 15,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
