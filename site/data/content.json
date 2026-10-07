@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T02:32:13.804Z",
+  "generated_at": "2026-10-07T09:13:25.274Z",
   "items": [
     {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114698-subtitle-e3-80-90-e7-b7-a8-e",
@@ -19,26 +19,6 @@
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-08-hoka-clifton-11-review-by-ciaoantsai",
-      "type": "news",
-      "title": "勘履鞋評 / 從 9 代穿到 11 代，跑者喬安：「HOKA Clifton 11 最成熟的一代日常訓練鞋！」",
-      "date": "2026-08-11",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-11",
-      "source": "KENLU",
-      "category": "入門知識",
-      "summary": "嗨，我是喬安，又回到熟悉的 Clifton 系列了！我開始規律跑步大約六年了，最初因為膝蓋容易不舒服，在教練建議下開始接觸 HOKA，也是從 Clifton 9 認識這個系列。",
-      "url": "https://kenlu.net/2026/08/hoka-clifton-11-review-by-ciaoantsai/",
-      "score": 33,
-      "source_origin": "candidate",
-      "published_at": "2026-10-07",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
       ]
     },
     {
@@ -114,26 +94,6 @@
       "summary": "對於想要挑戰半馬 Sub-85 的跑者來說，選擇賽事跑鞋最怕兩件事： 一是鞋子太過暴力難以駕馭，二是賽事後段體能下滑時失去了保護力。這次接觸全新的 PUMA Deviate NITRO Elite 4，實測訓練兩週課表後，它給我的感受只有兩個字：「踏實」。",
       "url": "https://kenlu.net/2026/09/puma-deviate-nitro-elite-4-review-by-caleb/",
       "score": 29,
-      "source_origin": "candidate",
-      "published_at": "2026-10-07",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-08-the-north-face-offtrail-ultra-official-news",
-      "type": "news",
-      "title": "官方新聞 / 迎戰 TNF100 2027 越野挑戰賽！The North Face 新一代越野跑鞋登場",
-      "date": "2026-08-11",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-08-11",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "The North Face 宣布 2027 年 The North Face 100 越野挑戰賽（簡稱 TNF100）將於香港及台中谷關接力舉行。",
-      "url": "https://kenlu.net/2026/08/the-north-face-offtrail-ultra-official-news/",
-      "score": 23,
       "source_origin": "candidate",
       "published_at": "2026-10-07",
       "publish_status": "published",
@@ -482,26 +442,6 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-10-mizuno-x-sean-wotherspoon-wave-mg4-ls-leak-news",
-      "type": "news",
-      "title": "勘履滑手機 / MIZUNO 找來 Sean Wotherspoon 打造聯名手套！等等，你以為只有這樣？",
-      "date": "2026-10-06",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-10-06",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "上個週末一早，編輯的 Instagram 限時動態幾乎被一咖色彩繽紛的棒球手套洗版。原來是洛杉磯知名選品店 Round Two 主理人 Sean Wotherspoon 與 MIZUNO 展開全新聯名企劃，以 「The World is in Your Hands」 為主題，將他招牌的撞色美學注入...",
-      "url": "https://kenlu.net/2026/10/mizuno-x-sean-wotherspoon-wave-mg4-ls-leak-news/",
-      "score": 9,
-      "source_origin": "candidate",
-      "published_at": "2026-10-07",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
       "id": "news-www-don1don-com-archives-242170-e8-b7-91-e6-ad-a5-e8-88-87-e5-96-ae-e8-bb-8a-e6-",
       "type": "news",
       "title": "跑步與單車機能品牌 REMA 服飾首辦跑步訓練班",
@@ -542,23 +482,23 @@
       ]
     },
     {
-      "id": "news-www-don1don-com-archives-242052-merrell-xtrail-e8-b6-8a-e9-87-8e-e8-b7-91-e8-b2-",
+      "id": "news-kenlu-net-2026-10-rose-puma-speedcat-burgundy",
       "type": "news",
-      "title": "MERRELL Xtrail 越野跑貓空站特難 阿竣分享第一手賽道攻略",
-      "date": "2026-10-01",
+      "title": "官方新聞 / 跟上 ROSÉ 指定「勃根地紅」！朴彩英操刀 PUMA SPEEDCAT 聯名款換上秋冬新色",
+      "date": "2026-10-07",
       "date_source": "first_seen",
       "article_date": "",
-      "first_seen_at": "2026-10-01",
-      "source": "動一動",
-      "category": "跑步新聞",
-      "summary": "阿竣說，越野跑最好玩的地方，是山徑裡從來沒有一個標準答案。譬如同一段上坡，有人能跑，也有人選擇快走。進入下坡路段，有跑者可以大膽放開速度，也有跑者收住腳步。每條道路上是石階、泥土、樹根，碎石與濕滑路面不斷轉換，越野跑者每一秒都必須重新觀察、判斷，然後做出選擇。",
-      "url": "https://www.don1don.com/archives/242052/merrell-xtrail-%e8%b6%8a%e9%87%8e%e8%b7%91%e8%b2%93%e7%a9%ba%e7%ab%99%e7%89%b9%e9%9b%a3-%e9%98%bf%e7%ab%a3%e5%88%86%e4%ba%ab%e7%ac%ac%e4%b8%80%e6%89%8b%e8%b3%bd%e9%81%93%e6%94%bb%e7%95%a5",
-      "score": 8,
+      "first_seen_at": "2026-10-07",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "ROSÉ 最近都被「勃根地紅」包圍！近期多次以勃根地紅點綴整體風格，讓這抹內斂又時髦的色彩，悄悄掀起一波夏末初秋的酒紅風潮。不同於鮮明正紅，勃根地紅帶著更深沉的低調奢華質感，為秋冬造型增添一抹濃郁而時髦的氣息。",
+      "url": "https://kenlu.net/2026/10/rose-puma-speedcat-burgundy/",
+      "score": 7,
       "source_origin": "candidate",
       "published_at": "2026-10-07",
       "publish_status": "published",
       "source_aliases": [
-        "動一動"
+        "KENLU"
       ]
     },
     {
@@ -619,26 +559,6 @@
       "publish_status": "published",
       "source_aliases": [
         "運動筆記"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-10-skechers-voting-event",
-      "type": "news",
-      "title": "官方新聞 / SKECHERS 成立「舒適無法黨」四大鞋款角逐舒適代表 投票就有機會把鞋帶回家",
-      "date": "2026-10-05",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-10-05",
-      "source": "KENLU",
-      "category": "跑鞋裝備",
-      "summary": "一年一度的週年慶開跑，除了搶優惠、買新品，今年更要「選邊站」！全球舒適科技領導品牌 SKECHERS 發揮創意，推出話題企劃「舒適無法黨」，將不同生活型態與穿鞋需求化身四大「候選人」，從全天候機能、跑步競速到潮流穿搭與復古時尚，各自端出代表鞋款角逐「舒適代表」寶座，邀請消費者票選心目中的舒適派。",
-      "url": "https://kenlu.net/2026/10/skechers-voting-event/",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-10-07",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
       ]
     },
     {
@@ -862,6 +782,26 @@
       ]
     },
     {
+      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-g74060477-harvard-best-fat-burning",
+      "type": "news",
+      "title": "討厭跑步必看！哈佛大學認證「這運動」才是燃脂天花板： 效率完勝慢跑，花最少時間瘦最快",
+      "date": "2026-10-07",
+      "date_source": "source",
+      "article_date": "2026-10-07",
+      "first_seen_at": "2026-10-07",
+      "source": "Women's Health Taiwan",
+      "category": "入門知識",
+      "summary": "同時提升心肺功能、耐力與下半身肌力而且幾乎不需器材！",
+      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/g74060477/harvard-best-fat-burning/",
+      "score": 5,
+      "source_origin": "candidate",
+      "published_at": "2026-10-07",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
+      ]
+    },
+    {
       "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a74029354-top-fat-burning-exercises",
       "type": "news",
       "title": "減肥該做什麼運動？專家點名「9種」燃脂運動排行榜！第一名不是跑步、是「這1種」",
@@ -919,6 +859,26 @@
       "publish_status": "published",
       "source_aliases": [
         "HK01 跑步"
+      ]
+    },
+    {
+      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a74026804-walking-live-longer-study",
+      "type": "news",
+      "title": "不是慢跑也不是重訓！研究揭密「最強長壽運動」是它，做對了多活11年",
+      "date": "2026-10-05",
+      "date_source": "source",
+      "article_date": "2026-10-05",
+      "first_seen_at": "2026-10-05",
+      "source": "Women's Health Taiwan",
+      "category": "跑步新聞",
+      "summary": "HYROX 類型訓練提醒跑者：肌力、動作控制與心肺耐力會互相影響。想提升表現，不能只堆跑量。",
+      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a74026804/walking-live-longer-study/",
+      "score": 4,
+      "source_origin": "candidate",
+      "published_at": "2026-10-07",
+      "publish_status": "published",
+      "source_aliases": [
+        "Women's Health Taiwan"
       ]
     },
     {
@@ -1082,6 +1042,26 @@
       ]
     },
     {
+      "id": "news-kenlu-net-2026-08-hoka-clifton-11-review-by-ciaoantsai",
+      "type": "news",
+      "title": "勘履鞋評 / 從 9 代穿到 11 代，跑者喬安：「HOKA Clifton 11 最成熟的一代日常訓練鞋！」",
+      "date": "2026-08-11",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-08-11",
+      "source": "KENLU",
+      "category": "入門知識",
+      "summary": "嗨，我是喬安，又回到熟悉的 Clifton 系列了！我開始規律跑步大約六年了，最初因為膝蓋容易不舒服，在教練建議下開始接觸 HOKA，也是從 Clifton 9 認識這個系列。",
+      "url": "https://kenlu.net/2026/08/hoka-clifton-11-review-by-ciaoantsai/",
+      "score": 32,
+      "source_origin": "archive",
+      "published_at": "2026-10-07",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
       "id": "news-running-biji-co-index-php-q-news-act-info-id-114466-subtitle-e3-80-90-e8-a9-95-e",
       "type": "news",
       "title": "【評測】從跑步到 HYROX 體能戰，ASICS GT-2000 15 打造全方位複合訓練的最佳戰靴",
@@ -1096,7 +1076,10 @@
       "score": 32,
       "source_origin": "archive",
       "published_at": "2026-10-07",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "運動筆記"
+      ]
     },
     {
       "id": "news-kenlu-net-2026-09-new-balance-2026-nyc-marathon-shoes-release-info",
@@ -1113,7 +1096,10 @@
       "score": 28,
       "source_origin": "archive",
       "published_at": "2026-10-07",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-hoka-clifton-pro-review",
@@ -1167,6 +1153,26 @@
       "category": "跑鞋裝備",
       "summary": "A speedy plated sneaker with plenty of spring。",
       "url": "https://www.tomsguide.com/wellness/running/weve-run-60-miles-in-the-new-balance-supercomp-rebel-v1-and-its-our-new-favorite-fast-training-shoe",
+      "score": 17,
+      "source_origin": "candidate",
+      "published_at": "2026-10-07",
+      "publish_status": "published",
+      "source_aliases": [
+        "Tom's Guide Running"
+      ]
+    },
+    {
+      "id": "news-www-tomsguide-com-wellness-running-i-ran-40-miles-in-the-on-cloudboom-volt-and-i",
+      "type": "news",
+      "title": "I ran 40 miles in the On Cloudboom Volt and it&rsquo;s a snappy super-sneaker for training and racing",
+      "date": "2026-08-30",
+      "date_source": "source",
+      "article_date": "2026-08-30",
+      "first_seen_at": "2026-09-01",
+      "source": "Tom's Guide Running",
+      "category": "跑鞋裝備",
+      "summary": "Looks good, runs good。",
+      "url": "https://www.tomsguide.com/wellness/running/i-ran-40-miles-in-the-on-cloudboom-volt-and-its-a-snappy-super-sneaker-for-training-and-racing",
       "score": 17,
       "source_origin": "candidate",
       "published_at": "2026-10-07",
@@ -2290,44 +2296,21 @@
       ]
     },
     {
-      "id": "shoe-www-runnersworld-com-gear-a73761888-nike-alphafly-4-launch-review",
+      "id": "shoe-kenlu-net-2026-08-on-cloudboom-strike-2-official-news",
       "type": "shoe",
-      "title": "Nike Delivers the Alphafly 4 Ahead of Fall Marathon Season. We’ve Tested It and Have the Deets",
-      "date": "2026-09-21",
+      "title": "官方新聞 / 速度再進化！瑞士昂跑 On Cloudboom Strike 2 全新登場",
+      "date": "2026-08-21",
       "date_source": "first_seen",
       "article_date": "",
-      "first_seen_at": "2026-09-21",
-      "source": "Runner's World",
-      "category": "跑鞋新品",
-      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
-      "url": "https://www.runnersworld.com/gear/a73761888/nike-alphafly-4-launch-review/",
-      "score": 30,
-      "source_origin": "candidate",
+      "first_seen_at": "2026-08-21",
+      "source": "KENLU",
+      "category": "速度訓練",
+      "summary": "這雙鞋目前以「速度訓練」定位收錄。適合節奏跑與中長距離配速課，能補上日常鞋與競速鞋之間的空位。",
+      "url": "https://kenlu.net/2026/08/on-cloudboom-strike-2-official-news/",
+      "score": 18,
+      "source_origin": "archive",
       "published_at": "2026-10-07",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
-      ]
-    },
-    {
-      "id": "shoe-www-runnersworld-com-gear-a73667372-hoka-tecton-x-4-review",
-      "type": "shoe",
-      "title": "The Hoka Tecton X 4 Review: They’re Fast, Light, and Ready for Rocky Trails",
-      "date": "2026-09-11",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-09-11",
-      "source": "Runner's World",
-      "category": "越野",
-      "summary": "這雙鞋目前以「越野」定位收錄。適合山徑、碎石與濕滑路面，先確認鞋底抓地、保護性與自己的路線需求。",
-      "url": "https://www.runnersworld.com/gear/a73667372/hoka-tecton-x-4-review/",
-      "score": 26,
-      "source_origin": "candidate",
-      "published_at": "2026-10-07",
-      "publish_status": "published",
-      "source_aliases": [
-        "Runner's World"
-      ]
+      "publish_status": "published"
     },
     {
       "id": "shoe-www-t3-com-active-running-adidas-adizero-adios-pro-5-review",
@@ -2368,6 +2351,23 @@
       "source_aliases": [
         "Tom's Guide Running"
       ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a71231662-adidas-adizero-adios-pro-4-review",
+      "type": "shoe",
+      "title": "The Adidas Sub-2 Marathon Shoe Sold Out in 2 Minutes. The Brand’s Adizero Adios Pro 4 Is Still Available for Almost Half the Price.",
+      "date": "2026-09-03",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-09-03",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a71231662/adidas-adizero-adios-pro-4-review/",
+      "score": 18,
+      "source_origin": "archive",
+      "published_at": "2026-10-07",
+      "publish_status": "published"
     },
     {
       "id": "shoe-www-t3-com-active-running-norda-055-launch-0726",
