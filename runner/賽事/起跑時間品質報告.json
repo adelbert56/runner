@@ -1,5 +1,28 @@
 [
   {
+    "race_id": "cd7b49ea-7a4c-469c-b863-c74e94cdeb8a",
+    "race_name": "2026東豐快通車路跑嘉年華",
+    "race_date": "2026-11-07",
+    "race_county": "臺中市",
+    "distances": [
+      "21km",
+      "10km",
+      "5km"
+    ],
+    "start_times": "半程馬拉松組 起跑 06:45、10公里 起跑 07:15、5公里 起跑 07:20、5公里 起跑 07:30、10公里 起跑 08:55、5公里 起跑 09:00、半程馬拉松組 起跑 09:40、10公里 起跑 09:45",
+    "registration_link": "https://signup.lohasnet.tw/signup/4271",
+    "official_event_url": "https://lohasnet.tw/DongfengRun2026/",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13100&subtitle=%E6%9D%B1%E8%B1%90%E5%BF%AB%E9%80%9A%E8%BB%8A%E8%B7%AF%E8%B7%91%E5%98%89%E5%B9%B4%E8%8F%AF",
+    "issues": [
+      {
+        "key": "same_group_multiple_times",
+        "severity": "high",
+        "label": "同一組別出現多個起跑時間",
+        "hint": "可疑組別：半程馬拉松組、10公里、5公里"
+      }
+    ]
+  },
+  {
     "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
     "race_name": "慵懶跑者聚樂部-COZY RUNNER CLUB",
     "race_date": "2026-11-15",
@@ -18,6 +41,30 @@
         "severity": "high",
         "label": "同一組別出現多個起跑時間",
         "hint": "可疑組別：10公里"
+      }
+    ]
+  },
+  {
+    "race_id": "567466c5-20c8-47f3-a0af-5e9b5241647d",
+    "race_name": "第四屆國姓鹿跑—四鹿尋境・漫跑國姓",
+    "race_date": "2026-12-13",
+    "race_county": "南投縣",
+    "distances": [
+      "42.195km",
+      "23km",
+      "13km",
+      "4.5km"
+    ],
+    "start_times": "全馬組 起跑 06:30、超半馬組 起跑 06:30、挑戰組 起跑 06:30",
+    "registration_link": "https://irunner.biji.co/2026Guomatathon/signup",
+    "official_event_url": "https://irunner.biji.co/2026Guomatathon?page=5667",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13174&subtitle=%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%9C%8B%E5%A7%93%E9%B9%BF%E8%B7%91%E2%80%94%E5%9B%9B%E9%B9%BF%E5%B0%8B%E5%A2%83%EF%BC%8E%E6%BC%AB%E8%B7%91%E5%9C%8B%E5%A7%93",
+    "issues": [
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "high",
+        "label": "起跑組別少於距離數",
+        "hint": "可能混入過期或其他來源的組別；距離：全馬（42.195K）、超半馬（23K）、13K、4.5K；起跑列：全馬組、超半馬組、挑戰組"
       }
     ]
   },
@@ -45,6 +92,30 @@
         "severity": "high",
         "label": "起跑組別少於距離數",
         "hint": "可能混入過期或其他來源的組別；距離：全馬（42.195K）、半馬（21K）、12.2K、5K、12.5K、10K、3K；起跑列：全馬組（42.195K）、半馬組（21K）、挑戰組（12.2K）、休閒組（5K）"
+      }
+    ]
+  },
+  {
+    "race_id": "05ea484a-216e-479f-8822-2511d85cdb8f",
+    "race_name": "2027 高美濕地馬拉松",
+    "race_date": "2027-03-14",
+    "race_county": "臺中市",
+    "distances": [
+      "42.195km",
+      "21km",
+      "10km",
+      "5km"
+    ],
+    "start_times": "42公里 起跑 06:00、21公里 起跑 06:10、10公里 起跑 06:20、5公里 起跑 06:30、5公里 起跑 08:00、10公里 起跑 08:50、21公里 起跑 10:40、42公里 起跑 12:30",
+    "registration_link": "https://signup.lohasnet.tw/signup/4284",
+    "official_event_url": "https://lohasnet.tw/Taichung_Harbor2027/",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13143&subtitle=2027+%E9%AB%98%E7%BE%8E%E6%BF%95%E5%9C%B0%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "same_group_multiple_times",
+        "severity": "high",
+        "label": "同一組別出現多個起跑時間",
+        "hint": "可疑組別：42公里、21公里、10公里、5公里"
       }
     ]
   },

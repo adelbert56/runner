@@ -13,7 +13,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-10-07",
+      "next_check_date": "2026-10-08",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：官方報名連結。保留供歷史資料補齊。"
     },
