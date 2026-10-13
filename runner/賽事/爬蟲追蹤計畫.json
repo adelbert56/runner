@@ -12,7 +12,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-10-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 164 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 159 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -44,7 +44,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-10-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 164 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 159 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -75,7 +75,7 @@
       "status_label": "每月追蹤",
       "next_check_date": "2026-10-15",
       "cadence": "monthly_1_15",
-      "reason": "距離賽事 191 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
+      "reason": "距離賽事 186 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
     },
     "missing": [
       "official_registration_link",
@@ -106,7 +106,7 @@
       "status_label": "未來再查",
       "next_check_date": "2027-06-07",
       "cadence": "future",
-      "reason": "距離賽事 423 天，先排到賽前約 180 天再追。"
+      "reason": "距離賽事 418 天，先排到賽前約 180 天再追。"
     },
     "missing": [
       "official_registration_link",
@@ -135,9 +135,9 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "weekly",
-      "reason": "距離賽事 66 天且開報日未知，應每週追蹤報名頁是否釋出。"
+      "reason": "距離賽事 61 天且開報日未知，應每週追蹤報名頁是否釋出。"
     },
     "missing": [
       "registration_opens_at",
@@ -165,7 +165,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：開報時間、報名截止時間。除非要補歷史資料，優先度較低。"
     },
@@ -192,7 +192,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：官方報名連結。保留供歷史資料補齊。"
     },
@@ -218,7 +218,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：開報時間、各距離開跑時間。保留供歷史資料補齊。"
     },
@@ -245,7 +245,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：各距離開跑時間、費用、名額。保留供歷史資料補齊。"
     },
@@ -273,7 +273,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、費用、名額。"
     },
@@ -301,7 +301,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：各距離開跑時間、費用。除非要補歷史資料，優先度較低。"
     },
@@ -326,11 +326,11 @@
     "is_official_direct": true,
     "priority_score": 2,
     "tracking": {
-      "status": "due_now",
-      "status_label": "現在該重爬",
-      "next_check_date": "2026-10-08",
-      "cadence": "every_3_days",
-      "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：各距離開跑時間、名額。"
+      "status": "monitor_weekly",
+      "status_label": "每週追蹤",
+      "next_check_date": "2026-10-13",
+      "cadence": "biweekly",
+      "reason": "開報日已過，仍缺：各距離開跑時間、名額。"
     },
     "missing": [
       "start_times",
@@ -355,7 +355,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：各距離開跑時間。除非要補歷史資料，優先度較低。"
     },
@@ -381,7 +381,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：各距離開跑時間。除非要補歷史資料，優先度較低。"
     },
@@ -407,7 +407,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：名額。除非要補歷史資料，優先度較低。"
     },
@@ -433,7 +433,7 @@
     "tracking": {
       "status": "archive_gap",
       "status_label": "賽事已過，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "賽事已過但仍缺：名額。除非要補歷史資料，優先度較低。"
     },
@@ -457,11 +457,11 @@
     "is_official_direct": true,
     "priority_score": 1,
     "tracking": {
-      "status": "pre_race_recheck",
-      "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-10-08",
-      "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 3 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：名額。"
+      "status": "archive_gap",
+      "status_label": "賽事已過，低頻補齊",
+      "next_check_date": "2026-10-13",
+      "cadence": "manual",
+      "reason": "賽事已過但仍缺：名額。除非要補歷史資料，優先度較低。"
     },
     "missing": [
       "quota"
@@ -485,9 +485,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 9 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：名額。"
+      "reason": "距離賽事 4 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：名額。"
     },
     "missing": [
       "quota"
@@ -511,7 +511,7 @@
     "tracking": {
       "status": "closed_gap",
       "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "manual",
       "reason": "報名已截止但仍缺：名額。保留供歷史資料補齊。"
     },
@@ -537,7 +537,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -563,7 +563,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -589,7 +589,7 @@
     "tracking": {
       "status": "monitor_weekly",
       "status_label": "每週追蹤",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "biweekly",
       "reason": "開報日已過，仍缺：名額。"
     },
@@ -615,7 +615,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：名額。"
     },
@@ -641,7 +641,7 @@
     "tracking": {
       "status": "due_now",
       "status_label": "現在該重爬",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "every_3_days",
       "reason": "開報窗口已到，應重爬官方報名、地點、主辦、費用與名額。缺：費用。"
     },
@@ -657,30 +657,6 @@
     }
   },
   {
-    "race_id": "34b4433b-8832-42e6-a063-1df6c91e8b30",
-    "race_name": "第一屆樂敗國際精品路跑",
-    "race_date": "2026-10-11",
-    "race_county": "臺中市",
-    "source_platform": "iRunner、運動筆記",
-    "is_official_direct": true,
-    "priority_score": 0,
-    "tracking": {
-      "status": "pre_race_recheck",
-      "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-10-08",
-      "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 3 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
-    },
-    "missing": [],
-    "current_links": {
-      "registration_link": "https://irunner.biji.co/2026Lovebuy",
-      "official_event_url": "https://irunner.biji.co/2026Lovebuy",
-      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13082&subtitle=%E7%AC%AC%E4%B8%80%E5%B1%86%E6%A8%82%E6%95%97%E5%9C%8B%E9%9A%9B%E7%B2%BE%E5%93%81%E8%B7%AF%E8%B7%91",
-      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13082",
-      "facebook_search_url": "https://www.facebook.com/search/top?q=%E7%AC%AC%E4%B8%80%E5%B1%86%E6%A8%82%E6%95%97%E5%9C%8B%E9%9A%9B%E7%B2%BE%E5%93%81%E8%B7%AF%E8%B7%91"
-    }
-  },
-  {
     "race_id": "3a39e33f-f3ce-44c1-860f-5e4142df7dcd",
     "race_name": "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽",
     "race_date": "2026-10-17",
@@ -691,9 +667,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 9 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "reason": "距離賽事 4 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
     },
     "missing": [],
     "current_links": {
@@ -715,9 +691,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 9 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "reason": "距離賽事 4 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
     },
     "missing": [],
     "current_links": {
@@ -739,9 +715,9 @@
     "tracking": {
       "status": "pre_race_recheck",
       "status_label": "賽前 14 天複查",
-      "next_check_date": "2026-10-08",
+      "next_check_date": "2026-10-13",
       "cadence": "every_3_days_until_race",
-      "reason": "距離賽事 10 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+      "reason": "距離賽事 5 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
     },
     "missing": [],
     "current_links": {
@@ -750,6 +726,102 @@
       "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13034&subtitle=2026%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%85%B7%E5%9F%8E%E5%B8%82%EF%BC%8E%E9%85%B7%E9%81%8B%E5%8B%95+%E6%B0%B4%E5%B2%B8%E8%8A%B1%E9%83%BD",
       "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13034",
       "facebook_search_url": "https://www.facebook.com/search/top?q=2026%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%85%B7%E5%9F%8E%E5%B8%82%EF%BC%8E%E9%85%B7%E9%81%8B%E5%8B%95%20%E6%B0%B4%E5%B2%B8%E8%8A%B1%E9%83%BD"
+    }
+  },
+  {
+    "race_id": "d53df74b-d1d5-443d-86c3-6e20bf2e6a53",
+    "race_name": "2026 濁水溪紫金馬拉松-高手名間站",
+    "race_date": "2026-10-24",
+    "race_county": "南投縣",
+    "source_platform": "Focusline、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 0,
+    "tracking": {
+      "status": "pre_race_recheck",
+      "status_label": "賽前 14 天複查",
+      "next_check_date": "2026-10-13",
+      "cadence": "every_3_days_until_race",
+      "reason": "距離賽事 11 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+    },
+    "missing": [],
+    "current_links": {
+      "registration_link": "https://www.focusline.com.tw/261024HY/personal",
+      "official_event_url": "https://www.focusline.com.tw/261024HY",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13136&subtitle=2026+%E6%BF%81%E6%B0%B4%E6%BA%AA%E7%B4%AB%E9%87%91%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%AB%98%E6%89%8B%E5%90%8D%E9%96%93%E7%AB%99",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13136",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%BF%81%E6%B0%B4%E6%BA%AA%E7%B4%AB%E9%87%91%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%AB%98%E6%89%8B%E5%90%8D%E9%96%93%E7%AB%99"
+    }
+  },
+  {
+    "race_id": "b861d413-e83b-476d-a325-47c41b83f3ff",
+    "race_name": "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑",
+    "race_date": "2026-10-25",
+    "race_county": "彰化縣",
+    "source_platform": "Lohas、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 0,
+    "tracking": {
+      "status": "pre_race_recheck",
+      "status_label": "賽前 14 天複查",
+      "next_check_date": "2026-10-13",
+      "cadence": "every_3_days_until_race",
+      "reason": "距離賽事 12 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+    },
+    "missing": [],
+    "current_links": {
+      "registration_link": "https://signup.lohasnet.tw/signup/4261",
+      "official_event_url": "https://lohasnet.tw/YuanLinLionsClub2026/",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13075&subtitle=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E+2026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13075",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=%3C%E7%B6%A0%E5%8B%95%E5%93%A1%E6%9E%97%E3%83%BB%E5%AE%88%E8%AD%B7%E6%B0%B8%E7%BA%8C%3E%202026%E7%AC%AC17%E5%B1%86%E5%93%A1%E6%9E%97%E7%8D%85%E5%AD%90%E7%9B%83%E8%A6%AA%E5%AD%90%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
+    }
+  },
+  {
+    "race_id": "c22e79f8-5375-4bd8-978c-1551c8b9cc7d",
+    "race_name": "2026 南投馬11th 草鞋墩馬拉松 前進鳥嘴潭、奔向九九峰",
+    "race_date": "2026-10-25",
+    "race_county": "南投縣",
+    "source_platform": "CTRun、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 0,
+    "tracking": {
+      "status": "pre_race_recheck",
+      "status_label": "賽前 14 天複查",
+      "next_check_date": "2026-10-13",
+      "cadence": "every_3_days_until_race",
+      "reason": "距離賽事 12 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+    },
+    "missing": [],
+    "current_links": {
+      "registration_link": "https://www.ctrun.com.tw/Activity?EventMain_ID=301",
+      "official_event_url": "https://www.ctrun.com.tw/Activity?EventMain_ID=301",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12926&subtitle=2026+%E5%8D%97%E6%8A%95%E9%A6%AC11th+%E8%8D%89%E9%9E%8B%E5%A2%A9%E9%A6%AC%E6%8B%89%E6%9D%BE+%E5%89%8D%E9%80%B2%E9%B3%A5%E5%98%B4%E6%BD%AD%E3%80%81%E5%A5%94%E5%90%91%E4%B9%9D%E4%B9%9D%E5%B3%B0",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12926",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E5%8D%97%E6%8A%95%E9%A6%AC11th%20%E8%8D%89%E9%9E%8B%E5%A2%A9%E9%A6%AC%E6%8B%89%E6%9D%BE%20%E5%89%8D%E9%80%B2%E9%B3%A5%E5%98%B4%E6%BD%AD%E3%80%81%E5%A5%94%E5%90%91%E4%B9%9D%E4%B9%9D%E5%B3%B0"
+    }
+  },
+  {
+    "race_id": "027109af-8571-4410-9a36-918ecc9d4a3f",
+    "race_name": "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場",
+    "race_date": "2026-10-25",
+    "race_county": "臺中市",
+    "source_platform": "iRunner、運動筆記",
+    "is_official_direct": true,
+    "priority_score": 0,
+    "tracking": {
+      "status": "pre_race_recheck",
+      "status_label": "賽前 14 天複查",
+      "next_check_date": "2026-10-13",
+      "cadence": "every_3_days_until_race",
+      "reason": "距離賽事 12 天，即使資料已完整也需重查公告、起跑時間、場地、交通與停辦異動。"
+    },
+    "missing": [],
+    "current_links": {
+      "registration_link": "https://irunner.biji.co/2026SpongeBob-TXG",
+      "official_event_url": "https://irunner.biji.co/2026SpongeBob-TXG",
+      "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
+      "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13066",
+      "facebook_search_url": "https://www.facebook.com/search/top?q=2026%20%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4"
     }
   }
 ]
