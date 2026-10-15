@@ -120,6 +120,35 @@
     ]
   },
   {
+    "race_id": "7f9373b2-a96d-4009-b293-976387176f58",
+    "race_name": "2027 集集濁水溪半程國際馬拉松",
+    "race_date": "2027-03-21",
+    "race_county": "南投縣",
+    "distances": [
+      "21.1km",
+      "13.14km",
+      "5.2km"
+    ],
+    "start_times": "半馬組（21K） 起跑 07:05、半馬組（21K） 起跑 12:00",
+    "registration_link": "https://irunner.biji.co/JijiTownship2027",
+    "official_event_url": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13164",
+    "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13164&subtitle=2027%E9%9B%86%E9%9B%86%E6%BF%81%E6%B0%B4%E6%BA%AA%E5%8D%8A%E7%A8%8B%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "issues": [
+      {
+        "key": "same_group_multiple_times",
+        "severity": "high",
+        "label": "同一組別出現多個起跑時間",
+        "hint": "可疑組別：半馬組（21K）"
+      },
+      {
+        "key": "group_count_less_than_distance_count",
+        "severity": "high",
+        "label": "起跑組別少於距離數",
+        "hint": "可能混入過期或其他來源的組別；距離：半馬（21.1K）、13.14K、5.2K；起跑列：半馬組（21K）、半馬組（21K）"
+      }
+    ]
+  },
+  {
     "race_id": "ea093a65-67f3-4504-baea-087dce8680e5",
     "race_name": "2027 神岡馬-神豐國際同濟會全國公益馬拉松-慢飛天使圓夢 讓愛起飛",
     "race_date": "2027-03-28",
