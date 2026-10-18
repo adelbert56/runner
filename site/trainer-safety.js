@@ -5,6 +5,21 @@ function activeSafetyHold() {
   return appData.safetyHold?.active ? appData.safetyHold : null;
 }
 
+function raceRecoveryDecision(raceDate, check, today) {
+  const validDate = value => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))
+    && Number.isFinite(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+  const elapsed = validDate(raceDate) && validDate(today) ? (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${raceDate}T00:00:00Z`)) / 86400000 : -1;
+  if (elapsed < 3) return { blocked: true, reason: `${raceDate} 賽後恢復只有日期資料，尚未通過保守48小時觀察窗口` };
+  const savedAfterDays = validDate(check?.savedAt) ? (Date.parse(`${check.savedAt}T00:00:00Z`) - Date.parse(`${raceDate}T00:00:00Z`)) / 86400000 : -1;
+  const fatigue = check?.fatigue === '' || check?.fatigue == null ? NaN : Number(check.fatigue);
+  if (!check || savedAfterDays < 3 || check.savedAt > today || !Number.isInteger(fatigue) || fatigue < 1 || fatigue > 5
+    || !['none', 'mild', 'pain'].includes(check.pain) || !['normal', 'changed'].includes(check.gait)) {
+    return { blocked: true, reason: `${raceDate} 賽後恢復回報缺失、過早或欄位不完整` };
+  }
+  if (check.pain !== 'none' || check.gait !== 'normal' || fatigue >= 4) return { blocked: true, reason: `${raceDate} 賽後恢復訊號尚未通過` };
+  return { blocked: false, reason: `${raceDate} 賽後恢復回報已通過（日期資料採三日保守窗口）` };
+}
+
 function recentRaceRecoveryGate(days = 14) {
   if (typeof appData === 'undefined') return null;
   const races = (appData.plan || []).flatMap((week) => week.days || [])
@@ -13,11 +28,58 @@ function recentRaceRecoveryGate(days = 14) {
   const race = races[0];
   if (!race) return null;
   const check = appData.raceRecoveryChecks?.[race.dateStr];
-  if (!check) return { blocked: true, reason: `${race.dateStr} 賽後 48 小時恢復回報尚未完成` };
-  if (check.pain !== 'none' || check.gait !== 'normal' || Number(check.fatigue) >= 4) {
-    return { blocked: true, reason: `${race.dateStr} 賽後恢復訊號尚未通過` };
+  return raceRecoveryDecision(race.dateStr, check, todayStr());
+}
+
+// 放行是資料決策，不替跑者補造新距離。未通過的課程保留預覽與原因，禁止匯出。
+function courseReleaseDecision(day, ctx, week) {
+  if (!day?.dateStr || day.dateStr < ctx.today || day.status === 'done' || day.type === 'rest') return null;
+  const reasons = [];
+  if (day.type === 'race' && (ctx.safetyHold?.active || day.safetyOverride || day.recoveryProtection)) reasons.push('傷痛或恢復保護尚未解除，賽事不能由既有核准自動放行');
+  const planDays = (ctx.plan || []).flatMap(item => item.days || []);
+  const runs = (ctx.garminRuns || []).filter(run => run.date && run.date <= ctx.today && Number(run.km) > 0);
+  const races = planDays.filter(item => item.type === 'race' && item.dateStr !== day.dateStr);
+  const review = typeof coachReviewForWeek === 'function' ? coachReviewForWeek(week) : null;
+  const approval = review?.progressionApproval;
+  const approvalFresh = approval?.reviewedOn && approval.reviewedOn <= ctx.today
+    && approval.reviewedOn >= addDaysToDateStr(ctx.today, -7) && approval.reviewedOn >= addDaysToDateStr(day.dateStr, -7)
+    && approval.recoveryConfirmed === true;
+  const isHard = ['tempo', 'interval', 'long'].includes(day.type);
+  if (isHard) {
+    const raceInWeek = races.find(race => (week?.days || []).some(item => item.dateStr === race.dateStr));
+    if (raceInWeek) reasons.push(`${raceInWeek.dateStr} 賽事已取代本週品質／長跑，不疊加硬課`);
+    const recentRace = races.filter(race => race.dateStr <= ctx.today && race.dateStr >= addDaysToDateStr(ctx.today, -14)).sort((a, b) => b.dateStr.localeCompare(a.dateStr))[0];
+    if (recentRace) {
+      const recovery = raceRecoveryDecision(recentRace.dateStr, appData.raceRecoveryChecks?.[recentRace.dateStr], ctx.today);
+      if (recovery.blocked) reasons.push(recovery.reason);
+    }
   }
-  return { blocked: false, reason: `${race.dateStr} 賽後恢復回報已通過` };
+  if (day.type === 'long') {
+    const km = Number(day.km) || 0;
+    const recentRuns = runs.filter(run => run.date >= addDaysToDateStr(ctx.today, -14));
+    const recentMax = Math.max(0, ...recentRuns.map(run => Number(run.km)));
+    const menuTotal = (review?.menu || []).reduce((sum, entry) => sum + (Number(entry.totalKm) || 0), 0);
+    const weekTotal = menuTotal || (typeof weekPlannedKm === 'function' ? weekPlannedKm(week) : 0);
+    const approvedDistance = approvalFresh && Number(approval.longRunKm) >= km;
+    const shareLimit = approvalFresh && Number(approval.maxLongRunShare) >= 0.4 && Number(approval.maxLongRunShare) <= 1 ? Number(approval.maxLongRunShare) : 0.4;
+    if (!recentMax || (km > recentMax && !approvedDistance)) reasons.push(`長跑 ${km} km 尚缺近期耐力與教練推進確認（近14天全程最長 ${recentMax || '未知'} km）`);
+    if (!weekTotal || km / weekTotal > shareLimit + 0.001) reasons.push('長跑占處方週量超過本計畫40%原則，缺少有效例外核准');
+    const recovery = typeof recoverySignalStatus === 'function' ? recoverySignalStatus() : null;
+    if (!recovery?.sufficient) reasons.push('近期恢復資料不足或過期，暫不放行長跑推進');
+    else if (recovery.strained) reasons.push('近期恢復訊號偏離基準，暫不放行長跑');
+  }
+  if (day.type === 'race') {
+    const km = Number(day.raceDistanceKm) || Number(day.km) || 0;
+    const previousHalf = races.filter(race => race.dateStr < day.dateStr && race.dateStr >= addDaysToDateStr(day.dateStr, -7)
+      && (Number(race.raceDistanceKm) || Number(race.km)) >= 15).sort((a, b) => b.dateStr.localeCompare(a.dateStr))[0];
+    if (km >= 15 && previousHalf) {
+      const recovery = raceRecoveryDecision(previousHalf.dateStr, appData.raceRecoveryChecks?.[previousHalf.dateStr], ctx.today);
+      const approved = approvalFresh && approval.reviewedOn >= addDaysToDateStr(previousHalf.dateStr, 2)
+        && Array.isArray(approval.approvedRaceDates) && approval.approvedRaceDates.includes(day.dateStr);
+      if (recovery.blocked || !approved) reasons.push('前一場半馬級賽事後一週再參賽，需賽後恢復與教練個別確認；可縮短、走跑或不參賽');
+    }
+  }
+  return reasons.length ? { status: 'pending', reasons } : null;
 }
 
 function renderSafetyHoldCard() {
@@ -80,8 +142,11 @@ function checkinSafetyDecision({ answers, fatigue, painConcern }) {
   if (easyStrain?.overreaching) {
     return { result: '維持', factor: 1, removeQuality: false, allowIntensity: false, note: `恢復自評過關，但近 ${easyStrain.days} 天輕鬆跑平均 RPE ${easyStrain.avgRpe}／10 偏高；下週維持跑量，先把輕鬆跑真的跑輕鬆。`, alternative: '本來符合小幅推進 +5% 的條件，但輕鬆跑的主觀吃力度已經超過輕鬆跑該有的範圍，加量只會把疲勞往前堆。' };
   }
+  if (!recovery?.sufficient) {
+    return { result: '維持', factor: 1, removeQuality: false, allowIntensity: false, note: '恢復資料缺失、過期或未達三筆有效睡眠／HRV／靜息心率紀錄；維持課表，不自動加量。', alternative: '自評可保留，但缺值不等於恢復正常，等待完整證據後才推進。' };
+  }
   if (answers.every(Boolean) && fatigue <= 2 && ramp && ramp.ramp <= 10) {
-    return { result: '小幅推進', factor: 1.05, removeQuality: false, allowIntensity: true, note: `完成度、恢復與實跑增幅（${ramp.ramp >= 0 ? '+' : ''}${ramp.ramp}%）皆在安全範圍；下週最多小幅增加 5%。`, alternative: `沒有一次加更多：目前週增幅已是 ${ramp.ramp >= 0 ? '+' : ''}${ramp.ramp}%，再往上疊會超出 10% 的安全增量上限。` };
+    return { result: '小幅推進', factor: 1.05, removeQuality: false, allowIntensity: true, note: `完成度、恢復與實跑增幅（${ramp.ramp >= 0 ? '+' : ''}${ramp.ramp}%）符合本計畫推進條件；下週最多小幅增加 5%。`, alternative: `沒有一次加更多：目前週增幅已是 ${ramp.ramp >= 0 ? '+' : ''}${ramp.ramp}%，再往上疊會超出本計畫 10% 的增量上限。` };
   }
   const lacksTrend = answers.every(Boolean) && fatigue <= 2 && !ramp;
   const note = lacksTrend
@@ -105,6 +170,8 @@ function coachPromotionGate(evidence) {
   if (raceRecovery?.blocked) reasons.push(raceRecovery.reason);
   if (!evidence.qualityCompleted) reasons.push('品質課未完成');
   if (!evidence.structuredEvidence) reasons.push('Garmin 未辨識到主課段，無法判讀節奏與心率');
+  if (!(Number(evidence.rpe) >= 1 && Number(evidence.rpe) <= 10)) reasons.push('主課 RPE 尚未提供');
+  if (evidence.recoveryConfirmed !== true) reasons.push('尚缺主課隔天的明確恢復確認');
   if (evidence.painConcern || evidence.nextDayPain) reasons.push('左腳疼痛、步態改變或隔天症狀未消退');
   if (Number(evidence.rpe) >= 8) reasons.push(`主課 RPE ${evidence.rpe}/10 過高`);
   if (evidence.paceCapBreached) reasons.push('主課快過處方的最快護欄');

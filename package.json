@@ -15,7 +15,7 @@
     "test": "npm run ui:check && npm run ui:layout && npm run trainer:logic",
     "ui:check": "node scripts/ui-smoke-check.mjs",
     "ui:layout": "node scripts/ui-layout-check.mjs",
-    "trainer:logic": "node scripts/trainer-logic-check.mjs",
+    "trainer:logic": "node scripts/trainer-logic-check.mjs && node scripts/trainer-lifecycle-check.mjs && node scripts/trainer-release-check.mjs",
     "data:apply": "node scripts/apply-manual-overrides.mjs",
     "data:dedupe": "node scripts/compact-race-database.mjs",
     "data:overrides:init-xlsx": "node scripts/init-manual-overrides-xlsx.mjs",

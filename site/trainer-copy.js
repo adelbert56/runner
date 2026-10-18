@@ -164,6 +164,7 @@ function coachPlanTrainingType(planText) {
   // 安全提醒會寫「非間歇／不排間歇」；分類前先移除否定詞，否則只要看見
   // 「間歇」兩字就會把 E 跑＋輕快步誤標成真正的 interval 課。
   const text = String(planText || '').trim()
+    .replace(/(?:不(?:是|做|排|安排)?|非)\s*(?:(?:ST|坡跑|節奏(?:跑)?|間歇(?:跑)?|閾值(?:跑)?|快段|品質課)\s*(?:、|或|與|及|和|／|\/|，|,)\s*)*(?:ST|坡跑|節奏(?:跑)?|間歇(?:跑)?|閾值(?:跑)?|快段|品質課)/gi, '')
     .replace(/非間歇/g, '')
     .replace(/不(?:是|做|排|安排)?間歇/g, '');
   if (/(?:^|\s)I\s*跑|間歇|快段/.test(text)) return 'interval';

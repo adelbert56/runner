@@ -79,10 +79,11 @@ vm.createContext(structureSandbox);
 vm.runInContext(extractFunction(trainerPlanJs, "buildGarminWorkoutStructure"), structureSandbox);
 const { buildGarminWorkoutStructure } = structureSandbox;
 
-const coachCopySandbox = {};
+const coachCopySandbox = { coachPlanTrainingType };
 vm.createContext(coachCopySandbox);
 vm.runInContext([extractFunction(trainerRenderJs, "coachPlanMainInstruction"), extractFunction(trainerRenderJs, "normalizeCoachWorkoutSteps")].join("\n\n"), coachCopySandbox);
-const { coachPlanMainInstruction, normalizeCoachWorkoutSteps } = coachCopySandbox;
+vm.runInContext(['workoutEndFromText', 'coachStructureConfidence', 'coachWorkoutStructure'].map(name => extractFunction(trainerRenderJs, name)).join('\n\n'), coachCopySandbox);
+const { coachPlanMainInstruction, normalizeCoachWorkoutSteps, coachWorkoutStructure } = coachCopySandbox;
 
 const racePrescriptionSandbox = {
   coachReviewForWeek: () => null,
@@ -96,6 +97,7 @@ vm.createContext(racePrescriptionSandbox);
 vm.runInContext([
   extractFunction(trainerCoachEngineJs, "coachPrescribedKm"),
   extractFunction(trainerCoachEngineJs, "coachPrescribedMainKm"),
+  extractFunction(trainerCoachEngineJs, "hasDatedCoachRecovery"),
   extractFunction(trainerCoachEngineJs, "coachPrescription"),
 ].join("\n\n"), racePrescriptionSandbox);
 const { coachPrescription } = racePrescriptionSandbox;
@@ -249,11 +251,51 @@ assertEqual(isValidClockInput("0:30", [2, 3]), false, "isValidClockInput rejects
 assertEqual(isValidClockInput("7:30", [2]), true, "isValidClockInput accepts M:SS pace input");
 assertEqual(coachPlanTrainingType("E 跑 6 km；非間歇、非品質課"), "easy", "negated interval wording stays an easy run");
 assertEqual(coachPlanTrainingType("本週不排間歇，只做 E 跑"), "easy", "do-not-schedule interval wording does not relabel the course");
+assertEqual(coachPlanTrainingType("平路E跑7 km；不做ST、坡跑、節奏或間歇。目的：恢復有氧連續性。"), "easy", "W16 recovery prescription ignores the full prohibited-workout list");
+assertEqual(coachPlanTrainingType("E 跑；不安排節奏或間歇"), "easy", "negated tempo and interval list stays easy");
+assertEqual(coachPlanTrainingType("間歇6×2分，恢復慢跑2分；不做ST、坡跑或節奏"), "interval", "real interval work survives a separate prohibited-workout list");
+assertEqual(coachPlanTrainingType("節奏跑20分；不做坡跑或間歇"), "tempo", "real tempo work survives prohibited intervals");
+assertEqual(coachPlanTrainingType("長跑12 km；不做節奏或間歇"), "long", "long run survives prohibited hard workouts");
 assertEqual(garminDayHasRunnableWork({ dateStr: "2026-09-19", type: "easy", km: 0, testSteps: [] }), false, "optional pre-race rest does not become a default Garmin 5 km workout");
 assertEqual(garminDayHasRunnableWork({ dateStr: "2026-09-20", type: "race", km: 10, testSteps: [] }), true, "race prescription with explicit distance remains Garmin-syncable");
+const recoveryStructure = coachWorkoutStructure("平路E跑7 km；不做ST、坡跑、節奏或間歇。目的：恢復有氧連續性。", { type: 'interval', km: 7 });
+assertEqual(recoveryStructure.map(step => step.kind).join(','), 'warmup,main,cooldown', 'Garmin recovery steps ignore prohibited intervals even with a stale interval baseline');
+assertEqual(recoveryStructure[1].end.value, 7000, 'Garmin continuous recovery main remains 7 km');
 const formalRacePrescription = coachPrescription({ dateStr: "2026-09-20", dow: 0, type: "race", km: 0, raceReplacement: "race", task: "以賽代訓" }, {}, {});
 assertEqual(formalRacePrescription.course.type, "race", "formal Garmin steps preserve the race identity");
 assertEqual(formalRacePrescription.course.km, 10, "formal race menu owns the Garmin race distance");
+assertEqual(formalRacePrescription.course.raceDistanceKm, 10, "formal race menu also owns the weekly-volume distance");
+
+const participantDistanceSandbox = {
+  coachReviewData: { raceDirectives: [{ date: '2026-10-18', distance: '11km' }] },
+  appData: { profile: {}, plan: [{ days: [{ dateStr: '2026-10-18', type: 'race', raceReplacement: 'race', raceDistanceKm: 42.195, km: 0, status: 'done', actualKm: 11.2 }] }] },
+  goalDistanceKm: () => 21.0975,
+  todayStr: () => '2026-10-19',
+  window: {},
+};
+vm.createContext(participantDistanceSandbox);
+vm.runInContext(['coachRaceDirective', 'confirmedRaceDistanceKm', 'participantRaceDistanceKm', 'raceMaxKm', 'flattenPlanDays', 'applyRegisteredSundayRaceReplacements'].map((name) => extractFunction(trainerJs, name)).join('\n'), participantDistanceSandbox);
+const taichungRace = { race_date: '2026-10-18', race_name: '臺中國際馬拉松', distances: ['42.195km', '21km', '11km', '4km'] };
+assertEqual(participantDistanceSandbox.participantRaceDistanceKm(taichungRace, '2026-10-18'), 11, 'confirmed 11K registration wins over the public full-marathon category');
+assertEqual(participantDistanceSandbox.applyRegisteredSundayRaceReplacements([]), true, 'historical race distance is repaired even without browser registration data');
+const repairedRaceDay = participantDistanceSandbox.appData.plan[0].days[0];
+assertEqual(repairedRaceDay.raceDistanceKm, 11, 'persisted 42.195K race is corrected to the confirmed 11K');
+assertEqual(repairedRaceDay.actualKm, 11.2, 'distance repair preserves Garmin actual distance');
+assertEqual(repairedRaceDay.status, 'done', 'distance repair preserves completed status');
+assertEqual(participantDistanceSandbox.applyRegisteredSundayRaceReplacements([]), false, 'distance repair is idempotent');
+Object.assign(participantDistanceSandbox, {
+  todayStr: () => '2026-10-18',
+  addDaysToDateStr: (_date, delta) => `2026-10-${18 + delta}`,
+  raceDayPackageSteps: (_profile, km) => [{ title: '賽事', km }],
+  readableRaceInstruction: (_text, fallback) => fallback,
+  scheduled10kNeedsStrengthDeload: () => false,
+  postRaceRecoveryDayCount: () => 1,
+});
+participantDistanceSandbox.applyRegisteredSundayRaceReplacements([taichungRace]);
+assertEqual(repairedRaceDay.raceDistanceKm, 11, 'same-day race refresh cannot overwrite 11K with the full-marathon category');
+assertEqual(repairedRaceDay.steps[0].km, 11, 'race package uses the confirmed 11K distance');
+vm.runInContext(extractFunction(trainerRenderJs, 'weekPlannedKm'), participantDistanceSandbox);
+assertEqual(participantDistanceSandbox.weekPlannedKm({ days: [{ type: 'easy', km: 5 }, { type: 'easy', km: 6 }, { type: 'easy', km: 4 }, repairedRaceDay] }), 26, 'W15 formal 5 + 6 + 4 + 11K prescription totals 26K');
 assertEqual(formalRacePrescription.course.workoutStructure[0].end.value, 10000, "formal 10K structure replaces informational race-card segments");
 
 const intervalStructure = buildGarminWorkoutStructure("interval", [
@@ -329,7 +371,7 @@ assertThrows(() => assertPublishableCoachReview(JSON.stringify({
   },
 })), "cumulative total cannot be published as a second Garmin distance step");
 
-assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, rpe: 7 }).status, 'pass', "structured quality evidence with controlled RPE passes the progression gate");
+assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, rpe: 7, recoveryConfirmed: true }).status, 'pass', "structured quality evidence with controlled RPE and explicit recovery passes the progression gate");
 assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: false, rpe: 6 }).status, 'conditional', "missing structured Garmin main evidence cannot advance long runs or intervals");
 assertEqual(coachPromotionGate({ qualityPlanned: true, qualityCompleted: true, structuredEvidence: true, nextDayPain: true, rpe: 6 }).status, 'blocked', "next-day pain blocks quality progression regardless of pace result");
 
@@ -426,13 +468,50 @@ Object.assign(raceVolumeSandbox, racePrescriptionSandbox, {
 });
 recoveryWeek.days.forEach((day, index) => { day.dow = [1, 2, 4, 6][index]; });
 vm.runInContext([
-  ...['coachPrescribedKm', 'coachPrescribedMainKm', 'coachPrescription', 'resolveCourse'].map((name) => extractFunction(trainerCoachEngineJs, name)),
+  ...['coachPrescribedKm', 'coachPrescribedMainKm', 'hasDatedCoachRecovery', 'coachPrescription', 'resolveCourse'].map((name) => extractFunction(trainerCoachEngineJs, name)),
 ].join('\n'), raceVolumeSandbox);
 assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(recoveryWeek).numericKm, 29, 'real course resolver preserves post-race rest and 5 km while applying 8 km and 16 km coach prescriptions');
+// Reproduce the browser's stale generic recovery overrides against a dated W15 menu.
+const w15RecoveryWeek = { weekNum: 15, days: [
+  { dateStr: '2026-10-12', dow: 1, type: 'rest', km: 0, raceReplacement: 'post-race', postRaceOf: '2026-10-11', status: 'planned' },
+  { dateStr: '2026-10-13', dow: 2, type: 'easy', km: 5, raceReplacement: 'post-race', postRaceOf: '2026-10-11', status: 'done', actualKm: 6.1 },
+  { dateStr: '2026-10-14', dow: 3, type: 'rest', km: 0 },
+  { dateStr: '2026-10-15', dow: 4, type: 'easy', km: 4, status: 'done' },
+  { dateStr: '2026-10-16', dow: 5, type: 'rest', km: 0 },
+  { dateStr: '2026-10-17', dow: 6, type: 'rest', km: 0 },
+  { dateStr: '2026-10-18', dow: 0, type: 'race', raceReplacement: 'race', raceDistanceKm: 11, km: 0, status: 'done' },
+] };
+const w15Menu = [
+  { date: '2026-10-12', day: '一', scheduledDow: 1, totalKm: 5, plan: '恢復 E 跑 5 km' },
+  { date: '2026-10-13', day: '二', scheduledDow: 2, totalKm: 6, plan: '輕鬆跑 6 km' },
+  { date: '2026-10-15', day: '四', scheduledDow: 4, totalKm: 4, plan: '輕鬆跑 4 km' },
+  { date: '2026-10-18', day: '日', scheduledDow: 0, totalKm: 11, plan: '11K 路跑', steps: [{ kind: 'main', end: { type: 'distance', value: 11000 } }] },
+];
+raceVolumeSandbox.coachReviewData = { nextWeek: { weekStart: '2026-10-12', menu: w15Menu, restDates: ['2026-10-14', '2026-10-16', '2026-10-17'] } };
+raceVolumeSandbox.appData = { profile: {}, plan: [w15RecoveryWeek] };
+raceVolumeSandbox.buildContext = () => ({ plan: [w15RecoveryWeek] });
+raceVolumeSandbox.saveData = () => {};
+vm.runInContext(['coachReviewForWeek', 'coachDaysForWeek', 'coachMenuForCurrentSchedule', 'materializeCoachReviewWeek'].map(name => extractFunction(trainerRenderJs, name)).join('\n'), raceVolumeSandbox);
+assertEqual(raceVolumeSandbox.weekPlannedKm(w15RecoveryWeek), 20, 'stale generic recovery reproduces the reported 20K browser total');
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(w15RecoveryWeek).numericKm, 26, 'real W15 resolver applies dated recovery prescriptions: 5 + 6 + 4 + 11');
+raceVolumeSandbox.materializeCoachReviewWeek();
+assertEqual(raceVolumeSandbox.weekPlannedKm(w15RecoveryWeek), 26, 'materialized W15 daily cards and header agree at 26K');
+assertEqual(w15RecoveryWeek.days.filter(day => day.type !== 'rest').length, 4, 'formal W15 has four running sessions');
+assertEqual(w15RecoveryWeek.days[1].actualKm, 6.1, 'W15 prescription repair preserves actual mileage');
+assertEqual(w15RecoveryWeek.days[1].status, 'done', 'W15 prescription repair preserves completion');
+const restoredW15 = JSON.parse(JSON.stringify(w15RecoveryWeek));
+assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(restoredW15).numericKm, 26, 'reloaded W15 retains the 26K target');
+const undatedRecoveryEntry = { ...w15Menu[1], date: undefined };
+raceVolumeSandbox.coachReviewData.nextWeek.menu[1] = undatedRecoveryEntry;
+assertEqual(raceVolumeSandbox.coachPrescription(w15RecoveryWeek.days[1], {}, w15RecoveryWeek), null, 'undated general menus cannot override post-race protection');
+raceVolumeSandbox.coachReviewData.nextWeek.menu[1] = { ...w15Menu[1], date: '2026-10-13', plan: '間歇跑 6 km' };
+assertEqual(raceVolumeSandbox.coachPrescription(w15RecoveryWeek.days[1], {}, w15RecoveryWeek), null, 'dated hard workouts cannot override post-race protection');
+raceVolumeSandbox.coachReviewData.nextWeek.menu[1] = { ...undatedRecoveryEntry, date: '2026-10-13', plan: '輕鬆跑 6 km' };
 raceVolumeSandbox.resolveCourse = (day) => ({ course: { ...day, type: 'rest', km: 0 } });
 assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(recoveryWeek).numericKm, 0, 'a fully rested week never falls back to an obsolete positive target');
 
 const selectedWeekSandbox = {
+  resolveCourse: day => ({ course: day }),
   currentWeek: 12,
   trainingDataHealth: () => ({ currentWeekCompleted: Array(5), currentWeekDays: Array(5), syncAge: 0 }),
   trainingAutopilotDecision: () => ({ title: '正式課程已完成' }),
@@ -481,11 +560,55 @@ assertEqual(fixedRaceMenu.some(entry => entry.scheduledDow === 6), false, 'the c
 confirmedWeekSandbox.appData.plan = [preservedW12, confirmedW13];
 confirmedWeekSandbox.buildContext = () => ({});
 confirmedWeekSandbox.coachPrescription = day => ({ course: { ...day, km: 5, coachPlan: true } });
+confirmedWeekSandbox.resolveCourse = day => ({ course: { ...day, km: 5, coachPlan: true }, source: 'coach-prescription' });
 confirmedWeekSandbox.saveData = () => {};
 const originalW12 = JSON.stringify(preservedW12);
 confirmedWeekSandbox.materializeCoachReviewWeek();
 assertEqual(JSON.stringify(preservedW12), originalW12, 'materializing W13 never mutates the archived W12 plan');
 assertEqual(confirmedW13.days[0].coachPlan.reviewWeekStart, '2026-09-28', 'materialized W13 is locked to its own review date');
+
+// Background weather/registration refreshes must preserve the unlock form and
+// its event handlers, as well as loading/error states owned by loadCoachReview.
+const coachHost = { innerHTML: 'unlock form with event handlers' };
+const coachRefreshSandbox = vm.createContext({
+  appData: { plan: [] },
+  coachReviewData: null,
+  coachReviewLoadState: 'locked',
+  document: { getElementById: id => id === 'coach-review-content' ? coachHost : null },
+  renderCoachReviewPanel: () => 'unlocked coaching panel',
+});
+vm.runInContext(extractFunction(trainerRenderJs, 'refreshCoachReviewPanels'), coachRefreshSandbox);
+for (const state of ['locked', 'loading', 'unavailable']) {
+  coachRefreshSandbox.coachReviewLoadState = state;
+  coachRefreshSandbox.refreshCoachReviewPanels();
+  assertEqual(coachHost.innerHTML, 'unlock form with event handlers', `background refresh preserves coach ${state} state`);
+}
+coachRefreshSandbox.coachReviewData = {};
+coachRefreshSandbox.coachReviewLoadState = 'unavailable';
+coachRefreshSandbox.refreshCoachReviewPanels();
+assertEqual(coachHost.innerHTML, 'unlock form with event handlers', 'background refresh preserves a rendering error even after decryption succeeds');
+coachRefreshSandbox.coachReviewLoadState = 'ready';
+coachRefreshSandbox.refreshCoachReviewPanels();
+assertEqual(coachHost.innerHTML, 'unlocked coaching panel', 'background refresh updates a ready unlocked coach panel');
+
+// Run the full plan renderer: race integration may call it during decryption.
+// A decoded review must be reused instead of starting another unlock cycle.
+let planRenderReviewLoads = 0;
+const planRenderSandbox = vm.createContext({
+  appData: { profile: {}, plan: [{ weekNum: 1, days: [] }] },
+  coachReviewData: { updatedAt: '2026-10-04' },
+  document: { getElementById: () => ({ innerHTML: '' }) },
+  window: { location: { hostname: 'example.invalid' }, loadCoachReview: () => { planRenderReviewLoads++; } },
+  todayWeekNum: () => 1,
+  ...Object.fromEntries(['renderHeroPanel', 'renderSafetyHoldCard', 'renderRunnerOnboardingCard', 'renderTabIntroCard', 'renderWeekOverviewCard', 'renderRaceWeekCard', 'renderPhaseTabs', 'renderWeekSection', 'renderCoachReviewPanel', 'renderCheckinSection', 'renderProgressHub', 'setupPlanToolbarPinning', 'loadGarminActivitySyncStatus'].map(name => [name, () => ''])),
+});
+vm.runInContext(extractFunction(trainerRenderJs, 'renderPlanView'), planRenderSandbox);
+planRenderSandbox.renderPlanView();
+planRenderSandbox.renderPlanView();
+assertEqual(planRenderReviewLoads, 0, 'repeated plan redraws reuse a decoded review without restarting automatic unlock');
+planRenderSandbox.coachReviewData = null;
+planRenderSandbox.renderPlanView();
+assertEqual(planRenderReviewLoads, 1, 'a plan without decoded review still starts the coach loader');
 
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);

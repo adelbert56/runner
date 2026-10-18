@@ -1179,7 +1179,10 @@ function planDayLockReason(day, source, today = todayStr()) {
   if (day.status === 'done') return '課程已完成';
   if (day.dateStr && day.dateStr < today) return '過去的課表不再回寫';
   if (day.isMakeup) return '補跑安排由完成紀錄決定';
-  if ((day.raceReplacement || day.raceReplacementBase) && source !== 'race') return '已報名賽事與賽前後安排是硬約束';
+  const recoveryWeek = source === 'coach' && typeof hasDatedCoachRecovery === 'function'
+    ? (appData.plan || []).find((week) => (week.days || []).some((item) => item.dateStr === day.dateStr)) : null;
+  const confirmedRecovery = recoveryWeek && hasDatedCoachRecovery(day, recoveryWeek);
+  if ((day.raceReplacement || day.raceReplacementBase) && source !== 'race' && !confirmedRecovery) return '已報名賽事與賽前後安排是硬約束';
   if (day.status === 'missed' && source !== 'coach') return '課程已標記跳過';
   if ((day.safetyOverride || day.recoveryProtection) && source !== 'coach') return '恢復保護中';
   return '';
@@ -1298,19 +1301,8 @@ function autoRecalibratePlan() {
 
   // 1. 跑量校準：最近完整週實跑 vs 課表目標
   const trend = Array.isArray(coachReviewData.trend) ? coachReviewData.trend.slice(-3) : [];
-  const ratios = [];
-  trend.forEach((entry) => {
-    const week = plan.find((w) => Array.isArray(w.days) && w.days.some((d) => d.dateStr === entry.week));
-    if (week && week.targetKm > 0 && entry.km > 0 && week.days[6].dateStr < today) {
-      ratios.push(entry.km / week.targetKm);
-    }
-  });
+  // 全程實跑與主課處方範圍不同；不可因熱身收操里程較多就自動加量或降量。
   let volumeFactor = 1;
-  if (ratios.length) {
-    const avg = ratios.reduce((sum, r) => sum + r, 0) / ratios.length;
-    if (avg < 0.9) volumeFactor = Math.max(avg, 0.75);      // 少跑 → 未來週降，最多 -25%
-    else if (avg > 1.15) volumeFactor = Math.min(avg, 1.1); // 超跑 → 小步上調，最多 +10%
-  }
 
   const reasons = [];
   const loadDecision = garminLoadDecision(completedRuns);
