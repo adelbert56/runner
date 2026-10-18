@@ -275,6 +275,26 @@ function coachRaceDirective(dateStr) {
   return directives.find((item) => item?.date === dateStr) || null;
 }
 
+function confirmedRaceDistanceKm(dateStr) {
+  const directive = String(coachRaceDirective(dateStr)?.distance || '').match(/^(\d+(?:\.\d+)?)\s*(?:km|k|公里)$/i);
+  if (directive) return Number(directive[1]);
+  // 已定稿週報記錄的是跑者實際參賽組別，公開賽事列表則包含所有組別。
+  const reviews = [coachReviewData?.nextWeek, ...(coachReviewData?.confirmedWeeks || [])];
+  const entry = reviews.flatMap((review) => review?.menu || []).find((item) =>
+    item.date === dateStr && /路跑|賽事|比賽/.test(String(item.plan || '')));
+  const main = entry?.steps?.find((step) => step.kind === 'main' && step.end?.type === 'distance');
+  const km = Number(main?.end?.value) / 1000 || Number(entry?.totalKm) || 0;
+  return km > 0 && km <= 110 ? km : 0;
+}
+
+function participantRaceDistanceKm(race, dateStr) {
+  const confirmed = confirmedRaceDistanceKm(dateStr);
+  if (confirmed) return confirmed;
+  const distances = Array.isArray(race?.distances) ? race.distances : [];
+  // 組別未知時不能把活動最長的全馬當成跑者參賽距離。
+  return distances.length === 1 ? raceMaxKm({ distances }) : 0;
+}
+
 function readableRaceInstruction(value, fallback) {
   const text = String(value || '').trim();
   // 舊版 localStorage 曾以錯誤編碼保存中文；不要把 ?��? 直接渲染給跑者。
@@ -423,6 +443,14 @@ function applyRegisteredSundayRaceReplacements(races) {
   const flat = flattenPlanDays();
   const byDateStr = new Map(flat.map((day) => [day.dateStr, day]));
   let changed = false;
+  flat.forEach((day) => {
+    if (day.raceReplacement !== 'race') return;
+    const confirmedKm = confirmedRaceDistanceKm(day.dateStr);
+    if (!confirmedKm || day.raceDistanceKm === confirmedKm) return;
+    day.raceDistanceKm = confirmedKm;
+    if (Number(day.km) > 0) day.km = confirmedKm;
+    changed = true;
+  });
   window.lastRaceIntegrationNotices = [];
   // 通知紀錄跟持久化的 key 綁定，而不是跟當下的 day 物件狀態綁定：
   // 就算課表被其他重排流程（rebuildStoredPlan 等）意外洗掉又重套，同一場賽事也只通知一次。
@@ -442,7 +470,9 @@ function applyRegisteredSundayRaceReplacements(races) {
     if (day.dateStr < today) return;
     const isValidRaceDay = day.raceReplacement === 'race' && validRaceDates.has(day.dateStr);
     const isValidPreRaceDay = day.raceReplacement === 'pre-race' && validRaceDates.has(addDaysToDateStr(day.dateStr, 1));
-    const isValidPostRaceDay = day.raceReplacement === 'post-race'
+    const postRaceKm = confirmedRaceDistanceKm(day.postRaceOf);
+    const withinConfirmedRecovery = !postRaceKm || day.dateStr <= addDaysToDateStr(day.postRaceOf, postRaceRecoveryDayCount(postRaceKm));
+    const isValidPostRaceDay = day.raceReplacement === 'post-race' && withinConfirmedRecovery
       && ((typeof day.postRaceOf === 'string' && day.postRaceOf !== '' && day.postRaceOf < today) || registeredDates.has(day.postRaceOf));
     const isValidPreRaceTaperDay = day.raceReplacement === 'pre-race-taper' && validRaceDates.has(day.preRaceTaperOf);
     if (!isValidRaceDay && !isValidPreRaceDay && !isValidPostRaceDay && !isValidPreRaceTaperDay) {
@@ -479,7 +509,7 @@ function applyRegisteredSundayRaceReplacements(races) {
       raceDay.km = 0;
       // Garmin 匯出用實際比賽距離；km 刻意留 0（避免拿它當訓練跑量），
       // 不能讓 Garmin 結構產生器沒有距離可用而每張配速卡都退回預設 5 km。
-      raceDay.raceDistanceKm = raceMaxKm(race) || goalDistanceKm(appData.profile);
+      raceDay.raceDistanceKm = participantRaceDistanceKm(race, dateStr);
       raceDay.focus = 'race';
       const directive = coachRaceDirective(dateStr);
       raceDay.task = `${raceName}｜以賽代訓${directive?.role ? `｜${directive.role}` : ''}`;
@@ -487,15 +517,17 @@ function applyRegisteredSundayRaceReplacements(races) {
         ? '受控階段檢測：不以半馬目標反推 10K 配速；賽後綜合近期實跑與恢復再決定後續處方'
         : readableRaceInstruction(directive?.summary, '本場以穩定完成與資料蒐集為主，不預設目標配速。');
       raceDay.hrTarget = '';
-      raceDay.steps = raceDayPackageSteps(appData.profile, raceDay.raceDistanceKm, dateStr);
+      raceDay.steps = raceDay.raceDistanceKm > 0
+        ? raceDayPackageSteps(appData.profile, raceDay.raceDistanceKm, dateStr) : [];
       changed = true;
     }
 
     // 已存在的賽事日也要重新套用最新教練處方；否則舊的 race steps/配速會永久留在 plan。
     if (raceDay.raceReplacement === 'race' && raceDay.raceName === raceName) {
       const freshDirective = coachRaceDirective(dateStr);
-      raceDay.raceDistanceKm = raceMaxKm(race) || goalDistanceKm(appData.profile);
-      const freshSteps = raceDayPackageSteps(appData.profile, raceDay.raceDistanceKm, dateStr);
+      raceDay.raceDistanceKm = participantRaceDistanceKm(race, dateStr);
+      const freshSteps = raceDay.raceDistanceKm > 0
+        ? raceDayPackageSteps(appData.profile, raceDay.raceDistanceKm, dateStr) : [];
       const freshPace = freshDirective?.deferCalibration
         ? '受控階段檢測：不以半馬目標反推 10K 配速；賽後綜合近期實跑與恢復再決定後續處方'
         : readableRaceInstruction(freshDirective?.summary, '本場以穩定完成與資料蒐集為主，不預設目標配速。');
@@ -534,7 +566,8 @@ function applyRegisteredSundayRaceReplacements(races) {
   // 賽後恢復：比賽後 N 天內不排品質課與長跑（N 依賽事距離）。
   // 只改今天（含）之後的課；已發生的日子凍結。已是 rest 或其他賽事替換日則跳過。
   raceByDate.forEach((race, dateStr) => {
-    const raceKm = raceMaxKm(race) || goalDistanceKm(appData.profile);
+    const raceKm = participantRaceDistanceKm(race, dateStr);
+    if (!raceKm) return;
     const recoveryCount = postRaceRecoveryDayCount(raceKm);
     const raceName = race?.race_name || '已報名賽事';
     const fullRestDays = raceKm >= 30 ? 2 : 1;
@@ -542,6 +575,8 @@ function applyRegisteredSundayRaceReplacements(races) {
       const day = byDateStr.get(addDaysToDateStr(dateStr, offset));
       if (!day || day.dateStr < today) continue;
       if (day.type === 'rest' || day.raceReplacement) continue;
+      const week = appData.plan.find((item) => (item.days || []).includes(day));
+      if (hasDatedCoachRecovery({ ...day, raceReplacement: 'post-race', postRaceOf: dateStr }, week)) continue;
       day.raceReplacementBase = { ...day };
       day.raceReplacement = 'post-race';
       day.postRaceOf = dateStr;
@@ -570,7 +605,7 @@ function applyRegisteredSundayRaceReplacements(races) {
   // 刻意排在賽後恢復之後：兩場賽事靠很近時，共用的日子讓「上一場的恢復」優先。
   validRaceDates.forEach((dateStr) => {
     const race = raceByDate.get(dateStr);
-    if ((raceMaxKm(race) || 0) < 15) return;
+    if (participantRaceDistanceKm(race, dateStr) < 15) return;
     for (let offset = 2; offset <= 3; offset++) {
       const day = byDateStr.get(addDaysToDateStr(dateStr, -offset));
       if (!day || day.dateStr < today) continue;
@@ -600,6 +635,8 @@ function refreshPlanAfterRaceSync() {
   const activeTab = tabs[activeTabIndex] || loadUiState().planTab || 'week';
   const selectedWeek = currentWeek;
   const scrollTop = (document.scrollingElement || document.documentElement).scrollTop;
+  // 賽事整合可能先還原舊的通用恢復卡；重套正式週報後才重繪。
+  materializeCoachReviewWeek();
   renderPlanView();
   currentWeek = Math.min(Math.max(1, selectedWeek), appData.plan.length);
   showView('plan');

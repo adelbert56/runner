@@ -218,6 +218,25 @@ function coachPrescribedMainKm(day, entry) {
     : coachPrescribedKm(day, entry);
 }
 
+function coachEntryTrainingType(entry) {
+  const steps = Array.isArray(entry?.steps) ? entry.steps : [];
+  const main = steps.find((step) => step.kind === 'main');
+  if (main && !steps.some((step) => step.kind === 'repeat')) {
+    if (/長跑|耐力跑/.test(String(main.title || ''))) return 'long';
+    if (/恢復|輕鬆|E\s*跑/.test(String(main.title || ''))) return 'easy';
+  }
+  return coachPlanTrainingType(entry?.plan);
+}
+
+function hasDatedCoachRecovery(day, week) {
+  if (day.raceReplacement !== 'post-race' || !day.postRaceOf || day.postRaceOf >= day.dateStr
+    || day.safetyOverride || day.recoveryProtection || day.isMakeup) return false;
+  const review = coachReviewForWeek(week);
+  if (!review || (review.restDates || []).includes(day.dateStr)) return false;
+  const entry = (review.menu || []).find((item) => item.date === day.dateStr);
+  return Boolean(entry && Number(entry.totalKm) > 0 && coachEntryTrainingType(entry) === 'easy');
+}
+
 function coachPrescription(day, ctx, week) {
   const restDates = coachReviewForWeek(week)?.restDates || [];
   if (restDates.includes(day.dateStr) && day.type !== 'race' && day.raceReplacement !== 'race') {
@@ -228,17 +247,21 @@ function coachPrescription(day, ctx, week) {
       source: 'coach-prescription'
     };
   }
-  // 已報名賽事、賽前減壓與賽後恢復是硬約束；教練週處方只能安排其餘訓練日，
-  // 不能把以賽代訓重新蓋成一般跑課。
-  if (day.raceReplacement && day.raceReplacement !== 'race') return null;
   const coachDays = coachDaysForWeek(week);
   const entry = coachDays.find((item) => item.scheduledDow === day.dow);
   if (!entry) return null;
+  const datedRecovery = hasDatedCoachRecovery(day, week) && entry.date === day.dateStr;
+  if (day.raceReplacement && day.raceReplacement !== 'race' && !datedRecovery) return null;
   // 已確認的教練菜單擁有距離真相；不能讓週期產生器殘留的 day.km
   // 覆蓋它，否則同一張卡會同時出現 13 與 14 km。
   const scheduledKm = coachPrescribedKm(day, entry);
   const mainKm = coachPrescribedMainKm(day, entry);
-  const prescribedDay = scheduledKm > 0 ? { ...day, km: scheduledKm, coachMainKm: mainKm } : day;
+  const prescribedDay = scheduledKm > 0 ? { ...day, km: scheduledKm, coachMainKm: mainKm } : { ...day };
+  if (datedRecovery) {
+    delete prescribedDay.raceReplacement;
+    delete prescribedDay.raceReplacementBase;
+    delete prescribedDay.postRaceOf;
+  }
   const suppliedSteps = Array.isArray(entry.steps) ? entry.steps : [];
   // 只有正式菜單附帶可執行步驟時，才允許它補上賽事 Garmin 結構；
   // 純文字一般跑課不可把既有賽事卡改標成 tempo/easy。
@@ -259,12 +282,17 @@ function coachPrescription(day, ctx, week) {
       source: 'race-adjustment'
     };
   }
-  const prescribedType = typeof coachPlanTrainingType === 'function' ? coachPlanTrainingType(entry.plan) : prescribedDay.type;
+  const prescribedType = coachEntryTrainingType(entry);
   const headline = coachPlanHeadline(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);
   const mainInstruction = coachPlanMainInstruction(entry.plan).replace(/((?:E\s*)?主課\s*(?:約)?\s*)\d+(?:\.\d+)?\s*(?:km|公里)/i, `$1${mainKm} km`);
-  const steps = (day.steps || []).map((step) => step.title === '主課'
+  const existingSteps = (day.steps || []).map((step) => step.title === '主課'
     ? { ...step, dose: '', detail: mainInstruction, isCoachMain: true }
     : step);
+  const steps = existingSteps.length || !suppliedSteps.length ? existingSteps : suppliedSteps.map((step) => ({
+    ...step,
+    dose: step.end?.label || '',
+    isCoachMain: step.kind === 'main'
+  }));
   return {
     type: 'replace',
     course: {

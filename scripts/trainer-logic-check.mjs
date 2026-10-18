@@ -96,6 +96,8 @@ vm.createContext(racePrescriptionSandbox);
 vm.runInContext([
   extractFunction(trainerCoachEngineJs, "coachPrescribedKm"),
   extractFunction(trainerCoachEngineJs, "coachPrescribedMainKm"),
+  extractFunction(trainerCoachEngineJs, "coachEntryTrainingType"),
+  extractFunction(trainerCoachEngineJs, "hasDatedCoachRecovery"),
   extractFunction(trainerCoachEngineJs, "coachPrescription"),
 ].join("\n\n"), racePrescriptionSandbox);
 const { coachPrescription } = racePrescriptionSandbox;
@@ -103,6 +105,76 @@ racePrescriptionSandbox.coachReviewForWeek = () => ({ restDates: ['2026-10-03', 
 assertEqual(coachPrescription({ dateStr: '2026-10-03', dow: 6, type: 'long', km: 16 }, {}, {}).course.type, 'rest', 'a confirmed pre-race rest date removes the generated Saturday long run');
 assertEqual(coachPrescription({ dateStr: '2026-10-04', dow: 0, type: 'race', raceReplacement: 'race' }, {}, {}).course.type, 'race', 'a rest-date constraint never cancels a registered race');
 racePrescriptionSandbox.coachReviewForWeek = () => null;
+
+// W16 must keep the dated coach recovery plan even if an older browser plan
+// still contains generic post-race replacement cards.
+const w16Menu = [
+  { date: '2026-10-19', scheduledDow: 1, totalKm: 4, plan: '恢復E跑4 km', steps: [{ kind: 'main', title: '賽後恢復 E 跑' }] },
+  { date: '2026-10-20', scheduledDow: 2, totalKm: 7, plan: 'E跑7 km；不做ST、坡跑、節奏或間歇。', steps: [{ kind: 'main', title: '平路 E 跑' }] },
+  { date: '2026-10-22', scheduledDow: 4, totalKm: 7, plan: 'E跑7 km', steps: [{ kind: 'main', title: 'E 跑' }] },
+  { date: '2026-10-24', scheduledDow: 6, totalKm: 12, plan: '平路長跑12 km', steps: [{ kind: 'main', title: '平路 Z2 長跑' }] },
+];
+const originalCoachDaysForWeek = racePrescriptionSandbox.coachDaysForWeek;
+racePrescriptionSandbox.coachReviewForWeek = () => ({ menu: w16Menu, restDates: [] });
+racePrescriptionSandbox.coachDaysForWeek = () => w16Menu;
+for (const [dateStr, dow, expectedKm] of [['2026-10-19', 1, 4], ['2026-10-20', 2, 7], ['2026-10-22', 4, 7]]) {
+  const oldCard = { dateStr, dow, type: 'rest', km: 0, raceReplacement: 'post-race', postRaceOf: '2026-10-18', status: 'planned' };
+  const course = coachPrescription(oldCard, {}, { days: [oldCard] })?.course;
+  assertEqual(course?.km, expectedKm, `W16 ${dateStr} dated coach plan replaces stale generic recovery`);
+  assertEqual(course?.type, 'easy', `W16 ${dateStr} stays easy despite negative quality wording`);
+  assertEqual(course?.raceReplacement, undefined, `W16 ${dateStr} clears stale race metadata`);
+}
+const saturdayCard = { dateStr: '2026-10-24', dow: 6, type: 'long', km: 10 };
+assertEqual(coachPrescription(saturdayCard, {}, { days: [saturdayCard] })?.course?.km, 12, 'W16 Saturday uses the 12 km coach long run');
+racePrescriptionSandbox.coachReviewForWeek = () => null;
+racePrescriptionSandbox.coachDaysForWeek = originalCoachDaysForWeek;
+
+const w16RaceSandbox = { coachReviewData: { confirmedWeeks: [{ menu: [{ date: '2026-10-18', totalKm: 11, plan: '第三場11K路跑', steps: [{ kind: 'main', end: { type: 'distance', value: 11000 } }] }] }] } };
+vm.createContext(w16RaceSandbox);
+vm.runInContext(['coachRaceDirective', 'confirmedRaceDistanceKm', 'participantRaceDistanceKm', 'raceMaxKm', 'postRaceRecoveryDayCount'].map((name) => extractFunction(trainerJs, name)).join('\n'), w16RaceSandbox);
+assertEqual(w16RaceSandbox.participantRaceDistanceKm({ distances: ['42.195km', '21km', '11km'] }, '2026-10-18'), 11, 'W15 confirmed 11K beats public full-marathon distance');
+assertEqual(w16RaceSandbox.postRaceRecoveryDayCount(11), 3, '11K recovery window ends before W16 Thursday and Saturday');
+
+const staleW16Days = [
+  ['2026-10-19', 1, 'rest', 0, 'easy', 4],
+  ['2026-10-20', 2, 'rest', 0, 'easy', 7],
+  ['2026-10-21', 3, 'rest', 0],
+  ['2026-10-22', 4, 'easy', 5.4, 'easy', 7],
+  ['2026-10-23', 5, 'rest', 0],
+  ['2026-10-24', 6, 'easy', 6, 'long', 12],
+  ['2026-10-25', 0, 'rest', 0],
+].map(([dateStr, dow, type, km, baseType, baseKm]) => {
+  const day = { dateStr, dow, type, km, status: 'planned', steps: [] };
+  if (baseType) Object.assign(day, { raceReplacement: 'post-race', postRaceOf: '2026-10-18', raceReplacementBase: { ...day, type: baseType, km: baseKm } });
+  return day;
+});
+const staleW16Week = { weekNum: 16, targetKm: 30, days: staleW16Days };
+const w16Integration = {
+  coachReviewData: { nextWeek: { weekStart: '2026-10-19', menu: w16Menu, restDates: ['2026-10-21', '2026-10-23', '2026-10-25'] },
+    confirmedWeeks: w16RaceSandbox.coachReviewData.confirmedWeeks },
+  appData: { profile: {}, plan: [{ weekNum: 15, days: [{ dateStr: '2026-10-18', dow: 0, type: 'race', km: 0,
+    raceReplacement: 'race', raceName: '臺中國際馬拉松', raceDistanceKm: 42.195, status: 'done', steps: [] }] }, staleW16Week] },
+  todayStr: () => '2026-10-18', buildContext: () => ({}), saveData: () => {}, window: {},
+  coachWorkoutStructure: (_plan, _day, steps) => steps, coachStructureConfidence: () => 'coach',
+  raceDayPackageSteps: () => [], readableRaceInstruction: (_value, fallback) => fallback,
+  scheduled10kNeedsStrengthDeload: () => false, goalDistanceKm: () => 21.0975,
+};
+vm.createContext(w16Integration);
+for (const [source, names] of [
+  [trainerCopyJs, ['coachPlanTrainingType', 'coachPlanHeadline']],
+  [trainerRenderJs, ['coachPlanMainInstruction', 'coachReviewForWeek', 'coachMenuForCurrentSchedule', 'coachDaysForWeek', 'materializeCoachReviewWeek', 'weekPlannedKm']],
+  [trainerCoachEngineJs, ['coachPrescribedKm', 'coachPrescribedMainKm', 'coachEntryTrainingType', 'hasDatedCoachRecovery', 'coachPrescription']],
+  [trainerJs, ['coachRaceDirective', 'confirmedRaceDistanceKm', 'participantRaceDistanceKm', 'raceMaxKm', 'postRaceRecoveryDayCount',
+    'addDaysToDateStr', 'restoreRaceReplacement', 'flattenPlanDays', 'applyRegisteredSundayRaceReplacements']],
+]) vm.runInContext(names.map((name) => extractFunction(source, name)).join('\n'), w16Integration);
+w16Integration.coachPlanHeadline = (text) => text;
+w16Integration.localDateStr = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+w16Integration.materializeCoachReviewWeek();
+w16Integration.applyRegisteredSundayRaceReplacements([{ race_date: '2026-10-18', race_name: '臺中國際馬拉松', distances: ['42.195km', '21km', '11km'] }]);
+w16Integration.materializeCoachReviewWeek();
+assertEqual(staleW16Week.days.filter((day) => day.type !== 'rest').map((day) => day.km).join(','), '4,7,7,12', 'stale browser W16 cards recover exact formal 4/7/7/12K schedule');
+assertEqual(w16Integration.weekPlannedKm(staleW16Week), 30, 'W16 daily cards and weekly total both read 30K');
+assertEqual(staleW16Week.days[0].steps[0].title, '賽後恢復 E 跑', 'W16 recovered card renders the formal main step instead of an empty course detail');
 
 const sessionStorySandbox = {
   paceToSeconds: (pace) => ({ '7:00': 420, '6:50': 410, '6:40': 400, '6:30': 390 }[pace] || 0),
@@ -426,7 +498,7 @@ Object.assign(raceVolumeSandbox, racePrescriptionSandbox, {
 });
 recoveryWeek.days.forEach((day, index) => { day.dow = [1, 2, 4, 6][index]; });
 vm.runInContext([
-  ...['coachPrescribedKm', 'coachPrescribedMainKm', 'coachPrescription', 'resolveCourse'].map((name) => extractFunction(trainerCoachEngineJs, name)),
+  ...['coachPrescribedKm', 'coachPrescribedMainKm', 'coachEntryTrainingType', 'hasDatedCoachRecovery', 'coachPrescription', 'resolveCourse'].map((name) => extractFunction(trainerCoachEngineJs, name)),
 ].join('\n'), raceVolumeSandbox);
 assertEqual(raceVolumeSandbox.effectiveWeekVolumeTarget(recoveryWeek).numericKm, 29, 'real course resolver preserves post-race rest and 5 km while applying 8 km and 16 km coach prescriptions');
 raceVolumeSandbox.resolveCourse = (day) => ({ course: { ...day, type: 'rest', km: 0 } });
