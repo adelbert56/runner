@@ -105,7 +105,7 @@ function buildStatusReminders(health = trainingDataHealth(appData.plan || [])) {
 // planStatus：單一狀態源。完成度／週量／autopilot 決策／預測 → 驅動所有卡。
 // ============================================================
 function planStatus(ctx = buildContext()) {
-  const plan = ctx.plan;
+  const plan = ctx.plan.map((week) => week ? { ...week, days: (week.days || []).map((day) => resolveCourse(day, ctx, week).course) } : week);
   const health = trainingDataHealth(plan);
   const decision = currentWeek === ctx.todayWeek ? trainingAutopilotDecision(plan)
     : { title: currentWeek > ctx.todayWeek ? '課程尚未開始' : '課程回顧', next: currentWeek > ctx.todayWeek ? '依本週每日正式課程執行，週跑量已納入恢復與安全調整。' : '查看本週留下的正式課程與完成紀錄。' };
@@ -113,19 +113,21 @@ function planStatus(ctx = buildContext()) {
   // 週目標、完成堂數與執行率都屬於目前選取週；累積實跑仍涵蓋整個週期。
   const currWeekPlan = plan[currentWeek - 1] || plan[ctx.todayWeek - 1];
   const selectedCompletion = trainingCompletionSummary(currWeekPlan ? [currWeekPlan] : [], ctx.today);
-  const effectiveTarget = effectiveWeekVolumeTarget(currWeekPlan);
+  const effectiveTarget = effectiveWeekVolumeTarget(currWeekPlan, ctx);
   const weekDates = new Set((currWeekPlan?.days || []).map((d) => d.dateStr));
   const currWeekDone = ctx.completion.allActivity
     .filter((e) => weekDates.has(e.date))
     .reduce((s, e) => s + (e.actualKm || 0), 0);
   const weekTargetKm = effectiveTarget.numericKm || 0;
+  const scheduledSessions = (currWeekPlan?.days || []).filter(day => day.type !== 'rest' && !day.isMakeup).length;
+  const weekActivities = ctx.completion.allActivity.filter(entry => weekDates.has(entry.date));
   return {
     health,
     decision,
     projection,
     completion: selectedCompletion,
     currentWeekCompleted: selectedCompletion.completedSessions,
-    currentWeekDays: (currWeekPlan?.days || []).filter((day) => day.type !== 'rest' && !day.isMakeup).length,
+    currentWeekDays: scheduledSessions,
     adherence: selectedCompletion.elapsedSessions ? selectedCompletion.adherence : null,
     totalKm: ctx.completion.totalKm,
     syncAge: health.syncAge,
@@ -133,7 +135,9 @@ function planStatus(ctx = buildContext()) {
     weekTargetDisplay: effectiveTarget.display,
     weekTargetSource: effectiveTarget.source,
     weekDoneKm: currWeekDone,
-    weekProgressPct: weekTargetKm > 0 ? Math.min(100, Math.round((currWeekDone / weekTargetKm) * 100)) : 0,
+    weekProgressPct: scheduledSessions > 0 ? Math.min(100, Math.round(selectedCompletion.completedSessions / scheduledSessions * 100)) : 0,
+    weekTotalMinutes: weekActivities.length && weekActivities.every(entry => Number(entry.actualTimeMins) > 0)
+      ? weekActivities.reduce((sum, entry) => sum + Number(entry.actualTimeMins), 0) : null,
     reminders: buildStatusReminders(health),
   };
 }
@@ -250,6 +254,8 @@ function coachPrescription(day, ctx, week) {
   const coachDays = coachDaysForWeek(week);
   const entry = coachDays.find((item) => item.scheduledDow === day.dow);
   if (!entry) return null;
+  // 通用賽後規則可能早於正式週報套入。具明確日期的恢復／輕鬆跑處方
+  // 可以取代那份通用底稿；未定日菜單、硬課與其他賽事保護仍不可覆蓋。
   const datedRecovery = hasDatedCoachRecovery(day, week) && entry.date === day.dateStr;
   if (day.raceReplacement && day.raceReplacement !== 'race' && !datedRecovery) return null;
   // 已確認的教練菜單擁有距離真相；不能讓週期產生器殘留的 day.km
@@ -274,6 +280,8 @@ function coachPrescription(day, ctx, week) {
       course: {
         ...prescribedDay,
         type: 'race',
+        raceDistanceKm: scheduledKm > 0 ? scheduledKm : day.raceDistanceKm,
+        raceDistanceStatus: scheduledKm > 0 ? 'confirmed' : day.raceDistanceStatus,
         workoutStructure: coachWorkoutStructure(entry.plan, prescribedDay, suppliedSteps),
         workoutStructureConfidence: 'coach',
         coachPlan: true
@@ -337,6 +345,7 @@ function courseResolutionLabel(source) {
     'coach-prescription': '教練處方',
     'daily-adjust': '出發前調整',
     'race-adjustment': '賽事調整',
+    'release-pending': '待教練放行',
     baseline: '正式課表'
   }[source] || '課表決策';
 }
@@ -396,8 +405,17 @@ function resolveCourse(day, ctx = buildContext(), week = null) {
   const resolvedWeek = week || ctx.plan.find((item) => (item.days || []).includes(day)
     || (day.weekNum && item.weekNum === day.weekNum)
     || (day.dateStr && (item.days || []).some((itemDay) => itemDay.dateStr === day.dateStr)));
-  const course = day;
-  const adapter = safetyGuard(course, ctx) || coachPrescription(course, ctx, resolvedWeek);
+  const course = day.releaseStatus === 'pending' ? { ...day, workoutStructureConfidence: day.releaseBaseConfidence } : day;
+  if (course !== day) { delete course.releaseStatus; delete course.releaseReasons; delete course.releaseBaseConfidence; }
+  const originalSafety = safetyGuard(course, ctx);
+  const prescription = originalSafety ? null : coachPrescription(course, ctx, resolvedWeek);
+  const adapter = originalSafety || (prescription && safetyGuard(prescription.course, ctx)) || prescription;
+  const resolvedCourse = adapter?.course || course;
+  const release = typeof courseReleaseDecision === 'function' ? courseReleaseDecision(resolvedCourse, ctx, resolvedWeek) : null;
+  if (release) return {
+    course: { ...resolvedCourse, releaseStatus: 'pending', releaseReasons: release.reasons, releaseBaseConfidence: resolvedCourse.workoutStructureConfidence, workoutStructureConfidence: 'note-only' },
+    paces: paceResolver(ctx, day.dateStr), rationale: `尚未放行：${release.reasons.join('；')}。`, source: 'release-pending'
+  };
   if (!adapter) return { course, paces: paceResolver(ctx, day.dateStr), rationale: courseRationale(course, ctx), source: courseResolutionSource(course) };
   return { course: adapter.course, paces: paceResolver(ctx, day.dateStr), rationale: adapter.rationale || courseRationale(adapter.course, ctx), source: adapter.source };
 }
@@ -406,8 +424,8 @@ function resolveCourse(day, ctx = buildContext(), week = null) {
 function resolveWeeklyDecision(ctx = buildContext(), week = ctx.plan[currentWeek - 1]) {
   if (!week) return null;
   const rows = (week.days || [])
-    .filter((day) => day.type !== 'rest')
-    .map((day) => ({ day, resolved: resolveCourse(day, ctx, week) }));
+    .map((day) => { const resolved = resolveCourse(day, ctx, week); return { day: resolved.course, resolved }; })
+    .filter(({ day }) => day.type !== 'rest');
   const thisWeekNext = rows.find(({ day }) => day.dateStr >= ctx.today);
   const nextWeek = !thisWeekNext && ctx.plan.slice(Number(week.weekNum || currentWeek)).find((candidate) => (candidate.days || [])
     .some((day) => day.type !== 'rest' && day.dateStr >= ctx.today));

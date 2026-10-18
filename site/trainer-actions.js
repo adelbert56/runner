@@ -635,12 +635,13 @@ function applyCoachPhaseScheduleForWeek(weekNum, { record = true, constraints = 
   const requestedFactor = Number(constraints.factor);
   const volumeFactor = phaseDeload ? 1 : Math.min(1, Math.max(0.75, Number.isFinite(requestedFactor) ? requestedFactor : 1));
   const priorWeek = appData.plan?.[weekNum - 2];
-  const priorTargetKm = Number(priorWeek?.targetKm) || 0;
+  const priorTargetKm = typeof weekPlannedKm === 'function' ? weekPlannedKm(priorWeek) : Number(priorWeek?.targetKm) || 0;
   const priorLongKm = Math.max(0, ...(priorWeek?.days || []).filter((day) => day.type === 'long').map((day) => Number(day.km) || 0));
   const holdProgression = Boolean(constraints.holdProgression);
   // 「條件通過／不通過」是正式的升級煞車：即使下一個日曆 phase 寫了更高
   // 的里程，也不得讓總量或長跑自動越過上一週已排定的量。
-  const effectiveVolume = Math.round(Math.min(volume * volumeFactor, holdProgression && priorTargetKm > 0 ? priorTargetKm : Infinity) * 10) / 10;
+  const volumeCeiling = priorTargetKm > 0 ? priorTargetKm * (holdProgression ? 1 : 1.1) : volume;
+  const effectiveVolume = Math.round(Math.min(volume * volumeFactor, volumeCeiling) * 10) / 10;
   const effectiveLongKm = Math.round(Math.min(longKm * volumeFactor, holdProgression && priorLongKm > 0 ? priorLongKm : Infinity) * 10) / 10;
   const deloadEachKm = Math.round(((effectiveVolume - effectiveLongKm) / Math.max(1, schedule.trainingDows.length - 1)) * 10) / 10;
   // 賽事週的 10K 本身就是當週品質刺激；不能再由一般課表塞一堂 T/I。
@@ -1070,7 +1071,11 @@ function recoverySignalStatus(days = 7) {
   if (latestStatus && /unbalanced|low|poor/i.test(latestStatus)) concerns.push(`Garmin HRV 狀態為 ${latestStatus}`);
   if (sleepHours && sleepHours < 6.5) concerns.push(`近 ${days} 天平均睡眠 ${sleepHours} 小時`);
   if (bodyBatteryHigh && bodyBatteryHigh < 60) concerns.push(`body battery 每日高點平均只到 ${bodyBatteryHigh}`);
-  return { days, samples: recent.length, sleepHours, bodyBatteryHigh, restingHr, hrvOvernight, hrvWeekly, hrvStatus: latestStatus, concerns, strained: concerns.length >= 2 };
+  const latestDate = recent.map(row => row.date).sort().at(-1);
+  const coverage = Object.fromEntries(['sleepHours', 'restingHr', 'hrvOvernight'].map(field => [field, recent.filter(row => Number(row[field]) > 0).length]));
+  const completeRows = recent.filter(row => ['sleepHours', 'restingHr', 'hrvOvernight'].every(field => Number(row[field]) > 0));
+  const sufficient = completeRows.length >= 3 && completeRows.map(row => row.date).sort().at(-1) >= addDaysToDateStr(today, -1);
+  return { days, samples: recent.length, latestDate, coverage, sufficient, sleepHours, bodyBatteryHigh, restingHr, hrvOvernight, hrvWeekly, hrvStatus: latestStatus, concerns, strained: concerns.length >= 2 };
 }
 
 // 主觀吃力度只在「輕鬆跑」上才有明確的判讀意義：輕鬆跑跑成吃力，就是恢復
@@ -1253,7 +1258,7 @@ function coachHrGuard(text) {
 
 // 將 Garmin 結構化主課、課後 RPE 與週檢核收斂成可稽核的升級證據。未結構化
 // 的全程紀錄仍會計入跑量，但不能當成放行 I 課或拉長長跑的證明。
-function weeklyCoachPromotionEvidence(weekNum, { painConcern = false } = {}) {
+function weeklyCoachPromotionEvidence(weekNum, { painConcern = false, recoveryConfirmed = false } = {}) {
   const week = appData.plan?.[Number(weekNum) - 1];
   const qualityDays = (week?.days || []).filter((day) => ['tempo', 'interval'].includes(day.type));
   if (!qualityDays.length) return { qualityPlanned: false };
@@ -1291,6 +1296,7 @@ function weeklyCoachPromotionEvidence(weekNum, { painConcern = false } = {}) {
     structuredEvidence: details.every((item) => item.structured),
     painConcern: Boolean(painConcern),
     nextDayPain,
+    recoveryConfirmed: recoveryConfirmed === true && qualityDays.every(day => day.dateStr < todayStr()),
     rpe: Math.max(0, ...details.map((item) => item.rpe)),
     paceCapBreached: details.some((item) => item.paceCapBreached),
     hrCapBreached: details.some((item) => item.hrCapBreached),
@@ -1342,7 +1348,7 @@ function completeWeeklyCheckin({ answers, fatigue, note, painConcern, earlyTrigg
   const score = answers.filter(Boolean).length;
   const timing = weeklyCheckinTiming();
   const decision = checkinSafetyDecision({ answers, fatigue, painConcern: effectivePainConcern });
-  const promotionGate = coachPromotionGate(weeklyCoachPromotionEvidence(currentWeek, { painConcern: effectivePainConcern }));
+  const promotionGate = coachPromotionGate(weeklyCoachPromotionEvidence(currentWeek, { painConcern: effectivePainConcern, recoveryConfirmed: Boolean(answers[1] && answers[3]) }));
   applyCoachPromotionGate(decision, promotionGate);
   if (!timing.ready && decision.allowIntensity && !earlyTrigger) {
     decision.result = '維持';

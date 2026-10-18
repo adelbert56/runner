@@ -143,8 +143,9 @@ function coachProfileSnapshot(payload, registrationData) {
       goal: text(profile.goal, 32), targetDate, targetTime: text(profile.targetTime, 16),
       heightCm: numberInRange(profile.heightCm, 120, 220), weightKg: numberInRange(profile.weightKg, 30, 150),
       maxHr: numberInRange(profile.maxHr, 120, 230), weeklyKm: numberInRange(profile.weeklyKm, 0, 200),
-      trainingDows: Array.isArray(profile.dayState) ? profile.dayState.filter((day) => Number.isInteger(day) && day >= 0 && day <= 6) : [],
-      longRunDay: numberInRange(profile.longRunDay, 0, 6),
+      trainingDows: Array.isArray(profile.dayState) ? profile.dayState.slice(0, 7).map((state, dow) => [1, 2].includes(Number(state)) ? dow : -1).filter((dow) => dow >= 0) : [],
+      longRunDay: Array.isArray(profile.dayState) && profile.dayState.slice(0, 7).indexOf(2) >= 0
+        ? profile.dayState.slice(0, 7).indexOf(2) : numberInRange(profile.longRunDay, 0, 6),
     },
     octoberRaceCheckpoints: checkpointRaces,
   };

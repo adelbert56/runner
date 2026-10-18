@@ -1,0 +1,34 @@
+[
+  {
+    "variant": "a",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "rows": 4,
+    "align": "right"
+  },
+  {
+    "variant": "a",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "rows": 4,
+    "align": "right"
+  },
+  {
+    "variant": "b",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "rows": 4,
+    "align": "right"
+  },
+  {
+    "variant": "b",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "rows": 4,
+    "align": "right"
+  }
+]

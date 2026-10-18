@@ -1944,3 +1944,61 @@
       .card { border: 1px solid #ccc; box-shadow: none; }
       .week-calendar { display: grid; grid-template-columns: repeat(3, 1fr); }
     }
+/* Analysis A: summary, trends, then activity records. */
+.analysis-layout-a { padding:24px; border:0; border-radius:var(--radius-lg); box-shadow:none; }
+.analysis-layout-a .trend-card-head { gap:12px; margin-bottom:24px; }
+.analysis-layout-a .trend-card-icon { display:none; }
+.analysis-layout-a .trend-card-title { font-weight:700; letter-spacing:0; }
+.analysis-layout-a .trend-card-updated { padding:8px 12px; border:0; white-space:normal; }
+.analysis-layout-a .trend-hero-row { gap:24px; padding:8px 0 24px; border:0; }
+.analysis-layout-a .trend-hero-item { padding:0; border:0; }
+.analysis-layout-a .trend-hero-label { font-size:13px; font-weight:500; letter-spacing:0; }
+.analysis-layout-a .trend-hero-label i { display:none; }
+.analysis-layout-a .trend-hero-value { margin-top:8px; font-size:30px; font-weight:700; letter-spacing:0; }
+.analysis-layout-a .trend-hero-value small { margin-left:4px; font-size:12px; font-weight:400; }
+.analysis-scope-note { margin:0; color:var(--c-text-muted); font-size:12px; line-height:1.6; }
+.analysis-layout-a .analysis-chart-grid { align-items:start; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:24px; margin-top:32px; }
+.analysis-layout-a .analysis-chart-card { min-width:0; padding:24px; background:var(--c-surface2); border:0; border-radius:var(--radius-lg); box-shadow:none; }
+.analysis-layout-a .analysis-chart-heading b { font-size:20px; font-weight:700; }
+.analysis-layout-a .analysis-chart-heading p { margin-top:8px; }
+.analysis-layout-a .volume-trend-stack { gap:24px; margin-top:24px; }
+.analysis-layout-a .volume-trend-section { padding:0; border:0; background:transparent; }
+.analysis-layout-a .volume-trend-subhead { gap:8px; flex-wrap:wrap; }
+.analysis-layout-a .volume-trend-subhead b i { display:none; }
+.analysis-layout-a .volume-trend-subhead span { color:var(--c-text-muted); background:transparent; padding:0; font-size:12px; font-weight:400; }
+.analysis-layout-a .trend-bar-chart .trend-bar-fill { background:var(--c-blue); box-shadow:none; border-radius:var(--radius-sm) var(--radius-sm) 0 0; }
+.analysis-layout-a .trend-bar-chart .trend-bar-col:last-child .trend-bar-fill { background:var(--c-primary); }
+.analysis-layout-a .trend-bar-chart .trend-bar-value { color:var(--c-text); font-weight:500; }
+.analysis-layout-a .volume-trend-insights { margin-top:24px; padding-top:24px; border-color:var(--c-border); }
+.analysis-layout-a .trend-monitor { margin-top:32px; padding:24px; border:0; background:var(--c-surface2); }
+.analysis-layout-a .trend-monitor-top { gap:24px; }
+.analysis-layout-a .trend-tile-grid { gap:12px; }
+.analysis-layout-a .trend-tile { padding:12px; border:0; }
+.analysis-run-records { margin-top:32px; }
+.analysis-run-records h3 { margin:0; font-size:20px; font-weight:700; }
+.analysis-run-records .table-scroll { margin-top:24px; }
+.analysis-run-records .analysis-scope-note { margin-top:16px; }
+.log-table { font-variant-numeric:tabular-nums; }
+.log-table th { padding:12px; background:var(--c-surface2); border-bottom:1px solid var(--c-border); letter-spacing:0; }
+.log-table td { padding:16px 12px; }
+.log-table tbody tr:hover { background:var(--c-surface2); }
+.analysis-log-table { min-width:600px; }
+.analysis-log-table caption { text-align:left; color:var(--c-text-muted); font-size:12px; padding-bottom:12px; }
+.analysis-log-table th, .analysis-log-table td, .garmin-log-table th, .garmin-log-table td { text-align:right; white-space:nowrap; }
+.analysis-log-table th:first-child, .analysis-log-table td:first-child, .analysis-log-table th:nth-child(2), .analysis-log-table td:nth-child(2), .garmin-log-table th:first-child, .garmin-log-table td:first-child { text-align:left; }
+.analysis-log-table .run-name { white-space:normal; min-width:160px; max-width:320px; overflow-wrap:anywhere; }
+.table-scroll:focus-visible { outline:2px solid var(--c-primary); outline-offset:4px; }
+@media(max-width:768px) {
+  .analysis-layout-a { padding:20px; }
+  .analysis-layout-a .trend-card-updated { margin-left:0; }
+  .analysis-layout-a .trend-hero-row { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 16px; }
+  .analysis-layout-a .trend-hero-item:nth-child(n) { padding:0; border:0; }
+  .analysis-layout-a .trend-hero-value { font-size:24px; }
+  .analysis-layout-a .analysis-chart-grid { grid-template-columns:minmax(0,1fr); }
+  .analysis-layout-a .analysis-chart-card, .analysis-layout-a .trend-monitor { padding:20px; }
+  .analysis-layout-a .analysis-chart-heading { flex-wrap:wrap; }
+  .analysis-layout-a .trend-monitor-top { grid-template-columns:1fr; }
+  .analysis-layout-a .trend-monitor-divider { display:none; }
+  .analysis-layout-a .trend-tile-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .analysis-log-table td, .garmin-log-table td { padding:12px; }
+}

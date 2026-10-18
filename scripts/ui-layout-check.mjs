@@ -335,7 +335,7 @@ async function assertTrainerReport(page, viewportName) {
     hasFocus: Boolean(element.querySelector(".weekly-coach-insight")) || Boolean(element.querySelector(".course-decision-context")),
     hasDuplicateFocus: Boolean(element.querySelector(".weekly-coach-insight") && element.querySelector(".course-decision-context")),
     hasActionableTitle: element.textContent.includes("本週執行重點") || element.textContent.includes("這週怎麼跑，先看這裡"),
-    hasVisibleGuidance: element.textContent.trim().length > 40,
+    hasVisibleGuidance: [...element.querySelectorAll('.coach-insight-description, .course-decision-context p')].some(node => node.textContent.trim().length > 0 && getComputedStyle(node).display !== 'none'),
     coachBriefOpen: !element.querySelector(".coach-insight-details") || element.querySelector(".coach-insight-details")?.open === true,
     beforeCourseTable: (() => {
       const weekContent = document.querySelector("#plan-tab-week");
@@ -527,6 +527,28 @@ async function assertTrainerReport(page, viewportName) {
   if (analysisContext.hasDuplicatedDecision || !analysisContext.hasLongestRun) {
     throw new Error(`${viewportName}/trainer-report: analysis must keep long-term context without duplicating the week decision ${JSON.stringify(analysisContext)}`);
   }
+  const analysisLayout = await page.locator('.analysis-layout-a').evaluate((element) => {
+    const table = element.querySelector('.analysis-log-table');
+    const numeric = table?.querySelector('tbody td:nth-child(3)');
+    return {
+      hasTable: Boolean(table),
+      hasRows: Boolean(table?.querySelector('tbody tr')),
+      scopedHeaders: table?.querySelectorAll('th[scope="col"]').length,
+      numericAlign: numeric ? getComputedStyle(numeric).textAlign : '',
+      scrollRegion: Boolean(table?.closest('[tabindex="0"][role="region"]')),
+      order: element.querySelector('.trend-hero-row').compareDocumentPosition(element.querySelector('.analysis-chart-grid')) & Node.DOCUMENT_POSITION_FOLLOWING,
+      detailOrder: element.querySelector('.analysis-chart-grid').compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING,
+    };
+  });
+  if (!analysisLayout.hasTable || !analysisLayout.hasRows || analysisLayout.scopedHeaders !== 5 || analysisLayout.numericAlign !== 'right' || !analysisLayout.scrollRegion || !analysisLayout.order || !analysisLayout.detailOrder) {
+    throw new Error(`${viewportName}/trainer-analysis-a: summary, charts and accessible numeric table contract failed ${JSON.stringify(analysisLayout)}`);
+  }
+  // Element captures otherwise stitch the sticky navigation across the analysis card.
+  await page.evaluate(() => document.querySelectorAll('body *').forEach((node) => {
+    if (['fixed', 'sticky'].includes(getComputedStyle(node).position)) node.setAttribute('data-analysis-capture-overlay', '');
+  }));
+  await page.locator('.analysis-layout-a').screenshot({ path: resolve(screenshotDir, `${viewportName}-trainer-analysis-a.png`), style: '[data-analysis-capture-overlay] { visibility:hidden !important; }' });
+  await page.evaluate(() => document.querySelectorAll('[data-analysis-capture-overlay]').forEach((node) => node.removeAttribute('data-analysis-capture-overlay')));
   const inputValidation = await page.evaluate(() => {
     const valid = {
       goal: "half",
@@ -1836,6 +1858,34 @@ async function assertRegistrationHero(page, viewportName) {
 }
 
 const { chromium } = await loadPlaywright();
+async function assertMileageScope(page, viewportName) {
+  await page.addInitScript(() => { window.__RUNNER_UI_FIXTURE__ = true; });
+  await page.goto(`${baseUrl}trainer.html`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#trainer-hero-shell');
+  await page.evaluate(() => {
+    const values = [5.4, 6.48, 6.28, 11.25];
+    const minutes = [40.1, 44.1, 44.6, 75.3];
+    const dates = ['2026-10-12', '2026-10-13', '2026-10-15', '2026-10-18'];
+    const kms = [5, 6, 4, 11];
+    appData = { ...createEmptyData(), profile: { goal: 'half', generatedAt: '2026-07-06', targetDate: '2026-12-06', targetTime: '2:15:00', dayState: [0, 1, 1, 0, 1, 0, 2], weeklyKm: 33, maxHr: 187, injuries: ['none'] }, plan: [{ weekNum: 1, days: dates.map((dateStr, i) => ({ dateStr, dow: [1, 2, 4, 0][i], type: i === 3 ? 'race' : 'easy', km: kms[i], status: 'done', task: '正式課程', steps: [], ...(i === 3 ? { raceReplacement: 'race', raceDistanceKm: 11 } : {}) })) }] };
+    coachReviewData = { analyticsRuns: dates.map((date, i) => ({ date, km: values[i], durationMin: minutes[i], pace: '7:00', hr: 140 })), nextWeek: { weekStart: dates[0], menu: dates.map((date, i) => ({ date, scheduledDow: [1, 2, 4, 0][i], totalKm: kms[i], plan: i === 3 ? '11K路跑' : `輕鬆跑 ${kms[i]} km`, steps: [] })) } };
+    currentWeek = 1;
+    renderPlanView();
+    showView('plan');
+    const host = document.getElementById('plan-tab-week');
+    host.classList.add('active');
+    host.innerHTML = renderWeekOverviewCard(appData.profile, appData.plan);
+  });
+  const card = page.locator('.automation-brief').last();
+  await card.waitFor({ state: 'visible' });
+  const evidence = await card.evaluate(element => ({ text: element.innerText, overflow: element.scrollWidth > element.clientWidth + 1 }));
+  if (!evidence.text.includes('4/4 堂 · 100%') || !evidence.text.includes('主課處方') || !evidence.text.includes('26 km') || !evidence.text.includes('29.41 km') || !evidence.text.includes('204 分鐘') || evidence.overflow) throw new Error(`${viewportName}/mileage-scope: ${JSON.stringify(evidence)}`);
+  await card.screenshot({ path: resolve(screenshotDir, `${viewportName}-trainer-mileage-scope.png`) });
+  // Unknown duration must not become 0 or be estimated from pace.
+  const missing = await page.evaluate(() => { coachReviewData.analyticsRuns[0].durationMin = null; return renderWeekOverviewCard(appData.profile, appData.plan); });
+  if (!missing.includes('尚缺完整時間')) throw new Error(`${viewportName}/mileage-scope: missing duration was fabricated`);
+  console.log(`OK ${viewportName}/mileage scope and completion progress`);
+}
 await mkdir(screenshotDir, { recursive: true });
 
 const server = startServer();
@@ -1843,11 +1893,16 @@ let browser;
 
 try {
   await waitForServer(baseUrl);
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, ...(process.env.UI_LAYOUT_BROWSER_CHANNEL ? { channel: process.env.UI_LAYOUT_BROWSER_CHANNEL } : {}) });
 
   for (const viewport of selectedViewports) {
     const page = await browser.newPage({ viewport });
     page.on("pageerror", (error) => fail(`${viewport.name}: page error: ${error.message}`));
+    if (process.env.UI_LAYOUT_RELEASE_ONLY === '1') {
+      await assertMileageScope(page, viewport.name);
+      await page.close();
+      continue;
+    }
     await page.goto(baseUrl, { waitUntil: "networkidle" });
 
     await assertTrainerReport(page, viewport.name);
