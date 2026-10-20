@@ -1,7 +1,7 @@
 {
-  "scrape_date": "2026-10-15 10:18",
+  "scrape_date": "2026-10-20 10:25",
   "added": 1,
-  "updated": 1,
+  "updated": 0,
   "total": 75,
   "sources": [
     "運動筆記",
@@ -10,10 +10,6 @@
     "跑者廣場全國賽會"
   ],
   "errors": [
-    "第一屆樂敗國際精品路跑||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13082",
-    "第一屆樂敗國際精品路跑||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13082&subtitle=%E7%AC%AC%E4%B8%80%E5%B1%86%E6%A8%82%E6%95%97%E5%9C%8B%E9%9A%9B%E7%B2%BE%E5%93%81%E8%B7%AF%E8%B7%91",
-    "2026 國際女孩日水水運動節||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13149",
-    "2026 國際女孩日水水運動節||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13149&subtitle=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80",
     "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽||2026-10-17: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12981",
     "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽||2026-10-17: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=12981&subtitle=2026+%E5%8D%97%E5%BA%84%E5%B1%B1%E6%B0%B4%E6%82%A0%E9%81%8A%E8%A1%8C+%E2%80%94+%E5%B1%B1%E6%B0%B4%E8%B7%AF%E8%B7%91%E8%B3%BD+%C3%97+%E6%85%A2%E5%9F%8E%E7%88%AC%E5%9D%A1%28%E8%A7%80%E8%B3%9E%29%E8%B3%BD",
     "2026年FUN電多巴胺路跑嘉年華||2026-10-17: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050",
@@ -27,6 +23,7 @@
     "2026 濁水溪紫金馬拉松-高手名間站||2026-10-24: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13136&subtitle=2026+%E6%BF%81%E6%B0%B4%E6%BA%AA%E7%B4%AB%E9%87%91%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%AB%98%E6%89%8B%E5%90%8D%E9%96%93%E7%AB%99",
     "2026 南投馬11th 草鞋墩馬拉松 前進鳥嘴潭、奔向九九峰||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12926",
     "2026 南投馬11th 草鞋墩馬拉松 前進鳥嘴潭、奔向九九峰||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=12926&subtitle=2026+%E5%8D%97%E6%8A%95%E9%A6%AC11th+%E8%8D%89%E9%9E%8B%E5%A2%A9%E9%A6%AC%E6%8B%89%E6%9D%BE+%E5%89%8D%E9%80%B2%E9%B3%A5%E5%98%B4%E6%BD%AD%E3%80%81%E5%A5%94%E5%90%91%E4%B9%9D%E4%B9%9D%E5%B3%B0",
+    "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026SpongeBob-TXG",
     "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13066",
     "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
     "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13075",
@@ -34,19 +31,18 @@
     "2026 清水馬拉松嘉年華||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13028",
     "2026 清水馬拉松嘉年華||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13028&subtitle=2026+%E6%B8%85%E6%B0%B4%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%98%89%E5%B9%B4%E8%8F%AF",
     "2026 聯大八甲馬拉松||2026-10-31: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7087",
+    "2026 風起台76・海野山共行馬拉松||2026-10-31: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/Expressway76?page=5548",
+    "2026 風起台76・海野山共行馬拉松||2026-10-31: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/Expressway76/signup?key",
     "2026 風起台76・海野山共行馬拉松||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13148",
     "2026 風起台76・海野山共行馬拉松||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13148&subtitle=2026%E9%A2%A8%E8%B5%B7%E5%8F%B076+%E6%B5%B7%E9%87%8E%E5%B1%B1%E5%85%B1%E8%A1%8C%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "2026 日月潭環湖馬拉松||2026-11-01: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/sunmoonlakemarathon2026",
     "2026 日月潭環湖馬拉松||2026-11-01: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12897",
     "2026 日月潭環湖馬拉松||2026-11-01: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=12897&subtitle=2026%E6%97%A5%E6%9C%88%E6%BD%AD%E7%92%B0%E6%B9%96%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "2026 愛在幼安公益路跑||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13119",
-    "2026 愛在幼安公益路跑||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13119&subtitle=%E6%84%9B%E5%9C%A8%E5%B9%BC%E5%AE%89%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
+    "*2026 愛在幼安公益路跑*||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13119",
+    "*2026 愛在幼安公益路跑*||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13119&subtitle=%E6%84%9B%E5%9C%A8%E5%B9%BC%E5%AE%89%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
   ],
   "has_errors": true,
   "enrichment_errors": [
-    "第一屆樂敗國際精品路跑||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13082",
-    "第一屆樂敗國際精品路跑||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13082&subtitle=%E7%AC%AC%E4%B8%80%E5%B1%86%E6%A8%82%E6%95%97%E5%9C%8B%E9%9A%9B%E7%B2%BE%E5%93%81%E8%B7%AF%E8%B7%91",
-    "2026 國際女孩日水水運動節||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13149",
-    "2026 國際女孩日水水運動節||2026-10-11: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13149&subtitle=2026%E5%9C%8B%E9%9A%9B%E5%A5%B3%E5%AD%A9%E6%97%A5%E6%B0%B4%E6%B0%B4%E9%81%8B%E5%8B%95%E7%AF%80",
     "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽||2026-10-17: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12981",
     "2026 南庄山水悠遊行 — 山水路跑賽 × 慢城爬坡(觀賞)賽||2026-10-17: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=12981&subtitle=2026+%E5%8D%97%E5%BA%84%E5%B1%B1%E6%B0%B4%E6%82%A0%E9%81%8A%E8%A1%8C+%E2%80%94+%E5%B1%B1%E6%B0%B4%E8%B7%AF%E8%B7%91%E8%B3%BD+%C3%97+%E6%85%A2%E5%9F%8E%E7%88%AC%E5%9D%A1%28%E8%A7%80%E8%B3%9E%29%E8%B3%BD",
     "2026年FUN電多巴胺路跑嘉年華||2026-10-17: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13050",
@@ -60,6 +56,7 @@
     "2026 濁水溪紫金馬拉松-高手名間站||2026-10-24: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13136&subtitle=2026+%E6%BF%81%E6%B0%B4%E6%BA%AA%E7%B4%AB%E9%87%91%E9%A6%AC%E6%8B%89%E6%9D%BE-%E9%AB%98%E6%89%8B%E5%90%8D%E9%96%93%E7%AB%99",
     "2026 南投馬11th 草鞋墩馬拉松 前進鳥嘴潭、奔向九九峰||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12926",
     "2026 南投馬11th 草鞋墩馬拉松 前進鳥嘴潭、奔向九九峰||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=12926&subtitle=2026+%E5%8D%97%E6%8A%95%E9%A6%AC11th+%E8%8D%89%E9%9E%8B%E5%A2%A9%E9%A6%AC%E6%8B%89%E6%9D%BE+%E5%89%8D%E9%80%B2%E9%B3%A5%E5%98%B4%E6%BD%AD%E3%80%81%E5%A5%94%E5%90%91%E4%B9%9D%E4%B9%9D%E5%B3%B0",
+    "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/2026SpongeBob-TXG",
     "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13066",
     "2026 海綿寶寶人生馬拉松-人生市場謎-臺中場||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13066&subtitle=2026+%E6%B5%B7%E7%B6%BF%E5%AF%B6%E5%AF%B6%E4%BA%BA%E7%94%9F%E9%A6%AC%E6%8B%89%E6%9D%BE-%E4%BA%BA%E7%94%9F%E5%B8%82%E5%A0%B4%E8%AC%8E-%E8%87%BA%E4%B8%AD%E5%A0%B4",
     "<綠動員林・守護永續> 2026第17屆員林獅子盃親子公益路跑||2026-10-25: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13075",
@@ -67,12 +64,15 @@
     "2026 清水馬拉松嘉年華||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13028",
     "2026 清水馬拉松嘉年華||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13028&subtitle=2026+%E6%B8%85%E6%B0%B4%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%98%89%E5%B9%B4%E8%8F%AF",
     "2026 聯大八甲馬拉松||2026-10-31: bao-ming: 403 Client Error: Forbidden for url: https://bao-ming.com/eb/content/7087",
+    "2026 風起台76・海野山共行馬拉松||2026-10-31: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/Expressway76?page=5548",
+    "2026 風起台76・海野山共行馬拉松||2026-10-31: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/Expressway76/signup?key",
     "2026 風起台76・海野山共行馬拉松||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13148",
     "2026 風起台76・海野山共行馬拉松||2026-10-31: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13148&subtitle=2026%E9%A2%A8%E8%B5%B7%E5%8F%B076+%E6%B5%B7%E9%87%8E%E5%B1%B1%E5%85%B1%E8%A1%8C%E9%A6%AC%E6%8B%89%E6%9D%BE",
+    "2026 日月潭環湖馬拉松||2026-11-01: iRunner: 403 Client Error: Forbidden for url: https://irunner.biji.co/sunmoonlakemarathon2026",
     "2026 日月潭環湖馬拉松||2026-11-01: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12897",
     "2026 日月潭環湖馬拉松||2026-11-01: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=12897&subtitle=2026%E6%97%A5%E6%9C%88%E6%BD%AD%E7%92%B0%E6%B9%96%E9%A6%AC%E6%8B%89%E6%9D%BE",
-    "2026 愛在幼安公益路跑||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13119",
-    "2026 愛在幼安公益路跑||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13119&subtitle=%E6%84%9B%E5%9C%A8%E5%B9%BC%E5%AE%89%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
+    "*2026 愛在幼安公益路跑*||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13119",
+    "*2026 愛在幼安公益路跑*||2026-11-07: 運動筆記: 403 Client Error: Forbidden for url: https://running.biji.co/index.php?q=competition&act=info&cid=13119&subtitle=%E6%84%9B%E5%9C%A8%E5%B9%BC%E5%AE%89%E5%85%AC%E7%9B%8A%E8%B7%AF%E8%B7%91"
   ],
   "has_enrichment_errors": true
 }
