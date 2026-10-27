@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-22T15:42:17.799Z",
-  "basis_date": "2026-10-22",
+  "generated_at": "2026-10-27T11:25:00.750Z",
+  "basis_date": "2026-10-27",
   "items": [
     {
       "platform": "運動筆記",
@@ -10,7 +10,7 @@
       "missing": 6,
       "opened_gap": 1,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 4,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
         "TOYOTA RUN 台中 視障專場",
@@ -30,7 +30,7 @@
       "missing": 1,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 3,
+      "due_now": 2,
       "sample_races": [
         "2026 專鑄不凡-SIMHOPE x 大腳丫全國馬拉松接力賽",
         "2026 Run For Dad 爸趣迷你馬拉松-運動i臺灣2.0",
@@ -110,7 +110,7 @@
       "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 VISOGE 夜跑派對 台中場",
         "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",

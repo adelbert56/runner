@@ -11,11 +11,11 @@
     "is_official_direct": false,
     "priority_score": 5,
     "tracking": {
-      "status": "closed_gap",
-      "status_label": "已截止，低頻補齊",
-      "next_check_date": "2026-10-22",
-      "cadence": "manual",
-      "reason": "報名已截止但仍缺：官方報名連結。保留供歷史資料補齊。"
+      "status": "pre_race_recheck",
+      "status_label": "賽前 14 天複查",
+      "next_check_date": "2026-10-27",
+      "cadence": "every_3_days_until_race",
+      "reason": "距離賽事 12 天，賽前兩週需重查公告、起跑時間、場地、交通與停辦異動。仍缺：官方報名連結。"
     },
     "missing": [
       {
