@@ -1206,7 +1206,7 @@
     "fees": "21K 1000元、11K 800元、6K 600元",
     "quota": "21K 1200人、11K 1200人、6K 1200人",
     "start_times": "松柏勇者組（21K） 起跑 06:30、茶香挑戰組（11K） 起跑 06:40、祈福樂跑組（6K） 起跑 06:50",
-    "verified_at": "2026-09-29",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：Focusline、運動筆記",
     "source_platform": "Focusline、運動筆記",
     "is_official_direct": true,
@@ -1353,7 +1353,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13028&subtitle=2026+%E6%B8%85%E6%B0%B4%E9%A6%AC%E6%8B%89%E6%9D%BE%E5%98%89%E5%B9%B4%E8%8F%AF",
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-10-27T11:01:23.441287+00:00",
+    "scraped_at": "2026-10-29T10:50:08.024964+00:00",
     "registration_opens_at": "2026-05-04",
     "registration_deadline": "2026-09-20",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=13028",
@@ -1377,16 +1377,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T00:07:52.725Z",
+      "updated_at": "2026-10-29T11:14:49.731Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，有霧，19-30°C，降雨機率 0%，最大風速 8 km/h",
-      "weather_code": 45,
-      "temperature_min_c": 19.3,
+      "summary": "臺中市縣市預報，晴朗，19-30°C，降雨機率 0%，最大風速 9 km/h",
+      "weather_code": 0,
+      "temperature_min_c": 19.2,
       "temperature_max_c": 29.8,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 7.7
+      "wind_speed_max_kmh": 9.4
     }
   },
   {
@@ -1425,19 +1425,19 @@
     "source": "跑者廣場全國賽會",
     "source_url": "http://www.taipeimarathon.org.tw/contest.aspx",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-10-27T11:01:23.422535+00:00",
+    "scraped_at": "2026-10-29T10:50:08.003827+00:00",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T00:07:52.754Z",
+      "updated_at": "2026-10-29T11:14:49.754Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，有霧，19-29°C，降雨機率 0%，最大風速 19 km/h",
+      "summary": "苗栗縣縣市預報，有霧，19-28°C，降雨機率 0%，最大風速 20 km/h",
       "weather_code": 45,
-      "temperature_min_c": 18.6,
-      "temperature_max_c": 28.7,
+      "temperature_min_c": 18.8,
+      "temperature_max_c": 28.4,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 19.3
+      "wind_speed_max_kmh": 19.9
     }
   },
   {
@@ -1476,19 +1476,19 @@
     "source": "跑者廣場全國賽會",
     "source_url": "http://www.taipeimarathon.org.tw/contest.aspx",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-10-27T11:01:23.422576+00:00",
+    "scraped_at": "2026-10-29T10:50:08.003900+00:00",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T00:07:52.783Z",
+      "updated_at": "2026-10-29T11:14:49.776Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，有霧，19-30°C，降雨機率 0%，最大風速 8 km/h",
-      "weather_code": 45,
-      "temperature_min_c": 19.3,
+      "summary": "臺中市縣市預報，晴朗，19-30°C，降雨機率 0%，最大風速 9 km/h",
+      "weather_code": 0,
+      "temperature_min_c": 19.2,
       "temperature_max_c": 29.8,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 7.7
+      "wind_speed_max_kmh": 9.4
     }
   },
   {
@@ -1516,7 +1516,7 @@
     "fees": "21K 1100元、10K 900元、5K 600元、3K 0元",
     "quota": "21K 600人、10K 800人、5K 600人、3K 800人",
     "start_times": "半馬組（21K） 起跑 07:10、半馬 起跑 07:10、10K 起跑 07:10、健跑組 起跑 07:10",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：iRunner、運動筆記",
     "source_platform": "iRunner、運動筆記",
     "is_official_direct": true,
@@ -1527,19 +1527,19 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-08-18",
-    "scraped_at": "2026-10-27T11:01:23.422616+00:00",
+    "scraped_at": "2026-10-29T10:50:08.003945+00:00",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T00:07:52.809Z",
+      "updated_at": "2026-10-29T11:14:49.799Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "彰化縣",
-      "summary": "彰化縣縣市預報，多雲，20-31°C，降雨機率 0%，最大風速 6 km/h",
-      "weather_code": 2,
-      "temperature_min_c": 20.3,
+      "summary": "彰化縣縣市預報，多雲，20-31°C，降雨機率 0%，最大風速 7 km/h",
+      "weather_code": 1,
+      "temperature_min_c": 19.9,
       "temperature_max_c": 31.2,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 6.3
+      "wind_speed_max_kmh": 7.1
     }
   },
   {
@@ -1558,7 +1558,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12897&subtitle=2026%E6%97%A5%E6%9C%88%E6%BD%AD%E7%92%B0%E6%B9%96%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-10-27T11:01:23.422657+00:00",
+    "scraped_at": "2026-10-29T10:50:08.003983+00:00",
     "registration_opens_at": "2026-01-23",
     "registration_deadline": "2026-05-31",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12897",
@@ -1582,16 +1582,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-11-01",
-      "updated_at": "2026-10-29T00:07:52.837Z",
+      "updated_at": "2026-10-29T11:14:49.822Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "南投縣",
-      "summary": "南投縣縣市預報，有霧，15-28°C，降雨機率 2%，最大風速 8 km/h",
+      "summary": "南投縣縣市預報，有霧，15-29°C，降雨機率 0%，最大風速 10 km/h",
       "weather_code": 45,
-      "temperature_min_c": 14.9,
-      "temperature_max_c": 28.3,
-      "precipitation_probability_max": 2,
-      "wind_speed_max_kmh": 7.8
+      "temperature_min_c": 15,
+      "temperature_max_c": 28.6,
+      "precipitation_probability_max": 0,
+      "wind_speed_max_kmh": 9.5
     }
   },
   {
@@ -1628,7 +1628,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-10-27T11:01:23.422741+00:00"
+    "scraped_at": "2026-10-29T10:50:08.004051+00:00"
   },
   {
     "race_id": "cd7b49ea-7a4c-469c-b863-c74e94cdeb8a",
@@ -1654,7 +1654,7 @@
     "fees": "21K 1300元、10K 1100元、5K 1000元",
     "quota": "21K 1000人、10K 1500人、5K 2000人",
     "start_times": "半程馬拉松組 起跑 06:45、10公里 起跑 07:15、5公里 起跑 07:20、5公里 起跑 07:30、10公里 起跑 08:55、5公里 起跑 09:00、半程馬拉松組 起跑 09:40、10公里 起跑 09:45",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：Lohas、運動筆記",
     "source_platform": "Lohas、運動筆記",
     "is_official_direct": true,
@@ -1665,7 +1665,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-30",
-    "scraped_at": "2026-10-27T11:01:23.422696+00:00"
+    "scraped_at": "2026-10-29T10:50:08.004021+00:00"
   },
   {
     "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
@@ -1684,7 +1684,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12929&subtitle=2026%E5%8F%B0%E7%81%A3%E7%B1%B3%E5%80%89%E7%94%B0%E4%B8%AD%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-10-27T11:01:23.422802+00:00",
+    "scraped_at": "2026-10-29T10:50:08.004163+00:00",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12929",
     "social_links": [],
@@ -1742,7 +1742,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-16",
-    "scraped_at": "2026-10-27T11:01:23.422773+00:00"
+    "scraped_at": "2026-10-29T10:50:08.004082+00:00"
   },
   {
     "race_id": "de7bb392-844d-44cb-87d7-c4810c713cc2",
@@ -1782,7 +1782,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-08-20",
-    "scraped_at": "2026-10-27T11:01:23.422832+00:00"
+    "scraped_at": "2026-10-29T10:50:08.004206+00:00"
   },
   {
     "race_id": "335fc118-fe19-43e2-8d81-42693a5e6582",
@@ -1851,7 +1851,8 @@
       "66f420dd-4e46-47d2-a807-d31217fb40a8",
       "249f3284-c270-4344-b76c-ca0351d0d3fa",
       "a8b30154-0fac-49ce-ab15-5c82dba3dcc5",
-      "db9b5022-b25f-4f27-beb6-e82b6a21321c"
+      "db9b5022-b25f-4f27-beb6-e82b6a21321c",
+      "667e33d4-f84b-4bc1-9e18-adae06afa25d"
     ]
   },
   {
@@ -1890,7 +1891,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-16",
-    "scraped_at": "2026-10-27T11:01:23.441145+00:00",
+    "scraped_at": "2026-10-29T10:50:08.024856+00:00",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
   },
@@ -1927,7 +1928,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "http://www.taipeimarathon.org.tw/contest.aspx",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-10-27T11:01:23.441169+00:00"
+    "scraped_at": "2026-10-29T10:50:08.024881+00:00"
   },
   {
     "race_id": "db09aa75-1035-41f1-acea-59fc25f50818",
@@ -1968,7 +1969,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-10-27T11:01:23.441203+00:00"
+    "scraped_at": "2026-10-29T10:50:08.024917+00:00"
   },
   {
     "race_id": "af9de05e-9895-478a-bcc6-92587d8c2382",
@@ -1987,7 +1988,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12814&subtitle=2026+%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%BA%97%E6%99%A8%E8%87%BA%E4%B8%AD%E5%9C%8B%E9%9A%9B%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-10-27T11:01:23.441252+00:00",
+    "scraped_at": "2026-10-29T10:50:08.024941+00:00",
     "registration_note": "人工查證：iRunner 報名頁與運動筆記賽事頁。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12814",
     "social_links": [],
@@ -2056,7 +2057,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-07-30",
-    "scraped_at": "2026-10-27T11:01:23.441393+00:00",
+    "scraped_at": "2026-10-29T10:50:08.025059+00:00",
     "merged_duplicate_race_ids": [
       "4fa61609-0618-4440-96d8-6bf7b81dde5a"
     ]
@@ -2097,7 +2098,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-16",
-    "scraped_at": "2026-10-27T11:01:23.441369+00:00",
+    "scraped_at": "2026-10-29T10:50:08.025036+00:00",
     "cancellation_notice": "",
     "cancellation_notice_url": ""
   },
@@ -2136,7 +2137,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-07-28",
-    "scraped_at": "2026-10-27T11:01:23.441336+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025009+00:00"
   },
   {
     "race_id": "567466c5-20c8-47f3-a0af-5e9b5241647d",
@@ -2163,7 +2164,7 @@
     "fees": "42.195K 1400元、23K 1200元、13K 1000元、4.5K 700元",
     "quota": "42.195K 400人、23K 400人、13K 400人、4.5K 400人",
     "start_times": "全馬組 起跑 06:30、超半馬組 起跑 06:30、挑戰組 起跑 06:30",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：iRunner、運動筆記",
     "source_platform": "iRunner、運動筆記",
     "is_official_direct": true,
@@ -2174,7 +2175,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-07-28",
-    "scraped_at": "2026-10-27T11:01:23.441415+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025081+00:00"
   },
   {
     "race_id": "e42b89e6-f0ff-4d07-ab24-1ad30598e6d3",
@@ -2188,12 +2189,12 @@
       "3.5km"
     ],
     "difficulty": "中級",
-    "registration_status": "已截止",
+    "registration_status": "報名中",
     "registration_link": "https://signup.lohasnet.tw/signup/4246",
     "official_event_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13031&subtitle=2026%E6%AD%B2%E6%AC%A1%E4%B8%99%E5%8D%88%E5%B9%B4%E9%A0%86%E6%BE%A4%E5%AE%AE%E7%AC%AC%E5%9B%9B%E5%B1%86%E5%86%A0%E8%BB%8D%E8%B7%AF%E8%B7%91",
     "registration_note": "未在來源頁找到官方報名連結，待人工補報名連結",
     "registration_opens_at": "2026-06-18",
-    "registration_deadline": "2026-10-18",
+    "registration_deadline": "2026-10-29",
     "venue": "彰化縣埔鹽鄉順澤宮",
     "start_location": "彰化縣埔鹽鄉順澤宮",
     "organizer": "埔鹽順澤宮",
@@ -2212,7 +2213,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-16",
-    "scraped_at": "2026-10-27T11:01:23.441435+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025146+00:00"
   },
   {
     "race_id": "2e43908e-6a30-4bec-bcb1-b5d83333bf40",
@@ -2231,7 +2232,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=12994&subtitle=2026%E7%AC%AC%E4%BA%8C%E5%B1%86%E9%A3%9F%E5%AE%89%E7%9B%83%E9%A6%AC%E6%8B%89%E6%9D%BE",
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-10-27T11:01:23.441454+00:00",
+    "scraped_at": "2026-10-29T10:50:08.025176+00:00",
     "registration_note": "人工補登：依使用者提供之 iRunner 官方報名頁連結校正。",
     "source_registration_link": "https://running.biji.co/index.php?q=member&act=form_comp_record&cid=12994",
     "social_links": [],
@@ -2286,7 +2287,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "http://www.taipeimarathon.org.tw/contest.aspx",
     "first_seen_at": "2026-09-24",
-    "scraped_at": "2026-10-27T11:01:23.441470+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025194+00:00"
   },
   {
     "race_id": "a1f481bc-35d7-4b29-822a-4db3cf8ef84d",
@@ -2326,7 +2327,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-08-18",
-    "scraped_at": "2026-10-27T11:01:23.441495+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025220+00:00"
   },
   {
     "race_id": "0929827f-0b09-441f-bb20-f42815b1bcb4",
@@ -2353,7 +2354,7 @@
     "detail_url": "https://running.biji.co/index.php?q=competition&act=info&cid=13033&subtitle=2027+%E7%AC%AC%E4%B9%9D%E5%B1%86%E9%BE%8D%E8%99%8E%E9%B3%B3%E8%B6%8A%E9%87%8E",
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
-    "scraped_at": "2026-10-27T11:01:23.441517+00:00",
+    "scraped_at": "2026-10-29T10:50:08.025243+00:00",
     "official_event_url": "https://bao-ming.com/eb/content/7004#reg",
     "venue": "加里山越野賽",
     "start_location": "苗栗縣三義鄉龍騰村（Gari Mountain）",
@@ -2404,7 +2405,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-28",
-    "scraped_at": "2026-10-27T11:01:23.441549+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025275+00:00"
   },
   {
     "race_id": "35aad553-6f20-4035-bc5f-8dba0f7dbe3e",
@@ -2430,7 +2431,7 @@
     "fees": "10K 1100元、6K 900元；晶片押金 $100",
     "quota": "21K 500人、10K 500人、6K 500人",
     "start_times": "半馬破風組(21K) 起跑 06:30、挑戰疾風組(10K) 起跑 06:40、樂活乘風組(6K) 起跑 06:50、南彰化組(6K) 起跑 06:50",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：Lohas、運動筆記",
     "source_platform": "Lohas、運動筆記",
     "is_official_direct": true,
@@ -2441,7 +2442,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-09-10",
-    "scraped_at": "2026-10-27T11:01:23.441533+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025260+00:00"
   },
   {
     "race_id": "50008e8f-2980-4d35-8b81-c9929bc41d44",
@@ -2467,7 +2468,7 @@
     "fees": "",
     "quota": "",
     "start_times": "",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：CTRun、運動筆記",
     "source_platform": "CTRun、運動筆記",
     "is_official_direct": true,
@@ -2478,7 +2479,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-09-16",
-    "scraped_at": "2026-10-27T11:01:23.441566+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025293+00:00"
   },
   {
     "race_id": "b21bc990-0a30-43d1-b566-284a06e8416e",
@@ -2521,7 +2522,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-05-16",
-    "scraped_at": "2026-10-27T11:01:23.441584+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025313+00:00"
   },
   {
     "race_id": "6449ad32-9985-442a-b655-abc9d820e03c",
@@ -2559,7 +2560,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-07-21",
-    "scraped_at": "2026-10-27T11:01:23.441604+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025334+00:00"
   },
   {
     "race_id": "c34f3feb-959b-4eca-af66-611548a15f22",
@@ -2600,7 +2601,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-09-10",
-    "scraped_at": "2026-10-27T11:01:23.441754+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025484+00:00"
   },
   {
     "race_id": "54b232d2-6781-4575-ab7d-fb5e93bd0c7d",
@@ -2627,7 +2628,7 @@
     "fees": "42.195K 1000元、21K 900元、12.2K 800元、5K 650元",
     "quota": "42.195K 1500人、21K 1500人、12.2K 1500人、5K 1500人",
     "start_times": "全馬組(42.195K) 起跑 06:00、半馬組(21K) 起跑 06:15、挑戰組(12.2K) 起跑 06:30、休閒組(5K) 起跑 06:45",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：Lohas",
     "source_platform": "Lohas",
     "is_official_direct": true,
@@ -2638,7 +2639,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "http://www.taipeimarathon.org.tw/contest.aspx",
     "first_seen_at": "2026-09-24",
-    "scraped_at": "2026-10-27T11:01:23.441624+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025354+00:00"
   },
   {
     "race_id": "42f0ff52-cc44-458a-b279-48f8eb97340c",
@@ -2676,7 +2677,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-09-10",
-    "scraped_at": "2026-10-27T11:01:23.441643+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025374+00:00"
   },
   {
     "race_id": "9b9e3beb-28ae-430e-9cf9-6be3ce3e2052",
@@ -2703,7 +2704,7 @@
     "fees": "42.195K 1300元、21K 1100元、10K 900元、3K 399元",
     "quota": "42.195K 800人、21K 600人、10K 600人、3K 500人",
     "start_times": "全馬組（42K） 起跑 06:00、挑戰自我組（21K） 起跑 06:00、奮勇向前組（10K） 起跑 06:10、健康趣味組（3K） 起跑 06:20",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：運動筆記、iRunner",
     "source_platform": "運動筆記、iRunner",
     "is_official_direct": true,
@@ -2714,7 +2715,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-07-21",
-    "scraped_at": "2026-10-27T11:01:23.441661+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025393+00:00"
   },
   {
     "race_id": "05ea484a-216e-479f-8822-2511d85cdb8f",
@@ -2741,7 +2742,7 @@
     "fees": "42.195K 1300元、21K 1150元、10K 1000元、5K 850元",
     "quota": "",
     "start_times": "42公里 起跑 06:00、21公里 起跑 06:10、10公里 起跑 06:20、5公里 起跑 06:30、5公里 起跑 08:00、10公里 起跑 08:50、21公里 起跑 10:40、42公里 起跑 12:30",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：Lohas、運動筆記",
     "source_platform": "Lohas、運動筆記",
     "is_official_direct": true,
@@ -2752,7 +2753,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-09-24",
-    "scraped_at": "2026-10-27T11:01:23.441680+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025412+00:00"
   },
   {
     "race_id": "7f9373b2-a96d-4009-b293-976387176f58",
@@ -2778,7 +2779,7 @@
     "fees": "21.1K 1100元、13.14K 900元、5.20K 700元",
     "quota": "21.1K 1000人、13.14K 1000人、5.20K 1000人",
     "start_times": "半馬組（21K） 起跑 07:05、半馬組（21K） 起跑 12:00",
-    "verified_at": "2026-10-27",
+    "verified_at": "2026-10-29",
     "verification_note": "平台爬蟲自動查證：運動筆記、iRunner",
     "source_platform": "運動筆記、iRunner",
     "is_official_direct": true,
@@ -2789,7 +2790,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-09-01",
-    "scraped_at": "2026-10-27T11:01:23.441698+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025430+00:00"
   },
   {
     "race_id": "b37990f4-5816-4e39-8493-598381c3618d",
@@ -2866,7 +2867,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-09-03",
-    "scraped_at": "2026-10-27T11:01:23.441718+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025451+00:00"
   },
   {
     "race_id": "07cb1dd3-a3ad-4e9e-b840-bab31cd99b4c",
@@ -2903,7 +2904,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-08-05",
-    "scraped_at": "2026-10-27T11:01:23.441783+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025513+00:00"
   },
   {
     "race_id": "8bec1055-3a03-4b34-8e80-8a315f18aee5",
@@ -2948,7 +2949,7 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-10-01",
-    "scraped_at": "2026-10-27T11:01:23.441807+00:00"
+    "scraped_at": "2026-10-29T10:50:08.025538+00:00"
   },
   {
     "race_id": "794c18cb-3e95-46d5-a10b-814e78f0ca6d",
