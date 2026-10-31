@@ -1377,16 +1377,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T23:27:24.582Z",
+      "updated_at": "2026-10-31T00:21:03.541Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，有霧，19-30°C，降雨機率 0%，最大風速 7 km/h",
-      "weather_code": 45,
-      "temperature_min_c": 18.8,
-      "temperature_max_c": 29.8,
+      "summary": "臺中市縣市預報，多雲，20-30°C，降雨機率 0%，最大風速 9 km/h",
+      "weather_code": 2,
+      "temperature_min_c": 19.9,
+      "temperature_max_c": 29.9,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 7.1
+      "wind_speed_max_kmh": 8.7
     }
   },
   {
@@ -1428,16 +1428,16 @@
     "scraped_at": "2026-10-29T10:50:08.003827+00:00",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T23:27:24.741Z",
+      "updated_at": "2026-10-31T00:21:03.938Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "苗栗縣",
-      "summary": "苗栗縣縣市預報，有霧，19-29°C，降雨機率 0%，最大風速 19 km/h",
+      "summary": "苗栗縣縣市預報，有霧，18-29°C，降雨機率 0%，最大風速 19 km/h",
       "weather_code": 45,
-      "temperature_min_c": 18.5,
-      "temperature_max_c": 28.7,
+      "temperature_min_c": 18.4,
+      "temperature_max_c": 28.6,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 18.5
+      "wind_speed_max_kmh": 19.3
     }
   },
   {
@@ -1479,16 +1479,16 @@
     "scraped_at": "2026-10-29T10:50:08.003900+00:00",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T23:27:24.898Z",
+      "updated_at": "2026-10-31T00:21:04.300Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，有霧，19-30°C，降雨機率 0%，最大風速 7 km/h",
-      "weather_code": 45,
-      "temperature_min_c": 18.8,
-      "temperature_max_c": 29.8,
+      "summary": "臺中市縣市預報，多雲，20-30°C，降雨機率 0%，最大風速 9 km/h",
+      "weather_code": 2,
+      "temperature_min_c": 19.9,
+      "temperature_max_c": 29.9,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 7.1
+      "wind_speed_max_kmh": 8.7
     }
   },
   {
@@ -1530,16 +1530,16 @@
     "scraped_at": "2026-10-29T10:50:08.003945+00:00",
     "weather_forecast": {
       "forecast_for": "2026-10-31",
-      "updated_at": "2026-10-29T23:27:25.055Z",
+      "updated_at": "2026-10-31T00:21:04.477Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "彰化縣",
       "summary": "彰化縣縣市預報，多雲，20-31°C，降雨機率 0%，最大風速 8 km/h",
       "weather_code": 2,
-      "temperature_min_c": 19.5,
+      "temperature_min_c": 19.8,
       "temperature_max_c": 31.2,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 7.6
+      "wind_speed_max_kmh": 8.4
     }
   },
   {
@@ -1582,16 +1582,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-11-01",
-      "updated_at": "2026-10-29T23:27:25.214Z",
+      "updated_at": "2026-10-31T00:21:04.630Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "南投縣",
-      "summary": "南投縣縣市預報，有霧，16-29°C，降雨機率 0%，最大風速 9 km/h",
+      "summary": "南投縣縣市預報，有霧，15-29°C，降雨機率 0%，最大風速 8 km/h",
       "weather_code": 45,
-      "temperature_min_c": 15.5,
-      "temperature_max_c": 28.9,
+      "temperature_min_c": 15.1,
+      "temperature_max_c": 28.7,
       "precipitation_probability_max": 0,
-      "wind_speed_max_kmh": 9.2
+      "wind_speed_max_kmh": 8.1
     }
   },
   {
@@ -1628,7 +1628,20 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-23",
-    "scraped_at": "2026-10-29T10:50:08.004051+00:00"
+    "scraped_at": "2026-10-29T10:50:08.004051+00:00",
+    "weather_forecast": {
+      "forecast_for": "2026-11-07",
+      "updated_at": "2026-10-31T00:21:04.764Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "苗栗縣",
+      "summary": "苗栗縣縣市預報，多雲，22-28°C，降雨機率 7%，最大風速 26 km/h",
+      "weather_code": 1,
+      "temperature_min_c": 21.6,
+      "temperature_max_c": 27.8,
+      "precipitation_probability_max": 7,
+      "wind_speed_max_kmh": 25.7
+    }
   },
   {
     "race_id": "cd7b49ea-7a4c-469c-b863-c74e94cdeb8a",
@@ -1665,7 +1678,20 @@
     "source": "跑者廣場全國賽會",
     "source_url": "https://running.biji.co/index.php?q=competition",
     "first_seen_at": "2026-06-30",
-    "scraped_at": "2026-10-29T10:50:08.004021+00:00"
+    "scraped_at": "2026-10-29T10:50:08.004021+00:00",
+    "weather_forecast": {
+      "forecast_for": "2026-11-07",
+      "updated_at": "2026-10-31T00:21:04.872Z",
+      "source": "Open-Meteo",
+      "scope": "county",
+      "location_label": "臺中市",
+      "summary": "臺中市縣市預報，毛毛雨，22-31°C，降雨機率 8%，最大風速 8 km/h",
+      "weather_code": 51,
+      "temperature_min_c": 22.1,
+      "temperature_max_c": 30.8,
+      "precipitation_probability_max": 8,
+      "wind_speed_max_kmh": 7.8
+    }
   },
   {
     "race_id": "ed3390df-f1b5-49f9-8e8a-d1a2fa43904f",
