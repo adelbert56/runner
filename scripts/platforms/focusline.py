@@ -49,7 +49,7 @@ def _quota_text(value: object) -> str:
         count = int(value)
     except (TypeError, ValueError):
         return ""
-    return f"{count:,}人"
+    return f"總名額 {count:,}人"
 
 
 def _load_api_details(url: str) -> dict:

@@ -1197,7 +1197,8 @@ function normalizeData(data) {
     nextCycleDraft: data?.nextCycleDraft && typeof data.nextCycleDraft === 'object' ? cloneTrainingValue(data.nextCycleDraft) : null,
     nextCycleCoachContext: data?.nextCycleCoachContext && typeof data.nextCycleCoachContext === 'object' ? cloneTrainingValue(data.nextCycleCoachContext) : null,
     coachPlanArchive: normalizeCoachPlanArchive(data?.coachPlanArchive),
-    frozenCourseArchive: normalizeFrozenCourseArchive(data?.frozenCourseArchive)
+    frozenCourseArchive: normalizeFrozenCourseArchive(data?.frozenCourseArchive),
+    ...(data?.recoveryManifest && typeof data.recoveryManifest === 'object' ? { recoveryManifest: cloneTrainingValue(data.recoveryManifest) } : {})
   };
   normalized.dayStatuses = {
     ...collectLegacyDayStatuses(normalized),
@@ -1317,6 +1318,7 @@ function saveData(data) {
   } catch (error) {
     console.warn('training data save failed', error);
     showModal?.('儲存失敗', '<p style="margin:0;line-height:1.7">本機儲存空間可能已滿，或瀏覽器處於無痕模式。這筆變更暫時沒有存進裝置，建議先匯出備份。</p>', [{ label: '知道了', primary: true, action: closeModal }]);
+    return null;
   }
   if (data && typeof data === 'object') {
     Object.keys(data).forEach((key) => {
@@ -1327,6 +1329,12 @@ function saveData(data) {
   window.TrainerSync?.onLocalSave?.(normalized);
   syncCoachProfileSnapshot(normalized);
   return normalized;
+}
+
+function savePreRestoreSnapshot(data, reason) {
+  const snapshot = JSON.stringify({ savedAt: new Date().toISOString(), reason, data: normalizeData(data) });
+  localStorage.setItem(PRE_RESTORE_STORAGE_KEY, snapshot);
+  if (localStorage.getItem(PRE_RESTORE_STORAGE_KEY) !== snapshot) throw new Error('pre-restore snapshot verification failed');
 }
 
 function weekHasMalformedVolume(week) {

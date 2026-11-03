@@ -2517,7 +2517,18 @@ function refreshCoachReviewPanels() {
 function syncGarminRunsToPlan(review) {
   if (!appData.plan?.length || !review) return;
   const runsByDate = new Map(garminActivityRecords().filter((run) => run?.date).map((run) => [run.date, run]));
-  const logByDate = new Map((appData.log || []).map((entry, index) => [entry.date, index]));
+  const isRawActivity = (entry) => entry?.source === 'garmin' && (
+    Object.prototype.hasOwnProperty.call(entry, 'activityId') ||
+    Object.prototype.hasOwnProperty.call(entry, 'garminActivityId') ||
+    Object.prototype.hasOwnProperty.call(entry, 'recoveredActivityType') ||
+    Object.prototype.hasOwnProperty.call(entry, 'hr') || Object.prototype.hasOwnProperty.call(entry, 'pace')
+  );
+  const logPriority = (entry) => entry?.source !== 'garmin' ? 3 : isRawActivity(entry) ? 1 : 2;
+  const logByDate = new Map();
+  (appData.log || []).forEach((entry, index) => {
+    const previous = logByDate.get(entry.date);
+    if (previous === undefined || logPriority(entry) > logPriority(appData.log[previous])) logByDate.set(entry.date, index);
+  });
   let changed = false;
 
   appData.plan.forEach((week) => week.days.forEach((rawDay, index) => {
@@ -2555,7 +2566,7 @@ function syncGarminRunsToPlan(review) {
       appData.log.push(entry);
       logByDate.set(day.dateStr, appData.log.length - 1);
       changed = true;
-    } else if (appData.log[existingIndex].source === 'garmin') {
+    } else if (appData.log[existingIndex].source === 'garmin' && !isRawActivity(appData.log[existingIndex])) {
       appData.log[existingIndex] = entry;
       changed = true;
     }
@@ -2592,7 +2603,7 @@ function syncGarminRunsToPlan(review) {
     if (existingIndex === undefined) {
       appData.log.push(entry);
       logByDate.set(targetDay.dateStr, appData.log.length - 1);
-    } else if (appData.log[existingIndex].source === 'garmin') {
+    } else if (appData.log[existingIndex].source === 'garmin' && !isRawActivity(appData.log[existingIndex])) {
       appData.log[existingIndex] = entry;
     }
     if (activityCompletesDay(targetDay, entry)) {

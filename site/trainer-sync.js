@@ -173,22 +173,14 @@
   async function applyRemote(remote) {
     const userId = sessionUserId(readSession());
     const data = await decryptSnapshot(remote.payload, userId);
-    const localChecksum = await checksum(appData);
-    if (hasMeaningfulData(appData) && localChecksum !== remote.checksum) {
-      try {
-        localStorage.setItem(PRE_RESTORE_STORAGE_KEY, JSON.stringify({
-          savedAt: new Date().toISOString(),
-          reason: 'cloud-sync',
-          data: normalizeData(appData)
-        }));
-      } catch (error) {
-        console.warn('training pre-sync snapshot unavailable', error);
-      }
+    if (hasMeaningfulData(appData)) {
+      savePreRestoreSnapshot(appData, 'cloud-sync');
     }
     applyingRemote = true;
     try {
-      appData = data;
-      saveData(appData);
+      const restored = saveData(data);
+      if (!restored) throw new Error('training save failed');
+      appData = restored;
       storeMeta({ revision: remote.revision, checksum: remote.checksum, updatedAt: remote.updated_at });
     } finally {
       applyingRemote = false;
@@ -204,7 +196,7 @@
     setStatus('偵測到雙裝置版本差異');
     showModal('選擇要保留的訓練資料', '<p style="margin:0;line-height:1.75">這台裝置與雲端各有不同訓練資料，系統不會擅自混合兩份課表。若載入雲端版本，這台的資料會先自動保留為「匯入前快照」，可從「資料與備份」復原。</p>', [
       { label: '保留這台裝置', primary: true, action: async () => { closeModal(); try { await writeRemote(remote?.revision || 0, true); } catch { setStatus('同步失敗，請稍後再試'); } } },
-      { label: '載入雲端版本（保留本機快照）', action: async () => { closeModal(); try { await applyRemote(remote); } catch { setStatus('同步密碼不正確或快照無法讀取'); } } },
+      { label: '載入雲端版本（保留本機快照）', action: async () => { closeModal(); try { await applyRemote(remote); } catch { setStatus('未能安全載入雲端資料，請檢查密碼與本機儲存空間'); } } },
       { label: '稍後決定', action: closeModal }
     ]);
   }

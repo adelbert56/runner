@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { todayInTaipei } from "./lib/time.mjs";
 import { normalizeContentUrl } from "./lib/content-url.mjs";
+import { contentTitleIssue } from "./lib/content-quality.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const candidatesPath = resolve(root, "runner/內容/候選內容.json");
@@ -607,6 +608,7 @@ function isExcludedShoeContent(item) {
 
 function isEligiblePublishedContent(item) {
   const text = `${item.title || ""} ${item.summary || ""} ${item.category || ""}`;
+  if (contentTitleIssue(item)) return false;
   if (isExcludedShoeContent(item)) return false;
   if (item.type !== "news") return true;
   return Boolean(String(item.summary || "").trim())

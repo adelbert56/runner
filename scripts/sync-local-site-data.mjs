@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { contentTitleIssue } from "./lib/content-quality.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const publicDataPaths = [
@@ -81,7 +82,23 @@ async function main() {
         }
         backups.push(await backupLocalData(path, localContent));
       }
-      await writeAtomically(path, remote);
+      let output = remote;
+      if (path === "site/data/content.json") {
+        try {
+          const payload = JSON.parse(String(remote));
+          if (!Array.isArray(payload.items)) throw new Error("invalid content items");
+          const items = payload.items.filter(item => !contentTitleIssue(item));
+          if (items.length !== payload.items.length) {
+            output = Buffer.from(`${JSON.stringify({ ...payload, items }, null, 2)}\n`);
+            console.log(`[content] Excluded ${payload.items.length - items.length} clearly unrelated or promotional item(s).`);
+          }
+        } catch (error) {
+          console.warn(`[skip] Invalid remote content data: ${error.message}`);
+          retained.push(path);
+          continue;
+        }
+      }
+      await writeAtomically(path, output);
       updated.push(path);
     }
   }

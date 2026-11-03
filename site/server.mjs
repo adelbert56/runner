@@ -1,9 +1,9 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream, existsSync, statSync, realpathSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
-import { extname, join, normalize, resolve } from "node:path";
+import { extname, join, normalize, resolve, relative, isAbsolute } from "node:path";
 import { createRegistrationBatchWorkbook, prepareRegistrationBatchImport } from "../local/registration/registration-batch-xlsx.js";
 
 const root = resolve(process.cwd());
@@ -59,8 +59,14 @@ function resolveRequestPath(url) {
   const decoded = decodeURIComponent(new URL(url, `http://localhost:${port}`).pathname);
   const requested = normalize(decoded === "/site/" ? "/site/index.html" : decoded);
   const filePath = resolve(join(root, requested));
-  if (!filePath.startsWith(root)) {
-    return null;
+  const allowedRoots = [resolve(root, "site"), resolve(root, "local", "registration")];
+  const allowedFiles = [resolve(root, "runner", "賽事", "賽事資料庫.json"), resolve(root, "output", "recovery", "layout-strength-config.json")];
+  const within = (base, target) => { const path = relative(base, target); return path !== ".." && !path.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) && !isAbsolute(path); };
+  if (!allowedRoots.some(base => within(base, filePath)) && !allowedFiles.includes(filePath)) return null;
+  if (existsSync(filePath)) {
+    const actual = realpathSync(filePath);
+    const realRoot = realpathSync(root);
+    if (!within(realRoot, actual) || (!allowedRoots.some(base => existsSync(base) && within(realpathSync(base), actual)) && !allowedFiles.some(file => file === filePath && actual === resolve(realRoot, relative(root, file))))) return null;
   }
   return filePath;
 }
@@ -340,8 +346,14 @@ function pruneRegistrationBatchPreviews() {
   });
 }
 
-const server = createServer(async (req, res) => {
-  const decoded = decodeURIComponent(new URL(req.url || "/", `http://localhost:${port}`).pathname);
+const handleRequest = async (req, res) => {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(new URL(req.url || "/", `http://localhost:${port}`).pathname);
+  } catch {
+    sendJson(res, 400, { error: "invalid-path" });
+    return;
+  }
   const origin = String(req.headers.origin || "");
   const requestHost = String(req.headers.host || "");
   // Training data is browser-local. Canonicalize the local UI origin so
@@ -578,7 +590,7 @@ const server = createServer(async (req, res) => {
 
   const requestedPath = resolveRequestPath(req.url || "/");
   const filePath = requestedPath && existsSync(requestedPath) && statSync(requestedPath).isDirectory()
-    ? join(requestedPath, "index.html")
+    ? resolveRequestPath(`${(req.url || "/").split("?")[0].replace(/\/$/, "")}/index.html`)
     : requestedPath;
   if (!filePath || !existsSync(filePath) || !statSync(filePath).isFile()) {
     res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
@@ -589,8 +601,23 @@ const server = createServer(async (req, res) => {
   const contentType = mimeTypes[extname(filePath).toLowerCase()] || "application/octet-stream";
   res.writeHead(200, { "content-type": contentType, "cache-control": "no-cache" });
   createReadStream(filePath).pipe(res);
-});
+};
 
-server.listen(port, () => {
+const server = createServer(handleRequest);
+server.listen(port, "127.0.0.1", () => {
   console.log(`Runner Plaza is running at http://127.0.0.1:${port}/site/`);
+  if (port === 4173) {
+    // Keep the local-only snapshot service available after the main service restarts.
+    const backup = spawn(process.execPath, [resolve(root, 'scripts', 'trainer-local-backup-server.mjs')], {
+      cwd: root, detached: true, stdio: 'ignore', windowsHide: true
+    });
+    backup.on('error', () => {});
+    backup.unref();
+  }
 });
+const ipv6Server = createServer(handleRequest);
+ipv6Server.on("error", (error) => {
+  if (["EAFNOSUPPORT", "EADDRNOTAVAIL"].includes(error.code)) return;
+  console.error(`IPv6 loopback unavailable: ${error.code || error.message}`);
+});
+ipv6Server.listen(port, "::1");

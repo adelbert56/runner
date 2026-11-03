@@ -69,11 +69,10 @@ function raceKey(race) {
 let races;
 try {
   races = JSON.parse(await readFile(source, "utf-8"));
-} catch {
-  console.warn(`Source not found: ${source}. Writing empty races.json.`);
-  await mkdir(dirname(target), { recursive: true });
-  await writeFile(target, "[]\n", "utf-8");
-  process.exit(0);
+  if (!Array.isArray(races) || races.length === 0) throw new Error("賽事正本不是非空陣列");
+} catch (error) {
+  console.error(`無法讀取有效賽事正本，保留現有網站資料：${error.message}`);
+  process.exit(1);
 }
 
 let previousRaces = [];
@@ -88,8 +87,21 @@ if (merges.length) {
   console.warn(`Suppressed ${merges.length} strong-identity duplicate race(s) from site output.`);
 }
 
+// Only transfer forecasts when the exact name and date match uniquely on both sides.
+const countKeys = (list) => list.reduce((map, race) => map.set(raceKey(race), (map.get(raceKey(race)) || 0) + 1), new Map());
+const oldCounts = countKeys(previousRaces);
+const newCounts = countKeys(uniqueRaces);
+const oldByKey = new Map(previousRaces.map((race) => [raceKey(race), race]));
+function forecastTime(race, forecast) {
+  if (!forecast || forecast.forecast_for !== String(race.race_date || '').slice(0, 10)) return 0;
+  const stamp = Date.parse(forecast.updated_at);
+  return Number.isFinite(stamp) ? stamp : 0;
+}
 const normalized = uniqueRaces.map((race) => ({
   ...race,
+  ...(oldCounts.get(raceKey(race)) === 1 && newCounts.get(raceKey(race)) === 1 &&
+    forecastTime(race, oldByKey.get(raceKey(race))?.weather_forecast) > forecastTime(race, race.weather_forecast)
+    ? { weather_forecast: oldByKey.get(raceKey(race)).weather_forecast } : {}),
   first_seen_at: firstSeenDate(race),
   is_official_direct: isOfficialDirect(race),
 }));

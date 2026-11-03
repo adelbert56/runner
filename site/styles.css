@@ -6292,3 +6292,17 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+.collections-backup-dialog {
+  width: min(32rem, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  overflow: auto;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+.collections-backup-dialog::backdrop { background: rgb(0 0 0 / 0.5); }
+.collections-backup-dialog p { color: var(--muted); }
+.collections-backup-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.collections-backup-status:empty { display: none; }

@@ -33,7 +33,7 @@ def test_focusline_extract_uses_api_payload(monkeypatch):
     assert details["registration_opens_at"] == "2026-05-01"
     assert details["registration_deadline"] == "2026-06-30"
     assert details["registration_status"] == "報名中"
-    assert details["quota"] == "3,318人"
+    assert details["quota"] == "總名額 3,318人"
 
 
 def test_lohas_extract_reads_signup_countdown_deadline():
