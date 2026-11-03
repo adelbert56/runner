@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { todayInTaipei } from "./lib/time.mjs";
 import { normalizeContentUrl } from "./lib/content-url.mjs";
+import { contentTitleIssue } from "./lib/content-quality.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const contentPath = resolve(root, "site/data/content.json");
@@ -33,6 +34,8 @@ function sentenceKeys(text) {
 function itemIssues(item, index, seenUrls) {
   const issues = [];
   const label = item.title || `第 ${index + 1} 筆`;
+  const titleIssue = contentTitleIssue(item);
+  if (titleIssue) issues.push({ severity: "high", label, issue: titleIssue });
   const urlKey = normalizeUrl(item.url);
   const summary = String(item.summary || "").trim();
   const keys = sentenceKeys(summary);

@@ -64,6 +64,7 @@
 | Input | 已存在 | 預設/focus/停用 | surface、line、green | `site/styles.css` | 實際頁面 | 既有 |
 | Select | 已存在 | 預設/focus/停用 | surface、line、green | `site/styles.css` | 實際頁面 | 既有 |
 | Card | 已存在 | 預設/hover/過期 | surface、line、radius、shadow-card | `site/styles.css` | 實際頁面 | 既有 |
+| 收藏備份對話框 | 已建立，待視覺驗收 | 預設／讀取／錯誤／取消 | surface、ink、muted、line、radius | `site/favorites-backup.js`、`site/styles.css` | 待補 | 我的賽事資料保護 |
 | 賽事事實列 | 已建立 | 完整／缺欄位隱藏／手機單欄 | muted、green-dark、line | `site/app.js`、`site/styles.css` | 本次驗證 | 賽事與內容資訊密度優化 |
 | 內容決策摘要 | 已建立 | 跑鞋／新聞 | green-dark、muted、line | `site/app.js`、`site/styles.css` | 本次驗證 | 賽事與內容資訊密度優化 |
 | Nav | 已存在 | 預設/hover/focus/窄螢幕橫向捲動 | muted、green-dark、surface | `site/styles.css` | 實際頁面 | 既有 |

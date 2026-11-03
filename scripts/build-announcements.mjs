@@ -118,16 +118,7 @@ function isNewDiscovery(race) {
 
 function verificationDetail(race) {
   const verified = shortDate(race.verified_at) || shortDate(today) || "今日";
-  if (hasRegistrationSite(race) && hasRegistrationDates(race)) {
-    return `${verified} 補齊報名網站與時間`;
-  }
-  if (hasRegistrationSite(race)) {
-    return `${verified} 補齊報名網站`;
-  }
-  if (hasRegistrationDates(race)) {
-    return `${verified} 補齊報名時間`;
-  }
-  return `${verified} 更新賽事資訊`;
+  return `${verified} 查證賽事資訊`;
 }
 
 function normalizeTypes(types) {

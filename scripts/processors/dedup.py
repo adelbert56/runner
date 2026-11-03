@@ -46,18 +46,24 @@ def _url_tokens(value: str) -> set[str]:
     if not normalized:
         return set()
 
-    tokens = {normalized}
     try:
         parsed = urlsplit(normalized)
     except ValueError:
-        return tokens
+        return set()
 
     query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    host = parsed.netloc.lower()
+    path = parsed.path.strip("/").lower()
+    # Landing pages are shared by unrelated events, not identity evidence.
+    if (host.endswith("lohasnet.tw") or host.endswith("focusline.com.tw") or host.endswith("ctrun.com.tw")) and path in {"", "event", "signup", "activity"} and not query.get("EventMain_ID"):
+        return set()
+    if host.endswith("running.biji.co") and not query.get("cid"):
+        return set()
+    tokens = {normalized}
     cid = query.get("cid", "").strip()
     if cid:
         tokens.add(f"cid:{cid}")
 
-    host = parsed.netloc.lower()
     path = parsed.path.strip("/")
     if host == "irunner.biji.co" and path:
         tokens.add(f"irunner:{path.split('/', 1)[0].lower()}")
@@ -256,6 +262,11 @@ def _is_unconfirmed_status(value: str) -> bool:
 
 
 def _same_event(left: dict, right: dict) -> bool:
+    left_ids = {token for token in _identity_tokens(left) if token.startswith("cid:")}
+    right_ids = {token for token in _identity_tokens(right) if token.startswith("cid:")}
+    # Conflicting source event IDs require review even when a link is shared.
+    if left_ids and right_ids and left_ids.isdisjoint(right_ids):
+        return False
     # Same source page (cid/signup id/...) means same event even if the
     # organizer corrected the date between scrapes — check this before the
     # date gate, otherwise a date correction spawns a permanent duplicate.

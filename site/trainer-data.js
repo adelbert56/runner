@@ -3,6 +3,7 @@
 (() => {
   let pendingImport = null;
   let pendingImportInfo = null;
+  let pendingStorageVersion = null;
 
   function counts(data) {
     const normalized = normalizeData(data);
@@ -40,6 +41,7 @@
         const rawData = parsed?.data || parsed;
         if (!rawData || typeof rawData !== 'object' || !Array.isArray(rawData.plan) || !Array.isArray(rawData.log)) throw new Error('invalid backup');
         pendingImport = normalizeData(rawData);
+        pendingStorageVersion = localStorage.getItem(STORAGE_KEY);
         pendingImportInfo = { fileName: file.name, exportedAt: parsed?.exportedAt || '' };
         const incoming = counts(pendingImport);
         const current = counts(appData);
@@ -57,11 +59,20 @@
 
   function applyImport() {
     if (!pendingImport) return;
-    try { localStorage.setItem(PRE_RESTORE_STORAGE_KEY, JSON.stringify({ savedAt: new Date().toISOString(), data: normalizeData(appData) })); } catch (error) { console.warn('training pre-restore snapshot unavailable', error); }
-    appData = pendingImport;
+    try {
+      if (localStorage.getItem(STORAGE_KEY) !== pendingStorageVersion) throw new Error('training data changed in another tab');
+      savePreRestoreSnapshot(appData, 'import');
+    } catch (error) {
+      console.warn('training pre-restore snapshot unavailable', error);
+      showModal('無法安全還原', '<p>目前資料已變更或匯入前快照無法保存；尚未套用備份。請重新整理並匯出目前資料後再試。</p>', [{ label: '知道了', action: closeModal }]);
+      return;
+    }
+    const restored = saveData(pendingImport);
+    if (!restored) return;
+    appData = restored;
     pendingImport = null;
     pendingImportInfo = null;
-    saveData(appData);
+    pendingStorageVersion = null;
     closeModal();
     renderPlanView();
     showView('plan');
@@ -71,8 +82,9 @@
     try {
       const snapshot = JSON.parse(localStorage.getItem(PRE_RESTORE_STORAGE_KEY) || 'null');
       if (!snapshot?.data) throw new Error('missing snapshot');
-      appData = normalizeData(snapshot.data);
-      saveData(appData);
+      const restored = saveData(normalizeData(snapshot.data));
+      if (!restored) return;
+      appData = restored;
       closeModal();
       renderPlanView();
       showView('plan');
