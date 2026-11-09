@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08",
+  "generated_at": "2026-11-09",
   "retention": {
     "closed_notice_days": 14,
     "daily_quips": 2
@@ -120,39 +120,26 @@
         "ending"
       ],
       "details": [
-        "11/15 截止｜剩 7 天"
+        "11/15 截止｜剩 6 天"
       ],
       "race_date": "2027-01-24",
       "first_seen_at": "2026-05-16"
-    },
-    {
-      "id": "2026 Miaoli Fun Young！跑酷越野障礙賽|2026-12-19|苗栗縣",
-      "race_key": "2026 Miaoli Fun Young！跑酷越野障礙賽|2026-12-19|苗栗縣",
-      "title": "12/19 苗栗縣｜2026 Miaoli Fun Young！跑酷越野障礙賽",
-      "types": [
-        "ending"
-      ],
-      "details": [
-        "11/08 截止｜剩 0 天"
-      ],
-      "race_date": "2026-12-19",
-      "first_seen_at": "2026-09-24"
     },
     {
       "id": "2027 晨曦麥香-馳舞向前馬拉松|2027-02-21|臺中市",
       "race_key": "2027 晨曦麥香-馳舞向前馬拉松|2027-02-21|臺中市",
       "title": "02/21 臺中市｜2027 晨曦麥香-馳舞向前馬拉松",
       "types": [
-        "closing"
+        "ending"
       ],
       "details": [
-        "11/16 截止｜剩 8 天"
+        "11/16 截止｜剩 7 天"
       ],
       "race_date": "2027-02-21",
       "first_seen_at": "2026-09-24"
     },
     {
-      "id": "quip-2026-11-08-0",
+      "id": "quip-2026-11-09-0",
       "title": "配速可以慢，按下報名的手速不要太慢。",
       "types": [
         "talk"
@@ -162,7 +149,7 @@
       ]
     },
     {
-      "id": "quip-2026-11-08-1",
+      "id": "quip-2026-11-09-1",
       "title": "跑步最難的不是上坡，是出門前那五分鐘。",
       "types": [
         "talk"
