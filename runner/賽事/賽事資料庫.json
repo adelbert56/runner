@@ -1755,16 +1755,16 @@
     "scraped_at": "2026-11-10T10:18:09.624835+00:00",
     "weather_forecast": {
       "forecast_for": "2026-11-14",
-      "updated_at": "2026-11-10T10:20:15.513Z",
+      "updated_at": "2026-11-11T01:38:01.896Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，降雨，21-30°C，降雨機率 53%，最大風速 10 km/h",
+      "summary": "臺中市縣市預報，降雨，21-29°C，降雨機率 72%，最大風速 7 km/h",
       "weather_code": 80,
-      "temperature_min_c": 20.9,
-      "temperature_max_c": 29.6,
-      "precipitation_probability_max": 53,
-      "wind_speed_max_kmh": 9.7
+      "temperature_min_c": 20.5,
+      "temperature_max_c": 29.2,
+      "precipitation_probability_max": 72,
+      "wind_speed_max_kmh": 6.9
     }
   },
   {
@@ -1842,16 +1842,16 @@
     ],
     "weather_forecast": {
       "forecast_for": "2026-11-15",
-      "updated_at": "2026-11-10T10:20:15.619Z",
+      "updated_at": "2026-11-11T01:38:01.933Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，毛毛雨，19-28°C，降雨機率 53%，最大風速 13 km/h",
-      "weather_code": 53,
-      "temperature_min_c": 18.8,
-      "temperature_max_c": 27.8,
-      "precipitation_probability_max": 53,
-      "wind_speed_max_kmh": 13.3
+      "summary": "臺中市縣市預報，降雨，19-28°C，降雨機率 75%，最大風速 14 km/h",
+      "weather_code": 80,
+      "temperature_min_c": 18.5,
+      "temperature_max_c": 28.3,
+      "precipitation_probability_max": 75,
+      "wind_speed_max_kmh": 13.6
     }
   },
   {
@@ -1895,16 +1895,16 @@
     "cancellation_notice_url": "",
     "weather_forecast": {
       "forecast_for": "2026-11-15",
-      "updated_at": "2026-11-10T10:20:15.724Z",
+      "updated_at": "2026-11-11T01:38:01.970Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "彰化縣",
-      "summary": "彰化縣縣市預報，雷雨，19-28°C，降雨機率 55%，最大風速 13 km/h",
-      "weather_code": 95,
-      "temperature_min_c": 18.9,
-      "temperature_max_c": 28.3,
-      "precipitation_probability_max": 55,
-      "wind_speed_max_kmh": 12.7
+      "summary": "彰化縣縣市預報，毛毛雨，20-29°C，降雨機率 64%，最大風速 11 km/h",
+      "weather_code": 51,
+      "temperature_min_c": 19.5,
+      "temperature_max_c": 28.7,
+      "precipitation_probability_max": 64,
+      "wind_speed_max_kmh": 11.1
     }
   },
   {
