@@ -1826,20 +1826,7 @@
       "15dc0e4b-571c-42c1-8431-557be7d8b04f",
       "ca7b24cf-80ed-4169-8647-bc640511ecf6",
       "98b31590-9def-404a-9eac-5a0ca1407b0f"
-    ],
-    "weather_forecast": {
-      "forecast_for": "2026-11-15",
-      "updated_at": "2026-11-15T00:35:31.259Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "臺中市",
-      "summary": "臺中市縣市預報，毛毛雨，21-27°C，降雨機率 93%，最大風速 12 km/h",
-      "weather_code": 53,
-      "temperature_min_c": 20.6,
-      "temperature_max_c": 27.4,
-      "precipitation_probability_max": 93,
-      "wind_speed_max_kmh": 12.2
-    }
+    ]
   },
   {
     "race_id": "96c6f753-a758-4842-b880-d532b8f2380d",
@@ -1879,20 +1866,7 @@
     "first_seen_at": "2026-05-16",
     "scraped_at": "2026-11-12T10:56:07.694576+00:00",
     "cancellation_notice": "",
-    "cancellation_notice_url": "",
-    "weather_forecast": {
-      "forecast_for": "2026-11-15",
-      "updated_at": "2026-11-15T00:35:31.282Z",
-      "source": "Open-Meteo",
-      "scope": "county",
-      "location_label": "彰化縣",
-      "summary": "彰化縣縣市預報，毛毛雨，20-28°C，降雨機率 92%，最大風速 12 km/h",
-      "weather_code": 53,
-      "temperature_min_c": 20.2,
-      "temperature_max_c": 27.8,
-      "precipitation_probability_max": 92,
-      "wind_speed_max_kmh": 12.3
-    }
+    "cancellation_notice_url": ""
   },
   {
     "race_id": "cd9fe61c-eab0-4c56-a097-c19c26ecb157",
@@ -1930,16 +1904,16 @@
     "scraped_at": "2026-11-12T10:56:07.694608+00:00",
     "weather_forecast": {
       "forecast_for": "2026-11-21",
-      "updated_at": "2026-11-15T00:35:31.305Z",
+      "updated_at": "2026-11-16T00:06:30.510Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
-      "summary": "臺中市縣市預報，多雲，12-23°C，降雨機率 36%，最大風速 13 km/h",
+      "summary": "臺中市縣市預報，多雲，13-24°C，降雨機率 36%，最大風速 13 km/h",
       "weather_code": 3,
-      "temperature_min_c": 12.2,
-      "temperature_max_c": 23.2,
+      "temperature_min_c": 12.8,
+      "temperature_max_c": 23.8,
       "precipitation_probability_max": 36,
-      "wind_speed_max_kmh": 12.5
+      "wind_speed_max_kmh": 12.8
     }
   },
   {
