@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T02:56:31.346Z",
+  "generated_at": "2026-11-16T07:00:42.415Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-10-nike-caitlin-1-review",
@@ -79,26 +79,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "news-bouncin-net-p-news-events-6262-new-balance-2026-10k-city-run-recap",
-      "type": "news",
-      "title": "2026 New Balance 10K 城市路跑系列賽登場！韋禮安驚喜開唱、近 7,000 名跑者共襄盛舉",
-      "date": "2026-11-03",
-      "date_source": "source",
-      "article_date": "2026-11-03",
-      "first_seen_at": "2026-11-04",
-      "source": "Bounce",
-      "category": "賽事資訊",
-      "summary": "2026 New Balance「10K 城市路跑系列賽」熱力開跑！賽事邁入第二屆。",
-      "url": "https://bouncin.net/p/news/events/6262/new-balance-2026-10k-city-run-recap",
-      "score": 26,
-      "source_origin": "candidate",
-      "published_at": "2026-11-16",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
       ]
     },
     {
@@ -222,6 +202,26 @@
       ]
     },
     {
+      "id": "news-kenlu-net-2026-11-under-armour-velociti-distance-storm-running-shoes",
+      "type": "news",
+      "title": "官方新聞 / 防潑水鞋面迎接秋冬雨季，UA Velociti Distance Storm 臺灣上市",
+      "date": "2026-11-16",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-11-16",
+      "source": "KENLU",
+      "category": "跑步新聞",
+      "summary": "UA Velociti Distance Storm 鞋面採用 UA Storm™ 防潑水材質，大底是深凸紋搭配 Exogrip 橡膠，臺灣定價 NT$4,980，黑橘、黑、白三色已在 UA 臺灣官網上架。",
+      "url": "https://kenlu.net/2026/11/under-armour-velociti-distance-storm-running-shoes/",
+      "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-11-16",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
       "id": "news-kenlu-net-2026-10-mizuno-wave-inspire-22-feature",
       "type": "news",
       "title": "更柔軟的穩定防線 / MIZUNO WAVE INSPIRE 22 重塑日常支撐體驗",
@@ -234,6 +234,26 @@
       "summary": "MIZUNO WAVE INSPIRE 22 中底改由氮氣 ENERZY NXT 全面接管，延續穩定支撐定位，適合低足弓、容易過度內旋的跑者。",
       "url": "https://kenlu.net/2026/10/mizuno-wave-inspire-22-feature/",
       "score": 19,
+      "source_origin": "candidate",
+      "published_at": "2026-11-16",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
+      "id": "news-kenlu-net-2026-11-reebok-question-mid-recoded-red-toe-release-info",
+      "type": "news",
+      "title": "上市速報 / 30 週年版本！Reebok Question Mid Recoded ‘Red Toe’ 臺灣販售資訊整理",
+      "date": "2026-11-16",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-11-16",
+      "source": "KENLU",
+      "category": "跑步新聞",
+      "summary": "Reebok Question Mid Recoded ‘Red Toe’ 30 週年版，2026 年 11 月臺灣發售，售價 NT$5,980，信義、台中、高雄門市販售。",
+      "url": "https://kenlu.net/2026/11/reebok-question-mid-recoded-red-toe-release-info/",
+      "score": 15,
       "source_origin": "candidate",
       "published_at": "2026-11-16",
       "publish_status": "published",
@@ -282,6 +302,26 @@
       ]
     },
     {
+      "id": "news-bouncin-net-p-news-new-stuff-6276-adidas-originals-beams-50th-anniversary-collab",
+      "type": "news",
+      "title": "BEAMS 50 週年限定聯名！adidas Originals 推出樂福鞋式運動鞋 演繹 Preppy 與 Yankee 風格",
+      "date": "2026-11-16",
+      "date_source": "source",
+      "article_date": "2026-11-16",
+      "first_seen_at": "2026-11-16",
+      "source": "Bounce",
+      "category": "跑步新聞",
+      "summary": "為慶祝 BEAMS 創立 50 週年，〈adidas Originals〉與〈BEAMS〉攜手推出特別聯名系列。",
+      "url": "https://bouncin.net/p/news/new-stuff/6276/adidas-originals-beams-50th-anniversary-collaboration",
+      "score": 14,
+      "source_origin": "candidate",
+      "published_at": "2026-11-16",
+      "publish_status": "published",
+      "source_aliases": [
+        "Bounce"
+      ]
+    },
+    {
       "id": "news-kenlu-net-2026-11-asics-working-freshservice-winjob-cp229-boa-news",
       "type": "news",
       "title": "新聞分享 / 工作鞋也玩聯名？ASICS 攜手 FreshService 推出 WINJOB CP229 BOA 聯名款",
@@ -293,26 +333,6 @@
       "category": "跑鞋裝備",
       "summary": "ASICS WORKING 首度與服裝品牌聯名，攜手 FreshService 推出全黑 WINJOB CP229 BOA，11 月 21 日日本發售，定價 23,100 日圓，臺灣尚未公布發售計畫。",
       "url": "https://kenlu.net/2026/11/asics-working-freshservice-winjob-cp229-boa-news/",
-      "score": 13,
-      "source_origin": "candidate",
-      "published_at": "2026-11-16",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-11-adidas-crazy-energy-bape-kh8660-release-info",
-      "type": "news",
-      "title": "上市速報 / adidas CRAZY ENERGY+ BAPE 臺灣販售資訊整理",
-      "date": "2026-11-07",
-      "date_source": "source",
-      "article_date": "2026-11-07",
-      "first_seen_at": "2026-11-07",
-      "source": "KENLU",
-      "category": "跑步新聞",
-      "summary": "adidas CRAZY ENERGY+ BAPE 2026 年 11 月 7 日起於臺灣 adidas 官網發售，售價 NT$6,800、型號 KH8660。",
-      "url": "https://kenlu.net/2026/11/adidas-crazy-energy-bape-kh8660-release-info/",
       "score": 13,
       "source_origin": "candidate",
       "published_at": "2026-11-16",
@@ -422,26 +442,6 @@
       ]
     },
     {
-      "id": "news-www-womenshealthmag-com-tw-fitness-running-a74407033-japanese-smile-slow-jogging",
-      "type": "news",
-      "title": "日本「微笑跑步法」是什麼？不用跑快也能提升心肺！3個技巧與新手訓練計畫一次看",
-      "date": "2026-11-12",
-      "date_source": "source",
-      "article_date": "2026-11-12",
-      "first_seen_at": "2026-11-13",
-      "source": "Women's Health Taiwan",
-      "category": "入門知識",
-      "summary": "只要能邊跑邊聊天、保持微笑，就能找到適合自己的節奏。",
-      "url": "https://www.womenshealthmag.com/tw/fitness/running/a74407033/japanese-smile-slow-jogging-method/",
-      "score": 9,
-      "source_origin": "candidate",
-      "published_at": "2026-11-16",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
-      ]
-    },
-    {
       "id": "news-kenlu-net-2026-10-la-new-gore-tex-hiking-shoes",
       "type": "news",
       "title": "官方新聞 / LA NEW GORE-TEX 旗艦新品吸千人搶先體驗 邀登山嚮導提供選鞋指南",
@@ -502,17 +502,17 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-11-new-balance-991-made-in-japan-news",
+      "id": "news-kenlu-net-2026-11-wtaps-x-hoka-speedgoat-ts-news",
       "type": "news",
-      "title": "勘履滑手機 / 991 不再只有英國製！日本 New Balance 先丟出一張預告",
-      "date": "2026-11-13",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-13",
+      "title": "新聞分享 / WTAPS 脫下軍裝？與 HOKA 二度聯名 Speedgoat TS 改走運動路線",
+      "date": "2026-11-14",
+      "date_source": "source",
+      "article_date": "2026-11-14",
+      "first_seen_at": "2026-11-16",
       "source": "KENLU",
       "category": "跑鞋裝備",
-      "summary": "New Balance Japan 2026 年 11 月預告日本製 991，鞋跟繡 made in JAPAN，是 MIJ 系列第四雙，型號售價未公布。",
-      "url": "https://kenlu.net/2026/11/new-balance-991-made-in-japan-news/",
+      "summary": "WTAPS x HOKA Speedgoat TS 以 Speedgoat 7 重新設計鞋面，推出灰洋紅、黑灰兩色，11 月 27 日國外發售，歐洲定價 175 歐元。",
+      "url": "https://kenlu.net/2026/11/wtaps-x-hoka-speedgoat-ts-news/",
       "score": 7,
       "source_origin": "candidate",
       "published_at": "2026-11-16",
@@ -693,26 +693,6 @@
       "category": "跑步新聞",
       "summary": "每週只要慢跑75分鐘以上，便能有效提升生物年齡。",
       "url": "https://www.womenshealthmag.com/tw/fitness/running/a74419890/running-live-longer-research/",
-      "score": 5,
-      "source_origin": "candidate",
-      "published_at": "2026-11-16",
-      "publish_status": "published",
-      "source_aliases": [
-        "Women's Health Taiwan"
-      ]
-    },
-    {
-      "id": "news-www-womenshealthmag-com-tw-fitness-work-outs-a74397495-7-exercises-burns-the-mos",
-      "type": "news",
-      "title": "消耗熱量最多的運動是「這個」？專業教練揭「7種高效燃脂運動」有效替代跑步，對膝蓋、關節更友善",
-      "date": "2026-11-11",
-      "date_source": "source",
-      "article_date": "2026-11-11",
-      "first_seen_at": "2026-11-12",
-      "source": "Women's Health Taiwan",
-      "category": "跑步新聞",
-      "summary": "名人健身教練揭露「熱量消耗最高」的7種運動！",
-      "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a74397495/7-exercises-burns-the-most-calories/",
       "score": 5,
       "source_origin": "candidate",
       "published_at": "2026-11-16",
@@ -959,6 +939,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-bouncin-net-p-news-events-6262-new-balance-2026-10k-city-run-recap",
+      "type": "news",
+      "title": "2026 New Balance 10K 城市路跑系列賽登場！韋禮安驚喜開唱、近 7,000 名跑者共襄盛舉",
+      "date": "2026-11-03",
+      "date_source": "source",
+      "article_date": "2026-11-03",
+      "first_seen_at": "2026-11-04",
+      "source": "Bounce",
+      "category": "賽事資訊",
+      "summary": "2026 New Balance「10K 城市路跑系列賽」熱力開跑！賽事邁入第二屆。",
+      "url": "https://bouncin.net/p/news/events/6262/new-balance-2026-10k-city-run-recap",
+      "score": 25,
+      "source_origin": "archive",
+      "published_at": "2026-11-16",
+      "publish_status": "published",
+      "source_aliases": [
+        "Bounce"
       ]
     },
     {
@@ -1359,26 +1359,6 @@
       "publish_status": "published",
       "source_aliases": [
         "Women's Health Taiwan"
-      ]
-    },
-    {
-      "id": "shoe-kenlu-net-2026-11-mizuno-sky-prime-feature",
-      "type": "shoe",
-      "title": "MIZUNO SKY PRIME：SKY 家族最厚的 PEBA 緩震慢跑鞋，與 WAVE SKY 9 怎麼選",
-      "date": "2026-11-07",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-07",
-      "source": "KENLU",
-      "category": "長距離緩震",
-      "summary": "這雙鞋目前以「長距離緩震」定位收錄。適合長跑、恢復跑與累積里程，挑選時要看後段穩定，不只看剛試穿的彈感。",
-      "url": "https://kenlu.net/2026/11/mizuno-sky-prime-feature/",
-      "score": 19,
-      "source_origin": "candidate",
-      "published_at": "2026-11-16",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
       ]
     },
     {
@@ -2236,6 +2216,26 @@
       "publish_status": "published",
       "source_aliases": [
         "Tom's Guide Running"
+      ]
+    },
+    {
+      "id": "shoe-www-runnersworld-com-gear-a74219165-mizuno-wave-rider-30-review",
+      "type": "shoe",
+      "title": "Mizuno Wave Rider 30 Review: A Comfortable Daily Trainer for Everyday Miles",
+      "date": "2026-10-23",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-10-23",
+      "source": "Runner's World",
+      "category": "跑鞋新品",
+      "summary": "這雙鞋目前以「跑鞋新品」定位收錄。先看用途、腳感、穩定、重量與價格，再決定是否放進跑鞋輪替。",
+      "url": "https://www.runnersworld.com/gear/a74219165/mizuno-wave-rider-30-review/",
+      "score": 28,
+      "source_origin": "candidate",
+      "published_at": "2026-11-16",
+      "publish_status": "published",
+      "source_aliases": [
+        "Runner's World"
       ]
     },
     {

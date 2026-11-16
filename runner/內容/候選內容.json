@@ -176,6 +176,26 @@
     "checked_at": "2026-11-16",
     "source": "KENLU",
     "source_type": "跑鞋評測 / 裝備情報",
+    "title": "上市速報 / Nike Ja 4 ‘Blur’ EP 臺灣販售資訊整理",
+    "url": "https://kenlu.net/2026/11/nike-ja-4-blur-ep-release-info/",
+    "category": "跑步新聞",
+    "score": 21,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "Nike Ja 4 ‘Blur’ EP 臺灣 11 月 16 日起發售，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。 販售資訊一覽 (如有更多店點公佈消息本文會持續更新)： Nike Ja 4 ‘Blur’ EP 鞋款資訊 販售店點 圖片來源：Nike",
+    "source_aliases": [
+      "KENLU"
+    ],
+    "first_seen_at": "2026-11-16",
+    "last_seen_at": "2026-11-16",
+    "seen_count": 2
+  },
+  {
+    "checked_at": "2026-11-16",
+    "source": "KENLU",
+    "source_type": "跑鞋評測 / 裝備情報",
     "title": "勘履滑手機 / 怕你跑步熱到，Nike 直接做了兩雙洞洞跑鞋！",
     "url": "https://kenlu.net/2026/11/nike-radical-airflow-pegasus-plus-2-trail-news/",
     "category": "跑鞋新品",
@@ -308,7 +328,7 @@
     ],
     "first_seen_at": "2026-11-16",
     "last_seen_at": "2026-11-16",
-    "seen_count": 4
+    "seen_count": 3
   },
   {
     "checked_at": "2026-11-16",
@@ -337,20 +357,6 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "ASICS WORKING 首度與服裝品牌聯名，攜手 FreshService 推出全黑 WINJOB CP229 BOA，11 月 21 日日本發售，定價 23,100 日圓，臺灣尚未公布發售計畫。"
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "KENLU",
-    "source_type": "跑鞋評測 / 裝備情報",
-    "title": "上市速報 / adidas CRAZY ENERGY+ BAPE 臺灣販售資訊整理",
-    "url": "https://kenlu.net/2026/11/adidas-crazy-energy-bape-kh8660-release-info/",
-    "category": "跑步新聞",
-    "score": 13,
-    "article_date": "2026-11-07",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "adidas CRAZY ENERGY+ BAPE 2026 年 11 月 7 日起於臺灣 adidas 官網發售，售價 NT$6,800、型號 KH8660。"
   },
   {
     "checked_at": "2026-11-16",
@@ -403,17 +409,38 @@
   },
   {
     "checked_at": "2026-11-16",
-    "source": "Bounce",
-    "source_type": "跑鞋新品",
-    "title": "2026 New Balance 10K 城市路跑系列賽登場！韋禮安驚喜開唱、近 7,000 名跑者共襄盛舉",
-    "url": "https://bouncin.net/p/news/events/6262/new-balance-2026-10k-city-run-recap",
-    "category": "跑鞋新品",
-    "score": 26,
-    "article_date": "2026-11-03",
+    "source": "KENLU",
+    "source_type": "跑鞋評測 / 裝備情報",
+    "title": "新聞分享 / WTAPS 脫下軍裝？與 HOKA 二度聯名 Speedgoat TS 改走運動路線",
+    "url": "https://kenlu.net/2026/11/wtaps-x-hoka-speedgoat-ts-news/",
+    "category": "訓練",
+    "score": 7,
+    "article_date": "2026-11-14",
     "suggested_for": "待判斷",
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
-    "description": "2026 New Balance「10K 城市路跑系列賽」熱力開跑！賽事邁入第二屆"
+    "description": "WTAPS x HOKA Speedgoat TS 以 Speedgoat 7 重新設計鞋面，推出灰洋紅、黑灰兩色，11 月 27 日國外發售，歐洲定價 175 歐元。",
+    "source_aliases": [
+      "KENLU",
+      "KENLU 越野"
+    ],
+    "first_seen_at": "2026-11-16",
+    "last_seen_at": "2026-11-16",
+    "seen_count": 3
+  },
+  {
+    "checked_at": "2026-11-16",
+    "source": "Bounce",
+    "source_type": "跑鞋新品",
+    "title": "BEAMS 50 週年限定聯名！adidas Originals 推出樂福鞋式運動鞋 演繹 Preppy 與 Yankee 風格",
+    "url": "https://bouncin.net/p/news/new-stuff/6276/adidas-originals-beams-50th-anniversary-collaboration",
+    "category": "跑步新聞",
+    "score": 14,
+    "article_date": "2026-11-16",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "為慶祝 BEAMS 創立 50 週年，〈adidas Originals〉與〈BEAMS〉攜手推出特別聯名系列"
   },
   {
     "checked_at": "2026-11-16",
@@ -490,27 +517,6 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "SAUCONY DAIKANYAMA Collection 以代官山侘寂美學重製 PROGRID OMNI 9 等四款跑鞋，2026 年 9 月登台，售價 5,290 元起。"
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "KENLU",
-    "source_type": "跑鞋評測 / 裝備情報",
-    "title": "官方新聞 / On Cloudvista 3 全面升級！跑入聲林、看見越野新風景",
-    "url": "https://kenlu.net/2026/09/on-cloudvista-3-official-news/",
-    "category": "跑步新聞",
-    "score": 15,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "On Cloudvista 3 定位 Everyday Trail，採升級版 CloudTec、生物基 Helion 泡棉與 Missiongrip 大底，強化多地形抓地。",
-    "source_aliases": [
-      "KENLU",
-      "KENLU 越野"
-    ],
-    "first_seen_at": "2026-11-16",
-    "last_seen_at": "2026-11-16",
-    "seen_count": 2
   },
   {
     "checked_at": "2026-11-16",
@@ -616,20 +622,6 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "2026 名古屋亞運現場直擊，專訪 ASICS 社長 COO 富永滿之與 ASICS Running 產品及策略團隊：從 YEAR OF ASIA 財報數字、頂上計畫箱根穿著率，到 NOVABLAST、RISE & SHINE 與擴大到 3,500 人的台灣 ASICS RUN 2027。"
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "KENLU",
-    "source_type": "跑鞋評測 / 裝備情報",
-    "title": "勘履滑手機 / 991 不再只有英國製！日本 New Balance 先丟出一張預告",
-    "url": "https://kenlu.net/2026/11/new-balance-991-made-in-japan-news/",
-    "category": "跑步新聞",
-    "score": 7,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "New Balance Japan 2026 年 11 月預告日本製 991，鞋跟繡 made in JAPAN，是 MIJ 系列第四雙，型號售價未公布。"
   },
   {
     "checked_at": "2026-11-16",
@@ -979,6 +971,20 @@
   },
   {
     "checked_at": "2026-11-16",
+    "source": "KENLU",
+    "source_type": "跑鞋評測 / 裝備情報",
+    "title": "官方新聞 / 防潑水鞋面迎接秋冬雨季，UA Velociti Distance Storm 臺灣上市",
+    "url": "https://kenlu.net/2026/11/under-armour-velociti-distance-storm-running-shoes/",
+    "category": "跑鞋新品",
+    "score": 19,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "UA Velociti Distance Storm 鞋面採用 UA Storm™ 防潑水材質，大底是深凸紋搭配 Exogrip 橡膠，臺灣定價 NT$4,980，黑橘、黑、白三色已在 UA 臺灣官網上架。"
+  },
+  {
+    "checked_at": "2026-11-16",
     "source": "KENLU 越野",
     "source_type": "越野跑鞋 / 越野訓練",
     "title": "新聞分享 / 越野跑鞋的藍寶堅尼！ NORDA 001 台北 FIELD DAY 販售資訊公開～",
@@ -1007,6 +1013,26 @@
     "source_aliases": [
       "KENLU",
       "KENLU 越野"
+    ],
+    "first_seen_at": "2026-11-16",
+    "last_seen_at": "2026-11-16",
+    "seen_count": 2
+  },
+  {
+    "checked_at": "2026-11-16",
+    "source": "KENLU",
+    "source_type": "跑鞋評測 / 裝備情報",
+    "title": "官方新聞 / 台北、台南雙站開跑！全新「MOMENTUM RUN跑步體驗店」登場",
+    "url": "https://kenlu.net/2026/09/momentum-run-official-news/",
+    "category": "跑步新聞",
+    "score": 13,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "摩曼頓 2026 年 9 月推出 MOMENTUM RUN 跑步體驗店，首波設於公館與台南，整合跨品牌跑鞋、SafeSize 3D 足測與品牌試跑。",
+    "source_aliases": [
+      "KENLU"
     ],
     "first_seen_at": "2026-11-16",
     "last_seen_at": "2026-11-16",
@@ -1149,6 +1175,26 @@
     "checked_at": "2026-11-16",
     "source": "KENLU",
     "source_type": "跑鞋評測 / 裝備情報",
+    "title": "上市速報 / 30 週年版本！Reebok Question Mid Recoded ‘Red Toe’ 臺灣販售資訊整理",
+    "url": "https://kenlu.net/2026/11/reebok-question-mid-recoded-red-toe-release-info/",
+    "category": "跑步新聞",
+    "score": 15,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "Reebok Question Mid Recoded ‘Red Toe’ 30 週年版，2026 年 11 月臺灣發售，售價 NT$5,980，信義、台中、高雄門市販售。",
+    "source_aliases": [
+      "KENLU"
+    ],
+    "first_seen_at": "2026-11-16",
+    "last_seen_at": "2026-11-16",
+    "seen_count": 2
+  },
+  {
+    "checked_at": "2026-11-16",
+    "source": "KENLU",
+    "source_type": "跑鞋評測 / 裝備情報",
     "title": "LOEWE × On 聯名登山鞋登場！Cloudsolo Hiker、Cloudtilt Cosmic 10/15 上市",
     "url": "https://kenlu.net/2026/10/loewe-x-on-cloudsolo-hikercloudtilt-cosmic-news/",
     "category": "跑步新聞",
@@ -1203,26 +1249,6 @@
     "source_aliases": [
       "KENLU",
       "KENLU 越野"
-    ],
-    "first_seen_at": "2026-11-16",
-    "last_seen_at": "2026-11-16",
-    "seen_count": 2
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "KENLU",
-    "source_type": "跑鞋評測 / 裝備情報",
-    "title": "官方新聞 / 台北、台南雙站開跑！全新「MOMENTUM RUN跑步體驗店」登場",
-    "url": "https://kenlu.net/2026/09/momentum-run-official-news/",
-    "category": "跑步新聞",
-    "score": 10,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "",
-    "source_aliases": [
-      "KENLU"
     ],
     "first_seen_at": "2026-11-16",
     "last_seen_at": "2026-11-16",
@@ -1328,20 +1354,6 @@
   },
   {
     "checked_at": "2026-11-16",
-    "source": "Women's Health Taiwan",
-    "source_type": "跑鞋選購 / 健康訓練",
-    "title": "日本「微笑跑步法」是什麼？不用跑快也能提升心肺！3個技巧與新手訓練計畫一次看",
-    "url": "https://www.womenshealthmag.com/tw/fitness/running/a74407033/japanese-smile-slow-jogging-method/",
-    "category": "入門知識",
-    "score": 9,
-    "article_date": "2026-11-12",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "只要能邊跑邊聊天、保持微笑，就能找到適合自己的節奏。"
-  },
-  {
-    "checked_at": "2026-11-16",
     "source": "HK01 跑步",
     "source_type": "跑步裝備 / 跑步知識",
     "title": "港珠澳半馬屈旨盈連續3屆入本地三甲繼續享受跑步 張耀樑跑出驚喜",
@@ -1373,6 +1385,20 @@
     "first_seen_at": "2026-11-16",
     "last_seen_at": "2026-11-16",
     "seen_count": 2
+  },
+  {
+    "checked_at": "2026-11-16",
+    "source": "Women's Health Taiwan",
+    "source_type": "跑鞋選購 / 健康訓練",
+    "title": "天冷在家也能輕鬆變瘦！每天10分鐘「這運動」，比出門跑步效率更高，還能練出易瘦體質",
+    "url": "https://www.womenshealthmag.com/tw/fitness/home-workout/g74434984/hiit-at-home/",
+    "category": "入門知識",
+    "score": 5,
+    "article_date": "2026-11-16",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "才10分鐘就能爆汗燃脂，CP值超高"
   },
   {
     "checked_at": "2026-11-16",
@@ -1457,20 +1483,6 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "每週只要慢跑75分鐘以上，便能有效提升生物年齡"
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "Women's Health Taiwan",
-    "source_type": "跑鞋選購 / 健康訓練",
-    "title": "消耗熱量最多的運動是「這個」？專業教練揭「7種高效燃脂運動」有效替代跑步，對膝蓋、關節更友善",
-    "url": "https://www.womenshealthmag.com/tw/fitness/work-outs/a74397495/7-exercises-burns-the-most-calories/",
-    "category": "跑步新聞",
-    "score": 5,
-    "article_date": "2026-11-11",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": "名人健身教練揭露「熱量消耗最高」的7種運動！"
   },
   {
     "checked_at": "2026-11-16",
@@ -1596,6 +1608,20 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "Our testers found a secure, comfy fit—especially for high arches and wide feet."
+  },
+  {
+    "checked_at": "2026-11-16",
+    "source": "Runner's World",
+    "source_type": "英文跑鞋評測 / 訓練知識",
+    "title": "Mizuno Wave Rider 30 Review: A Comfortable Daily Trainer for Everyday Miles",
+    "url": "https://www.runnersworld.com/gear/a74219165/mizuno-wave-rider-30-review/",
+    "category": "跑鞋新品",
+    "score": 24,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "A no-fuss daily trainer for newer runners, easy miles, gym sessions, and run/walk days."
   },
   {
     "checked_at": "2026-11-16",
@@ -1831,6 +1857,34 @@
   },
   {
     "checked_at": "2026-11-16",
+    "source": "Runner's World",
+    "source_type": "英文跑鞋評測 / 訓練知識",
+    "title": "Nike’s Newest Elite Racing Shoe Is Coming in 2027—Here’s Everything We Know",
+    "url": "https://www.runnersworld.com/gear/a74286086/nike-apex-jan-2027-launch/",
+    "category": "跑鞋新品",
+    "score": 22,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "What to know about Nike’s ultralight super shoe before it arrives in January 2027."
+  },
+  {
+    "checked_at": "2026-11-16",
+    "source": "Runner's World",
+    "source_type": "英文跑鞋評測 / 訓練知識",
+    "title": "The Adizero Adios Pro 5 Is the Fastest Adidas Racing Shoe You Can Actually Buy",
+    "url": "https://www.runnersworld.com/gear/a73824137/adidas-adizero-adios-pro-5-review/",
+    "category": "跑鞋新品",
+    "score": 17,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "Update: Adidas is rolling out a fix to prevent any premature wear of the forefoot foam."
+  },
+  {
+    "checked_at": "2026-11-16",
     "source": "Tom's Guide Running",
     "source_type": "英文跑鞋評測 / 鞋款整理",
     "title": "I’ve tested 16 new carbon plate running shoes this year, but my favorite is still the Puma Fast-R 3 — it’s reduced by $100 right now",
@@ -1965,6 +2019,20 @@
   },
   {
     "checked_at": "2026-11-16",
+    "source": "Runner's World",
+    "source_type": "英文跑鞋評測 / 訓練知識",
+    "title": "Salomon Aero Blaze 4 Grvl GTX Review: Built for Wet, Gritty Miles",
+    "url": "https://www.runnersworld.com/gear/a74336328/salomon-aero-blaze-4-grvl-gtx-review/",
+    "category": "訓練",
+    "score": 19,
+    "article_date": "",
+    "suggested_for": "待判斷",
+    "runner_takeaway": "待代理人摘要",
+    "publish_status": "candidate",
+    "description": "Pick the GTX for cold, wet runs; stick with the standard Grvl for warmer, drier miles."
+  },
+  {
+    "checked_at": "2026-11-16",
     "source": "Tom's Guide Running",
     "source_type": "英文跑鞋評測 / 鞋款整理",
     "title": "I ran 40 miles in the Brooks Hyperion Max 4 — here’s why I think it misses the mark",
@@ -2039,20 +2107,6 @@
   },
   {
     "checked_at": "2026-11-16",
-    "source": "Runner's World",
-    "source_type": "英文跑鞋評測 / 訓練知識",
-    "title": "Client Challenge",
-    "url": "https://www.runnersworld.com/gear/a74286086/nike-apex-jan-2027-launch/",
-    "category": "跑步新聞",
-    "score": 14,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": ""
-  },
-  {
-    "checked_at": "2026-11-16",
     "source": "Tom's Guide Running",
     "source_type": "英文跑鞋評測 / 鞋款整理",
     "title": "I ran 35 miles in the Adidas Adizero Adios Pro Evo 3 — is the record-breaking carbon super-shoe worth its $500 price?",
@@ -2064,34 +2118,6 @@
     "runner_takeaway": "待代理人摘要",
     "publish_status": "candidate",
     "description": "The Pro Evo 3 burns bright and short"
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "Runner's World",
-    "source_type": "英文跑鞋評測 / 訓練知識",
-    "title": "Client Challenge",
-    "url": "https://www.runnersworld.com/gear/a74336328/salomon-aero-blaze-4-grvl-gtx-review/",
-    "category": "跑步新聞",
-    "score": 12,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": ""
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "Runner's World",
-    "source_type": "英文跑鞋評測 / 訓練知識",
-    "title": "Client Challenge",
-    "url": "https://www.runnersworld.com/gear/a74219165/mizuno-wave-rider-30-review/",
-    "category": "跑步新聞",
-    "score": 12,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": ""
   },
   {
     "checked_at": "2026-11-16",
@@ -2112,19 +2138,5 @@
     "first_seen_at": "2026-11-16",
     "last_seen_at": "2026-11-16",
     "seen_count": 2
-  },
-  {
-    "checked_at": "2026-11-16",
-    "source": "Runner's World",
-    "source_type": "英文跑鞋評測 / 訓練知識",
-    "title": "Client Challenge",
-    "url": "https://www.runnersworld.com/gear/a73824137/adidas-adizero-adios-pro-5-review/",
-    "category": "跑步新聞",
-    "score": 11,
-    "article_date": "",
-    "suggested_for": "待判斷",
-    "runner_takeaway": "待代理人摘要",
-    "publish_status": "candidate",
-    "description": ""
   }
 ]
