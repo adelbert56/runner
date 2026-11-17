@@ -2906,18 +2906,22 @@ function renderWeekStripDay(day, selected) {
     ? (day.task || (day.supportBlocks || []).map((block) => block.title).filter(Boolean).join('・') || '主動恢復')
     : dayHeadline(day);
   const km = !isRest && Number(day.km) ? `${Number(day.km)} km` : '';
+  const statusText = [date === todayStr() ? '今天' : '', done && !isRest ? '已完成' : '',
+    day.status === 'missed' ? '已跳過' : '', day.releaseStatus === 'pending' ? '待放行' : ''].filter(Boolean);
+  const dayLabel = [date, isRest ? '休息' : trainingTypeLabel(day.type, day.focus), km, ...statusText].filter(Boolean).join('，');
   const flags = [
     date === todayStr() ? '<span class="week-strip-flag is-today">今天</span>' : '',
     done && !isRest ? '<span class="week-strip-flag is-done">✓ 完成</span>' : '',
     day.status === 'missed' ? '<span class="week-strip-flag is-missed">已跳過</span>' : '',
     day.releaseStatus === 'pending' ? '<span class="week-strip-flag is-pending">待放行</span>' : '',
   ].join('');
-  return `<button type="button" class="week-strip-day tone-${tone}${selected ? ' is-selected' : ''}" data-week-day="${reviewEscape(date)}" aria-pressed="${selected ? 'true' : 'false'}" aria-controls="week-day-panel-${reviewEscape(date)}" onclick="selectWeekDay('${reviewEscape(date)}')">
+  return `<button type="button" class="week-strip-day tone-${tone}${selected ? ' is-selected' : ''}" data-week-day="${reviewEscape(date)}" aria-label="${reviewEscape(dayLabel)}" aria-pressed="${selected ? 'true' : 'false'}" aria-controls="week-day-panel-${reviewEscape(date)}" onclick="selectWeekDay('${reviewEscape(date)}')">
     <span class="week-strip-date"><small><span class="week-strip-dow-prefix">週</span>${String(DOW_NAMES[day.dow] || '').slice(-1)}</small><b>${Number(date.slice(8, 10)) || ''}</b></span>
     <span class="week-strip-type">${isRest ? '休息' : reviewEscape(trainingTypeLabel(day.type, day.focus))}</span>
     <span class="week-strip-title">${reviewEscape(title)}</span>
     ${km ? `<span class="week-strip-km">${km}${day.hrTarget ? `<small>${reviewEscape(String(day.hrTarget).replace(/（.*$/, ''))}</small>` : ''}</span>` : ''}
     ${flags ? `<span class="week-strip-flags">${flags}</span>` : ''}
+    ${statusText.length ? `<span class="week-strip-mobile-status" aria-hidden="true">${reviewEscape(statusText.join('、'))}</span>` : ''}
     <span class="week-strip-dot" aria-hidden="true"></span>
   </button>`;
 }

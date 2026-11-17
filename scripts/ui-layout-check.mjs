@@ -303,6 +303,40 @@ async function assertTrainerReport(page, viewportName) {
   // deterministic weather fixture; otherwise they can repaint the week while
   // this assertion is reading it.
   await page.waitForTimeout(450);
+  if (viewportName === 'mobile') {
+    await page.evaluate(() => {
+      const fixture = document.createElement('div');
+      fixture.id = 'week-strip-audit';
+      fixture.className = 'week-strip';
+      fixture.style.margin = '16px';
+      fixture.innerHTML = Array.from({length: 7}, (_, i) => renderWeekStripDay({
+        dateStr: `2026-07-${String(13 + i).padStart(2, '0')}`,
+        dow: (i + 1) % 7, type: i === 3 ? 'long' : 'easy', km: 5,
+        task: '輕鬆跑', status: i === 1 ? 'done' : i === 2 ? 'missed' : 'planned',
+        releaseStatus: i === 3 ? 'pending' : undefined,
+      }, i === 0)).join('');
+      document.body.appendChild(fixture);
+    });
+    for (const width of [320, 390, 430]) {
+      await page.setViewportSize({width, height: 844});
+      const audit = await page.locator('#week-strip-audit').evaluate(element => {
+        const buttons = [...element.querySelectorAll('.week-strip-day')];
+        return buttons.map(button => {
+          const outer = button.getBoundingClientRect();
+          const number = button.querySelector('.week-strip-date b').getBoundingClientRect();
+          const status = button.querySelector('.week-strip-mobile-status');
+          return {width: outer.width, offset: Math.abs((number.left + number.width / 2) - (outer.left + outer.width / 2)),
+            label: button.getAttribute('aria-label'), status: status?.textContent || '', statusVisible: !!status && getComputedStyle(status).display !== 'none'};
+        });
+      });
+      if (audit.length !== 7 || audit.some(item => item.width < 44 || item.offset > 1.5)) throw new Error(`week strip geometry ${width}: ${JSON.stringify(audit)}`);
+      if (!audit[1].statusVisible || !audit[1].label.includes('已完成') || !audit[2].label.includes('已跳過') || !audit[3].label.includes('待放行')) throw new Error(`week strip states ${width}: ${JSON.stringify(audit)}`);
+    }
+    await page.setViewportSize({width: 390, height: 844});
+    await page.locator('#week-strip-audit').screenshot({path: resolve(screenshotDir, 'mobile-week-strip-audit.png')});
+    await page.locator('#week-strip-audit').evaluate(element => element.remove());
+    console.log('OK mobile week strip alignment, accessible statuses and touch size at 320/390/430');
+  }
   const restDayForecast = await page.evaluate(() => {
     eval(`trainerWeather = { "2026-07-24": { tmax: 30.8, rain: 50, morningRain: 20, eveningRain: 40 } }`);
     return dayWeatherLine({ dateStr: "2026-07-24", type: "rest" });
@@ -313,6 +347,32 @@ async function assertTrainerReport(page, viewportName) {
   // Exercise the real double-session entry path against the local fixture.
   // It must add a second session without replacing the formal course card.
   await page.evaluate(() => { showView("plan"); switchPlanTab("week"); });
+  if (viewportName === 'mobile') {
+    const tools = await page.locator('.plan-workspace-tools').evaluate(element => {
+      const box = element.getBoundingClientRect();
+      return {client: element.clientWidth, scroll: element.scrollWidth,
+        buttons: [...element.querySelectorAll('button')].map(button => {
+          const rect = button.getBoundingClientRect();
+          return {label: button.textContent.trim(), left: rect.left, right: rect.right, height: rect.height,
+            contained: rect.left >= box.left - 1 && rect.right <= box.right + 1};
+        })};
+    });
+    if (tools.scroll > tools.client + 1 || tools.buttons.some(button => !button.contained)) throw new Error(`mobile management tools clipped: ${JSON.stringify(tools)}`);
+    if (tools.buttons.some(button => button.height < 44)) throw new Error(`mobile management touch target too small: ${JSON.stringify(tools)}`);
+    await page.locator('.plan-toolbar').screenshot({path: resolve(screenshotDir, 'mobile-training-toolbar-audit.png')});
+    await page.evaluate(() => {
+      eval(`trainerWeather = { "2026-07-24": { tmax: 28, rain: 37, morningRain: 37, eveningRain: 0 } }`);
+      const fixture = document.createElement('div');
+      fixture.id = 'day-detail-audit';
+      fixture.innerHTML = renderDayDetail({ dateStr: '2026-07-24', dow: 5, type: 'easy', task: '輕鬆跑', km: 5, status: 'upcoming', coachPlan: true });
+      document.body.appendChild(fixture);
+    });
+    const detail = page.locator('#day-detail-audit .day-detail-side');
+    if (!await detail.locator('.wx-chip').count() || !await detail.getByText('教練提醒').count()) throw new Error('mobile weather and coach tip fixture is missing');
+    await detail.screenshot({path: resolve(screenshotDir, 'mobile-weather-coach-audit.png'), style: '.site-header, .top-navigation, .mobile-bottom-nav, .back-to-top { visibility: hidden !important; }'});
+    await page.locator('#day-detail-audit').evaluate(element => element.remove());
+    console.log('OK mobile management tools are visible without horizontal scrolling');
+  }
   const addSecondSession = page.locator("#plan-tab-week .add-extra-session").first();
   await addSecondSession.click();
   await page.locator("#m-extra-slot").selectOption("morning");
