@@ -1622,10 +1622,18 @@ function renderHeroDashboard({ week, meta, phaseText, totalWeeks, daysToRace, co
     const done = Boolean(garminRun) || day.status === 'done';
     const isToday = day.dateStr === today;
     const isRest = day.type === 'rest';
-    const sub = isRest ? '' : [day.hrTarget, isToday ? '今天' : '', done ? `✓ 已完成${garminRun?.km ? ` ${garminRun.km} km` : ''}` : ''].filter(Boolean).join(' · ');
-    return `<li class="dash-day${isToday ? ' is-today' : ''}${isRest ? ' is-rest' : ''}${done ? ' is-done' : ''}">
+    // 每列都要看得出「練什麼跑」：課型標籤（恢復／輕鬆／長跑／節奏／間歇）＋這堂的重點。
+    const typeLabel = isRest ? '休息' : trainingTypeLabel(day.type, day.focus);
+    const tone = typeof weekStripTone === 'function' ? weekStripTone(day) : (isRest ? 'rest' : 'easy');
+    const headline = isRest ? (day.task && day.task !== '休息' ? day.task : '恢復日') : (typeof dayHeadline === 'function' ? dayHeadline(day) : trainingTaskTitle(day));
+    const intent = String(trainingTaskTitle(day) || '').split(/\s*[｜|]\s*/).slice(1).join('｜');
+    // 課名只是重複課型時改用說明；沒有說明就只留標籤，不印「輕鬆跑 輕鬆跑」
+    const title = !isRest && headline === typeLabel ? intent : headline;
+    const hr = String(day.hrTarget || '').replace(/（.*$/, '');
+    const sub = isRest ? '' : [hr, isToday ? '今天' : '', done ? `✓ 已完成${garminRun?.km ? ` ${garminRun.km} km` : ''}` : '', day.releaseStatus === 'pending' ? '待放行' : ''].filter(Boolean).join(' · ');
+    return `<li class="dash-day tone-${tone}${isToday ? ' is-today' : ''}${isRest ? ' is-rest' : ''}${done ? ' is-done' : ''}">
         <span class="dash-day-date"><small>${DOW_NAMES[day.dow]}</small><b>${Number(day.dateStr.slice(8, 10))}</b></span>
-        <span class="dash-day-title">${isRest ? '休息' : reviewEscape(typeof dayHeadline === 'function' ? dayHeadline(day) : trainingTaskTitle(day))}${sub ? `<small>${reviewEscape(sub)}</small>` : ''}</span>
+        <span class="dash-day-title"><span class="dash-day-line"><span class="dash-day-type">${reviewEscape(typeLabel)}</span>${title ? `<span class="dash-day-name">${reviewEscape(title)}</span>` : ''}</span>${sub ? `<small>${reviewEscape(sub)}</small>` : ''}</span>
         <span class="dash-day-km">${isRest || !Number(day.km) ? '' : `${kmText(Number(day.km))} km`}</span>
       </li>`;
   }).join('');
