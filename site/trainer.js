@@ -1625,7 +1625,7 @@ function renderHeroDashboard({ week, meta, phaseText, totalWeeks, daysToRace, co
     const sub = isRest ? '' : [day.hrTarget, isToday ? '今天' : '', done ? `✓ 已完成${garminRun?.km ? ` ${garminRun.km} km` : ''}` : ''].filter(Boolean).join(' · ');
     return `<li class="dash-day${isToday ? ' is-today' : ''}${isRest ? ' is-rest' : ''}${done ? ' is-done' : ''}">
         <span class="dash-day-date"><small>${DOW_NAMES[day.dow]}</small><b>${Number(day.dateStr.slice(8, 10))}</b></span>
-        <span class="dash-day-title">${isRest ? '休息' : reviewEscape(trainingTaskTitle(day))}${sub ? `<small>${reviewEscape(sub)}</small>` : ''}</span>
+        <span class="dash-day-title">${isRest ? '休息' : reviewEscape(typeof dayHeadline === 'function' ? dayHeadline(day) : trainingTaskTitle(day))}${sub ? `<small>${reviewEscape(sub)}</small>` : ''}</span>
         <span class="dash-day-km">${isRest || !Number(day.km) ? '' : `${kmText(Number(day.km))} km`}</span>
       </li>`;
   }).join('');

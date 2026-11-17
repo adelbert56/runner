@@ -2096,3 +2096,220 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---------- 教練建議：週報主卡（2026-11-17） ---------- */
+
+.coach-brief {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
+  margin: 16px 0 20px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.05), 0 12px 32px rgba(31, 42, 36, 0.08);
+}
+
+.coach-brief-review {
+  padding: 28px 32px;
+  background: linear-gradient(135deg, var(--green-dark), var(--green));
+  color: #fff;
+}
+
+.coach-brief-kicker {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.coach-brief-verdict {
+  margin: 10px 0 20px;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.coach-brief-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.coach-brief-stats > div {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.coach-brief-stats dt {
+  font-size: 12px;
+  opacity: 0.82;
+}
+
+.coach-brief-stats dd {
+  margin: 2px 0 0;
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.coach-brief-stats dd small {
+  margin-left: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.coach-brief-next {
+  padding: 28px 32px;
+}
+
+.coach-brief-next-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.coach-brief-next-head b {
+  font-size: 16px;
+}
+
+.coach-brief-next-head span {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--tone-easy-tint);
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.coach-brief-next p {
+  margin: 0;
+  color: #2f3b34;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.coach-brief-next .coach-brief-weather {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: #4a554e;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.coach-brief-weather b {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .coach-brief {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .coach-brief-review,
+  .coach-brief-next {
+    padding: 20px 16px;
+  }
+
+  .coach-brief-verdict {
+    font-size: 20px;
+  }
+}
+
+/* ---------- 進度與分析：收合區與卡片語言（2026-11-17） ---------- */
+
+.analysis-fold {
+  margin-top: 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.05), 0 6px 18px rgba(31, 42, 36, 0.06);
+}
+
+.trend-card .analysis-fold {
+  background: var(--soft);
+  box-shadow: none;
+}
+
+.analysis-fold > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 20px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.analysis-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.analysis-fold > summary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  rotate: 45deg;
+}
+
+.analysis-fold[open] > summary::after {
+  rotate: 225deg;
+}
+
+.analysis-fold > summary b {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.analysis-fold[open] > summary {
+  border-bottom: 1px solid rgba(31, 42, 36, 0.06);
+}
+
+.analysis-fold > :not(summary) {
+  margin: 0;
+  padding: 16px 20px 20px;
+}
+
+.analysis-flow-fold > .coach-flow-card {
+  border: 0;
+  box-shadow: none;
+}
+
+#plan-tab-progress :is(.trend-card, .session-report, .coach-decision-card) {
+  border: 0;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.05), 0 12px 32px rgba(31, 42, 36, 0.07);
+}
+
+#plan-tab-progress .trend-card {
+  margin-top: 0;
+}
+
+#plan-tab-progress .trend-hero-value {
+  font-weight: 800;
+}
+
+#plan-tab-coach .coach-panel {
+  border: 0;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.05), 0 12px 32px rgba(31, 42, 36, 0.07);
+}
