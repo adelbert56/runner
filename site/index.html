@@ -10,6 +10,7 @@
     >
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260727-brand2">
 <link rel="stylesheet" href="./styles.css?v=20261103-backup1">
+<link rel="stylesheet" href="./modern.css?v=20261117-layout1">
   </head>
   <body>
     <header class="site-header">
@@ -20,12 +21,12 @@
         <span>跑者廣場</span>
       </a>
       <nav class="main-nav" aria-label="主要導覽">
-        <a href="#races" data-panel-link="races">🏁 賽事</a>
-        <a href="#announcements" data-panel-link="announcements">📢 公告</a>
-        <a href="#academy" data-panel-link="academy">📘 入門</a>
-        <a href="trainer.html">🗓 練跑計畫</a>
-        <a href="#gear" data-panel-link="gear">👟 跑鞋</a>
-        <a href="#news" data-panel-link="news">📰 新聞</a>
+        <a href="#races" data-panel-link="races"><span class="nav-icon" aria-hidden="true">🏁</span><span class="nav-label">賽事</span></a>
+        <a href="#announcements" data-panel-link="announcements"><span class="nav-icon" aria-hidden="true">📢</span><span class="nav-label">公告</span></a>
+        <a href="#academy" data-panel-link="academy"><span class="nav-icon" aria-hidden="true">📘</span><span class="nav-label">入門</span></a>
+        <a href="trainer.html"><span class="nav-icon" aria-hidden="true">🗓</span><span class="nav-label">練跑</span></a>
+        <a href="#gear" data-panel-link="gear"><span class="nav-icon" aria-hidden="true">👟</span><span class="nav-label">跑鞋</span></a>
+        <a href="#news" data-panel-link="news"><span class="nav-icon" aria-hidden="true">📰</span><span class="nav-label">新聞</span></a>
       </nav>
     </header>
 
@@ -127,7 +128,7 @@
               <span>搜尋賽事</span>
               <input id="race-search" type="search" placeholder="輸入賽事、縣市或距離">
             </label>
-            <details class="race-filter-panel" open>
+            <details class="race-filter-panel">
               <summary>篩選條件</summary>
               <div class="race-filter-body">
                 <div class="filter-stack">

@@ -1,0 +1,737 @@
+/*
+ * 版面現代化（2026-11-17，Squall 選定：賽事頁 A「精簡清單」、練跑頁 B「儀表板」）
+ * 決策紀錄：ai/artifacts/版面現代化/mockup-decision.md
+ * 只覆寫版面；色彩一律沿用 styles.css :root 的 token，不新增色彩。
+ */
+
+:root {
+  --row-gap: 12px;
+  --tint-green: #e7f2ec;
+  --tint-yellow: #fdf4d8;
+  --bottom-nav-height: 64px;
+  --target-size: 24px;
+}
+
+@media (pointer: coarse) {
+  :root { --target-size: 44px; }
+}
+
+/* ---------- 月份：側欄改成清單上方的橫向選擇列（修正寬螢幕蓋住內容） ---------- */
+
+.race-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.race-layout .month-panel,
+.race-layout .month-panel[style] {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.month-index-panel > summary {
+  display: none;
+}
+
+.race-layout .month-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+}
+
+.race-layout .month-list button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 36px;
+  gap: 6px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 14px;
+  font-weight: 700;
+  transform: none;
+}
+
+.race-layout .month-list button .month-label {
+  font-size: 14px;
+}
+
+.race-layout .month-list button .month-label::before {
+  content: none;
+}
+
+.race-layout .month-list button .month-count {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  color: var(--muted);
+}
+
+.race-layout .month-list button .month-count strong {
+  font-size: 13px;
+}
+
+.race-layout .month-list button.active {
+  background: var(--green-dark);
+  color: #fff;
+  box-shadow: none;
+}
+
+.race-layout .month-list button.active .month-count,
+.race-layout .month-list button.active .month-count small {
+  background: none;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* ---------- 賽事清單：一場一行（版面 A） ---------- */
+
+.race-list {
+  gap: 0;
+}
+
+.race-month-heading {
+  padding: 24px 4px 8px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.race-month-heading:first-child {
+  padding-top: 8px;
+}
+
+.race-card.race-row {
+  min-height: 0;
+  margin-bottom: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.05);
+  transform: none;
+}
+
+.race-card.race-row:hover {
+  border: 0;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.08), 0 8px 20px rgba(31, 42, 36, 0.08);
+  transform: none;
+}
+
+.race-card.race-row::before {
+  content: none;
+}
+
+.race-row-head {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 16px 16px 8px;
+}
+
+.race-row-date {
+  display: grid;
+  justify-items: center;
+  padding-top: 2px;
+}
+
+.race-row-date b {
+  font-size: 22px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.race-row-date small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.race-card.race-row h3 {
+  max-width: none;
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.race-row-meta {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.race-row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.race-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.race-tag.ok {
+  background: var(--tint-green);
+  color: var(--green-dark);
+}
+
+.race-tag.warn {
+  background: var(--tint-yellow);
+  color: #7a5a00;
+}
+
+.race-row-star.race-favorite {
+  display: grid;
+  place-items: center;
+  width: var(--target-size);
+  min-width: 36px;
+  height: var(--target-size);
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.race-row-star.race-favorite.active {
+  color: #c99400;
+}
+
+.race-row-star.race-favorite:hover {
+  background: var(--soft);
+}
+
+/* 已報名、一週內比賽：左側綠色細條標示 */
+.race-card.race-row.race-registered-soon {
+  box-shadow: inset 4px 0 0 var(--green), 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.05);
+}
+
+.race-card.race-row.race-expired {
+  opacity: 0.72;
+}
+
+/* 展開區：報名按鈕與完整資訊 */
+.race-more > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--target-size);
+  padding: 4px 16px 12px 76px;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.race-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.race-more > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -2px;
+}
+
+.race-more[open] > summary::after {
+  rotate: 225deg;
+  translate: 0 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .race-more > summary::after {
+    transition: rotate 0.2s ease, translate 0.2s ease;
+  }
+}
+
+.race-more > .race-main {
+  padding: 4px 16px 16px;
+  border-top: 1px solid var(--soft);
+}
+
+.race-more .race-header-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(240px, 280px);
+  gap: 24px;
+  padding-top: 12px;
+}
+
+@media (max-width: 960px) {
+  .race-more .race-header-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+.race-more .race-hero-facts {
+  display: block;
+}
+
+.race-more .race-venue-box {
+  width: auto;
+  min-height: 0;
+}
+
+/* 標題：中文可正常換行，避免整段因 keep-all 被擠到下一行 */
+.race-card.race-row h3 {
+  word-break: normal;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+  .race-row-head {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 14px 12px 6px;
+  }
+
+  .race-more > summary {
+    padding-left: 62px;
+  }
+
+  .race-more > .race-main {
+    padding: 4px 12px 14px;
+  }
+}
+
+/* ---------- 手機：底部固定導覽列 ---------- */
+
+.main-nav .nav-icon {
+  margin-right: 4px;
+}
+
+.main-nav a {
+  white-space: nowrap;
+}
+
+/* 中等寬度：上方導覽只留文字，避免擠到逐字換行 */
+@media (min-width: 721px) and (max-width: 1100px) {
+  .main-nav .nav-icon {
+    display: none;
+  }
+
+  .main-nav a {
+    padding-inline: 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  html {
+    scroll-padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
+  body {
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* backdrop-filter 會讓 fixed 子元素以頁首為定位基準，底部導覽列就會卡在上方 */
+  .site-header {
+    min-height: 56px;
+    padding-top: max(8px, env(safe-area-inset-top, 0px));
+    padding-bottom: 8px;
+    backdrop-filter: none;
+    background: rgba(255, 253, 248, 0.98);
+  }
+
+  /* 統計卡縮小，讓賽事清單在第一屏就出現 */
+  .stats-strip {
+    gap: 8px;
+    margin-top: 0;
+    padding: 12px;
+  }
+
+  .stats-strip .stat-card {
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .stats-strip .stat-card strong {
+    font-size: 22px;
+  }
+
+  .stats-strip .stat-caption,
+  .stats-strip .stat-subcaption {
+    font-size: 12px;
+  }
+
+  .race-section .section-heading h2 {
+    font-size: 24px;
+  }
+
+  .race-section .section-lead {
+    display: none;
+  }
+
+  .site-header .main-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 90;
+    display: flex;
+    justify-content: space-around;
+    gap: 0;
+    overflow: visible;
+    max-width: none;
+    margin: 0;
+    padding: 6px max(4px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+    border-top: 1px solid var(--line);
+    background: rgba(255, 253, 248, 0.97);
+    backdrop-filter: blur(12px);
+    mask-image: none;
+  }
+
+  .site-header .main-nav a {
+    display: grid;
+    flex: 1 1 0;
+    justify-items: center;
+    gap: 2px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 4px 2px;
+    border-radius: 10px;
+    background: none;
+    box-shadow: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .site-header .main-nav .nav-icon {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1;
+    filter: grayscale(1);
+    opacity: 0.65;
+  }
+
+  .site-header .main-nav a.active,
+  .site-header .main-nav a[aria-current="page"] {
+    color: var(--green-dark);
+    font-weight: 700;
+    background: var(--tint-green);
+  }
+
+  .site-header .main-nav a.active .nav-icon,
+  .site-header .main-nav a[aria-current="page"] .nav-icon {
+    filter: none;
+    opacity: 1;
+  }
+
+  /* 回到頂部等浮動按鈕避開底部導覽列 */
+  .back-top {
+    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+  }
+
+  /* 首頁大圖縮成橫幅，讓賽事清單更早出現 */
+  .hero {
+    min-height: 0;
+  }
+
+  .hero-content {
+    padding: 32px 20px 28px;
+  }
+
+  .hero-content h1 {
+    font-size: 28px;
+    line-height: 1.25;
+  }
+
+  .hero-content p:not(.eyebrow) {
+    font-size: 14px;
+  }
+}
+
+/* ---------- 練跑頁：儀表板（版面 B） ---------- */
+
+.trainer-dash {
+  display: grid;
+  gap: 16px;
+}
+
+.trainer-dash-hero {
+  padding: 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--green-dark), var(--green));
+  color: #fff;
+}
+
+.trainer-dash-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.trainer-dash .trainer-hero-eyebrow {
+  margin: 0 0 4px;
+}
+
+.trainer-dash-phase {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.trainer-dash-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.trainer-dash-title b {
+  font-size: 48px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.trainer-dash .trainer-hero-planline {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+}
+
+.trainer-dash-ring {
+  position: relative;
+  flex: 0 0 auto;
+  width: 88px;
+  height: 88px;
+}
+
+.trainer-dash-ring svg {
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+}
+
+.trainer-dash-ring circle {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 10;
+}
+
+.trainer-dash-ring .trainer-dash-ring-value {
+  stroke: var(--yellow);
+  stroke-linecap: round;
+}
+
+.trainer-dash-ring strong {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+.trainer-dash-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.trainer-dash-stats div {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.trainer-dash-stats small {
+  display: block;
+  font-size: 12px;
+  opacity: 0.82;
+}
+
+.trainer-dash-stats b {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.trainer-dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .trainer-dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.trainer-dash-week {
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.05);
+}
+
+.trainer-dash-week-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 8px;
+}
+
+.trainer-dash-week-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.trainer-dash-link {
+  min-height: var(--target-size);
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dash-days {
+  margin: 0;
+  padding: 0 0 8px;
+  list-style: none;
+}
+
+.dash-day {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.dash-day + .dash-day {
+  border-top: 1px solid var(--soft);
+}
+
+.dash-day-date {
+  display: grid;
+  justify-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dash-day-date b {
+  color: var(--ink);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-day-title {
+  display: grid;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.dash-day-title small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.dash-day-km {
+  color: var(--green-dark);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-day.is-today {
+  background: var(--tint-green);
+}
+
+.dash-day.is-rest .dash-day-title {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.dash-day.is-done .dash-day-km::before {
+  content: "✓ ";
+}
+
+@media (max-width: 520px) {
+  .trainer-dash-hero {
+    padding: 20px 16px;
+  }
+
+  .trainer-dash-title b {
+    font-size: 40px;
+  }
+
+  .trainer-dash-ring {
+    width: 72px;
+    height: 72px;
+  }
+
+  .trainer-dash-stats b {
+    font-size: 16px;
+  }
+}
+
+/* 儀表板不再需要外框：拿掉舊 hero 外殼的留白、底色與裝飾 */
+.trainer-hero-shell:has(.trainer-dash) {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.trainer-hero-shell:has(.trainer-dash)::after {
+  content: none;
+}
+
+.trainer-dash .trainer-hero-side .trainer-side-card {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .trainer-hero:has(.trainer-dash) {
+    margin-inline: 12px;
+    padding-inline: 0;
+  }
+}
