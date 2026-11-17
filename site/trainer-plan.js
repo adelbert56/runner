@@ -1516,22 +1516,112 @@ function autoRecalibratePlan() {
 // ============================================================
 // PHASE 4：體能推估 + 目標週期銜接
 // ============================================================
-// 用目前已校準的比賽配速反推完賽時間；racePaceSec 本身就是 Garmin/賽事回饋
-// 持續校準過的「目前體能」估值，不需要另外重新建模。
+// A distance-equivalent reference requires a dated race entry and the full
+// activity duration. Controlled events are not all-out race predictions.
+function raceEvidenceProjection(profile, plan, runs, directives, today) {
+  const targetKm = goalDistanceKm(profile);
+  const todayMs = Date.parse(`${today}T00:00:00Z`);
+  if (!(targetKm > 0) || !Number.isFinite(todayMs)) return null;
+  const raceDates = new Map();
+  (directives || []).filter(item => item?.scheduled === true && item.date).forEach(item => raceDates.set(item.date, item));
+  (plan || []).flatMap(week => week?.days || []).filter(day => day.raceReplacement === 'race' && day.dateStr).forEach(day => {
+    if (!raceDates.has(day.dateStr)) raceDates.set(day.dateStr, { date: day.dateStr, name: day.raceName });
+  });
+  const candidates = (runs || []).filter(run => {
+    const race = raceDates.get(run.date);
+    const age = (todayMs - Date.parse(`${run.date}T00:00:00Z`)) / 86400000;
+    const km = Number(run.km), minutes = Number(run.durationMin);
+    const declaredKm = Number.parseFloat(String(race?.distance || ''));
+    return race && !/恢復|休閒|陪跑/.test(String(race.role || '')) && Number.isFinite(age) && age >= 0 && age <= 90 && km >= 5 && km / targetKm >= 0.35 && km / targetKm <= 1.15
+      && minutes > 0 && minutes * 60 / km >= 150 && minutes * 60 / km <= 1200
+      && (!(declaredKm > 0) || Math.abs(km - declaredKm) / declaredKm <= 0.2);
+  }).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const sources = candidates.filter(run => candidates.filter(item => item.date === run.date).length === 1).slice(0, 5).map(run => {
+    const seconds = Number(run.durationMin) * 60;
+    return { date: run.date, km: Number(run.km), durationSec: seconds, name: raceDates.get(run.date)?.name || '已排定賽事',
+      equivalentSec: Math.round(seconds * Math.pow(targetKm / Number(run.km), 1.06)) };
+  });
+  if (!sources.length) return null;
+  const values = sources.map(source => source.equivalentSec).sort((a, b) => a - b);
+  const middle = Math.floor(values.length / 2);
+  const predictedFinishSec = Math.round(values.length % 2 ? values[middle] : (values[middle - 1] + values[middle]) / 2);
+  return { predictedFinishSec, predictedPace: predictedFinishSec / targetKm, sources };
+}
+
+function runningEvidence(runs, today) {
+  const now = Date.parse(`${today}T00:00:00Z`);
+  const valid = (runs || []).map(run => ({ ...run, age: (now - Date.parse(`${run.date}T00:00:00Z`)) / 86400000 }))
+    .filter(run => Number.isFinite(run.age) && run.age >= 0 && run.age <= 365 && Number(run.km) > 0);
+  const recent = valid.filter(run => run.age < 28);
+  const longRecent = valid.filter(run => run.age < 56);
+  const longest = list => list.reduce((best, run) => Number(run.km) > Number(best?.km || 0) ? run : best, null);
+  return { count: valid.length, recentCount: recent.length, recentKm: recent.reduce((sum, run) => sum + Number(run.km), 0),
+    recentLongest: longest(longRecent), historicalLongest: longest(valid) };
+}
+
+// Experimental personal estimate: compare like-for-like easy-run pace before
+// past long efforts and now. This is not a calibrated confidence interval.
+function personalHalfEstimate(profile, runs, today) {
+  const target = goalDistanceKm(profile);
+  const now = Date.parse(`${today}T00:00:00Z`);
+  if (profile?.goal !== 'half' || target < 20 || target > 22 || !Number.isFinite(now)) return null;
+  const seen = new Set();
+  const valid = (runs || []).filter(run => {
+    const km = Number(run.km), minutes = Number(run.durationMin);
+    if (!run.date || !(km > 0) || !(minutes > 0) || minutes * 60 / km < 150 || minutes * 60 / km > 1200) return false;
+    const key = run.activityId ? `id:${run.activityId}` : `${run.date}:${km}:${minutes}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const easyMax = Number(hrZones(profile)?.easyMax);
+  if (!(easyMax >= 120)) return null;
+  const median = values => { const s = [...values].sort((a, b) => a - b); const i = Math.floor(s.length / 2); return s.length % 2 ? s[i] : (s[i - 1] + s[i]) / 2; };
+  const easyWindow = (date, includeDay) => {
+    const end = Date.parse(`${date}T00:00:00Z`);
+    const items = valid.filter(run => {
+      const age = (end - Date.parse(`${run.date}T00:00:00Z`)) / 86400000;
+      return age >= (includeDay ? 0 : 1) && age <= 56 && run.km >= 3 && run.km <= 12
+        && Number(run.hr) >= easyMax - 20 && Number(run.hr) <= easyMax
+        && (typeof isCalibrationSafeRun !== 'function' || isCalibrationSafeRun(run));
+    });
+    const latestDate = items.map(run => run.date).sort().at(-1);
+    if (includeDay && (!latestDate || (end - Date.parse(`${latestDate}T00:00:00Z`)) / 86400000 > 14)) return null;
+    return items.length >= 3 ? { count: items.length, pace: median(items.map(run => Number(run.durationMin) * 60 / Number(run.km))), hr: median(items.map(run => Number(run.hr))), latestDate } : null;
+  };
+  const current = easyWindow(today, true);
+  if (!current) return null;
+  const anchors = valid.filter(run => {
+    const age = (now - Date.parse(`${run.date}T00:00:00Z`)) / 86400000;
+    return age > 0 && age <= 730 && Number(run.km) >= target * 0.9 && Number(run.km) <= target * 1.1;
+  }).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const references = anchors.flatMap(run => {
+    const baseline = easyWindow(run.date, false);
+    if (!baseline || Math.abs(current.hr - baseline.hr) > 5) return [];
+    const equivalent = Number(run.durationMin) * 60 * Math.pow(target / Number(run.km), 1.06);
+    return [{ date: run.date, km: Number(run.km), durationSec: Number(run.durationMin) * 60,
+      baselineCount: baseline.count, baselinePace: baseline.pace, baselineHr: baseline.hr,
+      estimateSec: Math.round(equivalent * current.pace / baseline.pace) }];
+  }).slice(0, 3);
+  if (!references.length) return null;
+  const estimateSec = Math.round(median(references.map(item => item.estimateSec)) / 60) * 60;
+  return { estimateSec, pace: estimateSec / target, current, references };
+}
+
 function fitnessProjection(profile = appData.profile) {
-  if (!profile || !profile.racePaceSec) return null;
-  const goalDist = goalDistanceKm(profile);
-  const predictedFinishSec = Math.round(profile.racePaceSec * goalDist);
-  const predictedPace = profile.racePaceSec;
+  if (!profile) return null;
+  const runs = typeof coachRunRecords === 'function' ? coachRunRecords() : [];
+  const evidence = raceEvidenceProjection(profile, appData.plan, runs, typeof coachReviewData === 'undefined' ? [] : coachReviewData?.raceDirectives, todayStr());
+  const history = runningEvidence(runs, todayStr());
+  const personal = personalHalfEstimate(profile, runs, todayStr());
   let trendNote = '';
-  let potentialNote = '';
   let deltaNote = '';
   try {
     const zones = hrZones(profile);
     const easyRuns = (typeof coachRunRecords === 'function' ? coachRunRecords() : [])
       .filter((run) => run.hr > 0 && run.hr <= zones.easyMax && run.paceSeconds > 0 && isCalibrationSafeRun(run))
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-    if (easyRuns.length >= 6) {
+    if (easyRuns.length >= 10) {
       const median = (values) => { const sorted = [...values].sort((a, b) => a - b); return sorted[Math.floor(sorted.length / 2)]; };
       const recentPaces = easyRuns.slice(-5).map(heatAdjustedPaceSec);
       // 只跟「緊接在前的 5 筆」比，不摻更早的歷史，趨勢才反映近期變化
@@ -1539,13 +1629,10 @@ function fitnessProjection(profile = appData.profile) {
       if (priorPaces.length) {
         const diff = median(priorPaces) - median(recentPaces); // 正值＝變快
         if (diff >= 5) {
-          trendNote = `近期輕鬆跑(Z2)等效配速比先前快 ${Math.round(diff)} 秒/km，體能持續進步`;
-          // 趨勢換算成完賽時間潛力：Z2 進步約半數可轉移到比賽配速（保守估）
-          const potentialMin = Math.round((diff * 0.5 * goalDist) / 60);
-          if (potentialMin >= 1) potentialNote = `若趨勢延續，完賽時間有機會再快約 ${potentialMin} 分`;
+          trendNote = `近期輕鬆跑(Z2)等效配速比先前快 ${Math.round(diff)} 秒/km`;
         }
         else if (diff <= -5) trendNote = `近期輕鬆跑(Z2)等效配速比先前慢 ${Math.round(-diff)} 秒/km，留意恢復與量能`;
-        else trendNote = '近期體能與先前相比大致持平';
+        else trendNote = '近期輕鬆跑配速與先前相比大致持平';
       }
     }
     const withVo2 = (typeof coachRunRecords === 'function' ? coachRunRecords() : []).filter((run) => Number(run.vo2max) > 0).map((run) => Number(run.vo2max));
@@ -1558,16 +1645,19 @@ function fitnessProjection(profile = appData.profile) {
       }
     }
   } catch (err) { /* 資料不足時跳過趨勢 */ }
-  return { predictedFinishSec, predictedPace, trendNote, deltaNote, potentialNote };
+  return { ...evidence, personal, history, trendNote, deltaNote };
 }
 
 function renderFitnessProjectionCard() {
   const projection = fitnessProjection();
   if (!projection) return '';
   const goalLabel = GOAL_NAME[appData.profile?.goal] || '目標賽事';
-  return `<section class="card fitness-projection-card"><div class="fitness-projection-kicker">FITNESS OUTLOOK</div><div class="fitness-projection-main"><div><h2>預估完賽</h2><p>${reviewEscape(goalLabel)}・依目前體能</p></div><strong>${secToTime(projection.predictedFinishSec)}<small>${secToPace(projection.predictedPace)}/km</small></strong></div>
-    <p class="fitness-projection-copy">依目前配速基準推算；${projection.trendNote ? `${reviewEscape(projection.trendNote)}${projection.deltaNote ? `（${reviewEscape(projection.deltaNote)}）` : ''}` : '持續累積實跑，讓推估更穩定。'}</p>
-    ${projection.potentialNote ? `<p class="fitness-projection-potential">${reviewEscape(projection.potentialNote)}</p>` : ''}
+  const hasEvidence = Number(projection.predictedFinishSec) > 0;
+  const personal = projection.personal;
+  return `<section class="card fitness-projection-card"><div class="fitness-projection-kicker">RACE REFERENCE</div><div class="fitness-projection-main"><div><h2>${appData.profile?.goal === 'half' ? '半馬個人化估計' : '個人化估計'}</h2><p>${reviewEscape(goalLabel)}・實驗性參考，低信心</p></div><strong>${personal ? `${secToTime(personal.estimateSec)}<small>${secToPace(personal.pace)}/km</small>` : '資料不足'}</strong></div>
+    <p class="fitness-projection-copy">${personal ? `依近 8 週 ${personal.current.count} 次相近心率跑步（中位 ${secToPace(personal.current.pace)}/km，HR ${personal.current.hr}），對照 ${personal.references.map(item => `${reviewEscape(item.date)} 的 ${item.km.toFixed(2)} km 實跑（${secToTime(item.durationSec)}）及當時 ${item.baselineCount} 次相近心率跑步`).join('、')}，按配速變化調整歷史長距離成績。這是實驗性估計，並非保證或精確預測；歷史跑可能不是全力賽，天氣、路線、努力程度與補給仍會影響。` : appData.profile?.goal === 'half' ? '缺少可比較的近期跑步或歷史半馬距離實績，暫不提供個人化估計。' : '目前個人化估計僅支援半馬，其他距離暫不提供估計。'}</p>
+    <p class="fitness-projection-copy">${hasEvidence ? `近 90 天 ${projection.sources.length} 場賽事換算中位值：${projection.sources.map(source => `${reviewEscape(source.date)} ${reviewEscape(source.name)} ${source.km.toFixed(2)} km／${secToTime(source.durationSec)}`).join('；')}。受控賽的努力程度可能不同，此數值不代表比賽預測或保證。` : '尚無可確認且資料完整的近期賽事實跑；不以課表設定推算完賽。'}</p>
+    <p class="fitness-projection-copy">近 28 天 ${projection.history.recentCount} 跑、${projection.history.recentKm.toFixed(1)} km；近 8 週最長 ${projection.history.recentLongest ? `${Number(projection.history.recentLongest.km).toFixed(2)} km（${reviewEscape(projection.history.recentLongest.date)}）` : '資料不足'}；近一年最長 ${projection.history.historicalLongest ? `${Number(projection.history.historicalLongest.km).toFixed(2)} km（${reviewEscape(projection.history.historicalLongest.date)}）` : '資料不足'}。跑量、長跑、天氣及恢復狀態影響信心，但目前未經個人驗證，不直接加權成預測成績。${projection.trendNote ? ` ${reviewEscape(projection.trendNote)}${projection.deltaNote ? `（${reviewEscape(projection.deltaNote)}）` : ''}。` : ''}</p>
   </section>`;
 }
 

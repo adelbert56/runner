@@ -306,6 +306,29 @@ async function assertTrainerReport(page, viewportName) {
   if (viewportName === 'mobile') {
     await page.evaluate(() => {
       const fixture = document.createElement('div');
+      fixture.id = 'race-evidence-audit';
+      fixture.style.margin = '16px';
+      const original = coachRunRecords;
+      const previous = coachReviewData;
+      try {
+        const relativeDate = (days) => { const day = new Date(`${todayStr()}T00:00:00Z`); day.setUTCDate(day.getUTCDate() - days); return day.toISOString().slice(0, 10); };
+        coachRunRecords = () => [
+          {date:relativeDate(3), km:10, durationMin:65},
+          {date:relativeDate(310), km:20, durationMin:140},
+          ...[342,335,328].map(days => ({date:relativeDate(days),km:6,durationMin:42,hr:140})),
+          ...[17,10,2].map(days => ({date:relativeDate(days),km:6,durationMin:43,hr:140})),
+        ];
+        coachReviewData = {raceDirectives:[{date:relativeDate(3), name:'受控賽', distance:'10km', scheduled:true}]};
+        fixture.innerHTML = renderFitnessProjectionCard();
+      } finally { coachRunRecords = original; coachReviewData = previous; }
+      document.body.appendChild(fixture);
+    });
+    const evidenceCard = page.locator('#race-evidence-audit');
+    if (!await evidenceCard.getByText('半馬個人化估計').count() || !await evidenceCard.getByText(/不代表比賽預測/).count()) throw new Error('race evidence card is missing its source or limitation');
+    await evidenceCard.screenshot({path: resolve(screenshotDir, 'mobile-race-evidence-audit.png'), style: '.site-header, .top-navigation, .mobile-bottom-nav, .back-to-top { visibility: hidden !important; }'});
+    await evidenceCard.evaluate(element => element.remove());
+    await page.evaluate(() => {
+      const fixture = document.createElement('div');
       fixture.id = 'week-strip-audit';
       fixture.className = 'week-strip';
       fixture.style.margin = '16px';
