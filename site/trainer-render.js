@@ -4142,7 +4142,9 @@ function dayHeadline(day) {
   const mainStep = steps.find((step) => dayStepLabel(step) === "主課");
   const mainTitle = mainStep?.isCoachMain ? String(mainStep.title || "").replace(/^📌\s*/, "") : "";
   const taskTitle = String(trainingTaskTitle(day) || "").split(/\s*[｜|]\s*/)[0];
-  return mainTitle || taskTitle.replace(/\s*\d+(?:\.\d+)?\s*km\s*$/, "") || taskTitle;
+  // 主課標題若只是「主課」這類通用字，改用課表標題，避免摘要只剩「主課」
+  const specificMain = /^(主課|主課內容|主訓練|main)$/i.test(mainTitle.trim()) ? "" : mainTitle;
+  return specificMain || taskTitle.replace(/\s*\d+(?:\.\d+)?\s*km\s*$/, "") || taskTitle;
 }
 
 function renderDayDetail(day, rationale = '', source = 'baseline') {
