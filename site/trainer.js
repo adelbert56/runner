@@ -1540,7 +1540,9 @@ function renderHeroPanel() {
   // Hero 的配速格顯示「會隨實跑校準的」輕鬆跑配速；賽事目標配速是靜態值，
   // 移到賽事日那格當副標，避免兩個不同語意的配速擠在同一個標籤下。
   const easyPace = heroEasyPaceInfo(profile);
-  const racePaceText = profile?.racePaceSec ? `目標配速 ${secToPace(profile.racePaceSec)}/km` : '';
+  // 教練週報的目標（例如 2:15:00 → 約 6:24/km）優先於網頁設定推算的配速。
+  const coachGoalPace = String((typeof coachReviewData !== 'undefined' && coachReviewData?.goal?.targetPace) || '').match(/\d{1,2}:\d{2}/)?.[0];
+  const racePaceText = coachGoalPace ? `目標配速 ${coachGoalPace}/km` : profile?.racePaceSec ? `目標配速 ${secToPace(profile.racePaceSec)}/km` : '';
   const weeklyTarget = week ? effectiveWeekVolumeTarget(week).display : '依可訓練日生成';
   shell.innerHTML = `
     <div class="trainer-hero-layout">

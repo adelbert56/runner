@@ -35,12 +35,15 @@ for (const [source, names] of [
   [render, ['weekPlannedKm', 'garminRaceDistanceKm', 'garminEffectiveDistanceKm', 'garminDayHasRunnableWork', 'weeklyGarminSyncPayload']],
 ]) vm.runInContext(names.map(name => extract(source, name)).join('\n'), p);
 const check = { savedAt: '2026-10-21', fatigue: '2', pain: 'none', gait: 'normal' };
-assert.equal(p.raceRecoveryDecision('2026-10-18', { ...check, savedAt: '2026-10-18' }, '2026-10-21').blocked, true);
 assert.equal(p.raceRecoveryDecision('2026-10-18', check, '2026-10-20').blocked, true);
-assert.equal(p.raceRecoveryDecision('2026-10-18', { ...check, fatigue: '' }, '2026-10-21').blocked, true);
-assert.equal(p.raceRecoveryDecision('2026-10-18', { ...check, savedAt: '2026-10-22' }, '2026-10-21').blocked, true);
+assert.equal(p.raceRecoveryDecision('2026-10-18', undefined, '2026-10-20').blocked, true);
+assert.equal(p.raceRecoveryDecision('2026-10-18', undefined, '2026-10-21').blocked, false);
+assert.equal(p.raceRecoveryDecision('2026-10-18', { ...check, savedAt: '2026-10-18', fatigue: '' }, '2026-10-21').blocked, false);
 assert.equal(p.raceRecoveryDecision('2026-10-18', check, '2026-10-21').blocked, false);
-console.log('PASS race recovery rejects early, future and incomplete reports');
+assert.equal(p.raceRecoveryDecision('2026-10-18', { ...check, pain: 'mild' }, '2026-10-21').blocked, true);
+assert.equal(p.raceRecoveryDecision('2026-10-18', { ...check, gait: 'changed' }, '2026-10-21').blocked, true);
+assert.equal(p.raceRecoveryDecision('2026-10-18', { ...check, fatigue: '4' }, '2026-10-21').blocked, true);
+console.log('PASS race recovery keeps the 3-day window, treats no report as normal, blocks explicit warnings');
 assert.equal(p.recoverySignalStatus(), null);
 p.coachReviewData.recovery = [{ date: today, hrvStatus: 'BALANCED' }];
 assert.equal(p.recoverySignalStatus().sufficient, false);
