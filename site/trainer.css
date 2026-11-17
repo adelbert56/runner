@@ -1083,6 +1083,23 @@
     .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
     .modal-body { font-size: 14px; color: var(--c-text-muted); margin-bottom: 20px; line-height: 1.6; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex: 0 0 auto; }
+    .password-field { display: flex; align-items: stretch; width: 100%; min-width: 0; border: 1px solid var(--c-border); border-radius: var(--radius-sm); background: var(--c-surface); overflow: hidden; }
+    .password-field:focus-within { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+    .password-field input { flex: 1 1 auto; width: 0; min-width: 0; border: 0; background: transparent; padding: 12px; font-size: 16px; color: var(--c-text); }
+    .password-field input:focus { outline: none; box-shadow: none; }
+    .password-toggle { flex: 0 0 48px; min-height: 48px; border: 0; background: transparent; color: var(--c-primary-hover); display: grid; place-items: center; cursor: pointer; }
+    .password-toggle:focus-visible { outline: 3px solid var(--c-primary); outline-offset: -3px; }
+    .coach-password-field { flex: 1 1 180px; width: auto; }
+    .sync-modal .form-input { font-size: 16px; }
+    .sync-modal [data-training-sync-status] { color: var(--c-text); margin: 8px 0; min-height: 1.6em; }
+    @media (max-width: 720px) {
+      .modal-overlay { padding: 12px; align-items: center; }
+      .sync-modal { width: 100%; max-height: calc(100dvh - 24px); padding: 20px; }
+      .sync-modal .modal-body { padding-right: 0; }
+      .sync-modal .modal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+      .sync-modal .modal-actions .btn { flex: 1 1 auto; min-height: 48px; }
+      .sync-modal .modal-actions .btn-primary { flex: 1 0 100%; order: -1; }
+    }
     .modal.cycle-management-modal { max-width:660px; width:min(92vw,660px); padding:28px; }
     .cycle-management-modal .modal-body { margin-bottom:18px; padding-right:0; }
     .cycle-management-current { padding:16px; border:1px solid rgba(31,42,36,.1); border-radius: var(--radius-lg); background:#fffdf8; }

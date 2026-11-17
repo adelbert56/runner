@@ -64,3 +64,18 @@ loginWindow.TRAINER_SYNC_CONFIG = null;
 loginWindow.openTrainingSyncModal();
 assert.equal(modal.title, '無法開啟同步');
 console.log('PASS login entry opens and missing credentials or configuration are visible');
+
+let selection = null;
+form['training-sync-passphrase'] = { type: 'password', value: 'synthetic-secret', selectionStart: 2, selectionEnd: 5,
+  focus() {}, setSelectionRange(start, end) { selection = [start, end]; } };
+const attrs = {};
+const eye = { setAttribute: (key, value) => { attrs[key] = value; } };
+loginWindow.TrainerSync.togglePasswordVisibility('training-sync-passphrase', eye);
+assert.equal(form['training-sync-passphrase'].type, 'text');
+assert.equal(form['training-sync-passphrase'].value, 'synthetic-secret');
+assert.deepEqual(selection, [2, 5]);
+assert.equal(attrs['aria-label'], '隱藏密碼');
+loginWindow.TrainerSync.togglePasswordVisibility('training-sync-passphrase', eye);
+assert.equal(form['training-sync-passphrase'].type, 'password');
+assert.equal(attrs['aria-label'], '顯示密碼');
+console.log('PASS password visibility preserves text and selection');
