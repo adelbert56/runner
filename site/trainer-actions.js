@@ -469,18 +469,23 @@ function renderCheckinSection() {
     </div>
     </section>`;
   }
-  const qHTML = CHECKIN_QUESTIONS.map((question, index) => `<li><input type="checkbox" id="cq-${index}"><label for="cq-${index}">${question}</label></li>`).join('');
+  // 版面現代化（2026-11-17）：題目改成可點的卡片、疲勞改成 1–5 滑桿；欄位 id 不變，submitCheckin 照舊讀取。
+  const qHTML = CHECKIN_QUESTIONS.map((question, index) => `<li><label class="checkin-tile" for="cq-${index}"><input type="checkbox" id="cq-${index}"><span class="checkin-tile-check" aria-hidden="true"></span><span>${question}</span></label></li>`).join('');
   return `<section class="checkin-card">
     <div class="checkin-head"><div><div class="checkin-kicker">Weekly review · ${currentWeek} / ${totalWeeks}</div><div class="checkin-title">📋 第 ${currentWeek} 週評估</div></div>${weekSwitcher}</div>
     <div class="checkin-body"><p class="checkin-intro">每週只做一次。我會先看你的疼痛、疲勞、睡眠和長跑恢復；安全條件沒到，我不會自動加量。${timing.ready ? ` 本週已進入收尾，可依結果安排下一週。` : ` 目前完成 ${timing.completed}/${timing.planned} 堂；可以先填，我會先護著你的恢復，但要等本週最後一堂課後才開放小幅推進。`}</p>${renderCheckinTrend()}
     <span class="checkin-section-label">恢復與完成度</span>
     <ul class="checkin-questions">${qHTML}</ul>
     <span class="checkin-section-label">主觀感受</span>
-    <div class="log-form-grid" style="margin-top:18px">
-      <div class="form-group"><label class="form-label">本週整體疲勞 (1–5)</label><input class="form-input" id="cw-fatigue" type="number" min="1" max="5" value="3"><div class="field-help">1 很輕鬆，3 正常可恢復，5 非常疲勞。</div></div>
-      <div class="form-group"><label class="form-label">本週一句話備註</label><input class="form-input" id="cw-note" type="text" placeholder="例：長跑後腿有點重，但隔天恢復"></div>
+    <div class="checkin-feel">
+      <div class="checkin-fatigue">
+        <label class="form-label" for="cw-fatigue">本週整體疲勞 <output id="cw-fatigue-value" for="cw-fatigue">3</output><span class="checkin-fatigue-unit">/ 5</span></label>
+        <input class="checkin-range" id="cw-fatigue" type="range" min="1" max="5" step="1" value="3" oninput="document.getElementById('cw-fatigue-value').textContent=this.value">
+        <div class="checkin-range-scale" aria-hidden="true"><span>很輕鬆</span><span>正常</span><span>非常疲勞</span></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="cw-note">本週一句話備註</label><input class="form-input" id="cw-note" type="text" placeholder="例：長跑後腿有點重，但隔天恢復"></div>
     </div>
-    <label class="checkin-safety"><input id="cw-pain-concern" type="checkbox" style="margin-top:3px">本週有疼痛、跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</label>
+    <label class="checkin-safety"><input id="cw-pain-concern" type="checkbox"><span><b>本週有疼痛或步態異常</b>跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</span></label>
     <button class="btn btn-primary checkin-submit" onclick="submitCheckin()">提交第 ${currentWeek} 週評估</button>
     ${renderCheckinHistory()}
     </div>
