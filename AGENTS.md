@@ -91,6 +91,14 @@ Companion documents:
 - Ask one batching question before closing:
   - Is there any adjacent, low-risk, clearly implied deliverable that should be included now to avoid a follow-up turn?
 
+## Training Plan (練跑計畫) Hard Rules
+
+Lesson from 2026-10-25..11-17: the weekly coach blocked 4 weeks in a row (no workouts reached Garmin for a month) while an agent kept adding safety gates, ending with 120+ uncommitted, never-activated files.
+
+- **Done = a real outcome, not passing tests.** Before claiming any trainer/coach fix is done, state whether this week's plan exists in `runner/訓練/週報.json` and reached Garmin. If not, it is not done.
+- **Degrade, never stall.** Missing runner feedback means a conservative week (easy runs + rest, no progression), published as usual. Only explicit red flags (pain ≥3, gait change, dizziness, illness) mean a rest/protect week, which is still published. Never add a gate whose failure mode is "no plan this week".
+- **Cap work in progress.** If uncommitted files exceed ~15, or two days pass with nothing activated in the real flow, stop adding mechanisms and report to the user.
+
 ## Coding Rules
 
 - Fix root causes where possible.

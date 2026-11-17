@@ -154,6 +154,34 @@ function coachProfileSnapshot(payload, registrationData) {
         ? profile.dayState.slice(0, 7).indexOf(2) : numberInRange(profile.longRunDay, 0, 6),
     },
     octoberRaceCheckpoints: checkpointRaces,
+    recentFeedback: coachFeedbackSnapshot(payload?.feedback),
+  };
+}
+
+// 週評估與賽後回報：週日排程教練讀這裡判斷疼痛／步態／疲勞。只保留白名單欄位。
+function coachFeedbackSnapshot(feedback) {
+  const text = (value, max) => typeof value === "string" ? value.slice(0, max) : "";
+  const isoDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")) ? String(value) : "";
+  const list = (value, max) => Array.isArray(value) ? value.slice(-max) : [];
+  return {
+    checkinQuestions: list(feedback?.checkinQuestions, 8).map((item) => text(item, 40)),
+    checkins: list(feedback?.checkins, 4).map((item) => ({
+      weekNum: Number.isInteger(Number(item?.weekNum)) ? Number(item.weekNum) : null,
+      date: isoDate(item?.date),
+      answers: list(item?.answers, 8).map(Boolean),
+      fatigue: Number.isFinite(Number(item?.fatigue)) ? Number(item.fatigue) : null,
+      painConcern: Boolean(item?.painConcern),
+      note: text(item?.note, 240),
+      provisional: Boolean(item?.provisional),
+    })),
+    raceRecovery: list(feedback?.raceRecovery, 8).filter((item) => isoDate(item?.date)).map((item) => ({
+      date: isoDate(item.date),
+      fatigue: text(item.fatigue, 2),
+      pain: text(item.pain, 24),
+      gait: text(item.gait, 24),
+      note: text(item.note, 240),
+      savedAt: text(item.savedAt, 32),
+    })),
   };
 }
 
