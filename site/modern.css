@@ -1084,6 +1084,7 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
 .week-strip-dot {
   display: none;
 }
+.week-strip-mobile-status { display: none; }
 
 /* 詳情面板：選中那天的完整課卡，一張大卡、內部不再框套框 */
 [data-week-detail] .week-day-panel > .day-card {
@@ -1186,6 +1187,10 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
 @media (max-width: 720px) {
   .week-strip {
     gap: 6px;
+    grid-template-columns: repeat(7, minmax(44px, 1fr));
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 2px 2px 8px;
   }
 
   .week-strip-day,
@@ -1200,7 +1205,12 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
 
   .week-strip-date {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
     justify-items: center;
+    align-items: center;
+    min-width: 0;
+    text-align: center;
     gap: 2px;
     font-size: 11px;
   }
@@ -1239,8 +1249,9 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
   }
 
   .week-strip-day.is-selected .week-strip-dot {
-    background: var(--yellow);
+    background: var(--surface);
   }
+  .week-strip-mobile-status { display: block; font-size: 11px; line-height: 1.2; overflow-wrap: anywhere; text-align: center; }
 
   [data-week-detail] .week-day-panel > .day-card {
     padding: 20px 16px;
@@ -1275,16 +1286,23 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
   }
 
   .plan-workspace-tools {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
+    flex-wrap: wrap;
+    overflow: visible;
   }
+
+  .plan-workspace-tools .btn {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .plan-toolbar-utilities { gap: 4px; }
 
   .plan-workspace-tools > *,
   .plan-toolbar-sync,
   .plan-toolbar-sync > *,
   .garmin-activity-sync-control {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
   }
 }
 
@@ -1877,6 +1895,27 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
   .dd-stats dd small {
     font-size: 12px;
   }
+}
+
+@media (max-width: 720px) {
+  .dd-body .day-detail-side { gap: 12px; }
+  .dd-body .day-detail-side .wx-chip,
+  .dd-body .day-detail-side .day-detail-note {
+    min-width: 0;
+    padding: 12px 0;
+    border-radius: 0;
+    background: transparent;
+    border-bottom: 1px solid var(--line);
+  }
+  .dd-body .day-detail-side .day-detail-note.is-pending {
+    padding: 12px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--tone-quality-tint);
+  }
+  .dd-body .day-detail-actions .btn,
+  .dd-body .add-extra-session { min-height: 44px; }
+  .dd-body .add-extra-session { padding: 8px 0; }
 }
 
 .dd-body .course-rationale {
