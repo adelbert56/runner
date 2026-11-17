@@ -706,6 +706,52 @@ planRenderSandbox.coachReviewData = null;
 planRenderSandbox.renderPlanView();
 assertEqual(planRenderReviewLoads, 1, 'a plan without decoded review still starts the coach loader');
 
+const projectionSandbox = vm.createContext({
+  appData: { profile: { goal: 'half', racePaceSec: 477 }, plan: [] },
+  GOAL_NAME: { half: '半馬 21K' },
+  goalDistanceKm: () => 21.0975,
+  todayStr: () => '2026-11-17',
+  coachReviewData: { raceDirectives: [{date:'2026-11-15', name:'受控賽', distance:'10km', scheduled:true}] },
+  hrZones: () => ({ easyMax: 150 }),
+  coachRunRecords: () => [],
+  reviewEscape: (value) => String(value),
+  secToTime: (seconds) => String(seconds),
+  secToPace: (seconds) => String(seconds),
+});
+vm.runInContext([extractFunction(trainerPlanJs, 'raceEvidenceProjection'), extractFunction(trainerPlanJs, 'runningEvidence'), extractFunction(trainerPlanJs, 'personalHalfEstimate'), extractFunction(trainerPlanJs, 'fitnessProjection'), extractFunction(trainerPlanJs, 'renderFitnessProjectionCard')].join('\n'), projectionSandbox);
+const projectionCard = projectionSandbox.renderFitnessProjectionCard();
+assertEqual(projectionCard.includes('預估完賽'), false, 'unverified training pace must not be presented as a fitness prediction');
+assertEqual(projectionCard.includes('資料不足'), true, 'missing race evidence displays no numeric prediction');
+const raceFixture = {date:'2026-11-15', km:10, durationMin:65, paceSeconds:240};
+projectionSandbox.coachRunRecords = () => [raceFixture];
+const evidenceProjection = projectionSandbox.fitnessProjection();
+assertEqual(evidenceProjection.predictedFinishSec, 8605, '10 km in 65 minutes converts using full activity time');
+assertEqual(projectionSandbox.renderFitnessProjectionCard().includes('不代表比賽預測'), true, 'controlled event conversion explains its limitation');
+projectionSandbox.coachRunRecords = () => [raceFixture, {...raceFixture}];
+assertEqual(Boolean(projectionSandbox.fitnessProjection().predictedFinishSec), false, 'ambiguous same-day activities do not produce a race conversion');
+projectionSandbox.coachRunRecords = () => [{...raceFixture, date:'2026-11-18'}];
+assertEqual(Boolean(projectionSandbox.fitnessProjection().predictedFinishSec), false, 'unmatched or future activities do not produce a race conversion');
+assertEqual(projectionSandbox.raceEvidenceProjection({goal:'half'}, [], [raceFixture], projectionSandbox.coachReviewData.raceDirectives, '2027-03-01'), null, 'stale race evidence does not produce a race conversion');
+assertEqual(projectionSandbox.raceEvidenceProjection({goal:'half'}, [], [{...raceFixture, km:5}], projectionSandbox.coachReviewData.raceDirectives, '2026-11-17'), null, 'a partial race distance does not produce a race conversion');
+const history = projectionSandbox.runningEvidence([raceFixture, {date:'2026-01-11',km:20}, {date:'2026-11-18',km:99}], '2026-11-17');
+assertEqual(history.recentKm, 10, 'recent mileage excludes old and future runs');
+assertEqual(history.historicalLongest.km, 20, 'long-term evidence includes past distance and excludes future runs');
+const twoRaceProjection = projectionSandbox.raceEvidenceProjection({goal:'half'}, [], [raceFixture, {date:'2026-10-18',km:11,durationMin:74}], [{date:'2026-11-15',scheduled:true},{date:'2026-10-18',scheduled:true}], '2026-11-17');
+assertEqual(twoRaceProjection.sources.length, 2, 'multiple eligible race results are shown');
+assertEqual(twoRaceProjection.predictedFinishSec, 8730, 'two race equivalents use their median');
+const personalizedRuns = [
+  {date:'2025-11-16',km:21,durationMin:150},
+  ...['2025-10-20','2025-10-27','2025-11-03'].map(date => ({date,km:6,durationMin:42.9,hr:142})),
+  ...['2026-11-03','2026-11-10','2026-11-16'].map(date => ({date,km:6,durationMin:43.68,hr:139})),
+];
+const personalEstimate = projectionSandbox.personalHalfEstimate({goal:'half'}, personalizedRuns, '2026-11-17');
+assertEqual(personalEstimate.references.length, 1, 'personal forecast uses the long-distance anchor with prior easy runs');
+assertEqual(personalEstimate.current.count, 3, 'personal forecast uses the current training cycle');
+assertEqual(projectionSandbox.personalHalfEstimate({goal:'half'}, personalizedRuns.slice(0, 4), '2026-11-17'), null, 'missing recent comparable runs does not invent a prediction');
+assertEqual(projectionSandbox.personalHalfEstimate({goal:'half'}, personalizedRuns, '2026-12-20'), null, 'stale current training cannot produce a current personal estimate');
+const duplicateInputs = [...personalizedRuns, personalizedRuns[4]];
+assertEqual(projectionSandbox.personalHalfEstimate({goal:'half'}, duplicateInputs, '2026-11-17').current.count, 3, 'duplicate activities do not inflate training samples');
+
 checks.forEach((check) => {
   console.log(`${check.ok ? "OK" : "FAIL"} ${check.message}`);
 });
