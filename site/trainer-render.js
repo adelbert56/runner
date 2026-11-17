@@ -2816,7 +2816,7 @@ function renderWeekSection(plan) {
   const dayStrip = resolvedDays.map((resolved) => renderWeekStripDay(resolved.course, resolved.course.dateStr === selectedDate)).join('');
   const dayCards = resolvedDays.map((resolved) => {
     const date = resolved.course.dateStr;
-    return `<div class="week-day-panel" id="week-day-panel-${reviewEscape(date)}" data-week-day-panel="${reviewEscape(date)}"${date === selectedDate ? '' : ' hidden'}>${renderDayCard(resolved.course, resolved.rationale, resolved.source)}</div>`;
+    return `<div class="week-day-panel" id="week-day-panel-${reviewEscape(date)}" data-week-day-panel="${reviewEscape(date)}"${date === selectedDate ? '' : ' hidden'}>${renderDayDetail(resolved.course, resolved.rationale, resolved.source)}</div>`;
   }).join('');
   return `
 <div class="card week-header-card">
@@ -2867,7 +2867,7 @@ function renderWeekStripDay(day, selected) {
   const tone = weekStripTone(day);
   const title = isRest
     ? (day.task || (day.supportBlocks || []).map((block) => block.title).filter(Boolean).join('・') || '主動恢復')
-    : trainingTaskTitle(day);
+    : dayHeadline(day);
   const km = !isRest && Number(day.km) ? `${Number(day.km)} km` : '';
   const flags = [
     date === todayStr() ? '<span class="week-strip-flag is-today">今天</span>' : '',
@@ -4046,6 +4046,152 @@ function dayCardIntent(day) {
     fueling: '補給與耐力適應',
     marathon: '專項耐力'
   }[day.focus] || '基礎耐力';
+}
+
+// 本週課表詳情面板（版面 A，2026-11-17）：左欄步驟時間軸、右欄天氣／提醒／動作。
+// 使用與 renderDayCard 相同的資料與動作（markDone、markMissed、showRunCompanion、
+// 第二堂、補給、圖解），只重排版面；class 名稱沿用以維持既有行為與測試。
+function dayStepLabel(step) {
+  const title = String(step?.title || '');
+  if (/熱身/.test(title)) return '熱身';
+  if (/收操/.test(title)) return '收操';
+  if (step?.isCoachMain || /主課/.test(title)) return '主課';
+  return title.slice(0, 4) || '步驟';
+}
+
+function renderDayDetailSteps(steps) {
+  const list = steps || [];
+  if (!list.length) return '';
+  return `<ol class="day-steps">${list.map((step) => {
+    const label = dayStepLabel(step);
+    const isMain = label === '主課';
+    const title = String(step.title || '').replace(/^📌\s*/, '');
+    const detail = String(step.detail || step.text || '').trim();
+    const guide = step.guideKind && Number.isInteger(step.guideCourseIndex)
+      ? `<button type="button" class="day-step-guide" onclick="openGuideLibrary('${step.guideKind}', ${step.guideCourseIndex})">看${reviewEscape(label)}圖解 →</button>`
+      : '';
+    return `<li class="day-step${isMain ? ' is-main' : ''}">
+      <span class="day-step-label">${reviewEscape(label)}</span>
+      <div class="day-step-body">
+        <div class="day-step-head">${step.dose ? `<b>${reviewEscape(step.dose)}</b>` : ''}${title && title !== label ? `<span>${reviewEscape(title)}</span>` : ''}</div>
+        ${detail ? `<p>${reviewEscape(detail)}</p>` : ''}
+        ${guide}
+      </div>
+    </li>`;
+  }).join('')}</ol>`;
+}
+
+// 步驟時間（分鐘）：熱身／收操取劑量中的最大分鐘數，主課以距離 × 輕鬆跑配速估算。
+function dayStepMinutes(step, day) {
+  const dose = String(step?.dose || '');
+  const minutes = [...dose.matchAll(/(\d+(?:\.\d+)?)\s*分/g)].map((match) => Number(match[1]));
+  if (minutes.length) return Math.max(...minutes);
+  const km = Number(dose.match(/(\d+(?:\.\d+)?)\s*km/)?.[1]) || (dayStepLabel(step) === '主課' ? Number(day?.km) || 0 : 0);
+  if (!km) return 0;
+  const paceSec = typeof adaptiveEasyPaceSec === 'function' && appData?.profile
+    ? Number(adaptiveEasyPaceSec(appData.profile, new Date())?.sec) || 440 : 440;
+  return Math.round((km * paceSec) / 60);
+}
+
+function renderDayDetailProfile(steps, day, tone) {
+  const parts = (steps || []).map((step) => ({ label: dayStepLabel(step), dose: String(step.dose || ''), minutes: dayStepMinutes(step, day) }))
+    .filter((part) => part.minutes > 0);
+  if (parts.length < 2) return '';
+  const mainHeight = tone === 'quality' ? 100 : tone === 'long' ? 78 : 66;
+  return `<div class="dd-profile tone-${tone}" role="img" aria-label="課程強度結構：${parts.map((part) => `${part.label} ${part.minutes} 分`).join('、')}">
+    ${parts.map((part) => `<div class="dd-seg${part.label === '主課' ? ' is-main' : ''}" style="flex:${part.minutes}">
+      <i style="height:${part.label === '主課' ? mainHeight : 34}%"></i>
+      <span><b>${reviewEscape(part.label)}</b>${reviewEscape(part.label === '主課' && part.dose ? `${part.dose} · 約 ${part.minutes} 分` : `${part.minutes} 分`)}</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+// 課卡主標：教練主課名稱優先，其次課表標題（去掉「｜說明」與尾端距離）。
+function dayHeadline(day) {
+  const steps = attachCourseGuides(day.steps, day.type) || [];
+  const mainStep = steps.find((step) => dayStepLabel(step) === "主課");
+  const mainTitle = mainStep?.isCoachMain ? String(mainStep.title || "").replace(/^📌\s*/, "") : "";
+  const taskTitle = String(trainingTaskTitle(day) || "").split(/\s*[｜|]\s*/)[0];
+  return mainTitle || taskTitle.replace(/\s*\d+(?:\.\d+)?\s*km\s*$/, "") || taskTitle;
+}
+
+function renderDayDetail(day, rationale = '', source = 'baseline') {
+  const extraSessions = day.extraSessions || [];
+  const garminRun = getGarminRunForDate(day.dateStr, extraSessions.map((session) => session.garminActivityId).filter(Boolean));
+  const isTodayCard = day.dateStr === todayStr();
+  const dateLabel = `${DOW_NAMES[day.dow]} ${Number(day.dateStr?.slice(5, 7))}/${Number(day.dateStr?.slice(8, 10))}${isTodayCard ? ' · 今天' : ''}`;
+  const tone = weekStripTone(day);
+  const weather = dayWeatherLine(day);
+  if (day.type === 'rest') {
+    return `<article class="day-card day-detail type-rest tone-rest ${isTodayCard ? 'today' : ''} ${day.status === 'missed' ? 'missed-card' : ''}">
+      <header class="dd-hero">
+        <div class="dd-hero-text">
+          <div class="day-detail-meta"><span class="day-detail-type tone-rest">休息日</span><span>${dateLabel}</span></div>
+          <h3 class="day-detail-title">${reviewEscape(day.task || '主動恢復 / 完全休息')}</h3>
+          <p class="day-detail-sub">今天不跑步，照下面的恢復內容做，讓身體吸收前幾天的訓練。</p>
+        </div>
+      </header>
+      <div class="dd-body">
+        <section class="day-detail-main"><h4 class="dd-section-title">恢復內容</h4>${renderSupportCards(day.supportBlocks) || '<p class="dd-empty">完全休息，或散步 10–20 分鐘。</p>'}</section>
+        <aside class="day-detail-side">${weather}${renderGarminRunResult(garminRun, true)}</aside>
+      </div>
+    </article>`;
+  }
+  const coachBadge = coachPlanBadge(day);
+  const handwrittenCoachPlan = isHandwrittenCoachPlan(day);
+  const steps = attachCourseGuides(day.steps, day.type) || [];
+  const mainStep = steps.find((step) => dayStepLabel(step) === '主課');
+  const taskText = trainingTaskTitle(day);
+  const taskIntent = taskText.split(/\s*[｜|]\s*/).slice(1).join('｜');
+  const headline = dayHeadline(day);
+  const subline = taskIntent;
+  const totalMinutes = steps.reduce((sum, step) => sum + dayStepMinutes(step, day), 0);
+  const hrCap = String(day.hrTarget || '').match(/[≤<]\s*(\d{2,3})/)?.[1];
+  const stats = [
+    Number(day.km) ? ['距離', Number(day.km), 'km'] : null,
+    hrCap ? ['心率上限', hrCap, 'bpm'] : day.hrTarget ? ['心率', String(day.hrTarget).replace(/（.*$/, ''), ''] : null,
+    totalMinutes ? ['預估時間', totalMinutes, '分'] : day.pace ? ['配速', day.pace, ''] : null,
+  ].filter(Boolean);
+  const statusClass = day.status === 'done' ? 'done-card' : day.status === 'missed' ? 'missed-card' : garminRun ? 'garmin-card' : '';
+  const statusHTML = garminRun ? renderGarminRunResult(garminRun)
+    : day.status === 'done' ? '<div class="day-detail-status is-done">✓ 今天這堂已完成</div>'
+      : day.status === 'missed' ? '<div class="day-detail-status is-missed">這堂已跳過</div>'
+        : day.dateStr > todayStr() ? `<div class="day-card-actions dd-cta"><button class="btn btn-secondary" onclick="negotiateFutureRun('${day.dateStr}')">這天不能跑，安全改排</button></div>`
+          : `<div class="day-card-actions dd-cta"><button class="btn btn-primary" onclick="markDone('${day.dateStr}','${day.type}',${day.km || 0})">✓ 完成並記錄</button><button class="btn btn-secondary dd-text-btn" onclick="markMissed('${day.dateStr}','${day.type}')">今天跳過</button></div>`;
+  const pending = day.releaseStatus === 'pending'
+    ? `<div class="day-detail-note is-pending"><b>待教練放行</b>${reviewEscape((day.releaseReasons || []).join('；'))}</div>` : '';
+  // 待放行原因已由上方黃色提醒呈現，不再重複顯示同一段文字
+  const rationaleHTML = rationale && !['baseline', 'coach-prescription', 'release-pending'].includes(source)
+    ? `<div class="day-detail-note course-rationale"><b>${reviewEscape(courseResolutionLabel(source))}</b>${reviewEscape(rationale)}</div>` : '';
+  const coachTip = handwrittenCoachPlan ? '<div class="day-detail-note"><b>教練提醒</b>依序完成熱身、主課與收操；以心率與動作品質為主，不追配速。</div>' : '';
+  return `<article class="day-card schedule-day-card day-detail type-${day.type} tone-${tone} ${isTodayCard ? 'today' : ''} ${statusClass} ${day.isDeload ? 'deload-card' : ''}">
+    <header class="dd-hero">
+      <div class="dd-hero-text">
+        <div class="day-detail-meta"><span class="day-detail-type tone-${tone}">${reviewEscape(trainingTypeLabel(day.type, day.focus))}</span><span>${dateLabel}</span>${coachBadge ? `<span class="day-detail-source">${coachBadge.emoji} ${reviewEscape(coachBadge.label)}</span>` : ''}</div>
+        <h3 class="day-detail-title">${reviewEscape(headline)}</h3>
+        ${subline ? `<p class="day-detail-sub">${reviewEscape(subline)}</p>` : ''}
+      </div>
+      ${stats.length ? `<dl class="dd-stats">${stats.map(([label, value, unit]) => `<div><dt>${label}</dt><dd>${reviewEscape(String(value))}${unit ? `<small>${unit}</small>` : ''}</dd></div>`).join('')}</dl>` : ''}
+    </header>
+    ${renderDayDetailProfile(steps, day, tone)}
+    <div class="dd-body">
+      <section class="day-detail-main">
+        <h4 class="dd-section-title">課程步驟</h4>
+        ${renderDayDetailSteps(steps) || `<p class="dd-empty">${reviewEscape(day.hrTarget || '依身體狀態完成')}</p>`}
+        ${extraSessions.map((session) => renderExtraSession(day, session)).join('')}
+      </section>
+      <aside class="day-detail-side">
+        ${pending}
+        ${statusHTML}
+        ${weather}
+        ${rationaleHTML}
+        ${coachTip}
+        ${renderDaySessionSummary(day, garminRun)}
+        <div class="day-card-actions day-detail-actions"><button class="btn btn-secondary" onclick="showRunCompanion('${day.dateStr}')">🎧 跑步陪伴</button>${renderRunFeedbackAction(day, garminRun)}${day.type === 'long' && Number(day.km) >= 16 ? `<button class="btn btn-secondary" onclick="openFuelingLog('${day.dateStr}')">🥤 ${appData.fuelingLogs?.[day.dateStr] ? '更新補給' : '記錄補給'}</button>` : ''}</div>
+        ${!extraSessions.length ? `<button class="add-extra-session" onclick="openAddExtraSession('${day.dateStr}')">＋ 加入第二堂</button>` : ''}
+      </aside>
+    </div>
+  </article>`;
 }
 
 function renderDayCard(day, rationale = '', source = 'baseline') {
