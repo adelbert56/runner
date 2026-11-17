@@ -1231,6 +1231,28 @@ function loadData() {
   }
 }
 
+// 週評估與賽後回報原本只存在瀏覽器，週日排程教練讀不到，才會連續數週以
+// 「疼痛／步態未回報」擋下課表。只送教練判讀需要的欄位，不送課表或 Garmin 明細。
+function recentCoachFeedback(data) {
+  const cutoff = new Date(Date.now() - 28 * 86400000).toISOString().slice(0, 10);
+  const checkins = (data?.checkins || [])
+    .filter((item) => item && typeof item === 'object')
+    .slice(-4)
+    .map((item) => ({
+      weekNum: item.weekNum,
+      date: item.date || '',
+      answers: Array.isArray(item.answers) ? item.answers.slice(0, CHECKIN_QUESTIONS.length) : [],
+      fatigue: item.fatigue,
+      painConcern: Boolean(item.painConcern),
+      note: String(item.note || '').slice(0, 240),
+      provisional: Boolean(item.provisional)
+    }));
+  const raceRecovery = Object.entries(data?.raceRecoveryChecks || {})
+    .filter(([date]) => date >= cutoff)
+    .map(([date, item]) => ({ date, fatigue: item?.fatigue || '', pain: item?.pain || '', gait: item?.gait || '', note: String(item?.note || '').slice(0, 240), savedAt: item?.savedAt || '' }));
+  return { checkinQuestions: CHECKIN_QUESTIONS, checkins, raceRecovery };
+}
+
 function syncCoachProfileSnapshot(data) {
   // 個人身高、體重、目標時間與已選的十月檢查賽原本只存在瀏覽器；教練排程
   // 看不到它們，才會持續用過期的 Markdown 檔。快照只寫進本機 gitignored 檔案；
@@ -1246,7 +1268,7 @@ function syncCoachProfileSnapshot(data) {
   fetch(endpoint, {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...pairingHeaders },
-    body: JSON.stringify({ profile: data.profile })
+    body: JSON.stringify({ profile: data.profile, feedback: recentCoachFeedback(data) })
   }).then((response) => {
     if (!response.ok && response.status !== 401) {
       console.warn('coach profile snapshot sync failed', response.status);

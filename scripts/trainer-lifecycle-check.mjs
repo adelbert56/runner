@@ -194,8 +194,27 @@ assert.equal(sandbox.weekPlannedKm(sandbox.saveData(protectedData).plan[0]), 21)
 console.log('PASS explicit frozen safety override remains protected instead of forcing 26K');
 
 vm.runInContext(extract(server, 'coachProfileSnapshot'), sandbox);
+vm.runInContext(extract(server, 'coachFeedbackSnapshot'), sandbox);
 const profileSnapshot = sandbox.coachProfileSnapshot({ profile: { dayState: [0, 1, 1, 0, 1, 0, 2] } }, {});
 assert.equal(JSON.stringify(profileSnapshot.profile.trainingDows), '[1,2,4,6]');
 assert.equal(profileSnapshot.profile.longRunDay, 6);
 console.log('PASS coach snapshot exports weekday indexes, not day-state values');
+
+const feedbackSnapshot = sandbox.coachProfileSnapshot({
+  profile: { dayState: [0, 1, 1, 0, 1, 0, 2] },
+  feedback: {
+    checkins: [{ weekNum: 20, date: '2026-11-22', answers: [true, false, 1], fatigue: '4', painConcern: 1, note: 'x'.repeat(500), evidenceSnapshot: { secret: 1 } }],
+    raceRecovery: [{ date: '2026-11-15', fatigue: '2', pain: 'mild', gait: 'normal', note: 'ok', savedAt: '2026-11-16' }, { date: 'bad', pain: 'pain' }]
+  }
+}, {});
+const fb = feedbackSnapshot.recentFeedback;
+assert.equal(fb.checkins[0].fatigue, 4);
+assert.equal(fb.checkins[0].painConcern, true);
+assert.equal(JSON.stringify(fb.checkins[0].answers), '[true,false,true]');
+assert.equal(fb.checkins[0].note.length, 240);
+assert.equal('evidenceSnapshot' in fb.checkins[0], false);
+assert.equal(fb.raceRecovery.length, 1);
+assert.equal(fb.raceRecovery[0].pain, 'mild');
+assert.equal(JSON.stringify(sandbox.coachProfileSnapshot({ profile: {} }, {}).recentFeedback), '{"checkinQuestions":[],"checkins":[],"raceRecovery":[]}');
+console.log('PASS coach snapshot carries whitelisted weekly check-ins and race recovery to the scheduled coach');
 console.log('PASS trainer lifecycle acceptance checks');
