@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-12T10:58:11.160Z",
-  "basis_date": "2026-11-12",
+  "generated_at": "2026-11-17T11:04:35.462Z",
+  "basis_date": "2026-11-17",
   "items": [
     {
       "platform": "運動筆記",
@@ -10,7 +10,7 @@
       "missing": 7,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 1,
       "sample_races": [
         "2026 KOF拳皇公益主題路跑",
         "TOYOTA RUN 台中 視障專場",
@@ -24,10 +24,10 @@
     },
     {
       "platform": "Lohas",
-      "total": 15,
+      "total": 14,
       "official_direct": 13,
-      "verified": 15,
-      "missing": 3,
+      "verified": 14,
+      "missing": 2,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 0,
@@ -36,10 +36,10 @@
         "2026年FUN電多巴胺路跑嘉年華",
         "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
       ],
-      "complete_rate": "80%",
-      "official_direct_rate": "87%",
+      "complete_rate": "86%",
+      "official_direct_rate": "93%",
       "verified_rate": "100%",
-      "score": 90,
+      "score": 93,
       "status": "穩定"
     },
     {
@@ -70,7 +70,7 @@
       "missing": 4,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 2,
+      "due_now": 1,
       "sample_races": [
         "2026 BOBDOG RUN(台中場)",
         "2026 松鶴越野",
@@ -110,7 +110,7 @@
       "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
-      "due_now": 1,
+      "due_now": 0,
       "sample_races": [
         "2026 VISOGE 夜跑派對 台中場",
         "仁愛長庚合作聯盟醫院 2026 永慶盃路跑",
