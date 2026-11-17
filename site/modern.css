@@ -2357,3 +2357,29 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
 .dash-day-title small {
   margin-top: 2px;
 }
+
+/* 練跑頁初次設定畫面：已有帳號可直接登入同步（2026-11-17） */
+.trainer-sync-entry {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--tone-easy-tint);
+}
+
+.trainer-sync-entry b {
+  color: var(--green-dark);
+  font-size: 16px;
+}
+
+.trainer-sync-entry span {
+  color: #4a554e;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.trainer-sync-entry .btn {
+  justify-self: start;
+  margin-top: 4px;
+}

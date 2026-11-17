@@ -81,3 +81,21 @@ cloud.saveData = () => null;
 await assert.rejects(cloud.applyRemote({ payload: {}, checksum: 'x' }));
 assert.equal(cloudMetaCalls, 0); assert.equal(cloud.appData.log.length, 1); assert.equal(cloud.applyingRemote, false);
 console.log('PASS cloud snapshot and storage failures preserve local state and revision');
+
+let conflicts = 0, adoptions = 0, uploads = 0, currentMeta = null, coach = '';
+const equal = vm.createContext({
+  syncKey: {}, appData: { profile: {} }, readSession: () => ({}), sessionUserId: () => 'fixture',
+  readRemote: async () => ({ revision: 2, checksum: 'same', payload: {} }), readMeta: () => currentMeta,
+  checksum: async () => 'same', hasMeaningfulData: () => true, localCoachPassphrase: () => coach,
+  decryptSnapshot: async (_payload, _id, _key, options) => { if (!options) { adoptions++; coach = 'synthetic'; } return { profile: {} }; },
+  coachDigest: async () => coach, storeMeta: value => { currentMeta = value; },
+  showConflict: () => { conflicts++; }, writeRemote: async () => { uploads++; },
+  setStatus() {}, handleStaleKey: async () => false, console,
+});
+vm.runInContext(extract('reconcile', sync), equal);
+await equal.reconcile();
+assert.equal(conflicts, 0); assert.equal(adoptions, 1); assert.equal(uploads, 0);
+coach = ''; currentMeta = { revision: 1, coachDigest: '' }; adoptions = 0;
+await equal.reconcile();
+assert.equal(adoptions, 1); assert.equal(uploads, 0);
+console.log('PASS equal device data avoids conflicts and adopts a missing coach passphrase');
