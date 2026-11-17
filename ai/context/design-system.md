@@ -78,6 +78,7 @@
 | 賽事精簡列（race-row） | 已建立 | 收合／展開「報名與詳細資訊」／已報名綠條／過期淡化／手機 | `--surface`、`--soft`、`--muted`、`--green-dark`、`--tint-green`、`--tint-yellow` | `site/app.js`、`site/modern.css` | 本機 375／800／1280px 截圖 | 版面現代化 |
 | 底部導覽列（main-nav ≤720px） | 已建立 | 預設／目前頁／safe-area | `--muted`、`--green-dark`、`--tint-green`、`--line` | `site/index.html`、`site/trainer.html`、`site/modern.css` | 本機 375px 截圖 | 版面現代化 |
 | 練跑儀表板（trainer-dash） | 已建立 | 有課表／今日／已完成／休息日／手機單欄 | `--green-dark`、`--green`、`--yellow`、`--surface`、`--tint-green` | `site/trainer.js`、`site/modern.css` | 本機 375／1280px 截圖（範例資料） | 版面現代化 |
+| 週曆摘要列＋詳情面板（week-strip / week-day-panel） | 已建立 | 選中／今天／完成／跳過／待放行／手機日期圓鈕 | `--tone-easy`、`--tone-long`、`--tone-quality`、`--tone-rest` 系列、`--green-dark` | `site/trainer-render.js`、`site/modern.css` | 本機 375／1280px 截圖（範例資料） | 版面現代化 |
 
 （「來源階段」記錄這個元件是 S4 初建，還是後續某個功能 Epic 補做並回登的。）
 
@@ -93,4 +94,5 @@
 | 訓練分析教練判讀順序 | 變體 A（判讀流程帶） | `ai/artifacts/教練流程可視化/mockup-decision-教練決策說明.md` | Squall／2026-08-27 |
 | 我的賽事待辦 | 變體 B（有內容的時間分組） | `ai/artifacts/網站可信度與功能健全化/mockup-decision-我的賽事待辦.md` | Squall／2026-09-15 |
 | 賽事列表（全站版面現代化） | 變體 A（精簡清單＋月份分隔＋底部導覽） | `ai/artifacts/版面現代化/mockup-decision.md` | Squall／2026-11-17 |
+| 練跑本週課表 | 變體 A（週曆＋詳情面板） | `ai/artifacts/版面現代化/mockup-decision.md` | Squall／2026-11-17 |
 | 練跑首頁（全站版面現代化） | 變體 B（儀表板） | `ai/artifacts/版面現代化/mockup-decision.md` | Squall／2026-11-17 |

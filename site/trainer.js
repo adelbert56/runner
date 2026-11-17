@@ -1837,6 +1837,8 @@ function goToToday() {
     jumpToPhaseWeek(hit.weekNum);
   }
   requestAnimationFrame(() => {
+    // 本週課表一次只顯示一天：「今天」要先切到今天那張課卡再捲動
+    if (typeof selectWeekDay === 'function' && document.querySelector(`[data-week-day="${todayStr()}"]`)) selectWeekDay(todayStr());
     const target = document.querySelector('.day-card.today') || document.getElementById('plan-tab-week');
     target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });

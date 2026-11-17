@@ -2804,9 +2804,19 @@ function renderWeekSection(plan) {
           : (week.isTaper ? '收斂疲勞，讓雙腿在比賽前保持新鮮。' : isDeload ? '降低訓練負荷，讓身體吸收前一階段成果。' : '穩定完成本週課表，把訓練累積成下一階段的能力。');
   const effectiveTarget = effectiveWeekVolumeTarget(week);
   const context = buildContext();
-  const dayCards = week.days.map((day) => {
-    const resolved = resolveCourse(day, context, week);
-    return renderDayCard(resolved.course, resolved.rationale, resolved.source);
+  // 版面 A（2026-11-17）：上方 7 天摘要列，下方只顯示選中那天的完整課卡。
+  // 課卡本身（含所有按鈕與動作）沿用 renderDayCard，只是一次顯示一張。
+  const resolvedDays = week.days.map((day) => resolveCourse(day, context, week));
+  const dates = resolvedDays.map((resolved) => resolved.course.dateStr);
+  const today = todayStr();
+  const firstRun = resolvedDays.find((resolved) => resolved.course.type !== 'rest')?.course.dateStr;
+  const selectedDate = dates.includes(selectedWeekDayDate) ? selectedWeekDayDate
+    : dates.includes(today) ? today
+      : firstRun || dates[0];
+  const dayStrip = resolvedDays.map((resolved) => renderWeekStripDay(resolved.course, resolved.course.dateStr === selectedDate)).join('');
+  const dayCards = resolvedDays.map((resolved) => {
+    const date = resolved.course.dateStr;
+    return `<div class="week-day-panel" id="week-day-panel-${reviewEscape(date)}" data-week-day-panel="${reviewEscape(date)}"${date === selectedDate ? '' : ' hidden'}>${renderDayCard(resolved.course, resolved.rationale, resolved.source)}</div>`;
   }).join('');
   return `
 <div class="card week-header-card">
@@ -2836,7 +2846,55 @@ function renderWeekSection(plan) {
   </div>
  </div>
 <div class="week-coach-support">${renderCourseDecisionPanel(plan, phaseRuleText)}</div>
-<div class="week-calendar" aria-label="本週課程表">${dayCards}</div>`;
+<div class="week-calendar" data-week-detail aria-label="本週課程表"><div class="week-strip" aria-label="本週 7 天，點選查看當天課程">${dayStrip}</div>${dayCards}</div>`;
+}
+
+// 本週課表目前選中的日期；切換週或重繪時沿用，不在週內就改選今天。
+let selectedWeekDayDate = '';
+
+function weekStripTone(day) {
+  if (day.type === 'rest') return 'rest';
+  if (day.type === 'long') return 'long';
+  if (['tempo', 'interval', 'race'].includes(day.type)) return 'quality';
+  return 'easy';
+}
+
+function renderWeekStripDay(day, selected) {
+  const date = day.dateStr || '';
+  const isRest = day.type === 'rest';
+  const garminRun = typeof getGarminRunForDate === 'function' ? getGarminRunForDate(date) : null;
+  const done = Boolean(garminRun) || day.status === 'done';
+  const tone = weekStripTone(day);
+  const title = isRest
+    ? (day.task || (day.supportBlocks || []).map((block) => block.title).filter(Boolean).join('・') || '主動恢復')
+    : trainingTaskTitle(day);
+  const km = !isRest && Number(day.km) ? `${Number(day.km)} km` : '';
+  const flags = [
+    date === todayStr() ? '<span class="week-strip-flag is-today">今天</span>' : '',
+    done && !isRest ? '<span class="week-strip-flag is-done">✓ 完成</span>' : '',
+    day.status === 'missed' ? '<span class="week-strip-flag is-missed">已跳過</span>' : '',
+    day.releaseStatus === 'pending' ? '<span class="week-strip-flag is-pending">待放行</span>' : '',
+  ].join('');
+  return `<button type="button" class="week-strip-day tone-${tone}${selected ? ' is-selected' : ''}" data-week-day="${reviewEscape(date)}" aria-pressed="${selected ? 'true' : 'false'}" aria-controls="week-day-panel-${reviewEscape(date)}" onclick="selectWeekDay('${reviewEscape(date)}')">
+    <span class="week-strip-date"><small><span class="week-strip-dow-prefix">週</span>${String(DOW_NAMES[day.dow] || '').slice(-1)}</small><b>${Number(date.slice(8, 10)) || ''}</b></span>
+    <span class="week-strip-type">${isRest ? '休息' : reviewEscape(trainingTypeLabel(day.type, day.focus))}</span>
+    <span class="week-strip-title">${reviewEscape(title)}</span>
+    ${km ? `<span class="week-strip-km">${km}${day.hrTarget ? `<small>${reviewEscape(String(day.hrTarget).replace(/（.*$/, ''))}</small>` : ''}</span>` : ''}
+    ${flags ? `<span class="week-strip-flags">${flags}</span>` : ''}
+    <span class="week-strip-dot" aria-hidden="true"></span>
+  </button>`;
+}
+
+function selectWeekDay(date) {
+  selectedWeekDayDate = date;
+  document.querySelectorAll('[data-week-day]').forEach((button) => {
+    const active = button.dataset.weekDay === date;
+    button.classList.toggle('is-selected', active);
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  document.querySelectorAll('[data-week-day-panel]').forEach((panel) => {
+    panel.hidden = panel.dataset.weekDayPanel !== date;
+  });
 }
 
 
