@@ -1590,6 +1590,7 @@ function renderHeroPanel() {
       <aside class="trainer-hero-side" aria-label="${hasPlan ? '今日課表' : '功能重點'}">
         ${hasPlan ? renderHeroTodayCard() : `
         <div class="trainer-side-card">
+          ${typeof window.openTrainingSyncModal === 'function' ? `<div class="trainer-sync-entry"><b>已經有帳號？</b><span>在別台裝置建好課表的話，登入同步就會直接載入。</span><button type="button" class="btn btn-primary" onclick="openTrainingSyncModal()">☁️ 登入同步</button></div>` : ''}
           <div class="trainer-side-kicker">Getting Started</div>
           <div class="trainer-side-title">往下填設定，一次生成本週課表</div>
           <div class="trainer-side-list">
