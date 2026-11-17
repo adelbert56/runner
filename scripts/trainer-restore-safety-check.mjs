@@ -98,4 +98,7 @@ assert.equal(conflicts, 0); assert.equal(adoptions, 1); assert.equal(uploads, 0)
 coach = ''; currentMeta = { revision: 1, coachDigest: '' }; adoptions = 0;
 await equal.reconcile();
 assert.equal(adoptions, 1); assert.equal(uploads, 0);
+coach = 'new'; currentMeta = { revision: 1, coachDigest: 'old' }; uploads = 0;
+await equal.reconcile();
+assert.equal(uploads, 1, 'a local passphrase change is uploaded even after another device advanced the revision');
 console.log('PASS equal device data avoids conflicts and adopts a missing coach passphrase');

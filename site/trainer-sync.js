@@ -288,13 +288,14 @@
       }
       const localChecksum = await checksum(appData);
       if (localChecksum === remote.checksum) {
+        const hadLocalCoach = Boolean(localCoachPassphrase());
         // Confirm the encrypted snapshot before trusting its checksum or adopting a passphrase.
         const remoteData = await decryptSnapshot(remote.payload, sessionUserId(readSession()), syncKey, { adopt: false });
         if (await checksum(remoteData) !== localChecksum) throw new Error('cloud checksum mismatch');
         if (!localCoachPassphrase()) await decryptSnapshot(remote.payload, sessionUserId(readSession()));
         // 訓練資料一致；只有這台的教練密語變了（例如剛輸入）才補傳一次，讓其他新裝置拿得到
         const localCoach = await coachDigest();
-        if (localCoach && localCoach !== (meta?.coachDigest || '') && meta?.revision === remote.revision) return await writeRemote(remote.revision);
+        if (meta && hadLocalCoach && localCoach && localCoach !== (meta.coachDigest || '')) return await writeRemote(remote.revision);
         storeMeta({ revision: remote.revision, checksum: remote.checksum, updatedAt: remote.updated_at, coachDigest: localCoach });
         setStatus('所有裝置資料一致');
         return;
