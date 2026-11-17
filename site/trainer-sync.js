@@ -156,6 +156,19 @@
     try { return localStorage.getItem(COACH_PASSPHRASE_KEY) || ''; } catch { return ''; }
   }
 
+  function togglePasswordVisibility(id, button) {
+    const input = document.getElementById(id);
+    if (!input || !button) return;
+    const start = input.selectionStart, end = input.selectionEnd;
+    const reveal = input.type === 'password';
+    input.type = reveal ? 'text' : 'password';
+    button.setAttribute('aria-label', reveal ? '隱藏密碼' : '顯示密碼');
+    button.setAttribute('aria-pressed', String(reveal));
+    button.title = reveal ? '隱藏密碼' : '顯示密碼';
+    input.focus({ preventScroll: true });
+    if (start != null && end != null) input.setSelectionRange(start, end);
+  }
+
   async function encryptSnapshot(data, userId) {
     const plaintext = JSON.stringify({ data: normalizeData(data), coachReviewPassphrase: localCoachPassphrase() });
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -365,7 +378,7 @@
   }
 
   function openUnlockModal() {
-    showModal('解鎖加密同步', '<p style="margin:0 0 14px;line-height:1.7">輸入你自己設定的同步密碼。此密碼不會上傳，也無法由網站找回。</p><label class="form-label" for="training-sync-passphrase">同步密碼</label><input id="training-sync-passphrase" class="form-input" type="password" autocomplete="current-password" placeholder="至少 10 個字元"><p data-training-sync-status role="status" aria-live="polite"></p><label for="training-sync-remember" style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px;line-height:1.5"><input id="training-sync-remember" type="checkbox" checked>記住這台裝置（之後打開自動同步，不用再輸入）</label>', [{ label: '解鎖並同步', primary: true, action: () => unlock().catch(() => setStatus('同步密碼不正確或連線失敗')) }, { label: '切換帳號', action: async () => { closeModal(); await forgetDevice(); openModal(); } }, { label: '取消', action: closeModal }]);
+    showModal('解鎖加密同步', '<p style="margin:0 0 14px;line-height:1.7">輸入你自己設定的同步密碼。此密碼不會上傳，也無法由網站找回。</p><label class="form-label" for="training-sync-passphrase">同步密碼</label><span class="password-field"><input id="training-sync-passphrase" class="form-input" type="password" autocomplete="current-password" placeholder="至少 10 個字元"><button type="button" class="password-toggle" aria-label="顯示密碼" aria-pressed="false" title="顯示密碼" onclick="TrainerSync.togglePasswordVisibility(&quot;training-sync-passphrase&quot;, this)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><p data-training-sync-status role="status" aria-live="polite"></p><label for="training-sync-remember" style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px;line-height:1.5"><input id="training-sync-remember" type="checkbox" checked>記住這台裝置（之後打開自動同步，不用再輸入）</label>', [{ label: '解鎖並同步', primary: true, action: () => unlock().catch(() => setStatus('同步密碼不正確或連線失敗')) }, { label: '切換帳號', action: async () => { closeModal(); await forgetDevice(); openModal(); } }, { label: '取消', action: closeModal }], { className: 'sync-modal' });
   }
 
   // 登出同步：清掉這台的登入資訊、記住的金鑰與版本快取，並請 Supabase 撤銷登入。
@@ -411,13 +424,13 @@
       return;
     }
     if (!readSession()) {
-      showModal('登入跨裝置同步', '<p style="margin:0 0 14px;line-height:1.7">使用管理員建立的帳號登入；登入後只會載入此帳號自己的訓練資料。</p><label class="form-label" for="training-sync-email">Email</label><input id="training-sync-email" class="form-input" type="email" autocomplete="username" placeholder="you@example.com"><label class="form-label" for="training-sync-login-password" style="display:block;margin-top:12px">密碼</label><input id="training-sync-login-password" class="form-input" type="password" autocomplete="current-password" placeholder="你的登入密碼"><p data-training-sync-status role="status" aria-live="polite"></p>', [{ label: '登入', primary: true, action: () => loginWithPassword().catch((error) => setStatus(error?.message?.includes('Invalid login credentials') ? 'Email 或密碼錯誤' : '登入失敗，請稍後再試')) }, { label: '取消', action: closeModal }]);
+      showModal('登入跨裝置同步', '<p style="margin:0 0 14px;line-height:1.7">使用管理員建立的帳號登入；登入後只會載入此帳號自己的訓練資料。</p><label class="form-label" for="training-sync-email">Email</label><input id="training-sync-email" class="form-input" type="email" autocomplete="username" placeholder="you@example.com"><label class="form-label" for="training-sync-login-password" style="display:block;margin-top:12px">密碼</label><span class="password-field"><input id="training-sync-login-password" class="form-input" type="password" autocomplete="current-password" placeholder="你的登入密碼"><button type="button" class="password-toggle" aria-label="顯示密碼" aria-pressed="false" title="顯示密碼" onclick="TrainerSync.togglePasswordVisibility(&quot;training-sync-login-password&quot;, this)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><p data-training-sync-status role="status" aria-live="polite"></p>', [{ label: '登入', primary: true, action: () => loginWithPassword().catch((error) => setStatus(error?.message?.includes('Invalid login credentials') ? 'Email 或密碼錯誤' : '登入失敗，請稍後再試')) }, { label: '取消', action: closeModal }], { className: 'sync-modal' });
       return;
     }
     openUnlockModal();
   }
 
-  window.TrainerSync = { renderControl, refreshControl: () => setStatus(status), onLocalSave, openModal, reconcile };
+  window.TrainerSync = { togglePasswordVisibility, renderControl, refreshControl: () => setStatus(status), onLocalSave, openModal, reconcile };
   window.openTrainingSyncModal = openModal;
   if (readSession()) {
     setStatus('已登入，正在讀取裝置金鑰…');

@@ -62,6 +62,7 @@
 |---|---|---|---|---|---|---|
 | Button | 已存在 | 預設/hover/focus/停用 | primary、secondary、favorite、calendar | `site/styles.css` | 實際頁面 | 既有 |
 | Input | 已存在 | 預設/focus/停用 | surface、line、green | `site/styles.css` | 實際頁面 | 既有 |
+| 密碼顯示切換 | 已建立，待手機實機驗收 | 隱藏／顯示／focus；不提交表單 | Input、Button、`--c-border`、`--c-primary` | `site/trainer-sync.js`、`site/trainer.css` | 靜態與互動邏輯測試 | 手機版重構 |
 | Select | 已存在 | 預設/focus/停用 | surface、line、green | `site/styles.css` | 實際頁面 | 既有 |
 | Card | 已存在 | 預設/hover/過期 | surface、line、radius、shadow-card | `site/styles.css` | 實際頁面 | 既有 |
 | 收藏備份對話框 | 已建立，待視覺驗收 | 預設／讀取／錯誤／取消 | surface、ink、muted、line、radius | `site/favorites-backup.js`、`site/styles.css` | 待補 | 我的賽事資料保護 |

@@ -3337,7 +3337,7 @@ loadRegistrationRaceCheckpoints();
         <div class="card-title">🔒 教練建議</div>
         <p style="margin:4px 0 10px;opacity:0.85">本區塊為加密的個人訓練紀錄。密語預設只保留在目前頁面；若這是你專用且受信任的本機瀏覽器，才可選擇記住。<span role="alert" aria-live="assertive">${wrongKey ? '<br><b style="color:#b3402a">密語不正確，請再試一次。</b>' : ''}</span></p>
         <form id="coach-review-form" style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="password" id="coach-review-pass" placeholder="通關密語" autocomplete="current-password" style="flex:1;min-width:180px;padding:8px 10px" />
+          <span class="password-field coach-password-field"><input type="password" id="coach-review-pass" placeholder="通關密語" autocomplete="current-password" aria-label="教練週報密語" /><button type="button" class="password-toggle" aria-label="顯示密語" aria-pressed="false" title="顯示密語" onclick="TrainerSync.togglePasswordVisibility('coach-review-pass', this)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span>
           <button type="submit" class="btn btn-primary">解鎖</button>
           <label style="flex-basis:100%;font-size:12px;color:var(--c-text-muted);cursor:pointer"><input type="checkbox" id="coach-review-remember"> 在這台受信任裝置記住密語</label>
         </form>

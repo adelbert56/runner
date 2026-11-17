@@ -4344,6 +4344,7 @@ function showModal(title, bodyHTML, actions, options = {}) {
   overlay.setAttribute('aria-hidden', 'false');
   setModalBackgroundInert(true);
   requestAnimationFrame(() => {
+    if (!overlay.classList.contains('open')) return;
     const firstField = modalEl?.querySelector('input:not([type="hidden"]), select, textarea');
     (firstField || modalFocusableElements()[0] || modalEl)?.focus();
   });
@@ -4359,5 +4360,7 @@ function closeModal() {
   setModalBackgroundInert(false);
   const returnFocus = modalReturnFocus;
   modalReturnFocus = null;
-  if (returnFocus?.isConnected) requestAnimationFrame(() => returnFocus.focus());
+  if (returnFocus?.isConnected) requestAnimationFrame(() => {
+    if (!overlay.classList.contains('open')) returnFocus.focus();
+  });
 }

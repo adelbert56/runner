@@ -102,3 +102,22 @@ coach = 'new'; currentMeta = { revision: 1, coachDigest: 'old' }; uploads = 0;
 await equal.reconcile();
 assert.equal(uploads, 1, 'a local passphrase change is uploaded even after another device advanced the revision');
 console.log('PASS equal device data avoids conflicts and adopts a missing coach passphrase');
+
+let overlayOpen = false, returnFocusCount = 0, fieldFocusCount = 0;
+const frames = [];
+class FakeElement { constructor() { this.isConnected = true; } focus() { returnFocusCount++; } }
+const originalButton = new FakeElement();
+const modalOverlay = { classList: { add() { overlayOpen = true; }, remove() { overlayOpen = false; }, contains() { return overlayOpen; } }, setAttribute() {} };
+const modalElement = { className: '', querySelector: () => ({focus: () => {fieldFocusCount++;}}) };
+const modalParts = { modal: modalOverlay, 'modal-title': {}, 'modal-body': {}, 'modal-actions': {appendChild() {}} };
+const modalSandbox = vm.createContext({ modalReturnFocus: null, HTMLElement: FakeElement,
+  document: { activeElement: originalButton, querySelector: () => modalElement, getElementById: id => modalParts[id], createElement: () => ({}) },
+  setModalBackgroundInert() {}, stopSupportDrillTimer() {}, modalFocusableElements: () => [], requestAnimationFrame: fn => frames.push(fn) });
+vm.runInContext(`${extract('showModal', await readFile('site/trainer-render.js', 'utf8'))}\n${extract('closeModal', await readFile('site/trainer-render.js', 'utf8'))}`, modalSandbox);
+modalSandbox.showModal('login', '', []);
+modalSandbox.closeModal();
+modalSandbox.showModal('password', '', []);
+for (const frame of frames) frame();
+assert.equal(returnFocusCount, 0, 'closing the first dialog must not steal focus from the next dialog');
+assert.ok(fieldFocusCount > 0);
+console.log('PASS opening the next dialog preserves its input focus');
