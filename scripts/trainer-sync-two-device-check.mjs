@@ -45,3 +45,22 @@ await b.window.__test.reconcile();
 assert.equal(b.localStorage.getItem('coach-review:passphrase'), 'synthetic coach two');
 assert.equal(b.state.conflicts, 0);
 console.log('PASS two isolated devices use encrypted snapshots, avoid conflicts, and propagate a changed coach passphrase');
+
+// Exercise the setup-screen entry and feedback without accessing a real account.
+let modal = null;
+let visibleStatus = '';
+const form = { 'training-sync-email': {value: ''}, 'training-sync-login-password': {value: ''} };
+const loginWindow = { TRAINER_SYNC_CONFIG: {url:'https://fixture.invalid', publishableKey:'fixture', table:'snapshots'}, setTimeout, clearTimeout, addEventListener() {} };
+const loginContext = vm.createContext({ window: loginWindow, localStorage: {getItem: () => null}, crypto: webcrypto, TextEncoder, TextDecoder, atob, btoa, console,
+  document: {getElementById: id => form[id], querySelectorAll: () => [{set textContent(v) {visibleStatus = v;}}]},
+  showModal: (title, body, actions) => {modal = {title, body, actions};}, closeModal() {} });
+vm.runInContext(source, loginContext);
+loginWindow.openTrainingSyncModal();
+assert.equal(modal.title, '登入跨裝置同步');
+assert.match(modal.body, /data-training-sync-status/);
+await modal.actions.find(action => action.label === '登入').action();
+assert.equal(visibleStatus, '請輸入 Email 與密碼');
+loginWindow.TRAINER_SYNC_CONFIG = null;
+loginWindow.openTrainingSyncModal();
+assert.equal(modal.title, '無法開啟同步');
+console.log('PASS login entry opens and missing credentials or configuration are visible');
