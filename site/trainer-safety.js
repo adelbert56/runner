@@ -10,14 +10,13 @@ function raceRecoveryDecision(raceDate, check, today) {
     && Number.isFinite(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
   const elapsed = validDate(raceDate) && validDate(today) ? (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${raceDate}T00:00:00Z`)) / 86400000 : -1;
   if (elapsed < 3) return { blocked: true, reason: `${raceDate} 賽後恢復只有日期資料，尚未通過保守48小時觀察窗口` };
-  const savedAfterDays = validDate(check?.savedAt) ? (Date.parse(`${check.savedAt}T00:00:00Z`) - Date.parse(`${raceDate}T00:00:00Z`)) / 86400000 : -1;
+  // 跑者約定「有問題會主動回報」（2026-11-17）：沒回報或欄位不全視為正常，
+  // 只有明確回報疼痛、步態改變或疲勞 ≥4 才擋，避免每場賽後都要手動補填才能放行。
   const fatigue = check?.fatigue === '' || check?.fatigue == null ? NaN : Number(check.fatigue);
-  if (!check || savedAfterDays < 3 || check.savedAt > today || !Number.isInteger(fatigue) || fatigue < 1 || fatigue > 5
-    || !['none', 'mild', 'pain'].includes(check.pain) || !['normal', 'changed'].includes(check.gait)) {
-    return { blocked: true, reason: `${raceDate} 賽後恢復回報缺失、過早或欄位不完整` };
-  }
-  if (check.pain !== 'none' || check.gait !== 'normal' || fatigue >= 4) return { blocked: true, reason: `${raceDate} 賽後恢復訊號尚未通過` };
-  return { blocked: false, reason: `${raceDate} 賽後恢復回報已通過（日期資料採三日保守窗口）` };
+  const painReported = ['mild', 'pain'].includes(check?.pain);
+  const gaitChanged = check?.gait === 'changed';
+  if (painReported || gaitChanged || (Number.isFinite(fatigue) && fatigue >= 4)) return { blocked: true, reason: `${raceDate} 賽後恢復訊號尚未通過` };
+  return { blocked: false, reason: check ? `${raceDate} 賽後恢復回報已通過（三日保守窗口已過）` : `${raceDate} 賽後三日已過且未回報異常，視為恢復正常` };
 }
 
 function recentRaceRecoveryGate(days = 14) {
