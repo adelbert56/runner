@@ -1437,7 +1437,8 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
   color: var(--green-dark);
 }
 
-.day-step-body p {
+.day-step-body p,
+.day-step-detail {
   margin: 4px 0 0;
   color: #4a554e;
   font-size: 14px;

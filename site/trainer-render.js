@@ -4074,7 +4074,7 @@ function renderDayDetailSteps(steps) {
       <span class="day-step-label">${reviewEscape(label)}</span>
       <div class="day-step-body">
         <div class="day-step-head">${step.dose ? `<b>${reviewEscape(step.dose)}</b>` : ''}${title && title !== label ? `<span>${reviewEscape(title)}</span>` : ''}</div>
-        ${detail ? `<p>${reviewEscape(detail)}</p>` : ''}
+        ${detail ? `<div class="day-step-detail">${reviewEscape(detail)}</div>` : ''}
         ${guide}
       </div>
     </li>`;
@@ -4128,7 +4128,6 @@ function renderDayDetail(day, rationale = '', source = 'baseline') {
         <div class="dd-hero-text">
           <div class="day-detail-meta"><span class="day-detail-type tone-rest">休息日</span><span>${dateLabel}</span></div>
           <h3 class="day-detail-title">${reviewEscape(day.task || '主動恢復 / 完全休息')}</h3>
-          <p class="day-detail-sub">今天不跑步，照下面的恢復內容做，讓身體吸收前幾天的訓練。</p>
         </div>
       </header>
       <div class="dd-body">
