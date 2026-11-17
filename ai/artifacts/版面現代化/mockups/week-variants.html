@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本週課表 — 樣稿 A／B</title>
+<style>
+  :root {
+    --ink: #1f2a24; --muted: #65736b; --faint: #8c978f; --soft: #f6f4ee; --surface: #fff; --line: #e2ded4;
+    --green: #24724f; --green-dark: #155338; --green-tint: #e7f2ec; --yellow: #f5c84c; --yellow-tint: #fdf4d8;
+    --long: #1d4f73; --long-tint: #e5eef5; --rest-tint: #f1efe8;
+    --shadow: 0 1px 2px rgba(31,42,36,.06), 0 4px 12px rgba(31,42,36,.06);
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+    color: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #dcd8cd; padding: 32px 24px 64px; }
+  h1.page { font-size: 24px; margin: 0 0 4px; }
+  p.lead { margin: 0 0 32px; color: #4a554e; font-size: 14px; max-width: 900px; line-height: 1.6; }
+  .variant { margin-bottom: 56px; }
+  .variant > h2 { font-size: 20px; margin: 0 0 4px; }
+  .variant > p { margin: 0 0 16px; font-size: 14px; color: #4a554e; max-width: 900px; line-height: 1.6; }
+  .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+  .frame { background: var(--soft); border-radius: 16px; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,.14); }
+  .frame.desk { width: 1180px; max-width: 100%; }
+  .phone { width: 375px; height: 812px; background: var(--soft); border-radius: 32px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.18); padding: 16px 0 0; }
+  .caption { font-size: 13px; font-weight: 700; color: #4a554e; margin: 0 0 8px; }
+
+  .pill { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+  .p-easy { background: var(--green-tint); color: var(--green-dark); }
+  .p-long { background: var(--long-tint); color: var(--long); }
+  .p-rest { background: var(--rest-tint); color: var(--muted); }
+  .p-warn { background: var(--yellow-tint); color: #7a5a00; font-weight: 500; }
+  .muted { color: var(--muted); }
+
+  /* step bar: proportional warmup / main / cooldown */
+  .bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; }
+  .bar i { display: block; height: 100%; }
+  .bar .w { background: #c9d9cf; flex: 8; }
+  .bar .m { background: var(--green); }
+  .bar .c { background: #c9d9cf; flex: 8; }
+  .bar.long .m { background: var(--long); }
+
+  /* ---------- A: 週曆 + 詳情 ---------- */
+  .a-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .a-day { background: var(--surface); border-radius: 12px; padding: 14px 12px; box-shadow: var(--shadow); min-height: 150px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+  .a-day .d { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: var(--muted); }
+  .a-day .d b { font-size: 18px; color: var(--ink); }
+  .a-day .t { font-size: 14px; font-weight: 700; line-height: 1.35; }
+  .a-day .km { font-size: 22px; font-weight: 700; margin-top: auto; }
+  .a-day .km small { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .a-day.rest { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+  .a-day.rest .t { color: var(--muted); font-weight: 500; font-size: 13px; }
+  .a-day.sel { box-shadow: 0 0 0 2px var(--green-dark), var(--shadow); }
+  .a-day.today .d::after { content: "今天"; font-size: 11px; font-weight: 700; color: #fff; background: var(--green-dark); border-radius: 999px; padding: 1px 8px; }
+  .a-detail { margin-top: 16px; background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); padding: 24px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; }
+  .a-detail h3 { margin: 4px 0 4px; font-size: 24px; }
+  .a-detail .sub { font-size: 14px; color: var(--muted); margin-bottom: 16px; }
+  .steps { display: grid; gap: 0; }
+  .step { display: grid; grid-template-columns: 64px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--soft); }
+  .step:first-child { border-top: 0; }
+  .step .k { font-size: 12px; color: var(--muted); font-weight: 700; padding-top: 2px; }
+  .step .v { font-size: 14px; line-height: 1.6; }
+  .step .v b { font-size: 15px; }
+  .step.main .v b { color: var(--green-dark); }
+  .side h4 { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+  .wx { display: flex; gap: 12px; align-items: center; background: var(--soft); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-bottom: 16px; }
+  .wx b { font-size: 20px; }
+  .note { font-size: 14px; line-height: 1.7; background: var(--green-tint); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 700; background: var(--green-dark); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--green-dark); box-shadow: inset 0 0 0 1px var(--line); }
+
+  /* A mobile */
+  .m-strip { display: flex; gap: 6px; padding: 0 16px 12px; }
+  .m-strip div { flex: 1; text-align: center; border-radius: 12px; padding: 8px 0 10px; font-size: 11px; color: var(--muted); background: var(--surface); box-shadow: var(--shadow); }
+  .m-strip div b { display: block; font-size: 16px; color: var(--ink); margin: 2px 0 4px; }
+  .m-strip div i { display: block; width: 6px; height: 6px; border-radius: 50%; margin: 0 auto; background: transparent; }
+  .m-strip div.run i { background: var(--green); }
+  .m-strip div.lg i { background: var(--long); }
+  .m-strip div.sel { background: var(--green-dark); color: #d6e9de; }
+  .m-strip div.sel b { color: #fff; }
+  .m-strip div.sel i { background: var(--yellow); }
+  .m-card { margin: 0 16px 12px; background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); padding: 20px; }
+  .m-card h3 { margin: 6px 0 2px; font-size: 22px; }
+
+  /* ---------- B: 時間軸清單 ---------- */
+  .b-list { display: grid; gap: 8px; }
+  .b-day { display: grid; grid-template-columns: 72px 1fr 120px; gap: 16px; align-items: center; background: var(--surface); border-radius: 12px; box-shadow: var(--shadow); padding: 16px 20px; }
+  .b-day.rest { background: transparent; box-shadow: inset 0 0 0 1px var(--line); padding: 12px 20px; }
+  .b-day .dd { font-size: 12px; color: var(--muted); }
+  .b-day .dd b { display: block; font-size: 20px; color: var(--ink); }
+  .b-day .mid .t { font-size: 16px; font-weight: 700; margin: 4px 0 6px; }
+  .b-day.rest .mid .t { font-size: 14px; font-weight: 500; color: var(--muted); margin: 0; }
+  .b-day .mid .s { font-size: 13px; color: var(--muted); }
+  .b-day .r { text-align: right; font-size: 22px; font-weight: 700; }
+  .b-day .r small { display: block; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .b-day.today { box-shadow: 0 0 0 2px var(--green-dark), var(--shadow); }
+  .b-open { grid-column: 1 / -1; border-top: 1px solid var(--soft); margin-top: 8px; padding-top: 16px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; }
+  .b-day .bar { margin-top: 8px; max-width: 360px; }
+
+  .notes { max-width: 900px; background: var(--surface); border-radius: 12px; padding: 20px 24px; font-size: 14px; line-height: 1.7; }
+  .notes h3 { margin: 0 0 8px; font-size: 16px; }
+  .notes ul { margin: 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1 class="page">本週課表 — 樣稿 A／B</h1>
+<p class="lead">內容取自你這週的實際課表（11/16–11/22）。兩個方向都把「每天一眼看懂」和「細節」分開：摘要只放課型、距離、心率；熱身／主課／收操、天氣、肌力、圖解按鈕都收進詳情。課型用顏色區分：綠＝輕鬆跑、藍＝長跑、灰＝休息。</p>
+
+<section class="variant">
+  <h2>A．週曆＋詳情面板（像 Runna／TrainingPeaks）</h2>
+  <p>上面一排 7 天小卡，一眼看完整週；點哪天，下面就展開那天的完整內容（步驟、天氣、教練提醒、按鈕）。預設選今天。手機版改成上方 7 個日期圓鈕，下方一張當日大卡。</p>
+  <div class="row">
+    <div>
+      <p class="caption">A-1 桌機</p>
+      <div class="frame desk">
+        <div class="a-week">
+          <div class="a-day rest"><div class="d">週一 <b>16</b></div><span class="pill p-rest">休息</span><div class="t">恢復日：步行、關節活動、滾筒</div></div>
+          <div class="a-day today sel"><div class="d">週二 <b>17</b></div><span class="pill p-easy">恢復跑</span><div class="t">賽後恢復 E 跑</div><div class="bar"><i class="w"></i><i class="m" style="flex:24"></i><i class="c"></i></div><div class="km">6 <small>km · HR≤145</small></div></div>
+          <div class="a-day rest"><div class="d">週三 <b>18</b></div><span class="pill p-rest">休息</span><div class="t">肌力與核心 10–15 分</div></div>
+          <div class="a-day"><div class="d">週四 <b>19</b></div><span class="pill p-easy">輕鬆跑</span><div class="t">E 跑，不做坡跑或節奏</div><div class="bar"><i class="w"></i><i class="m" style="flex:28"></i><i class="c"></i></div><div class="km">7 <small>km · HR≤150</small></div></div>
+          <div class="a-day rest"><div class="d">週五 <b>20</b></div><span class="pill p-rest">休息</span><div class="t">核心與穩定 5–10 分</div></div>
+          <div class="a-day"><div class="d">週六 <b>21</b></div><span class="pill p-long">長跑</span><div class="t">12/6 前最後一次較長耐力</div><div class="bar long"><i class="w"></i><i class="m" style="flex:48"></i><i class="c"></i></div><div class="km">12 <small>km · HR≤150</small></div></div>
+          <div class="a-day rest"><div class="d">週日 <b>22</b></div><span class="pill p-rest">休息</span><div class="t">恢復日：足底與小腿放鬆</div></div>
+        </div>
+        <div class="a-detail">
+          <div>
+            <span class="pill p-easy">恢復跑</span> <span class="muted" style="font-size:13px">週二 11/17 · 今天</span>
+            <h3>賽後恢復 E 跑 6 km</h3>
+            <div class="sub">11/15 賽後第 2 天，回報無痛、步態正常 · 總時間約 60 分</div>
+            <div class="steps">
+              <div class="step"><div class="k">熱身</div><div class="v"><b>8 分</b><br><span class="muted">原地動態活動：髖、踝、小腿；不計里程</span></div></div>
+              <div class="step main"><div class="k">主課</div><div class="v"><b>6 km · HR ≤145</b><br><span class="muted">輕鬆到能完整聊天。今天沒跑就跳過，不補跑；腳感沉或睡不足 6 小時改 4 km 或休息</span></div></div>
+              <div class="step"><div class="k">收操</div><div class="v"><b>8 分</b><br><span class="muted">走路、補水、伸展</span></div></div>
+            </div>
+          </div>
+          <div class="side">
+            <h4>今天的天氣</h4>
+            <div class="wx"><b>28°C</b><span>清晨降雨 37%、傍晚 0%<br><span class="muted">建議傍晚出發</span></span></div>
+            <h4>教練提醒</h4>
+            <div class="note">這週只跑輕鬆。週六 12 km 是 12/6 前最後一次較長的跑，順便演練比賽補給。</div>
+            <div class="btns"><span class="btn">✓ 標記完成</span><span class="btn ghost">熱身圖解</span><span class="btn ghost">同步到 Garmin</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="caption">A-2 手機</p>
+      <div class="phone">
+        <div class="m-strip">
+          <div>一<b>16</b><i></i></div><div class="sel run">二<b>17</b><i></i></div><div>三<b>18</b><i></i></div><div class="run">四<b>19</b><i></i></div><div>五<b>20</b><i></i></div><div class="lg">六<b>21</b><i></i></div><div>日<b>22</b><i></i></div>
+        </div>
+        <div class="m-card">
+          <span class="pill p-easy">恢復跑</span> <span class="muted" style="font-size:12px">今天 · 11/17</span>
+          <h3>賽後恢復 E 跑 6 km</h3>
+          <div class="muted" style="font-size:13px;margin-bottom:12px">HR ≤145 · 約 60 分</div>
+          <div class="bar" style="margin-bottom:8px"><i class="w"></i><i class="m" style="flex:24"></i><i class="c"></i></div>
+          <div class="steps">
+            <div class="step"><div class="k">熱身</div><div class="v"><b>8 分</b> <span class="muted">動態活動</span></div></div>
+            <div class="step main"><div class="k">主課</div><div class="v"><b>6 km · HR ≤145</b><br><span class="muted">輕鬆到能聊天；沒跑就跳過</span></div></div>
+            <div class="step"><div class="k">收操</div><div class="v"><b>8 分</b> <span class="muted">走路、伸展</span></div></div>
+          </div>
+        </div>
+        <div class="m-card" style="padding:14px 20px"><div class="wx" style="margin:0;background:none;padding:0"><b>28°C</b><span>清晨降雨 37%<br><span class="muted">建議傍晚出發</span></span></div></div>
+        <div style="padding:0 16px" class="btns"><span class="btn" style="flex:1;justify-content:center">✓ 標記完成</span><span class="btn ghost">圖解</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="variant">
+  <h2>B．時間軸清單（像 Garmin Coach）</h2>
+  <p>一天一列由上往下，左邊日期、中間課名與步驟比例條、右邊大字距離；休息日是淡色細列。點一列就在原地展開那天的步驟、天氣和按鈕（一次只開一天）。手機和桌機同一種結構，最好上手。</p>
+  <div class="row">
+    <div>
+      <p class="caption">B-1 桌機（週二展開）</p>
+      <div class="frame desk">
+        <div class="b-list">
+          <div class="b-day rest"><div class="dd">週一<b>16</b></div><div class="mid"><div class="t">休息 · 恢復日：步行、關節活動、滾筒</div></div><div class="r"></div></div>
+          <div class="b-day today">
+            <div class="dd">週二<b>17</b></div>
+            <div class="mid"><span class="pill p-easy">恢復跑</span> <span class="pill p-easy" style="background:var(--green-dark);color:#fff">今天</span><div class="t">賽後恢復 E 跑</div><div class="s">HR ≤145 · 熱身 8 分 → 主課 6 km → 收操 8 分</div><div class="bar"><i class="w"></i><i class="m" style="flex:24"></i><i class="c"></i></div></div>
+            <div class="r">6 km<small>約 60 分</small></div>
+            <div class="b-open">
+              <div class="steps">
+                <div class="step"><div class="k">熱身</div><div class="v"><b>8 分</b><br><span class="muted">原地動態活動：髖、踝、小腿；不計里程</span></div></div>
+                <div class="step main"><div class="k">主課</div><div class="v"><b>6 km · HR ≤145</b><br><span class="muted">輕鬆到能完整聊天。今天沒跑就跳過，不補跑</span></div></div>
+                <div class="step"><div class="k">收操</div><div class="v"><b>8 分</b><br><span class="muted">走路、補水、伸展</span></div></div>
+              </div>
+              <div class="side">
+                <div class="wx"><b>28°C</b><span>清晨降雨 37%、傍晚 0%<br><span class="muted">建議傍晚出發</span></span></div>
+                <div class="btns"><span class="btn">✓ 標記完成</span><span class="btn ghost">熱身圖解</span><span class="btn ghost">同步到 Garmin</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="b-day rest"><div class="dd">週三<b>18</b></div><div class="mid"><div class="t">休息 · 肌力與核心 10–15 分</div></div><div class="r"></div></div>
+          <div class="b-day"><div class="dd">週四<b>19</b></div><div class="mid"><span class="pill p-easy">輕鬆跑</span><div class="t">E 跑，不做坡跑或節奏</div><div class="bar"><i class="w"></i><i class="m" style="flex:28"></i><i class="c"></i></div></div><div class="r">7 km<small>HR ≤150</small></div></div>
+          <div class="b-day rest"><div class="dd">週五<b>20</b></div><div class="mid"><div class="t">休息 · 核心與穩定 5–10 分</div></div><div class="r"></div></div>
+          <div class="b-day"><div class="dd">週六<b>21</b></div><div class="mid"><span class="pill p-long">長跑</span><div class="t">12/6 前最後一次較長耐力 · 演練補給</div><div class="bar long"><i class="w"></i><i class="m" style="flex:48"></i><i class="c"></i></div></div><div class="r">12 km<small>HR ≤150</small></div></div>
+          <div class="b-day rest"><div class="dd">週日<b>22</b></div><div class="mid"><div class="t">休息 · 足底與小腿放鬆</div></div><div class="r"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="notes">
+  <h3>兩個方向共通</h3>
+  <ul>
+    <li>課型顏色固定：綠＝輕鬆／恢復跑、藍＝長跑、黃＝品質課（節奏、間歇）、灰＝休息；全站同一套。</li>
+    <li>每堂跑步課有一條「熱身／主課／收操」比例條，一眼看出今天主要在跑什麼。</li>
+    <li>框不再套框：一天只有一張卡，裡面用間距與細線分段；「主課（可收合）」「查看今天的熱身圖解」等收進詳情。</li>
+    <li>休息日變成淡色細卡，只寫恢復內容，不再佔一整欄高。</li>
+    <li>「待教練放行」改成小黃標籤放在那天標題旁，不再整段文字。</li>
+  </ul>
+</div>
+</body>
+</html>

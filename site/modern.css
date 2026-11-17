@@ -945,3 +945,947 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
     font-size: 22px;
   }
 }
+
+/* ---------- 練跑頁「本週課表」：週曆＋詳情面板（版面 A，2026-11-17） ---------- */
+
+:root {
+  --tone-easy: #24724f;
+  --tone-easy-tint: #e7f2ec;
+  --tone-long: #1d4f73;
+  --tone-long-tint: #e5eef5;
+  --tone-quality: #9a6a00;
+  --tone-quality-tint: #fdf4d8;
+  --tone-rest: #65736b;
+  --tone-rest-tint: #f1efe8;
+}
+
+.week-calendar[data-week-detail] {
+  display: block;
+}
+
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.week-strip-day {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  min-height: 148px;
+  padding: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.05);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.week-strip-day:hover {
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.08), 0 8px 20px rgba(31, 42, 36, 0.09);
+}
+
+.week-strip-day.tone-rest {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.week-strip-day.is-selected {
+  box-shadow: 0 0 0 2px var(--green-dark), 0 8px 20px rgba(31, 42, 36, 0.08);
+}
+
+.week-strip-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.week-strip-date b {
+  color: var(--ink);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.week-strip-type {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tone-easy .week-strip-type { background: var(--tone-easy-tint); color: var(--tone-easy); }
+.tone-long .week-strip-type { background: var(--tone-long-tint); color: var(--tone-long); }
+.tone-quality .week-strip-type { background: var(--tone-quality-tint); color: var(--tone-quality); }
+.tone-rest .week-strip-type { background: var(--tone-rest-tint); color: var(--tone-rest); }
+
+.week-strip-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tone-rest .week-strip-title {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.week-strip-km {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: auto;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.week-strip-km small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.week-strip-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.week-strip-flag {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.week-strip-flag.is-today { background: var(--green-dark); color: #fff; }
+.week-strip-flag.is-done { background: var(--tone-easy-tint); color: var(--tone-easy); }
+.week-strip-flag.is-missed { background: #fbe9e4; color: #9a3412; }
+.week-strip-flag.is-pending { background: var(--tone-quality-tint); color: #7a5a00; }
+
+.week-strip-dot {
+  display: none;
+}
+
+/* 詳情面板：選中那天的完整課卡，一張大卡、內部不再框套框 */
+[data-week-detail] .week-day-panel > .day-card {
+  width: 100%;
+  max-width: none;
+  padding: 24px;
+  border: 0;
+  border-left: 4px solid var(--tone-easy);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.06);
+}
+
+[data-week-detail] .week-day-panel > .day-card.type-long { border-left-color: var(--tone-long); }
+[data-week-detail] .week-day-panel > :is(.day-card.type-tempo, .day-card.type-interval, .day-card.type-race) { border-left-color: var(--tone-quality); }
+[data-week-detail] .week-day-panel > .day-card.type-rest { border-left-color: var(--line); }
+
+[data-week-detail] .day-card-date {
+  font-size: 13px;
+}
+
+[data-week-detail] .day-card-task {
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+[data-week-detail] .day-card-task small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+[data-week-detail] .day-card-prescription {
+  font-size: 13px;
+}
+
+/* 內層：步驟、恢復區塊、可收合主課 → 用細線分段，不再各自加框加底色 */
+[data-week-detail] :is(.step-card, .support-card) {
+  margin: 0;
+  padding: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--soft);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+[data-week-detail] .workout-steps,
+[data-week-detail] .support-grid {
+  display: grid;
+  gap: 0;
+}
+
+[data-week-detail] .day-workout-details {
+  margin-top: 16px;
+  border-top: 0;
+}
+
+[data-week-detail] .day-workout-details > summary {
+  padding: 0 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+[data-week-detail] .coach-detail-hint {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+[data-week-detail] .wx-chip {
+  margin: 12px 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+[data-week-detail] .day-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .week-strip-day {
+    min-height: 128px;
+    padding: 10px;
+  }
+
+  .week-strip-title {
+    font-size: 12px;
+  }
+}
+
+/* 手機：7 個日期圓鈕，下面一張當日大卡 */
+@media (max-width: 720px) {
+  .week-strip {
+    gap: 6px;
+  }
+
+  .week-strip-day,
+  .week-strip-day.tone-rest {
+    align-items: center;
+    gap: 4px;
+    min-height: 0;
+    padding: 8px 0 10px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.05);
+  }
+
+  .week-strip-date {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    font-size: 11px;
+  }
+
+  .week-strip-date b {
+    font-size: 16px;
+  }
+
+  .week-strip-type,
+  .week-strip-title,
+  .week-strip-km,
+  .week-strip-flags {
+    display: none;
+  }
+
+  .week-strip-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+  }
+
+  .tone-easy .week-strip-dot { background: var(--tone-easy); }
+  .tone-long .week-strip-dot { background: var(--tone-long); }
+  .tone-quality .week-strip-dot { background: var(--yellow); }
+
+  .week-strip-day.is-selected {
+    background: var(--green-dark);
+    box-shadow: none;
+  }
+
+  .week-strip-day.is-selected .week-strip-date,
+  .week-strip-day.is-selected .week-strip-date b {
+    color: #fff;
+  }
+
+  .week-strip-day.is-selected .week-strip-dot {
+    background: var(--yellow);
+  }
+
+  [data-week-detail] .week-day-panel > .day-card {
+    padding: 20px 16px;
+  }
+
+  [data-week-detail] .day-card-task {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 721px) {
+  [data-week-detail] .day-card-actions .btn,
+  [data-week-detail] .add-extra-session {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 720px) {
+  .week-strip-dow-prefix {
+    display: none;
+  }
+}
+
+/* 工具列：Garmin 按鈕容器被擠到 67px 而溢出蓋住「跨裝置同步」（既有問題）；
+   手機改成不縮的橫向捲動列 */
+@media (max-width: 720px) {
+  .week-strip-date > * {
+    justify-self: center;
+    text-align: center;
+  }
+
+  .plan-workspace-tools {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .plan-workspace-tools > *,
+  .plan-toolbar-sync,
+  .plan-toolbar-sync > *,
+  .garmin-activity-sync-control {
+    flex: 0 0 auto;
+  }
+}
+
+/* ---------- 本週課表詳情面板 v2：兩欄（步驟｜天氣・提醒・動作） ---------- */
+
+[data-week-detail] .week-day-panel > .day-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+  gap: 32px;
+  align-items: start;
+  padding: 28px 32px;
+}
+
+@media (max-width: 1000px) {
+  [data-week-detail] .week-day-panel > .day-detail {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 20px 16px;
+  }
+}
+
+.day-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.day-detail-type {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.day-detail-type.tone-easy { background: var(--tone-easy-tint); color: var(--tone-easy); }
+.day-detail-type.tone-long { background: var(--tone-long-tint); color: var(--tone-long); }
+.day-detail-type.tone-quality { background: var(--tone-quality-tint); color: var(--tone-quality); }
+.day-detail-type.tone-rest { background: var(--tone-rest-tint); color: var(--tone-rest); }
+
+.day-detail-source {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--soft);
+  font-size: 12px;
+}
+
+.day-detail-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  margin: 12px 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.day-detail-km {
+  color: var(--green-dark);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-detail.type-long .day-detail-km { color: var(--tone-long); }
+
+.day-detail-sub {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* 步驟時間軸：左側標籤＋圓點連線 */
+.day-steps {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 16px;
+  padding: 0 0 20px;
+}
+
+.day-step::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  bottom: 0;
+  left: 27px;
+  width: 2px;
+  background: var(--soft);
+}
+
+.day-step:last-child::before {
+  content: none;
+}
+
+.day-step-label {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.day-step.is-main .day-step-label {
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.day-detail.type-long .day-step.is-main .day-step-label {
+  background: var(--tone-long);
+}
+
+.day-step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.day-step-head b {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-step-head span {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.day-step.is-main .day-step-head b {
+  color: var(--green-dark);
+}
+
+.day-step-body p,
+.day-step-detail {
+  margin: 4px 0 0;
+  color: #4a554e;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.day-step-guide {
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.day-step-guide:hover {
+  text-decoration: underline;
+}
+
+/* 右欄 */
+.day-detail-side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.day-detail-side .wx-chip {
+  margin: 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--soft);
+  font-size: 14px;
+}
+
+.day-detail-note {
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--tone-easy-tint);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.day-detail-note b {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--green-dark);
+  font-size: 13px;
+}
+
+.day-detail-note.is-pending {
+  background: var(--tone-quality-tint);
+}
+
+.day-detail-note.is-pending b {
+  color: #7a5a00;
+}
+
+.day-detail-status {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.day-detail-status.is-done { color: var(--tone-easy); }
+.day-detail-status.is-missed { color: #9a3412; }
+
+.day-detail-side .day-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.day-detail-side .day-card-actions .btn {
+  flex: 1 1 140px;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.day-detail-side .add-extra-session {
+  width: 100%;
+  margin: 0;
+}
+
+/* 休息日：恢復內容不再框套框 */
+.day-detail .support-grid {
+  display: grid;
+  gap: 0;
+  margin-top: 16px;
+}
+
+.day-detail .support-card {
+  padding: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--soft);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* ---------- 本週課表詳情 v3：產品級訓練詳情頁（頂部數據帶＋強度結構圖＋兩欄） ---------- */
+
+[data-week-detail] .week-day-panel > .day-detail {
+  display: block;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.05), 0 12px 32px rgba(31, 42, 36, 0.08);
+}
+
+.day-detail {
+  --dd-tone: var(--tone-easy);
+  --dd-tint: var(--tone-easy-tint);
+}
+
+.day-detail.tone-long { --dd-tone: var(--tone-long); --dd-tint: var(--tone-long-tint); }
+.day-detail.tone-quality { --dd-tone: #b7791f; --dd-tint: var(--tone-quality-tint); }
+.day-detail.tone-rest { --dd-tone: var(--tone-rest); --dd-tint: var(--tone-rest-tint); }
+
+/* 頂部數據帶 */
+.dd-hero {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px 48px;
+  padding: 32px 40px 28px;
+  background: linear-gradient(180deg, var(--dd-tint) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.dd-hero-text {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.dd-hero .day-detail-title {
+  display: block;
+  margin: 14px 0 6px;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.dd-hero .day-detail-sub {
+  margin: 0;
+  color: #4a554e;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.dd-stats {
+  display: flex;
+  margin: 0;
+}
+
+.dd-stats > div {
+  min-width: 104px;
+  padding: 0 24px;
+  border-left: 1px solid rgba(31, 42, 36, 0.1);
+}
+
+.dd-stats > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.dd-stats dt {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dd-stats dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dd-stats dd small {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dd-stats > div:first-child dd {
+  color: var(--dd-tone);
+}
+
+/* 強度結構圖：寬度＝時間，高度＝強度 */
+.dd-profile {
+  display: flex;
+  gap: 4px;
+  padding: 8px 40px 0;
+}
+
+.dd-seg {
+  display: grid;
+  grid-template-rows: 64px auto;
+  gap: 8px;
+  min-width: 56px;
+}
+
+.dd-seg i {
+  display: block;
+  align-self: end;
+  width: 100%;
+  border-radius: 8px 8px 4px 4px;
+  background: #d8e4dc;
+}
+
+.dd-seg.is-main i {
+  background: linear-gradient(180deg, var(--dd-tone), color-mix(in srgb, var(--dd-tone) 72%, #fff));
+}
+
+.dd-seg span {
+  display: grid;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dd-seg span b {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+/* 主體兩欄 */
+.dd-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 40px;
+  margin-top: 24px;
+  padding: 28px 40px 36px;
+  border-top: 1px solid var(--soft);
+}
+
+.dd-section-title {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dd-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.dd-body .day-step-label {
+  width: 56px;
+}
+
+.day-detail .day-step.is-main .day-step-label {
+  background: var(--dd-tone);
+}
+
+.day-detail .day-step.is-main .day-step-head b {
+  color: var(--dd-tone);
+}
+
+/* 右欄：一個主要按鈕，其餘輕量 */
+.dd-body .day-detail-side {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.dd-body .dd-cta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.dd-body .dd-cta .btn-primary {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--green-dark);
+  box-shadow: 0 8px 20px rgba(21, 83, 56, 0.22);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.dd-body .dd-cta .btn-primary:hover {
+  background: #0f4029;
+}
+
+.dd-body .dd-text-btn,
+.dd-body .dd-cta .btn-secondary.dd-text-btn {
+  min-height: 36px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dd-body .dd-text-btn:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.dd-body .day-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.dd-body .day-detail-actions .btn {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dd-body .day-detail-actions .btn:hover {
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+
+.dd-body .add-extra-session {
+  justify-self: start;
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dd-body .add-extra-session:hover {
+  text-decoration: underline;
+}
+
+.dd-body .day-detail-status {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--tone-easy-tint);
+  font-size: 15px;
+}
+
+.dd-body .day-detail-status.is-missed {
+  background: #fbe9e4;
+}
+
+.dd-body .day-detail-note {
+  border-radius: 14px;
+  background: var(--soft);
+}
+
+.dd-body .day-detail-note.is-pending {
+  background: var(--tone-quality-tint);
+}
+
+.dd-body .wx-chip {
+  margin: 0;
+  border-radius: 14px;
+}
+
+@media (max-width: 1000px) {
+  .dd-hero {
+    padding: 24px 20px 20px;
+  }
+
+  .dd-hero .day-detail-title {
+    font-size: 26px;
+  }
+
+  .dd-stats {
+    width: 100%;
+  }
+
+  .dd-stats > div {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 12px;
+  }
+
+  .dd-stats dd {
+    font-size: 26px;
+  }
+
+  .dd-profile {
+    padding: 4px 20px 0;
+  }
+
+  .dd-seg {
+    grid-template-rows: 48px auto;
+    min-width: 44px;
+  }
+
+  .dd-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 16px;
+    padding: 20px 20px 24px;
+  }
+}
+
+@media (max-width: 420px) {
+  .dd-seg span {
+    font-size: 11px;
+  }
+
+  .dd-stats dd small {
+    font-size: 12px;
+  }
+}
+
+.dd-body .course-rationale {
+  display: block;
+}
+
+.dd-body .course-rationale b,
+.dd-body .course-rationale span {
+  display: block;
+  width: auto;
+  writing-mode: horizontal-tb;
+}
