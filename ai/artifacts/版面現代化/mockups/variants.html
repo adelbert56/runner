@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>跑者廣場版面現代化 — 樣稿 A／B</title>
+<style>
+  :root {
+    --ink: #1f2a24; --muted: #65736b; --faint: #8c978f; --soft: #f6f4ee; --surface: #fff; --line: #e2ded4;
+    --green: #24724f; --green-dark: #155338; --green-tint: #e7f2ec; --yellow: #f5c84c; --yellow-tint: #fdf4d8;
+    --radius: 12px; --radius-sm: 8px;
+    --shadow: 0 1px 2px rgba(31,42,36,.06), 0 4px 12px rgba(31,42,36,.06);
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+    color: var(--ink);
+  }
+  body { margin: 0; background: #dcd8cd; padding: 32px 24px 64px; }
+  h1.page { font-size: 24px; margin: 0 0 4px; }
+  p.lead { margin: 0 0 32px; color: #4a554e; font-size: 14px; }
+  .variant { margin-bottom: 48px; }
+  .variant > h2 { font-size: 20px; margin: 0 0 4px; }
+  .variant > p { margin: 0 0 16px; font-size: 14px; color: #4a554e; max-width: 760px; line-height: 1.6; }
+  .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+  .phone { width: 375px; height: 780px; background: var(--soft); border-radius: 32px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.18); display: flex; flex-direction: column; position: relative; }
+  .phone .label { position: absolute; top: -28px; left: 4px; font-size: 13px; font-weight: 700; color: #4a554e; }
+  .wrap { position: relative; }
+  .scroll { flex: 1; overflow: hidden; }
+  /* shared bits */
+  .appbar { display: flex; align-items: center; gap: 12px; padding: 16px 20px 12px; background: var(--soft); }
+  .logo { width: 32px; height: 32px; border-radius: 8px; background: var(--green-dark); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
+  .appbar strong { font-size: 16px; }
+  .tabbar { display: flex; justify-content: space-around; padding: 8px 0 20px; background: var(--surface); border-top: 1px solid var(--line); }
+  .tabbar span { display: grid; justify-items: center; gap: 2px; font-size: 11px; color: var(--faint); font-weight: 500; }
+  .tabbar span i { font-style: normal; font-size: 18px; filter: grayscale(1); opacity: .6; }
+  .tabbar span.on { color: var(--green-dark); font-weight: 700; }
+  .tabbar span.on i { filter: none; opacity: 1; }
+  .chip { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--surface); color: var(--muted); white-space: nowrap; box-shadow: inset 0 0 0 1px var(--line); }
+  .chip.on { background: var(--green-dark); color: #fff; box-shadow: none; }
+  .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; background: var(--soft); color: var(--muted); }
+  .tag.warn { background: var(--yellow-tint); color: #7a5a00; }
+  .tag.ok { background: var(--green-tint); color: var(--green-dark); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; background: var(--green-dark); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--green-dark); box-shadow: inset 0 0 0 1px var(--line); }
+  .muted { color: var(--muted); }
+
+  /* ---------- Variant A: 精簡清單 ---------- */
+  .a-search { margin: 0 20px 12px; height: 44px; border-radius: 10px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; padding: 0 14px; color: var(--faint); font-size: 14px; }
+  .a-chips { display: flex; gap: 8px; padding: 0 20px 16px; overflow: hidden; }
+  .a-month { padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .a-list { background: var(--surface); margin: 0 12px 12px; border-radius: var(--radius); box-shadow: var(--shadow); }
+  .a-item { display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; padding: 16px; align-items: start; }
+  .a-item + .a-item { border-top: 1px solid var(--soft); }
+  .a-date { text-align: center; }
+  .a-date b { display: block; font-size: 20px; line-height: 1.1; }
+  .a-date small { font-size: 12px; color: var(--muted); }
+  .a-title { font-size: 15px; font-weight: 700; line-height: 1.35; margin: 0 0 4px; }
+  .a-meta { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+  .a-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .a-star { font-size: 18px; color: var(--faint); }
+  .a-star.on { color: #e0a800; }
+  /* A trainer */
+  .a-today { margin: 4px 16px 16px; padding: 24px; border-radius: 16px; background: var(--green-dark); color: #fff; }
+  .a-today small { font-size: 13px; opacity: .8; font-weight: 500; }
+  .a-today h3 { font-size: 30px; margin: 8px 0 4px; line-height: 1.2; }
+  .a-today p { margin: 0 0 16px; font-size: 14px; opacity: .85; line-height: 1.5; }
+  .a-today .steps { display: flex; gap: 8px; font-size: 13px; }
+  .a-today .steps span { background: rgba(255,255,255,.14); border-radius: 6px; padding: 4px 8px; }
+  .a-week { margin: 0 16px 16px; padding: 16px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .a-week h4, .a-coach h4 { margin: 0 0 12px; font-size: 14px; }
+  .a-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .a-days div { padding: 8px 0; border-radius: 8px; font-size: 12px; color: var(--muted); }
+  .a-days div b { display: block; font-size: 14px; color: var(--ink); margin-top: 2px; }
+  .a-days div.run { background: var(--green-tint); }
+  .a-days div.run b { color: var(--green-dark); }
+  .a-days div.today { box-shadow: inset 0 0 0 2px var(--green-dark); }
+  .a-days div.long { background: var(--green-dark); color: #d6e9de; }
+  .a-days div.long b { color: #fff; }
+  .a-bar { height: 8px; border-radius: 4px; background: var(--soft); margin: 16px 0 6px; overflow: hidden; }
+  .a-bar i { display: block; height: 100%; width: 24%; background: var(--green); }
+  .a-coach { margin: 0 16px; padding: 16px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); font-size: 14px; line-height: 1.6; }
+
+  /* ---------- Variant B: 儀表板 ---------- */
+  .b-hero { margin: 0 16px 16px; padding: 20px; border-radius: 16px; background: linear-gradient(135deg, #155338, #24724f); color: #fff; }
+  .b-hero small { font-size: 12px; opacity: .8; font-weight: 500; }
+  .b-hero .big { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 2px; }
+  .b-hero .big b { font-size: 48px; line-height: 1; }
+  .b-hero .race { font-size: 14px; font-weight: 700; }
+  .b-hero .sub { font-size: 13px; opacity: .8; margin-top: 2px; }
+  .b-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+  .b-stats div { background: rgba(255,255,255,.12); border-radius: 10px; padding: 10px; }
+  .b-stats small { display: block; font-size: 11px; opacity: .8; }
+  .b-stats b { font-size: 16px; }
+  .b-section { padding: 4px 20px 8px; display: flex; justify-content: space-between; align-items: baseline; }
+  .b-section h4 { margin: 0; font-size: 16px; }
+  .b-section a { font-size: 13px; color: var(--green-dark); font-weight: 500; }
+  .b-cards { display: grid; gap: 12px; padding: 0 16px 16px; }
+  .b-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; display: grid; grid-template-columns: auto 1fr; gap: 12px; }
+  .b-card .cal { width: 52px; border-radius: 10px; overflow: hidden; text-align: center; box-shadow: inset 0 0 0 1px var(--line); align-self: start; }
+  .b-card .cal small { display: block; background: var(--green-dark); color: #fff; font-size: 11px; padding: 2px 0; font-weight: 700; }
+  .b-card .cal b { display: block; font-size: 20px; padding: 4px 0 6px; }
+  .b-card h5 { margin: 0 0 4px; font-size: 15px; line-height: 1.35; }
+  .b-card .meta { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .b-card .act { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .b-card .act .btn { flex: 1; height: 36px; font-size: 13px; }
+  .b-plan { margin: 0 16px 12px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .b-plan .d { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; }
+  .b-plan .d + .d { border-top: 1px solid var(--soft); }
+  .b-plan .d .dw { font-size: 12px; color: var(--muted); text-align: center; }
+  .b-plan .d .dw b { display: block; font-size: 16px; color: var(--ink); }
+  .b-plan .d .t { font-size: 14px; font-weight: 700; }
+  .b-plan .d .t small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+  .b-plan .d.today { background: var(--green-tint); }
+  .b-plan .d.rest .t { color: var(--faint); font-weight: 500; }
+  .b-plan .km { font-size: 14px; font-weight: 700; color: var(--green-dark); }
+  .ring { width: 56px; height: 56px; border-radius: 50%; background: conic-gradient(#f5c84c 0 24%, rgba(255,255,255,.2) 24% 100%); display: grid; place-items: center; }
+  .ring span { width: 44px; height: 44px; border-radius: 50%; background: #1d6143; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+
+  .notes { max-width: 760px; background: var(--surface); border-radius: var(--radius); padding: 20px 24px; font-size: 14px; line-height: 1.7; margin-top: 8px; }
+  .notes h3 { margin: 0 0 8px; font-size: 16px; }
+  .notes ul { margin: 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1 class="page">跑者廣場版面現代化 — 樣稿</h1>
+<p class="lead">兩個方向都沿用現有配色（森林綠、暖白、黃色只做提醒）與字型，以手機為主設計；桌機會把同樣內容排成 2–3 欄。請選 A 或 B（也可以混搭，例如「賽事用 A、練跑用 B」）。</p>
+
+<section class="variant">
+  <h2>A．精簡清單（像行事曆 App）</h2>
+  <p>重點是<strong>一眼掃完</strong>：賽事一場一行，只留日期、名稱、縣市距離和報名狀態；按鈕和詳細資料點進去才看到。練跑頁一打開就是「今天跑什麼」，下面一條 7 天週曆。底部固定導覽列，單手就能切頁。</p>
+  <div class="row">
+    <div class="wrap"><span class="phone"><span class="label">A-1 賽事列表</span>
+      <div class="appbar"><div class="logo">跑</div><strong>中部賽事</strong></div>
+      <div class="scroll">
+        <div class="a-search">🔍 搜尋賽事、縣市或距離</div>
+        <div class="a-chips"><span class="chip on">全部</span><span class="chip">半馬</span><span class="chip">10K 以下</span><span class="chip">臺中</span><span class="chip">可報名</span></div>
+        <div class="a-month">11 月</div>
+        <div class="a-list">
+          <div class="a-item"><div class="a-date"><b>21</b><small>週六</small></div><div><p class="a-title">國立臺灣體育運動大學第34屆駱駝盃路跑賽</p><p class="a-meta">臺中市 · 21km</p><div class="a-tags"><span class="tag">已截止</span><span class="tag ok">官方直連</span></div></div><span class="a-star">☆</span></div>
+        </div>
+        <div class="a-month">12 月</div>
+        <div class="a-list">
+          <div class="a-item"><div class="a-date"><b>05</b><small>週六</small></div><div><p class="a-title">2026 濁水溪紫金馬拉松-高手名間站</p><p class="a-meta">南投縣 · 21K / 11K / 6K</p><div class="a-tags"><span class="tag">已截止</span></div></div><span class="a-star">☆</span></div>
+          <div class="a-item"><div class="a-date"><b>06</b><small>週日</small></div><div><p class="a-title">2026 第二屆麗晨臺中國際馬拉松</p><p class="a-meta">臺中市 · 42K / 21K / 10K / 5K</p><div class="a-tags"><span class="tag ok">已報名</span><span class="tag">19 天後</span></div></div><span class="a-star on">★</span></div>
+          <div class="a-item"><div class="a-date"><b>13</b><small>週日</small></div><div><p class="a-title">2026 通霄粉紅超跑馬拉松</p><p class="a-meta">苗栗縣 · 42K / 22.5K / 12K / 4.5K</p><div class="a-tags"><span class="tag">已截止</span></div></div><span class="a-star">☆</span></div>
+        </div>
+      </div>
+      <div class="tabbar"><span class="on"><i>🏁</i>賽事</span><span><i>🗓</i>練跑</span><span><i>📘</i>入門</span><span><i>👟</i>跑鞋</span><span><i>📰</i>新聞</span></div>
+    </span></div>
+
+    <div class="wrap"><span class="phone"><span class="label">A-2 練跑首頁</span>
+      <div class="appbar"><div class="logo">跑</div><strong>練跑計畫</strong><span class="muted" style="margin-left:auto;font-size:13px">W20</span></div>
+      <div class="scroll">
+        <div class="a-today"><small>今天 11/17（二）</small><h3>恢復跑 6 km</h3><p>心率 ≤145，輕鬆到能聊天。沒跑就跳過，不補。</p><div class="steps"><span>熱身 8 分</span><span>主課 6 km</span><span>收操 8 分</span></div></div>
+        <div class="a-week"><h4>本週 25 km · 下週開始減量</h4>
+          <div class="a-days"><div>一<b>休</b></div><div class="run today">二<b>6</b></div><div>三<b>休</b></div><div class="run">四<b>7</b></div><div>五<b>休</b></div><div class="long">六<b>12</b></div><div>日<b>休</b></div></div>
+          <div class="a-bar"><i></i></div><div class="muted" style="font-size:12px">已完成 6 / 25 km</div>
+        </div>
+        <div class="a-coach"><h4>教練說</h4>11/15 10K 後無痛、步態正常。這週只跑輕鬆，週六 12 km 是 12/6 前最後一次較長的跑，順便演練比賽補給。</div>
+      </div>
+      <div class="tabbar"><span><i>🏁</i>賽事</span><span class="on"><i>🗓</i>練跑</span><span><i>📘</i>入門</span><span><i>👟</i>跑鞋</span><span><i>📰</i>新聞</span></div>
+    </span></div>
+  </div>
+</section>
+
+<section class="variant">
+  <h2>B．儀表板（像運動 App 首頁）</h2>
+  <p>重點是<strong>目標感</strong>：最上面是倒數到 12/6 的大數字和本週進度，再往下是「我的賽事」卡片（直接有主要按鈕）和本週每天課表。資訊比 A 多一點，但每一區都有標題，好找。</p>
+  <div class="row">
+    <div class="wrap"><span class="phone"><span class="label">B-1 賽事首頁</span>
+      <div class="appbar"><div class="logo">跑</div><strong>跑者廣場</strong></div>
+      <div class="scroll">
+        <div class="b-hero"><small>下一場目標賽</small><div class="big"><b>19</b><span>天</span></div><div class="race">第二屆麗晨臺中國際馬拉松 · 21K</div><div class="sub">12/06（日）· 目標 2:15:00 · 6:24/km</div></div>
+        <div class="b-section"><h4>可以報名的賽事</h4><a>全部 50 場 →</a></div>
+        <div class="b-cards">
+          <div class="b-card"><div class="cal"><small>12月</small><b>13</b></div><div><h5>2026 母子鱷魚40週年-突破前行馬拉松</h5><div class="meta">臺中市 · 42K / 21K / 13K / 5K</div><span class="tag ok">報名中</span></div><div class="act"><span class="btn">報名</span><span class="btn ghost">☆ 收藏</span></div></div>
+          <div class="b-card"><div class="cal"><small>12月</small><b>19</b></div><div><h5>2026 第二屆食安盃馬拉松</h5><div class="meta">臺中市 · 42K / 21K / 10K / 5K</div><span class="tag ok">報名中</span></div><div class="act"><span class="btn">報名</span><span class="btn ghost">☆ 收藏</span></div></div>
+        </div>
+      </div>
+      <div class="tabbar"><span class="on"><i>🏁</i>賽事</span><span><i>🗓</i>練跑</span><span><i>📘</i>入門</span><span><i>👟</i>跑鞋</span><span><i>📰</i>新聞</span></div>
+    </span></div>
+
+    <div class="wrap"><span class="phone"><span class="label">B-2 練跑首頁</span>
+      <div class="appbar"><div class="logo">跑</div><strong>練跑計畫</strong></div>
+      <div class="scroll">
+        <div class="b-hero"><div style="display:flex;justify-content:space-between;align-items:center"><div><small>W20 半馬收整</small><div class="big"><b>6</b><span>/ 25 km</span></div><div class="sub">距離 12/6 比賽 19 天</div></div><div class="ring"><span>24%</span></div></div>
+          <div class="b-stats"><div><small>目標配速</small><b>6:24</b></div><div><small>E 心率上限</small><b>150</b></div><div><small>最長距離</small><b>12 km</b></div></div></div>
+        <div class="b-section"><h4>本週課表</h4><a>教練說明 →</a></div>
+        <div class="b-plan">
+          <div class="d today"><div class="dw">二<b>17</b></div><div class="t">恢復跑<small>HR ≤145 · 今天</small></div><div class="km">6 km</div></div>
+          <div class="d rest"><div class="dw">三<b>18</b></div><div class="t">休息</div><div></div></div>
+          <div class="d"><div class="dw">四<b>19</b></div><div class="t">E 跑<small>HR ≤150</small></div><div class="km">7 km</div></div>
+          <div class="d rest"><div class="dw">五<b>20</b></div><div class="t">休息</div><div></div></div>
+          <div class="d"><div class="dw">六<b>21</b></div><div class="t">長跑<small>HR ≤150 · 演練補給</small></div><div class="km">12 km</div></div>
+        </div>
+      </div>
+      <div class="tabbar"><span><i>🏁</i>賽事</span><span class="on"><i>🗓</i>練跑</span><span><i>📘</i>入門</span><span><i>👟</i>跑鞋</span><span><i>📰</i>新聞</span></div>
+    </span></div>
+  </div>
+</section>
+
+<div class="notes">
+  <h3>兩個方向共通的改動</h3>
+  <ul>
+    <li>手機底部固定導覽列，取代現在擠在上方、要橫向滑的選單。</li>
+    <li>修掉桌機中等寬度時，左側「月份」欄蓋住內容的跑版。</li>
+    <li>賽事卡片的次要資訊（交通、組別時間、資料來源）收進點開後的詳細頁，列表只留決策需要的資訊。</li>
+    <li>練跑頁把大標題介紹移到「設定」裡，打開就是今天的課。</li>
+    <li>入門、跑鞋、新聞頁沿用同一套卡片與間距；報名管理（本機）只調間距，不改流程。</li>
+  </ul>
+</div>
+</body>
+</html>

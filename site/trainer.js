@@ -36,7 +36,7 @@ function addLocalRegistrationLink() {
   if (!nav || nav.querySelector('[data-local-only="registration"]')) return;
   const link = document.createElement('a');
   link.href = '/local/registration/registration.html';
-  link.textContent = '📝 報名管理';
+  link.innerHTML = '<span class="nav-icon" aria-hidden="true">📝</span><span class="nav-label">報名</span>';
   link.setAttribute('data-local-only', 'registration');
   nav.append(link);
 }
@@ -1544,6 +1544,11 @@ function renderHeroPanel() {
   const coachGoalPace = String((typeof coachReviewData !== 'undefined' && coachReviewData?.goal?.targetPace) || '').match(/\d{1,2}:\d{2}/)?.[0];
   const racePaceText = coachGoalPace ? `目標配速 ${coachGoalPace}/km` : profile?.racePaceSec ? `目標配速 ${secToPace(profile.racePaceSec)}/km` : '';
   const weeklyTarget = week ? effectiveWeekVolumeTarget(week).display : '依可訓練日生成';
+  if (hasPlan) {
+    const goalPace = coachGoalPace || (profile?.racePaceSec ? secToPace(profile.racePaceSec) : '');
+    shell.innerHTML = renderHeroDashboard({ week, meta, phaseText, totalWeeks, daysToRace, coachGoalPace: goalPace, easyPace });
+    return;
+  }
   shell.innerHTML = `
     <div class="trainer-hero-layout">
       <div class="trainer-hero-main">
@@ -1593,6 +1598,64 @@ function renderHeroPanel() {
           </div>
         </div>`}
       </aside>
+    </div>`;
+}
+
+// 版面 B「儀表板」（2026-11-17，ai/artifacts/版面現代化/mockup-decision.md）：
+// 本週進度與倒數放最上面，接著逐日課表與今日課卡。數字一律取自 planStatus()／weekPlannedKm，
+// 與頁面其他區塊同一個來源。
+function renderHeroDashboard({ week, meta, phaseText, totalWeeks, daysToRace, coachGoalPace, easyPace }) {
+  const status = typeof planStatus === 'function' ? planStatus() : null;
+  const plannedKm = typeof weekPlannedKm === 'function' ? Number(weekPlannedKm(week)) || 0 : 0;
+  const doneKm = Number(status?.weekDoneKm) || 0;
+  const pct = plannedKm > 0 ? Math.min(100, Math.round((doneKm / plannedKm) * 100)) : 0;
+  const today = todayStr();
+  const ctx = buildContext();
+  const days = (week.days || []).map((day) => resolveCourse(day, ctx, week).course);
+  const runDays = days.filter((day) => day.type !== 'rest');
+  const longKm = Math.max(0, ...runDays.map((day) => Number(day.km) || 0));
+  const kmText = (value) => `${Number.isInteger(value) ? value : value.toFixed(1)}`;
+  const countdown = daysToRace === null ? '' : daysToRace > 0 ? `距離比賽 ${daysToRace} 天` : daysToRace === 0 ? '今天比賽！' : '已完賽';
+  const ringDash = 270.18;
+  const dayRows = days.map((day) => {
+    const garminRun = typeof getGarminRunForDate === 'function' ? getGarminRunForDate(day.dateStr) : null;
+    const done = Boolean(garminRun) || day.status === 'done';
+    const isToday = day.dateStr === today;
+    const isRest = day.type === 'rest';
+    const sub = isRest ? '' : [day.hrTarget, isToday ? '今天' : '', done ? `✓ 已完成${garminRun?.km ? ` ${garminRun.km} km` : ''}` : ''].filter(Boolean).join(' · ');
+    return `<li class="dash-day${isToday ? ' is-today' : ''}${isRest ? ' is-rest' : ''}${done ? ' is-done' : ''}">
+        <span class="dash-day-date"><small>${DOW_NAMES[day.dow]}</small><b>${Number(day.dateStr.slice(8, 10))}</b></span>
+        <span class="dash-day-title">${isRest ? '休息' : reviewEscape(trainingTaskTitle(day))}${sub ? `<small>${reviewEscape(sub)}</small>` : ''}</span>
+        <span class="dash-day-km">${isRest || !Number(day.km) ? '' : `${kmText(Number(day.km))} km`}</span>
+      </li>`;
+  }).join('');
+  return `
+    <div class="trainer-dash">
+      <section class="trainer-dash-hero" aria-labelledby="trainer-hero-title">
+        <div class="trainer-dash-top">
+          <div>
+            <div class="trainer-hero-eyebrow"><span class="trainer-dash-phase">W${currentWeek} · ${reviewEscape(phaseText)}</span></div>
+            <h1 class="trainer-dash-title" id="trainer-hero-title"><b>${kmText(doneKm)}</b><span>/ ${kmText(plannedKm)} km</span></h1>
+            <p class="trainer-hero-planline">${[meta.label, countdown, `第 ${currentWeek} / ${totalWeeks} 週`].filter(Boolean).join(' · ')}</p>
+          </div>
+          <div class="trainer-dash-ring" role="img" aria-label="本週完成 ${pct}%">
+            <svg viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="43"/><circle class="trainer-dash-ring-value" cx="56" cy="56" r="43" style="stroke-dasharray:${ringDash};stroke-dashoffset:${ringDash * (1 - pct / 100)}"/></svg>
+            <strong>${pct}%</strong>
+          </div>
+        </div>
+        <div class="trainer-dash-stats">
+          <div><small>目標配速</small><b>${coachGoalPace ? `${coachGoalPace}` : '—'}</b></div>
+          <div><small>${reviewEscape(String(easyPace.label).replace(/^本週/, ''))}</small><b>${reviewEscape(String(easyPace.value))}</b></div>
+          <div><small>本週長跑</small><b>${longKm ? `${kmText(longKm)} km` : '—'}</b></div>
+        </div>
+      </section>
+      <div class="trainer-dash-grid">
+        <section class="trainer-dash-week" aria-labelledby="trainer-dash-week-title">
+          <div class="trainer-dash-week-head"><h2 id="trainer-dash-week-title">本週課表</h2><button type="button" class="trainer-dash-link" onclick="goToToday()">完整課表 →</button></div>
+          <ol class="dash-days">${dayRows}</ol>
+        </section>
+        <aside class="trainer-hero-side" aria-label="今日課表">${renderHeroTodayCard()}</aside>
+      </div>
     </div>`;
 }
 

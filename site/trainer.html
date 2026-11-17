@@ -7,6 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260727-brand2">
   <link rel="stylesheet" href="./styles.css?v=20260529-message-list1">
   <link rel="stylesheet" href="trainer.css?v=20261019-course-type-fix">
+  <link rel="stylesheet" href="./modern.css?v=20261117-layout1">
   <script>
     // 全域錯誤兜底：任何 render 路徑丟出的例外，沒有這層會直接是空白畫面、
     // 使用者完全不知道發生什麼事。獨立於其他腳本之外（不依賴 showModal 等
@@ -45,12 +46,12 @@
     <span>跑者廣場</span>
   </a>
   <nav class="main-nav" aria-label="主要導覽">
-    <a href="index.html#races">🏁 賽事</a>
-    <a href="index.html#announcements">📢 公告</a>
-    <a href="index.html#academy">📘 入門</a>
-    <a href="trainer.html" class="active">🗓 練跑計畫</a>
-    <a href="index.html#gear">👟 跑鞋</a>
-    <a href="index.html#news">📰 新聞</a>
+    <a href="index.html#races"><span class="nav-icon" aria-hidden="true">🏁</span><span class="nav-label">賽事</span></a>
+    <a href="index.html#announcements"><span class="nav-icon" aria-hidden="true">📢</span><span class="nav-label">公告</span></a>
+    <a href="index.html#academy"><span class="nav-icon" aria-hidden="true">📘</span><span class="nav-label">入門</span></a>
+    <a href="trainer.html" class="active" aria-current="page"><span class="nav-icon" aria-hidden="true">🗓</span><span class="nav-label">練跑</span></a>
+    <a href="index.html#gear"><span class="nav-icon" aria-hidden="true">👟</span><span class="nav-label">跑鞋</span></a>
+    <a href="index.html#news"><span class="nav-icon" aria-hidden="true">📰</span><span class="nav-label">新聞</span></a>
   </nav>
 </header>
 

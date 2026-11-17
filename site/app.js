@@ -27,7 +27,7 @@ function addLocalRegistrationLink() {
   }
   const link = document.createElement("a");
   link.href = LOCAL_REGISTRATION_HREF;
-  link.textContent = "報名管理";
+  link.innerHTML = '<span class="nav-icon" aria-hidden="true">📝</span><span class="nav-label">報名</span>';
   link.setAttribute("data-local-only", "registration");
   nav.append(link);
 }
@@ -2028,20 +2028,43 @@ function renderRaceCard(race) {
       : "",
   ].filter(Boolean);
 
+  // 版面 A（2026-11-17）：收合時一行摘要，報名按鈕與完整資訊收進「報名與詳細資訊」。
+  const rowTags = [
+    cancelled ? ["活動停辦", "warn"] : null,
+    registered ? ["已報名", "ok"] : null,
+    registered && raceDays !== null && raceDays >= 0 ? [raceDays === 0 ? "今天比賽" : `${raceDays} 天後比賽`, "ok"] : null,
+    !registered && closingSoon ? [deadlineDaysNum === 0 ? "今天截止" : `${deadlineDaysNum} 天後截止`, "warn"] : null,
+    !registered && !closingSoon && !cancelled ? [status, statusClass === "status-open" ? "ok" : statusClass === "status-soon" ? "warn" : ""] : null,
+    datesNeedCheck ? ["日期待查證", "warn"] : null,
+    disappeared ? ["來源已下架", "warn"] : null,
+  ].filter(Boolean);
   return `
-    <article id="${escapeHtml(raceDomId(race))}" class="race-card ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""} ${registeredRaceSoon ? "race-registered-soon" : ""} ${registeredRaceToday ? "race-registered-today" : ""}">
+    <article id="${escapeHtml(raceDomId(race))}" class="race-card race-row ${expired ? "race-expired" : ""} ${status === "已截止" ? "registration-closed" : ""} ${registeredRaceSoon ? "race-registered-soon" : ""} ${registeredRaceToday ? "race-registered-today" : ""}">
+      <div class="race-row-head">
+        <div class="race-row-date" aria-label="${escapeHtml(date.full)}"><b>${escapeHtml(date.day)}</b><small>${escapeHtml(date.weekday)}</small></div>
+        <div class="race-row-body">
+          <h3>${raceTitleHtml(race.race_name)}</h3>
+          <p class="race-row-meta">${escapeHtml(race.race_county)} · ${escapeHtml(distances)}</p>
+          <div class="race-row-tags">${rowTags.map(([label, tone]) => `<span class="race-tag ${escapeHtml(tone)}">${escapeHtml(label)}</span>`).join("")}</div>
+        </div>
+        <button
+          class="favorite-button icon-button race-favorite race-row-star ${favorite ? "active" : ""}"
+          type="button"
+          data-favorite="${escapeHtml(key)}"
+          aria-pressed="${favorite ? "true" : "false"}"
+          aria-label="${favorite ? "取消收藏" : "加入收藏"}"
+          title="${favorite ? "取消收藏" : "加入收藏"}"
+        ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
+      </div>
+      <details class="race-more">
+        <summary>報名與詳細資訊</summary>
       <div class="race-main">
         <div class="race-header-row">
           <div class="race-identity">
-            <div class="race-title-row">
-              <h3>${raceTitleHtml(race.race_name)}</h3>
-            </div>
             <div class="race-summary-line">
-              <span>${icon("pin")}${escapeHtml(race.race_county)}</span>
               <span class="${cls}">${icon("flag")}${escapeHtml(difficulty)}</span>
               <span class="race-status ${statusClass}">${icon("clock")}${escapeHtml(status)}</span>
             </div>
-            <p class="race-distance">${escapeHtml(distances)}</p>
             <div class="race-schedule" aria-label="報名時間">
               <span class="${datesNeedCheck ? "schedule-warning" : ""}">${icon("calendar")}<strong>開報</strong>${escapeHtml(scheduleOpenText)}</span>
               <span${closingSoon ? ' class="schedule-urgent"' : ""}>${icon("calendar")}<strong>截止</strong>${escapeHtml(deadline)}${closingSoon ? `<em class="deadline-count">${deadlineDaysNum === 0 ? "今天！" : `${deadlineDaysNum}天`}</em>` : ""}</span>
@@ -2051,16 +2074,7 @@ function renderRaceCard(race) {
             <div class="race-insight">${escapeHtml(decision)}</div>
             ${trustItems.length ? `<div class="race-trust-line" aria-label="資料可信度">${trustItems.map(([label, type], i) => `<span class="trust-pill ${escapeHtml(type)}">${icon(i === 0 ? "link" : i === 1 ? "shield" : "info")}${escapeHtml(label)}</span>`).join("")}</div>` : ""}
           </div>
-          <div class="race-hero-facts">
-            <div class="date-block" aria-label="${escapeHtml(date.full)}">
-              <div>
-                <span>${escapeHtml(date.year)}</span>
-                <strong>${escapeHtml(date.month)}/${escapeHtml(date.day)}</strong>
-                <em>${escapeHtml(date.weekday)}</em>
-              </div>
-            </div>
-            ${venue ? `<div class="race-venue-box"><dl><div><dt><span class="fact-label">${icon("pin")}活動地點</span></dt><dd>${escapeHtml(venue)}</dd></div></dl>${mapLink ? `<a class="fact-action" href="${escapeHtml(mapLink)}" target="_blank" rel="noreferrer">查看地點與交通資訊 ${icon("arrow")}</a>` : ""}</div>` : `<div class="race-venue-box race-venue-box--empty"></div>`}
-          </div>
+          ${venue ? `<div class="race-hero-facts"><div class="race-venue-box"><dl><div><dt><span class="fact-label">${icon("pin")}活動地點</span></dt><dd>${escapeHtml(venue)}</dd></div></dl>${mapLink ? `<a class="fact-action" href="${escapeHtml(mapLink)}" target="_blank" rel="noreferrer">查看地點與交通資訊 ${icon("arrow")}</a>` : ""}</div></div>` : ""}
           <div class="race-header-action">
             ${
               canPlanTraining
@@ -2082,14 +2096,6 @@ function renderRaceCard(race) {
                   <button type="button" data-calendar-copy="${escapeHtml(key)}">複製資訊</button>
                 </div>
               </div>
-              <button
-                class="favorite-button icon-button race-favorite ${favorite ? "active" : ""}"
-                type="button"
-                data-favorite="${escapeHtml(key)}"
-                aria-pressed="${favorite ? "true" : "false"}"
-                aria-label="${favorite ? "取消收藏" : "加入收藏"}"
-                title="${favorite ? "取消收藏" : "加入收藏"}"
-              ><span aria-hidden="true">${favorite ? "★" : "☆"}</span></button>
             </div>
         <button
           class="registration-toggle race-registered ${registered ? "active" : ""}"
@@ -2105,6 +2111,7 @@ function renderRaceCard(race) {
         </div>
         ${factItems.length ? `<details class="race-fact-details"><summary><span class="fact-summary-open">查看組別開跑時間、費用與名額</span><span class="fact-summary-close">收合賽事資訊</span></summary><dl class="race-fact-grid" aria-label="賽事完整資訊">${factItems.map((item) => `<div class="${escapeHtml(factClassFor(item.label))}"><dt><span class="fact-label">${icon(FACT_ICONS[item.label] || "info")}${escapeHtml(item.label)}</span>${item.action ? `<a class="fact-action" href="${escapeHtml(item.action.href)}" target="_blank" rel="noreferrer">${escapeHtml(item.action.label)}</a>` : ""}</dt><dd>${item.label === "開跑" ? renderStartTimes(race) : item.label === "費用" ? renderFees(item.value) : item.label === "名額" ? renderQuota(item.value) : escapeHtml(item.value)}</dd></div>`).join("")}</dl></details>` : ""}
       </div>
+      </details>
     </article>
   `;
 }
@@ -2576,18 +2583,30 @@ function renderRaces() {
     return;
   }
 
-  const currentHtml = currentRaces.map(renderRaceCard).join("");
+  // 版面 A：清單依日期排序，在月份切換處插入分隔標題，取代會蓋住內容的側邊月份欄。
+  const withMonthHeadings = (races) => {
+    let lastMonth = "";
+    return races.map((race) => {
+      const month = String(race.race_date || "").slice(0, 7);
+      const heading = month && month !== lastMonth
+        ? `<div class="race-month-heading">${escapeHtml(month.slice(0, 4))} 年 ${escapeHtml(String(Number(month.slice(5, 7))))} 月</div>`
+        : "";
+      lastMonth = month;
+      return heading + renderRaceCard(race);
+    }).join("");
+  };
+  const currentHtml = withMonthHeadings(currentRaces);
   const historyHtml = historyRaces.length && state.registration !== "history"
     ? `
       <details class="history-races">
         <summary>歷史賽事已收起 · ${escapeHtml(String(historyRaces.length))} 場</summary>
         <p class="history-races-note">預設收起舊賽事，只有需要回查時再展開。</p>
         <div class="history-race-list">
-          ${historyRaces.map(renderRaceCard).join("")}
+          ${withMonthHeadings(historyRaces)}
         </div>
       </details>
     `
-    : historyRaces.map(renderRaceCard).join("");
+    : withMonthHeadings(historyRaces);
 
   els.raceList.innerHTML = `${currentHtml}${historyHtml}`;
 
