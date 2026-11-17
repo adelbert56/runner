@@ -735,3 +735,213 @@
     padding-inline: 0;
   }
 }
+
+/* ---------- 其他分頁（公告、入門、跑鞋、新聞）：與賽事頁同一套版面語言 ---------- */
+
+/* 首頁大圖與統計卡只屬於賽事首頁；切到其他分頁時收起，內容直接出現在第一屏 */
+main:has(.page-panel.active:not(#races)) > .hero,
+main:has(.page-panel.active:not(#races)) > .stats-strip {
+  display: none;
+}
+
+/* 跑鞋與新聞卡片：與賽事列同樣的白卡＋輕陰影，資訊階層由字級與灰階建立 */
+.shoe-release-list,
+.news-list {
+  gap: 8px;
+}
+
+.shoe-release-list > article,
+.news-list > article {
+  position: relative;
+  padding: 16px 56px 16px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.05);
+  transform: none;
+}
+
+.shoe-release-list > article:hover,
+.news-list > article:hover {
+  border: 0;
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.08), 0 8px 20px rgba(31, 42, 36, 0.08);
+  transform: none;
+}
+
+.shoe-release-list > article time,
+.news-list > article time {
+  display: block;
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.shoe-release-list .content-tag-row,
+.news-list .content-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.shoe-release-list .content-tag,
+.news-list .content-tag,
+.shoe-release-list .content-origin-tag,
+.news-list .content-origin-tag {
+  min-height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.shoe-release-list .content-tag,
+.news-list .content-tag {
+  background: var(--tint-green);
+  color: var(--green-dark);
+}
+
+.shoe-release-list > article h3,
+.news-list > article h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.shoe-release-list .content-decision,
+.news-list .content-decision {
+  margin: 0 0 8px;
+  color: #4a554e;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.shoe-release-list .content-decision span,
+.news-list .content-decision span {
+  margin-right: 6px;
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+.shoe-release-list .content-favorite,
+.news-list .content-favorite {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.shoe-release-list .content-favorite.active,
+.news-list .content-favorite.active {
+  color: #c99400;
+}
+
+/* 公告：一則一列的白卡 */
+.announcement-console {
+  gap: 8px;
+}
+
+.announcement-card {
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(31, 42, 36, 0.06), 0 4px 12px rgba(31, 42, 36, 0.05);
+  text-align: left;
+}
+
+.announcement-card .announcement-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.announcement-card .announcement-detail {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.announcement-tag {
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 720px) {
+  /* 分頁標題縮小、說明壓成兩行，內容更早出現 */
+  .page-panel .section-heading h2 {
+    font-size: 24px;
+    line-height: 1.3;
+  }
+
+  .page-panel .section-heading .section-lead {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .page-panel.section {
+    padding-top: 20px;
+  }
+
+  /* 跑鞋／新聞篩選：類別與排序並排，筆數與收藏分享縮成一列 */
+  .content-controls {
+    padding: 12px;
+  }
+
+  .content-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .content-filter-grid .content-limit-control {
+    grid-column: 1 / -1;
+  }
+
+  .content-sort > span {
+    font-size: 12px;
+  }
+
+  .content-sort select {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  .content-limit-control .limit-segment button {
+    min-height: 36px;
+  }
+
+  .content-action-row {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .content-action-row button {
+    min-height: 40px;
+  }
+
+  /* 入門：深色路徑區塊縮減留白 */
+  .academy-hero {
+    padding: 20px 16px;
+  }
+
+  .academy-hero h3,
+  .academy-hero .academy-title {
+    font-size: 22px;
+  }
+}
