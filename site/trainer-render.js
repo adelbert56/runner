@@ -84,6 +84,13 @@ function setupPlanToolbarPinning() {
     return pinTop;
   };
   const sync = () => {
+    // Fixed pinning changes document flow at the threshold and can cause
+    // visible jumps on touch devices. Keep the toolbar in flow on phones.
+    if (window.matchMedia?.('(max-width: 720px)').matches) {
+      toolbar.classList.remove('is-pinned');
+      anchor.style.height = '';
+      return;
+    }
     const pinTop = updatePinTop();
     const shouldPin = anchor.getBoundingClientRect().top <= pinTop;
     if (shouldPin === toolbar.classList.contains('is-pinned')) return;
@@ -101,7 +108,7 @@ function setupPlanToolbarPinning() {
   anchor.style.height = '';
   updatePinTop();
   window.addEventListener('scroll', sync, { passive: true, signal: controller.signal });
-  window.addEventListener('resize', updatePinTop, { passive: true, signal: controller.signal });
+  window.addEventListener('resize', sync, { passive: true, signal: controller.signal });
 }
 
 function switchPlanTab(tab) {
