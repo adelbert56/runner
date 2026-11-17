@@ -18,7 +18,7 @@
     "server:boundary": "node scripts/local-server-boundary-check.mjs",
     "trainer:backup:check": "node scripts/trainer-backup-server-check.mjs",
     "ui:layout": "node scripts/ui-layout-check.mjs",
-    "trainer:logic": "node scripts/trainer-logic-check.mjs && node scripts/trainer-lifecycle-check.mjs && node scripts/trainer-release-check.mjs && node scripts/trainer-restore-safety-check.mjs && node scripts/trainer-garmin-log-safety-check.mjs && node scripts/trainer-local-cleanup-check.mjs",
+    "trainer:logic": "node scripts/trainer-logic-check.mjs && node scripts/trainer-lifecycle-check.mjs && node scripts/trainer-release-check.mjs && node scripts/trainer-restore-safety-check.mjs && node scripts/trainer-garmin-log-safety-check.mjs && node scripts/trainer-local-cleanup-check.mjs && node scripts/trainer-sync-two-device-check.mjs",
     "data:apply": "node scripts/apply-manual-overrides.mjs",
     "data:dedupe": "node scripts/compact-race-database.mjs",
     "data:overrides:init-xlsx": "node scripts/init-manual-overrides-xlsx.mjs",
