@@ -2405,11 +2405,13 @@ main:has(.page-panel.active:not(#races)) > .stats-strip {
   .trainer-hero-title { font-size: 32px; line-height: 1.2; letter-spacing: 0; }
   .trainer-sync-entry .btn { width: 100%; justify-self: stretch; min-height: 48px; }
   .plan-toolbar { gap: 8px; }
+  .plan-toolbar.is-pinned { position: relative; top: auto; left: auto; width: auto; transform: none; }
   .plan-toolbar-sync { flex-wrap: wrap; min-width: 0; }
   .plan-toolbar-sync [data-training-sync-status] { display: block; overflow-wrap: anywhere; }
   .plan-workspace-tools { min-width: 0; }
   .week-strip { gap: 4px; }
   .week-strip-day { min-width: 0; }
+  .race-layout .month-list, .plan-tab-list, .coach-evidence-tablist, .table-scroll { overscroll-behavior-x: contain; }
   .dd-body, .checkin-body { min-width: 0; }
   .site-header .main-nav a { min-height: 48px; }
 }

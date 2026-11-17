@@ -616,6 +616,30 @@ const confirmedWeekSandbox = {
     confirmedWeeks: [{ weekStart: '2026-09-21', menu: [{ day: '六', totalKm: 16, plan: '長跑16 km' }] }],
   },
 };
+
+let mobileViewport = true, pinned = false, anchorTop = 20;
+const toolbarCallbacks = {};
+const toolbarProbe = {
+  offsetHeight: 100,
+  style: { setProperty() {} },
+  classList: { contains: () => pinned, add: () => {pinned = true;}, remove: () => {pinned = false;} },
+};
+const toolbarAnchor = { style: {height: ''}, getBoundingClientRect: () => ({top: anchorTop}) };
+const toolbarSandbox = vm.createContext({ planToolbarPinController: null, AbortController,
+  document: {querySelector: selector => selector === '.plan-toolbar' ? toolbarProbe : selector === '.plan-toolbar-anchor' ? toolbarAnchor : {getBoundingClientRect: () => ({bottom: 64})}},
+  window: {matchMedia: () => ({matches: mobileViewport}), addEventListener: (type, fn) => {toolbarCallbacks[type] = fn;}} });
+vm.runInContext(extractFunction(trainerRenderJs, 'setupPlanToolbarPinning'), toolbarSandbox);
+toolbarSandbox.setupPlanToolbarPinning();
+toolbarCallbacks.scroll();
+assertEqual(pinned, false, 'mobile scrolling leaves the toolbar in normal flow');
+assertEqual(toolbarAnchor.style.height, '', 'mobile scrolling does not create a shifting spacer');
+mobileViewport = false;
+toolbarCallbacks.scroll();
+assertEqual(pinned, true, 'desktop scrolling retains pinned toolbar behavior');
+mobileViewport = true;
+toolbarCallbacks.resize();
+assertEqual(pinned, false, 'resizing to mobile clears a previously pinned toolbar');
+assertEqual(toolbarAnchor.style.height, '', 'resizing to mobile clears the desktop spacer');
 vm.createContext(confirmedWeekSandbox);
 vm.runInContext(['coachReviewForWeek', 'coachWeekMatches', 'coachMenuForCurrentSchedule', 'coachDaysForWeek', 'materializeCoachReviewWeek'].map(name => extractFunction(trainerRenderJs, name)).join('\n'), confirmedWeekSandbox);
 const preservedW12 = { days: [{ dateStr: '2026-09-21', dow: 1, task: '原課表', km: 5 }] };
