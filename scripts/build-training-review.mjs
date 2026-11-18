@@ -124,14 +124,48 @@ function buildAnalyticsRuns(activities) {
   }).filter((activity) => activity.date && activity.km > 0);
 }
 
+function mergeAnalyticsRuns(published, fetched) {
+  const activityKey = (run) => run.activityId != null && String(run.activityId) !== ''
+    ? `id:${run.activityId}`
+    : `legacy:${JSON.stringify([run.date, run.startTime, run.name, run.km, run.durationMin])}`;
+  const runs = new Map();
+  for (const run of [...(Array.isArray(published) ? published : []), ...fetched]) {
+    if (typeof run?.date !== 'string' || !run.date || !(run.km > 0)) continue;
+    const key = activityKey(run);
+    const previous = runs.get(key);
+    if (!previous) {
+      runs.set(key, run);
+      continue;
+    }
+    const refreshed = { ...run };
+    // A fetch without detail must not discard earlier Garmin workout evidence.
+    if (!run.qualityEligible && previous.qualityEligible && previous.qualitySource === 'garmin-workout-steps') {
+      for (const field of ['qualityEligible', 'qualitySource', 'qualityKm', 'qualityPace', 'qualityHr', 'qualityMaxHr', 'qualityCadence', 'sessionFamily']) {
+        refreshed[field] = previous[field];
+      }
+    }
+    if (!run.laps?.length && previous.laps?.length) refreshed.laps = previous.laps;
+    if (!run.selfEvaluation && previous.selfEvaluation) refreshed.selfEvaluation = previous.selfEvaluation;
+    if (!run.terrainSummary && previous.terrainSummary) {
+      refreshed.terrainSummary = previous.terrainSummary;
+      refreshed.terrainDetailStatus = previous.terrainDetailStatus;
+    }
+    if (run.temperatureC == null && previous.temperatureC != null) {
+      refreshed.temperatureC = previous.temperatureC;
+      refreshed.temperatureSource = previous.temperatureSource;
+    }
+    runs.set(key, refreshed);
+  }
+  return [...runs.values()].sort((a, b) =>
+    a.date.localeCompare(b.date) || String(a.startTime || '').localeCompare(String(b.startTime || '')));
+}
+
 // Publish slimming: per-session evidence only powers recent-run reports. Keep
 // laps and privacy-safe terrain summaries for recent runs; older history still
 // retains volume/trend fields but never route-like detail.
 function slimAnalyticsLaps(runs, keepRecent = 20) {
-  const keep = new Set(
-    [...runs].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, keepRecent).map((run) => run.activityId)
-  );
-  return runs.map((run) => (keep.has(run.activityId) ? run : { ...run, laps: [], terrainSummary: null }));
+  const keep = new Set(runs.slice(Math.max(0, runs.length - keepRecent)));
+  return runs.map((run) => (keep.has(run) ? run : { ...run, laps: [], terrainSummary: null }));
 }
 
 function buildWeeklyTrend(runs) {
@@ -610,8 +644,9 @@ async function buildPublishedReview(plaintext) {
   await appendJobSummary(missingStepsNote);
   try {
     const activityFeed = JSON.parse(await readFile(ACTIVITY_SOURCE, "utf8"));
-    const activities = Array.isArray(activityFeed.activities) ? activityFeed.activities : [];
-    const analyticsRuns = buildAnalyticsRuns(activities);
+    if (!Array.isArray(activityFeed.activities)) throw new Error('Invalid Garmin activity feed');
+    // GitHub runners fetch a rolling window with no previous local activity file.
+    const analyticsRuns = mergeAnalyticsRuns(review?.analyticsRuns, buildAnalyticsRuns(activityFeed.activities));
     review = review || buildGarminOnlyReview(analyticsRuns, activityFeed.updatedAt);
     const autopilot = buildGarminAutopilot(analyticsRuns, activityFeed.updatedAt);
     review = refreshReviewFromGarmin(review, analyticsRuns, activityFeed.updatedAt, autopilot, missingStepsNote);
@@ -624,13 +659,18 @@ async function buildPublishedReview(plaintext) {
     review.recovery = buildRecoverySignals(activityFeed.recovery);
     review.autopilot = autopilot;
   } catch {
+    if (process.env.GITHUB_ACTIONS === 'true') {
+      throw new Error('Cannot refresh Garmin analytics; the existing encrypted review was kept.');
+    }
     review = review || buildGarminOnlyReview([], null);
-    review.analyticsRuns = [];
-    review.analyticsUpdatedAt = null;
-    review.analyticsStatus = "missing";
-    review.lactateThresholdHr = null;
-    review.recovery = [];
-    review.autopilot = buildGarminAutopilot([], null);
+    if (!review.analyticsRuns?.length) {
+      review.analyticsRuns = [];
+      review.analyticsUpdatedAt = null;
+      review.analyticsStatus = "missing";
+      review.lactateThresholdHr = null;
+      review.recovery = [];
+      review.autopilot = buildGarminAutopilot([], null);
+    }
     // Garmin 實跑讀不到時 refreshReviewFromGarmin 不會跑，missingStepsNote 就沒機會
     // 併進 coachNote——這裡補上，避免這條警告只在沒有 Garmin 資料的那次靜靜消失。
     if (missingStepsNote && review.nextWeek) {
