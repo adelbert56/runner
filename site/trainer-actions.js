@@ -452,6 +452,7 @@ function renderCheckinHistory() {
 
 function renderCheckinSection() {
   const existing = (appData.checkins || []).find(checkin => checkin.weekNum === currentWeek);
+  const history = `<details class="week-disclosure"><summary>歷史評估與恢復趨勢</summary>${renderCheckinTrend()}${renderCheckinHistory()}</details>`;
   const totalWeeks = appData.plan?.length || 1;
   const timing = weeklyCheckinTiming();
   const weekSwitcher = `<div class="checkin-week-switcher" aria-label="切換評估週數">
@@ -465,7 +466,7 @@ function renderCheckinSection() {
       ${existing.fatigue ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">本週整體疲勞：${existing.fatigue}/5</p>` : ''}
       ${existing.safetyNote ? `<p style="font-size:13px;color:var(--c-orange);margin-top:6px">安全判斷：${existing.safetyNote}</p>` : ''}
       ${existing.note ? `<p style="font-size:13px;color:var(--c-text-muted);margin-top:6px">週記：${existing.note}</p>` : ''}
-      <p style="font-size:13px;margin:10px 0 0;line-height:1.65">${existing.adjustment}</p>${existing.provisional && timing.ready ? '<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-secondary" onclick="reopenWeeklyCheckin()">完成本週最終評估</button></div>' : ''}${renderCheckinTrend()}${renderCheckinHistory()}
+      <p style="font-size:13px;margin:10px 0 0;line-height:1.65">${existing.adjustment}</p>${existing.provisional && timing.ready ? '<div class="training-status-actions" style="margin-top:12px;justify-content:flex-start"><button class="btn btn-secondary" onclick="reopenWeeklyCheckin()">完成本週最終評估</button></div>' : ''}${history}
     </div>
     </section>`;
   }
@@ -473,7 +474,7 @@ function renderCheckinSection() {
   const qHTML = CHECKIN_QUESTIONS.map((question, index) => `<li><label class="checkin-tile" for="cq-${index}"><input type="checkbox" id="cq-${index}"><span class="checkin-tile-check" aria-hidden="true"></span><span>${question}</span></label></li>`).join('');
   return `<section class="checkin-card">
     <div class="checkin-head"><div><div class="checkin-kicker">Weekly review · ${currentWeek} / ${totalWeeks}</div><div class="checkin-title">📋 第 ${currentWeek} 週評估</div></div>${weekSwitcher}</div>
-    <div class="checkin-body"><p class="checkin-intro">每週只做一次。我會先看你的疼痛、疲勞、睡眠和長跑恢復；安全條件沒到，我不會自動加量。${timing.ready ? ` 本週已進入收尾，可依結果安排下一週。` : ` 目前完成 ${timing.completed}/${timing.planned} 堂；可以先填，我會先護著你的恢復，但要等本週最後一堂課後才開放小幅推進。`}</p>${renderCheckinTrend()}
+    <div class="checkin-body"><p class="checkin-intro">每週只做一次。我會先看你的疼痛、疲勞、睡眠和長跑恢復；安全條件沒到，我不會自動加量。${timing.ready ? ` 本週已進入收尾，可依結果安排下一週。` : ` 目前完成 ${timing.completed}/${timing.planned} 堂；可以先填，我會先護著你的恢復，但要等本週最後一堂課後才開放小幅推進。`}</p>
     <span class="checkin-section-label">恢復與完成度</span>
     <ul class="checkin-questions">${qHTML}</ul>
     <span class="checkin-section-label">主觀感受</span>
@@ -487,7 +488,7 @@ function renderCheckinSection() {
     </div>
     <label class="checkin-safety"><input id="cw-pain-concern" type="checkbox"><span><b>本週有疼痛或步態異常</b>跛行、步態改變或越跑越痛。勾選後會停止下週品質課並建議評估。</span></label>
     <button class="btn btn-primary checkin-submit" onclick="submitCheckin()">提交第 ${currentWeek} 週評估</button>
-    ${renderCheckinHistory()}
+    ${history}
     </div>
   </section>`;
 }

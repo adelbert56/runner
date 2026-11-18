@@ -369,8 +369,34 @@ async function assertTrainerReport(page, viewportName) {
   }
   // Exercise the real double-session entry path against the local fixture.
   // It must add a second session without replacing the formal course card.
-  await page.evaluate(() => { showView("plan"); switchPlanTab("week"); });
+  await page.evaluate(() => { showView("plan"); switchPlanTab("week"); window.scrollTo({ top: 0, behavior: 'instant' }); });
+  const workspace = await page.locator('.week-workspace').evaluate((element) => ({
+    dateCount: element.querySelectorAll('.week-strip-day').length,
+    visibleCourseCount: element.querySelectorAll('.week-day-panel:not([hidden])').length,
+    progressBesideSchedule: element.querySelector('.week-schedule').nextElementSibling?.matches('.week-summary'),
+    duplicateSchedule: Boolean(document.querySelector('.trainer-dash-week')),
+    top: element.querySelector('.week-strip').getBoundingClientRect().top
+  }));
+  if (workspace.dateCount !== 7 || workspace.visibleCourseCount !== 1 || !workspace.progressBesideSchedule ||
+      workspace.duplicateSchedule || workspace.top >= viewports.find(viewport => viewport.name === viewportName).height) {
+    throw new Error(`${viewportName}/week-workspace: ${JSON.stringify(workspace)}`);
+  }
+  await assertNoHorizontalOverflow(page, `${viewportName}/week-workspace`);
+  await page.screenshot({path: resolve(screenshotDir, `${viewportName}-trainer-week-workspace.png`)});
+  const originalDate = await page.locator('.week-strip-day[aria-pressed="true"]').getAttribute('data-week-day');
+  const otherDate = await page.locator('.week-strip-day[aria-pressed="false"]').first().getAttribute('data-week-day');
+  const newDate = page.locator(`.week-strip-day[data-week-day="${otherDate}"]`);
+  await newDate.press('Enter');
+  const selectedPanel = await newDate.getAttribute('aria-controls');
+  if (!await page.locator(`[id="${selectedPanel}"]`).isVisible() || await newDate.getAttribute('aria-pressed') !== 'true') {
+    throw new Error(`${viewportName}/week-workspace: date selection did not open its course`);
+  }
+  await page.locator(`.week-strip-day[data-week-day="${originalDate}"]`).press('Enter');
   if (viewportName === 'mobile') {
+    await page.setViewportSize({ width: 320, height: 844 });
+    await assertNoHorizontalOverflow(page, '320px/trainer-week-workspace');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('.plan-management > summary').click();
     const tools = await page.locator('.plan-workspace-tools').evaluate(element => {
       const box = element.getBoundingClientRect();
       return {client: element.clientWidth, scroll: element.scrollWidth,
@@ -383,6 +409,8 @@ async function assertTrainerReport(page, viewportName) {
     if (tools.scroll > tools.client + 1 || tools.buttons.some(button => !button.contained)) throw new Error(`mobile management tools clipped: ${JSON.stringify(tools)}`);
     if (tools.buttons.some(button => button.height < 44)) throw new Error(`mobile management touch target too small: ${JSON.stringify(tools)}`);
     await page.locator('.plan-toolbar').screenshot({path: resolve(screenshotDir, 'mobile-training-toolbar-audit.png')});
+    await page.locator('.plan-management > summary').press('Escape');
+    if (await page.locator('.plan-management').evaluate(element => element.open)) throw new Error('management disclosure did not close on Escape');
     await page.evaluate(() => {
       eval(`trainerWeather = { "2026-07-24": { tmax: 28, rain: 37, morningRain: 37, eveningRain: 0 } }`);
       const fixture = document.createElement('div');
@@ -420,13 +448,9 @@ async function assertTrainerReport(page, viewportName) {
     hasActionableTitle: element.textContent.includes("本週執行重點") || element.textContent.includes("這週怎麼跑，先看這裡"),
     hasVisibleGuidance: [...element.querySelectorAll('.coach-insight-description, .course-decision-context p')].some(node => node.textContent.trim().length > 0 && getComputedStyle(node).display !== 'none'),
     coachBriefOpen: !element.querySelector(".coach-insight-details") || element.querySelector(".coach-insight-details")?.open === true,
-    beforeCourseTable: (() => {
-      const weekContent = document.querySelector("#plan-tab-week");
-      const calendar = weekContent?.querySelector(".week-calendar");
-      return Boolean(calendar) && [...weekContent.querySelectorAll(".course-decision-panel, .week-calendar")].indexOf(element) < [...weekContent.querySelectorAll(".course-decision-panel, .week-calendar")].indexOf(calendar);
-    })(),
+    afterCourseTable: Boolean(element.closest('details')?.previousElementSibling?.matches('.week-calendar')),
   }));
-  if ((courseDecision.hasFocus && (courseDecision.hasDuplicateFocus || !courseDecision.hasActionableTitle || !courseDecision.hasVisibleGuidance || !courseDecision.coachBriefOpen)) || !courseDecision.beforeCourseTable) {
+  if ((courseDecision.hasFocus && (courseDecision.hasDuplicateFocus || !courseDecision.hasActionableTitle || !courseDecision.hasVisibleGuidance || !courseDecision.coachBriefOpen)) || !courseDecision.afterCourseTable) {
     throw new Error(`${viewportName}/trainer-course-decision: visible coaching brief is incomplete ${JSON.stringify(courseDecision)}`);
   }
   const completedCurrentWeekReview = await page.evaluate(() => {
@@ -601,7 +625,7 @@ async function assertTrainerReport(page, viewportName) {
     switchPlanTab("progress");
     switchProgressPanel("analysis");
   });
-  await page.waitForSelector(".session-report", { timeout: 5000 });
+  await page.waitForSelector(".analysis-layout-a", { timeout: 5000 });
   await assertNoHorizontalOverflow(page, `${viewportName}/trainer-report`);
   const analysisContext = await page.locator("#progress-panel-analysis").evaluate((element) => ({
     hasDuplicatedDecision: element.textContent.includes("自動訓練決策"),
@@ -1252,6 +1276,11 @@ async function assertTrainerReport(page, viewportName) {
   if (safetyHold.type !== "easy" || safetyHold.focus !== "recovery" || !safetyHold.task.includes("傷痛保護模式") || !safetyHold.rationale.includes("安全保護")) {
     throw new Error(`${viewportName}/trainer-safety-hold: quality workout was not safely masked ${JSON.stringify(safetyHold)}`);
   }
+  await page.evaluate(() => {
+    switchPlanTab('progress');
+    switchProgressPanel('garmin');
+  });
+  await page.locator('#progress-panel-garmin .garmin-report-link[data-activity-id="7008"]').click();
   const report = await page.locator(".session-report").evaluate((element) => ({
     hasPlanComparison: element.textContent.includes("正式課表對照"),
     hasNextAction: element.textContent.includes("下一步"),
@@ -1272,7 +1301,7 @@ async function assertTrainerReport(page, viewportName) {
     path: resolve(screenshotDir, `${viewportName}-trainer-report.png`),
     fullPage: true,
   });
-  const reportDetails = page.locator(".session-report-details");
+  const reportDetails = page.locator(".session-report-details").filter({ hasText: "查看分圈配速與教練判讀" });
   if (!(await reportDetails.evaluate((element) => element.open))) await reportDetails.locator("summary").click();
   await page.getByRole("button", { name: /^全部\s+16$/ }).click();
   const allLapsVisible = await page.locator(".session-report").evaluate((element) => element.querySelectorAll(".session-lap-list .session-lap").length);
@@ -1893,9 +1922,10 @@ async function assertTrainerReport(page, viewportName) {
     eval(`coachReviewData = ${JSON.stringify(recoveredReview)}`);
     eval('selectedTrainingReportActivityId = 825001; selectedTrainingReportLapCategory = null;');
     switchPlanTab('progress');
-    switchProgressPanel('analysis');
-    const host = document.getElementById('progress-panel-analysis') || document.getElementById('training-analysis-content');
-    if (host) host.innerHTML = renderTrainingAnalysis();
+    switchProgressPanel('garmin');
+    const host = document.getElementById('plan-tab-progress');
+    host.innerHTML = renderProgressHub(appData.plan);
+    document.getElementById('training-report-disclosure').open = true;
   });
   await page.waitForSelector('.session-report-status', { state: 'attached', timeout: 5000 });
   const recoveredReport = await page.locator('.session-report').evaluate((element) => ({
@@ -1958,6 +1988,7 @@ async function assertMileageScope(page, viewportName) {
     const host = document.getElementById('plan-tab-week');
     host.classList.add('active');
     host.innerHTML = renderWeekOverviewCard(appData.profile, appData.plan);
+    host.querySelector('details').open = true;
   });
   const card = page.locator('.automation-brief').last();
   await card.waitFor({ state: 'visible' });

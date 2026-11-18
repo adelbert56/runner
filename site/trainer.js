@@ -1521,150 +1521,40 @@ function renderHeroPanel() {
   const shell = document.getElementById('trainer-hero-shell');
   if (!shell) return;
   const profile = appData.profile;
-  const hasPlan = Boolean(profile && appData.plan && appData.plan.length);
-  const meta = profile ? (GOAL_META[profile.goal] || GOAL_META.half) : GOAL_META.half;
-  const week = hasPlan ? (appData.plan[currentWeek - 1] || appData.plan[0]) : null;
-  const totalWeeks = hasPlan ? appData.plan.length : null;
-  // 教練規劃存在時，階段名稱以教練分期為準，與週期分頁列一致（避免兩套標籤打架）
-  const phaseText = week ? `${(typeof coachPhaseForWeek === 'function' && coachPhaseForWeek(week)?.phase) || week.phaseLabel}` : '建立你的個人手冊';
-  const progressText = hasPlan ? `第 ${currentWeek} / ${totalWeeks} 週` : '尚未建立';
-  const targetDateText = profile?.targetDate || '先設定模式與比賽日';
-  const daysToRace = daysUntilTargetDate(profile?.targetDate);
-  const countdownText = daysToRace === null
-    ? ''
-    : daysToRace > 0
-      ? ` · 剩 ${daysToRace} 天`
-      : daysToRace === 0
-        ? ' · 就是今天！'
-        : ' · 已完賽';
-  // Hero 的配速格顯示「會隨實跑校準的」輕鬆跑配速；賽事目標配速是靜態值，
-  // 移到賽事日那格當副標，避免兩個不同語意的配速擠在同一個標籤下。
-  const easyPace = heroEasyPaceInfo(profile);
-  // 教練週報的目標（例如 2:15:00 → 約 6:24/km）優先於網頁設定推算的配速。
-  const coachGoalPace = String((typeof coachReviewData !== 'undefined' && coachReviewData?.goal?.targetPace) || '').match(/\d{1,2}:\d{2}/)?.[0];
-  const racePaceText = coachGoalPace ? `目標配速 ${coachGoalPace}/km` : profile?.racePaceSec ? `目標配速 ${secToPace(profile.racePaceSec)}/km` : '';
-  const weeklyTarget = week ? effectiveWeekVolumeTarget(week).display : '依可訓練日生成';
-  if (hasPlan) {
-    const goalPace = coachGoalPace || (profile?.racePaceSec ? secToPace(profile.racePaceSec) : '');
-    shell.innerHTML = renderHeroDashboard({ week, meta, phaseText, totalWeeks, daysToRace, coachGoalPace: goalPace, easyPace });
+  const week = appData.plan?.[currentWeek - 1];
+  const meta = GOAL_META[profile?.goal] || GOAL_META.half;
+  shell.classList.toggle('trainer-plan-heading', Boolean(profile && week));
+  if (profile && week) {
+    const phase = coachPhaseForWeek(week)?.phase || week.phaseLabel;
+    const daysToRace = daysUntilTargetDate(profile.targetDate);
+    const countdown = daysToRace === null ? '' : daysToRace > 0 ? `距離比賽 ${daysToRace} 天` : daysToRace === 0 ? '今天比賽' : '已完賽';
+    shell.innerHTML = `
+      <p class="trainer-hero-kicker">第 ${currentWeek} / ${appData.plan.length} 週${phase ? ` · ${reviewEscape(phase)}` : ''}</p>
+      <h1 class="trainer-hero-title" id="trainer-hero-title">練跑計畫</h1>
+      <p class="trainer-hero-planline">${[meta.label, countdown].filter(Boolean).join(' · ')}</p>`;
     return;
   }
   shell.innerHTML = `
     <div class="trainer-hero-layout">
       <div class="trainer-hero-main">
-        <div class="trainer-hero-eyebrow">
-          <div class="trainer-hero-kicker">Runner Planner · Active Plan</div>
-          ${hasPlan ? `<span class="trainer-hero-phase">${reviewEscape(phaseText)}</span>` : ''}
+        <div class="trainer-hero-eyebrow"><div class="trainer-hero-kicker">Runner Planner</div></div>
+        <h1 class="trainer-hero-title" id="trainer-hero-title">建立你的個人訓練計畫</h1>
+        <p class="trainer-hero-planline">從目標、可訓練日到每日課表，一次建立。</p>
+        <div class="trainer-hero-points">
+          <span class="trainer-point">入門 / 半馬 / 全馬 / 傷後重建</span>
+          <span class="trainer-point">熱身・主課・收操分段顯示</span>
         </div>
-        <div class="trainer-hero-title-row">
-          <div>
-            <h1 class="trainer-hero-title" id="trainer-hero-title">${hasPlan ? meta.label : '建立你的個人訓練計畫'}</h1>
-            <p class="trainer-hero-planline">${hasPlan ? `第 ${currentWeek} / ${totalWeeks} 週 · ${reviewEscape(phaseText)}` : '從目標、可訓練日到每日課表，一次建立。'}</p>
-          </div>
-          ${hasPlan ? `<div class="trainer-hero-progress-group" role="img" aria-label="週期時程 ${Math.round((currentWeek / totalWeeks) * 100)}%"><div class="trainer-hero-progress"><svg viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="43"/><circle class="trainer-hero-progress-value" cx="56" cy="56" r="43" style="stroke-dasharray:270.18;stroke-dashoffset:${270.18 * (1 - currentWeek / totalWeeks)}"/></svg><strong>${Math.round((currentWeek / totalWeeks) * 100)}%</strong></div><span class="trainer-hero-progress-caption">週期時程</span></div>` : ''}
-        </div>
-        ${hasPlan ? '' : '<p class="trainer-hero-copy">設定目標、可訓練日與目前跑量，建立一份能每天照著執行的個人訓練計畫。</p>'}
-        <div class="trainer-hero-stats">
-          <div class="trainer-stat">
-            <div class="trainer-stat-label"><span aria-hidden="true">▣</span> 賽事日</div>
-            <div class="trainer-stat-value">${hasPlan ? targetDateText : meta.label}</div>
-            <div class="trainer-stat-sub">${hasPlan ? [(daysToRace === null ? '目標日尚未設定' : daysToRace > 0 ? `距離目標日 ${daysToRace} 天` : daysToRace === 0 ? '就是今天' : '已完賽'), racePaceText].filter(Boolean).join(' · ') : '入門 / 半馬 / 全馬 / 傷後重建'}</div>
-          </div>
-          <div class="trainer-stat">
-            <div class="trainer-stat-label"><span aria-hidden="true">♨</span> 當週處方</div>
-            <div class="trainer-stat-value">${hasPlan ? weeklyTarget : progressText}</div>
-            <div class="trainer-stat-sub">${hasPlan ? '正式課表總跑量' : '先完成設定後開始'}</div>
-          </div>
-          <div class="trainer-stat">
-            <div class="trainer-stat-label"><span aria-hidden="true">♡</span> ${hasPlan ? easyPace.label : '配速基準'}</div>
-            <div class="trainer-stat-value">${hasPlan ? easyPace.value : weeklyTarget}</div>
-            <div class="trainer-stat-sub">${hasPlan ? easyPace.sub : '會依你的條件自動估算'}</div>
-          </div>
-        </div>
-        ${hasPlan ? '' : `<div class="trainer-hero-points">
-          <span class="trainer-point">目標日 ${targetDateText}</span>
-          <span class="trainer-point">熱身・主課・收操會分段顯示</span>
-          <span class="trainer-point">完成設定後開始追蹤</span>
-        </div>`}
       </div>
-      <aside class="trainer-hero-side" aria-label="${hasPlan ? '今日課表' : '功能重點'}">
-        ${hasPlan ? renderHeroTodayCard() : `
+      <aside class="trainer-hero-side" aria-label="登入與設定">
         <div class="trainer-side-card">
           ${typeof window.openTrainingSyncModal === 'function' ? `<div class="trainer-sync-entry"><b>已經有帳號？</b><span>在別台裝置建好課表的話，登入同步就會直接載入。</span><button type="button" class="btn btn-primary" onclick="openTrainingSyncModal()">☁️ 登入同步</button></div>` : ''}
-          <div class="trainer-side-kicker">Getting Started</div>
-          <div class="trainer-side-title">往下填設定，一次生成本週課表</div>
+          <div class="trainer-side-title">設定目標、可訓練日與目前跑量</div>
           <div class="trainer-side-list">
-            <div class="trainer-side-item"><b>Plan</b><span>節奏 / 長跑 / 恢復分流</span></div>
-            <div class="trainer-side-item"><b>Coach</b><span>依 Garmin 實績給下週建議</span></div>
+            <div class="trainer-side-item"><b>課表</b><span>節奏 / 長跑 / 恢復分流</span></div>
+            <div class="trainer-side-item"><b>教練</b><span>依 Garmin 實績給下週建議</span></div>
           </div>
-        </div>`}
+        </div>
       </aside>
-    </div>`;
-}
-
-// 版面 B「儀表板」（2026-11-17，ai/artifacts/版面現代化/mockup-decision.md）：
-// 本週進度與倒數放最上面，接著逐日課表與今日課卡。數字一律取自 planStatus()／weekPlannedKm，
-// 與頁面其他區塊同一個來源。
-function renderHeroDashboard({ week, meta, phaseText, totalWeeks, daysToRace, coachGoalPace, easyPace }) {
-  const status = typeof planStatus === 'function' ? planStatus() : null;
-  const plannedKm = typeof weekPlannedKm === 'function' ? Number(weekPlannedKm(week)) || 0 : 0;
-  const doneKm = Number(status?.weekDoneKm) || 0;
-  const pct = plannedKm > 0 ? Math.min(100, Math.round((doneKm / plannedKm) * 100)) : 0;
-  const today = todayStr();
-  const ctx = buildContext();
-  const days = (week.days || []).map((day) => resolveCourse(day, ctx, week).course);
-  const runDays = days.filter((day) => day.type !== 'rest');
-  const longKm = Math.max(0, ...runDays.map((day) => Number(day.km) || 0));
-  const kmText = (value) => `${Number.isInteger(value) ? value : value.toFixed(1)}`;
-  const countdown = daysToRace === null ? '' : daysToRace > 0 ? `距離比賽 ${daysToRace} 天` : daysToRace === 0 ? '今天比賽！' : '已完賽';
-  const ringDash = 270.18;
-  const dayRows = days.map((day) => {
-    const garminRun = typeof getGarminRunForDate === 'function' ? getGarminRunForDate(day.dateStr) : null;
-    const done = Boolean(garminRun) || day.status === 'done';
-    const isToday = day.dateStr === today;
-    const isRest = day.type === 'rest';
-    // 每列都要看得出「練什麼跑」：課型標籤（恢復／輕鬆／長跑／節奏／間歇）＋這堂的重點。
-    const typeLabel = isRest ? '休息' : trainingTypeLabel(day.type, day.focus);
-    const tone = typeof weekStripTone === 'function' ? weekStripTone(day) : (isRest ? 'rest' : 'easy');
-    const headline = isRest ? (day.task && day.task !== '休息' ? day.task : '恢復日') : (typeof dayHeadline === 'function' ? dayHeadline(day) : trainingTaskTitle(day));
-    const intent = String(trainingTaskTitle(day) || '').split(/\s*[｜|]\s*/).slice(1).join('｜');
-    // 課名只是重複課型時改用說明；沒有說明就只留標籤，不印「輕鬆跑 輕鬆跑」
-    const title = !isRest && headline === typeLabel ? intent : headline;
-    const hr = String(day.hrTarget || '').replace(/（.*$/, '');
-    const sub = isRest ? '' : [hr, isToday ? '今天' : '', done ? `✓ 已完成${garminRun?.km ? ` ${garminRun.km} km` : ''}` : '', day.releaseStatus === 'pending' ? '待放行' : ''].filter(Boolean).join(' · ');
-    return `<li class="dash-day tone-${tone}${isToday ? ' is-today' : ''}${isRest ? ' is-rest' : ''}${done ? ' is-done' : ''}">
-        <span class="dash-day-date"><small>${DOW_NAMES[day.dow]}</small><b>${Number(day.dateStr.slice(8, 10))}</b></span>
-        <span class="dash-day-title"><span class="dash-day-line"><span class="dash-day-type">${reviewEscape(typeLabel)}</span>${title ? `<span class="dash-day-name">${reviewEscape(title)}</span>` : ''}</span>${sub ? `<small>${reviewEscape(sub)}</small>` : ''}</span>
-        <span class="dash-day-km">${isRest || !Number(day.km) ? '' : `${kmText(Number(day.km))} km`}</span>
-      </li>`;
-  }).join('');
-  return `
-    <div class="trainer-dash">
-      <section class="trainer-dash-hero" aria-labelledby="trainer-hero-title">
-        <div class="trainer-dash-top">
-          <div>
-            <div class="trainer-hero-eyebrow"><span class="trainer-dash-phase">W${currentWeek} · ${reviewEscape(phaseText)}</span></div>
-            <h1 class="trainer-dash-title" id="trainer-hero-title"><b>${kmText(doneKm)}</b><span>/ ${kmText(plannedKm)} km</span></h1>
-            <p class="trainer-hero-planline">${[meta.label, countdown, `第 ${currentWeek} / ${totalWeeks} 週`].filter(Boolean).join(' · ')}</p>
-          </div>
-          <div class="trainer-dash-ring" role="img" aria-label="本週完成 ${pct}%">
-            <svg viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="43"/><circle class="trainer-dash-ring-value" cx="56" cy="56" r="43" style="stroke-dasharray:${ringDash};stroke-dashoffset:${ringDash * (1 - pct / 100)}"/></svg>
-            <strong>${pct}%</strong>
-          </div>
-        </div>
-        <div class="trainer-dash-stats">
-          <div><small>目標配速</small><b>${coachGoalPace ? `${coachGoalPace}` : '—'}</b></div>
-          <div><small>${reviewEscape(String(easyPace.label).replace(/^本週/, ''))}</small><b>${reviewEscape(String(easyPace.value))}</b></div>
-          <div><small>本週長跑</small><b>${longKm ? `${kmText(longKm)} km` : '—'}</b></div>
-        </div>
-      </section>
-      <div class="trainer-dash-grid">
-        <section class="trainer-dash-week" aria-labelledby="trainer-dash-week-title">
-          <div class="trainer-dash-week-head"><h2 id="trainer-dash-week-title">本週課表</h2><button type="button" class="trainer-dash-link" onclick="goToToday()">完整課表 →</button></div>
-          <ol class="dash-days">${dayRows}</ol>
-        </section>
-        <aside class="trainer-hero-side" aria-label="今日課表">${renderHeroTodayCard()}</aside>
-      </div>
     </div>`;
 }
 
@@ -1763,78 +1653,6 @@ function findTodayPlanDay() {
   return null;
 }
 
-function heroTodayStepSummary(step, day) {
-  const dose = String(step?.dose || '').replace(/\bNaN(?:\.\d+)?\s*(?:km|公里)\b/gi, '').replace(/\s{2,}/g, ' ').trim();
-  if (dose) return dose;
-  const detail = String(step?.detail || step?.text || '').trim();
-  if (!detail) return step?.title === '主課' ? trainingTaskTitle(day) : '';
-  return step?.title === '主課'
-    ? detail.replace(/。目的：.*$/s, '').replace(/。目標：.*$/s, '')
-    : detail;
-}
-
-function heroTodaySummaryParts(summary, supportingSteps = []) {
-  const supportingTitles = supportingSteps
-    .map((step) => String(step?.title || '').trim())
-    .filter(Boolean);
-  return String(summary || '')
-    .split(/\s*[·・｜；;]\s*|(?<=。)\s*/)
-    .map((part) => part.trim())
-    .filter((part) => part && !supportingTitles.some((title) => part.startsWith(title)));
-}
-
-function renderHeroTodayCard() {
-  const hit = findTodayPlanDay();
-  const typeName = TRAINING_TYPE_LABELS;
-  const badgeClass = { easy: 'badge-easy', tempo: 'badge-tempo', interval: 'badge-interval', long: 'badge-long', race: 'badge-long', rest: 'badge-rest' };
-  if (!hit) {
-    return `
-      <div class="trainer-side-card hero-today-card">
-        <div class="trainer-side-kicker">Today</div>
-        <div class="trainer-side-title">今天不在計畫範圍內</div>
-        <div class="trainer-side-copy">計畫尚未開始或已結束；可到課表確認週次，或修改設定重新生成。</div>
-        <button class="btn btn-primary hero-today-btn" onclick="goToToday()">📍 查看本週課表</button>
-      </div>`;
-  }
-  const { day } = hit;
-  const garminRun = typeof getGarminRunForDate === 'function' ? getGarminRunForDate(day.dateStr) : null;
-  const statusText = garminRun
-    ? `✓ Garmin 已記錄 ${garminRun.km ? `${garminRun.km} km` : ''}`
-    : day.status === 'done'
-      ? '✓ 已完成'
-      : day.status === 'missed'
-        ? '✗ 已跳過'
-        : '';
-  const detail = day.type === 'rest'
-    ? (day.supportBlocks || []).map((block) => block.title).join('・') || '主動恢復 / 完全休息'
-    : [day.pace, day.hrTarget].filter(Boolean).join(' · ');
-  const steps = day.steps || [];
-  const mainStep = steps.find((step) => step.title === '主課');
-  const supportingSteps = steps.filter((step) => step !== mainStep);
-  const renderHeroStep = (step, isMain = false) => {
-    const summary = heroTodayStepSummary(step, day);
-    const summaryMarkup = isMain
-      ? `<div class="hero-today-main-copy">${heroTodaySummaryParts(summary, supportingSteps).map((part) => `<span>${reviewEscape(part)}</span>`).join('')}</div>`
-      : `<span>${reviewEscape(summary)}</span>`;
-    return `<div class="hero-today-step${isMain ? ' is-main' : ''}"><b>${reviewEscape(step.title || '')}</b>${summaryMarkup}</div>`;
-  };
-  const stepStrip = mainStep
-    ? `<div class="hero-today-steps">${renderHeroStep(mainStep, true)}${supportingSteps.length ? `<div class="hero-today-side-steps">${supportingSteps.map((step) => renderHeroStep(step)).join('')}</div>` : ''}</div>`
-    : steps.length
-      ? `<div class="hero-today-steps">${steps.map((step) => renderHeroStep(step)).join('')}</div>`
-      : '';
-  return `
-    <div class="trainer-side-card hero-today-card">
-      <div class="trainer-side-kicker">Today · ${DOW_NAMES[day.dow]} ${day.dateStr.slice(5)}</div>
-      <div class="trainer-side-title"><span class="workout-badge ${coachPlanBadge(day) ? 'badge-coach' : (badgeClass[day.type] || 'badge-rest')}">${coachPlanBadge(day) ? `${coachPlanBadge(day).emoji}${coachPlanBadge(day).label}` : (typeName[day.type] || '訓練')}</span> ${reviewEscape(trainingTaskTitle(day))}</div>
-      ${detail ? `<div class="trainer-side-copy">${detail}</div>` : ''}
-      ${dayWeatherLine(day, { showForRest: true })}
-      ${stepStrip}
-      ${statusText ? `<div class="trainer-side-metric">${statusText}</div>` : ''}
-      <button class="btn btn-primary hero-today-btn" onclick="goToToday()">📍 查看今日課表</button>
-    </div>`;
-}
-
 function goToToday() {
   if (!document.getElementById('plan-tab-week')) {
     renderPlanView();
@@ -1842,9 +1660,7 @@ function goToToday() {
   }
   switchPlanTab('week');
   const hit = findTodayPlanDay();
-  if (hit?.weekNum) {
-    jumpToPhaseWeek(hit.weekNum);
-  }
+  jumpToPhaseWeek(hit?.weekNum || todayWeekNum());
   requestAnimationFrame(() => {
     // 本週課表一次只顯示一天：「今天」要先切到今天那張課卡再捲動
     if (typeof selectWeekDay === 'function' && document.querySelector(`[data-week-day="${todayStr()}"]`)) selectWeekDay(todayStr());
@@ -2960,6 +2776,7 @@ function prefillSetupForm(profile) {
 let currentWeek = 1;
 let coachReviewData = null;
 let coachReviewLoadState = 'loading';
+let coachReviewRefreshFailed = false;
 let registrationRaceData = null;
 let registrationRaceLoadState = 'idle';
 
@@ -3215,8 +3032,11 @@ loadRegistrationRaceCheckpoints();
 (function () {
   const PASSPHRASE_STORAGE_KEY = 'coach-review:passphrase';
   const DATA_URL = 'data/training-review.enc.json';
+  const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
   let unlockedPassphrase = '';
   let loadRequest = 0;
+  let appliedCiphertext = '';
+  let nextRefreshAt = 0;
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -3290,6 +3110,7 @@ loadRegistrationRaceCheckpoints();
   }
 
   function renderLoading(text) {
+    refreshWeekOverviewCard();
     const host = document.getElementById('coach-review-content');
     if (!host) return;
     host.innerHTML = `
@@ -3299,9 +3120,11 @@ loadRegistrationRaceCheckpoints();
       </div>`;
   }
 
-  function renderUnlocked(data) {
+  function renderUnlocked(data, ciphertext) {
     try {
+      coachReviewRefreshFailed = false;
       render(data);
+      appliedCiphertext = ciphertext;
     } catch (err) {
       console.warn('coach-review: unlocked review render failed', err);
       renderNotice('週報已解密，但頁面顯示失敗。請重試載入；不需要更換密語。');
@@ -3319,6 +3142,7 @@ loadRegistrationRaceCheckpoints();
 
   function renderNotice(text) {
     coachReviewLoadState = 'unavailable';
+    refreshWeekOverviewCard();
     const host = document.getElementById('coach-review-content');
     if (!host) return;
     host.innerHTML = `
@@ -3330,6 +3154,7 @@ loadRegistrationRaceCheckpoints();
 
   function renderUnlock(payload, wrongKey) {
     coachReviewLoadState = 'locked';
+    refreshWeekOverviewCard();
     const host = document.getElementById('coach-review-content');
     if (!host) return;
     host.innerHTML = `
@@ -3362,42 +3187,62 @@ loadRegistrationRaceCheckpoints();
       unlockedPassphrase = pass;
       if (document.getElementById('coach-review-remember')?.checked) {
         localStorage.setItem(PASSPHRASE_STORAGE_KEY, pass);
+        window.TrainerSync?.onLocalSave?.();
       } else {
         localStorage.removeItem(PASSPHRASE_STORAGE_KEY);
       }
-      renderUnlocked(data);
+      renderUnlocked(data, payload.ct);
     });
   }
 
-  async function init() {
+  async function init(options) {
     const request = ++loadRequest;
+    nextRefreshAt = Date.now() + REFRESH_INTERVAL_MS;
+    const keepExisting = options?.background === true && Boolean(coachReviewData);
+    const showFailure = (message) => {
+      if (keepExisting) {
+        coachReviewRefreshFailed = true;
+        refreshWeekOverviewCard();
+      } else {
+        renderNotice(message);
+      }
+    };
+    if (!coachReviewData) coachReviewLoadState = 'loading';
     if (!window.crypto?.subtle) {
       renderNotice('此瀏覽器環境不支援解密（需要 HTTPS 或本機安全環境），無法顯示教練建議。');
       return;
     }
-    renderLoading('讀取教練建議中…');
+    if (!keepExisting) renderLoading('讀取教練建議中…');
     let payload;
     try {
       const res = await fetch(DATA_URL, { cache: 'no-store' });
       if (request !== loadRequest) return;
-      if (!res.ok) { renderNotice('目前無法讀取教練建議資料，請稍後重新整理。'); return; }
+      if (!res.ok) return showFailure('目前無法讀取教練建議資料，請稍後重新整理。');
       payload = await res.json();
       if (request !== loadRequest) return;
-      if (!payload?.ct || !payload?.salt || !payload?.iv) { renderNotice('教練建議資料格式異常，請稍後重新整理。'); return; }
+      if (!payload?.ct || !payload?.salt || !payload?.iv) return showFailure('教練建議資料格式異常，請稍後重新整理。');
     } catch (err) {
       if (request !== loadRequest) return;
       console.warn('coach-review: fetch failed', err);
-      renderNotice('讀取教練建議失敗（可能離線），請確認網路連線後重新整理。');
+      showFailure('讀取教練建議失敗（可能離線），請確認網路連線後重新整理。');
+      return;
+    }
+    if (keepExisting && payload.ct === appliedCiphertext) {
+      if (coachReviewRefreshFailed) {
+        coachReviewRefreshFailed = false;
+        refreshWeekOverviewCard();
+      }
       return;
     }
     const savedPassphrase = unlockedPassphrase || localStorage.getItem(PASSPHRASE_STORAGE_KEY);
     if (savedPassphrase) {
-      renderLoading('解鎖教練建議中…');
+      if (!keepExisting) renderLoading('解鎖教練建議中…');
       let data;
       try {
         data = await decrypt(payload, savedPassphrase);
       } catch (err) {
         if (request !== loadRequest) return;
+        if (keepExisting) return showFailure('新版週報未能讀取，會保留上次取得的資料。');
         console.warn('coach-review: saved passphrase no longer valid', err);
         unlockedPassphrase = '';
         localStorage.removeItem(PASSPHRASE_STORAGE_KEY);
@@ -3405,7 +3250,7 @@ loadRegistrationRaceCheckpoints();
       if (request !== loadRequest) return;
       if (data) {
         unlockedPassphrase = savedPassphrase;
-        renderUnlocked(data);
+        renderUnlocked(data, payload.ct);
         return;
       }
     }
@@ -3414,6 +3259,8 @@ loadRegistrationRaceCheckpoints();
 
   window.lockCoachReview = () => {
     unlockedPassphrase = '';
+    appliedCiphertext = '';
+    coachReviewRefreshFailed = false;
     localStorage.removeItem(PASSPHRASE_STORAGE_KEY);
     coachReviewData = null;
     coachReviewLoadState = 'loading';
@@ -3421,6 +3268,13 @@ loadRegistrationRaceCheckpoints();
     init();
   };
   window.loadCoachReview = init;
+  function refreshWhenVisible() {
+    if (document.visibilityState !== 'visible' || Date.now() < nextRefreshAt) return;
+    if (coachReviewLoadState === 'locked' || !(unlockedPassphrase || localStorage.getItem(PASSPHRASE_STORAGE_KEY))) return;
+    return init({ background: true });
+  }
+  document.addEventListener('visibilitychange', refreshWhenVisible);
+  window.setInterval(refreshWhenVisible, REFRESH_INTERVAL_MS);
 
   init();
 })();

@@ -2019,3 +2019,127 @@
   .analysis-layout-a .trend-tile-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .analysis-log-table td, .garmin-log-table td { padding:12px; }
 }
+/* 練跑版面 B：週曆與課程詳情並列於週進度。 */
+.trainer-page .trainer-plan-heading {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.trainer-plan-heading::after { display: none; }
+.trainer-plan-heading .trainer-hero-kicker { margin: 0 0 4px; letter-spacing: 0; }
+.trainer-plan-heading .trainer-hero-title { margin: 0; font-size: 36px; line-height: 1.2; letter-spacing: 0; }
+.trainer-plan-heading .trainer-hero-planline { margin: 8px 0 0; }
+.trainer-page .plan-toolbar { justify-content: space-between; flex-wrap: nowrap; }
+.plan-management { position: relative; margin-left: auto; }
+.plan-management > summary, .week-disclosure > summary {
+  min-height: 44px;
+  padding-block: 10px;
+  color: var(--c-primary-hover);
+  font-weight: 750;
+  cursor: pointer;
+}
+.plan-management > summary { white-space: nowrap; padding-inline: 8px; }
+.plan-management > summary:hover, .week-disclosure > summary:hover { text-decoration: underline; }
+.plan-management .plan-workspace-tools {
+  position: absolute;
+  inset: calc(100% + 8px) 0 auto auto;
+  display: grid;
+  gap: 8px;
+  width: min(320px, calc(100vw - 56px));
+  padding: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface);
+}
+.plan-management .plan-toolbar-sync, .plan-management .plan-toolbar-utilities { display: grid; gap: 4px; width: 100%; }
+.plan-management .plan-toolbar-utilities { padding: 4px 0 0; border-inline: 0; border-top: 1px solid var(--c-border); }
+.plan-management .garmin-activity-sync-control, .plan-management .training-sync-control { display: grid; justify-items: start; }
+.plan-management .garmin-activity-sync-control span,
+.plan-management .plan-toolbar-sync [data-training-sync-status] {
+  position: static;
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  clip: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: 12px;
+}
+.plan-management .plan-workspace-tools .btn { min-height: 44px; text-align: left; }
+.week-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .42fr); align-items: start; gap: 16px; }
+.week-workspace > .card { min-width: 0; margin: 0; padding: 20px; border: 0; border-radius: var(--radius-lg); background: var(--c-surface); box-shadow: none; }
+.week-schedule .week-header-top { display: flex; flex-flow: row wrap; align-items: center; gap: 8px; padding: 0 0 12px; border: 0; background: transparent; }
+.week-schedule .week-nav-cluster { width: auto; gap: 8px; }
+.week-schedule .week-header-title { flex-basis: auto; }
+.week-schedule .week-header-label { margin: 0; font-size: 20px; line-height: 1.25; letter-spacing: 0; }
+.week-header-context { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; color: var(--c-text-muted); font-size: 13px; }
+.week-schedule .week-header-right { width: auto; margin-left: auto; padding: 0; border: 0; }
+.week-schedule .week-nav-btn, .week-schedule .week-today-btn { min-width: 44px; min-height: 44px; }
+.week-schedule .week-strip { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; padding: 2px 2px 4px; margin: 0 0 12px; }
+.week-schedule .week-strip-day {
+  align-items: center;
+  gap: 4px;
+  min-height: 68px;
+  padding: 8px 2px;
+  border-radius: var(--radius-sm);
+  background: var(--c-surface2);
+  box-shadow: none;
+  text-align: center;
+}
+.week-schedule .week-strip-day:hover { box-shadow: inset 0 0 0 1px var(--c-primary); }
+.week-schedule .week-strip-day.is-selected { background: var(--c-primary-hover); color: var(--c-surface); }
+.week-schedule .week-strip-date { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; font-size: 12px; }
+.week-schedule .week-strip-date b { font-size: 16px; }
+.week-schedule .week-strip-title, .week-schedule .week-strip-dot, .week-schedule .week-strip-flags { display: none; }
+.week-schedule .week-strip-day .week-strip-type { display: block; padding: 0; background: transparent; font-size: 12px; white-space: normal; }
+.week-schedule .week-strip-km { display: block; margin: 0; color: inherit; font-size: 12px; }
+.week-schedule .week-strip-km small { display: none; }
+.week-schedule .week-strip-mobile-status { display: block; font-size: 11px; line-height: 1.25; }
+.week-schedule .week-strip-day.is-selected :is(.week-strip-date, .week-strip-date b, .week-strip-type) { color: inherit; }
+.week-schedule [data-week-detail] .week-day-panel > .day-detail { padding: 16px 0; border: 0; border-top: 1px solid var(--c-border); border-radius: 0; background: transparent; box-shadow: none; }
+.week-schedule .dd-hero .day-detail-title { font-size: clamp(24px, 2.4vw, 30px); }
+.week-schedule .week-next-course { margin-top: 8px; min-height: 44px; text-align: left; }
+.week-schedule .week-release-note { margin: 0 0 12px; }
+.week-schedule .week-resource-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); padding: 12px 0; background: transparent; }
+.week-disclosure { border-top: 1px solid var(--c-border); }
+#plan-tab-week > .week-disclosure { margin-top: 12px; }
+.week-pause-notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.week-workspace .week-summary { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.week-summary h2, .plan-panel-title { margin: 0; font-size: 20px; line-height: 1.3; }
+.plan-panel-title { margin-bottom: 12px; }
+.week-summary :is(dl, p, dd) { margin: 0; }
+.week-summary-km { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.week-summary-km > div + div { padding-left: 8px; border-left: 1px solid var(--c-border); }
+.week-summary-km dt, .week-summary-facts dt, .week-summary-note, .week-data-status { color: var(--c-text-muted); font-size: 13px; }
+.week-summary-km dd { color: var(--c-primary-hover); font-size: 20px; font-weight: 850; overflow-wrap: anywhere; }
+.week-summary-km dd small { display: block; color: var(--c-text-muted); font-size: 13px; font-weight: 600; }
+.week-summary .plan-progress-track { padding: 0; }
+.week-summary-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.week-summary-actions .btn { min-height: 44px; }
+.week-summary-facts > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; padding: 8px 0; }
+.week-summary .week-summary-note { margin-top: 8px; }
+.garmin-records-view { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.garmin-records-view > .card { margin-bottom: 0; }
+.garmin-records-scroll { max-height: 320px; overflow: auto; }
+.garmin-report-link { min-height: 44px; white-space: nowrap; }
+.checkin-body > .week-disclosure { margin-top: 16px; }
+@media (max-width: 900px) {
+  .week-workspace { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .trainer-page .trainer-plan-heading { padding: 0; }
+  .trainer-plan-heading .trainer-hero-title { font-size: 30px; }
+  .trainer-page .plan-toolbar { align-items: center; margin-bottom: 0; }
+  .trainer-page .plan-toolbar .tab { min-height: 44px; padding-inline: 6px; font-size: 12px; }
+  .trainer-page .plan-tab-list { gap: 0; }
+  .week-workspace > .card { padding: 12px; }
+  .week-schedule .week-header-top { flex-direction: row; }
+}

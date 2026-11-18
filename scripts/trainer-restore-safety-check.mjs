@@ -67,8 +67,8 @@ const sync = await readFile('site/trainer-sync.js', 'utf8');
 let cloudSaveCalls = 0;
 let cloudMetaCalls = 0;
 const cloud = vm.createContext({
-  appData: { profile: {}, plan: [1], log: [1] }, applyingRemote: false,
-  readSession: () => ({}), sessionUserId: () => 'fixture', decryptSnapshot: async () => ({ profile: {}, plan: [2], log: [] }),
+  appData: { profile: {}, plan: [1], log: [1] }, applyingRemote: false, syncKey: {},
+  decryptSnapshot: async () => ({ data: { profile: {}, plan: [2], log: [] }, coachPassphrase: 'synthetic' }),
   hasMeaningfulData: () => true, savePreRestoreSnapshot() { throw Error('quota'); },
   saveData: value => { cloudSaveCalls++; return value; }, storeMeta() { cloudMetaCalls++; },
   renderPlanView() {}, showView() {}, setStatus() {},
@@ -82,12 +82,27 @@ await assert.rejects(cloud.applyRemote({ payload: {}, checksum: 'x' }));
 assert.equal(cloudMetaCalls, 0); assert.equal(cloud.appData.log.length, 1); assert.equal(cloud.applyingRemote, false);
 console.log('PASS cloud snapshot and storage failures preserve local state and revision');
 
+let resolveCloudSnapshot;
+cloud.readSession = () => ({});
+cloud.normalizeData = value => value;
+cloud.decryptSnapshot = () => new Promise(resolve => { resolveCloudSnapshot = resolve; });
+const pendingRestore = cloud.applyRemote({ payload: {} }, JSON.stringify(cloud.appData));
+cloud.appData.log.push(2);
+resolveCloudSnapshot({ data: { log: [] }, coachPassphrase: 'synthetic' });
+await pendingRestore;
+assert.equal(cloudSaveCalls, 0);
+assert.equal(cloudMetaCalls, 0);
+assert.equal(cloud.appData.log.length, 2);
+console.log('PASS an edit made during automatic download is preserved');
+
 let conflicts = 0, adoptions = 0, uploads = 0, currentMeta = null, coach = '';
 const equal = vm.createContext({
   syncKey: {}, appData: { profile: {} }, readSession: () => ({}), sessionUserId: () => 'fixture',
   readRemote: async () => ({ revision: 2, checksum: 'same', payload: {} }), readMeta: () => currentMeta,
-  checksum: async () => 'same', hasMeaningfulData: () => true, localCoachPassphrase: () => coach,
-  decryptSnapshot: async (_payload, _id, _key, options) => { if (!options) { adoptions++; coach = 'synthetic'; } return { profile: {} }; },
+  normalizeData: value => value, digest: async () => 'same', checksum: async () => 'same',
+  hasMeaningfulData: () => true, localCoachPassphrase: () => coach,
+  decryptSnapshot: async () => ({ data: { profile: {} }, coachPassphrase: 'synthetic' }),
+  adoptCoachPassphrase(value) { adoptions++; coach = value; },
   coachDigest: async () => coach, storeMeta: value => { currentMeta = value; },
   showConflict: () => { conflicts++; }, writeRemote: async () => { uploads++; },
   setStatus() {}, handleStaleKey: async () => false, console,

@@ -12,7 +12,11 @@ function device() {
   const map = new Map([['runner-trainer:sync-session:v1', JSON.stringify({ access_token: token })]]);
   const localStorage = { getItem: key => map.get(key) ?? null, setItem: (key, value) => map.set(key, String(value)), removeItem: key => map.delete(key) };
   const state = { conflicts: 0, statuses: [] };
-  const window = { TRAINER_SYNC_CONFIG: {url: 'https://fixture.invalid', publishableKey: 'fixture', table: 'snapshots'}, setTimeout, clearTimeout, addEventListener() {} };
+  const timers = new Map();
+  const window = { TRAINER_SYNC_CONFIG: {url: 'https://fixture.invalid', publishableKey: 'fixture', table: 'snapshots'},
+    setTimeout(callback, delay) { const id = Symbol(); timers.set(id, { callback, delay }); return id; },
+    clearTimeout(id) { timers.delete(id); }, addEventListener() {},
+    loadCoachReview() { state.reviewLoads = (state.reviewLoads || 0) + 1; } };
   const fetch = async (_url, options = {}) => {
     if (!options.method) return {ok: true, status: 200, json: async () => remote ? [structuredClone(remote)] : []};
     const body = JSON.parse(options.body);
@@ -26,25 +30,57 @@ function device() {
     showModal: () => {state.conflicts++;}, closeModal() {}, savePreRestoreSnapshot() {}, saveData: x => x,
     renderPlanView() {}, showView() {}, console, Date, Uint8Array, JSON });
   vm.runInContext(source, sandbox);
-  return {window, localStorage, state};
+  return {window, localStorage, state, sandbox, timers,
+    async runTimer(delay) {
+      const entry = [...timers].find(([, task]) => task.delay === delay);
+      assert.ok(entry, `expected a ${delay} ms timer`);
+      timers.delete(entry[0]);
+      await entry[1].callback();
+    }};
 }
 const a = device(), b = device();
 await a.window.__test.unlock(); await b.window.__test.unlock();
+await a.window.__test.reconcile();
+const remembered = device();
+remembered.localStorage.setItem('coach-review:passphrase', 'synthetic coach one');
+remembered.window.TrainerSync.onLocalSave();
+assert.equal(remembered.timers.size, 0, 'a locked sync session does not schedule an upload');
+await remembered.window.__test.unlock();
+remembered.window.TrainerSync.onLocalSave();
+await remembered.runTimer(900);
+assert.equal(remote.revision, 2, 'a remembered passphrase fills an empty cloud key without another training edit');
+assert.ok(!JSON.stringify(remote).includes('synthetic coach one'));
+await b.window.__test.reconcile();
+await b.runTimer(0);
+assert.equal(b.state.reviewLoads, 1, 'the second device reloads the review automatically');
 a.localStorage.setItem('coach-review:passphrase', 'synthetic coach one');
 await a.window.__test.reconcile();
-await b.window.__test.reconcile();
+assert.equal(remote.revision, 2, 'matching passphrases do not create duplicate revisions');
 assert.equal(b.state.conflicts, 0);
 assert.equal(b.localStorage.getItem('coach-review:passphrase'), 'synthetic coach one');
 // Simulate a separate remote update while A also changes its local coach passphrase.
 remote.revision++;
 a.localStorage.setItem('coach-review:passphrase', 'synthetic coach two');
 await a.window.__test.reconcile();
-assert.equal(remote.revision, 3);
+assert.equal(remote.revision, 4);
 b.localStorage.removeItem('coach-review:passphrase');
 await b.window.__test.reconcile();
 assert.equal(b.localStorage.getItem('coach-review:passphrase'), 'synthetic coach two');
 assert.equal(b.state.conflicts, 0);
 console.log('PASS two isolated devices use encrypted snapshots, avoid conflicts, and propagate a changed coach passphrase');
+
+a.sandbox.appData = { ...a.sandbox.appData, log: [{ date: '2026-11-17', actualKm: 6.5 }] };
+await a.window.__test.reconcile();
+await b.window.__test.reconcile();
+assert.equal(b.sandbox.appData.log[0].actualKm, 6.5, 'an unchanged device follows a newer cloud revision automatically');
+assert.equal(b.state.conflicts, 0);
+a.sandbox.appData = { ...a.sandbox.appData, log: [{ date: '2026-11-17', actualKm: 7 }] };
+b.sandbox.appData = { ...b.sandbox.appData, log: [{ date: '2026-11-17', actualKm: 8 }] };
+await a.window.__test.reconcile();
+await b.window.__test.reconcile();
+assert.equal(b.state.conflicts, 1, 'concurrent edits still require a choice');
+assert.equal(b.sandbox.appData.log[0].actualKm, 8);
+console.log('PASS newer results reach an unchanged device and concurrent edits preserve local data');
 
 // Exercise the setup-screen entry and feedback without accessing a real account.
 let modal = null;

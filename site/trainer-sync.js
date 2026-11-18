@@ -148,6 +148,7 @@
     try {
       if (localStorage.getItem(COACH_PASSPHRASE_KEY)) return false;
       localStorage.setItem(COACH_PASSPHRASE_KEY, value);
+      window.setTimeout(() => window.loadCoachReview?.(), 0);
       return true;
     } catch { return false; }
   }
@@ -176,16 +177,14 @@
     return { version: 2, iv: bytesToBase64(iv), cipher: bytesToBase64(new Uint8Array(cipher)) };
   }
 
-  async function decryptSnapshot(envelope, userId, key = syncKey, { adopt = true } = {}) {
+  async function decryptSnapshot(envelope, key = syncKey) {
     if (!envelope || ![1, 2].includes(envelope.version) || !envelope.iv || !envelope.cipher) throw new Error('不支援的同步快照格式');
     const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: base64ToBytes(envelope.iv) }, key, base64ToBytes(envelope.cipher));
     const parsed = JSON.parse(decoder.decode(plaintext));
     // version 1：只有訓練資料（舊格式仍可讀）；version 2：另帶教練週報密語
-    if (envelope.version === 2) {
-      if (adopt && adoptCoachPassphrase(parsed.coachReviewPassphrase)) window.setTimeout(() => window.loadCoachReview?.(), 0);
-      return normalizeData(parsed.data);
-    }
-    return normalizeData(parsed);
+    return envelope.version === 2
+      ? { data: normalizeData(parsed.data), coachPassphrase: parsed.coachReviewPassphrase }
+      : { data: normalizeData(parsed), coachPassphrase: '' };
   }
 
   async function api(path, options = {}, retried = false) {
@@ -248,9 +247,11 @@
     setStatus(`已同步 · ${new Date(result[0].updated_at).toLocaleString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`);
   }
 
-  async function applyRemote(remote) {
-    const userId = sessionUserId(readSession());
-    const data = await decryptSnapshot(remote.payload, userId);
+  async function applyRemote(remote, localBaseline) {
+    const key = syncKey;
+    const { data, coachPassphrase } = await decryptSnapshot(remote.payload, key);
+    if (localBaseline !== undefined &&
+        (key !== syncKey || !readSession() || localBaseline !== JSON.stringify(normalizeData(appData)))) return;
     if (hasMeaningfulData(appData)) {
       savePreRestoreSnapshot(appData, 'cloud-sync');
     }
@@ -259,6 +260,7 @@
       const restored = saveData(data);
       if (!restored) throw new Error('training save failed');
       appData = restored;
+      adoptCoachPassphrase(coachPassphrase);
       storeMeta({ revision: remote.revision, checksum: remote.checksum, updatedAt: remote.updated_at, coachDigest: await coachDigest() });
     } finally {
       applyingRemote = false;
@@ -299,16 +301,21 @@
         await writeRemote(0);
         return;
       }
-      const localChecksum = await checksum(appData);
+      const localBaseline = JSON.stringify(normalizeData(appData));
+      const localChecksum = await digest(localBaseline);
       if (localChecksum === remote.checksum) {
-        const hadLocalCoach = Boolean(localCoachPassphrase());
         // Confirm the encrypted snapshot before trusting its checksum or adopting a passphrase.
-        const remoteData = await decryptSnapshot(remote.payload, sessionUserId(readSession()), syncKey, { adopt: false });
-        if (await checksum(remoteData) !== localChecksum) throw new Error('cloud checksum mismatch');
-        if (!localCoachPassphrase()) await decryptSnapshot(remote.payload, sessionUserId(readSession()));
+        const snapshot = await decryptSnapshot(remote.payload);
+        if (await checksum(snapshot.data) !== localChecksum) throw new Error('cloud checksum mismatch');
+        const localCoachPass = localCoachPassphrase();
+        const cloudHasCoach = typeof snapshot.coachPassphrase === 'string' && Boolean(snapshot.coachPassphrase);
+        if (!localCoachPass) adoptCoachPassphrase(snapshot.coachPassphrase);
         // 訓練資料一致；只有這台的教練密語變了（例如剛輸入）才補傳一次，讓其他新裝置拿得到
         const localCoach = await coachDigest();
-        if (meta && hadLocalCoach && localCoach && localCoach !== (meta.coachDigest || '')) return await writeRemote(remote.revision);
+        if (localCoachPass && localCoachPass !== snapshot.coachPassphrase &&
+            (!cloudHasCoach || (meta && localCoach !== (meta.coachDigest || '')))) {
+          return await writeRemote(remote.revision);
+        }
         storeMeta({ revision: remote.revision, checksum: remote.checksum, updatedAt: remote.updated_at, coachDigest: localCoach });
         setStatus('所有裝置資料一致');
         return;
@@ -316,6 +323,7 @@
       if (!meta && hasMeaningfulData(appData)) return showConflict(remote);
       // 必須 await：否則 applyRemote 的解密錯誤不會進到下面的 catch
       if (!meta || !hasMeaningfulData(appData)) return await applyRemote(remote);
+      if (remote.revision > meta.revision && localChecksum === meta.checksum) return await applyRemote(remote, localBaseline);
       if (meta.revision === remote.revision) return await writeRemote(remote.revision);
       return showConflict(remote);
     } catch (error) {
@@ -330,7 +338,7 @@
   function onLocalSave() {
     if (applyingRemote || !syncKey || !readSession()) return;
     window.clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(() => { reconcile(); }, 900);
+    saveTimer = window.setTimeout(reconcile, 900);
     setStatus('準備同步…');
   }
 
@@ -363,7 +371,7 @@
     const remote = await readRemote();
     if (remote?.payload) {
       try {
-        await decryptSnapshot(remote.payload, userId, candidate, { adopt: false });
+        await decryptSnapshot(remote.payload, candidate);
       } catch (error) {
         // 只有 AES-GCM 驗證失敗才代表密碼錯；其他錯誤（格式不支援、資料損毀）要說清楚，避免使用者一直重打密碼
         setStatus(error?.name === 'OperationError' ? '同步資料無法解密，請確認同步密碼；也可能是雲端資料損毀' : '雲端資料格式不支援或已損毀，請先更新網頁；仍無法解決請聯絡管理員');

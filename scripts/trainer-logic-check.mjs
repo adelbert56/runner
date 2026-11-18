@@ -621,6 +621,7 @@ let mobileViewport = true, pinned = false, anchorTop = 20;
 const toolbarCallbacks = {};
 const toolbarProbe = {
   offsetHeight: 100,
+  querySelector: () => null,
   style: { setProperty() {} },
   classList: { contains: () => pinned, add: () => {pinned = true;}, remove: () => {pinned = false;} },
 };
@@ -696,7 +697,7 @@ const planRenderSandbox = vm.createContext({
   document: { getElementById: () => ({ innerHTML: '' }) },
   window: { location: { hostname: 'example.invalid' }, loadCoachReview: () => { planRenderReviewLoads++; } },
   todayWeekNum: () => 1,
-  ...Object.fromEntries(['renderHeroPanel', 'renderSafetyHoldCard', 'renderRunnerOnboardingCard', 'renderTabIntroCard', 'renderWeekOverviewCard', 'renderRaceWeekCard', 'renderPhaseTabs', 'renderWeekSection', 'renderCoachReviewPanel', 'renderCheckinSection', 'renderProgressHub', 'setupPlanToolbarPinning', 'loadGarminActivitySyncStatus'].map(name => [name, () => ''])),
+  ...Object.fromEntries(['renderHeroPanel', 'renderWeekWorkspace', 'renderCoachReviewPanel', 'renderCheckinSection', 'renderProgressHub', 'setupPlanToolbarPinning', 'loadGarminActivitySyncStatus'].map(name => [name, () => ''])),
 });
 vm.runInContext(extractFunction(trainerRenderJs, 'renderPlanView'), planRenderSandbox);
 planRenderSandbox.renderPlanView();
@@ -705,6 +706,67 @@ assertEqual(planRenderReviewLoads, 0, 'repeated plan redraws reuse a decoded rev
 planRenderSandbox.coachReviewData = null;
 planRenderSandbox.renderPlanView();
 assertEqual(planRenderReviewLoads, 1, 'a plan without decoded review still starts the coach loader');
+
+let arrivalsFetched = 0;
+let arrivalRenders = 0;
+let arrivalKeyRemoved = false;
+let syncNow = 300_000;
+let nextReviewCipher = 'fixture-old';
+const arrivalSandbox = vm.createContext({
+  Date: { now: () => syncNow }, REFRESH_INTERVAL_MS: 300_000,
+  DATA_URL: '/synthetic-review', PASSPHRASE_STORAGE_KEY: 'review-key',
+  coachReviewData: { analyticsUpdatedAt: '2026-11-16', analyticsRuns: [] },
+  coachReviewLoadState: 'ready', coachReviewRefreshFailed: false,
+  unlockedPassphrase: 'synthetic', appliedCiphertext: 'fixture-old', loadRequest: 0, nextRefreshAt: 300_000,
+  document: { visibilityState: 'hidden' }, window: { crypto: { subtle: {} } },
+  localStorage: { getItem: () => 'synthetic', removeItem: () => { arrivalKeyRemoved = true; } },
+  fetch: async () => {
+    arrivalsFetched++;
+    return { ok: Boolean(nextReviewCipher), json: async () => ({ ct: nextReviewCipher, salt: 'fixture', iv: 'fixture' }) };
+  },
+  decrypt: async (payload) => {
+    if (payload.ct === 'fixture-corrupt') throw Error('synthetic decryption error');
+    return { analyticsUpdatedAt: '2026-11-17', analyticsRuns: [{ date: '2026-11-17', km: 6.5 }] };
+  },
+  renderUnlocked(data, ciphertext) {
+    arrivalSandbox.coachReviewData = data;
+    arrivalSandbox.appliedCiphertext = ciphertext;
+    arrivalSandbox.coachReviewRefreshFailed = false;
+    arrivalRenders++;
+  },
+  refreshWeekOverviewCard() {}, reviewEscape: String,
+  renderLoading() { throw Error('background refresh must keep the existing review visible'); },
+});
+const coachLoaderSource = trainerJs.slice(trainerJs.indexOf("const PASSPHRASE_STORAGE_KEY = 'coach-review:passphrase';"));
+vm.runInContext(`async ${extractFunction(coachLoaderSource, 'init')}\n${extractFunction(coachLoaderSource, 'refreshWhenVisible')}\n${extractFunction(trainerRenderJs, 'renderCourseSyncNotice')}`, arrivalSandbox);
+await arrivalSandbox.refreshWhenVisible();
+assertEqual(arrivalsFetched, 0, 'hidden page does not poll the encrypted review');
+arrivalSandbox.document.visibilityState = 'visible';
+await arrivalSandbox.refreshWhenVisible();
+assertEqual(arrivalRenders, 0, 'an unchanged encrypted review does not re-render or rerun coach adaptation');
+nextReviewCipher = 'fixture-arrived';
+await arrivalSandbox.refreshWhenVisible();
+assertEqual(arrivalsFetched, 1, 'background refresh respects the interval');
+syncNow += 300_000;
+await arrivalSandbox.refreshWhenVisible();
+assertEqual(arrivalSandbox.coachReviewData.analyticsRuns[0]?.km, 6.5, 'a new Garmin activity arrives while the page is open');
+syncNow += 300_000;
+nextReviewCipher = 'fixture-corrupt';
+await arrivalSandbox.refreshWhenVisible();
+assertEqual(arrivalSandbox.coachReviewData.analyticsRuns[0]?.km, 6.5, 'an invalid new review does not remove the previous run');
+assertEqual(arrivalKeyRemoved, false, 'a background decryption error does not discard a known working passphrase');
+assertEqual(arrivalSandbox.renderCourseSyncNotice('2026-11-18').includes('暫時無法更新'), true, 'an update error has its own course status');
+syncNow += 300_000;
+nextReviewCipher = null;
+await arrivalSandbox.refreshWhenVisible();
+assertEqual(arrivalSandbox.coachReviewRefreshFailed, true, 'failed network refresh stays visible while keeping the previous run');
+syncNow += 300_000;
+nextReviewCipher = 'fixture-arrived';
+await arrivalSandbox.refreshWhenVisible();
+assertEqual(arrivalSandbox.coachReviewRefreshFailed, false, 'successful retry clears the status automatically');
+assertEqual(arrivalSandbox.renderCourseSyncNotice('2026-11-18').includes('等待 Garmin 紀錄'), true, 'an uncovered activity date is waiting, not recorded as zero');
+arrivalSandbox.coachReviewLoadState = 'locked';
+assertEqual(arrivalSandbox.renderCourseSyncNotice('2026-11-18').includes('解鎖週報'), true, 'locked review points to the actual unlock action');
 
 const projectionSandbox = vm.createContext({
   appData: { profile: { goal: 'half', racePaceSec: 477 }, plan: [] },
