@@ -461,9 +461,10 @@ function applyRegisteredSundayRaceReplacements(races) {
   appData.raceIntegrationNotifiedKeys = Array.isArray(appData.raceIntegrationNotifiedKeys) ? appData.raceIntegrationNotifiedKeys : [];
   const notifiedKeys = new Set(appData.raceIntegrationNotifiedKeys);
 
-  const validRaceDates = new Set(
-    flat.filter((day) => day.dateStr >= today && raceByDate.has(day.dateStr)).map((day) => day.dateStr)
-  );
+  const continuationRestDates = new Set(appData.plan.filter(week => week.coachContinuation).flatMap(week =>
+    coachReviewForWeek(week)?.restDates || []));
+  const validRaceDates = new Set(flat.filter((day) => day.dateStr >= today && raceByDate.has(day.dateStr)
+    && !continuationRestDates.has(day.dateStr)).map((day) => day.dateStr));
 
   const registeredDates = new Set(races.map((race) => race.race_date).filter(Boolean));
 
@@ -1373,6 +1374,10 @@ function weekHasMalformedVolume(week) {
   if (!week || !Array.isArray(week.days)) return true;
   const runDays = week.days.filter(day => ['easy', 'tempo', 'interval', 'long'].includes(day.type));
   if (!runDays.length) return false;
+  if (week.coachContinuation && runDays.length === 1) {
+    const [day] = runDays;
+    if (day.coachPlan?.locked && day.type === 'easy' && day.km > 0 && day.km <= 4 && day.km === week.targetKm) return false;
+  }
   const longDay = runDays.find(day => day.type === 'long');
   const longKm = longDay?.km || 0;
   return runDays.some(day => {
@@ -3092,6 +3097,7 @@ loadRegistrationRaceCheckpoints();
     // 初次 init 時加密週報尚未解鎖，這裡取得 scheduled 賽事後必須再同步一次，
     // 才能把正式確認的賽事真正寫進這個瀏覽器的本機課表。
     syncRegisteredSundayRaces();
+    const wasShowingCurrentWeek = currentWeek === todayWeekNum();
     const formalCoachWeekMaterialized = materializeCoachReviewWeek();
     const historicalCoachPlansRestored = restoreHistoricalCoachPlansFromReview();
     syncGarminRunsToPlan(data);
@@ -3105,7 +3111,7 @@ loadRegistrationRaceCheckpoints();
     // 還原必須排在校準之後：先還原再校準的話，已提前排定的教練週會被同一輪
     // 的自動校準覆蓋，跑者隔天看到的又是非教練版課表。
     const restoredEarlyCoachSchedule = restorePendingEarlyCoachSchedule();
-    if ((formalCoachWeekMaterialized || historicalCoachPlansRestored || coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || longRunTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(currentWeek);
+    if ((formalCoachWeekMaterialized || historicalCoachPlansRestored || coachScheduleAligned || coachCourseNamesAligned || coachDeloadStructureAligned || recoveryTargetsAligned || longRunTargetsAligned || adaptation.dailyAdvisory || restoredEarlyCoachSchedule) && document.getElementById('plan-tab-week')) jumpToPhaseWeek(wasShowingCurrentWeek ? todayWeekNum() : currentWeek);
     refreshCoachReviewPanels();
   }
 

@@ -2242,6 +2242,9 @@ function coachPhaseForWeek(week) {
 function coachReviewForWeek(week) {
   if (!Array.isArray(week?.days)) return null;
   const reviews = [coachReviewData?.nextWeek, ...(coachReviewData?.confirmedWeeks || [])];
+  if (week.coachContinuation && Array.isArray(coachReviewData?.history)) {
+    reviews.push(...coachReviewData.history.slice().reverse().map(entry => entry?.planSnapshot));
+  }
   return reviews.find((review) => review?.weekStart && week.days.some((day) => day.dateStr === review.weekStart)) || null;
 }
 
@@ -2826,7 +2829,7 @@ function renderTabIntroCard() {
 
 function coachDaysForWeek(week) {
   const coachNextWeek = coachReviewForWeek(week);
-  if (coachNextWeek && coachNextWeek !== coachReviewData?.nextWeek) {
+  if (coachNextWeek && !week.coachContinuation && coachNextWeek !== coachReviewData?.nextWeek) {
     return (coachNextWeek.menu || []).map((entry) => ({ ...entry, scheduledDow: ['日', '一', '二', '三', '四', '五', '六'].indexOf(entry.day) }));
   }
   return coachNextWeek ? coachMenuForCurrentSchedule(coachNextWeek.menu) : [];
@@ -2835,36 +2838,73 @@ function coachDaysForWeek(week) {
 // 正式週報不能只在 render-time 覆蓋畫面。若不把處方寫回 plan，週報切到
 // 下一週後，舊週就會退回通用產生器內容，連凍結 archive 都只會存到錯的底稿。
 function materializeCoachReviewWeek() {
-  const week = (appData.plan || []).find((item) => item.days?.some((day) => day.dateStr === coachReviewData?.nextWeek?.weekStart));
-  const coachDays = week ? coachDaysForWeek(week) : [];
-  if (!week || !coachDays.length) return false;
+  const review = coachReviewData?.nextWeek;
+  const plan = appData.plan || [];
+  const existing = plan.find((item) => item.days?.some((day) => day.dateStr === review?.weekStart));
   const context = buildContext();
   let changed = false;
-  week.days = (week.days || []).map((day) => {
-    const prescription = resolveCourse(day, context, week);
-    if (!['coach-prescription', 'race-adjustment'].includes(prescription.source)) return day;
-    const next = {
-      ...prescription.course,
-      status: day.status,
-      isMakeup: day.isMakeup,
-      extraSessions: day.extraSessions,
-      coachPlan: {
-        ...(day.coachPlan && typeof day.coachPlan === 'object' ? day.coachPlan : {}),
-        source: 'manual-coach-review',
-        reviewWeekStart: String(coachReviewData?.nextWeek?.weekStart || ''),
-        locked: true
-      }
-    };
-    if (JSON.stringify(next) !== JSON.stringify(day)) changed = true;
-    return next;
-  });
-  const targetKm = coachDays.reduce((sum, entry) => sum + (Number(entry?.totalKm) || 0), 0);
-  if (targetKm > 0 && Number(week.targetKm) !== targetKm) {
-    week.targetKm = Math.round(targetKm * 10) / 10;
+
+  function applyReview(week) {
+    const activeReview = coachReviewForWeek(week);
+    const coachDays = coachDaysForWeek(week);
+    if (!coachDays.length && !activeReview?.restDates?.length) return;
+    week.days = week.days.map((day) => {
+      const prescription = resolveCourse(day, context, week);
+      if (!['coach-prescription', 'race-adjustment'].includes(prescription.source)) return day;
+      const next = {
+        ...prescription.course,
+        status: day.status,
+        isMakeup: day.isMakeup,
+        extraSessions: day.extraSessions,
+        coachPlan: {
+          ...(day.coachPlan && typeof day.coachPlan === 'object' ? day.coachPlan : {}),
+          source: 'manual-coach-review',
+          reviewWeekStart: activeReview.weekStart,
+          locked: true
+        }
+      };
+      if (JSON.stringify(next) !== JSON.stringify(day)) changed = true;
+      return next;
+    });
+    const targetKm = coachDays.reduce((sum, entry) => sum + (Number(entry?.totalKm) || 0), 0);
+    const fullRest = week.days.every(day => activeReview?.restDates?.includes(day.dateStr));
+    if ((targetKm > 0 || fullRest) && Number(week.targetKm) !== targetKm) {
+      week.targetKm = Math.round(targetKm * 10) / 10;
+      changed = true;
+    }
+  }
+
+  if (existing) applyReview(existing);
+  const targetDate = appData.profile?.targetDate;
+  const extended = [...plan];
+  // Rehydrate contiguous published weeks when an offline device missed a review.
+  while (targetDate && extended.at(-1)?.days?.at(-1)?.dateStr >= targetDate) {
+    const weekStart = addDaysToDateStr(extended.at(-1).days.at(-1).dateStr, 1);
+    if (new Date(`${weekStart}T00:00:00`).getDay() !== 1) break;
+    const days = Array.from({ length: 7 }, (_, index) => ({
+      dateStr: addDaysToDateStr(weekStart, index),
+      dow: (index + 1) % 7,
+      type: 'rest', task: '休息', km: 0, steps: [], status: 'planned'
+    }));
+    const week = { weekNum: extended.length + 1, phase: 'base', phaseLabel: '賽後銜接', coachContinuation: true, targetKm: 0, days };
+    const continuation = coachReviewForWeek(week);
+    if (continuation?.weekStart !== weekStart) break;
+    const menu = Array.isArray(continuation.menu) ? continuation.menu : [];
+    const restDates = Array.isArray(continuation.restDates) ? continuation.restDates : [];
+    // Only a fully dated coach prescription can extend the race cycle.
+    const dates = [...menu.map(entry => entry?.date), ...restDates];
+    if (dates.length !== 7 || !days.every(day => dates.includes(day.dateStr))) break;
+    if (!menu.every(entry => days.some(day => day.dateStr === entry.date && day.dow === entry.scheduledDow)
+      && Number.isFinite(Number(entry.totalKm)) && Number(entry.totalKm) > 0)) break;
+    applyReview(week);
+    extended.push(week);
     changed = true;
   }
-  if (changed) saveData(appData);
-  return changed;
+  if (!changed) return false;
+  if (extended.length > plan.length) appData.plan = extended;
+  if (saveData(appData) || extended.length === plan.length) return true;
+  appData.plan = plan;
+  return false;
 }
 
 // 通用產生器每四週會帶 isDeload；正式教練週期一旦存在，必須以它為準。

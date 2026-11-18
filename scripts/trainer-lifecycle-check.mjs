@@ -44,7 +44,7 @@ const sandbox = {
   buildContext: () => ({ plan: sandbox.appData.plan, today: sandbox.todayStr(), todayWeek: 1, completion: { allActivity: [], totalKm: 0 } }),
   safetyGuard: () => null, paceResolver: () => ({}), courseRationale: () => '', courseResolutionSource: () => 'baseline',
   coachWorkoutStructure: (_text, _day, steps) => steps, coachStructureConfidence: () => 'coach',
-  raceDayPackageSteps: () => [], saveData: () => {},
+  raceDayPackageSteps: () => [], saveData: data => data,
   runnerRegisteredRaceKeys: () => new Set(['previous', 'current']), runnerRaceKey: race => race.race_id,
   coachScheduledRaceEntries: () => [], fetch: () => new Promise(resolve => { releaseFetch = resolve; }),
   refreshPlanAfterRaceSync: () => events.push('race refresh'), recordRaceIntegrationLog: () => {}, console,
@@ -218,3 +218,66 @@ assert.equal(fb.raceRecovery[0].pain, 'mild');
 assert.equal(JSON.stringify(sandbox.coachProfileSnapshot({ profile: {} }, {}).recentFeedback), '{"checkinQuestions":[],"checkins":[],"raceRecovery":[]}');
 console.log('PASS coach snapshot carries whitelisted weekly check-ins and race recovery to the scheduled coach');
 console.log('PASS trainer lifecycle acceptance checks');
+
+// The browser generator stops at the race week. An already published,
+// dated coach week must remain usable after that boundary.
+const raceWeek = { weekNum: 1, days: Array.from({ length: 7 }, (_, index) => ({
+  dateStr: sandbox.addDaysToDateStr('2026-11-30', index),
+  dow: (index + 1) % 7, type: 'rest', km: 0, status: 'done',
+})) };
+sandbox.todayStr = () => '2026-12-07';
+sandbox.saveData = data => data;
+sandbox.appData = { profile: { targetDate: '2026-12-06' }, plan: [raceWeek], log: [] };
+sandbox.coachReviewData = { nextWeek: {
+  weekStart: '2026-12-07', targetKm: '7',
+  restDates: ['2026-12-07', '2026-12-08', '2026-12-09', '2026-12-11', '2026-12-13'],
+  menu: [
+    { date: '2026-12-10', scheduledDow: 4, totalKm: 3, plan: '恢復 E 跑 3 km' },
+    { date: '2026-12-12', scheduledDow: 6, totalKm: 4, plan: '輕鬆跑 4 km' },
+  ],
+} };
+const completedRaceWeek = JSON.stringify(raceWeek);
+const firstRecoveryReview = sandbox.coachReviewData.nextWeek;
+assert.equal(sandbox.materializeCoachReviewWeek(), true, 'published recovery week must be imported after the target race');
+assert.equal(sandbox.appData.plan.length, 2);
+assert.equal(JSON.stringify(sandbox.appData.plan[0]), completedRaceWeek);
+assert.equal(sandbox.weekPlannedKm(sandbox.appData.plan[1]), 7);
+assert.equal(sandbox.appData.plan[1].days.filter(day => day.type === 'rest').length, 5);
+sandbox.applyRegisteredSundayRaceReplacements([{ race_date: '2026-12-13', race_name: '21K', distances: ['21km'] }]);
+assert.equal(sandbox.appData.plan[1].days.at(-1).type, 'rest', 'registration alone must not replace prescribed recovery');
+assert.equal(sandbox.materializeCoachReviewWeek(), false, 'reloading the same review must not append a duplicate');
+console.log('PASS published 12/7 recovery week extends the plan without changing the completed race week');
+
+const restWeekStart = '2026-12-14';
+sandbox.coachReviewData = { nextWeek: { weekStart: restWeekStart, menu: [] } };
+assert.equal(sandbox.materializeCoachReviewWeek(), false, 'an empty Garmin review must not create a new week');
+sandbox.coachReviewData.nextWeek.restDates = Array.from({ length: 7 }, (_, index) => sandbox.addDaysToDateStr(restWeekStart, index));
+sandbox.saveData = () => null;
+assert.equal(sandbox.materializeCoachReviewWeek(), false);
+assert.equal(sandbox.appData.plan.length, 2, 'a failed save must not leave an unsaved week in memory');
+sandbox.saveData = data => data;
+assert.equal(sandbox.materializeCoachReviewWeek(), true, 'a confirmed protection week also extends the plan');
+assert.equal(sandbox.weekPlannedKm(sandbox.appData.plan[2]), 0);
+console.log('PASS unconfirmed menus, storage failures and full protection weeks');
+
+sandbox.appData.plan = [raceWeek];
+assert.equal(sandbox.materializeCoachReviewWeek(), false, 'missing dates cannot be filled with invented courses');
+sandbox.coachReviewData.history = [{ planSnapshot: firstRecoveryReview }];
+assert.equal(sandbox.materializeCoachReviewWeek(), true, 'a returning device can recover consecutive published weeks');
+assert.equal(sandbox.appData.plan.length, 3);
+assert.equal(sandbox.weekPlannedKm(sandbox.appData.plan[1]), 7);
+assert.equal(sandbox.weekPlannedKm(sandbox.appData.plan[2]), 0);
+assert.equal(sandbox.materializeCoachReviewWeek(), false);
+assert.equal(JSON.stringify(sandbox.appData.plan[0]), completedRaceWeek);
+console.log('PASS returning device imports archived recovery and current protection weeks in order');
+
+const singleEasyDay = firstRecoveryReview.menu[0];
+sandbox.appData.plan = [raceWeek];
+sandbox.coachReviewData = { nextWeek: {
+  ...firstRecoveryReview, targetKm: '3', menu: [singleEasyDay],
+  restDates: [...firstRecoveryReview.restDates, firstRecoveryReview.menu[1].date],
+} };
+assert.equal(sandbox.materializeCoachReviewWeek(), true);
+vm.runInContext(extract(trainer, 'weekHasMalformedVolume'), sandbox);
+assert.equal(sandbox.weekHasMalformedVolume(sandbox.appData.plan[1]), false, 'a confirmed short single run must survive reload');
+console.log('PASS single-run recovery week respects existing volume validation');
