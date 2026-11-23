@@ -199,5 +199,12 @@ console.log('PASS password visibility preserves text and selection');
   assert.equal(shown.title, '重設連結無法使用');
   await shown.actions[0].action();
   assert.equal(shown.title, '登入跨裝置同步', 'resend goes to the login form, not a stale reset');
+  // A fresh valid link in the same tab wins over an earlier expired-link notice.
+  tabStore.set('runner-trainer:sync-recovery:v1:error', 'otp_expired');
+  win.location.hash = `#access_token=x.${claims}.x&refresh_token=r2&expires_in=3600&token_type=bearer&type=recovery`;
+  vm.runInContext(source, ctx);
+  win.listeners.load();
+  await new Promise(resolve => setTimeout(resolve, 350));
+  assert.equal(shown.title, '設定新的登入密碼');
 }
 console.log('PASS sync passphrase is stored separately and forgotten login passwords can be reset by email');

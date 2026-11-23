@@ -573,7 +573,10 @@
   // 過期／已用過的連結：清掉先前未完成的重設，並把錯誤記在分頁裡，等待期間重新整理也看得到下一步說明
   const RECOVERY_ERROR_KEY = `${RECOVERY_KEY}:error`;
   const recoveryReturn = takeRecoveryFromUrl();
-  if (recoveryReturn?.session) storePendingRecovery(recoveryReturn.session);
+  if (recoveryReturn?.session) {
+    storePendingRecovery(recoveryReturn.session);
+    try { window.sessionStorage?.removeItem(RECOVERY_ERROR_KEY); } catch {}
+  }
   if (recoveryReturn?.error) {
     storePendingRecovery(null);
     try { window.sessionStorage?.setItem(RECOVERY_ERROR_KEY, recoveryReturn.error); } catch {}
