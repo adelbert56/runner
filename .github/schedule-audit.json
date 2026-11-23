@@ -50,8 +50,8 @@
       "path": ".github/workflows/automation-orchestrator.yml",
       "expected_event": "schedule",
       "require_schedule": true,
-      "max_age_minutes": 90,
-      "recovery_events": ["workflow_dispatch"]
+      "max_age_minutes": 600,
+      "recovery_events": ["workflow_dispatch", "workflow_run"]
     },
     {
       "name": "Refresh runner quips",

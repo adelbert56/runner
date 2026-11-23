@@ -455,7 +455,13 @@ def update_scrape_status_with_enrichment_errors(stats: dict) -> None:
         except json.JSONDecodeError:
             status = {}
 
-    enrichment_errors = [f"{key}: {error}" for key, error in stats["errors"][:30]]
+    # A platform's anti-bot challenge page is an expected, known condition we
+    # cannot (and must not) bypass; existing race data is kept as-is. Record it
+    # separately so it does not reopen the crawler-health issue on every run.
+    blocked = [(key, error) for key, error in stats["errors"] if "bot_gate:" in error]
+    real_errors = [(key, error) for key, error in stats["errors"] if "bot_gate:" not in error]
+    enrichment_errors = [f"{key}: {error}" for key, error in real_errors[:30]]
+    enrichment_blocked = [f"{key}: {error}" for key, error in blocked[:30]]
     existing_errors = status.get("errors")
     if not isinstance(existing_errors, list):
         existing_errors = []
@@ -470,6 +476,7 @@ def update_scrape_status_with_enrichment_errors(stats: dict) -> None:
     status.update(
         {
             "enrichment_errors": enrichment_errors,
+            "enrichment_blocked": enrichment_blocked,
             "has_enrichment_errors": bool(enrichment_errors),
             "has_errors": has_any_errors,
             "errors": list(dict.fromkeys([*existing_non_enrichment_errors, *enrichment_errors])),
