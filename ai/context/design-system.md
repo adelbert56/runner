@@ -80,6 +80,7 @@
 | 底部導覽列（main-nav ≤720px） | 已建立 | 預設／目前頁／safe-area | `--muted`、`--green-dark`、`--tint-green`、`--line` | `site/index.html`、`site/trainer.html`、`site/modern.css` | 本機 375px 截圖 | 版面現代化 |
 | 練跑儀表板（trainer-dash） | 已建立 | 有課表／今日／已完成／休息日／手機單欄 | `--green-dark`、`--green`、`--yellow`、`--surface`、`--tint-green` | `site/trainer.js`、`site/modern.css` | 本機 375／1280px 截圖（範例資料） | 版面現代化 |
 | 週曆摘要列＋詳情面板（week-strip / week-day-panel） | 已建立 | 選中／今天／完成／跳過／待放行／手機日期圓鈕 | `--tone-easy`、`--tone-long`、`--tone-quality`、`--tone-rest` 系列、`--green-dark` | `site/trainer-render.js`、`site/modern.css` | 本機 375／1280px 截圖（範例資料） | 版面現代化 |
+| 訓練週進度（week-summary） | 已建立 | 已載入／載入中／未解鎖／無資料／日期過期 | `--c-surface`、`--c-border`、`--c-primary-hover`、`--c-text-muted` | `site/trainer-render.js`、`site/trainer.css` | 本機手機與桌面，使用測試資料 | 練跑版面 |
 
 （「來源階段」記錄這個元件是 S4 初建，還是後續某個功能 Epic 補做並回登的。）
 
@@ -97,3 +98,4 @@
 | 賽事列表（全站版面現代化） | 變體 A（精簡清單＋月份分隔＋底部導覽） | `ai/artifacts/版面現代化/mockup-decision.md` | Squall／2026-11-17 |
 | 練跑本週課表 | 變體 A（週曆＋詳情面板） | `ai/artifacts/版面現代化/mockup-decision.md` | Squall／2026-11-17 |
 | 練跑首頁（全站版面現代化） | 變體 B（儀表板） | `ai/artifacts/版面現代化/mockup-decision.md` | Squall／2026-11-17 |
+| 練跑計畫 | 變體 B（週課表優先，更新練跑首頁） | `ai/artifacts/練跑版面/mockup-decision-練跑計畫.md` | Squall／2026-11-18 |

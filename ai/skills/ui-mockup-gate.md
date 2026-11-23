@@ -20,7 +20,7 @@
 4. 產出 2-3 個 mockup 變體（皆以既有 token／元件組成），存到 `ai/artifacts/<Epic>/mockups/`，檔名含畫面與變體（例如 `dashboard-variant-a.html`）。
 5. 依清晰度、資訊密度、實作複雜度與風險比較各變體。
 6. 以 `ai/templates/mockup-decision.md` 為範本，將決策記錄於 `ai/artifacts/<Epic>/mockup-decision-<畫面>.md`。
-7. 邀請人工選擇時，先提供比較稿連結與每案一句差異；有互動選項工具時，以該工具顯示可直接點選的選項（含建議選項），同時允許使用者自由補充。工具不可用時，在訊息中清楚列出可回覆的方案。收到選擇後記錄決策並直接繼續實作；選擇前保留實作關卡。
+7. 在人工選擇變體之前，停止進行實作。
 
 ## Style tile 變體（Epic 0 步驟 2a 的 S2 階段專用）
 

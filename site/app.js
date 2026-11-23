@@ -935,8 +935,9 @@ function setupResponsiveDefaults() {
   if (raceFilters) {
     raceFilters.open = !compact;
   }
+  // 月份索引的 summary 在 modern.css 已隱藏（改成橫向／側欄選擇列），收起就無法再展開
   if (monthIndex) {
-    monthIndex.open = !compact;
+    monthIndex.open = true;
   }
 }
 
