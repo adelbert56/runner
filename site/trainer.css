@@ -1275,12 +1275,26 @@
     .garmin-run-history summary b { color:var(--c-primary-hover); font-size:11px; }
     .garmin-run-history .log-table { margin-top:10px; }
     .garmin-progress-insights { display:grid; gap:14px; }
-    .fitness-projection-card { margin:0; padding:20px; border-color:#d7e7dc; background:linear-gradient(135deg,#f0f8f2,#fffdf9); }
-    .fitness-projection-main { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-top:2px; }
-    .fitness-projection-main h2 { font-size:18px; }
-    .fitness-projection-main p { margin:0; color:var(--c-text-muted); font-size:12px; }
-    .fitness-projection-main strong { color:var(--c-primary-hover); font-size:25px; font-weight:900; letter-spacing:-.04em; text-align:right; }
-    .fitness-projection-main strong small { display:block; margin-top:3px; color:var(--c-text-muted); font-size:11px; font-weight:750; letter-spacing:0; }
+    .fitness-projection-card { margin:0; padding:20px; border-color:var(--c-border); background:var(--c-surface); }
+    .fitness-projection-main { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px; border-radius:var(--radius); background:var(--c-primary-hover); color:var(--c-surface); }
+    .fitness-projection-main h2 { margin:0 0 4px; color:inherit; font-size:16px; }
+    .fitness-projection-main p { margin:0; color:var(--c-tint-green); font-size:12px; }
+    .fitness-projection-main strong { flex-shrink:0; color:inherit; font-size:32px; font-weight:900; line-height:1.15; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right; }
+    .fitness-projection-main strong small { display:block; margin-top:4px; color:var(--c-tint-green); font-size:12px; }
+    .fitness-projection-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:12px 0; }
+    .fitness-projection-metrics > div { padding:12px; border-radius:var(--radius-sm); background:var(--c-surface2); }
+    .fitness-projection-metrics dt, .fitness-projection-context { color:var(--c-text-muted); font-size:12px; }
+    .fitness-projection-metrics dd:not(.fitness-projection-context) { color:var(--c-text); font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; }
+    .fitness-projection-metrics small { font-size:12px; }
+    .fitness-projection-coach { margin-top:16px; }
+    .fitness-projection-coach h3 { margin:0 0 4px; font-size:16px; color:var(--c-text); }
+    .fitness-projection-coach p { margin:0; color:var(--c-text-muted); font-size:14px; line-height:1.6; }
+    .fitness-projection-coach .fitness-projection-aerobic { margin-top:8px; color:var(--c-primary-hover); font-size:12px; }
+    .fitness-projection-coach .fitness-projection-next { margin-top:12px; padding:12px; border-inline-start:3px solid var(--c-primary); border-radius:var(--radius-sm); background:var(--c-tint-green); color:var(--c-text); }
+    .fitness-projection-next b { margin-inline-end:4px; color:var(--c-primary-hover); }
+    .fitness-projection-card .session-report-details { margin-top:12px; padding-top:0; border-top:0; }
+    .fitness-projection-card .session-report-details > summary { min-height:44px; }
+    .fitness-projection-card details ul { padding-inline-start:20px; color:var(--c-text-muted); font-size:13px; }
     .fitness-projection-copy { margin:14px 0 0; color:var(--c-text-muted); font-size:12px; line-height:1.6; }
     .fitness-projection-potential { margin:9px 0 0; color:var(--c-primary-hover); font-size:12px; font-weight:800; }
     .garmin-sync-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:11px; align-items:center; margin:0; padding:14px 16px; border:1px solid #d7e6db; border-radius:var(--radius-lg); background:#fbfdfb; }

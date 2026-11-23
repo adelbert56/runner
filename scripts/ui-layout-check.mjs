@@ -310,22 +310,38 @@ async function assertTrainerReport(page, viewportName) {
       fixture.style.margin = '16px';
       const original = coachRunRecords;
       const previous = coachReviewData;
+      const previousProfile = appData.profile;
       try {
         const relativeDate = (days) => { const day = new Date(`${todayStr()}T00:00:00Z`); day.setUTCDate(day.getUTCDate() - days); return day.toISOString().slice(0, 10); };
-        coachRunRecords = () => [
+        const runs = [
           {date:relativeDate(3), km:10, durationMin:65},
+          {date:relativeDate(33), km:14, durationMin:108},
           {date:relativeDate(310), km:20, durationMin:140},
           ...[342,335,328].map(days => ({date:relativeDate(days),km:6,durationMin:42,hr:140})),
           ...[17,10,2].map(days => ({date:relativeDate(days),km:6,durationMin:43,hr:140})),
         ];
         coachReviewData = {raceDirectives:[{date:relativeDate(3), name:'受控賽', distance:'10km', scheduled:true}]};
+        appData.profile = { ...appData.profile, targetDate: relativeDate(-30) };
+        coachRunRecords = () => runs;
         fixture.innerHTML = renderFitnessProjectionCard();
-      } finally { coachRunRecords = original; coachReviewData = previous; }
+        const updated = document.createElement('div');
+        coachRunRecords = () => [...runs, {date: relativeDate(1), km: 17, durationMin: 124},
+          ...[4, 1, 0].map(days => ({date: relativeDate(days), km: 6, durationMin: 40, hr: 140}))];
+        updated.innerHTML = renderFitnessProjectionCard();
+        if (updated.querySelector('strong').textContent === fixture.querySelector('strong').textContent
+          || !updated.textContent.includes('近期已有長距離實跑')) throw new Error('new Garmin records must update the estimate and coach direction');
+      } finally { coachRunRecords = original; coachReviewData = previous; appData.profile = previousProfile; }
       document.body.appendChild(fixture);
     });
     const evidenceCard = page.locator('#race-evidence-audit');
-    if (!await evidenceCard.getByText('半馬個人化估計').count() || !await evidenceCard.getByText(/不代表比賽預測/).count()) throw new Error('race evidence card is missing its source or limitation');
+    if (!await evidenceCard.getByText('半馬完賽估計').isVisible()
+      || !await evidenceCard.getByText('依課表完成長跑，守住輕鬆強度。').isVisible()
+      || !await evidenceCard.getByText(/前 4 週曾跑到 14.0 km/).isVisible()
+      || !await evidenceCard.getByText(/輕鬆跑基準.*中位心率 140/).isVisible()
+      || await evidenceCard.getByText(/受控賽的努力程度/).isVisible()) throw new Error('coach card must lead with guidance and collapse calculation details');
     await evidenceCard.screenshot({path: resolve(screenshotDir, 'mobile-race-evidence-audit.png'), style: '.site-header, .top-navigation, .mobile-bottom-nav, .back-to-top { visibility: hidden !important; }'});
+    await evidenceCard.getByText('查看估計依據').click();
+    if (!await evidenceCard.getByText(/受控賽的努力程度/).isVisible()) throw new Error('calculation evidence must be expandable');
     await evidenceCard.evaluate(element => element.remove());
     await page.evaluate(() => {
       const fixture = document.createElement('div');

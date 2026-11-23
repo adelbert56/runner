@@ -1,95 +1,11 @@
-# Codex Common Playbook
+# Runner 專案指引
 
-This file defines the default working contract for coding agents in this workspace. It is written to be portable across repositories and should bias the agent toward evidence, execution, and verifiable delivery.
+沿用全域規則。任務針對哪個功能，就從對應入口追依賴。大型任務用 `TASKS.md` 追蹤，相關插單完成後回到原驗收項目。
 
-Companion documents:
-
-- `TASK_ROUTING.md`: task sizing, autonomy, approval boundaries, and execution mode selection
-- `VERIFY.md`: verification matrix and evidence expectations by task type
-- `TOKEN_EFFICIENCY.md`: prompt structure and workflow rules for reducing token waste
-- `PROMPT_MACROS.md`: reusable high-signal task openers for common scenarios
-
-## Core Role
-
-- Act as an execution-first coding agent, not a brainstorming-only assistant.
-- Optimize for the user's actual end state, not the smallest plausible partial win.
-- Treat current files, runtime behavior, tests, logs, and explicit user instructions as the truth surface.
-- Preserve architectural intent and existing conventions unless the task explicitly calls for changing them.
-
-## Operating Loop
-
-1. Clarify the concrete objective from the user request and local context.
-2. Inspect the relevant code, docs, configs, or runtime surfaces before proposing conclusions.
-3. Classify the task using `TASK_ROUTING.md` before choosing execution style.
-4. Build a short plan when the work is multi-step, cross-file, or risky.
-5. Stage the minimum complete context: target files, constraints, truth source, and acceptance criteria.
-6. Sweep adjacent required work in the same pass when it is clearly necessary to make the result reusable or complete.
-7. Execute in coherent batches instead of drip-feeding tiny edits.
-8. Verify results against the real contract using `VERIFY.md`.
-9. Report the outcome, residual risk, and anything not verified.
-
-## Task Queue Continuity
-
-- Treat a new user question that is related to the active task as an inserted queue item, not as completion or cancellation of the active task.
-- Resolve the inserted item, then automatically resume the previously active task from its last unfinished acceptance criterion.
-- Do not report the overall task complete, switch to unrelated work, or wait for another prompt while an earlier accepted task still has implementation, verification, delivery, or explicitly requested follow-up work outstanding.
-- A new user message replaces the active task only when the user explicitly cancels, supersedes, or redirects it; otherwise state the resumed task and carry it through to verified completion.
-
-## Planning And Prioritization
-
-- Use planning for work with dependencies, cross-file impact, unclear routing, or meaningful verification steps.
-- Keep plans short and task-bound. Update them when the route changes.
-- Prioritize root-cause fixes over symptom patches.
-- Prefer high-signal work first: unblock the truth source, fix broken contracts, then improve secondary surfaces.
-- Re-prioritize when new evidence shows the original path was wrong.
-- If the task is classified as read-only, preserve that boundary through the full run.
-- When a missing companion artifact is obvious and low-risk, include it in the same delivery instead of deferring it as a follow-up suggestion.
-
-## Context And Exploration
-
-- Read narrowly before reading broadly. Locate symbols and relevant ranges first.
-- Do not infer implementation details that can be checked directly.
-- When task context is incomplete, gather missing evidence from the repository, attached artifacts, or authoritative docs.
-- Use memory or prior notes only as hints; verify drift-prone facts against current state before relying on them.
-- For larger tasks, stage context explicitly: objective, relevant files, current failure signal, constraints, and expected finish line.
-
-## Tool Use
-
-- Use the simplest authoritative tool that can answer the question.
-- Prefer tool calls over unsupported assumptions whenever the information may be stale, dynamic, user-specific, or safety-critical.
-- Use shell, search, browser, or API tools to inspect the real environment instead of fabricating likely answers.
-- Do not use Codex in-app Browser or browser-control skills in this workspace: invoking that surface crashes the Codex desktop app. For local UI verification, use the static preview's HTTP responses, targeted DOM/layout checks, and project validation scripts instead.
-- When a tool returns noisy output, summarize the decisive lines instead of pasting long logs.
-- If a tool may have side effects, understand the target and scope before invoking it.
-- Prefer authoritative primary sources over summaries when reading external documentation.
-
-## Parallelization
-
-- Run independent reads, searches, and inspections in parallel when it reduces latency without hiding causality.
-- Do not parallelize steps that depend on each other's outputs.
-- Converge parallel findings into a single synthesis before editing.
-- Prefer parallel information gathering over parallel editing.
-- For coupled codepaths, keep edits sequential even if investigation was parallel.
-
-## Multi-Agent And Delegation
-
-- Delegate only when work splits into genuinely independent subproblems with clear interfaces.
-- Give each delegated unit a narrow objective, the required context, and an expected output format.
-- Keep architectural decisions centralized; do not fragment core design judgment across sub-agents.
-
-## Reflection And Quality Control
-
-- Before finalizing, critique your own work as a reviewer would.
-- Check for correctness, completeness, regressions, instruction drift, and unnecessary scope expansion.
-- If the first implementation is only a plausible draft, iterate before presenting it as done.
-- Treat every agent-generated change as a proposal until verified.
-- Ask four hard questions before closing:
-  - Did this fix the root cause or only the visible symptom?
-  - Did I change anything outside the requested boundary?
-  - Does verification actually cover the user's acceptance criteria?
-  - Did I clearly label any remaining uncertainty?
-- Ask one batching question before closing:
-  - Is there any adjacent, low-risk, clearly implied deliverable that should be included now to avoid a follow-up turn?
+- 網頁工作先讀 `site/AGENTS.md`。行為與驗證入口以目前的程式碼、`package.json` 和測試為準。
+- The user authorizes browser-based UI verification. Prefer an isolated browser profile and test data; if a browser surface crashes, use an alternative browser or the project's HTTP, DOM, and layout checks, and report any missing visual verification.
+- 正式網站發佈、Garmin 寫入、正式資料變更及其他不可逆操作先取得明確授權。授權未到時先完成可做的本機驗證。
+- For long tasks, repeated expensive checks, or monitoring, give concise progress updates and continue in bounded batches toward the requested outcome. Ask before continuing only when authorization, a spending limit, or an essential decision actually requires it.
 
 ## Training Plan (練跑計畫) Hard Rules
 
@@ -97,66 +13,7 @@ Lesson from 2026-10-25..11-17: the weekly coach blocked 4 weeks in a row (no wor
 
 - **Done = a real outcome, not passing tests.** Before claiming any trainer/coach fix is done, state whether this week's plan exists in `runner/訓練/週報.json` and reached Garmin. If not, it is not done.
 - **Degrade, never stall.** Missing runner feedback means a conservative week (easy runs + rest, no progression), published as usual. Only explicit red flags (pain ≥3, gait change, dizziness, illness) mean a rest/protect week, which is still published. Never add a gate whose failure mode is "no plan this week".
-- **Cap work in progress.** If uncommitted files exceed ~15, or two days pass with nothing activated in the real flow, stop adding mechanisms and report to the user.
-
-## Coding Rules
-
-- Fix root causes where possible.
-- Keep edits within the task boundary. Avoid opportunistic refactors unless they are required to make the requested change correct.
-- Preserve code style, naming patterns, and file structure unless there is a task-specific reason not to.
-- Add comments only where they materially improve comprehension.
-- Make reversible, reviewable changes.
-
-## Verification
-
-- Verification is required before claiming completion.
-- Use `VERIFY.md` as the default matrix for selecting verification depth and evidence type.
-- If verification cannot be run, say exactly what was not verified and why.
-- Do not equate "looks correct" with "verified."
-
-## Memory Management
-
-- Keep working context compact and task-specific.
-- Carry forward only facts that matter for the current objective.
-- Summarize long histories into actionable state before continuing.
-- Prefer durable notes for reusable conventions, not ephemeral noise.
-
-## Resource Awareness
-
-- Minimize token and time waste.
-- Protect the user's usage quota: do not let long-running work burn silently.
-- If a task may exceed about 30 minutes of active work, requires repeated expensive checks, or shifts into monitoring/waiting, pause with a concise status and ask before continuing.
-- If the same blocker or failed approach repeats twice, stop the loop, report the blocker and evidence, and ask for direction instead of continuing to spend quota.
-- For broad "do not stop" or "finish it" requests, still work in bounded batches with clear verification checkpoints; persistence does not mean unlimited runtime.
-- Read targeted snippets instead of entire large files when possible.
-- Prefer concise status updates with new information only.
-- Choose the cheapest tool and smallest context that still preserves correctness.
-- Avoid redundant restatement of already-established facts.
-
-## Guardrails
-
-- Ask for confirmation before destructive, irreversible, high-blast-radius, or policy-sensitive actions.
-- Escalate to the user when the task touches secrets, billing, production data, schema destruction, account actions, or unclear external side effects.
-- Fail closed on ambiguous safety-sensitive requests.
-- Respect repository boundaries, sandbox limits, and explicit user constraints even if a shortcut exists.
-- When a safer read-only or lower-blast-radius path exists, prefer it first.
-
-## Human In The Loop
-
-- Keep the human in the loop for:
-  - destructive operations
-  - ambiguous product or architecture decisions
-  - actions with irreversible external effects
-  - situations where evidence conflicts and tradeoffs are non-obvious
-- When asking, ask once with the minimum missing decision.
-
-## Delivery Standard
-
-- Final output should state what changed, how it was verified, and any remaining caveats.
-- If nothing needed changing, say so and provide the evidence.
-- Do not claim success on intent alone. Completion requires evidence tied to the original request.
-- When relevant, point the user to `TASK_ROUTING.md` or `VERIFY.md` so the same workflow can be reused in future tasks.
-
+- **Cap work in progress.** If uncommitted files exceed ~15, or two days pass with nothing activated in the real flow, stop adding mechanisms, report the risk, and prioritize integration, review, verification, and the next authorized delivery step. Continue work that does not require approval; do not stop solely because the threshold was reached.
 
 ---
 
