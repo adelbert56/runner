@@ -570,14 +570,29 @@
 
   window.TrainerSync = { togglePasswordVisibility, renderControl, refreshControl: () => setStatus(status), onLocalSave, openModal, reconcile, requestPasswordReset };
   window.openTrainingSyncModal = openModal;
+  // 過期／已用過的連結：清掉先前未完成的重設，並把錯誤記在分頁裡，等待期間重新整理也看得到下一步說明
+  const RECOVERY_ERROR_KEY = `${RECOVERY_KEY}:error`;
   const recoveryReturn = takeRecoveryFromUrl();
   if (recoveryReturn?.session) storePendingRecovery(recoveryReturn.session);
-  if (recoveryReturn || readPendingRecovery() || readSession()) {
-    setStatus(recoveryReturn || readPendingRecovery() ? '正在開啟密碼重設…' : '已登入，正在讀取裝置金鑰…');
+  if (recoveryReturn?.error) {
+    storePendingRecovery(null);
+    try { window.sessionStorage?.setItem(RECOVERY_ERROR_KEY, recoveryReturn.error); } catch {}
+  }
+  const takeRecoveryError = () => {
+    try {
+      const code = window.sessionStorage?.getItem(RECOVERY_ERROR_KEY);
+      window.sessionStorage?.removeItem(RECOVERY_ERROR_KEY);
+      return code || recoveryReturn?.error || null;
+    } catch { return recoveryReturn?.error || null; }
+  };
+  let recoveryErrorPending = false;
+  try { recoveryErrorPending = Boolean(window.sessionStorage?.getItem(RECOVERY_ERROR_KEY)); } catch {}
+  if (recoveryReturn || recoveryErrorPending || readPendingRecovery() || readSession()) {
+    setStatus(recoveryReturn || recoveryErrorPending || readPendingRecovery() ? '正在開啟密碼重設…' : '已登入，正在讀取裝置金鑰…');
     // 等 trainer.js 建好 appData（與 showModal）後再處理；重設中先設新密碼，不自動用舊登入恢復同步
     window.addEventListener('load', () => {
       window.setTimeout(() => {
-        if (recoveryReturn?.error) return showRecoveryError();
+        if (takeRecoveryError()) return showRecoveryError();
         if (readPendingRecovery()) return openNewPasswordModal();
         resumeRememberedDevice().catch(() => setStatus('同步暫時無法完成'));
       }, 300);

@@ -187,11 +187,17 @@ console.log('PASS password visibility preserves text and selection');
   assert.equal(sessionStore.has('runner-trainer:sync-session:v1'), true);
   assert.equal(tabStore.size, 0, 'pending reset is cleared once the password is saved');
 
-  // An expired link explains what to do instead of failing silently.
+  // An expired link explains what to do instead of failing silently, even after a reload,
+  // and drops any older unfinished reset so "重新寄信" reaches the login form.
+  tabStore.set('runner-trainer:sync-recovery:v1', JSON.stringify({ access_token: 'stale' }));
+  sessionStore.clear();
   win.location.hash = '#error=access_denied&error_code=otp_expired&error_description=expired';
   vm.runInContext(source, ctx);
+  vm.runInContext(source, ctx); // reload before the load handler ran
   win.listeners.load();
   await new Promise(resolve => setTimeout(resolve, 350));
   assert.equal(shown.title, '重設連結無法使用');
+  await shown.actions[0].action();
+  assert.equal(shown.title, '登入跨裝置同步', 'resend goes to the login form, not a stale reset');
 }
 console.log('PASS sync passphrase is stored separately and forgotten login passwords can be reset by email');
