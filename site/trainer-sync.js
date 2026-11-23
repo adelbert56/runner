@@ -414,6 +414,7 @@
   function openUnlockModal() {
     const account = syncPassphraseAccount(sessionEmail(readSession()));
     showModal('解鎖加密同步', `<p style="margin:0 0 14px;line-height:1.7">輸入你自己設定的同步密碼（不是登入密碼）。此密碼不會上傳，也無法由網站找回；建議存進瀏覽器的密碼管理器，帳號名稱會顯示為「${escapeAttr(account)}」。</p><form onsubmit="return false">${hiddenAccountField(account)}<label class="form-label" for="training-sync-passphrase">同步密碼</label>${passwordField('training-sync-passphrase', 'current-password', '至少 10 個字元')}</form><p data-training-sync-status role="status" aria-live="polite"></p>` + '<label for="training-sync-remember" style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px;line-height:1.5"><input id="training-sync-remember" type="checkbox" checked>記住這台裝置（之後打開自動同步，不用再輸入）</label>', [{ label: '解鎖並同步', primary: true, action: () => unlock().catch(() => setStatus('同步密碼不正確或連線失敗')) }, { label: '切換帳號', action: async () => { closeModal(); await forgetDevice(); openModal(); } }, { label: '取消', action: closeModal }], { className: 'sync-modal' });
+    focusField('training-sync-passphrase');
   }
 
   // 登出同步：清掉這台的登入資訊、記住的金鑰與版本快取，並請 Supabase 撤銷登入。
@@ -469,7 +470,25 @@
     setStatus('若此 Email 有帳號，重設信已寄出。請到信箱（含垃圾郵件）點連結，會回到本頁設定新密碼。');
   }
 
-  // 讀取重設信帶回的網址片段；處理完立刻從網址移除，避免 token 留在歷史紀錄或被分享出去。
+  // 重設信帶回的一次性登入只放在這個分頁的 sessionStorage，等新密碼存好才變成正式登入；
+  // 取消、按 Esc 或重新整理都還能回到設定新密碼，不會把連結白白用掉，也不會留下沒設密碼的登入。
+  const RECOVERY_KEY = 'runner-trainer:sync-recovery:v1';
+  let pendingRecovery = null;
+
+  function readPendingRecovery() {
+    if (pendingRecovery) return pendingRecovery;
+    try { return JSON.parse(window.sessionStorage?.getItem(RECOVERY_KEY) || 'null'); } catch { return null; }
+  }
+
+  function storePendingRecovery(session) {
+    pendingRecovery = session;
+    try {
+      if (session) window.sessionStorage?.setItem(RECOVERY_KEY, JSON.stringify(session));
+      else window.sessionStorage?.removeItem(RECOVERY_KEY);
+    } catch {}
+  }
+
+  // 讀取重設信帶回的網址片段，並立刻從網址與歷史紀錄移除，避免 token 停留在網址列或被分享出去。
   function takeRecoveryFromUrl() {
     const hash = window.location?.hash || '';
     if (!/(type=recovery|error_code=)/.test(hash)) return null;
@@ -480,10 +499,15 @@
     return { session: { access_token: params.get('access_token'), refresh_token: params.get('refresh_token'), token_type: params.get('token_type') || 'bearer', expires_in: Number(params.get('expires_in')) || 3600 } };
   }
 
+  // 解鎖／設密碼視窗的第一個欄位是給密碼管理器看的隱藏帳號欄，焦點要直接放到密碼框
+  function focusField(id) {
+    window.requestAnimationFrame?.(() => window.requestAnimationFrame?.(() => document.getElementById(id)?.focus?.()));
+  }
+
   async function saveNewPassword() {
     const password = document.getElementById('training-sync-new-password')?.value || '';
     const confirm = document.getElementById('training-sync-new-password-confirm')?.value || '';
-    const session = readSession();
+    const session = readPendingRecovery();
     const current = config();
     if (!session?.access_token || !current) return setStatus('重設連結已失效，請重新申請重設信');
     if (password.length < 8) return setStatus('新密碼至少需要 8 個字元');
@@ -498,11 +522,16 @@
       const detail = response ? await response.text().catch(() => '') : '';
       if (/different from the old/i.test(detail)) return setStatus('新密碼不能和舊密碼相同');
       if (/weak|at least/i.test(detail)) return setStatus('新密碼太簡單，請加長或混合英數字');
-      if (response?.status === 401 || response?.status === 403) return setStatus('重設連結已過期，請重新申請重設信');
+      if (response?.status === 401 || response?.status === 403) {
+        storePendingRecovery(null);
+        return setStatus('重設連結已過期，請關閉後重新申請重設信');
+      }
       return setStatus('新密碼儲存失敗，請稍後再試');
     }
     const user = await response.json().catch(() => null);
-    if (user?.email) storeSession({ ...session, user });
+    storePendingRecovery(null);
+    syncKey = null;
+    storeSession(user?.email ? { ...session, user } : session);
     closeModal();
     setStatus('登入密碼已更新，請輸入同步密碼');
     await resumeRememberedDevice();
@@ -510,26 +539,22 @@
   }
 
   function openNewPasswordModal() {
-    const email = sessionEmail(readSession());
-    showModal('設定新的登入密碼', `<p style="margin:0 0 14px;line-height:1.7">${email ? `帳號 ${escapeAttr(email)}。` : ''}只會更換登入密碼；雲端訓練資料仍用原本的同步密碼解鎖。</p><form onsubmit="return false">${hiddenAccountField(email)}<label class="form-label" for="training-sync-new-password">新登入密碼</label>${passwordField('training-sync-new-password', 'new-password', '至少 8 個字元')}<label class="form-label" for="training-sync-new-password-confirm" style="display:block;margin-top:12px">再輸入一次</label>${passwordField('training-sync-new-password-confirm', 'new-password', '再輸入一次新密碼')}</form><p data-training-sync-status role="status" aria-live="polite"></p>`, [{ label: '儲存新密碼', primary: true, action: () => saveNewPassword().catch(() => setStatus('新密碼儲存失敗，請稍後再試')) }, { label: '取消', action: closeModal }], { className: 'sync-modal' });
+    const email = sessionEmail(readPendingRecovery());
+    showModal('設定新的登入密碼', `<p style="margin:0 0 14px;line-height:1.7">${email ? `帳號 ${escapeAttr(email)}。` : ''}只會更換登入密碼；雲端訓練資料仍用原本的同步密碼解鎖。</p><form onsubmit="return false">${hiddenAccountField(email)}<label class="form-label" for="training-sync-new-password">新登入密碼</label>${passwordField('training-sync-new-password', 'new-password', '至少 8 個字元')}<label class="form-label" for="training-sync-new-password-confirm" style="display:block;margin-top:12px">再輸入一次</label>${passwordField('training-sync-new-password-confirm', 'new-password', '再輸入一次新密碼')}</form><p data-training-sync-status role="status" aria-live="polite"></p>`, [{ label: '儲存新密碼', primary: true, action: () => saveNewPassword().catch(() => setStatus('新密碼儲存失敗，請稍後再試')) }, { label: '稍後再設', action: closeModal }], { className: 'sync-modal' });
+    focusField('training-sync-new-password');
   }
 
-  function handleRecoveryReturn() {
-    const recovery = takeRecoveryFromUrl();
-    if (!recovery) return false;
-    if (recovery.error) {
-      showModal('重設連結無法使用', '<p style="margin:0;line-height:1.7">連結已過期或已經用過。請重新開啟「跨裝置同步」，按「忘記登入密碼」再寄一次。</p>', [{ label: '重新寄信', primary: true, action: () => { closeModal(); openModal(); } }, { label: '關閉', action: closeModal }], { className: 'sync-modal' });
-      return true;
-    }
-    syncKey = null;
-    storeSession(recovery.session);
-    openNewPasswordModal();
-    return true;
+  function showRecoveryError() {
+    showModal('重設連結無法使用', '<p style="margin:0;line-height:1.7">連結已過期或已經用過。請重新開啟「跨裝置同步」，按「忘記登入密碼」再寄一次。</p>', [{ label: '重新寄信', primary: true, action: () => { closeModal(); openModal(); } }, { label: '關閉', action: closeModal }], { className: 'sync-modal' });
   }
 
   function openModal() {
     if (!config()) {
       showModal('無法開啟同步', '<p>同步設定尚未載入，請重新整理頁面；若仍無法使用，請稍後再試。</p>', [{ label: '關閉', action: closeModal }]);
+      return;
+    }
+    if (readPendingRecovery()) {
+      openNewPasswordModal();
       return;
     }
     if (readSession() && syncKey) {
@@ -545,13 +570,15 @@
 
   window.TrainerSync = { togglePasswordVisibility, renderControl, refreshControl: () => setStatus(status), onLocalSave, openModal, reconcile, requestPasswordReset };
   window.openTrainingSyncModal = openModal;
-  const returningFromReset = /(type=recovery|error_code=)/.test(window.location?.hash || '');
-  if (returningFromReset || readSession()) {
-    setStatus(returningFromReset ? '正在開啟密碼重設…' : '已登入，正在讀取裝置金鑰…');
-    // 等 trainer.js 建好 appData（與 showModal）後再處理；重設信帶回來時先設新密碼，不自動用舊登入恢復同步
+  const recoveryReturn = takeRecoveryFromUrl();
+  if (recoveryReturn?.session) storePendingRecovery(recoveryReturn.session);
+  if (recoveryReturn || readPendingRecovery() || readSession()) {
+    setStatus(recoveryReturn || readPendingRecovery() ? '正在開啟密碼重設…' : '已登入，正在讀取裝置金鑰…');
+    // 等 trainer.js 建好 appData（與 showModal）後再處理；重設中先設新密碼，不自動用舊登入恢復同步
     window.addEventListener('load', () => {
       window.setTimeout(() => {
-        if (handleRecoveryReturn()) return;
+        if (recoveryReturn?.error) return showRecoveryError();
+        if (readPendingRecovery()) return openNewPasswordModal();
         resumeRememberedDevice().catch(() => setStatus('同步暫時無法完成'));
       }, 300);
     });

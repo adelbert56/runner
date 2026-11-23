@@ -128,7 +128,9 @@ console.log('PASS password visibility preserves text and selection');
   const win = { TRAINER_SYNC_CONFIG: {url:'https://fixture.invalid', publishableKey:'fixture', table:'snapshots'}, setTimeout, clearTimeout,
     listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; },
     location: { hash: '', origin: 'https://site.test', pathname: '/site/trainer.html', search: '' },
-    history: { replaceState: (_s, _t, url) => replaced.push(url) } };
+    history: { replaceState: (_s, _t, url) => { replaced.push(url); win.location.hash = ''; } } };
+  const tabStore = new Map();
+  win.sessionStorage = { getItem: k => tabStore.get(k) ?? null, setItem: (k, v) => tabStore.set(k, String(v)), removeItem: k => tabStore.delete(k) };
   const ctx = vm.createContext({ window: win, localStorage: { getItem: k => sessionStore.get(k) ?? null, setItem: (k, v) => sessionStore.set(k, String(v)), removeItem: k => sessionStore.delete(k) },
     crypto: webcrypto, TextEncoder, TextDecoder, atob, btoa, console, URLSearchParams, indexedDB: undefined,
     fetch: async (url, options = {}) => { calls.push({ url, options }); return { ok: true, status: 200, json: async () => ({ email: 'runner@example.test' }), text: async () => '' }; },
@@ -158,10 +160,16 @@ console.log('PASS password visibility preserves text and selection');
   // Returning from the email link: token is removed from the URL, then a new password can be saved.
   win.location.hash = `#access_token=x.${claims}.x&refresh_token=r1&expires_in=3600&token_type=bearer&type=recovery`;
   vm.runInContext(source, ctx);
+  assert.deepEqual(replaced, ['/site/trainer.html'], 'token leaves the address bar as soon as the script runs, before page load');
+  assert.equal(sessionStore.has('runner-trainer:sync-session:v1'), false, 'no login is stored until the new password is saved');
   win.listeners.load();
   await new Promise(resolve => setTimeout(resolve, 350));
-  assert.deepEqual(replaced, ['/site/trainer.html']);
   assert.equal(shown.title, '設定新的登入密碼');
+  // Dismissing and reloading the tab must not burn the link: the sync button reopens the reset form.
+  shown = null;
+  vm.runInContext(source, ctx);
+  win.openTrainingSyncModal();
+  assert.equal(shown.title, '設定新的登入密碼', 'reset form survives cancel and reload in the same tab');
   assert.match(shown.body, /id="training-sync-new-password"[^>]*autocomplete="new-password"/);
   assert.match(shown.body, /autocomplete="username" value="runner@example\.test"/, 'new login password is saved under the plain email');
   fields['training-sync-new-password'] = { value: 'new-login-1' };
@@ -176,6 +184,8 @@ console.log('PASS password visibility preserves text and selection');
   assert.equal(calls[0].options.headers.Authorization, `Bearer x.${claims}.x`);
   assert.deepEqual(JSON.parse(calls[0].options.body), { password: 'new-login-1' });
   assert.equal(shown.title, '解鎖加密同步', 'after resetting, the runner unlocks with the unchanged sync passphrase');
+  assert.equal(sessionStore.has('runner-trainer:sync-session:v1'), true);
+  assert.equal(tabStore.size, 0, 'pending reset is cleared once the password is saved');
 
   // An expired link explains what to do instead of failing silently.
   win.location.hash = '#error=access_denied&error_code=otp_expired&error_description=expired';
