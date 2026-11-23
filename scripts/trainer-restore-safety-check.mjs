@@ -106,6 +106,7 @@ const equal = vm.createContext({
   coachDigest: async () => coach, storeMeta: value => { currentMeta = value; },
   showConflict: () => { conflicts++; }, writeRemote: async () => { uploads++; },
   setStatus() {}, handleStaleKey: async () => false, console,
+  formatSyncTime: () => '今天 10:00', reportSyncFailure() {},
 });
 vm.runInContext(extract('reconcile', sync), equal);
 await equal.reconcile();

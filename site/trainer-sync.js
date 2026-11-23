@@ -13,22 +13,113 @@
   let applyingRemote = false;
   let saveTimer = 0;
   let status = '尚未登入';
+  let syncKind = 'signedout';
+  // 同步狀態種類：標題、是否在「管理」旁顯示提醒點，以及下一步按鈕。
+  const SYNC_KINDS = {
+    ok: { title: '已同步', actions: [['立即同步', 'TrainerSync.retry()'], ['設定', 'openTrainingSyncModal()']] },
+    syncing: { title: '同步中…', actions: [] },
+    offline: { title: '目前離線', badge: true, actions: [] },
+    error: { title: '同步失敗', badge: true, actions: [['重試', 'TrainerSync.retry()', true], ['設定', 'openTrainingSyncModal()']] },
+    locked: { title: '需要輸入同步密碼', badge: true, actions: [['輸入同步密碼', 'openTrainingSyncModal()', true]] },
+    conflict: { title: '兩台裝置的資料不同', badge: true, actions: [['選擇要保留哪一份', 'TrainerSync.retry()', true]] },
+    stalekey: { title: '同步密碼不符', badge: true, actions: [['重新輸入同步密碼', 'openTrainingSyncModal()', true]] },
+    signedout: { title: '未開啟同步', actions: [['登入跨裝置同步', 'openTrainingSyncModal()']] },
+    expired: { title: '登入已過期', badge: true, actions: [['重新登入', 'openTrainingSyncModal()', true]] }
+  };
 
   function config() {
     const value = window.TRAINER_SYNC_CONFIG;
     return value?.url && value?.publishableKey ? value : null;
   }
 
-  function setStatus(next) {
+  // kind 省略時只更新文字（例如登入表單的驗證訊息），不改變工具列的同步狀態與提醒點。
+  function setStatus(next, kind) {
     status = next;
+    if (kind && SYNC_KINDS[kind]) syncKind = kind;
     document.querySelectorAll('[data-training-sync-status]').forEach((node) => { node.textContent = next; });
+    if (!kind) return;
+    document.querySelectorAll('[data-training-sync-indicator]').forEach((node) => {
+      node.setAttribute?.('data-sync-kind', syncKind);
+      const title = node.querySelector?.('[data-training-sync-title]');
+      if (title) title.textContent = SYNC_KINDS[syncKind].title;
+      const actions = node.querySelector?.('[data-training-sync-actions]');
+      if (actions) actions.innerHTML = renderActions();
+    });
+    document.querySelectorAll('[data-training-sync-badge]').forEach((node) => {
+      node.setAttribute?.('data-sync-kind', syncKind);
+      node.hidden = !SYNC_KINDS[syncKind].badge;
+    });
+  }
+
+  function renderActions() {
+    return SYNC_KINDS[syncKind].actions.map(([label, handler, primary]) =>
+      `<button class="btn ${primary ? 'btn-primary' : 'btn-secondary'}" type="button" onclick="${handler}">${label}</button>`).join('');
   }
 
   function renderControl() {
-    return `<div class="training-sync-control">
-      <button class="btn btn-secondary" type="button" onclick="openTrainingSyncModal()">☁️ 跨裝置同步</button>
+    return `<div class="training-sync-control" data-training-sync-indicator data-sync-kind="${syncKind}">
+      <div class="sync-status-head"><span class="sync-status-dot" aria-hidden="true"></span><strong data-training-sync-title>${SYNC_KINDS[syncKind].title}</strong></div>
       <span data-training-sync-status role="status" aria-live="polite">${status}</span>
+      <div class="sync-status-actions" data-training-sync-actions>${renderActions()}</div>
     </div>`;
+  }
+
+  // 「管理」按鈕旁的提醒點：只有需要處理（失敗、待解鎖、資料不同、離線）時出現。
+  function renderBadge() {
+    const needsAttention = Boolean(SYNC_KINDS[syncKind].badge);
+    return `<span class="sync-attention-dot" data-training-sync-badge data-sync-kind="${syncKind}" role="img" aria-label="跨裝置同步需要處理"${needsAttention ? '' : ' hidden'}></span>`;
+  }
+
+  // 今天 10:38／昨天 21:05／11/20 21:05：隔天打開也分得出是不是今天同步的。
+  function formatSyncTime(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    const dayKey = (d) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const today = new Date();
+    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    if (dayKey(date) === dayKey(today)) return `今天 ${time}`;
+    if (dayKey(date) === dayKey(yesterday)) return `昨天 ${time}`;
+    return `${date.getMonth() + 1}/${date.getDate()} ${time}`;
+  }
+
+  function isOffline(error) {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+    return error instanceof TypeError; // fetch 連不上網路時丟 TypeError
+  }
+
+  function syncFailureReason(error) {
+    const code = Number(error?.status) || 0;
+    if (code === 401 || code === 403) return '登入已過期，請按「設定」重新登入';
+    if (code === 429) return '同步太頻繁，請等一下再試';
+    if (code >= 500) return '雲端伺服器暫時沒有回應';
+    return '雲端回應異常';
+  }
+
+  // 同步失敗或離線：說明原因、提醒資料仍在本機，並附上一次成功的時間。
+  function reportSyncFailure(error) {
+    const last = readMeta()?.updatedAt;
+    const lastText = last ? `上次成功：${formatSyncTime(last)}` : '';
+    if (isOffline(error)) {
+      return setStatus(['修改會先存在這台裝置，連上網路後自動同步。', lastText].filter(Boolean).join(' '), 'offline');
+    }
+    setStatus([`${syncFailureReason(error)}。資料仍在這台裝置，不會遺失。`, lastText].filter(Boolean).join(' '), 'error');
+  }
+
+  // 所有自動／手動同步排成一列依序跑，避免「連回網路」與「剛存檔」兩次同步互相搶寫雲端版本。
+  let syncQueue = Promise.resolve();
+  function queueReconcile() {
+    const run = syncQueue.then(reconcile, reconcile);
+    syncQueue = run.catch(() => {});
+    return run;
+  }
+
+  function retry() {
+    if (!readSession() || !syncKey) return openModal();
+    window.clearTimeout(saveTimer);
+    setStatus('正在比對雲端資料…', 'syncing');
+    return queueReconcile();
   }
 
   function readSession() {
@@ -53,6 +144,7 @@
     if (!response.ok) {
       localStorage.removeItem(SESSION_KEY);
       syncKey = null;
+      setStatus('這台裝置的登入已過期，請重新登入跨裝置同步。本機資料不受影響。', 'expired');
       return null;
     }
     const nextSession = await response.json();
@@ -227,7 +319,11 @@
       }
     });
     if (response.status === 401 && !retried && await refreshSession()) return api(path, options, true);
-    if (!response.ok) throw new Error((await response.text()) || `同步失敗（${response.status}）`);
+    if (!response.ok) {
+      const error = new Error((await response.text()) || `同步失敗（${response.status}）`);
+      error.status = response.status;
+      throw error;
+    }
     return response.status === 204 ? null : response.json();
   }
 
@@ -270,7 +366,7 @@
     }
     if (!result?.length) throw new Error('conflict');
     storeMeta({ revision: result[0].revision, checksum: snapshotChecksum, updatedAt: result[0].updated_at, coachDigest: await coachDigest() });
-    setStatus(`已同步 · ${new Date(result[0].updated_at).toLocaleString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`);
+    setStatus(`${formatSyncTime(result[0].updated_at)} · 已上傳這台裝置的修改`, 'ok');
   }
 
   async function applyRemote(remote, localBaseline) {
@@ -295,7 +391,7 @@
       renderPlanView();
       showView('plan');
     }
-    setStatus(`已載入雲端資料 · ${new Date(remote.updated_at).toLocaleString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`);
+    setStatus(`${formatSyncTime(remote.updated_at)} · 已載入雲端資料`, 'ok');
   }
 
   // AES-GCM 解密失敗（OperationError）＝記住的金鑰與雲端不符，多半是同步密碼在別台裝置改過：
@@ -305,15 +401,15 @@
     const userId = sessionUserId(readSession());
     if (userId) await clearDeviceKey(userId);
     syncKey = null;
-    setStatus('同步資料無法解密，請確認同步密碼；也可能是雲端資料損毀');
+    setStatus('同步資料無法解密，請確認同步密碼；也可能是雲端資料損毀', 'stalekey');
     return true;
   }
 
   function showConflict(remote) {
-    setStatus('偵測到雙裝置版本差異');
+    setStatus('這台裝置和雲端各有不同的修改，請選擇要保留哪一份。', 'conflict');
     showModal('選擇要保留的訓練資料', '<p style="margin:0;line-height:1.75">這台裝置與雲端各有不同訓練資料，系統不會擅自混合兩份課表。若載入雲端版本，這台的資料會先自動保留為「匯入前快照」，可從「資料與備份」復原。</p>', [
-      { label: '保留這台裝置', primary: true, action: async () => { closeModal(); try { await writeRemote(remote?.revision || 0, true); } catch { setStatus('同步失敗，請稍後再試'); } } },
-      { label: '載入雲端版本（保留本機快照）', action: async () => { closeModal(); try { await applyRemote(remote); } catch (error) { if (!(await handleStaleKey(error))) setStatus('未能安全載入雲端資料，請檢查密碼與本機儲存空間'); } } },
+      { label: '保留這台裝置', primary: true, action: async () => { closeModal(); try { await writeRemote(remote?.revision || 0, true); } catch (error) { reportSyncFailure(error); } } },
+      { label: '載入雲端版本（保留本機快照）', action: async () => { closeModal(); try { await applyRemote(remote); } catch (error) { if (!(await handleStaleKey(error))) setStatus('未能安全載入雲端資料，請檢查密碼與本機儲存空間', 'error'); } } },
       { label: '稍後決定', action: closeModal }
     ]);
   }
@@ -343,7 +439,7 @@
           return await writeRemote(remote.revision);
         }
         storeMeta({ revision: remote.revision, checksum: remote.checksum, updatedAt: remote.updated_at, coachDigest: localCoach });
-        setStatus('所有裝置資料一致');
+        setStatus(`${formatSyncTime(remote.updated_at)} · 所有裝置資料一致`, 'ok');
         return;
       }
       if (!meta && hasMeaningfulData(appData)) return showConflict(remote);
@@ -357,15 +453,15 @@
       // 同步進行中被登出：不要用錯誤訊息蓋掉「尚未登入」
       if (!syncKey || !readSession()) return;
       console.warn('training sync reconcile failed', error);
-      setStatus('同步暫時無法完成');
+      reportSyncFailure(error);
     }
   }
 
   function onLocalSave() {
     if (applyingRemote || !syncKey || !readSession()) return;
     window.clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(reconcile, 900);
-    setStatus('準備同步…');
+    saveTimer = window.setTimeout(queueReconcile, 900);
+    setStatus('有新的修改，稍後自動同步…', 'syncing');
   }
 
   async function loginWithPassword() {
@@ -383,7 +479,7 @@
     syncKey = null; // 新登入一律重新解鎖，避免沿用前一個帳號的金鑰
     storeSession(await response.json());
     closeModal();
-    setStatus('已登入，請輸入同步密碼');
+    setStatus('已登入，請輸入同步密碼', 'locked');
     openUnlockModal();
   }
 
@@ -407,7 +503,7 @@
     syncKey = candidate;
     const saved = remember ? await saveDeviceKey(userId, syncKey) : (await clearDeviceKey(userId), true);
     closeModal();
-    setStatus(remember && saved === null ? '這台裝置無法記住金鑰（可能是私密瀏覽），下次需重新輸入' : '正在比對雲端資料…');
+    setStatus(remember && saved === null ? '這台裝置無法記住金鑰（可能是私密瀏覽），下次需重新輸入' : '正在比對雲端資料…', 'syncing');
     await reconcile();
   }
 
@@ -434,7 +530,7 @@
       fetch(`${current.url}/auth/v1/logout?scope=local`, { method: 'POST', headers: { apikey: current.publishableKey, Authorization: `Bearer ${session.access_token}` } }).catch(() => null);
     }
     localStorage.removeItem(SESSION_KEY);
-    setStatus('尚未登入');
+    setStatus('尚未登入', 'signedout');
   }
 
   // 開頁時：已登入且這台裝置記住了金鑰，就自動同步，不再要求輸入同步密碼。
@@ -444,9 +540,9 @@
     const key = await loadDeviceKey(userId);
     // 等待期間若已登出或換帳號，就不要把舊帳號的金鑰設回去
     if (sessionUserId(readSession()) !== userId) return;
-    if (!key) return setStatus('已登入，請輸入同步密碼');
+    if (!key) return setStatus('已登入，請輸入同步密碼', 'locked');
     syncKey = key;
-    setStatus('正在比對雲端資料…');
+    setStatus('正在比對雲端資料…', 'syncing');
     await reconcile();
   }
 
@@ -533,7 +629,7 @@
     syncKey = null;
     storeSession(user?.email ? { ...session, user } : session);
     closeModal();
-    setStatus('登入密碼已更新，請輸入同步密碼');
+    setStatus('登入密碼已更新，請輸入同步密碼', 'locked');
     await resumeRememberedDevice();
     if (!syncKey) openUnlockModal();
   }
@@ -568,7 +664,10 @@
     openUnlockModal();
   }
 
-  window.TrainerSync = { togglePasswordVisibility, renderControl, refreshControl: () => setStatus(status), onLocalSave, openModal, reconcile, requestPasswordReset };
+  window.TrainerSync = { togglePasswordVisibility, renderControl, renderBadge, refreshControl: () => setStatus(status, syncKind), onLocalSave, openModal, reconcile, retry, requestPasswordReset };
+  // 斷網時先說清楚，連回網路就自動補同步
+  window.addEventListener?.('offline', () => { if (syncKey && readSession()) reportSyncFailure(new TypeError('offline')); });
+  window.addEventListener?.('online', () => (syncKey && readSession() ? retry() : undefined));
   window.openTrainingSyncModal = openModal;
   // 過期／已用過的連結：清掉先前未完成的重設，並把錯誤記在分頁裡，等待期間重新整理也看得到下一步說明
   const RECOVERY_ERROR_KEY = `${RECOVERY_KEY}:error`;
@@ -591,13 +690,13 @@
   let recoveryErrorPending = false;
   try { recoveryErrorPending = Boolean(window.sessionStorage?.getItem(RECOVERY_ERROR_KEY)); } catch {}
   if (recoveryReturn || recoveryErrorPending || readPendingRecovery() || readSession()) {
-    setStatus(recoveryReturn || recoveryErrorPending || readPendingRecovery() ? '正在開啟密碼重設…' : '已登入，正在讀取裝置金鑰…');
+    setStatus(recoveryReturn || recoveryErrorPending || readPendingRecovery() ? '正在開啟密碼重設…' : '已登入，正在讀取裝置金鑰…', 'syncing');
     // 等 trainer.js 建好 appData（與 showModal）後再處理；重設中先設新密碼，不自動用舊登入恢復同步
     window.addEventListener('load', () => {
       window.setTimeout(() => {
         if (takeRecoveryError()) return showRecoveryError();
         if (readPendingRecovery()) return openNewPasswordModal();
-        resumeRememberedDevice().catch(() => setStatus('同步暫時無法完成'));
+        resumeRememberedDevice().catch(reportSyncFailure);
       }, 300);
     });
   }

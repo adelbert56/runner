@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>同步狀態 mockup</title>
+<style>
+  :root { --ink:#1f2a24; --muted:#65736b; --soft:#f6f4ee; --surface:#fff; --line:#e2ded4; --green:#24724f; --green-dark:#155338; --yellow:#f5c84c; --red:#b3261e; --radius:10px; --radius-sm:8px; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:24px 16px 60px; background:var(--soft); color:var(--ink); font:14px/1.55 "Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  .lead { color:var(--muted); margin:0 0 24px; }
+  .variant { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; margin:0 auto 28px; max-width:1080px; }
+  .variant > h2 { font-size:18px; margin:0 0 4px; }
+  .variant > p.why { margin:0 0 16px; color:var(--muted); }
+  .row { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
+  .frame { border:1px solid var(--line); border-radius:var(--radius); background:#fbfaf6; padding:16px; flex:1 1 520px; min-width:0; }
+  .frame.phone { flex:0 0 340px; max-width:100%; }
+  .frame-label { font-size:12px; font-weight:800; color:var(--muted); margin-bottom:10px; }
+  .eyebrow { font-size:11px; font-weight:800; color:var(--green-dark); }
+  .title { font-size:26px; font-weight:900; margin:2px 0; }
+  .meta { font-weight:800; color:var(--green-dark); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .tabs { display:flex; align-items:center; gap:6px; margin-top:12px; padding:8px; background:var(--surface); border:1px solid var(--line); border-radius:999px; }
+  .tab { padding:6px 12px; border-radius:999px; font-weight:700; font-size:13px; color:#3d4a43; }
+  .tab.on { background:#e7f0ea; color:var(--green-dark); }
+  .tabs .spacer { flex:1; }
+  .manage { font-weight:800; color:var(--green-dark); position:relative; padding:6px 10px; }
+  .dot { width:9px; height:9px; border-radius:50%; display:inline-block; flex:none; }
+  .ok { background:var(--green); } .warn { background:var(--yellow); box-shadow:0 0 0 1px #c99a12 inset; } .bad { background:var(--red); } .off { background:#a7b0aa; }
+  .spin { width:11px; height:11px; border-radius:50%; border:2px solid #cfe0d5; border-top-color:var(--green); display:inline-block; }
+  /* A: chip */
+  .chip { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface); font-size:12px; font-weight:800; color:#3d4a43; }
+  .chip.err { border-color:#f1c4c0; background:#fdf2f1; color:var(--red); }
+  .chip.att { border-color:#f0dc9a; background:#fffaeb; color:#7a5a00; }
+  .pop { margin-top:10px; width:300px; max-width:100%; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 8px 24px rgba(31,42,36,.12); padding:14px; }
+  .pop h4 { margin:0 0 2px; font-size:14px; }
+  .pop p { margin:0 0 10px; color:var(--muted); font-size:13px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:0 14px; border-radius:var(--radius-sm); border:1px solid var(--line); background:var(--surface); font-weight:800; font-size:13px; color:var(--ink); }
+  .btn.primary { background:var(--green-dark); color:#fff; border-color:var(--green-dark); }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; }
+  /* B: card in manage menu */
+  .menu { margin-top:10px; margin-left:auto; width:300px; max-width:100%; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 8px 24px rgba(31,42,36,.12); padding:10px; }
+  .menu .item { padding:9px 8px; font-size:13px; font-weight:700; color:#3d4a43; }
+  .synccard { border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px; margin:4px 0 6px; }
+  .synccard.err { border-color:#f1c4c0; background:#fdf2f1; }
+  .synccard .head { display:flex; gap:8px; align-items:center; font-weight:900; }
+  .synccard .sub { color:var(--muted); font-size:12px; margin:4px 0 10px; }
+  /* C: badge */
+  .badge { position:absolute; top:4px; right:-2px; }
+  .states { margin-top:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:8px; }
+  .state { display:flex; flex-direction:column; gap:6px; padding:10px; border:1px dashed var(--line); border-radius:var(--radius-sm); background:var(--surface); }
+  .state small { color:var(--muted); font-size:11px; font-weight:700; }
+  .pick { margin-top:14px; padding:10px 12px; border-radius:var(--radius-sm); background:#eef5f0; color:var(--green-dark); font-weight:700; font-size:13px; }
+  .pro, .con { margin:6px 0 0; padding-left:18px; font-size:13px; }
+  .con { color:#7a4a00; }
+</style>
+</head>
+<body>
+<h1>跨裝置同步狀態：三個方案</h1>
+<p class="lead">目前狀態藏在「管理」選單裡，手機上完全隱藏。下面三個方案都不改同步邏輯，只改顯示方式。請選一個（或混搭）。</p>
+
+<!-- ================= A ================= -->
+<section class="variant">
+  <h2>A：標題下方常駐狀態膠囊</h2>
+  <p class="why">在「半馬 21K · 距離比賽 13 天」旁邊放一顆小膠囊，任何時候都看得到。點一下就展開詳細狀態和操作。</p>
+  <div class="row">
+    <div class="frame">
+      <div class="frame-label">桌機</div>
+      <div class="eyebrow">第 21 / 22 週 · 減量＋比賽</div>
+      <div class="title">練跑計畫</div>
+      <div class="meta">半馬 21K · 距離比賽 13 天 <span class="chip"><span class="dot ok"></span>已同步 · 今天 10:38</span></div>
+      <div class="tabs"><span class="tab on">課表</span><span class="tab">教練建議</span><span class="tab">週評估</span><span class="tab">紀錄</span><span class="spacer"></span><span class="manage">▸ 管理</span></div>
+      <div class="pop">
+        <h4><span class="dot ok"></span> 所有裝置資料一致</h4>
+        <p>最後同步：今天 10:38<br>帳號 you@example.com</p>
+        <div class="btns"><span class="btn">立即同步</span><span class="btn">同步設定</span></div>
+      </div>
+    </div>
+    <div class="frame phone">
+      <div class="frame-label">手機 375px</div>
+      <div class="eyebrow">第 21 / 22 週</div>
+      <div class="title" style="font-size:22px">練跑計畫</div>
+      <div class="meta" style="font-size:13px">半馬 21K · 13 天</div>
+      <div style="margin-top:6px"><span class="chip err"><span class="dot bad"></span>同步失敗 · 點此重試</span></div>
+      <div class="pop" style="width:100%">
+        <h4><span class="dot bad"></span> 同步失敗</h4>
+        <p>連不上雲端伺服器（逾時）。你的資料仍存在這台手機，不會遺失。</p>
+        <div class="btns"><span class="btn primary">重試</span></div>
+      </div>
+    </div>
+  </div>
+  <ul class="pro"><li>最顯眼，手機桌機一致；出錯時第一眼就會看到。</li></ul>
+  <ul class="con"><li>標題區多一個元素；沒開同步的人也會看到「未開啟同步」膠囊（可改成只在開啟後才顯示）。</li></ul>
+</section>
+
+<!-- ================= B ================= -->
+<section class="variant">
+  <h2>B：「管理」選單裡的同步狀態卡</h2>
+  <p class="why">位置不變，但把一行灰字改成一張小卡：狀態顏色、日期時間、原因、按鈕。手機也顯示。</p>
+  <div class="row">
+    <div class="frame">
+      <div class="frame-label">桌機（展開管理）</div>
+      <div class="tabs"><span class="tab on">課表</span><span class="tab">教練建議</span><span class="tab">週評估</span><span class="tab">紀錄</span><span class="spacer"></span><span class="manage">▾ 管理</span></div>
+      <div class="menu">
+        <div class="item">◉ 讀取 Garmin 實跑</div>
+        <div class="synccard">
+          <div class="head"><span class="dot ok"></span>已同步</div>
+          <div class="sub">今天 10:38 · 所有裝置資料一致</div>
+          <div class="btns"><span class="btn">立即同步</span><span class="btn">設定</span></div>
+        </div>
+        <div class="item">▬ 週期管理</div>
+        <div class="item">⚙ 修改設定</div>
+      </div>
+    </div>
+    <div class="frame phone">
+      <div class="frame-label">手機 375px（展開管理）</div>
+      <div class="menu" style="width:100%">
+        <div class="synccard err">
+          <div class="head" style="color:var(--red)"><span class="dot bad"></span>同步失敗</div>
+          <div class="sub">連不上雲端（逾時）。資料仍在這台手機。<br>上次成功：昨天 21:05</div>
+          <div class="btns"><span class="btn primary">重試</span></div>
+        </div>
+        <div class="item">▬ 週期管理</div>
+      </div>
+    </div>
+  </div>
+  <ul class="pro"><li>改動最小，版面不變。</li></ul>
+  <ul class="con"><li>還是要點「管理」才看得到；同步失敗時你可能好幾天都沒發現。</li></ul>
+</section>
+
+<!-- ================= C ================= -->
+<section class="variant">
+  <h2>C：B 的狀態卡＋「管理」按鈕上的提醒點（建議）</h2>
+  <p class="why">平常乾淨，什麼都不多顯示；只有需要處理時（失敗、要輸入密碼、兩台資料不同），「管理」旁邊出現紅點或黃點，點開就是 B 的狀態卡。</p>
+  <div class="row">
+    <div class="frame">
+      <div class="frame-label">桌機：一切正常（不顯示點）</div>
+      <div class="tabs"><span class="tab on">課表</span><span class="tab">教練建議</span><span class="tab">週評估</span><span class="tab">紀錄</span><span class="spacer"></span><span class="manage">▸ 管理</span></div>
+      <div class="frame-label" style="margin-top:16px">桌機：需要處理（黃點）</div>
+      <div class="tabs"><span class="tab on">課表</span><span class="tab">教練建議</span><span class="tab">週評估</span><span class="tab">紀錄</span><span class="spacer"></span><span class="manage">▸ 管理 <span class="dot warn badge"></span></span></div>
+      <div class="menu">
+        <div class="synccard" style="border-color:#f0dc9a;background:#fffaeb">
+          <div class="head" style="color:#7a5a00"><span class="dot warn"></span>兩台裝置的資料不同</div>
+          <div class="sub">這台最後修改：今天 09:12<br>雲端最後修改：今天 10:02（另一台裝置）</div>
+          <div class="btns"><span class="btn primary">選擇要保留哪一份</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="frame phone">
+      <div class="frame-label">手機 375px：離線</div>
+      <div class="tabs" style="border-radius:14px"><span class="tab on">課表</span><span class="tab">建議</span><span class="spacer"></span><span class="manage">管理 <span class="dot off badge"></span></span></div>
+      <div class="menu" style="width:100%">
+        <div class="synccard">
+          <div class="head"><span class="dot off"></span>目前離線</div>
+          <div class="sub">修改會先存在這台手機，連上網路後自動同步。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ul class="pro"><li>不打擾、不佔版面；出問題時一定看得到提醒。</li><li>手機、桌機同一套規則。</li></ul>
+  <ul class="con"><li>「正常」時要點開才看得到最後同步時間。</li></ul>
+</section>
+
+<!-- ================= states ================= -->
+<section class="variant">
+  <h2>所有狀態（三個方案共用的文字與顏色）</h2>
+  <div class="states">
+    <div class="state"><span class="chip"><span class="dot ok"></span>已同步 · 今天 10:38</span><small>synced｜無動作（可立即同步）</small></div>
+    <div class="state"><span class="chip"><span class="spin"></span>同步中…</span><small>syncing</small></div>
+    <div class="state"><span class="chip"><span class="dot off"></span>離線，連線後自動同步</span><small>offline｜自動恢復</small></div>
+    <div class="state"><span class="chip err"><span class="dot bad"></span>同步失敗：連線逾時</span><small>error｜重試</small></div>
+    <div class="state"><span class="chip att"><span class="dot warn"></span>需要輸入同步密碼</span><small>locked｜解鎖</small></div>
+    <div class="state"><span class="chip att"><span class="dot warn"></span>兩台裝置資料不同</span><small>conflict｜選擇保留</small></div>
+    <div class="state"><span class="chip err"><span class="dot bad"></span>同步密碼不符</span><small>stale-key｜重新輸入</small></div>
+    <div class="state"><span class="chip"><span class="dot off"></span>未開啟同步</span><small>signed-out｜登入</small></div>
+  </div>
+  <div class="pick">時間格式：今天 10:38／昨天 21:05／11/20 21:05。顏色只用既有 token（綠、黃、灰）與既有錯誤紅。</div>
+</section>
+</body>
+</html>

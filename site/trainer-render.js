@@ -31,7 +31,7 @@ function renderPlanView() {
     <button id="plan-tab-button-progress" class="tab" role="tab" aria-controls="plan-tab-progress" aria-selected="false" tabindex="-1" onclick="switchPlanTab('progress')">紀錄</button>
   </div>
   <details class="plan-management">
-    <summary>管理</summary>
+    <summary>管理${window.TrainerSync?.renderBadge?.() || ''}</summary>
     <div class="plan-workspace-tools" aria-label="訓練管理工具">
       <div class="plan-toolbar-sync">
         ${garminActivitySyncControl}

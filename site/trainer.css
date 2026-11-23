@@ -2157,3 +2157,40 @@
   .week-workspace > .card { padding: 12px; }
   .week-schedule .week-header-top { flex-direction: row; }
 }
+
+/* Cross-device sync status card + attention dot on 管理 (2026-11-23, mockup C) */
+.plan-management .training-sync-control[data-training-sync-indicator] {
+  display: grid;
+  justify-items: stretch;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md, 8px);
+  background: var(--c-surface);
+}
+.training-sync-control .sync-status-head { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.sync-status-dot, .sync-attention-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: #a7b0aa; }
+.plan-management .plan-toolbar-sync .training-sync-control [data-training-sync-status] { padding: 0; font-size: 12px; line-height: 1.5; }
+.training-sync-control .sync-status-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.training-sync-control .sync-status-actions:empty { display: none; }
+.plan-management .plan-workspace-tools .sync-status-actions .btn { min-height: 44px; padding-inline: 12px; text-align: center; }
+[data-sync-kind="ok"] .sync-status-dot { background: var(--c-primary); }
+[data-sync-kind="syncing"] .sync-status-dot { background: transparent; border: 2px solid #cfe0d5; border-top-color: var(--c-primary); animation: sync-spin 0.9s linear infinite; }
+[data-sync-kind="locked"] .sync-status-dot, [data-sync-kind="conflict"] .sync-status-dot,
+.sync-attention-dot[data-sync-kind="locked"], .sync-attention-dot[data-sync-kind="conflict"] { background: var(--c-yellow); box-shadow: inset 0 0 0 1px #c99a12; }
+[data-sync-kind="error"] .sync-status-dot, [data-sync-kind="stalekey"] .sync-status-dot,
+.sync-attention-dot[data-sync-kind="error"], .sync-attention-dot[data-sync-kind="stalekey"] { background: var(--c-red); }
+.plan-management .training-sync-control[data-sync-kind="error"],
+.plan-management .training-sync-control[data-sync-kind="stalekey"] { border-color: #ecc6c1; background: #fdf3f2; }
+.plan-management .training-sync-control[data-sync-kind="error"] .sync-status-head,
+.plan-management .training-sync-control[data-sync-kind="stalekey"] .sync-status-head { color: var(--c-red); }
+.plan-management .training-sync-control[data-sync-kind="locked"],
+.plan-management .training-sync-control[data-sync-kind="conflict"] { border-color: #f0dc9a; background: #fffaeb; }
+.plan-management > summary .sync-attention-dot { display: inline-block; margin-left: 6px; vertical-align: 2px; }
+.plan-management > summary .sync-attention-dot[hidden] { display: none; }
+@keyframes sync-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { [data-sync-kind="syncing"] .sync-status-dot { animation: none; } }
+.plan-management .plan-workspace-tools .sync-status-actions .btn-primary { border-color: var(--c-primary); background: var(--c-primary); color: #fff; }
+.plan-management .plan-workspace-tools .sync-status-actions .btn-primary:hover { background: var(--c-primary-hover); }
+[data-sync-kind="expired"] .sync-status-dot, .sync-attention-dot[data-sync-kind="expired"] { background: var(--c-yellow); box-shadow: inset 0 0 0 1px #c99a12; }
+.plan-management .training-sync-control[data-sync-kind="expired"] { border-color: #f0dc9a; background: #fffaeb; }

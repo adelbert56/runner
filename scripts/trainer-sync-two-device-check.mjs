@@ -208,3 +208,101 @@ console.log('PASS password visibility preserves text and selection');
   assert.equal(shown.title, '設定新的登入密碼');
 }
 console.log('PASS sync passphrase is stored separately and forgotten login passwords can be reset by email');
+
+// Sync status card + 管理 attention dot: each state has a kind, a reason and a next step.
+{
+  const raw = await readFile('site/trainer-sync.js', 'utf8');
+  const src = raw.replace('  window.TrainerSync =', `  window.__t = { async unlock() { syncKey = await deriveKey('fixture-user', 'synthetic sync password'); }, formatSyncTime };\n  window.TrainerSync =`);
+  const map = new Map([['runner-trainer:sync-session:v1', JSON.stringify({ access_token: token })]]);
+  const localStorage = { getItem: key => map.get(key) ?? null, setItem: (key, value) => map.set(key, String(value)), removeItem: key => map.delete(key) };
+  const ui = { text: '', kind: '', title: '', actions: '', badgeHidden: null, badgeKind: '' };
+  const indicator = {
+    setAttribute(_name, value) { ui.kind = value; },
+    querySelector(sel) {
+      if (sel.includes('title')) return { set textContent(v) { ui.title = v; } };
+      return { set innerHTML(v) { ui.actions = v; } };
+    }
+  };
+  const badge = { setAttribute(_name, value) { ui.badgeKind = value; }, set hidden(v) { ui.badgeHidden = v; } };
+  const document = { querySelectorAll(sel) {
+    if (sel === '[data-training-sync-status]') return [{ set textContent(v) { ui.text = v; } }];
+    if (sel === '[data-training-sync-indicator]') return [indicator];
+    if (sel === '[data-training-sync-badge]') return [badge];
+    return [];
+  } };
+  let mode = 'network';
+  let active = 0, maxActive = 0;
+  let stored = null;
+  const fetch = async (_url, options = {}) => {
+    if (mode === 'network') throw new TypeError('Failed to fetch');
+    if (mode === 'server') return { ok: false, status: 503, text: async () => 'unavailable' };
+    if (mode === 'expired') return { ok: false, status: 401, text: async () => 'jwt expired' };
+    active++; maxActive = Math.max(maxActive, active);
+    await new Promise(resolve => setTimeout(resolve, 5));
+    active--;
+    if (!options.method) return { ok: true, status: 200, json: async () => stored ? [structuredClone(stored)] : [] };
+    stored = JSON.parse(options.body);
+    return { ok: true, status: 200, json: async () => [structuredClone(stored)] };
+  };
+  const listeners = {};
+  const window = { TRAINER_SYNC_CONFIG: { url: 'https://fixture.invalid', publishableKey: 'fixture', table: 'snapshots' },
+    setTimeout() { return 0; }, clearTimeout() {}, addEventListener(name, fn) { listeners[name] = fn; } };
+  const navigator = { onLine: true };
+  const ctx = vm.createContext({ window, localStorage, fetch, navigator, crypto: webcrypto, TextEncoder, TextDecoder, atob, btoa, document,
+    appData: { profile: { name: 'synthetic' }, plan: [{ week: 1 }] }, normalizeData: x => x,
+    showModal() {}, closeModal() {}, savePreRestoreSnapshot() {}, saveData: x => x, renderPlanView() {}, showView() {},
+    console: { ...console, warn() {} }, Date, Uint8Array, JSON, TypeError });
+  vm.runInContext(src, ctx);
+  const sync = window.TrainerSync;
+  assert.match(sync.renderBadge(), /hidden/, 'no attention dot before anything needs handling');
+  assert.match(sync.renderControl(), /data-training-sync-indicator/);
+  await window.__t.unlock();
+
+  await sync.reconcile();
+  assert.equal(ui.kind, 'offline');
+  assert.match(ui.text, /連上網路後自動同步/);
+  assert.equal(ui.badgeHidden, false, 'offline shows the attention dot');
+
+  mode = 'server';
+  await sync.reconcile();
+  assert.equal(ui.kind, 'error');
+  assert.equal(ui.title, '同步失敗');
+  assert.match(ui.text, /雲端伺服器暫時沒有回應.*不會遺失/);
+  assert.match(ui.actions, /重試/);
+  assert.equal(ui.badgeKind, 'error');
+
+  mode = 'ok';
+  await sync.retry();
+  assert.equal(ui.kind, 'ok');
+  assert.match(ui.text, /^今天 \d\d:\d\d · /, 'success time says 今天, not just a clock time');
+  assert.equal(ui.badgeHidden, true, 'dot disappears once synced');
+
+  navigator.onLine = false;
+  listeners.offline();
+  assert.equal(ui.kind, 'offline');
+  assert.match(ui.text, /上次成功：今天/, 'offline notice keeps the last successful sync time');
+  navigator.onLine = true;
+  await listeners.online();
+  assert.equal(ui.kind, 'ok', 'coming back online syncs again automatically');
+
+  // Coming back online while a save-triggered sync runs must not race it.
+  maxActive = 0;
+  await Promise.all([sync.retry(), sync.retry()]);
+  assert.equal(maxActive, 1, 'syncs run one at a time');
+  assert.equal(ui.kind, 'ok');
+
+  // A refresh that fails clears the session: the card must offer sign-in, not spin forever.
+  map.set('runner-trainer:sync-session:v1', JSON.stringify({ access_token: token, refresh_token: 'r' }));
+  mode = 'expired';
+  await sync.retry();
+  assert.equal(ui.kind, 'expired');
+  assert.equal(ui.badgeHidden, false);
+  assert.match(ui.actions, /重新登入/);
+
+  const now = new Date();
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 21, 5);
+  assert.equal(window.__t.formatSyncTime(yesterday.toISOString()), '昨天 21:05');
+  const older = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3, 8, 7);
+  assert.equal(window.__t.formatSyncTime(older.toISOString()), `${older.getMonth() + 1}/${older.getDate()} 08:07`);
+}
+console.log('PASS sync status card reports offline, failures with a retry, and dated success, with an attention dot only when needed');
