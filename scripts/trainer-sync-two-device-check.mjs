@@ -115,3 +115,96 @@ loginWindow.TrainerSync.togglePasswordVisibility('training-sync-passphrase', eye
 assert.equal(form['training-sync-passphrase'].type, 'password');
 assert.equal(attrs['aria-label'], '顯示密碼');
 console.log('PASS password visibility preserves text and selection');
+
+// Password managers must see the sync passphrase as a separate account from the login password.
+{
+  const claims = Buffer.from(JSON.stringify({ sub: 'fixture-user', email: 'runner@example.test' })).toString('base64');
+  const sessionStore = new Map([['runner-trainer:sync-session:v1', JSON.stringify({ access_token: `x.${claims}.x` })]]);
+  let shown = null;
+  let status = '';
+  const fields = {};
+  const calls = [];
+  const replaced = [];
+  const win = { TRAINER_SYNC_CONFIG: {url:'https://fixture.invalid', publishableKey:'fixture', table:'snapshots'}, setTimeout, clearTimeout,
+    listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; },
+    location: { hash: '', origin: 'https://site.test', pathname: '/site/trainer.html', search: '' },
+    history: { replaceState: (_s, _t, url) => { replaced.push(url); win.location.hash = ''; } } };
+  const tabStore = new Map();
+  win.sessionStorage = { getItem: k => tabStore.get(k) ?? null, setItem: (k, v) => tabStore.set(k, String(v)), removeItem: k => tabStore.delete(k) };
+  const ctx = vm.createContext({ window: win, localStorage: { getItem: k => sessionStore.get(k) ?? null, setItem: (k, v) => sessionStore.set(k, String(v)), removeItem: k => sessionStore.delete(k) },
+    crypto: webcrypto, TextEncoder, TextDecoder, atob, btoa, console, URLSearchParams, indexedDB: undefined,
+    fetch: async (url, options = {}) => { calls.push({ url, options }); return { ok: true, status: 200, json: async () => ({ email: 'runner@example.test' }), text: async () => '' }; },
+    document: { getElementById: id => fields[id], querySelectorAll: () => [{ set textContent(v) { status = v; } }] },
+    showModal: (title, body, actions) => { shown = { title, body, actions }; }, closeModal() {} });
+  vm.runInContext(source, ctx);
+  win.openTrainingSyncModal();
+  assert.equal(shown.title, '解鎖加密同步');
+  assert.match(shown.body, /autocomplete="username" value="runner@example\.test（同步密碼）"/, 'sync passphrase is saved under its own account name');
+  assert.match(shown.body, /id="training-sync-passphrase"[^>]*autocomplete="current-password"/);
+
+  // Forgot password: needs an email, then asks Supabase to send a recovery link back to this page.
+  sessionStore.clear();
+  win.openTrainingSyncModal();
+  assert.equal(shown.title, '登入跨裝置同步');
+  assert.match(shown.body, /忘記登入密碼/);
+  await win.TrainerSync.requestPasswordReset();
+  assert.match(status, /請先在上方輸入 Email/);
+  assert.equal(calls.length, 0);
+  fields['training-sync-email'] = { value: ' runner@example.test ' };
+  await win.TrainerSync.requestPasswordReset();
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, 'https://fixture.invalid/auth/v1/recover?redirect_to=' + encodeURIComponent('https://site.test/site/trainer.html'));
+  assert.deepEqual(JSON.parse(calls[0].options.body), { email: 'runner@example.test' });
+  assert.match(status, /若此 Email 有帳號/);
+
+  // Returning from the email link: token is removed from the URL, then a new password can be saved.
+  win.location.hash = `#access_token=x.${claims}.x&refresh_token=r1&expires_in=3600&token_type=bearer&type=recovery`;
+  vm.runInContext(source, ctx);
+  assert.deepEqual(replaced, ['/site/trainer.html'], 'token leaves the address bar as soon as the script runs, before page load');
+  assert.equal(sessionStore.has('runner-trainer:sync-session:v1'), false, 'no login is stored until the new password is saved');
+  win.listeners.load();
+  await new Promise(resolve => setTimeout(resolve, 350));
+  assert.equal(shown.title, '設定新的登入密碼');
+  // Dismissing and reloading the tab must not burn the link: the sync button reopens the reset form.
+  shown = null;
+  vm.runInContext(source, ctx);
+  win.openTrainingSyncModal();
+  assert.equal(shown.title, '設定新的登入密碼', 'reset form survives cancel and reload in the same tab');
+  assert.match(shown.body, /id="training-sync-new-password"[^>]*autocomplete="new-password"/);
+  assert.match(shown.body, /autocomplete="username" value="runner@example\.test"/, 'new login password is saved under the plain email');
+  fields['training-sync-new-password'] = { value: 'new-login-1' };
+  fields['training-sync-new-password-confirm'] = { value: 'new-login-2' };
+  await shown.actions[0].action();
+  assert.equal(status, '兩次輸入的新密碼不一樣');
+  fields['training-sync-new-password-confirm'] = { value: 'new-login-1' };
+  calls.length = 0;
+  await shown.actions[0].action();
+  assert.equal(calls[0].url, 'https://fixture.invalid/auth/v1/user');
+  assert.equal(calls[0].options.method, 'PUT');
+  assert.equal(calls[0].options.headers.Authorization, `Bearer x.${claims}.x`);
+  assert.deepEqual(JSON.parse(calls[0].options.body), { password: 'new-login-1' });
+  assert.equal(shown.title, '解鎖加密同步', 'after resetting, the runner unlocks with the unchanged sync passphrase');
+  assert.equal(sessionStore.has('runner-trainer:sync-session:v1'), true);
+  assert.equal(tabStore.size, 0, 'pending reset is cleared once the password is saved');
+
+  // An expired link explains what to do instead of failing silently, even after a reload,
+  // and drops any older unfinished reset so "重新寄信" reaches the login form.
+  tabStore.set('runner-trainer:sync-recovery:v1', JSON.stringify({ access_token: 'stale' }));
+  sessionStore.clear();
+  win.location.hash = '#error=access_denied&error_code=otp_expired&error_description=expired';
+  vm.runInContext(source, ctx);
+  vm.runInContext(source, ctx); // reload before the load handler ran
+  win.listeners.load();
+  await new Promise(resolve => setTimeout(resolve, 350));
+  assert.equal(shown.title, '重設連結無法使用');
+  await shown.actions[0].action();
+  assert.equal(shown.title, '登入跨裝置同步', 'resend goes to the login form, not a stale reset');
+  // A fresh valid link in the same tab wins over an earlier expired-link notice.
+  tabStore.set('runner-trainer:sync-recovery:v1:error', 'otp_expired');
+  win.location.hash = `#access_token=x.${claims}.x&refresh_token=r2&expires_in=3600&token_type=bearer&type=recovery`;
+  vm.runInContext(source, ctx);
+  win.listeners.load();
+  await new Promise(resolve => setTimeout(resolve, 350));
+  assert.equal(shown.title, '設定新的登入密碼');
+}
+console.log('PASS sync passphrase is stored separately and forgotten login passwords can be reset by email');
