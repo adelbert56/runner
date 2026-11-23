@@ -23,7 +23,8 @@
     locked: { title: '需要輸入同步密碼', badge: true, actions: [['輸入同步密碼', 'openTrainingSyncModal()', true]] },
     conflict: { title: '兩台裝置的資料不同', badge: true, actions: [['選擇要保留哪一份', 'TrainerSync.retry()', true]] },
     stalekey: { title: '同步密碼不符', badge: true, actions: [['重新輸入同步密碼', 'openTrainingSyncModal()', true]] },
-    signedout: { title: '未開啟同步', actions: [['登入跨裝置同步', 'openTrainingSyncModal()']] }
+    signedout: { title: '未開啟同步', actions: [['登入跨裝置同步', 'openTrainingSyncModal()']] },
+    expired: { title: '登入已過期', badge: true, actions: [['重新登入', 'openTrainingSyncModal()', true]] }
   };
 
   function config() {
@@ -106,10 +107,19 @@
     setStatus([`${syncFailureReason(error)}。資料仍在這台裝置，不會遺失。`, lastText].filter(Boolean).join(' '), 'error');
   }
 
+  // 所有自動／手動同步排成一列依序跑，避免「連回網路」與「剛存檔」兩次同步互相搶寫雲端版本。
+  let syncQueue = Promise.resolve();
+  function queueReconcile() {
+    const run = syncQueue.then(reconcile, reconcile);
+    syncQueue = run.catch(() => {});
+    return run;
+  }
+
   function retry() {
     if (!readSession() || !syncKey) return openModal();
+    window.clearTimeout(saveTimer);
     setStatus('正在比對雲端資料…', 'syncing');
-    return reconcile();
+    return queueReconcile();
   }
 
   function readSession() {
@@ -134,6 +144,7 @@
     if (!response.ok) {
       localStorage.removeItem(SESSION_KEY);
       syncKey = null;
+      setStatus('這台裝置的登入已過期，請重新登入跨裝置同步。本機資料不受影響。', 'expired');
       return null;
     }
     const nextSession = await response.json();
@@ -449,7 +460,7 @@
   function onLocalSave() {
     if (applyingRemote || !syncKey || !readSession()) return;
     window.clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(reconcile, 900);
+    saveTimer = window.setTimeout(queueReconcile, 900);
     setStatus('有新的修改，稍後自動同步…', 'syncing');
   }
 

@@ -231,10 +231,15 @@ console.log('PASS sync passphrase is stored separately and forgotten login passw
     return [];
   } };
   let mode = 'network';
+  let active = 0, maxActive = 0;
   let stored = null;
   const fetch = async (_url, options = {}) => {
     if (mode === 'network') throw new TypeError('Failed to fetch');
     if (mode === 'server') return { ok: false, status: 503, text: async () => 'unavailable' };
+    if (mode === 'expired') return { ok: false, status: 401, text: async () => 'jwt expired' };
+    active++; maxActive = Math.max(maxActive, active);
+    await new Promise(resolve => setTimeout(resolve, 5));
+    active--;
     if (!options.method) return { ok: true, status: 200, json: async () => stored ? [structuredClone(stored)] : [] };
     stored = JSON.parse(options.body);
     return { ok: true, status: 200, json: async () => [structuredClone(stored)] };
@@ -279,6 +284,20 @@ console.log('PASS sync passphrase is stored separately and forgotten login passw
   navigator.onLine = true;
   await listeners.online();
   assert.equal(ui.kind, 'ok', 'coming back online syncs again automatically');
+
+  // Coming back online while a save-triggered sync runs must not race it.
+  maxActive = 0;
+  await Promise.all([sync.retry(), sync.retry()]);
+  assert.equal(maxActive, 1, 'syncs run one at a time');
+  assert.equal(ui.kind, 'ok');
+
+  // A refresh that fails clears the session: the card must offer sign-in, not spin forever.
+  map.set('runner-trainer:sync-session:v1', JSON.stringify({ access_token: token, refresh_token: 'r' }));
+  mode = 'expired';
+  await sync.retry();
+  assert.equal(ui.kind, 'expired');
+  assert.equal(ui.badgeHidden, false);
+  assert.match(ui.actions, /重新登入/);
 
   const now = new Date();
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 21, 5);

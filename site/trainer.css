@@ -2192,3 +2192,5 @@
 @media (prefers-reduced-motion: reduce) { [data-sync-kind="syncing"] .sync-status-dot { animation: none; } }
 .plan-management .plan-workspace-tools .sync-status-actions .btn-primary { border-color: var(--c-primary); background: var(--c-primary); color: #fff; }
 .plan-management .plan-workspace-tools .sync-status-actions .btn-primary:hover { background: var(--c-primary-hover); }
+[data-sync-kind="expired"] .sync-status-dot, .sync-attention-dot[data-sync-kind="expired"] { background: var(--c-yellow); box-shadow: inset 0 0 0 1px #c99a12; }
+.plan-management .training-sync-control[data-sync-kind="expired"] { border-color: #f0dc9a; background: #fffaeb; }
