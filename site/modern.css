@@ -97,6 +97,52 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
+/* styles.css 桌機舊側欄會用 ::after 補短標籤並藏起場數，這裡一律關掉，避免「1月1月」 */
+.race-layout .month-list button .month-label::after {
+  content: none;
+}
+
+.race-layout .month-list button .month-count {
+  display: inline-flex;
+}
+
+/* 桌機：月份放左側固定欄，捲動清單時仍可一鍵切換 */
+@media (min-width: 961px) {
+  /* overflow-x: hidden 會讓 body 變成捲動容器，sticky 側欄就失效；clip 只裁切不建立捲動容器 */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  .race-layout {
+    grid-template-columns: 136px minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .race-layout .month-panel,
+  .race-layout .month-panel[style] {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+    max-height: calc(100dvh - 120px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .race-layout .month-list {
+    flex-direction: column;
+    overflow-x: visible;
+    padding: 2px;
+  }
+
+  .race-layout .month-list button {
+    justify-content: space-between;
+    width: 100%;
+    min-height: 40px;
+    border-radius: 12px;
+  }
+}
+
 /* ---------- 賽事清單：一場一行（版面 A） ---------- */
 
 .race-list {
