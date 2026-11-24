@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-24T01:41:02.246Z",
+  "generated_at": "2026-11-24T10:57:05.636Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-10-nike-caitlin-1-review",
@@ -182,26 +182,6 @@
       ]
     },
     {
-      "id": "news-bouncin-net-p-news-hot-topics-6287-nike-tuned-air-digital-printing-technology",
-      "type": "news",
-      "title": "Nike 發表全新 Tuned Air 技術 數位印刷打造新世代 Air 氣墊 解鎖更多緩震設計可能",
-      "date": "2026-11-18",
-      "date_source": "source",
-      "article_date": "2026-11-18",
-      "first_seen_at": "2026-11-19",
-      "source": "Bounce",
-      "category": "跑鞋裝備",
-      "summary": "跑者將於 2027 年底率先體驗 Tuned Air 科技。",
-      "url": "https://bouncin.net/p/news/hot-topics/6287/nike-tuned-air-digital-printing-technology",
-      "score": 22,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
-      ]
-    },
-    {
       "id": "news-bouncin-net-p-news-hot-topics-6292-caitlin-clark-nike-caitlin-1-color-changing-l",
       "type": "news",
       "title": "Nike Caitlin 1 藏有黑科技？Caitlin Clark 親自展示神奇變色鞋面",
@@ -222,43 +202,23 @@
       ]
     },
     {
-      "id": "news-kenlu-net-2026-11-adidas-harden-vol-11-rockstar-james-harden-51-points-news",
+      "id": "news-kenlu-net-2026-11-nike-gyakusou-vomero-plus-alphafly-4-leak-news",
       "type": "news",
-      "title": "選手實著 / 新鞋就是要配新紀錄，James Harden 腳踩 adidas Harden Vol. 11 ‘Rockstar’ 狂轟 51 分",
+      "title": "勘履滑手機 / 等了五年確定回歸！全新 Nike x GYAKUSOU 第二雙竟是 Vomero Plus，國外 12 月登場",
       "date": "2026-11-24",
       "date_source": "first_seen",
       "article_date": "",
       "first_seen_at": "2026-11-24",
       "source": "KENLU",
-      "category": "跑步新聞",
-      "summary": "James Harden 穿 adidas Harden Vol.11 ‘Rockstar’ 黑色配色砍下 51 分，超越 Kobe 升上 50 分場次史上第三。Harden Vol.11 預計 12 月登場、定價 160 美金，臺灣尚未公布。",
-      "url": "https://kenlu.net/2026/11/adidas-harden-vol-11-rockstar-james-harden-51-points-news/",
+      "category": "跑鞋裝備",
+      "summary": "GYAKUSOU Vomero Plus 與 Alphafly 4 現身義大利選貨店 Urbanstaroma，定價分別為 190、275 歐元，預計 12 月 11 日發售，臺灣尚未公布發售計畫。",
+      "url": "https://kenlu.net/2026/11/nike-gyakusou-vomero-plus-alphafly-4-leak-news/",
       "score": 19,
       "source_origin": "candidate",
       "published_at": "2026-11-24",
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "news-bouncin-net-p-news-new-stuff-6286-nike-mind-new-shoes-sock-moc-flyknit-slip-snea",
-      "type": "news",
-      "title": "Nike Mind 全新 4 款鞋型登場 將感官科技延伸至日常穿著",
-      "date": "2026-11-18",
-      "date_source": "source",
-      "article_date": "2026-11-18",
-      "first_seen_at": "2026-11-19",
-      "source": "Bounce",
-      "category": "跑鞋裝備",
-      "summary": "Nike 進一步透過四款全新的 Nike Mind 結合感官科學研究，滿足運動員在不同運動階段的需求。",
-      "url": "https://bouncin.net/p/news/new-stuff/6286/nike-mind-new-shoes-sock-moc-flyknit-slip-sneaker-2027",
-      "score": 18,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
       ]
     },
     {
@@ -333,26 +293,6 @@
       "category": "跑鞋裝備",
       "summary": "New Balance P350 白紅配色（型號 UHSL5B7）2026 年 11 月於臺灣 New Balance 官網發售，臺灣定價 3,680 元，整理販售店點與鞋款資訊。",
       "url": "https://kenlu.net/2026/11/new-balance-p350-uhsl5b7-release-info/",
-      "score": 15,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
-      "id": "news-kenlu-net-2026-11-reebok-question-mid-recoded-red-toe-release-info",
-      "type": "news",
-      "title": "上市速報 / 30 週年版本！Reebok Question Mid Recoded ‘Red Toe’ 臺灣販售資訊整理",
-      "date": "2026-11-16",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-16",
-      "source": "KENLU",
-      "category": "跑步新聞",
-      "summary": "Reebok Question Mid Recoded ‘Red Toe’ 30 週年版，2026 年 11 月臺灣發售，售價 NT$5,980，信義、台中、高雄門市販售。",
-      "url": "https://kenlu.net/2026/11/reebok-question-mid-recoded-red-toe-release-info/",
       "score": 15,
       "source_origin": "candidate",
       "published_at": "2026-11-24",
@@ -482,6 +422,26 @@
       ]
     },
     {
+      "id": "news-bouncin-net-p-news-new-stuff-6298-kith-star-wars-asics-gel-lyte-iii-remastered-d",
+      "type": "news",
+      "title": "Kith 攜手 STAR WARS™、ASICS 推出 GEL-LYTE III™ Remastered「Darth Vader」",
+      "date": "2026-11-24",
+      "date_source": "source",
+      "article_date": "2026-11-24",
+      "first_seen_at": "2026-11-24",
+      "source": "Bounce",
+      "category": "跑鞋裝備",
+      "summary": "重現 Ronnie Fieg 2008 年經典配色。",
+      "url": "https://bouncin.net/p/news/new-stuff/6298/kith-star-wars-asics-gel-lyte-iii-remastered-darth-vader",
+      "score": 12,
+      "source_origin": "candidate",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "Bounce"
+      ]
+    },
+    {
       "id": "news-www-don1don-com-archives-242040-momentum-run-e8-b7-91-e6-ad-a5-e9-ab-94-e9-a9-97",
       "type": "news",
       "title": "MOMENTUM RUN 跑步體驗店登場 台北台南雙站開跑 打造跑者新基地",
@@ -539,26 +499,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-243390-e7-ac-ac-12-e5-b1-86-e6-96-b0-e5-8c-97-e9-90-b5-",
-      "type": "news",
-      "title": "第 12 屆新北鐵道馬拉松接力賽來了，追火車創意接棒 2027 活動登場",
-      "date": "2026-11-20",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-20",
-      "source": "動一動",
-      "category": "賽事資訊",
-      "summary": "第12屆「新北市鐵道馬拉松接力賽」將於2027年4月18日登場，新北市政府觀光旅遊局於 11 月19 日舉辦開報記者會，同一日中午 12 時起正式開放報名，總計提供1,100隊名額，包括「變裝組」、「競賽組」及「企業團體競賽組」。",
-      "url": "https://www.don1don.com/archives/243390/%e7%ac%ac-12-%e5%b1%86%e6%96%b0%e5%8c%97%e9%90%b5%e9%81%93%e9%a6%ac%e6%8b%89%e6%9d%be%e6%8e%a5%e5%8a%9b%e8%b3%bd%e4%be%86%e4%ba%86%ef%bc%8c%e8%bf%bd%e7%81%ab%e8%bb%8a%e5%89%b5%e6%84%8f%e6%8e%a5",
-      "score": 10,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
       ]
     },
     {
@@ -642,26 +582,6 @@
       ]
     },
     {
-      "id": "news-bouncin-net-p-news-new-stuff-6285-nike-sportswear-project-ride-morpho-x-therma-f",
-      "type": "news",
-      "title": "Nike Sportswear 開啟全新篇章 Project Ride、Morpho X 與 Therma-FIT A.I.R. 三大創新產品正式亮相",
-      "date": "2026-11-18",
-      "date_source": "source",
-      "article_date": "2026-11-18",
-      "first_seen_at": "2026-11-19",
-      "source": "Bounce",
-      "category": "跑鞋裝備",
-      "summary": "Nike Sportswear 正式揭開品牌下一階段的發展方向。",
-      "url": "https://bouncin.net/p/news/new-stuff/6285/nike-sportswear-project-ride-morpho-x-therma-fit-air",
-      "score": 8,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "Bounce"
-      ]
-    },
-    {
       "id": "news-kenlu-net-2026-11-asics-winjob-working-shoes-limit-color",
       "type": "news",
       "title": "工作防護鞋也能很有個性！/ ASICS WINJOB 三款限定色打破既有框架",
@@ -679,6 +599,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-www-don1don-com-archives-243423-e4-bb-a4-e4-ba-ba-e6-b5-81-e9-80-a3-e5-bf-98-e8-",
+      "type": "news",
+      "title": "令人流連忘返的第七屆台北葡萄酒馬拉松，在美堤完美複刻尼斯的悠閒",
+      "date": "2026-11-24",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-11-24",
+      "source": "動一動",
+      "category": "賽事資訊",
+      "summary": "Taipei Wine Marathon 台北葡萄酒馬拉松於 11 月 21 日在台北美堤河濱公園悠然開跑。",
+      "url": "https://www.don1don.com/archives/243423/%e4%bb%a4%e4%ba%ba%e6%b5%81%e9%80%a3%e5%bf%98%e8%bf%94%e7%9a%84%e7%ac%ac%e4%b8%83%e5%b1%86%e5%8f%b0%e5%8c%97%e8%91%a1%e8%90%84%e9%85%92%e9%a6%ac%e6%8b%89%e6%9d%be%ef%bc%8c%e5%9c%a8%e7%be%8e%e5%a0%a4",
+      "score": 7,
+      "source_origin": "candidate",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
       ]
     },
     {
@@ -713,26 +653,6 @@
       "category": "跑步新聞",
       "summary": "第二屆亞太越野跑錦標賽（APTRC）將於 11 月 25 日在福建武夷山開幕，集結 27 個國家及地區、逾 330 位選手。中華隊首度參賽便派出 35 人，是本屆第三大代表隊。",
       "url": "https://www.don1don.com/archives/243398/%e7%ac%ac%e4%ba%8c%e5%b1%86%e4%ba%9e%e5%a4%aa%e8%b6%8a%e9%87%8e%e8%b7%91%e9%8c%a6%e6%a8%99%e8%b3%bd%ef%bd%9c%e4%b8%ad%e8%8f%af%e9%9a%8a%e9%a6%96%e5%ba%a6%e5%87%ba%e5%be%81%ef%bc%8c35-%e4%bd%8d",
-      "score": 7,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-243348-e4-be-86-e9-a6-99-e6-b8-af-e8-b6-8a-e9-87-8e-e8-",
-      "type": "news",
-      "title": "來香港越野跑吧！跑進大嶼山，看看高樓之外的香港",
-      "date": "2026-11-19",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-19",
-      "source": "動一動",
-      "category": "跑步新聞",
-      "summary": "提起香港地景，你首先想到什麼呢？是維多利亞港旁林立的玻璃帷幕高樓？還是綿長不絕的石階？其實這座充滿行人與熱鬧氛圍的城巿，有將近四分之三的土地是郊野，包括公園、沙灘、離島及林木茂密的山谷，以及四通八達的山徑步道。大嶼山的反差更加明顯。",
-      "url": "https://www.don1don.com/archives/243348/%e4%be%86%e9%a6%99%e6%b8%af%e8%b6%8a%e9%87%8e%e8%b7%91%e5%90%a7%ef%bc%81%e8%b7%91%e9%80%b2%e5%a4%a7%e5%b6%bc%e5%b1%b1%ef%bc%8c%e7%9c%8b%e7%9c%8b%e9%ab%98%e6%a8%93%e4%b9%8b%e5%a4%96%e7%9a%84%e9%a6%99",
       "score": 7,
       "source_origin": "candidate",
       "published_at": "2026-11-24",
@@ -842,6 +762,66 @@
       ]
     },
     {
+      "id": "news-kenlu-net-2026-11-nikola-jokic-debut-361-joker-3",
+      "type": "news",
+      "title": "新聞分享 / Nikola Jokić 著用 Joker 3 征戰賽場，361° 設計師場下接力亮相皮鞋版",
+      "date": "2026-11-24",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-11-24",
+      "source": "KENLU",
+      "category": "跑步新聞",
+      "summary": "新聞分享 / Nikola Jokić 著用 Joker 3 征戰賽場，361° 設計師場下接力亮相皮鞋版。",
+      "url": "https://kenlu.net/2026/11/nikola-jokic-debut-361-joker-3/",
+      "score": 6,
+      "source_origin": "candidate",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
+      "id": "news-www-don1don-com-archives-243467-e5-be-9e-e6-9d-be-e9-b6-b4-e8-b7-91-e4-b8-8a-e5-",
+      "type": "news",
+      "title": "從松鶴跑上八仙山 2027 TNF100 探索谷關之美",
+      "date": "2026-11-24",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-11-24",
+      "source": "動一動",
+      "category": "跑步新聞",
+      "summary": "從大甲溪畔的泰雅部落出發，循著昔日的保線路與林道進山頭。2027 年 4 月 24 日至 25 日， TNF100 在臺中和平運動公園登場，從每人 4.1 公里的三人接力，到累計爬升 3,740 公尺的 60公里挑戰，追求競速的越野跑者、有意挑戰自我的越野玩家可。",
+      "url": "https://www.don1don.com/archives/243467/%e5%be%9e%e6%9d%be%e9%b6%b4%e8%b7%91%e4%b8%8a%e5%85%ab%e4%bb%99%e5%b1%b1-2027-tnf100-%e6%8e%a2%e7%b4%a2%e8%b0%b7%e9%97%9c%e4%b9%8b%e7%be%8e",
+      "score": 6,
+      "source_origin": "candidate",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
+      "id": "news-www-don1don-com-archives-243479-e6-9d-b1-e5-90-b3-e8-b6-85-e9-a6-ac27-e5-b9-b4-e",
+      "type": "news",
+      "title": "東吳超馬27年 聯手故宮跨界特展為賽事倒數領跑",
+      "date": "2026-11-24",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-11-24",
+      "source": "動一動",
+      "category": "賽事資訊",
+      "summary": "2026東吳國際超級馬拉松將於12月5日至6日在東吳大學外雙溪校區溪望操場熱血開跑！今年東吳大學與國立故宮博物院再續前緣，共同策辦「藝動雙溪—東吳×故宮奔騰無界特展」。即日起至12月11日，以「金牌賽事、跨域合作、性別平權、慈善公益、臺灣之光」五大主題，呈現東吳。",
+      "url": "https://www.don1don.com/archives/243479/%e6%9d%b1%e5%90%b3%e8%b6%85%e9%a6%ac27%e5%b9%b4-%e8%81%af%e6%89%8b%e6%95%85%e5%ae%ae%e8%b7%a8%e7%95%8c%e7%89%b9%e5%b1%95%e7%82%ba%e8%b3%bd%e4%ba%8b%e5%80%92%e6%95%b8%e9%a0%98%e8%b7%91",
+      "score": 6,
+      "source_origin": "candidate",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "動一動"
+      ]
+    },
+    {
       "id": "news-www-don1don-com-archives-243088-str-runcare-e8-b7-91-e8-80-85-e5-82-b7-e7-97-9b-",
       "type": "news",
       "title": "STR RunCare 跑者傷痛 AI 上線｜逾 6 成跑者同一部位反覆出狀況，30 題幫你判斷該找誰",
@@ -899,6 +879,26 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
+      ]
+    },
+    {
+      "id": "news-irsports-com-tw-w-bd-1575",
+      "type": "news",
+      "title": "IR跑步科學｜賽前三週，跑量要怎麼減？ | 部落格 | IR SPORTS 跑創運動",
+      "date": "2026-11-24",
+      "date_source": "source",
+      "article_date": "2026-11-24",
+      "first_seen_at": "2026-11-24",
+      "source": "IR SPORTS",
+      "category": "訓練",
+      "summary": "馬拉松進步不只靠高強度，穩定低強度跑量才是地基。安排課表時，要先確保恢復能力跟得上。",
+      "url": "https://irsports.com.tw/w/bd/1575",
+      "score": 4,
+      "source_origin": "candidate",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "IR SPORTS"
       ]
     },
     {
@@ -979,26 +979,6 @@
       "publish_status": "published",
       "source_aliases": [
         "運動科學網"
-      ]
-    },
-    {
-      "id": "news-irsports-com-tw-w-bd-1570",
-      "type": "news",
-      "title": "學員故事｜工程師 Uno 跑了三年，也讓老婆從「一棵樹就喊停」到主動約跑 | 部落格 | IR SPORTS 跑創運動",
-      "date": "2026-09-02",
-      "date_source": "source",
-      "article_date": "2026-09-02",
-      "first_seen_at": "2026-08-25",
-      "source": "IR SPORTS",
-      "category": "跑步新聞",
-      "summary": "初半馬故事適合作為新手備賽參考，重點在循序累積、穩定完成課表與避免臨時硬拉長跑。",
-      "url": "https://irsports.com.tw/w/bd/1570",
-      "score": 3,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "IR SPORTS"
       ]
     },
     {
@@ -1094,6 +1074,26 @@
       "summary": "New Balance FuelCell SC Elite v6、Ellipse 紐約馬拉松限定配色臺灣現已發售，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
       "url": "https://kenlu.net/2026/09/new-balance-2026-nyc-marathon-shoes-release-info/",
       "score": 28,
+      "source_origin": "archive",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
+    },
+    {
+      "id": "news-kenlu-net-2026-08-adidas-harden-vol-1-restomod-pioneer-release-info",
+      "type": "news",
+      "title": "上市速報 / 中底改用 HYPERBOOST 科技 adidas Harden Vol. 1 Restomod ‘Pioneer’ 臺灣販售資整理",
+      "date": "2026-08-27",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-08-27",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "adidas Harden Vol.1 Restomod ‘Pioneer’ 臺灣現已發售，為大家整理已經公布販售資訊的店點，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
+      "url": "https://kenlu.net/2026/08/adidas-harden-vol-1-restomod-pioneer-release-info/",
+      "score": 26,
       "source_origin": "archive",
       "published_at": "2026-11-24",
       "publish_status": "published"
@@ -1239,26 +1239,6 @@
       ]
     },
     {
-      "id": "shoe-kenlu-net-2026-11-adidas-adizero-adios-pro-evo-3-taiwan-release-official-news",
-      "type": "shoe",
-      "title": "官方新聞 / adidas ADIZERO ADIOS PRO EVO 3 臺灣發售消息公布！破二跑鞋 11 月 24 日上市",
-      "date": "2026-11-24",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-24",
-      "source": "KENLU",
-      "category": "跑鞋新品",
-      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://kenlu.net/2026/11/adidas-adizero-adios-pro-evo-3-taiwan-release-official-news/",
-      "score": 25,
-      "source_origin": "candidate",
-      "published_at": "2026-11-24",
-      "publish_status": "published",
-      "source_aliases": [
-        "KENLU"
-      ]
-    },
-    {
       "id": "shoe-kenlu-net-2026-10-asics-gel-slowcush-review-by-hung-yu",
       "type": "shoe",
       "title": "勘履鞋評 / Team ASICS 周鴻宇實測 GEL-SLOWCUSH：「 在不需要跑快的日子裡，可以更舒服完成訓練」",
@@ -1379,23 +1359,23 @@
       ]
     },
     {
-      "id": "shoe-global-hk01-com-e8-b7-91-e6-ad-a5-60412868-e8-b7-91-e9-9e-8b-e6-8e-a8-e8-8d-90-a",
+      "id": "shoe-bouncin-net-p-news-new-stuff-6296-adidas-adizero-adios-pro-evo-3-release-taiwan",
       "type": "shoe",
-      "title": "跑鞋推荐｜adidas PRO 5实测 内歛推进力宜当高阶万用训练鞋",
-      "date": "2026-11-22",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-22",
-      "source": "HK01 跑步",
-      "category": "跑鞋新品",
+      "title": "adidas ADIZERO ADIOS PRO EVO 3 正式登台！97 克極致輕量競速跑鞋 11/24 限量發售",
+      "date": "2026-11-24",
+      "date_source": "source",
+      "article_date": "2026-11-24",
+      "first_seen_at": "2026-11-24",
+      "source": "Bounce",
+      "category": "競速",
       "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
-      "url": "https://global.hk01.com/%E8%B7%91%E6%AD%A5/60412868/%E8%B7%91%E9%9E%8B%E6%8E%A8%E8%8D%90-adidas-pro-5%E5%AE%9E%E6%B5%8B-%E5%86%85%E6%AD%9B%E6%8E%A8%E8%BF%9B%E5%8A%9B%E5%AE%9C%E5%BD%93%E9%AB%98%E9%98%B6%E4%B8%87%E7%94%A8%E8%AE%AD%E7%BB%83%E9%9E%8B",
-      "score": 17,
+      "url": "https://bouncin.net/p/news/new-stuff/6296/adidas-adizero-adios-pro-evo-3-release-taiwan",
+      "score": 18,
       "source_origin": "candidate",
       "published_at": "2026-11-24",
       "publish_status": "published",
       "source_aliases": [
-        "HK01 跑步"
+        "Bounce"
       ]
     },
     {
@@ -1556,6 +1536,26 @@
       "publish_status": "published",
       "source_aliases": [
         "Bounce"
+      ]
+    },
+    {
+      "id": "shoe-kenlu-net-2026-11-adidas-adizero-adios-pro-evo-3-taiwan-release-official-news",
+      "type": "shoe",
+      "title": "官方新聞 / adidas ADIZERO ADIOS PRO EVO 3 臺灣發售消息公布！破二跑鞋 11 月 24 日上市",
+      "date": "2026-11-24",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-11-24",
+      "source": "KENLU",
+      "category": "跑鞋新品",
+      "summary": "年度跑鞋整理適合用來掌握新品方向，但購買前仍要回到用途、腳感、訓練課表與預算判斷。",
+      "url": "https://kenlu.net/2026/11/adidas-adizero-adios-pro-evo-3-taiwan-release-official-news/",
+      "score": 24,
+      "source_origin": "archive",
+      "published_at": "2026-11-24",
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
       ]
     },
     {
