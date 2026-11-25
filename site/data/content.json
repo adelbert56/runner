@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-25T04:27:47.739Z",
+  "generated_at": "2026-11-25T05:33:52.603Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-10-nike-caitlin-1-review",
@@ -479,26 +479,6 @@
       "publish_status": "published",
       "source_aliases": [
         "KENLU"
-      ]
-    },
-    {
-      "id": "news-www-don1don-com-archives-243390-e7-ac-ac-12-e5-b1-86-e6-96-b0-e5-8c-97-e9-90-b5-",
-      "type": "news",
-      "title": "第 12 屆新北鐵道馬拉松接力賽來了，追火車創意接棒 2027 活動登場",
-      "date": "2026-11-20",
-      "date_source": "first_seen",
-      "article_date": "",
-      "first_seen_at": "2026-11-20",
-      "source": "動一動",
-      "category": "賽事資訊",
-      "summary": "第12屆「新北市鐵道馬拉松接力賽」將於2027年4月18日登場，新北市政府觀光旅遊局於 11 月19 日舉辦開報記者會，同一日中午 12 時起正式開放報名，總計提供1,100隊名額，包括「變裝組」、「競賽組」及「企業團體競賽組」。",
-      "url": "https://www.don1don.com/archives/243390/%e7%ac%ac-12-%e5%b1%86%e6%96%b0%e5%8c%97%e9%90%b5%e9%81%93%e9%a6%ac%e6%8b%89%e6%9d%be%e6%8e%a5%e5%8a%9b%e8%b3%bd%e4%be%86%e4%ba%86%ef%bc%8c%e8%bf%bd%e7%81%ab%e8%bb%8a%e5%89%b5%e6%84%8f%e6%8e%a5",
-      "score": 10,
-      "source_origin": "candidate",
-      "published_at": "2026-11-25",
-      "publish_status": "published",
-      "source_aliases": [
-        "動一動"
       ]
     },
     {
@@ -1100,6 +1080,23 @@
       "source_aliases": [
         "KENLU"
       ]
+    },
+    {
+      "id": "news-kenlu-net-2026-08-adidas-harden-vol-1-restomod-pioneer-release-info",
+      "type": "news",
+      "title": "上市速報 / 中底改用 HYPERBOOST 科技 adidas Harden Vol. 1 Restomod ‘Pioneer’ 臺灣販售資整理",
+      "date": "2026-08-27",
+      "date_source": "first_seen",
+      "article_date": "",
+      "first_seen_at": "2026-08-27",
+      "source": "KENLU",
+      "category": "跑鞋裝備",
+      "summary": "adidas Harden Vol.1 Restomod ‘Pioneer’ 臺灣現已發售，為大家整理已經公布販售資訊的店點，為大家整理已經公布販售資訊的店點，實際販售方式機制與地點異動請以店家公告為準，更多鞋款販售消息也可參考站內的上市速報。",
+      "url": "https://kenlu.net/2026/08/adidas-harden-vol-1-restomod-pioneer-release-info/",
+      "score": 26,
+      "source_origin": "archive",
+      "published_at": "2026-11-25",
+      "publish_status": "published"
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-i-ran-40-miles-in-the-brooks-hyperion-max-4-h",
