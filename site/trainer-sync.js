@@ -16,7 +16,7 @@
   let syncKind = 'signedout';
   // 同步狀態種類：標題、是否在「管理」旁顯示提醒點，以及下一步按鈕。
   const SYNC_KINDS = {
-    ok: { title: '已同步', actions: [['立即同步', 'TrainerSync.retry()'], ['設定', 'openTrainingSyncModal()']] },
+    ok: { title: '跨裝置資料已同步', actions: [['立即同步', 'TrainerSync.retry()'], ['設定', 'openTrainingSyncModal()']] },
     syncing: { title: '同步中…', actions: [] },
     offline: { title: '目前離線', badge: true, actions: [] },
     error: { title: '同步失敗', badge: true, actions: [['重試', 'TrainerSync.retry()', true], ['設定', 'openTrainingSyncModal()']] },

@@ -1,3 +1,5 @@
+import { hasGarminSyncEvidence } from "./lib/garmin-sync-evidence.mjs";
+
 const OWNER_REPO = process.env.GITHUB_REPOSITORY || "adelbert56/runner";
 const GH_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
 const BRANCH = process.env.ORCHESTRATOR_BRANCH || "main";
@@ -105,17 +107,26 @@ async function recentRuns(workflow) {
   return data.workflow_runs || [];
 }
 
-function hasRunAfterSlot(runs, startUtc) {
-  return runs.some((run) => {
+async function hasRunAfterSlot(task, runs, startUtc) {
+  for (const run of runs) {
     const createdAt = new Date(run.created_at);
     if (createdAt < startUtc) {
-      return false;
+      continue;
     }
     if (run.status === "queued" || run.status === "in_progress" || run.status === "waiting") {
       return true;
     }
-    return run.status === "completed" && run.conclusion === "success";
-  });
+    if (run.status !== "completed" || run.conclusion !== "success") continue;
+    if (task.workflow !== "garmin-sync.yml") return true;
+    const attempt = run.run_attempt ? `/attempts/${run.run_attempt}` : "";
+    try {
+      const { jobs } = await gh(`/actions/runs/${run.id}${attempt}/jobs`);
+      if (hasGarminSyncEvidence(jobs)) return true;
+    } catch {
+      console.warn(`Could not verify Garmin run ${run.id}; checking other runs for completed Garmin sync.`);
+    }
+  }
+  return false;
 }
 
 async function dispatch(workflow) {
@@ -135,7 +146,7 @@ for (const task of TASKS) {
   }
 
   const runs = CAN_READ_GITHUB ? await recentRuns(task.workflow) : [];
-  if (CAN_READ_GITHUB && hasRunAfterSlot(runs, slot.startUtc)) {
+  if (CAN_READ_GITHUB && await hasRunAfterSlot(task, runs, slot.startUtc)) {
     decisions.push(`${task.name}: already covered since ${slot.startUtc.toISOString()}`);
     continue;
   }

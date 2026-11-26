@@ -446,7 +446,7 @@ function trainingDataHealth(plan = appData.plan || []) {
     // the current week. Do not keep an old Sunday run as a permanent alert.
     return entry.date >= currentWeekStart && day?.type === 'rest' && !summary.creditedMakeupDates.has(entry.date);
   }).length;
-  const asOf = coachReviewData?.autopilot?.asOf || coachReviewData?.analyticsUpdatedAt || coachReviewData?.updatedAt;
+  const asOf = garminDataUpdatedAt(coachReviewData);
   const syncAge = daysSinceDate(asOf);
   const issues = [];
   if (missedWithoutReason) issues.push(`${missedWithoutReason} 筆跳過尚未記錄原因`);
@@ -1214,6 +1214,12 @@ function setGarminCompletionRule() {
   switchPlanTab(activeTab);
 }
 
+function garminDataUpdatedAt(review) {
+  if (review?.analyticsStatus === 'missing') return null;
+  const date = review?.analyticsUpdatedAt || review?.syncedAt;
+  return /^\d{4}-\d{2}-\d{2}$/.test(date || '') ? date : null;
+}
+
 function coachRunStatus() {
   const sync = appData.profile?.coachSync || {};
   if (sync.frequency === 'manual') return { level: 'ok', text: '手動更新排程，無自動時間可比對' };
@@ -1231,20 +1237,18 @@ function coachRunStatus() {
     scheduled.setDate(scheduled.getDate() - diff);
   }
   if (scheduled > now) scheduled.setDate(scheduled.getDate() - (scheduledDow !== null ? 7 : 1));
-  // syncedAt＝這份加密檔最後一次被排程「成功建置」的日期（每次同步都會更新，含每天的 Garmin-only 排程）；
-  // coachReviewData.updatedAt 是人工週報自己填的日期，只有手動寫新週報才會變，用它來判斷「排程有沒有跑」會誤判。
-  const updatedAt = coachReviewData?.syncedAt || coachReviewData?.updatedAt || coachReviewData?.autopilot?.asOf;
+  const updatedAt = garminDataUpdatedAt(coachReviewData);
   const scheduledDay = new Date(scheduled);
   scheduledDay.setHours(0, 0, 0, 0);
   const isFresh = updatedAt && new Date(`${updatedAt}T00:00:00`) >= scheduledDay;
-  if (isFresh) return { level: 'ok', text: '✅ 本次排程已完成' };
+  if (isFresh) return { level: 'ok', text: '✅ Garmin 實跑資料已更新' };
   const minsSince = Math.round((now - scheduled) / 60000);
   if (minsSince <= 20) return { level: 'running', text: `⏳ 產生中（通常 5–20 分鐘，已 ${Math.max(minsSince, 0)} 分）` };
   if (minsSince <= 45) return { level: 'delayed', text: `⏳ 延遲中（已超過預計時間 ${minsSince} 分）` };
-  if (coachReviewData?.analyticsStatus === 'missing') {
-    return { level: 'failed', text: '⚠️ Garmin 從未同步成功過，請確認帳號授權或手動觸發一次同步', actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
+  if (!updatedAt) {
+    return { level: 'failed', text: '⚠️ 尚無 Garmin 更新紀錄，請確認帳號授權或手動同步', actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
   }
-  return { level: 'failed', text: `⚠️ 可能失敗，已超過 ${minsSince} 分鐘未更新（上次成功同步：${updatedAt || '未知'}）`, actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
+  return { level: 'failed', text: `⚠️ Garmin 已逾預定檢查時間 ${minsSince} 分鐘（上次更新：${updatedAt}）`, actionUrl: 'https://github.com/adelbert56/runner/actions/workflows/garmin-sync.yml', actionLabel: '手動補跑 Garmin 同步' };
 }
 
 function currentTrainingGoalLabel() {
@@ -2491,10 +2495,11 @@ function renderCoachReviewPanel() {
   const decisionDetails = resolveWeeklyDecision(buildContext(), decisionWeek);
   const upcomingWeekStart = appData.plan?.[currentWeek]?.days?.[0]?.dateStr || '';
   const reviewWeekStart = nextWeek.weekStart || '';
-  const garminUpdatedAt = coachReviewData.analyticsUpdatedAt || coachReviewData.syncedAt || coachReviewData.updatedAt;
-  const reviewFreshness = garminUpdatedAt === coachReviewData.updatedAt
-    ? `Garmin 資料截至 ${garminUpdatedAt}`
-    : `Garmin 資料截至 ${garminUpdatedAt} · 人工週報 ${coachReviewData.updatedAt}`;
+  const garminUpdatedAt = garminDataUpdatedAt(coachReviewData);
+  const reviewFreshness = [
+    garminUpdatedAt ? `Garmin 資料截至 ${garminUpdatedAt}` : '尚無 Garmin 更新日期',
+    coachReviewData.updatedAt && garminUpdatedAt !== coachReviewData.updatedAt ? `人工週報 ${coachReviewData.updatedAt}` : '',
+  ].filter(Boolean).join(' · ');
   // 同一天的同一段分析文字會被雲端與本機各記一次，去重後才不會整頁都是同樣的句子
   const noteEntries = [...(coachReviewData.history || []), ...(appData.garminAnalysisHistory || [])]
     .filter((item) => item?.summary)

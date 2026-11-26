@@ -74,6 +74,23 @@ vm.createContext(garminRunnableSandbox);
 vm.runInContext(extractFunction(trainerRenderJs, "garminDayHasRunnableWork"), garminRunnableSandbox);
 const { garminDayHasRunnableWork } = garminRunnableSandbox;
 
+class GarminStatusDate extends Date {
+  constructor(...args) {
+    super(...(args.length ? args : ["2026-11-26T10:30:00"]));
+  }
+}
+const garminStatusSandbox = { Date: GarminStatusDate, appData: { profile: {} } };
+vm.createContext(garminStatusSandbox);
+vm.runInContext(["garminDataUpdatedAt", "coachRunStatus"].map((name) => extractFunction(trainerRenderJs, name)).join("\n"), garminStatusSandbox);
+const garminRunStatus = (review) => {
+  garminStatusSandbox.coachReviewData = review;
+  return garminStatusSandbox.coachRunStatus();
+};
+assertEqual(garminRunStatus({ updatedAt: "2026-11-26", analyticsUpdatedAt: "2026-11-23" }).level, "failed", "a fresh editorial review cannot mask stale Garmin data");
+assertEqual(garminRunStatus({ updatedAt: "2026-11-23", analyticsUpdatedAt: "2026-11-26" }).level, "ok", "fresh Garmin data clears the overdue badge independently of the editorial review");
+assertEqual(garminRunStatus({ updatedAt: "2026-11-26", analyticsStatus: "missing" }).level, "failed", "missing Garmin data cannot pass as synced");
+assertEqual(garminRunStatus({ syncedAt: "2026-11-26" }).level, "ok", "legacy Garmin sync timestamps are accepted");
+
 const structureSandbox = {};
 vm.createContext(structureSandbox);
 vm.runInContext(extractFunction(trainerPlanJs, "buildGarminWorkoutStructure"), structureSandbox);

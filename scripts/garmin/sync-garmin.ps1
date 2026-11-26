@@ -13,6 +13,7 @@ $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $statusPath = Join-Path $repoRoot "runner\訓練\garmin-sync-status.json"
 $fetchScript = Join-Path $repoRoot "scripts\garmin\fetch_garmin.py"
 $reviewScript = Join-Path $repoRoot "scripts\build-training-review.mjs"
+$projectPython = Join-Path $repoRoot ".venv\Scripts\python.exe"
 
 function Write-SyncStatus([string]$Status, [string]$Message) {
     $payload = [ordered]@{
@@ -25,11 +26,25 @@ function Write-SyncStatus([string]$Status, [string]$Message) {
 
 try {
     Set-Location -LiteralPath $repoRoot
-    $env:UV_CACHE_DIR = Join-Path $env:TEMP "runner-uv-cache"
-    & uv run python $fetchScript --days $Days --recovery-days $RecoveryDays --non-interactive
+    $uv = Get-Command uv -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($uv) {
+        $pythonCommand = $uv.Source
+        $pythonArgs = @("run", "python")
+        $env:UV_CACHE_DIR = Join-Path $env:TEMP "runner-uv-cache"
+    }
+    elseif (Test-Path -LiteralPath $projectPython -PathType Leaf) {
+        $pythonCommand = $projectPython
+        $pythonArgs = @()
+    }
+    else {
+        throw "Runner needs uv on PATH or a configured .venv\Scripts\python.exe to sync Garmin activities. Run uv sync from the Runner folder after installing uv."
+    }
+
+    & $pythonCommand @pythonArgs $fetchScript --days $Days --recovery-days $RecoveryDays --non-interactive
     $fetchExitCode = $LASTEXITCODE
     if ($fetchExitCode -eq 3) {
-        throw "Garmin token is unavailable or expired. Run 'uv run python scripts/garmin/fetch_garmin.py' once and complete sign-in, then the scheduled sync will resume."
+        $interactiveCommand = if ($uv) { "uv run python" } else { ".\.venv\Scripts\python.exe" }
+        throw "Garmin token is unavailable or expired. Run '$interactiveCommand scripts/garmin/fetch_garmin.py' once and complete sign-in, then the scheduled sync will resume."
     }
     if ($fetchExitCode -ne 0) {
         throw "Garmin fetch exited with code $fetchExitCode"

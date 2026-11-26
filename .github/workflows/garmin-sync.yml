@@ -23,26 +23,23 @@ jobs:
       GARMIN_TOKENSTORE_B64: ${{ secrets.GARMIN_TOKENSTORE_B64 }}
       TRAINING_REVIEW_KEY: ${{ secrets.TRAINING_REVIEW_KEY }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
       - name: Check recent sync guard
         id: sync-guard
         env:
           GH_TOKEN: ${{ github.token }}
           CURRENT_RUN_ID: ${{ github.run_id }}
-          EVENT_NAME: ${{ github.event_name }}
-          REPOSITORY: ${{ github.repository }}
-        run: |
-          if [ "$EVENT_NAME" != "schedule" ]; then
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          runs_json="$(gh run list --repo "$REPOSITORY" --workflow garmin-sync.yml --branch main --limit 30 --json databaseId,createdAt,status,conclusion)"
-          prior_count="$(printf '%s' "$runs_json" | jq --argjson current "$CURRENT_RUN_ID" '[.[] | select(.databaseId != $current) | select((now - (.createdAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) <= 72000) | select((.conclusion == "success") or (.status == "in_progress") or (.status == "queued"))] | length')"
-          if [ "$prior_count" -gt 0 ]; then
-            echo "A Garmin sync already succeeded or is active within 20 hours; skipping this backup slot."
-            echo "should_run=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-          fi
+        run: node scripts/garmin-sync-guard.mjs
 
       - name: Check required secrets
         if: steps.sync-guard.outputs.should_run == 'true'
@@ -51,19 +48,6 @@ jobs:
             echo "GARMIN_TOKENSTORE_B64 and TRAINING_REVIEW_KEY must be configured as repository secrets." >&2
             exit 1
           fi
-
-      - name: Checkout
-        if: steps.sync-guard.outputs.should_run == 'true'
-        uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node
-        if: steps.sync-guard.outputs.should_run == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-          cache: npm
 
       - name: Setup Python
         if: steps.sync-guard.outputs.should_run == 'true'

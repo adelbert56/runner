@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { hasGarminSyncEvidence } from "./lib/garmin-sync-evidence.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const checks = [];
@@ -429,6 +430,14 @@ assertCheck(pagesWorkflow.includes("actions/setup-node@v6"), "Pages deploy insta
 assertCheck(pagesWorkflow.includes('node-version: "22"'), "Pages deploy uses the shared Node version");
 assertCheck(pagesWorkflow.includes("npm run announcements:build") && pagesWorkflow.includes("npm run automation:health"), "Pages deploy rebuilds derived site data");
 assertCheck(garminWorkflow.includes("run: node scripts/build-training-review.mjs") && garminWorkflow.includes("expires an old menu"), "Garmin CI refreshes the current Garmin week and expires stale encrypted coach menus");
+const garminJob = (fetch, build, conclusion = "success") => ({ conclusion, steps: [
+  { name: "Fetch Garmin running activities", conclusion: fetch },
+  { name: "Build encrypted training review", conclusion: build },
+] });
+assertCheck(hasGarminSyncEvidence([garminJob("success", "success")]), "Garmin fetch and review both succeeded");
+assertCheck(!hasGarminSyncEvidence([garminJob("skipped", "skipped")]), "a green Garmin guard-only run does not count as a sync");
+assertCheck(!hasGarminSyncEvidence([garminJob("success", "failure", "failure")]), "a Garmin fetch with a failed review does not suppress a retry");
+assertCheck(!hasGarminSyncEvidence([garminJob("success", "success", "failure")]), "a failure after Garmin fetch and review preserves the retry path");
 assertCheck(trainingReviewBuildScript.includes("async function decrypt") && trainingReviewBuildScript.includes("preserving the existing encrypted coach plan") && trainingReviewBuildScript.includes('TRAINING_REVIEW_ALLOW_GARMIN_ONLY'), "training review builder reuses the encrypted coach plan and requires explicit opt-in before Garmin-only fallback data");
 
 for (const [name, workflow] of [
