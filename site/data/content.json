@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T02:55:30.440Z",
+  "generated_at": "2026-11-26T03:15:25.353Z",
   "items": [
     {
       "id": "news-kenlu-net-2026-10-nike-caitlin-1-review",
@@ -1076,7 +1076,10 @@
       "score": 25,
       "source_origin": "archive",
       "published_at": "2026-11-26",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "Bounce"
+      ]
     },
     {
       "id": "news-kenlu-net-2026-09-brooks-road-to-sub4-official-news",
@@ -1093,7 +1096,10 @@
       "score": 24,
       "source_origin": "archive",
       "published_at": "2026-11-26",
-      "publish_status": "published"
+      "publish_status": "published",
+      "source_aliases": [
+        "KENLU"
+      ]
     },
     {
       "id": "news-www-tomsguide-com-wellness-running-i-ran-40-miles-in-the-brooks-hyperion-max-4-h",

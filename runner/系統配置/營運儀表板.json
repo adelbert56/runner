@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T02:55:30.784Z",
+  "generated_at": "2026-11-26T03:15:25.907Z",
   "basis_date": "2026-11-26",
   "races": {
     "total": 77,
@@ -54,7 +54,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 53,
+        "consecutive_failures": 54,
         "base_priority": 5,
         "effective_priority": 4,
         "error_kind": "http",
@@ -79,7 +79,7 @@
         "source_type": "跑鞋新品 / 跑步專題",
         "status": "穩定",
         "ok": true,
-        "candidate_count": 16,
+        "candidate_count": 15,
         "consecutive_failures": 0,
         "base_priority": 5,
         "effective_priority": 6,
@@ -146,7 +146,7 @@
         "status": "需補強",
         "ok": false,
         "candidate_count": 0,
-        "consecutive_failures": 23,
+        "consecutive_failures": 24,
         "base_priority": 2,
         "effective_priority": 1,
         "error_kind": "unknown",
