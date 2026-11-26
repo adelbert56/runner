@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T13:46:58.479Z",
+  "generated_at": "2026-11-26T14:02:00.569Z",
   "basis_date": "2026-11-26",
   "items": [
     {
@@ -24,10 +24,10 @@
     },
     {
       "platform": "Lohas",
-      "total": 14,
+      "total": 15,
       "official_direct": 13,
-      "verified": 14,
-      "missing": 2,
+      "verified": 15,
+      "missing": 3,
       "opened_gap": 0,
       "date_anomaly": 0,
       "due_now": 0,
@@ -36,10 +36,10 @@
         "2026年FUN電多巴胺路跑嘉年華",
         "2026 臺中國際馬拉松-酷城市．酷運動 水岸花都"
       ],
-      "complete_rate": "86%",
-      "official_direct_rate": "93%",
+      "complete_rate": "80%",
+      "official_direct_rate": "87%",
       "verified_rate": "100%",
-      "score": 93,
+      "score": 90,
       "status": "穩定"
     },
     {
