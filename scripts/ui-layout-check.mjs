@@ -326,7 +326,8 @@ async function assertTrainerReport(page, viewportName) {
         fixture.innerHTML = renderFitnessProjectionCard();
         const updated = document.createElement('div');
         coachRunRecords = () => [...runs, {date: relativeDate(1), km: 17, durationMin: 124},
-          ...[4, 1, 0].map(days => ({date: relativeDate(days), km: 6, durationMin: 40, hr: 140}))];
+          // Today's forecast can exclude a same-day run from the easy-pace baseline.
+          ...[5, 4, 1].map(days => ({date: relativeDate(days), km: 6, durationMin: 40, hr: 140}))];
         updated.innerHTML = renderFitnessProjectionCard();
         if (updated.querySelector('strong').textContent === fixture.querySelector('strong').textContent
           || !updated.textContent.includes('近期已有長距離實跑')) throw new Error('new Garmin records must update the estimate and coach direction');
