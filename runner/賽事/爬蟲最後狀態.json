@@ -1,6 +1,6 @@
 {
-  "scrape_date": "2026-11-26 11:24",
-  "added": 1,
+  "scrape_date": "2026-11-26 12:14",
+  "added": 0,
   "updated": 0,
   "total": 78,
   "sources": [
@@ -9,15 +9,21 @@
     "台灣越野跑協會",
     "跑者廣場全國賽會"
   ],
-  "errors": [],
-  "has_errors": false,
-  "enrichment_errors": [],
-  "enrichment_blocked": [
-    "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: parse failed (bot_gate: bao-ming returned a security challenge page)",
-    "2026 Miaoli Fun Young！跑酷越野障礙賽||2026-12-19: bao-ming: parse failed (bot_gate: bao-ming returned a security challenge page)",
-    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: parse failed (bot_gate: bao-ming returned a security challenge page)",
-    "2027 浪漫台三~戀戀大湖草莓文化嘉年華馬拉松||2027-02-27: bao-ming: parse failed (bot_gate: bao-ming returned a security challenge page)",
-    "2027 The North Face 100 谷關越野挑戰賽||2027-04-25: bao-ming: parse failed (bot_gate: bao-ming returned a security challenge page)"
+  "errors": [
+    "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4e945010>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2026 Miaoli Fun Young！跑酷越野障礙賽||2026-12-19: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4e817a90>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4e0d3290>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2027 浪漫台三~戀戀大湖草莓文化嘉年華馬拉松||2027-02-27: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4d9a1a10>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2027 The North Face 100 谷關越野挑戰賽||2027-04-25: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4d533b10>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))"
   ],
-  "has_enrichment_errors": false
+  "has_errors": true,
+  "enrichment_errors": [
+    "國立臺灣體育運動大學第34屆駱駝盃路跑賽||2026-11-21: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4e945010>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2026 Miaoli Fun Young！跑酷越野障礙賽||2026-12-19: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4e817a90>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2027 第九屆龍虎鳳越野||2027-01-09: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4e0d3290>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2027 浪漫台三~戀戀大湖草莓文化嘉年華馬拉松||2027-02-27: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4d9a1a10>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))",
+    "2027 The North Face 100 谷關越野挑戰賽||2027-04-25: bao-ming: HTTPSConnectionPool(host='sv.e-better.com.tw', port=443): Max retries exceeded with url: /verify?s=bao-ming.com (Caused by ConnectTimeoutError(<HTTPSConnection(host='sv.e-better.com.tw', port=443) at 0x74dd4d533b10>, 'Connection to sv.e-better.com.tw timed out. (connect timeout=45)'))"
+  ],
+  "enrichment_blocked": [],
+  "has_enrichment_errors": true
 }

@@ -162,84 +162,6 @@
     }
   },
   {
-    "race_id": "ae18f392-6659-4054-877b-45345b88554a",
-    "race_name": "2027 第八屆BC臺灣柏釧公益路跑",
-    "race_date": "2027-04-10",
-    "race_county": "彰化縣",
-    "registration_opens_at": "",
-    "registration_deadline": "",
-    "registration_status": "未知",
-    "source_platform": "Lohas",
-    "is_official_direct": false,
-    "priority_score": 14,
-    "tracking": {
-      "status": "monitor_monthly",
-      "status_label": "每月追蹤",
-      "next_check_date": "2026-12-01",
-      "cadence": "monthly_1_15",
-      "reason": "距離賽事 135 天，可能尚未釋出完整資訊，先固定每月 1 號與 15 號檢查。"
-    },
-    "missing": [
-      {
-        "key": "official_registration_link",
-        "label": "官方報名連結",
-        "severity": "high",
-        "hint": "補 registration_link，避免只連到運動筆記登入/紀錄頁。"
-      },
-      {
-        "key": "registration_opens_at",
-        "label": "開報時間",
-        "severity": "medium",
-        "hint": "補 registration_opens_at，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "registration_deadline",
-        "label": "報名截止時間",
-        "severity": "medium",
-        "hint": "補 registration_deadline，格式 YYYY-MM-DD。"
-      },
-      {
-        "key": "start_times",
-        "label": "各距離開跑時間",
-        "severity": "low",
-        "hint": "補 start_times，可用物件如 {\"21km\":\"06:00\"} 或字串。"
-      },
-      {
-        "key": "fees",
-        "label": "費用",
-        "severity": "low",
-        "hint": "補 fees，可用字串或分組物件。"
-      },
-      {
-        "key": "quota",
-        "label": "名額",
-        "severity": "low",
-        "hint": "補 quota 或 participant_limit。"
-      }
-    ],
-    "current_links": {
-      "registration_link": "",
-      "official_event_url": "https://lohasnet.tw/#/event",
-      "detail_url": "https://lohasnet.tw/#/event",
-      "source_registration_link": "",
-      "facebook_search_url": ""
-    },
-    "suggested_override": {
-      "race_name": "2027 第八屆BC臺灣柏釧公益路跑",
-      "race_date": "2027-04-10",
-      "registration_link": "",
-      "official_event_url": "",
-      "registration_opens_at": "",
-      "registration_deadline": "",
-      "venue": "",
-      "organizer": "",
-      "fees": "",
-      "quota": "",
-      "verified_at": "",
-      "verification_note": ""
-    }
-  },
-  {
     "race_id": "07cb1dd3-a3ad-4e9e-b840-bab31cd99b4c",
     "race_name": "2027 全國視障公益路跑賽",
     "race_date": "2027-04-17",
@@ -318,7 +240,7 @@
     }
   },
   {
-    "race_id": "f196bdc6-4fb0-4c24-85da-5bf9ba108f63",
+    "race_id": "be820450-ab5a-4f4b-95ef-a6c1cea836e0",
     "race_name": "2027 中興新村半程馬拉松",
     "race_date": "2027-05-23",
     "race_county": "南投縣",
