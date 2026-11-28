@@ -1907,7 +1907,7 @@
     ],
     "weather_forecast": {
       "forecast_for": "2026-12-05",
-      "updated_at": "2026-11-28T01:44:44.382Z",
+      "updated_at": "2026-11-28T04:46:33.706Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "南投縣",
@@ -1961,7 +1961,7 @@
     "scraped_at": "2026-11-26T15:33:54.937809+00:00",
     "weather_forecast": {
       "forecast_for": "2026-12-05",
-      "updated_at": "2026-11-28T01:44:44.400Z",
+      "updated_at": "2026-11-28T04:46:33.725Z",
       "source": "Open-Meteo",
       "scope": "county",
       "location_label": "臺中市",
